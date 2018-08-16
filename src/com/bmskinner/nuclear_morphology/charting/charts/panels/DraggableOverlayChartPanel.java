@@ -42,10 +42,10 @@ import org.jfree.ui.RectangleEdge;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
@@ -61,11 +61,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
     private volatile ISegmentedProfile profile = null;
 
-    private volatile List<SegmentCrosshair> crosses = new ArrayList<SegmentCrosshair>(); // drawing
-                                                                                         // lines
-                                                                                         // on
-                                                                                         // the
-                                                                                         // chart
+    private volatile List<SegmentCrosshair> crosses = new ArrayList<>(); // drawing lines on the chart
 
     protected volatile Crosshair xCrosshair;
 
@@ -396,15 +392,15 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         SignalChangeEvent event = new SignalChangeEvent(this, message, this.getClass().getSimpleName());
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
+            ((EventListener) iterator.next()).eventReceived(event);
         }
     }
 
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
+    public synchronized void addSignalChangeListener(EventListener l) {
         listeners.add(l);
     }
 
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
+    public synchronized void removeSignalChangeListener(EventListener l) {
         listeners.remove(l);
     }
 

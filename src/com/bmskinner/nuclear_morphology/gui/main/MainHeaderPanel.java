@@ -175,7 +175,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
         JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
         btnSaveWorkspace.addActionListener(e -> {
-            mw.getEventHandler().signalChangeReceived(
+            mw.getEventHandler().eventReceived(
                     new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
         });
 

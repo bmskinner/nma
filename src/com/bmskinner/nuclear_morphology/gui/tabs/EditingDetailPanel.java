@@ -25,17 +25,13 @@ import javax.swing.JTabbedPane;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 
 @SuppressWarnings("serial")
-public class EditingDetailPanel extends DetailPanel
-        implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
+public class EditingDetailPanel extends DetailPanel {
     
     private static final String PANEL_TITLE_LBL = "Editing";
 
@@ -78,9 +74,9 @@ public class EditingDetailPanel extends DetailPanel
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
-        super.signalChangeReceived(event);
+        super.eventReceived(event);
         finer("Editing panel heard signal: " + event.type());
 
         // Pass downwards if the signal was not generated internally

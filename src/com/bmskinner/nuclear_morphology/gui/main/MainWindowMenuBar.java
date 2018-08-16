@@ -47,13 +47,13 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 		super();
 		this.mw = mw;
 		sh = new SignalChangeEventHandler(this);
-		sh.addSignalChangeListener(mw.getEventHandler());
+		sh.addListener(mw.getEventHandler());
 		
 		ih = new InterfaceEventHandler(this);
-		ih.addInterfaceEventListener(mw.getEventHandler());
+		ih.addListener(mw.getEventHandler());
 		
 		dh = new DatasetEventHandler(this);
-		dh.addDatasetEventListener(mw.getEventHandler());
+		dh.addListener(mw.getEventHandler());
 		
 		add(createFileMenu());
         add(createEditMenu());

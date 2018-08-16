@@ -56,16 +56,13 @@ import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -77,8 +74,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel, SignalChangeListener, DatasetEventListener,
-        InterfaceEventListener, Loggable, ChartOptionsRenderedEventListener {
+public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
 
     private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
     
@@ -118,7 +114,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     public DetailPanel(@NonNull InputSupplier context, @Nullable TabPanel parent, @NonNull String title) {
     	inputSupplier = context;
         parentPanel = parent;
-        this.addChartOptionsRenderedEventListener(this);
+//        this.addChartOptionsRenderedEventListener(this);
         panelTabTitleLbl = title;
     }
     
@@ -639,42 +635,36 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
-        sh.addSignalChangeListener(l);
+    public synchronized void addSignalChangeListener(EventListener l) {
+        sh.addListener(l);
     }
 
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
-        sh.removeSignalChangeListener(l);
-    }
-
-    public synchronized void addDatasetEventListener(DatasetEventListener l) {
-        dh.addDatasetEventListener(l);//datasetListeners.add(l);
-    }
-
-    public synchronized void removeDatasetEventListener(DatasetEventListener l) {
-        dh.removeDatasetEventListener(l);//datasetListeners.remove(l);
+    public synchronized void removeSignalChangeListener(EventListener l) {
+        sh.removeListener(l);
     }
     
-    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        duh.addDatasetUpdateEventListener(l);//datasetListeners.add(l);
+    public synchronized void addDatasetEventListener(EventListener l) {
+        dh.addListener(l);
     }
 
-    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        duh.removeDatasetUpdateEventListener(l);//datasetListeners.remove(l);
+    public synchronized void removeDatasetEventListener(EventListener l) {
+        dh.removeListener(l);
+    }
+    
+    public synchronized void addDatasetUpdateEventListener(EventListener l) {
+        duh.addListener(l);
     }
 
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
-        ih.addInterfaceEventListener(l);// interfaceListeners.add(l);
+    public synchronized void removeDatasetUpdateEventListener(EventListener l) {
+        duh.removeListener(l);
     }
 
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
-        ih.removeInterfaceEventListener(l);//interfaceListeners.remove(l);
+    public synchronized void addInterfaceEventListener(EventListener l) {
+        ih.addListener(l);
     }
 
-    @Override
-    public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
-        // To be overridden as needed by extending classes
-        update(getDatasets());
+    public synchronized void removeInterfaceEventListener(EventListener l) {
+        ih.removeListener(l);
     }
 
     @Override
@@ -697,17 +687,18 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         return sh;
     }
 
-    public void interfaceEventReceived(InterfaceEvent event) {
+    @Override
+    public void eventReceived(InterfaceEvent event) {
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
-                ih.fireInterfaceEvent(new InterfaceEvent(this, event));
+                ih.fire(new InterfaceEvent(this, event));
             }
         }
     }
-
-    public void datasetEventReceived(DatasetEvent event) {
-
+    
+    @Override
+    public void eventReceived(DatasetEvent event) {
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
@@ -716,15 +707,22 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    public void signalChangeReceived(SignalChangeEvent event) {
+    @Override
+    public void eventReceived(SignalChangeEvent event) {
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
-                sh.fireSignalChangeEvent(new SignalChangeEvent(this, event));
+                sh.fire(new SignalChangeEvent(this, event));
             }
         }
     }
-
+    
+    @Override
+    public void eventReceived(ChartOptionsRenderedEvent e) {
+        // To be overridden as needed by extending classes
+        update(getDatasets());
+    }
+    
     /**
      * Charting can be an intensive process, especially with background images
      * being imported for outline charts. This worker will keep the chart
@@ -932,17 +930,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see gui.DatasetUpdateEventListener#datasetUpdateEventReceived(gui.
-     * DatasetUpdateEvent)
-     */
-    public void datasetUpdateEventReceived(DatasetUpdateEvent e) {
+    @Override
+    public void eventReceived(DatasetUpdateEvent e) {
         // Signal sub panels to update
         duh.fireDatasetUpdateEvent(e.getDatasets());
         this.update(e.getDatasets());
-
     }
 
 }

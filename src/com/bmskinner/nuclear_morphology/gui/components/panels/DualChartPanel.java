@@ -24,7 +24,6 @@ import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -35,10 +34,10 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 
 /**
@@ -50,7 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
  * @author bms41
  *
  */
-public abstract class DualChartPanel implements SignalChangeListener, SegmentEventListener, ChartSetEventListener {
+public abstract class DualChartPanel implements EventListener, SegmentEventListener, ChartSetEventListener {
 
     protected ExportableChartPanel chartPanel;
 
@@ -178,7 +177,7 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
         // Change the range of the main chart based on the lower chart
         if (event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)) {

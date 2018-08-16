@@ -281,8 +281,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     }
 
     @Override
-    public void datasetEventReceived(DatasetEvent event) {
-        super.datasetEventReceived(event);
+    public void eventReceived(DatasetEvent event) {
+        super.eventReceived(event);
         // Pass messages upwards
         if (event.getSource() instanceof CellCollectionOverviewDialog) {
             this.getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
@@ -290,7 +290,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     }
 
     @Override
-    public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
+    public void eventReceived(ChartOptionsRenderedEvent e) {
         update();
     }
 

@@ -33,7 +33,6 @@ public class SignalChangeEvent extends EventObject {
     
     public static final String UPDATE_PANELS_WITH_NULL     = "UpdatePanelsNull";
     public static final String UPDATE_PANELS               = "UpdatePanels";
-    public static final String UPDATE_POPULATION_PANELS    = "UpdatePopulationPanel";
 
     public static final String LOBE_DETECTION              = "LobeDetection";
     public static final String EXPORT_STATS                = "ExportStatsAction";

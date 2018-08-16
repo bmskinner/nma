@@ -28,8 +28,10 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
@@ -91,16 +93,26 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 
             // public void run(){
 
-            if ((downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS) {
+//            if ((downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS) {
+//
+//                final CountDownLatch latch = new CountDownLatch(1);
+//                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, progressAcceptors.get(0), eh, latch);
+//                r.run();
+//                try {
+//                    latch.await();
+//                } catch (InterruptedException e) {
+//                    error("Interruption in segmentation thread", e);
+//                }
+//            }
+            
+            getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
 
-                final CountDownLatch latch = new CountDownLatch(1);
-                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, progressAcceptors.get(0), eh, latch);
-                r.run();
-                try {
-                    latch.await();
-                } catch (InterruptedException e) {
-                    error("Interruption in segmentation thread", e);
-                }
+            if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
+                finest("Adding dataset to list manager");
+                DatasetListManager.getInstance().addDataset(dataset);
+                finest("Firing add dataset signal");
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+
             }
 
             // if no list was provided, or no more entries remain,
@@ -108,8 +120,8 @@ public class RunProfilingAction extends SingleDatasetResultAction {
             if (!hasRemainingDatasetsToProcess()) {
 
                 cancel();
-                getInterfaceEventHandler().removeInterfaceEventListener(eh);
-                getDatasetEventHandler().removeDatasetEventListener(eh);
+                getInterfaceEventHandler().removeListener(eh);
+                getDatasetEventHandler().removeListener(eh);
                 //
                 RunProfilingAction.this.countdownLatch();
 

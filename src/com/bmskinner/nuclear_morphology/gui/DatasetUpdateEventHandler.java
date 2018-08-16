@@ -43,27 +43,7 @@ public class DatasetUpdateEventHandler extends AbstractEventHandler {
      */
     public void fireDatasetUpdateEvent(List<IAnalysisDataset> list) {
         DatasetUpdateEvent e = new DatasetUpdateEvent(parent, list);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetUpdateEventListener) iterator.next()).datasetUpdateEventReceived(e);
-        }
-    }
-
-    /**
-     * Add a listener for dataset update events.
-     * 
-     * @param l the listener to add
-     */
-    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        listeners.add(l);
-    }
-
-    /**
-     * Remove the given listener.
-     * @param l the listener
-     */
-    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        listeners.remove(l);
+        fire(e);
     }
 
 }

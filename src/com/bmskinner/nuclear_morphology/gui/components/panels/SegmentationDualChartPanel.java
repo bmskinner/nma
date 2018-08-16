@@ -27,6 +27,10 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 
 public class SegmentationDualChartPanel extends DualChartPanel {
 
@@ -53,5 +57,29 @@ public class SegmentationDualChartPanel extends DualChartPanel {
         rangePanel.setChart(rangeChart);
         this.updateChartPanelRange();
     }
+
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(InterfaceEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

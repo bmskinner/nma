@@ -18,26 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.swing.AbstractAction;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-
-import org.eclipse.jdt.annotation.Nullable;
-
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
-
 @SuppressWarnings("serial")
 public class PopulationListPopupMenu extends AbstractPopupMenu {
 	

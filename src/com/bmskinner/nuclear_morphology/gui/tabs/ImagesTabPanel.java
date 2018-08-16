@@ -62,6 +62,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -366,7 +367,7 @@ public class ImagesTabPanel extends DetailPanel {
     	        	return;
     	        }
     	        tree.repaint();
-    	        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+    	        getInterfaceEventHandler().fire(InterfaceEvent.of(this, InterfaceMethod.RECACHE_CHARTS));
     		}
 
     	};

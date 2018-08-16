@@ -26,13 +26,15 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
  * Store listeners for dataset events, and allows firing of dataset events
+ * The dataset event listeners are used to signal an activity should be
+ * performed on a dataset or datasets. They are sent by a tab panel.
+ * 
  * @author bms41
  * @since 1.13.7
  *
  */
 public class DatasetEventHandler extends AbstractEventHandler {
 
-    
     public DatasetEventHandler(Object parent){
         super(parent);
     }
@@ -57,10 +59,7 @@ public class DatasetEventHandler extends AbstractEventHandler {
     public synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
 
         DatasetEvent event = new DatasetEvent(parent, method, parent.getClass().getSimpleName(), list);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
+        fire(event);
     }
 
     /**
@@ -73,10 +72,7 @@ public class DatasetEventHandler extends AbstractEventHandler {
             IAnalysisDataset secondary) {
 
         DatasetEvent event = new DatasetEvent(parent, method, parent.getClass().getSimpleName(), list, secondary);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
+        fire(event);
     }
     
     /**
@@ -84,27 +80,6 @@ public class DatasetEventHandler extends AbstractEventHandler {
      * @param event the event
      */
     public synchronized void fireDatasetEvent(DatasetEvent event) {
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
+    	fire(event);
     }
-
-    
-    /**
-     * Add the given event listener to this handler
-     * @param l the listener
-     */
-    public synchronized void addDatasetEventListener(DatasetEventListener l) {
-        listeners.add(l);
-    }
-
-    /**
-     * Remove the given event listener from this handler
-     * @param l the listener
-     */
-    public synchronized void removeDatasetEventListener(DatasetEventListener l) {
-        listeners.remove(l);
-    }
-
 }

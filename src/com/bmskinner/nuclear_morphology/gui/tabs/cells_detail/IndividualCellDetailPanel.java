@@ -35,12 +35,10 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public class IndividualCellDetailPanel extends DetailPanel implements SignalChangeListener {
-
+public class IndividualCellDetailPanel extends DetailPanel {
     private JTabbedPane tabPane;
 
     private static final String PANEL_TITLE_LBL = "Cells";
@@ -196,7 +194,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
         if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
             model.updateViews();
         }

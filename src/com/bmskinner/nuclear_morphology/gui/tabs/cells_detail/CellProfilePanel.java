@@ -216,9 +216,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
             dualPanel.setProfile(profile, false);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
             fine("Error getting profile", e1);
-            // JFreeChart chart1 = MorphologyChartFactory.makeErrorChart();
-            // JFreeChart chart2 = MorphologyChartFactory.makeErrorChart();
-            // dualPanel.setCharts(chart1, chart2);
         }
 
     }
@@ -229,7 +226,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
     }
 
     @Override
-    public void datasetEventReceived(DatasetEvent event) {
+    public void eventReceived(DatasetEvent event) {
         if (event.getSource() instanceof CellResegmentationDialog) { // Pass
                                                                      // upwards
             this.getDatasetEventHandler().fireDatasetEvent(event.method(), event.getDatasets());

@@ -20,17 +20,17 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.Dialog;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JDialog;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
+import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -43,8 +43,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public abstract class MessagingDialog extends JDialog implements Loggable {
-
-    protected final List<Object> listeners = new ArrayList<Object>();
+    
+    protected final DatasetEventHandler dh = new DatasetEventHandler(this);
+    protected final InterfaceEventHandler ih = new InterfaceEventHandler(this);
 
     public MessagingDialog() {
         super();
@@ -61,29 +62,25 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
         super(d);
     }
 
-    public synchronized void addDatasetEventListener(DatasetEventListener l) {
-        listeners.add(l);
+    public synchronized void addDatasetEventListener(EventListener l) {
+        dh.addListener(l);
     }
 
-    public synchronized void removeDatasetEventListener(DatasetEventListener l) {
-        listeners.remove(l);
+    public synchronized void removeDatasetEventListener(EventListener l) {
+        dh.removeListener(l);
     }
 
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
-        listeners.add(l);
+    public synchronized void addInterfaceEventListener(EventListener l) {
+    	ih.addListener(l);
     }
 
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
-        listeners.remove(l);
+    public synchronized void removeInterfaceEventListener(EventListener l) {
+    	ih.removeListener(l);
     }
 
     protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
-
         DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
+        dh.fire(event);
     }
 
     protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
@@ -97,34 +94,21 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
             IAnalysisDataset template) {
 
         DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list, template);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
+        dh.fire(event);
     }
 
     protected synchronized void fireDatasetEvent(DatasetEvent event) {
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
+    	dh.fire(event);
     }
 
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
 
         InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
-        }
+        ih.fire(event);
     }
 
     protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
-
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
-        }
+    	ih.fire(event);
     }
 
 }

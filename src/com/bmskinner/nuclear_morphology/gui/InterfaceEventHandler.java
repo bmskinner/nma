@@ -34,29 +34,7 @@ public class InterfaceEventHandler extends AbstractEventHandler {
         super(parent);
     }
     
-    public synchronized void fireInterfaceEvent(InterfaceMethod method) {
-
-        InterfaceEvent event = new InterfaceEvent(parent, method, parent.getClass().getSimpleName());
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
-        }
+    public void fireInterfaceEvent(InterfaceMethod method) {
+    	fire(InterfaceEvent.of(parent, method));
     }
-    
-    public synchronized void fireInterfaceEvent(InterfaceEvent event) {
-
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
-        }
-    }
-
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
-        listeners.add(l);
-    }
-
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
-        listeners.remove(l);
-    }
-
 }

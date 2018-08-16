@@ -47,7 +47,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
     public MainDragAndDropTarget(EventHandler eh) {
         super();
-        sh.addSignalChangeListener(eh);
+        sh.addListener(eh);
     }
 
     @Override

@@ -42,7 +42,6 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
@@ -51,7 +50,6 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -63,7 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
  *
  */
 @SuppressWarnings("serial")
-public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
+public class PopulationsPanel extends DetailPanel  {
 
     private static final String PANEL_TITLE_LBL = "Populations";
     
@@ -503,7 +501,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
         switch (event.type()) {
 	        // catch any signals that affect the datasets directly

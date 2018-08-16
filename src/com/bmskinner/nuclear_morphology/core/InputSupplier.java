@@ -6,6 +6,8 @@ import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+
 /**
  * Interface to allow different user interaction interfaces. Provides methods
  * to request user input.
@@ -138,6 +140,17 @@ public interface InputSupplier {
 	 * @throws RequestCancelledException
 	 */
 	File requestFileSave(@Nullable File defaultFolder, String name, String extension) throws RequestCancelledException;
+	
+	
+	/**
+	 * Request the user to choose between a set of options
+	 * @param options the options to choose between
+	 * @param defaultOption the index of the default option
+	 * @param message the message to provide to the user
+	 * @return the chosen option
+	 */
+	int requestOption( String[] options, int defaultOption, String message) throws RequestCancelledException;
+	
 	
 	/**
 	 * Exception thwown when the user cancels the input request

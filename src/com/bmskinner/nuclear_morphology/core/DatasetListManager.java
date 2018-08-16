@@ -54,12 +54,12 @@ public final class DatasetListManager implements Loggable {
      * the list can be used to determine the order of root datasets within the
      * populations panel.
      */
-    private final List<IAnalysisDataset> list = new ArrayList<>();
+    private volatile List<IAnalysisDataset> list = new ArrayList<>();
 
     /**
      * The datasets currently selected in the UI. Includes child datasets
      */
-    private final List<IAnalysisDataset> selected = new ArrayList<>();
+    private volatile List<IAnalysisDataset> selected = new ArrayList<>();
 
     /**
      * This map stores the UUID of a dataset as a key against the hashcode of

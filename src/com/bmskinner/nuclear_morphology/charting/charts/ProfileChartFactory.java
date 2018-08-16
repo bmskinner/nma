@@ -54,7 +54,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public static JFreeChart createEmptyChart() {
+	public synchronized static JFreeChart createEmptyChart() {
 		return makeEmptyProfileChart(ProfileType.ANGLE);
 	}
 
@@ -64,7 +64,9 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public static JFreeChart makeEmptyChart(ProfileType type) {
+	public synchronized static JFreeChart makeEmptyChart(ProfileType type) {
+		if(type==null)
+			return createEmptyChart();
 		return makeEmptyProfileChart(type);
 	}
 
@@ -73,7 +75,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return a chart
 	 */
-	private static JFreeChart makeEmptyProfileChart(ProfileType type) {
+	private synchronized static JFreeChart makeEmptyProfileChart(ProfileType type) {
 
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();

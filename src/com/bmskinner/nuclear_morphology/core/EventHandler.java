@@ -34,16 +34,15 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
+import com.bmskinner.nuclear_morphology.gui.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
@@ -60,6 +59,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.gui.PopulationListUpdateListener.PopulationListUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
@@ -83,17 +83,17 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.7
  *
  */
-public class EventHandler implements Loggable, SignalChangeListener, DatasetEventListener, InterfaceEventListener {
+public class EventHandler implements Loggable, EventListener {
 
 	private final InputSupplier ic;
     private ProgressBarAcceptor acceptor;
 
-    private List<DatasetUpdateEventListener> updateListeners = new ArrayList<>();
-    private List<InterfaceEventListener> interfaceListeners = new ArrayList<>();
-    private List<DatasetEventListener> datasetListeners = new ArrayList<>();
-    private List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
-    
-    
+    private final List<EventListener> updateListeners = new ArrayList<>();
+    private final List<EventListener> interfaceListeners = new ArrayList<>();
+    private final List<EventListener> datasetListeners = new ArrayList<>();
+    private final List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
+    private final List<PopulationListUpdateListener> populationsListUpdateListeners = new ArrayList<>();
+
     
     /**
      * Constructor 
@@ -128,13 +128,13 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     	acceptor = p;
     }
     
-    public void addInterfaceEventListener(InterfaceEventListener l) {
+    public void addInterfaceEventListener(EventListener l) {
     	interfaceListeners.add(l);
     }
     
     private void fireInterfaceEvent(InterfaceEvent e) {
-    	for(InterfaceEventListener l : interfaceListeners) {
-    		l.interfaceEventReceived(e);
+    	for(EventListener l : interfaceListeners) {
+    		l.eventReceived(e);
     	}
     }
     
@@ -155,13 +155,13 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     	}
     }
     
-    public void addDatasetEventListener(DatasetEventListener l) {
+    public void addDatasetEventListener(EventListener l) {
     	datasetListeners.add(l);
     }
         
     private void fireDatasetEvent(DatasetEvent event) {
-    	for(DatasetEventListener l : datasetListeners) {
-    		l.datasetEventReceived(event);
+    	for(EventListener l : datasetListeners) {
+    		l.eventReceived(event);
     	}
     }
 
@@ -278,12 +278,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
                 d.addDatasetEventListener(EventHandler.this);
             };
-            
-            //TODO - update only populations panel
-            if (event.type().equals(SignalChangeEvent.UPDATE_POPULATION_PANELS))
-            	return () -> fireDatasetUpdateEvent(selectedDatasets);
-//                return () -> mw.getPopulationsPanel().update(selectedDatasets);
-                
+                            
             if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
             	return () ->{
                     log("Exporting cell locations...");
@@ -303,7 +298,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         				ws.remove(d);
         			}
             		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
-//            		log("Removing dataset from workspace "+workspaceName);
             	};
             
         	if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
@@ -488,12 +482,12 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     @Override
-    public synchronized void signalChangeReceived(final SignalChangeEvent event) {
+    public synchronized void eventReceived(final SignalChangeEvent event) {
         new ActionFactory().run(event);
     }
 
     @Override
-    public synchronized void datasetEventReceived(final DatasetEvent event) {
+    public synchronized void eventReceived(final DatasetEvent event) {
 
         // Try to launch via factory
         new ActionFactory().run(event);
@@ -527,7 +521,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     @Override
-    public synchronized void interfaceEventReceived(final InterfaceEvent event) {
+    public synchronized void eventReceived(final InterfaceEvent event) {
 
     	fireInterfaceEvent(event); //pass onwards to registered listeners - only MainWindow at present
         InterfaceMethod method = event.method();
@@ -558,7 +552,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         case DUMP_LOG_INFO:
             for (IAnalysisDataset d : selected) {
-
                 for (Nucleus n : d.getCollection().getNuclei()) {
                     log(n.toString());
                 }
@@ -567,11 +560,15 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         case INFO:
             for (IAnalysisDataset d : selected) {
-
                 log(d.getCollection().toString());
             }
             break;
-
+            
+        case REFRESH_POPULATIONS: {
+        	firePopulationListUpdateEvent();
+        	break;
+        }
+            
         default:
             break;
 
@@ -587,7 +584,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 			if (scale > 0) { // don't allow a scale to cause divide by zero errors
 				selectedDatasets.stream().forEach(d->d.getCollection().setScale(scale));
 				log("Updated scale to "+scale+" pixels per micron");
-				interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
+				eventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
 			}
 				
 		} catch (RequestCancelledException e) {
@@ -725,11 +722,11 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
     
 
-    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+    public synchronized void addDatasetUpdateEventListener(EventListener l) {
         updateListeners.add(l);
     }
 
-    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+    public synchronized void removeDatasetUpdateEventListener(EventListener l) {
         updateListeners.remove(l);
     }
 //
@@ -739,10 +736,39 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 //     * @param list
 //     */
     public synchronized void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
-        for(DatasetUpdateEventListener l : updateListeners) {
-        	l.datasetUpdateEventReceived(new DatasetUpdateEvent(this, list));
+        for(EventListener l : updateListeners) {
+        	l.eventReceived(new DatasetUpdateEvent(this, list));
         }
     }
+    
+    public synchronized void addPopulationListUpdateListener(PopulationListUpdateListener l) {
+    	populationsListUpdateListeners.add(l);
+    }
+
+    public synchronized void removePopulationListUpdateListener(PopulationListUpdateListener l) {
+    	populationsListUpdateListeners.remove(l);
+    }
+    
+    public void firePopulationListUpdateEvent() {
+    	PopulationListUpdateEvent e = new PopulationListUpdateEvent(this);
+    	for(PopulationListUpdateListener l : populationsListUpdateListeners) {
+    		l.populationListUpdateEventReceived(e);
+    	}
+    }
+
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
     
     
 

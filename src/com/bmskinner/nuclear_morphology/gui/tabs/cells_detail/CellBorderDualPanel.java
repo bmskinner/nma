@@ -18,6 +18,10 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
+import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
 
 public class CellBorderDualPanel extends DualChartPanel {
@@ -35,5 +39,29 @@ public class CellBorderDualPanel extends DualChartPanel {
         updateChartPanelRange();
 
     }
+
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(InterfaceEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

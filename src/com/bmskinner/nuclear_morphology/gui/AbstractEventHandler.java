@@ -18,8 +18,12 @@
 
 package com.bmskinner.nuclear_morphology.gui;
 
+import java.util.EventObject;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
  * Abstract holder for all event handlers
@@ -30,7 +34,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class AbstractEventHandler {
     
     protected final Object parent;
-    protected final List<Object> listeners   = new CopyOnWriteArrayList<Object>();
+    protected final List<EventListener> listeners   = new CopyOnWriteArrayList<EventListener>();
     
     /**
      * Construct with a parent object
@@ -39,5 +43,47 @@ public abstract class AbstractEventHandler {
     public AbstractEventHandler(final Object parent){
         this.parent = parent;
     }
+    
+    /**
+     * Add a listener for the given event type
+     * 
+     * @param l the listener to add
+     */
+    public synchronized void addListener(EventListener l) {
+        listeners.add(l);
+    }
+    
+    /**
+     * Remove the given listener if present.
+     * 
+     * @param l the listener to remove
+     */
+    public synchronized void removeListener(EventListener l) {
+        listeners.remove(l);
+    }
+    
+    /**
+     * Fire the given event to all listeners
+     * @param event
+     */
+    public void fire(EventObject event) {
+    	
+    	for(EventListener l : listeners) {
+    		
+    		if(event instanceof DatasetEvent)
+    			l.eventReceived((DatasetEvent) event);
+    		if(event instanceof InterfaceEvent)
+    			l.eventReceived((InterfaceEvent) event);
+    		if(event instanceof SignalChangeEvent)
+    			l.eventReceived((SignalChangeEvent) event);
+    		if(event instanceof DatasetUpdateEvent)
+    			l.eventReceived((DatasetUpdateEvent) event);
+    		if(event instanceof ChartOptionsRenderedEvent)
+    			l.eventReceived((ChartOptionsRenderedEvent) event);
+    		
+    	}
+    }
+    
+    
 
 }

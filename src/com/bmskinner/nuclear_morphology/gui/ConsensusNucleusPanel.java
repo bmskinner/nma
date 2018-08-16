@@ -553,7 +553,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
         // pass on log messages back to the main window
         if (event.sourceName().equals(ConsensusNucleusChartPanel.SOURCE_COMPONENT)) {

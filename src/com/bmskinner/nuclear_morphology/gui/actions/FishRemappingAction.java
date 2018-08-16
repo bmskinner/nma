@@ -97,7 +97,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
         // Do not use super.finished(), or it will trigger another save action
         fine("FISH mapping complete");
         cancel();
-        getInterfaceEventHandler().removeInterfaceEventListener(eh);
-        getDatasetEventHandler().removeDatasetEventListener(eh);
+        getInterfaceEventHandler().removeListener(eh);
+        getDatasetEventHandler().removeListener(eh);
     }
 }

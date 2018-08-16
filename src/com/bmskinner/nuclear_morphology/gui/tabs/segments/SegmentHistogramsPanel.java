@@ -63,12 +63,12 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateMultiple();
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         this.setEnabled(true);
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -129,7 +129,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel {
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         this.setEnabled(true);
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));

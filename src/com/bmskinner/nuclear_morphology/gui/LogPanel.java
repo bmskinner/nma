@@ -527,7 +527,7 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
      */
     private void runCommand(String command) {
     	if (commandMap.containsKey(command)) {
-            getInterfaceEventHandler().fireInterfaceEvent(commandMap.get(command));
+            getInterfaceEventHandler().fire(InterfaceEvent.of(this, commandMap.get(command)));
         } else {
 
             if (LOCAL_CMDS.containsKey(command)) {

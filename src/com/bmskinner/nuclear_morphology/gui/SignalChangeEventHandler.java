@@ -33,28 +33,7 @@ public class SignalChangeEventHandler extends AbstractEventHandler {
         super(parent);
     }
     
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
-        listeners.add(l);
+    public void fireSignalChangeEvent(String method) {
+    	fire(new SignalChangeEvent(parent, method, parent.getClass().getName()));
     }
-
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
-        listeners.remove(l);
-    }
-    
-    public synchronized void fireSignalChangeEvent(String message) {
-
-        SignalChangeEvent event = new SignalChangeEvent(parent, message, parent.getClass().getSimpleName());
-        Iterator<Object> iterator =listeners.iterator();
-        while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
-        }
-    }
-
-    public synchronized void fireSignalChangeEvent(SignalChangeEvent event) {
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
-        }
-    }
-
 }

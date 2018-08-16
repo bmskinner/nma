@@ -28,15 +28,16 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
+import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Action for constructing hierarchical trees based on dataset parameters
@@ -45,7 +46,7 @@ import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
  *
  */
 public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
-        implements DatasetEventListener, InterfaceEventListener {
+        implements EventListener {
 
     private static final String PROGRESS_BAR_LABEL = "Building tree";
 
@@ -104,7 +105,7 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
     }
 
     @Override
-    public void datasetEventReceived(DatasetEvent event) {
+    public void eventReceived(DatasetEvent event) {
         finest("BuildHierarchicalTreeAction heard dataset event");
         if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
             getDatasetEventHandler().fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
@@ -113,9 +114,27 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
     }
 
     @Override
-    public void interfaceEventReceived(InterfaceEvent event) {
+    public void eventReceived(InterfaceEvent event) {
         getInterfaceEventHandler().fireInterfaceEvent(event.method());
 
     }
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(SignalChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

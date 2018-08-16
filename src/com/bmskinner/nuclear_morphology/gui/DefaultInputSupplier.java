@@ -137,6 +137,19 @@ public class DefaultInputSupplier implements InputSupplier {
 			throw new RequestCancelledException();
 		return f;
 	}
+
+	@Override
+	public int requestOption(String[] options, int defaultOption, String message) throws RequestCancelledException {
+        int result = JOptionPane.showOptionDialog(null, message, message,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, options, options[defaultOption]);
+        if(result<0)
+        	throw new RequestCancelledException();
+        return result;
+        
+	}
+	
+	
 	
 	
 

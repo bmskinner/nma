@@ -213,13 +213,13 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                 finer("Saving the dataset");
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
 
-                if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
-                    finest("Adding dataset to list manager");
-                    DatasetListManager.getInstance().addDataset(dataset);
-                    finest("Firing add dataset signal");
-                    getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-
-                }
+//                if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
+//                    finest("Adding dataset to list manager");
+//                    DatasetListManager.getInstance().addDataset(dataset);
+//                    finest("Firing add dataset signal");
+//                    getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+//
+//                }
 
                 // if no list was provided, or no more entries remain,
                 // call the finish

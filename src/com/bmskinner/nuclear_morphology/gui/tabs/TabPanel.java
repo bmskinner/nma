@@ -23,15 +23,12 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 
-public interface TabPanel extends DatasetUpdateEventListener {
+public interface TabPanel extends EventListener {
 
     /**
      * Update the panel display based on the datasets selected in the global
@@ -79,14 +76,14 @@ public interface TabPanel extends DatasetUpdateEventListener {
     void addSubPanel(TabPanel panel);
     
     TabPanel getParentPanel();
-
+    
     /**
      * Add a listener for signal change events from this panel
      * 
      * @param l
      *            the listener
      */
-    void addSignalChangeListener(SignalChangeListener l);
+    void addSignalChangeListener(EventListener l);
 
     /**
      * Remove a listener for signal change events from this panel
@@ -94,23 +91,21 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void removeSignalChangeListener(SignalChangeListener l);
+    void removeSignalChangeListener(EventListener l);
 
     /**
      * Add a listener for dataset events from this panel
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
-    void addDatasetEventListener(DatasetEventListener l);
+    void addDatasetEventListener(EventListener l);
 
     /**
      * Remove a listener for dataset events from this panel
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
-    void removeDatasetEventListener(DatasetEventListener l);
+    void removeDatasetEventListener(EventListener l);
 
     /**
      * Add a listener for interface events from this panel
@@ -118,7 +113,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void addInterfaceEventListener(InterfaceEventListener l);
+    void addInterfaceEventListener(EventListener l);
 
     /**
      * Remove a listener for interface events from this panel
@@ -126,7 +121,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void removeInterfaceEventListener(InterfaceEventListener l);
+    void removeInterfaceEventListener(EventListener l);
 
     /**
      * Add a listener for dataset update events from this panel
@@ -134,7 +129,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void addDatasetUpdateEventListener(DatasetUpdateEventListener l);
+    void addDatasetUpdateEventListener(EventListener l);
 
     /**
      * Remove a listener for dataset update events from this panel
@@ -142,7 +137,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void removeDatasetUpdateEventListener(DatasetUpdateEventListener l);
+    void removeDatasetUpdateEventListener(EventListener l);
 
     /**
      * Get the list of sub panels

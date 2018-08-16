@@ -26,7 +26,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 
@@ -37,7 +36,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
  *
  */
 @SuppressWarnings("serial")
-public class SignalsDetailPanel extends DetailPanel implements SignalChangeListener {
+public class SignalsDetailPanel extends DetailPanel {
 
    
     private static final String PANEL_TITLE_LBL = "Nuclear signals";
@@ -91,8 +90,8 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
     }
     
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
-        super.signalChangeReceived(event);
+    public void eventReceived(SignalChangeEvent event) {
+        super.eventReceived(event);
         if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
             update(getDatasets());
         }

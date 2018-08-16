@@ -21,8 +21,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -53,13 +51,13 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 
@@ -71,9 +69,18 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class AbstractScatterChartPanel extends DetailPanel implements ActionListener {
+public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
     private static final String PANEL_TITLE_LBL = "Scatter";
+    private static final String FILTER_BTN_LBL  = "Filter visible";
+    private static final String FILTER_BTN_TOOLTIP = "Create a sub-population based on the visible values";
+    
+    private static final String X_AXIS_LBL = "X axis";
+    private static final String Y_AXIS_LBL = "Y axis";
+    
+    private static final String SPEARMAN_LBL = "Spearman's rank correlation coefficients are shown in the table";
+    
+    
     protected ExportableChartPanel chartPanel;  // hold the charts
     protected JPanel               headerPanel; // hold buttons
 
@@ -127,24 +134,23 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
         statABox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));
         statBBox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));
 
-        statABox.addActionListener(this);
-        statBBox.addActionListener(this);
+        statABox.addActionListener(e->update(getDatasets()));
+        statBBox.addActionListener(e->update(getDatasets()));
 
-        gateButton = new JButton("Filter visible");
-        gateButton.setToolTipText("Create a sub-population based on the visible values");
-        gateButton.addActionListener(this);
-        gateButton.setActionCommand("Gate");
+        gateButton = new JButton(FILTER_BTN_LBL);
+        gateButton.setToolTipText(FILTER_BTN_TOOLTIP);
+        gateButton.addActionListener(e-> gateOnVisible());
         gateButton.setEnabled(false);
 
         JPanel panel = new JPanel(new FlowLayout());
 
-        panel.add(new JLabel("X axis"));
+        panel.add(new JLabel(X_AXIS_LBL));
         panel.add(statABox);
-        panel.add(new JLabel("Y axis"));
+        panel.add(new JLabel(Y_AXIS_LBL));
         panel.add(statBBox);
 
         panel.add(gateButton);
-        panel.add(new JLabel("Spearman's rank correlation coefficients are shown in the table"));
+        panel.add(new JLabel(SPEARMAN_LBL));
 
         return panel;
     }
@@ -207,7 +213,13 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 
     private void gateOnVisible() {
 
-        int result = getFilterDialogResult();
+     	int result;
+		try {
+			String[] options = { "Filter collection", "Do not filter", };
+			result = this.getInputSupplier().requestOption(options, 1, "Filter selected datasets on visible values?");
+		} catch (RequestCancelledException e2) {
+			return;
+		}
 
         if (result != 0) { // button at index 0 - continue
             return;
@@ -259,20 +271,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
         log("Filtered datasets");
 
         finer("Firing population update request");
+//        getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_POPULATION_PANELS);
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        if (e.getActionCommand().equals("Gate")) {
-
-            gateOnVisible();
-
-        } else {
-            // A stats box fired, update charts
-            update(getDatasets());
-        }
     }
 
     protected Range getRangeBounds() {
@@ -282,16 +282,4 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
     protected Range getDomainBounds() {
         return chartPanel.getChart().getXYPlot().getDomainAxis().getRange();
     }
-
-    protected int getFilterDialogResult() {
-
-        Object[] options = { "Filter collection", "Cancel", };
-        int result = JOptionPane.showOptionDialog(null, "Filter selected datasets on visible values?", "Confirm filter",
-
-                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-                null, options, options[0]);
-        return result;
-    }
-
 }

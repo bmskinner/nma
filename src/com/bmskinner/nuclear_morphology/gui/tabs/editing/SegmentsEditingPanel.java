@@ -179,7 +179,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
 
         ISegmentedProfile profile = null;
 
@@ -221,13 +221,13 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         updateNull();
 
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
 
         ChartOptions options = new ChartOptionsBuilder().setShowXAxis(false).setShowYAxis(false).build();
 
@@ -239,7 +239,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         dualPanel.setCharts(MorphologyChartFactory.createLoadingChart(), MorphologyChartFactory.createLoadingChart());
     }

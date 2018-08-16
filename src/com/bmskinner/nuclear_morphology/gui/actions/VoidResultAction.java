@@ -70,16 +70,16 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     	
     	progressAcceptors.add(acceptor);
     	this.eh = eh;
-        ih.addInterfaceEventListener(eh);
-        dh.addDatasetEventListener(eh);
+        ih.addListener(eh);
+        dh.addListener(eh);
         createProgressBar(barMessage);
     }
     
     protected VoidResultAction(@NonNull String barMessage, @NonNull List<ProgressBarAcceptor> acceptors, @NonNull EventHandler eh) {
     	progressAcceptors.addAll(acceptors);
     	this.eh = eh;
-        ih.addInterfaceEventListener(eh);
-        dh.addDatasetEventListener(eh);
+        ih.addListener(eh);
+        dh.addListener(eh);
         createProgressBar(barMessage);
     }
     
@@ -138,8 +138,8 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      */
     public void cancel() {
         removeProgressBar();
-        dh.removeDatasetEventListener(eh);
-        ih.removeInterfaceEventListener(eh);
+        dh.removeListener(eh);
+        ih.removeListener(eh);
     }
 
     protected void setProgressBarVisible(boolean b) {

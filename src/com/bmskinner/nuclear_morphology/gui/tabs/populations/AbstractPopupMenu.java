@@ -1,13 +1,10 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -21,9 +18,9 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSamp
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled.ActiveCountContext;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenu;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenuItem;
 
@@ -66,7 +63,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     private PopupMenuItem addNuclearSignalMenuItem;
     private PopupMenuItem fishRemappinglMenuItem;
 
-    private List<Object> listeners = new ArrayList<Object>();
+    private List<EventListener> listeners = new ArrayList<>();
     
     /**
      * Simplify creation of menu items
@@ -440,19 +437,19 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         this.fishRemappinglMenuItem.setEnabled(b);
     }
 
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
+    public synchronized void addSignalChangeListener(EventListener l) {
         listeners.add(l);
     }
 
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
+    public synchronized void removeSignalChangeListener(EventListener l) {
         listeners.remove(l);
     }
 
     protected synchronized void fireSignalChangeEvent(String message) {
         SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
-        Iterator<Object> iterator = listeners.iterator();
+        Iterator<EventListener> iterator = listeners.iterator();
         while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
+            iterator.next().eventReceived(event);
         }
     }
 

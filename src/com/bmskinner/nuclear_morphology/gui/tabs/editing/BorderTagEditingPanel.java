@@ -199,8 +199,8 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     }
 
     @Override
-    public void interfaceEventReceived(InterfaceEvent event) {
-        super.interfaceEventReceived(event);// Pass messages upwards
+    public void eventReceived(InterfaceEvent event) {
+        super.eventReceived(event);// Pass messages upwards
 
         if (event.getSource() instanceof RulesetDialog) {
             fine("Heard interface event");
@@ -210,8 +210,8 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     }
 
     @Override
-    public void datasetEventReceived(DatasetEvent event) {
-        super.datasetEventReceived(event);
+    public void eventReceived(DatasetEvent event) {
+        super.eventReceived(event);
 
         if (event.getSource() instanceof RulesetDialog) {
             fine("Heard dataset event");

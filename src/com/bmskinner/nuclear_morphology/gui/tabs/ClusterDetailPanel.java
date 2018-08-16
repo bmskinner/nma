@@ -53,10 +53,9 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ManualClusteringDialog;
@@ -70,7 +69,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ManualClusteringDialog;
  *
  */
 @SuppressWarnings("serial")
-public class ClusterDetailPanel extends DetailPanel implements DatasetEventListener {
+public class ClusterDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Clusters";
     private static final String NEW_CLUSTER_LBL = "Cluster cells";
@@ -396,8 +395,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     }
 
     @Override
-    public void datasetEventReceived(DatasetEvent event) {
-        super.datasetEventReceived(event);
+    public void eventReceived(DatasetEvent event) {
+        super.eventReceived(event);
 
         if (event.getSource() instanceof ClusterTreeDialog) {
             this.getDatasetEventHandler().fireDatasetEvent(event);
@@ -405,9 +404,9 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     }
 
     public void interfaceEventReceived(InterfaceEvent event) {
-        super.interfaceEventReceived(event);
+    	 super.eventReceived(event);
         if (event.getSource() instanceof ClusterTreeDialog || event.getSource() instanceof ManualClusteringDialog) {
-            getInterfaceEventHandler().fireInterfaceEvent(event);
+            getInterfaceEventHandler().fire(event);
         }
     }
 

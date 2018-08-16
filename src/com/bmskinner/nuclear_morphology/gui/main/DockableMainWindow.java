@@ -3,17 +3,11 @@ package com.bmskinner.nuclear_morphology.gui.main;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.StreamHandler;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -22,14 +16,14 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -45,16 +39,12 @@ import com.bmskinner.nuclear_morphology.gui.tabs.profiles.NucleusProfilesPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.javadocking.DockingManager;
-import com.javadocking.dock.CompositeLineDock;
 import com.javadocking.dock.Position;
-import com.javadocking.dock.SingleDock;
 import com.javadocking.dock.TabDock;
-import com.javadocking.dock.factory.LeafDockFactory;
 import com.javadocking.dock.factory.SingleDockFactory;
-import com.javadocking.dock.factory.TabDockFactory;
 import com.javadocking.dockable.DefaultDockable;
 import com.javadocking.dockable.Dockable;
 import com.javadocking.dockable.DockingMode;
@@ -74,12 +64,11 @@ public class DockableMainWindow extends AbstractMainWindow {
     private ConsensusNucleusPanel consensusNucleusPanel;
     private TabDock tabDock; // bottom panel tabs
 
-    
-    
     /**
      * Create the frame.
      * 
      * @param standalone is the frame a standalone app, or launched within ImageJ?
+     * @param eh the event handler controlling actions
      */
     public DockableMainWindow(boolean standalone, EventHandler eh) {
     	super(standalone, eh);
@@ -90,11 +79,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 
         this.eh.addProgressBarAcceptor(logPanel);
         createEventHandling();
-        eh.addInterfaceEventListener(this);
-        eh.addDatasetSelectionListener(this);
-        eh.addDatasetEventListener(this);
-        eh.addDatasetUpdateEventListener(this);
-        
+               
         this.setJMenuBar(new MainWindowMenuBar(this));
 
     }
@@ -130,37 +115,12 @@ public class DockableMainWindow extends AbstractMainWindow {
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
-            
-//            Dockable dockable1 = new DefaultDockable("Window1", logPanel, "Log panel", null, DockingMode.ALL);
-//            SingleDock logTabDock = new SingleDock();
-//            logTabDock.addDockable(dockable1, new Position(0));
-            
-        
-//            CompositeLineDock lineDock1 = new CompositeLineDock(CompositeLineDock.ORIENTATION_HORIZONTAL, true, new LeafDockFactory());
-
-//            lineDock1.addChildDock(logTabDock, new Position(0));
-            
-            
-//    		dockModel.addRootDock("topdock", lineDock1, this);
     		
             // ---------------
             // Create the consensus chart
             // ---------------
-            populationsPanel = new PopulationsPanel(eh.getInputSupplier());
-            
-//            Dockable popDockable = new DefaultDockable("Window2", populationsPanel, "Datasets", null, DockingMode.ALL);
-//            SingleDock popTabDock = new SingleDock();
-//            popTabDock.addDockable(popDockable, new Position(0));
-//            lineDock1.addChildDock(popTabDock, new Position(1));
-            
-            
-            
+            populationsPanel = new PopulationsPanel(eh.getInputSupplier());            
             consensusNucleusPanel = new ConsensusNucleusPanel(eh.getInputSupplier());
-            
-//            Dockable consDockable = new DefaultDockable("Window3", consensusNucleusPanel, "Consensus", null, DockingMode.ALL);
-//            SingleDock consTabDock = new SingleDock();
-//            consTabDock.addDockable(consDockable, new Position(0));
-//            lineDock1.addChildDock(consTabDock, new Position(2));
             detailPanels.add(consensusNucleusPanel);
             
             
@@ -192,10 +152,10 @@ public class DockableMainWindow extends AbstractMainWindow {
             topRow.add(consensusNucleusPanel, c);
             createTabs();
             dockModel.addRootDock("tabdock", tabDock, this);
+            
             // ---------------
             // Add the top and bottom rows to the main panel
             // ---------------
-//            JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, lineDock1, tabDock);
             JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topRow, tabDock);
             contentPane.add(panelMain, BorderLayout.CENTER);
            
@@ -285,8 +245,8 @@ public class DockableMainWindow extends AbstractMainWindow {
     }
 
     
-
-    public PopulationsPanel getPopulationsPanel() {
+    @Override
+    protected PopulationsPanel getPopulationsPanel() {
         return this.populationsPanel;
     }
 
@@ -296,7 +256,7 @@ public class DockableMainWindow extends AbstractMainWindow {
     }
 
 	@Override
-	public void interfaceEventReceived(InterfaceEvent event) {
+	public void eventReceived(InterfaceEvent event) {
 		if(event.getSource().equals(eh)){
 			InterfaceMethod method = event.method();
 	        
@@ -343,7 +303,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 	}
 
 	@Override
-	public void datasetEventReceived(DatasetEvent event) {
+	public void eventReceived(DatasetEvent event) {
 
 		if (event.method().equals(DatasetEvent.REFRESH_CACHE))
             recacheCharts(event.getDatasets());
@@ -380,7 +340,19 @@ public class DockableMainWindow extends AbstractMainWindow {
         getPopulationsPanel().update(dataset);
         
         //Force all panels to update with the new datasets
-        eh.interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
+        eh.eventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
     }
+
+	@Override
+	public void eventReceived(SignalChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

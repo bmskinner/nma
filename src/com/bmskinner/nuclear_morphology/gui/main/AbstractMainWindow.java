@@ -17,21 +17,22 @@ import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
+import com.bmskinner.nuclear_morphology.gui.EventListener;
+import com.bmskinner.nuclear_morphology.gui.PopulationListUpdateListener;
+import com.bmskinner.nuclear_morphology.gui.PopulationListUpdateListener.PopulationListUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public abstract class AbstractMainWindow extends JFrame implements Loggable, MainView, InterfaceEventListener, DatasetSelectionListener, DatasetEventListener, DatasetUpdateEventListener {
+public abstract class AbstractMainWindow extends JFrame implements Loggable, MainView, EventListener, DatasetSelectionListener, PopulationListUpdateListener {
 	
 	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
             + Version.currentVersion().toString();
 	
-	protected final List<InterfaceEventListener> listeners   = new ArrayList<>();
-	protected List<Object> updateListeners = new ArrayList<Object>();
+	protected final List<EventListener> listeners   = new ArrayList<>();
+	protected List<EventListener> updateListeners = new ArrayList<>();
 	
 	// store panels for iterating messages
 	protected final List<TabPanel> detailPanels = new ArrayList<>();
@@ -49,6 +50,11 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
     	 isStandalone = standalone;
          this.eh = eh;
          setTitle(PROGRAM_TITLE_BAR_LBL);
+         eh.addInterfaceEventListener(this);
+         eh.addDatasetSelectionListener(this);
+         eh.addDatasetEventListener(this);
+         eh.addDatasetUpdateEventListener(this);
+         eh.addPopulationListUpdateListener(this);
     }
     
     /**
@@ -165,7 +171,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
                 panel.refreshChartCache(list);
                 panel.refreshTableCache(list);
             }
-            datasetUpdateEventReceived(new DatasetUpdateEvent(this, list));//DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
+            eventReceived(new DatasetUpdateEvent(this, list));//DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
         };
         ThreadManager.getInstance().submit(task);
 
@@ -177,16 +183,23 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
         super.dispose();
     }
     
-    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+    public synchronized void addDatasetUpdateEventListener(EventListener l) {
         updateListeners.add(l);
     }
 
-    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+    public synchronized void removeDatasetUpdateEventListener(EventListener l) {
         updateListeners.remove(l);
     }
     
+    protected abstract PopulationsPanel getPopulationsPanel();
+    
     @Override
-	public void datasetUpdateEventReceived(DatasetUpdateEvent event) {
+    public void populationListUpdateEventReceived(PopulationListUpdateEvent event) {
+    	this.getPopulationsPanel().update();
+    }
+    
+    @Override
+	public void eventReceived(DatasetUpdateEvent event) {
 		PanelUpdater r = new PanelUpdater(event.getDatasets());
         ThreadManager.getInstance().submit(r);
 		
@@ -206,50 +219,57 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 
         @Override
         public synchronized void run() {
-            final PanelLoadingUpdater loader = new PanelLoadingUpdater(lock);
-            try {
 
-                final Future<?> f = ThreadManager.getInstance().submit(loader);
-
-                synchronized (lock) {
-                // Wait for loading state to be set
-                	while (!f.isDone() && !isCancelled.get()) {
-                		lock.wait();
-                	}
-                }
-                
-                // Again stop if a cancel signal was heard 
-                if (isCancelled.get()) {
-                    return;
-                }
-                
-                Boolean ok = (Boolean) f.get();
-
-                if(ok!=null && !ok){
-                    warn("Error updating the UI panels");
-                }
-
-            } catch (InterruptedException e1) {
-                warn("Interrupted update");
-                error("Error setting loading state", e1);
-                error("Cause of loading state error", e1.getCause());
-                return;
-            } catch (ExecutionException e1) {
-                error("Error setting loading state", e1);
-                error("Cause of loading state error", e1.getCause());
-                return;
-            } catch (Exception e1){
-                error("Undefined error setting panel loading state", e1);
-            }
+//            try {
+            	log("Setting panels to loading");
+            	 for (TabPanel p : getTabPanels()) {
+                     p.setChartsAndTablesLoading();
+                 }
+            	 
+//            	// Loader to put all the panels into a loading state
+//            	final PanelLoadingUpdater loader = new PanelLoadingUpdater(lock);
+//            	
+//            	// Run the loading job on a background thread
+//                final Future<?> f = ThreadManager.getInstance().submit(loader);
+//               
+//                // Wait for loading state to be set in all panels
+//                synchronized (lock) {
+//                	while (!f.isDone() && !isCancelled.get()) {
+//                		lock.wait();
+//                	}
+//                }
+//                
+//                // Stop if a cancel signal was heard in the meantime
+//                if (isCancelled.get())
+//                    return;
+//                
+//                Boolean ok = (Boolean) f.get();
+//
+//                if(ok!=null && !ok)
+//                    warn("Error updating the UI panels");
+//
+//            } catch (InterruptedException e1) {
+//                warn("Interrupted update");
+//                error("Error setting loading state", e1);
+//                error("Cause of loading state error", e1.getCause());
+//                return;
+//            } catch (ExecutionException e1) {
+//                error("Error setting loading state", e1);
+//                error("Cause of loading state error", e1.getCause());
+//                return;
+//            } catch (Exception e1){
+//                error("Undefined error setting panel loading state", e1);
+//            }
             
+            // All panels are in loading state
             // Now fire the update
+            log("Beginning update");
             DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-            Iterator<Object> iterator = updateListeners.iterator();
+            Iterator<EventListener> iterator = updateListeners.iterator();
             while (iterator.hasNext()) {
-                if (isCancelled.get()) {
+                if (isCancelled.get())
                     return;
-                }
-                ((DatasetUpdateEventListener) iterator.next()).datasetUpdateEventReceived(e);
+                iterator.next().eventReceived(e);
             }
 
         }
@@ -261,7 +281,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 
     }
 
-    public class PanelLoadingUpdater implements Callable {
+    private class PanelLoadingUpdater implements Callable {
     	private final Object lock;
     	
     	public PanelLoadingUpdater(Lock l) {
@@ -280,6 +300,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
                 return false;
             }
             
+            // Notify all listeners that the loading state is set
             synchronized (lock) {
                 lock.notifyAll();
             }

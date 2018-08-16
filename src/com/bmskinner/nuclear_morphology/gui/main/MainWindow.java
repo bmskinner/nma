@@ -23,38 +23,28 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
@@ -68,16 +58,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.profiles.NucleusProfilesPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
-import com.javadocking.DockingManager;
-import com.javadocking.dock.Position;
-import com.javadocking.dock.SplitDock;
-import com.javadocking.dock.TabDock;
-import com.javadocking.dockable.Dockable;
-import com.javadocking.dockable.DockingMode;
-import com.javadocking.dockable.DefaultDockable;
-import com.javadocking.model.FloatDockModel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is the core of the program UI. All display panels are contained here.
@@ -113,10 +95,6 @@ public class MainWindow extends AbstractMainWindow {
 
         this.eh.addProgressBarAcceptor(logPanel);
         createEventHandling();
-        eh.addInterfaceEventListener(this);
-        eh.addDatasetSelectionListener(this);
-        eh.addDatasetEventListener(this);
-        eh.addDatasetUpdateEventListener(this);
     }
 
     /**
@@ -307,7 +285,7 @@ public class MainWindow extends AbstractMainWindow {
     
     
 	@Override
-	public void interfaceEventReceived(InterfaceEvent event) {
+	public void eventReceived(InterfaceEvent event) {
 		if(event.getSource().equals(eh)){
 			InterfaceMethod method = event.method();
 	        
@@ -354,7 +332,7 @@ public class MainWindow extends AbstractMainWindow {
 	}
 
 	@Override
-	public void datasetEventReceived(DatasetEvent event) {
+	public void eventReceived(DatasetEvent event) {
 
 		if (event.method().equals(DatasetEvent.REFRESH_CACHE))
             recacheCharts(event.getDatasets());
@@ -388,6 +366,18 @@ public class MainWindow extends AbstractMainWindow {
         getPopulationsPanel().update(dataset);
         
       //Force all panels to update with the new datasets
-       eh.interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
-    }  
+       eh.eventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
+    }
+
+	@Override
+	public void eventReceived(SignalChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}  
 }

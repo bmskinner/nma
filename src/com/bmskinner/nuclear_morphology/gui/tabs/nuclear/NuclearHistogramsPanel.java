@@ -39,11 +39,10 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 
 @SuppressWarnings("serial")
-public class NuclearHistogramsPanel extends HistogramsTabPanel implements SignalChangeListener {
+public class NuclearHistogramsPanel extends HistogramsTabPanel  {
 
     public NuclearHistogramsPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEUS);
@@ -110,7 +109,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
         if (event.type().equals("MarkerPositionUpdated")) {
 

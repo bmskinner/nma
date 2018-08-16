@@ -27,8 +27,8 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.gui.EventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener, Loggable {
 
     protected List<ActionListener> listeners          = new ArrayList<ActionListener>();
-    private final List<Object>   interfaceListeners = new ArrayList<Object>();
+    private final List<EventListener>   interfaceListeners = new ArrayList<>();
 
     public EnumeratedOptionsPanel() {
         this.setLayout(new FlowLayout());
@@ -59,20 +59,20 @@ public abstract class EnumeratedOptionsPanel extends JPanel implements ActionLis
         listeners.remove(l);
     }
 
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
+    public synchronized void addInterfaceEventListener(EventListener l) {
         interfaceListeners.add(l);
     }
 
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
+    public synchronized void removeInterfaceEventListener(EventListener l) {
         interfaceListeners.remove(l);
     }
 
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
 
         InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
+        Iterator<EventListener> iterator = interfaceListeners.iterator();
         while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
+            iterator.next().eventReceived(event);
         }
     }
 
