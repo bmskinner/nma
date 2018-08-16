@@ -81,6 +81,7 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
         m.setBorder(BorderFactory.createBevelBorder(1));
         monitorPanel.add(m);
         monitorPanel.setVisible(false);
+        monitorPanel.setOpaque(false);
         return monitorPanel;
 	}
 	

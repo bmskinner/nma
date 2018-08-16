@@ -60,6 +60,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
@@ -77,12 +78,14 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     private SegmentationDualChartPanel dualPanel;
 
     private JPanel  buttonsPanel;
+    private JButton segmentButton;
     private JButton mergeButton;
     private JButton unmergeButton;
     private JButton splitButton;
     private JButton windowSizeButton;
     private JButton updatewindowButton;
 
+    private static final String STR_SEGMENT_PROFILE   = "Segment profile";
     private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
     private static final String STR_UNMERGE_SEGMENT   = "Unhide segment boundary";
     private static final String STR_SPLIT_SEGMENT     = "Split segment";
@@ -144,6 +147,12 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
                 }
             }
         };
+        
+        segmentButton = new JButton(STR_SEGMENT_PROFILE);
+        segmentButton.addActionListener(e->{
+        	 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, getDatasets());
+        });
+        panel.add(segmentButton);
 
         mergeButton = new JButton(STR_MERGE_SEGMENT);
         mergeButton.addActionListener(this);
@@ -263,27 +272,15 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
                 return;
             }
 
-            // Don't allow merging below 2 segments (causes errors)
-            if (medianProfile.getSegmentCount() <= 2) {
-                mergeButton.setEnabled(false);
-            } else {
-                mergeButton.setEnabled(true);
-            }
+            // Don't allow merging below 2 segments
+            mergeButton.setEnabled(medianProfile.getSegmentCount()>2);
 
             // Check if there are any merged segments
-            boolean hasMerges = false;
-            for (IBorderSegment seg : medianProfile.getSegments()) {
-                if (seg.hasMergeSources()) {
-                    hasMerges = true;
-                }
-            }
+            boolean hasMerges = medianProfile.getSegments().stream().anyMatch(s->s.hasMergeSources());
 
             // If there are no merged segments, don't allow unmerging
-            if (hasMerges) {
-                unmergeButton.setEnabled(true);
-            } else {
-                unmergeButton.setEnabled(false);
-            }
+            unmergeButton.setEnabled(hasMerges);
+
 
             // set child dataset options
             if (options.firstDataset() instanceof ChildAnalysisDataset) {
@@ -299,39 +296,50 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     }
 
     public void setButtonsEnabled(boolean b) {
+    	segmentButton.setEnabled(b);
         unmergeButton.setEnabled(b);
         mergeButton.setEnabled(b);
         splitButton.setEnabled(b);
         windowSizeButton.setEnabled(b);
         updatewindowButton.setEnabled(b);
-        // reprofileButton.setEnabled(b);
 
     }
 
     private void updateCollectionWindowSize() throws Exception {
-        double windowSizeMin = 0.01;
-        double windowSizeMax = 0.1;
-        double windowSizeActual = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+    	
+    	double windowSizeActual = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
         Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
         if(op.isPresent())
         	windowSizeActual = op.get().getProfileWindowProportion();
+        
+        try {
+        	double windowSize =  getInputSupplier().requestDouble( "Select new window size", windowSizeActual, 0.01, 0.1, 0.01);
+        	setAnalysing(true);
+        	setCollectionWindowSize(windowSize);
+        	refreshChartCache();
+        	getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+        	setAnalysing(false);
+        } catch(RequestCancelledException e) {
 
-        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual, windowSizeMin, windowSizeMax, 0.01);
-        JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
-
-        int option = JOptionPane.showOptionDialog(null, windowSizeSpinner, "Select new window size",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-        if (option == JOptionPane.CANCEL_OPTION) {
-            return;
-
-        } else if (option == JOptionPane.OK_OPTION) {
-            this.setAnalysing(true);
-            double windowSize = (double) windowSizeSpinner.getModel().getValue();
-            setCollectionWindowSize(windowSize);
-            this.refreshChartCache();
-            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-            this.setAnalysing(false);
         }
+
+
+//        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual, windowSizeMin, windowSizeMax, 0.01);
+//        JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
+//
+//        int option = JOptionPane.showOptionDialog(null, windowSizeSpinner, "Select new window size",
+//                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+//        if (option == JOptionPane.CANCEL_OPTION) {
+//            return;
+//
+//        } else if (option == JOptionPane.OK_OPTION) {
+//            this.setAnalysing(true);
+//            double windowSize = (double) windowSizeSpinner.getModel().getValue();
+//            setCollectionWindowSize(windowSize);
+//            this.refreshChartCache();
+//            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//            this.setAnalysing(false);
+//        }
 
     }
 
@@ -467,7 +475,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             this.two = two;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return one.getName() + " - " + two.getName();
         }
 
