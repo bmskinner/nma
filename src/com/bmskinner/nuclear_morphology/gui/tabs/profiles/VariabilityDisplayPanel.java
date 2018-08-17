@@ -39,6 +39,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
@@ -66,13 +67,8 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
     protected ExportableChartPanel chartPanel;
     private JSpinner               pvalueSpinner;
 
-    // private BorderTagOptionsPanel borderTagOptionsPanel = new
-    // BorderTagOptionsPanel();
     private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
 
-    // private ProfileCollectionTypeSettingsPanel
-    // profileCollectionTypeSettingsPanel = new
-    // ProfileCollectionTypeSettingsPanel();
     private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
     public VariabilityDisplayPanel(@NonNull InputSupplier context) {
@@ -81,15 +77,11 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();
 
-        JFreeChart chart = new MorphologyChartFactory(options).makeVariabilityChart();
+        JFreeChart chart = new ProfileChartFactory(options).makeVariabilityChart();
 
         chartPanel = new ExportableChartPanel(chart);
         chartPanel.getChartRenderingInfo().setEntityCollection(null);
         this.add(chartPanel, BorderLayout.CENTER);
-
-        // buttonPanel.add(borderTagOptionsPanel);
-        // borderTagOptionsPanel.addActionListener(this);
-        // borderTagOptionsPanel.setEnabled(false);
 
         pvalueSpinner = new JSpinner(
                 new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL, 0d, 1d, 0.001d));
@@ -119,47 +111,28 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
         return PANEL_TITLE_LBL;
     }
     
-    public void setEnabled(boolean b) {
+    @Override
+	public void setEnabled(boolean b) {
         // borderTagOptionsPanel.setEnabled(b);
         profileCollectionTypeSettingsPanel.setEnabled(b);
         profileMarkersOptionsPanel.setEnabled(b);
         pvalueSpinner.setEnabled(b);
     }
 
-    // public void update(List<AnalysisDataset> list){
-    //
-    //
-    // }
-
     /**
-     * Update the profile panel with data from the given datasets
-     * 
-     * @param list
-     *            the datasets
-     * @param normalised
-     *            flag for raw or normalised lengths
-     * @param rightAlign
-     *            flag for left or right alignment (no effect if normalised is
-     *            true)
+     * Update the profile panel with data from the given options
      */
     private void updateProfiles(ChartOptions options) {
-
         try {
-
             setChart(options);
-            // JFreeChart chart = getChart(options);
-            // chartPanel.setChart(chart);
-
         } catch (Exception e) {
-            log(Level.SEVERE, "Error in plotting variability chart", e);
+           stack("Error in plotting variability chart", e);
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         update(getDatasets());
-
     }
 
     @Override
@@ -216,7 +189,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new MorphologyChartFactory(options).makeVariabilityChart();
+        return new ProfileChartFactory(options).makeVariabilityChart();
     }
 
 }

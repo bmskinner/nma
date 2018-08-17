@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -26,10 +27,16 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
+/**
+ * Create charting datasets from analysis datasets.
+ * @author ben
+ * @since 1.14.0
+ *
+ */
 public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 
-	private static final double DEFAULT_PROFILE_LENGTH = 100;
+	private static final int DEFAULT_PROFILE_LENGTH = 100;
 
 	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
 	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
@@ -37,7 +44,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public static final String PROFILE_SERIES_PREFIX  = "Profile_";
 	public static final String MEDIAN_SERIES_PREFIX   = "Median_";
 
-	public ProfileDatasetCreator(ChartOptions options) {
+	public ProfileDatasetCreator(@NonNull ChartOptions options) {
 		super(options);
 	}
 	
@@ -119,7 +126,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	private int getMaximumMedianProfileLength(final List<IAnalysisDataset> list) {
 		return list.stream().mapToInt(d->d.getCollection().getMedianArrayLength())
-				.max().orElse(100);
+				.max().orElse(DEFAULT_PROFILE_LENGTH);
 	}
 
 	/**
@@ -128,10 +135,10 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param collection
 	 * @return
 	 */
-	private int getMaximumNucleusProfileLength(ICellCollection collection) {
+	private int getMaximumNucleusProfileLength(final ICellCollection collection) {
 		return collection.streamCells().flatMap(c->c.getNuclei().stream())
 				.mapToInt(n->n.getBorderLength())
-				.max().orElse(100);
+				.max().orElse(DEFAULT_PROFILE_LENGTH);
 	}
 
 	
@@ -158,7 +165,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	private void appendProfileDataset(ProfileChartDataset ds, int i, int maxMedianLength) throws ChartDatasetCreationException {
+	private void appendProfileDataset(final ProfileChartDataset ds, int i, int maxMedianLength) throws ChartDatasetCreationException {
 
 		ICellCollection collection = options.getDatasets().get(i).getCollection();
 		boolean isNormalised       = options.isNormalised();
@@ -196,7 +203,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 						.getOrderedSegments();
 
 				if (isNormalised) {
-					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), 100, 0, 0);
+					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), DEFAULT_PROFILE_LENGTH, 0, 0);
 				} else {
 					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), collection.getMedianArrayLength(), offset, 0);
 				}
@@ -232,7 +239,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				for (int j=0; j<nuclei.size(); j++) {
 					Nucleus n = nuclei.get(j);
 
-					int length = isNormalised ? 100 : n.getBorderLength();
+					int length = isNormalised ? DEFAULT_PROFILE_LENGTH : n.getBorderLength();
 
 					IProfile yValues = isNormalised ? n.getProfile(type, borderTag).interpolate(length) : n.getProfile(type, borderTag);
 					IProfile xValues = createXPositions(yValues, length);
@@ -289,9 +296,9 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 	/**
 	 * Create the x values for a profile chart based on the desired profile length
-	 * @param profile
-	 * @param newLength
-	 * @return
+	 * @param profile the profile 
+	 * @param newLength the length of the x-axis
+	 * @return the position of each index in the profile after interpolation to <code>newLength</code> 
 	 */
 	private static IProfile createXPositions(IProfile profile, int newLength){
 		float[] result = new float[profile.size()];
@@ -432,4 +439,67 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 	}
 
+	
+    /**
+     * Create a chart of the variability in the interquartile ranges across the
+     * angle profiles of the given datasets
+     * 
+     * @return
+     * @throws ChartDatasetCreationException
+     */
+    public ProfileChartDataset createProfileVariabilityDataset() throws ChartDatasetCreationException {
+        if (options.isSingleDataset())
+            return createSingleProfileVariabilityDataset();
+		return createMultiProfileVariabilityDataset();
+    }
+
+    private ProfileChartDataset createSingleProfileVariabilityDataset() throws ChartDatasetCreationException {
+
+    	ProfileChartDataset ds = new ProfileChartDataset();
+
+        try {
+
+            ICellCollection collection = options.firstDataset().getCollection();
+
+            IProfile profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
+
+            if(collection.getProfileCollection().hasSegments()) {
+            	List<IBorderSegment> segments = collection.getProfileCollection()
+                        .getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN).getOrderedSegments();
+            	addSegmentsFromProfile(segments, profile, ds.getLines(), DEFAULT_PROFILE_LENGTH, 0, 0);
+            } else {
+            	IProfile xpoints = createXPositions(profile, DEFAULT_PROFILE_LENGTH);
+				float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
+				ds.addLines(MEDIAN_SERIES_PREFIX+"0", data, 0);
+            }
+        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
+                | UnsegmentedProfileException e) {
+            fine("Error creating single dataset variability data", e);
+            throw new ChartDatasetCreationException("Error creating single dataset variability data", e);
+        }
+        return ds;
+    }
+
+    private ProfileChartDataset createMultiProfileVariabilityDataset() throws ChartDatasetCreationException {
+
+    	ProfileChartDataset ds = new ProfileChartDataset();
+
+        for (int i=0; i<options.getDatasets().size(); i++) {
+        	IAnalysisDataset dataset = options.getDatasets().get(i);
+            ICellCollection collection = dataset.getCollection();
+
+            IProfile profile;
+            try {
+                profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
+            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+                fine("Error getting profile from tag", e);
+                throw new ChartDatasetCreationException("Unable to get median profile", e);
+            }
+            IProfile xpoints = createXPositions(profile, DEFAULT_PROFILE_LENGTH);
+            float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
+            ds.addLines(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX + i + "_" + collection.getName(), data, i);
+        }
+
+        return ds;
+    }
 }

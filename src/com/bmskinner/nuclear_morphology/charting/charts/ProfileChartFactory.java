@@ -4,19 +4,18 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.util.List;
+import java.text.DecimalFormat;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.TextAnchor;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
@@ -28,6 +27,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -39,9 +39,11 @@ import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.stats.DipTester;
 
 /**
- * Create profile charts
+ * Create profile charts. The majority of methods are private, preferring explicit options
+ * to have been set in the ChartOptions provided.
  * @author bms41
  * @since 1.14.0
  *
@@ -272,9 +274,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
     		fine("Unable to create profile dataset", e);
     		return makeErrorChart();
     	}
-    	
-//    	System.out.println(profiles.toString());
-    	
+    	    	
     	// Set x-axis length
     	int xLength = 100;
     	if (!options.isNormalised())	
@@ -285,58 +285,6 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		JFreeChart chart = makeProfileChart(profiles, xLength);
 		applyAxisOptions(chart);
 		return chart;
-		
-
-//        int lastSeries = 0;
-//
-//        for (int i = 0; i < iqrProfiles.size(); i++) {
-//            XYSeriesCollection seriesCollection = iqrProfiles.get(i);
-//
-//            // add to dataset
-//            plot.setDataset(i, seriesCollection);
-//
-//            // find the series index
-//            String name = (String) seriesCollection.getSeriesKey(0);
-//
-//            // index should be the position in the AnalysisDatase list
-//            // see construction in NucleusDatasetCreator.getInstance()
-//            int index = MorphologyChartFactory.getIndexFromLabel(name);
-//
-//            // make a transparent color based on teh profile segmenter system
-//            Paint profileColour = options.getDatasets().get(index).getDatasetColour().orElse(ColourSelecter.getColor(i));
-//            Paint iqrColour = ColourSelecter.getTransparentColour((Color) profileColour, true, 128);
-//
-//            // fill beteween the upper and lower IQR with single colour; do not
-//            // show shapes
-//            XYDifferenceRenderer differenceRenderer = new XYDifferenceRenderer(iqrColour, iqrColour, false);
-//
-//            // go through each series in the collection, and set the line colour
-//            for (int series = 0; series < seriesCollection.getSeriesCount(); series++) {
-//                differenceRenderer.setSeriesPaint(series, iqrColour);
-//                differenceRenderer.setSeriesVisibleInLegend(series, false);
-//
-//            }
-//            plot.setRenderer(i, differenceRenderer);
-//
-//            lastSeries++; // track the count of series
-//        }
-//
-//        plot.setDataset(lastSeries, medianProfiles);
-//        StandardXYItemRenderer medianRenderer = new StandardXYItemRenderer();
-//        plot.setRenderer(lastSeries, medianRenderer);
-//
-//        for (int j = 0; j < medianProfiles.getSeriesCount(); j++) {
-//            medianRenderer.setSeriesVisibleInLegend(j, Boolean.FALSE);
-//            medianRenderer.setSeriesStroke(j, new BasicStroke(2));
-//            String name = (String) medianProfiles.getSeriesKey(j);
-//            int index = MorphologyChartFactory.getIndexFromLabel(name);
-//
-//            Paint profileColour = options.getDatasets().get(index).getDatasetColour().orElse(ColourSelecter.getColor(j));
-//            medianRenderer.setSeriesPaint(j, ((Color) profileColour).darker());
-//        }
-//
-//        applyAxisOptions(chart);
-//        return chart;
     }
 
 	/**
@@ -374,7 +322,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			int index   = ds.getLines().getDatasetIndex(name);
 			
 			lineRenderer.setSeriesStroke(i, chooseSeriesStroke(name));
-			lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()).darker());
+			lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()));
 		}
 		
 		// Format the range charts
@@ -412,7 +360,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
 			return ColourSelecter.getColor(index, swatch);
 		if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX))
-			return ColourSelecter.getColor(index, swatch);
+			return ColourSelecter.getColor(index, swatch);//.darker();
 		if (name.startsWith(ProfileDatasetCreator.NUCLEUS_SERIES_PREFIX))
 			return Color.LIGHT_GRAY;
 		if (name.startsWith(ProfileDatasetCreator.QUARTILE_SERIES_PREFIX))
@@ -466,4 +414,95 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			plot.addAnnotation(segmentAnnotation);
 		}
 	}
+	
+	
+    /**
+     * Create a chart showing the variability of the profile; i.e
+     * the size of the IQR at each point along the profile.
+     * @return
+     */
+    public JFreeChart makeVariabilityChart() {
+
+        if (!options.hasDatasets())
+            return ProfileChartFactory.makeEmptyChart(options.getType());
+
+        try {
+            if (options.isSingleDataset())
+                return makeSingleVariabilityChart();
+            return makeMultiVariabilityChart();
+        } catch (Exception e) {
+            return makeErrorChart();
+        }
+    }
+
+    /**
+     * Create a variabillity chart showing the IQR for a single dataset. Segment
+     * colours are applied.
+     */
+    private JFreeChart makeSingleVariabilityChart() {
+    	ProfileChartDataset ds;
+        try {
+            ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
+        } catch (ChartDatasetCreationException e) {
+            return makeErrorChart();
+        }
+
+        JFreeChart chart = makeProfileChart(ds, 100);
+        XYPlot plot = chart.getXYPlot();
+        plot.getRangeAxis().setLabel("IQR");
+        plot.getRangeAxis().setAutoRange(true);
+
+        if (options.isShowMarkers()) { // add the bimodal regions
+            ICellCollection collection = options.firstDataset().getCollection();
+
+            // dip test the profiles
+
+            double significance = options.getModalityPosition();
+            BooleanProfile modes = new DipTester(collection).testCollectionIsUniModal(options.getTag(), significance,
+                    options.getType());
+
+            // add any regions with bimodal distribution to the chart
+            float[] xPositions = new float[modes.size()];
+            for (int i = 0; i < xPositions.length; i++) {
+            	xPositions[i] = (float) i / (float) xPositions.length * 100f;
+            }
+
+            for (int i = 0; i < modes.size(); i++) {
+                double x = xPositions[i];
+                if (modes.get(i) == true) {
+                    ValueMarker marker = new ValueMarker(x, Color.black, new BasicStroke(2f));
+                    plot.addDomainMarker(marker);
+                }
+            }
+
+            try {
+
+                double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
+                DecimalFormat df = new DecimalFormat("#0.000");
+                XYTextAnnotation annotation = new XYTextAnnotation(
+                        "Markers for non-unimodal positions (p<" + df.format(significance) + ")", 1, ymax);
+                annotation.setTextAnchor(TextAnchor.TOP_LEFT);
+                plot.addAnnotation(annotation);
+            } catch (IllegalArgumentException ex) {
+                fine("Missing data in variability chart");
+            }
+        }
+        applyAxisOptions(chart);
+        return chart;
+    }
+
+    /**
+     * Create a variability chart showing the IQR for a multiple datasets.
+     */
+    private JFreeChart makeMultiVariabilityChart() throws Exception {
+    	ProfileChartDataset ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
+
+    	JFreeChart chart = makeProfileChart(ds, 100);
+        XYPlot plot = chart.getXYPlot();
+
+        plot.getRangeAxis().setAutoRange(true);
+        plot.getRangeAxis().setLabel("IQR");
+        applyAxisOptions(chart);
+        return chart;
+    }
 }
