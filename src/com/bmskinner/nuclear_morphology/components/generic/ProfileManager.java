@@ -121,7 +121,7 @@ public class ProfileManager implements Loggable {
                     n.updateDependentStats();
                 }
 
-                log("Updated "+tag+" from "+oldIndex+" to new index "+newIndex);
+                finer("Updated "+tag+" from "+oldIndex+" to new index "+newIndex);
             }
         });
 

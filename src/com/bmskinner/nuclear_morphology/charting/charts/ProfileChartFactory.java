@@ -13,6 +13,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -358,7 +359,11 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		// Start the x-axis at -1 so tags can be seen clearly
 		plot.getDomainAxis().setRange(DEFAULT_PROFILE_START_INDEX, xLength);
-		plot.setRenderer(0, new StandardXYItemRenderer());
+		XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
+		lineRenderer.setBaseShapesVisible(options.isShowPoints());
+		lineRenderer.setBaseLinesVisible(options.isShowLines());
+		lineRenderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		plot.setRenderer(0, lineRenderer);
 		plot.getRenderer().setBaseToolTipGenerator(null);
 		
 		
@@ -368,8 +373,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			String name = ds.getLines().getSeriesKey(i).toString();
 			int index   = ds.getLines().getDatasetIndex(name);
 			
-			plot.getRenderer().setSeriesStroke(i, chooseSeriesStroke(name));
-			plot.getRenderer().setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()).darker());
+			lineRenderer.setSeriesStroke(i, chooseSeriesStroke(name));
+			lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()).darker());
 		}
 		
 		// Format the range charts

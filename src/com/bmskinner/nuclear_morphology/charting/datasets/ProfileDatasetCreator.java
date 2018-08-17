@@ -167,7 +167,8 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		ProfileType type           = options.getType();
 		boolean isSegmented        = collection.getProfileCollection().hasSegments();
 		boolean isShowSegments     = !options.isHideProfiles() && options.isSingleDataset();
-		boolean isShowNuclei       = options.isSingleDataset();	
+		boolean isShowNuclei       = options.isSingleDataset() && !options.isHideProfiles();
+		boolean isShowIQR          = !options.isShowPoints(); // points only displayed for single lines
 
 		int maxNucleusLength    = getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = collection.getMedianArrayLength();
@@ -207,18 +208,20 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 
 			// make the IQR
-			IProfile profile25 = collection.getProfileCollection().getProfile(type, borderTag, Stats.LOWER_QUARTILE);
-			IProfile profile75 = collection.getProfileCollection().getProfile(type, borderTag, Stats.UPPER_QUARTILE);
+			if(isShowIQR) {
+				IProfile profile25 = collection.getProfileCollection().getProfile(type, borderTag, Stats.LOWER_QUARTILE);
+				IProfile profile75 = collection.getProfileCollection().getProfile(type, borderTag, Stats.UPPER_QUARTILE);
 
-			float[][] data25 = { xpoints.toFloatArray(), profile25.toFloatArray() };
-			float[][] data75 = { xpoints.toFloatArray(), profile75.toFloatArray() };
-			
-			if(isShowSegments) { // IQR as lines only
-				ds.addLines(QUARTILE_SERIES_PREFIX+"25_"+i, data25, i);
-				ds.addLines(QUARTILE_SERIES_PREFIX+"75_"+i, data75, i);
-			} else { // IQR as difference range
-				ds.addRanges(QUARTILE_SERIES_PREFIX+"25_"+i, data25, i);
-				ds.addRanges(QUARTILE_SERIES_PREFIX+"75_"+i, data75, i);
+				float[][] data25 = { xpoints.toFloatArray(), profile25.toFloatArray() };
+				float[][] data75 = { xpoints.toFloatArray(), profile75.toFloatArray() };
+
+				if(isShowSegments) { // IQR as lines only
+					ds.addLines(QUARTILE_SERIES_PREFIX+"25_"+i, data25, i);
+					ds.addLines(QUARTILE_SERIES_PREFIX+"75_"+i, data75, i);
+				} else { // IQR as difference range
+					ds.addRanges(QUARTILE_SERIES_PREFIX+"25_"+i, data25, i);
+					ds.addRanges(QUARTILE_SERIES_PREFIX+"75_"+i, data75, i);
+				}
 			}
 
 			if(isShowNuclei) {
