@@ -222,21 +222,14 @@ public class ProfileChartFactoryTest {
 	
 	@Test
 	public void testMultipleNucleusDatasetProfile() throws Exception {
-		IAnalysisDataset d = TestDatasetFactory.variableRectangularDataset(100, 10);
-		DatasetProfilingMethod m = new DatasetProfilingMethod(d);
-		m.call();
+		IAnalysisDataset d = TestDatasetFactory.profileDataset(TestDatasetFactory.variableRectangularDataset(100, 4));
 		generateChartsforOptions(d);
 	}
 	
 	@Test
 	public void testMultipleDatasetsProfile() throws Exception {
-		IAnalysisDataset d1 = TestDatasetFactory.variableRectangularDataset(100, 4);
-		DatasetProfilingMethod m = new DatasetProfilingMethod(d1);
-		m.call();
-		
-		IAnalysisDataset d2 = TestDatasetFactory.variableRectangularDataset(100, 10);
-		m = new DatasetProfilingMethod(d2);
-		m.call();
+		IAnalysisDataset d1 = TestDatasetFactory.profileDataset(TestDatasetFactory.variableRectangularDataset(100, 4));
+		IAnalysisDataset d2 = TestDatasetFactory.profileDataset(TestDatasetFactory.variableRectangularDataset(100, 10));
 		
 		List<IAnalysisDataset> list = new ArrayList<>();
 		list.add(d1);

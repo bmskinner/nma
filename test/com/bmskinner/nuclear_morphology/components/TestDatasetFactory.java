@@ -29,6 +29,12 @@ public class TestDatasetFactory {
 	public static final int DEFAULT_BORDER_OFFSET = 20;
 	public static final boolean DEFAULT_IS_BORDER_OFFSET = true;
 	
+	/**
+	 * Run profiling on the given dataset and return the same dataset
+	 * @param d
+	 * @return
+	 * @throws Exception
+	 */
 	public static IAnalysisDataset profileDataset(IAnalysisDataset d) throws Exception {
 		DatasetProfilingMethod m = new DatasetProfilingMethod(d);
 		m.call();
