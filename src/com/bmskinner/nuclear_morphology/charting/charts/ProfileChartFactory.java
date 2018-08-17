@@ -272,7 +272,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
     		return makeErrorChart();
     	}
     	
-    	System.out.println(profiles.toString());
+//    	System.out.println(profiles.toString());
     	
     	// Set x-axis length
     	int xLength = 100;

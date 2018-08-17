@@ -90,21 +90,12 @@ public class ProfileManager implements Loggable {
      * @param type
      * @param median
      */
-    public void updateTagToMedianBestFit(Tag tag, ProfileType type, IProfile median) {
+    public void updateTagToMedianBestFit(@NonNull Tag tag, @NonNull ProfileType type, @NonNull IProfile median) {
 
         collection.getNuclei().stream().forEach(n -> {
             if (!n.isLocked()) {
 
             	int oldIndex = n.getBorderIndex(tag);
-            	if(Tag.REFERENCE_POINT.equals(tag)) {
-            		try {
-            			System.out.println(tag+" from old index "+oldIndex);
-            			System.out.println(n.getProfile(type, tag).valueString());
-            		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e2) {
-            			// TODO Auto-generated catch block
-            			e2.printStackTrace();
-            		}
-            	}
             	
                 // returns the positive offset index of this profile which best
                 // matches the median profile
@@ -129,16 +120,8 @@ public class ProfileManager implements Loggable {
                     n.updateVerticallyRotatedNucleus();
                     n.updateDependentStats();
                 }
-                
-                if(Tag.REFERENCE_POINT.equals(tag)) {
-                	try {
-                		System.out.println(tag+" from new index "+newIndex);
-                		System.out.println(n.getProfile(type, tag).valueString());
-                	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e2) {
-                		// TODO Auto-generated catch block
-                		e2.printStackTrace();
-                	}
-                }
+
+                log("Updated "+tag+" from "+oldIndex+" to new index "+newIndex);
             }
         });
 

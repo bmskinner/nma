@@ -208,12 +208,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public boolean hasSegmentStartingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
-
-        if (getSegmentStartingWith(tag) == null) {
-            return false;
-        } else {
-            return true;
-        }
+    	return getSegmentStartingWith(tag) != null;
     }
 
     @Override
@@ -239,12 +234,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public boolean hasSegmentEndingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
-
-        if (getSegmentEndingWith(tag) == null) {
-            return false;
-        } else {
-            return true;
-        }
+    	return getSegmentEndingWith(tag) != null;
     }
 
 
@@ -394,12 +384,8 @@ public class DefaultProfileCollection implements IProfileCollection {
             throw new IllegalArgumentException("Cell collection is empty");
 
         this.length = length;
-        if (segments != null && length != segments[0].getProfileLength()) {
-
+        if (segments != null && length != segments[0].getProfileLength()) 
             throw new ProfileException("Creating profile aggregate will invalidate segments");
-//
-//            segments = null;
-        }
 
         for (ProfileType type : ProfileType.values()) {
 
@@ -408,26 +394,18 @@ public class DefaultProfileCollection implements IProfileCollection {
             map.put(type, agg);
             try {
                 for (Nucleus n : collection.getNuclei()) {
-
                     switch (type) {
-                    case FRANKEN:
-
-                        agg.addValues(n.getProfile(type));
-
+                    case FRANKEN: agg.addValues(n.getProfile(type));
                         break;
-                    default:
-                        agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT));
+                    default: agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT));
                         break;
-
                     }
                 }
-
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
                 stack("Error making aggregate", e);
             }
-
         }
-
+        cache.clear();
     }
 
 
@@ -485,7 +463,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public IProfile getIQRProfile(ProfileType type, Tag tag)
+    public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Tag tag)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
@@ -502,7 +480,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public List<Integer> findMostVariableRegions(ProfileType type, Tag tag) {
+    public List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Tag tag) {
 
         List<Integer> result = new ArrayList<Integer>(0);
 
@@ -684,6 +662,13 @@ public class DefaultProfileCollection implements IProfileCollection {
         public void remove(final ProfileType type, final double quartile, final Tag tag) {
             ProfileKey key = new ProfileKey(type, quartile, tag);
             map.remove(key);
+        }
+        
+        /**
+         * Remove all profiles from the cache
+         */
+        public void clear() {
+        	map.clear();
         }
 
         public void remove(final Tag t) {

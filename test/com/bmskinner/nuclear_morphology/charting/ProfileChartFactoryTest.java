@@ -222,7 +222,7 @@ public class ProfileChartFactoryTest {
 	
 	@Test
 	public void testMultipleNucleusDatasetProfile() throws Exception {
-		IAnalysisDataset d = TestDatasetFactory.variableRectangularDataset(100, 2);
+		IAnalysisDataset d = TestDatasetFactory.variableRectangularDataset(100, 10);
 		DatasetProfilingMethod m = new DatasetProfilingMethod(d);
 		m.call();
 		generateChartsforOptions(d);

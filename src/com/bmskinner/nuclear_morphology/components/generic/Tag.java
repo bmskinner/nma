@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.Serializable;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 
 /**
@@ -32,12 +34,12 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagTy
  */
 public interface Tag extends Comparable<Tag>, Serializable {
 
-    public static final BorderTagObject REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
-    public static final BorderTagObject ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
-    public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
-    public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
-    public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
-    public static final BorderTagObject CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
+    @NonNull public static final BorderTagObject REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
+    @NonNull public static final BorderTagObject ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
+    @NonNull public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
+    @NonNull public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
+    @NonNull public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
+    @NonNull public static final BorderTagObject CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
 
     /**
      * Get the name of the tag

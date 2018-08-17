@@ -1218,7 +1218,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				throw new UnavailableComponentException("No segment with first segment id ");
 
 			int index = getIndexOfSegment(firstSeg.getID());			
-
+			
 			List<IBorderSegment> result = new ArrayList<>();
 			List<IBorderSegment> current = getSegments();
 			for(int j=0; j<segments.nChildren(); j++){
