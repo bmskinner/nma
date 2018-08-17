@@ -193,20 +193,10 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
         float[] medians = new float[length];
 
         for (int i = 0; i < length; i++) {
-
             float[] values = getValuesAtIndex(i);
-
             medians[i] = Stats.quartile(values, quartile);
         }
-
-        IProfile profile = new FloatProfile(medians);
-        return profile;
-
-    }
-
-    @Override
-    public double getBinSize() {
-        return 0;
+        return new FloatProfile(medians);
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 /**
@@ -138,7 +139,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			fine("Error creating profile chart", e);
 			return makeErrorChart();
 		}
-		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), options.getType());
+		JFreeChart chart = makeProfileChart(ds, n.getBorderLength());
 
 		XYPlot plot = chart.getXYPlot();
 
@@ -213,7 +214,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		int length = options.isNormalised() ? 100 : collection.getMaxProfileLength(); // default if normalised
 
-		JFreeChart chart = makeProfileChart(ds, length, options.getType());
+		JFreeChart chart = makeProfileChart(ds, length);
 
 		// mark the reference and orientation points
 
@@ -267,52 +268,24 @@ public class ProfileChartFactory extends AbstractChartFactory {
     	try {
     		profiles = new ProfileDatasetCreator(options).createProfileDataset();
     	} catch (ChartDatasetCreationException e) {
-    		// TODO Auto-generated catch block
     		fine("Unable to create profile dataset", e);
     		return makeErrorChart();
     	}
+    	
+    	System.out.println(profiles.toString());
+    	
+    	// Set x-axis length
+    	int xLength = 100;
+    	if (!options.isNormalised())	
+    		xLength = options.getDatasets().stream().mapToInt(d->d.getCollection()
+    				.getMedianArrayLength()).max().orElse(100);
+
 		
-		JFreeChart chart = makeProfileChart(profiles, 100, options.getType());
+		JFreeChart chart = makeProfileChart(profiles, xLength);
+		applyAxisOptions(chart);
 		return chart;
-//        NucleusDatasetCreator creator = new NucleusDatasetCreator(options);
+		
 
-//        try {
-//
-//            if (options.getType().equals(ProfileType.FRANKEN)) {
-//                iqrProfiles = creator.createMultiProfileIQRFrankenDataset();
-//                medianProfiles = creator.createMultiProfileFrankenDataset();
-//            } else {
-//                iqrProfiles = creator.createMultiProfileIQRDataset();
-//                medianProfiles = creator.createMultiProfileDataset();
-//
-//            }
-//
-//        } catch (ChartDatasetCreationException e) {
-//            return makeErrorChart();
-//        }
-
-        // find the maximum profile length - used when rendering raw profiles
-//        int length = 100;
-//
-//        if (!options.isNormalised()) {
-//            for (IAnalysisDataset d : options.getDatasets()) {
-//                length = Math.max(d.getCollection().getMedianArrayLength(), length);
-//            }
-//        }
-//
-//        JFreeChart chart = createBaseXYChart();
-//
-//        XYPlot plot = chart.getXYPlot();
-//        plot.getDomainAxis().setLabel("Position");
-//        plot.getRangeAxis().setLabel(options.getType().getLabel());
-//        plot.getDomainAxis().setRange(0, length);
-//
-//        if (options.getType().getDimension().equals(StatisticDimension.ANGLE)) {
-//            plot.getRangeAxis().setRange(0, 360);
-//            plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
-//        }
-//        plot.setBackgroundPaint(Color.WHITE);
-//
 //        int lastSeries = 0;
 //
 //        for (int i = 0; i < iqrProfiles.size(); i++) {
@@ -366,27 +339,26 @@ public class ProfileChartFactory extends AbstractChartFactory {
     }
 
 	/**
-	 * Create a profile chart from a given XYDataset. Set the series colours for
+	 * Create a profile chart from a given chart dataset. Set the series colours for
 	 * each component
 	 * 
 	 * @param ds the chart dataset of profiles
+	 * @param xLength the maximum of the x-axis
 	 * @return a chart
 	 */
-	private JFreeChart makeProfileChart(ProfileChartDataset ds, int xLength, ProfileType type) {
+	private JFreeChart makeProfileChart(ProfileChartDataset ds, int xLength) {
 
-		JFreeChart chart = makeEmptyProfileChart(type);
+		JFreeChart chart = makeEmptyProfileChart(options.getType());
 		XYPlot plot = chart.getXYPlot();
 		plot.setDataset(0, ds.getLines());
-//		
+
 		for(int i=0; i<ds.getDatasetCount(); i++) {
 			plot.setDataset(i+1, ds.getRanges(i));
 		}
 
-		// the default is to use an x range of 100, for a normalised chart
+		// Start the x-axis at -1 so tags can be seen clearly
 		plot.getDomainAxis().setRange(DEFAULT_PROFILE_START_INDEX, xLength);
 		plot.setRenderer(0, new StandardXYItemRenderer());
-
-//		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
 		plot.getRenderer().setBaseToolTipGenerator(null);
 		
 		
@@ -397,13 +369,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			int index   = ds.getLines().getDatasetIndex(name);
 			
 			plot.getRenderer().setSeriesStroke(i, chooseSeriesStroke(name));
-			plot.getRenderer().setSeriesPaint(i,  chooseSeriesColour(name, index));
+			plot.getRenderer().setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()).darker());
 		}
 		
 		// Format the range charts
 		for (int i = 0; i<ds.getDatasetCount(); i++) {
 			// make a semi-transparent colour
-			Paint profileColour = options.getDatasets().get(i).getDatasetColour().orElse(ColourSelecter.getColor(i));
+			Paint profileColour = options.getDatasets().get(i).getDatasetColour().orElse(ColourSelecter.getColor(i, options.getSwatch()));
 			Paint colour = ColourSelecter.getTransparentColour((Color) profileColour, true, 128);
 			XYDifferenceRenderer rangeRenderer = new XYDifferenceRenderer(colour, colour, false);
 			plot.setRenderer(i+1, rangeRenderer);
@@ -431,18 +403,18 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		return ChartComponents.PROFILE_STROKE;
 	}
 	
-	private Color chooseSeriesColour(String name, int index) {
+	private Color chooseSeriesColour(String name, int index, ColourSwatch swatch) {
 		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
-			return ColourSelecter.getColor(index);
+			return ColourSelecter.getColor(index, swatch);
 		if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX))
-			return ColourSelecter.getColor(index);
+			return ColourSelecter.getColor(index, swatch);
 		if (name.startsWith(ProfileDatasetCreator.NUCLEUS_SERIES_PREFIX))
 			return Color.LIGHT_GRAY;
 		if (name.startsWith(ProfileDatasetCreator.QUARTILE_SERIES_PREFIX))
 			return Color.DARK_GRAY;
 		if (name.startsWith(ProfileDatasetCreator.PROFILE_SERIES_PREFIX))
 			return Color.LIGHT_GRAY;
-		return ColourSelecter.getColor(index);
+		return ColourSelecter.getColor(index, swatch);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.components;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -27,6 +28,12 @@ public class TestDatasetFactory {
 	public static final int DEFAULT_ROTATION = 0;
 	public static final int DEFAULT_BORDER_OFFSET = 20;
 	public static final boolean DEFAULT_IS_BORDER_OFFSET = true;
+	
+	public static IAnalysisDataset profileDataset(IAnalysisDataset d) throws Exception {
+		DatasetProfilingMethod m = new DatasetProfilingMethod(d);
+		m.call();
+		return d;
+	}
 	
 	/**
 	 * Create a dataset consisting of square nuclei.

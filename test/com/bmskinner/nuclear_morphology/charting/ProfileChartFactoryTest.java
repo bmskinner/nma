@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
@@ -61,8 +62,9 @@ public class ProfileChartFactoryTest {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	private JPanel makeChartPanel(JFreeChart chart, ChartOptions options) throws InterruptedException {
+	private JPanel makeChartPanel(JFreeChart chart, ChartOptions options, String variable) throws InterruptedException {
 		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(new JLabel(variable), BorderLayout.NORTH);
 		panel.add(new ChartPanel(chart), BorderLayout.CENTER);
 		panel.add(new JTextArea(options.toString()), BorderLayout.WEST);
 		return panel;
@@ -119,7 +121,7 @@ public class ProfileChartFactoryTest {
 					.setShowMarkers(true)
 					.setNormalised(true)
 					.build();
-			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options));
+			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Tag: "+tag));
 		}
 		
 		for(ProfileAlignment p : ProfileAlignment.values()) {
@@ -127,14 +129,14 @@ public class ProfileChartFactoryTest {
 					.setAlignment(p)
 					.setNormalised(false)
 					.build();
-			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options));
+			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Alignment: "+p));
 		}
 		
 		for(ColourSwatch p : ColourSwatch.values()) {
 			ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets)
 					.setSwatch(p)
 					.build();
-			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options));
+			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Swatch: "+p));
 		}
 		ChartOptions trueOptions = new ChartOptionsBuilder().setDatasets(datasets)
 				.setNormalised(true)
@@ -149,7 +151,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(true)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions));
+		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions, "All true"));
 		
 		ChartOptions falseOptions = new ChartOptionsBuilder().setDatasets(datasets)
 				.setNormalised(false)
@@ -164,7 +166,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(false)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions));
+		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false"));
 		showCharts(panels);
 	}
 	
@@ -190,7 +192,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(true)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions));
+		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions, "All true"));
 		
 		ChartOptions falseOptions = new ChartOptionsBuilder().setDatasets(d)
 				.setCell(c)
@@ -206,7 +208,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(false)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions));
+		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false"));
 		showCharts(panels);
 	}
 	

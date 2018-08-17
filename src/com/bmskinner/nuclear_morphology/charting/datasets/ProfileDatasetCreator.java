@@ -94,6 +94,20 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		public XYSeriesCollection getRanges(int datasetIndex) {
 			return ranges.get(datasetIndex);
 		}
+		
+		@Override
+		public String toString() {
+			StringBuilder b = new StringBuilder("ProfileChartDataset:\nLines:\n");
+			for(int i=0; i<lines.getSeriesCount(); i++) {
+				Comparable seriesKey = lines.getSeriesKey(i);
+				b.append("\tSeries "+i+": "+seriesKey+"\tDataset "+lines.getDatasetIndex(seriesKey)+"\n");				
+			}
+			b.append("Ranges:\n");
+			for(int i : ranges.keySet()) {
+				b.append("\tDataset "+i+"\n");
+			}
+			return b.toString();
+		}
 	}
 
 	/**
@@ -128,9 +142,10 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public ProfileChartDataset createProfileDataset() throws ChartDatasetCreationException {
 		ProfileChartDataset ds = new ProfileChartDataset();
+		int maxMedianLength = getMaximumMedianProfileLength(options.getDatasets());
 		for(int i=0; i<options.getDatasets().size(); i++) {
 			IAnalysisDataset d  = options.getDatasets().get(i);
-			appendProfileDataset(ds, d, i);
+			appendProfileDataset(ds, d, i, maxMedianLength);
 		}
 		return ds;
 	}
@@ -144,7 +159,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	private void appendProfileDataset(ProfileChartDataset ds, IAnalysisDataset dataset, int i) throws ChartDatasetCreationException {
+	private void appendProfileDataset(ProfileChartDataset ds, IAnalysisDataset dataset, int i, int maxMedianLength) throws ChartDatasetCreationException {
 
 		ICellCollection collection = options.firstDataset().getCollection();
 		boolean isNormalised       = options.isNormalised();
@@ -155,7 +170,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		boolean isShowSegments     = !options.isHideProfiles() && options.isSingleDataset();
 		boolean isShowNuclei       = options.isSingleDataset();	
 
-		int maxLength = getMaximumNucleusProfileLength(collection);
+		int maxNucleusLength    = getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = collection.getMedianArrayLength();
 		double offset = 0;
 		try {
@@ -163,16 +178,19 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 			IProfile xpoints = createXPositions(medianProfile, isNormalised ? 100 : medianProfileLength);
 
-			if (alignment.equals(ProfileAlignment.RIGHT)) {
-				offset = maxLength - collection.getMedianArrayLength();
-				xpoints = xpoints.add(offset);
-			}
+			// Offset the x positions depending on 1) the alignment setting and 2) if the display is of medians only or individual nuclei
+			if (alignment.equals(ProfileAlignment.RIGHT) && isShowNuclei)
+				offset = maxNucleusLength - collection.getMedianArrayLength();
+			if (alignment.equals(ProfileAlignment.RIGHT) && !isShowNuclei)
+				offset = maxMedianLength - collection.getMedianArrayLength();
 
+			xpoints = xpoints.add(offset);
+			
 			// rendering order will be first on top
 
 			// add the segments if any exist and there is only a single dataset
 			if(isSegmented && isShowSegments) {
-				log("Drawing segments");
+//				log("Drawing segments");
 				List<IBorderSegment> segments = collection.getProfileCollection()
 						.getSegmentedProfile(type, options.getTag(), Stats.MEDIAN)
 						.getOrderedSegments();
@@ -183,7 +201,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), collection.getMedianArrayLength(), offset, 0);
 				}
 			} else {
-				log("Drawing only median: isSegmented "+isSegmented+" isShowSegments "+isShowSegments);
+//				log("Drawing only median: isSegmented "+isSegmented+" isShowSegments "+isShowSegments);
 				// add the median profile
 				float[][] data50 = { xpoints.toFloatArray(), medianProfile.toFloatArray() };
 				ds.addLines(MEDIAN_SERIES_PREFIX+i, data50, i);
@@ -205,12 +223,14 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 			
 
-			// add the first n individual nuclei - avoid slowing the UI with too many cells
-			List<Nucleus> nuclei = collection.getNuclei().stream()
-					.limit(MAX_PROFILE_CHART_ITEMS)
-					.collect(Collectors.toList());
+			
 			
 			if(isShowNuclei) {
+				// add the first n individual nuclei - avoid slowing the UI with too many cells
+				List<Nucleus> nuclei = collection.getNuclei().stream()
+						.limit(MAX_PROFILE_CHART_ITEMS)
+						.collect(Collectors.toList());
+				
 				for (Nucleus n : nuclei) {
 
 					int length = isNormalised ? xpoints.size() : n.getBorderLength();
@@ -218,7 +238,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					IProfile angles = isNormalised ? n.getProfile(type, borderTag).interpolate(length) : n.getProfile(type, borderTag);
 					IProfile x = isNormalised ? xpoints : createXPositions(angles, n.getBorderLength());
 					if (alignment.equals(ProfileAlignment.RIGHT))
-						x = x.add(maxLength - n.getBorderLength());
+						x = x.add(maxNucleusLength - n.getBorderLength());
 
 					if (angles == null || x == null)
 						throw new ChartDatasetCreationException("Nucleus profile is null");
@@ -228,8 +248,11 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					ds.addLines(NUCLEUS_SERIES_PREFIX + n.getSourceFileName() + "-" + n.getNucleusNumber(), ndata, i);
 				}
 			}
-		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-			fine("Error getting profile from tag", e);
+		} catch (UnavailableBorderTagException e) {
+			fine("Border tag is not present: "+borderTag);
+			return;
+		}catch (ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
+			stack("Error getting profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get median profile", e);
 		}
 	}

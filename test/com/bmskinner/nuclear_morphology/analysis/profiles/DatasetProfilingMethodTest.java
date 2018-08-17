@@ -45,9 +45,8 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 	
-	private void testProfiling(IAnalysisDataset dataset) throws Exception {
-		DatasetProfilingMethod m = new DatasetProfilingMethod(dataset);
-		m.call();
+	private void testProfilingIsConsistent(IAnalysisDataset dataset) throws Exception {
+		dataset = TestDatasetFactory.profileDataset(dataset);
 
 		// Check the collection
 		IProfile median = dataset.getCollection()
@@ -64,14 +63,14 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 	@Test
 	public void testSingleCellDataset() throws Exception {
 		IAnalysisDataset dataset = TestDatasetFactory.squareDataset(1);
-		testProfiling(dataset);
+		testProfilingIsConsistent(dataset);
 	}
 	
 	@Test
 	public void testMultiCellIdenticalRectangularDataset() throws Exception {
 		int nCells = 10;
 		IAnalysisDataset dataset = TestDatasetFactory.identicalRectangularDataset(nCells);
-		testProfiling(dataset);
+		testProfilingIsConsistent(dataset);
 	}
 	
 	@Test
@@ -79,14 +78,14 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, TestDatasetFactory.DEFAULT_BASE_WIDTH, 
 				TestDatasetFactory.DEFAULT_BASE_HEIGHT, TestDatasetFactory.DEFAULT_X_BASE, TestDatasetFactory.DEFAULT_Y_BASE, 
 				TestDatasetFactory.DEFAULT_ROTATION, false, TestDatasetFactory.DEFAULT_BORDER_OFFSET);
-		testProfiling(dataset);
+		testProfilingIsConsistent(dataset);
 	}
 	
 	@Test
 	public void testMultiCellVariableRectangularDataset() throws Exception {
 
 		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 20);
-		testProfiling(dataset);
+		testProfilingIsConsistent(dataset);
 	}
 	
 	@Test
@@ -176,6 +175,44 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 			// We can't expect full precision equality due to cumulative single precision interpolation
 			assertTrue(equals(globalMedian.toFloatArray(), median.toFloatArray(), 0.001f));
 		}
+	}
+	
+	@Test
+	public void testSingleSquareCellMedianProfileHasExpectedValuesForQuartiles() throws Exception {
+		IAnalysisDataset dataset = TestDatasetFactory.profileDataset(TestDatasetFactory.squareDataset(1));
+		IProfile median = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		
+		IProfile q1 = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+		
+		IProfile q3 = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+		
+		assertTrue(equals(median.toFloatArray(), q1.toFloatArray(), 0.0001f));
+		assertTrue(equals(median.toFloatArray(), q3.toFloatArray(), 0.0001f));
+	}
+	
+	@Test
+	public void testMultipleSquareCellMedianProfileHasExpectedValuesForQuartiles() throws Exception {
+		IAnalysisDataset dataset = TestDatasetFactory.profileDataset(TestDatasetFactory.squareDataset(100));
+		IProfile median = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		
+		IProfile q1 = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+		
+		IProfile q3 = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+		
+		assertTrue(equals(median.toFloatArray(), q1.toFloatArray(), 0.0001f));
+		assertTrue(equals(median.toFloatArray(), q3.toFloatArray(), 0.0001f));
 	}
 	
 }

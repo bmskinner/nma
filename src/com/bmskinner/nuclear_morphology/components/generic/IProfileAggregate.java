@@ -24,6 +24,11 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 
+/**
+ * Store aggregated profile data.
+ * @author bms41
+ *
+ */
 public interface IProfileAggregate {
 
     /**
@@ -32,13 +37,6 @@ public interface IProfileAggregate {
      * @throws ProfileException
      */
     void addValues(@NonNull IProfile yvalues) throws ProfileException;
-
-    /**
-     * Get the size of the bins covering the range 0-100
-     * 
-     * @return
-     */
-    double getBinSize();
 
     /**
      * Get the aggregate length
@@ -73,8 +71,7 @@ public interface IProfileAggregate {
      * Get the angle values at the given position in the aggragate from all
      * nuclei
      * 
-     * @param position
-     *            the position to search. Must be between 0 and the length of
+     * @param position the position to search. Must be between 0 and the length of
      *            the aggregate.
      * @return an unsorted array of the values at the given position
      * @throws Exception

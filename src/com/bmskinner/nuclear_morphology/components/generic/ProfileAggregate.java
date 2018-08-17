@@ -134,10 +134,10 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
      * 
      * @see components.generic.IProfileAggregate#getBinSize()
      */
-    @Override
-    public double getBinSize() {
-        return this.profileIncrement;
-    }
+//    @Override
+//    public double getBinSize() {
+//        return this.profileIncrement;
+//    }
 
     /*
      * (non-Javadoc)
@@ -405,7 +405,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("Profile aggregate with " + aggregate.size() + " bins of size " + getBinSize() + "\n");
+        builder.append("Profile aggregate with " + aggregate.size() + " bins of size " + profileIncrement + "\n");
 
         try {
             builder.append("First bin at " + xPositions[0] + ":\n");

@@ -118,28 +118,15 @@ public class DefaultProfileCollection implements IProfileCollection {
         if (!map.containsKey(type))
             throw new UnavailableProfileTypeException("Profile type is not present: " + type.toString());
 
-        IProfile p = cache.getProfile(type, quartile, tag);
-
-        if (p == null) { // profile not yet in cache
-            IProfileAggregate agg = map.get(type);
-
-            try {
-
-                p = agg.getQuartile(quartile);
-
-            } catch (NullPointerException e) {
-                warn("Cannot get profile for " + quartile);
-                stack("Error fetching quartile", e);
-                throw new ProfileException("Null pointer exception getting quartile from aggregate");
-            }
-
+        if(!cache.hasProfile(type, quartile, tag)) {
+        	IProfileAggregate agg = map.get(type);
+        	IProfile p = agg.getQuartile(quartile);
             int offset = indexes.get(tag);
             p = p.offset(offset);
             cache.addProfile(type, quartile, tag, p);
         }
-
-        return p;
-
+        	
+        return cache.getProfile(type, quartile, tag);
     }
 
     @Override
@@ -229,13 +216,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#getSegmentStartingWith(components.
-     * generic.BorderTagObject)
-     */
     @Override
     public IBorderSegment getSegmentStartingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
         List<IBorderSegment> segments = this.getSegments(tag);
@@ -256,13 +236,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#hasSegmentEndingWith(components.
-     * generic.BorderTagObject)
-     */
+
     @Override
     public boolean hasSegmentEndingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
 
@@ -273,13 +247,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#getSegmentEndingWith(components.
-     * generic.BorderTagObject)
-     */
+
     @Override
     public IBorderSegment getSegmentEndingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
         List<IBorderSegment> segments = this.getSegments(tag);
@@ -300,11 +268,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfileCollection#getSegmentContaining(int)
-     */
+
     @Override
     public IBorderSegment getSegmentContaining(int index) throws UnsegmentedProfileException {
         List<IBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
@@ -325,13 +289,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#getSegmentContaining(components.
-     * generic.BorderTagObject)
-     */
+
     @Override
     public IBorderSegment getSegmentContaining(@NonNull Tag tag) throws ProfileException {
         List<IBorderSegment> segments = this.getSegments(tag);
