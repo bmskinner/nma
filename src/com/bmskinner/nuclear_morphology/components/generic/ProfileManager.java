@@ -308,6 +308,9 @@ public class ProfileManager implements Loggable {
                      n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
                  }
              }
+        	 
+        	// Update signals as needed
+             collection.getSignalManager().recalculateSignalAngles();
         	
         	return;
         }
@@ -352,6 +355,9 @@ public class ProfileManager implements Loggable {
             //
             finest("Set border tag in consensus to " + newIndex + " from " + oldNIndex);
         }
+        
+     // Update signals as needed
+        collection.getSignalManager().recalculateSignalAngles();
 
     }
 

@@ -39,31 +39,11 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
 
     private static final long serialVersionUID = 1L;
 
-    private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<IBorderPoint>(3); // holds
-                                                                                              // the
-                                                                                              // points
-                                                                                              // considered
-                                                                                              // to
-                                                                                              // be
-                                                                                              // sperm
-                                                                                              // tails
-                                                                                              // before
-                                                                                              // filtering
-    protected transient boolean          clockwiseRP        = false;                          // is
-                                                                                              // the
-                                                                                              // original
-                                                                                              // orientation
-                                                                                              // of
-                                                                                              // the
-                                                                                              // nucleus
-                                                                                              // with
-                                                                                              // RP
-                                                                                              // clockwise
-                                                                                              // to
-                                                                                              // the
-                                                                                              // CoM,
-                                                                                              // or
-                                                                                              // not
+    // points considered to be sperm tails before filtering
+    private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<>(3);
+    
+   // Does the orientation of the nucleus have RP clockwise to the CoM. Only applicable to hooked sperm
+    protected transient boolean clockwiseRP = false;
 
     /**
      * Construct with an ROI, a source image and channel, and the original
@@ -84,21 +64,21 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
     }
 
     public List<IBorderPoint> getEstimatedTailPoints() {
-        return this.tailEstimatePoints;
+        return tailEstimatePoints;
     }
 
     protected void addTailEstimatePosition(IBorderPoint p) {
-        this.tailEstimatePoints.add(p);
+        tailEstimatePoints.add(p);
     }
 
     @Override
     public boolean isClockwiseRP() {
-        return this.clockwiseRP;
+        return clockwiseRP;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        tailEstimatePoints = new ArrayList<IBorderPoint>(0);
+        tailEstimatePoints = new ArrayList<>(0);
         clockwiseRP = false;
     }
 

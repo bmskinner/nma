@@ -255,10 +255,10 @@ public class FloatPointTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#findAngle(com.bmskinner.nuclear_morphology.components.generic.IPoint, com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#findSmallestAngle(com.bmskinner.nuclear_morphology.components.generic.IPoint, com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
 	@Test
-	public void testFindAngle() {
+	public void testFindSmallestAngle() {
 		
 		/*
 		 *                     |
@@ -284,39 +284,80 @@ public class FloatPointTest {
 		
 		double exp = 90;
 		
-		double angle = POINT_0x_10y.findAngle(CENTRE_POINT, POINT_10x_10y);
+		double angle = POINT_0x_10y.findSmallestAngle(CENTRE_POINT, POINT_10x_10y);
 		
 		assertEquals(exp, angle, 0);
 		
 		// 90 degrees
 		
 		exp = 90;
-		angle = CENTRE_POINT.findAngle(POINT_10x_10y, f);
+		angle = CENTRE_POINT.findSmallestAngle(POINT_10x_10y, f);
 		assertEquals(exp, angle, 0);
 		
 		// 0 degrees
 		
 		exp=0;
-		angle = POINT_0x_10y.findAngle(CENTRE_POINT, CENTRE_POINT);
+		angle = POINT_0x_10y.findSmallestAngle(CENTRE_POINT, CENTRE_POINT);
 		assertEquals(exp, angle, 0);
 		
 		// 180 degrees horiz
 		exp=180;
 		
-		angle = CENTRE_POINT.findAngle(d, e);
+		angle = CENTRE_POINT.findSmallestAngle(d, e);
 		assertEquals(exp, angle, 0);
 		
 		// 180 degrees vert
 		exp=180;
 		
-		angle = e.findAngle(POINT_10x_10y, f);
+		angle = e.findSmallestAngle(POINT_10x_10y, f);
 		assertEquals(exp, angle, 0);
 		
 		// 135 degrees in -y axis
 		exp=135;
 		
-		angle = CENTRE_POINT.findAngle(d, f);
+		angle = CENTRE_POINT.findSmallestAngle(d, f);
 		assertEquals(exp, angle, 0);
+	}
+	
+	@Test
+	public void testFindAbsoluteAngle() {
+		/*
+		 *                     |
+		 *                     b       c
+		 *                     |
+		 *                     |
+		 *                     |
+		 *      ______d________a_______e________
+		 *                     |
+		 *                     |
+		 *                     |
+		 *                     |       f
+		 *                     |
+		 * 
+		 * 
+		 */
+		
+		IPoint a = CENTRE_POINT;
+		IPoint b = POINT_0x_10y;
+		IPoint c = POINT_10x_10y;
+		IPoint d = new FloatPoint(-10, 0);
+		IPoint e = new FloatPoint(10, 0);
+		IPoint f = new FloatPoint(10, -10);
+		
+		// 90 degrees clockwise
+		assertEquals(90, a.findAbsoluteAngle(b, e), 0);
+		assertEquals(270, a.findAbsoluteAngle(e, b), 0);
+		
+		// 270 degrees clockwise
+		assertEquals(270, a.findAbsoluteAngle(b, d), 0);
+		assertEquals(90, a.findAbsoluteAngle(d, b), 0);
+		
+		// 0 degrees 
+		assertEquals(0, a.findAbsoluteAngle(b, b), 0);
+		
+		// 180 degrees
+		assertEquals(180, a.findAbsoluteAngle(d, e), 0);
+		assertEquals(180, a.findAbsoluteAngle(e, d), 0);
 	}
 			
 	@Test

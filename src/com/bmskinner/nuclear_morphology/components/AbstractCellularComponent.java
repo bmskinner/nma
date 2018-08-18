@@ -1124,7 +1124,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
 
         for (int i = 0; i < this.getBorderLength(); i++) {
 
-            double angle = this.getCentreOfMass().findAngle(p, this.getBorderPoint(i));
+            double angle = this.getCentreOfMass().findSmallestAngle(p, this.getBorderPoint(i));
 
             if (Math.abs(180 - angle) < minAngle) {
                 minDeltaYIndex = i;
@@ -1151,7 +1151,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         for (int i = 0; i < this.getBorderLength(); i++) {
 
             IBorderPoint p = this.getBorderPoint(i);
-            double angle = this.getCentreOfMass().findAngle(a, p);
+            double angle = this.getCentreOfMass().findSmallestAngle(a, p);
             if (Math.abs(90 - angle) < Math.abs(90 - bestAngle)) {
                 bestAngle = angle;
                 orthgonalPoint = p;
@@ -1361,7 +1361,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         IPoint currentBottom = IPoint.makeNew(getCentreOfMass().getX(), getMinY());
         // String state = "";
 
-        double currentAngle = getCentreOfMass().findAngle(currentBottom, bottomPoint);
+        double currentAngle = getCentreOfMass().findSmallestAngle(currentBottom, bottomPoint);
         // log(this.getNameAndNumber()+": Initial angle - "+currentAngle);
         // log(this.getNameAndNumber()+": Cur - "+currentBottom.toString());
         // log(this.getNameAndNumber()+": CoM - "+getCentreOfMass().toString());
@@ -1439,7 +1439,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
          * C |\ V P
          * 
          */
-        double oldAngle = this.getCentreOfMass().findAngle(p, IPoint.makeNew(this.getCentreOfMass().getX(), -10));
+        double oldAngle = this.getCentreOfMass().findSmallestAngle(p, IPoint.makeNew(this.getCentreOfMass().getX(), -10));
 
         if (p.getX() < this.getCentreOfMass().getX()) {
             oldAngle = 360 - oldAngle;
@@ -1468,7 +1468,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         for (int i = 0; i < getBorderLength(); i++) {
             IPoint p = getBorderPoint(i);
             double distance = p.getLengthTo(getCentreOfMass());
-            double pAngle = getCentreOfMass().findAngle(p, IPoint.makeNew(0, -10));
+            double pAngle = getCentreOfMass().findSmallestAngle(p, IPoint.makeNew(0, -10));
             if (p.getX() < 0) {
                 pAngle = 360 - pAngle;
             }

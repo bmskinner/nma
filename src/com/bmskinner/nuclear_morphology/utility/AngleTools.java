@@ -73,7 +73,7 @@ public class AngleTools {
          * C |\ V P
          * 
          */
-        double oldAngle = centre.findAngle(p, IPoint.makeNew(centre.getX(), -10));
+        double oldAngle = centre.findSmallestAngle(p, IPoint.makeNew(centre.getX(), -10));
 
         if (p.getX() < centre.getX()) {
             oldAngle = 360 - oldAngle;

@@ -54,6 +54,13 @@ public class InterfaceEvent extends EventObject {
         this.sourceName = event.sourceName();
     }
     
+    /**
+     * Utility method to create an interface update event from a source.
+     * Equivalent to calling {@code new InterfaceEvent(source, method, source.getClass().getName())}
+     * @param source the object firing the update
+     * @param method the method to request
+     * @return
+     */
     public static InterfaceEvent of(Object source, InterfaceMethod method) {
     	return new InterfaceEvent(source, method, source.getClass().getName());
     }

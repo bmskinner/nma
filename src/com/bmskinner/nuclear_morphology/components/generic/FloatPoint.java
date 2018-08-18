@@ -236,24 +236,23 @@ public class FloatPoint extends Point2D.Float implements IPoint {
     }
 
     @Override
-    public double findAngle(@NonNull IPoint a, @NonNull IPoint c) {
+    public double findSmallestAngle(@NonNull IPoint a, @NonNull IPoint c) {
 
-        if (a == null || c == null) {
+        if (a == null || c == null)
             throw new IllegalArgumentException("An input point is null in angle finding");
-        }
 
         /*
          * Test of rotation and comparison to a horizontal axis From
          * http://stackoverflow.com/questions/3486172/angle-between-3-points
+         * 
+         * The vectors are rotated so one is on the xaxis, at which point atan2 does the rest
          */
 
         IPoint ab = IPoint.makeNew(x - a.getX(), y - a.getY());
         IPoint cb = IPoint.makeNew(x - c.getX(), y - c.getY());
 
-        double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot
-                                                                      // product
-        double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross
-                                                                        // product
+        double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
+        double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product
 
         double alpha = Math.atan2(cross, dot);
 
@@ -281,35 +280,32 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         // degrees = 360.0-degrees;
         //
         // return degrees;
+    }
+    
+    @Override
+    public double findAbsoluteAngle(@NonNull IPoint start, @NonNull IPoint end) {
 
-        /*
-         * Test code - not working
-         */
+        if (start == null || end == null)
+            throw new IllegalArgumentException("Input points cannot be null for angle calculation");
+        IPoint ab = IPoint.makeNew(x - start.getX(), y - start.getY());
+        IPoint cb = IPoint.makeNew(x - end.getX(), y - end.getY());
 
-        // Use the cosine rule: a-b^2 = this-b^2 + this-a^2 - 2 * this-b *
-        // this-a * cos (theta)
+        double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
+        double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product
 
-        // double ab = a.getLengthTo(b);
-        // double bc = getLengthTo(b);
-        // double ac = getLengthTo(a);
-        //
-        // double ab2cosT = Math.pow(bc,2) + Math.pow(ac,2) - Math.pow(ab,2);
-        //
-        // double cosT = ab2cosT / (2 * ac * bc);
-        //
-        // double t = Math.acos(cosT);
-        // return Math.toDegrees(t);
-
-        /*
-         * OLD CODE - WORKING
-         */
-
-        // float[] xpoints = { (float) a.getX(), (float) getX(), (float)
-        // b.getX()};
-        // float[] ypoints = { (float) a.getY(), (float) getY(), (float)
-        // b.getY()};
-        // PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-        // return roi.getAngle();
+        double alpha = Math.atan2(cross, dot);
+                
+        double angle = alpha * 180 / Math.PI;
+//        System.out.println("Angle: "+angle);
+        
+        double neg = 0-angle;
+//        System.out.println("Negated angle: "+neg);
+        
+        double mod = (neg+360)%360;
+//        System.out.println("Mod angle: "+mod);
+        return mod;
+//        return (360+angle)%360;
+//        return Math.abs();
     }
 
     /**

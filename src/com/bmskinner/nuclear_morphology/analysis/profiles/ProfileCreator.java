@@ -133,7 +133,7 @@ public class ProfileCreator implements Loggable {
             IBorderPoint pointAfter  = point.nextPoint(pointOffset);
 
             // Find the smallest angle between the points
-            float angle = (float) point.findAngle(pointBefore, pointAfter);
+            float angle = (float) point.findSmallestAngle(pointBefore, pointAfter);
             
             // Is the measured angle is inside or outside the object?
             // Take the midpoint between the before and after points.

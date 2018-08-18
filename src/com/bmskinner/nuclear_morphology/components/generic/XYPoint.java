@@ -29,6 +29,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
@@ -278,33 +280,33 @@ public class XYPoint implements Serializable, Loggable, IPoint {
      * components.generic.IPoint)
      */
     @Override
-    public double findAngle(IPoint a, IPoint b) {
-
-        // Use the cosine rule: a-b^2 = this-b^2 + this-a^2 - 2 * this-b *
-        // this-a * cos (theta)
-
-        // double ab = a.getLengthTo(b);
-        // double bc = getLengthTo(b);
-        // double ac = getLengthTo(a);
-        //
-        // double ab2cosT = Math.pow(bc,2) + Math.pow(ac,2) - Math.pow(ab,2);
-        //
-        // double cosT = ab2cosT / (2 * ac * bc);
-        //
-        // double t = Math.acos(cosT);
-        // return Math.toDegrees(t);
-
+    public double findSmallestAngle(IPoint a, IPoint b) {
         float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX() };
         float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY() };
         PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
         return roi.getAngle();
     }
+    
+    @Override
+    public double findAbsoluteAngle(@NonNull IPoint start, @NonNull IPoint end) {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#hashCode()
-     */
+        if (start == null || end == null)
+            throw new IllegalArgumentException("Input points cannot be null for angle calculation");
+        IPoint ab = IPoint.makeNew(x - start.getX(), y - start.getY());
+        IPoint cb = IPoint.makeNew(x - end.getX(), y - end.getY());
+
+        double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
+        double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product
+
+        double alpha = Math.atan2(cross, dot);
+                
+        double angle = alpha * 180 / Math.PI;        
+        double neg = 0-angle;        
+        double mod = (neg+360)%360;
+        return mod;
+
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -317,11 +319,7 @@ public class XYPoint implements Serializable, Loggable, IPoint {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#equals(java.lang.Object)
-     */
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

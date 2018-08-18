@@ -701,7 +701,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         for (int i = 0; i < getBorderLength(); i++) {
             IPoint p = getBorderPoint(i);
             double distance = p.getLengthTo(getCentreOfMass());
-            double pAngle = getCentreOfMass().findAngle(p, IPoint.makeNew(0, -10));
+            double pAngle = getCentreOfMass().findSmallestAngle(p, IPoint.makeNew(0, -10));
             if (p.getX() < 0)
                 pAngle = 360 - pAngle;
 

@@ -412,6 +412,7 @@ public class SignalManager implements Loggable {
 
             median = Stats.quartile(values, Stats.MEDIAN);
             median += getMeanSignalAngle(signalGroupId);
+            median = (median+360)%360; // ensure range
         } else {
             values = this.getSignalStatistics(stat, scale, signalGroupId);
 

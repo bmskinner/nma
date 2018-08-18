@@ -568,6 +568,11 @@ public class EventHandler implements Loggable, EventListener {
         	firePopulationListUpdateEvent();
         	break;
         }
+        
+        case RECACHE_CHARTS:{
+        	fireInterfaceEvent(event); // pass to main window
+        	break;
+        }
             
         default:
             break;

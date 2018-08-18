@@ -218,7 +218,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         if (PlottableStatistic.OP_RP_ANGLE.equals(stat)) {
             try {
-                result = getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT),
+                result = getCentreOfMass().findSmallestAngle(this.getBorderTag(Tag.REFERENCE_POINT),
                         this.getBorderTag(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
                 stack("Cannot get border tag", e);
@@ -255,8 +255,10 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     // do not move this into SignalCollection - it is overridden in
     // RodentSpermNucleus
-    public void calculateSignalAnglesFromPoint(IBorderPoint p) {
+    public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
 
+    	//TODO - there is an issue with pigs. The smallest angle wrt the OP is not the correct angle to choose
+    	
         for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
             if (signalCollection.hasSignal(signalGroup)) {
@@ -265,7 +267,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
                 for (INuclearSignal s : signals) {
 
-                    double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
+                    double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
                     s.setStatistic(PlottableStatistic.ANGLE, angle);
 
                 }

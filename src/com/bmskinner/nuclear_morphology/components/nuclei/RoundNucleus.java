@@ -379,7 +379,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
             break;
         case OP_RP_ANGLE:
-            result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT),
+            result = this.getCentreOfMass().findSmallestAngle(this.getBorderTag(Tag.REFERENCE_POINT),
                     this.getBorderTag(Tag.ORIENTATION_POINT));
             break;
         default:
@@ -489,7 +489,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 
                 for (INuclearSignal s : signals) {
 
-                    double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
+                    double angle = this.getCentreOfMass().findSmallestAngle(p, s.getCentreOfMass());
                     s.setStatistic(PlottableStatistic.ANGLE, angle);
 
                 }

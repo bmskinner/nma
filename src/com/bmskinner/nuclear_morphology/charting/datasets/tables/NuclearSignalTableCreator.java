@@ -426,17 +426,9 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
             List<Object> temp = new ArrayList<Object>(0);
             try {
 
-                if (collection.getSignalManager().getSignalCount(signalGroup) == 0) { // Signal
-                                                                                      // group
-                                                                                      // has
-                                                                                      // no
-                                                                                      // signals
-                    for (int j = 0; j < numberOfRowsPerSignalGroup; j++) { // Make
-                                                                           // a
-                                                                           // blank
-                                                                           // block
-                                                                           // of
-                                                                           // cells
+            	// No signals, make a blank block of cells
+                if (collection.getSignalManager().getSignalCount(signalGroup) == 0) {
+                    for (int j = 0; j < numberOfRowsPerSignalGroup; j++) {
                         temp.add(EMPTY_STRING);
                     }
                     continue;

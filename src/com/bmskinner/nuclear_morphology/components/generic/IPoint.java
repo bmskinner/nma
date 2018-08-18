@@ -156,13 +156,32 @@ public interface IPoint {
      * Measure the smallest angle between the two lines a-this and this-b
      * connecting the three points
      * 
-     * @param a
-     *            the first line endpoint
-     * @param b
-     *            the second line endpoint
+     * @param a the first line endpoint
+     * @param b the second line endpoint
+     * @see findAbsoluteAngle
      * @return
      */
-    double findAngle(final @NonNull IPoint a, final @NonNull IPoint b);
+    double findSmallestAngle(final @NonNull IPoint a, final @NonNull IPoint b);
+    
+    /**
+     * Measure the absolute angle between the two lines a-this and this-b
+     * connecting the three points. The measurement is made clockwise from the
+     * start point to the end point.
+     * <p>
+     * Contrast with {@link findSmallestAngle}:
+     * 
+     * <pre>    a<br>    |<br>    o  135<br> 225 \<br>       b<br></pre>
+     * 
+     * findAbsoluteAngle(b, a) will return 225<br>
+     * findAbsoluteAngle(a, b) will return 135<br>
+     * findSmallestAngle(b, a) will return 135<br>
+     * findSmallestAngle(a, b) will return 135<br>
+     * 
+     * @param start the first line endpoint
+     * @param end the second line endpoint
+     * @return
+     */
+    double findAbsoluteAngle(final @NonNull IPoint start, final @NonNull IPoint end);
 
     /**
      * Get the midpoint of the two points

@@ -74,7 +74,7 @@ public interface Rotatable extends Loggable {
          * 
          */
 
-        double currentAngle = lowerPoint.findAngle(upperPoint, comp);
+        double currentAngle = lowerPoint.findSmallestAngle(upperPoint, comp);
 
         if (topPoint.isLeftOf(bottomPoint) && topPoint.isAbove(bottomPoint)) {
             angleToRotate = 360 - currentAngle;

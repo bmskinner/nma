@@ -215,7 +215,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
          * However, the image coordinates have a reversed Y axis
          */
 
-        double angleFromVertical = lowerPoint.findAngle(upperPoint, comp);
+        double angleFromVertical = lowerPoint.findSmallestAngle(upperPoint, comp);
 
         double angle = 0;
         if (topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)) {

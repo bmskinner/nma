@@ -150,18 +150,12 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
             // If the nucleus is asymmetric, calculate angles
             if (!dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)) {
-
-                finer("Nucleus type is asymmetric: " + n.getClass().getSimpleName());
-
                 if (n.hasBorderTag(Tag.ORIENTATION_POINT)) {
                     finest("Calculating angle from orientation point");
                     n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
                 } else {
                     finest("No orientation point in nucleus");
                 }
-
-            } else {
-                finer("Nucleus type is round: " + n.getClass().getSimpleName());
             }
 
         } catch (ImageImportException | UnavailableBorderPointException | UnavailableBorderTagException e) {
