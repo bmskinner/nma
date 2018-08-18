@@ -286,38 +286,15 @@ public class MainWindow extends AbstractMainWindow {
     
 	@Override
 	public void eventReceived(InterfaceEvent event) {
+		super.eventReceived(event);
 		if(event.getSource().equals(eh)){
 			InterfaceMethod method = event.method();
 	        
 	        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
 
 	        switch (method) {
-
-	        case REFRESH_POPULATIONS:
-	        	getPopulationsPanel().update(selected); // ensure all child
-	                                                       // datasets are included
-	            break;
-
 	        case CLEAR_LOG_WINDOW:
 	        	logPanel.clear();
-	            break;
-
-	        case UPDATE_IN_PROGRESS:
-	            for (TabPanel panel : getTabPanels()) {
-	                panel.setAnalysing(true);
-	            }
-	            setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	            break;
-
-	        case UPDATE_COMPLETE:
-	            for (TabPanel panel : getTabPanels()) {
-	                panel.setAnalysing(false);
-	            }
-	            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	            break;
-	            
-	        case RECACHE_CHARTS:
-	            recacheCharts();
 	            break;
 	        }
 	        
@@ -333,20 +310,9 @@ public class MainWindow extends AbstractMainWindow {
 
 	@Override
 	public void eventReceived(DatasetEvent event) {
-
-		if (event.method().equals(DatasetEvent.REFRESH_CACHE))
-            recacheCharts(event.getDatasets());
-        
-
-        if (event.method().equals(DatasetEvent.CLEAR_CACHE))
-            clearChartCache(event.getDatasets());
-        
+		super.eventReceived(event);
         if (event.method().equals(DatasetEvent.ADD_DATASET))
             addDataset(event.firstDataset());
-        
-        if (event.method().equals(DatasetEvent.ADD_WORKSPACE))
-        	getPopulationsPanel().update();
-        
 	}
 	    
     /**

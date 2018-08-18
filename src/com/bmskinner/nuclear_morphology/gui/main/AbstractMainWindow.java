@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui.main;
 
+import java.awt.Cursor;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
@@ -14,12 +15,16 @@ import javax.swing.JFrame;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.EventListener;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.PopulationListUpdateListener;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.PopulationListUpdateListener.PopulationListUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
@@ -138,6 +143,10 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
             for (TabPanel panel : getTabPanels()) {
                 panel.refreshChartCache();
                 panel.refreshTableCache();
+                
+                // All caches have been cleared, now reload whatever was selected 
+                eventReceived(new DatasetUpdateEvent(this, DatasetListManager.getInstance().getSelectedDatasets()));
+                
             }
         };
         ThreadManager.getInstance().execute(task);
@@ -203,6 +212,54 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 		PanelUpdater r = new PanelUpdater(event.getDatasets());
         ThreadManager.getInstance().execute(r);
 		
+	}
+    
+    @Override
+	public void eventReceived(DatasetEvent event) {
+
+		if (event.method().equals(DatasetEvent.REFRESH_CACHE))
+            recacheCharts(event.getDatasets());
+
+        if (event.method().equals(DatasetEvent.CLEAR_CACHE))
+            clearChartCache(event.getDatasets());
+        
+        if (event.method().equals(DatasetEvent.ADD_WORKSPACE))
+        	getPopulationsPanel().update();
+	}
+	
+	@Override
+	public void eventReceived(InterfaceEvent event) {
+
+		if(event.getSource().equals(eh)){
+			InterfaceMethod method = event.method();
+	        
+	        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
+
+	        switch (method) {
+
+	        case REFRESH_POPULATIONS: getPopulationsPanel().update(selected); // ensure all child datasets are included
+	            break;
+
+	        case UPDATE_IN_PROGRESS:
+	            for (TabPanel panel : getTabPanels()) {
+	                panel.setAnalysing(true);
+	            }
+	            setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	            break;
+
+	        case UPDATE_COMPLETE:
+	            for (TabPanel panel : getTabPanels()) {
+	                panel.setAnalysing(false);
+	            }
+	            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	            break;
+
+	        case RECACHE_CHARTS:{
+	        	recacheCharts();
+	        	break;
+	        }
+	        }
+		}
 	}
     
     public class PanelUpdater implements CancellableRunnable {

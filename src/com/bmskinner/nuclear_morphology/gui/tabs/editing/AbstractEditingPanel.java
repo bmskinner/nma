@@ -100,7 +100,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
         SegmentationHandler sh = new SegmentationHandler(activeDataset());
         sh.setBorderTag(tag, newTagIndex);
 
-        refreshChartCache();
+        refreshChartCache(); // immediate visualisation of result
 
         if (tag.type().equals(BorderTagType.CORE)) {
 

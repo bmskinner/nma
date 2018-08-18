@@ -322,25 +322,6 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         } catch(RequestCancelledException e) {
 
         }
-
-
-//        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual, windowSizeMin, windowSizeMax, 0.01);
-//        JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
-//
-//        int option = JOptionPane.showOptionDialog(null, windowSizeSpinner, "Select new window size",
-//                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-//        if (option == JOptionPane.CANCEL_OPTION) {
-//            return;
-//
-//        } else if (option == JOptionPane.OK_OPTION) {
-//            this.setAnalysing(true);
-//            double windowSize = (double) windowSizeSpinner.getModel().getValue();
-//            setCollectionWindowSize(windowSize);
-//            this.refreshChartCache();
-//            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//            this.setAnalysing(false);
-//        }
-
     }
 
     private void setCollectionWindowSize(double windowSize) throws Exception {

@@ -570,7 +570,7 @@ public class EventHandler implements Loggable, EventListener {
         }
         
         case RECACHE_CHARTS:{
-        	fireInterfaceEvent(event); // pass to main window
+        	fireInterfaceEvent(InterfaceEvent.of(this, event.method())); // pass to main window. Change source so it is not ignored
         	break;
         }
             

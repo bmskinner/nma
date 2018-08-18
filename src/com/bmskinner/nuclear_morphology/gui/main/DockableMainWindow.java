@@ -254,74 +254,6 @@ public class DockableMainWindow extends AbstractMainWindow {
 	public ProgressBarAcceptor getProgressAcceptor() {
         return this.logPanel;
     }
-
-	@Override
-	public void eventReceived(InterfaceEvent event) {
-		if(event.getSource().equals(eh)){
-			InterfaceMethod method = event.method();
-	        
-	        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
-
-	        switch (method) {
-
-	        case REFRESH_POPULATIONS:
-	        	getPopulationsPanel().update(selected); // ensure all child
-	                                                       // datasets are included
-	            break;
-
-	        case CLEAR_LOG_WINDOW:
-	        	logPanel.clear();
-	            break;
-
-	        case UPDATE_IN_PROGRESS:
-	            for (TabPanel panel : getTabPanels()) {
-	                panel.setAnalysing(true);
-	            }
-	            setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	            break;
-
-	        case UPDATE_COMPLETE:
-	            for (TabPanel panel : getTabPanels()) {
-	                panel.setAnalysing(false);
-	            }
-	            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	            break;
-	            
-	        case RECACHE_CHARTS:
-	            recacheCharts();
-	            break;
-	        }
-	        
-	        
-		}
-		
-	}
-
-	@Override
-	public void datasetSelectionEventReceived(DatasetSelectionEvent e) {
-		getPopulationsPanel().selectDatasets(e.getDatasets());
-	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-
-		if (event.method().equals(DatasetEvent.REFRESH_CACHE))
-            recacheCharts(event.getDatasets());
-        
-
-        if (event.method().equals(DatasetEvent.CLEAR_CACHE))
-            clearChartCache(event.getDatasets());
-        
-        if (event.method().equals(DatasetEvent.ADD_DATASET))
-            addDataset(event.firstDataset());
-        
-        if (event.method().equals(DatasetEvent.ADD_WORKSPACE))
-        	getPopulationsPanel().update();
- 
-        
-	}
-	
-	
     
     /**
      * Add the given dataset and all its children to the populations panel
@@ -342,6 +274,32 @@ public class DockableMainWindow extends AbstractMainWindow {
         //Force all panels to update with the new datasets
         eh.eventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
     }
+
+	@Override
+	public void datasetSelectionEventReceived(DatasetSelectionEvent e) {
+		getPopulationsPanel().selectDatasets(e.getDatasets());
+	}
+
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		super.eventReceived(event);
+        if (event.method().equals(DatasetEvent.ADD_DATASET))
+            addDataset(event.firstDataset());
+	}
+	
+	@Override
+	public void eventReceived(InterfaceEvent event) {
+		super.eventReceived(event);
+		if(event.getSource().equals(eh)){
+			InterfaceMethod method = event.method();
+
+			switch(method) {
+	        case CLEAR_LOG_WINDOW: logPanel.clear();
+	            break;
+			}
+
+		}
+	}
 
 	@Override
 	public void eventReceived(SignalChangeEvent event) {
