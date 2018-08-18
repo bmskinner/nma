@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
@@ -66,6 +67,7 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
     public void finished() {
         // Do not use super.finished(), or it will trigger another save action
         cancel();
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
         getInterfaceEventHandler().removeListener(eh);
         getDatasetEventHandler().removeListener(eh);
     }

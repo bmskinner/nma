@@ -623,31 +623,32 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         return super.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#updateSourceImageDirectory(java.io.File)
-     */
     @Override
     public void updateSourceImageDirectory(@NonNull File expectedImageDirectory) {
 
-        if (!expectedImageDirectory.exists())
-            throw new IllegalArgumentException("Requested directory does not exist: " + expectedImageDirectory);
+    	if (!expectedImageDirectory.exists()) {
+    		warn(String.format("Requested directory '%s' does not exist",  expectedImageDirectory));
+    		return;
+    	}
 
-        // Is the name of the expectedImageDirectory the same as the dataset
-        // image directory?
-        if (!checkName(expectedImageDirectory, this))
-            throw new IllegalArgumentException("Dataset name does not match new folder");
+    	// Is the name of the expectedImageDirectory the same as the dataset
+    	// image directory?
+    	String expectedName = getCollection().getFolder().getName();
+    	if (!expectedImageDirectory.getName().equals(expectedName)) {
+    		warn(String.format("Caution: Existing dataset folder '%s' does not match new folder name '%s'",
+    				expectedName, expectedImageDirectory.getName()));
+    	}
 
-        // Does expectedImageDirectory contain image files?
-        if (!hasImages(expectedImageDirectory))
-            throw new IllegalArgumentException("Target folder contains no images");
+    	// Does expectedImageDirectory contain image files?
+    	if (!hasImages(expectedImageDirectory)) {
+    		warn("Target folder contains no images");
+    		return;
+    	}
 
         getCollection().setSourceFolder(expectedImageDirectory);
 
         for (IAnalysisDataset child : this.getAllChildDatasets()) {
             child.getCollection().setSourceFolder(expectedImageDirectory);
-
         }
 
         log("Updated image paths to new folder location");
@@ -662,9 +663,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * @param dataset
      * @return
      */
-    private boolean checkName(@NonNull File expectedImageDirectory, @NonNull IAnalysisDataset dataset) { 	
-       return (dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName()));
-    }
+//    private boolean checkName(@NonNull File expectedImageDirectory, @NonNull IAnalysisDataset dataset) { 	
+//       return (dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName()));
+//    }
 
     /**
      * Check that the given directory contains >0 image files suitable for the
