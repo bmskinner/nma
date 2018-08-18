@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
@@ -74,7 +76,7 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
      * @param p the border point to orient from (the zero angle)
      * @throws Exception
      */
-    void calculateSignalAnglesFromPoint(IBorderPoint p);
+    void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p);
 
     String dumpInfo(int type);
 

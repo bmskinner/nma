@@ -245,7 +245,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         return false;
     }
 
-    public ISignalCollection getSignalCollection() {
+    @Override
+	public ISignalCollection getSignalCollection() {
         return signalCollection;
     }
 
@@ -255,7 +256,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     // do not move this into SignalCollection - it is overridden in
     // RodentSpermNucleus
-    public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
+    @Override
+	public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
 
     	//TODO - there is an issue with pigs. The smallest angle wrt the OP is not the correct angle to choose
     	
@@ -278,7 +280,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     /*
      * Get a readout of the state of the nucleus Used only for debugging
      */
-    public String dumpInfo(int type) {
+    @Override
+	public String dumpInfo(int type) {
         String result = "";
         result += "Dumping nucleus info: " + this.getNameAndNumber() + "\n";
         result += "    Border length: " + this.getBorderLength() + "\n";
@@ -545,7 +548,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * 
      * @return
      */
-    public String toString() {
+    @Override
+	public String toString() {
         String newLine = System.getProperty("line.separator");
         StringBuilder b = new StringBuilder();
 
