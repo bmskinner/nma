@@ -53,7 +53,8 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
         chartPanel.addChartMouseListener(new ChartMouseListener() {
 
-            public void chartMouseClicked(ChartMouseEvent e) {
+            @Override
+			public void chartMouseClicked(ChartMouseEvent e) {
 
                 if (e.getEntity() instanceof XYItemEntity) {
                     XYItemEntity ent = (XYItemEntity) e.getEntity();
@@ -68,7 +69,8 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
             }
 
-            public void chartMouseMoved(ChartMouseEvent e) {
+            @Override
+			public void chartMouseMoved(ChartMouseEvent e) {
             }
 
         });

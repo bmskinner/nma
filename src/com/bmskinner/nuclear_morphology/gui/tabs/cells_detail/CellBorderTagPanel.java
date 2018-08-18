@@ -123,7 +123,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
         profileOptions.setEnabled(b);
     }
 
-    public void update() {
+    @Override
+	public void update() {
 
         try {
 
@@ -191,7 +192,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
         return new ProfileChartFactory(options).createProfileChart();
     }
 
-    public void setBorderTagAction(Tag tag, int newTagIndex) {
+    @Override
+	public void setBorderTagAction(Tag tag, int newTagIndex) {
 
         if (tag == null) {
             fine("Tag is null");

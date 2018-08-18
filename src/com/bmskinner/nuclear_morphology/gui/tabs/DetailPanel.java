@@ -137,7 +137,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param panel the panel to add
      */
-    public void addSubPanel(final TabPanel panel) {
+    @Override
+	public void addSubPanel(final TabPanel panel) {
         subPanels.add(panel);
         panel.addSignalChangeListener(this);
         panel.addDatasetEventListener(this);
@@ -169,7 +170,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @return
      */
-    public synchronized IAnalysisDataset activeDataset() {
+    @Override
+	public synchronized IAnalysisDataset activeDataset() {
         return DatasetListManager.getInstance().getActiveDataset();
     }
 
@@ -213,7 +215,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
         return this.chartCache;
     }
 
-    public synchronized boolean isUpdating() {
+    @Override
+	public synchronized boolean isUpdating() {
 
         if (this.isUpdating.get()) {
             return true;
@@ -237,7 +240,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param b
      */
-    public synchronized void setAnalysing(boolean b) {
+    @Override
+	public synchronized void setAnalysing(boolean b) {
         if (b) {
 
             for (Component c : this.getComponents()) {
@@ -263,7 +267,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * Force any chart panels currently visible on screen to redraw, allowing
      * text to be rendered with the appropriate aspect ratio
      */
-    public synchronized void updateSize() {
+    @Override
+	public synchronized void updateSize() {
 
         updateSize(this);
 
@@ -524,7 +529,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void clearChartCache() {
+    @Override
+	public synchronized void clearChartCache() {
         this.getChartCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearChartCache();
@@ -537,7 +543,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
         getChartCache().clear(list);
         if (hasSubPanels()) {
             for (TabPanel panel : this.subPanels) {
@@ -551,7 +558,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void refreshChartCache() {
+    @Override
+	public synchronized void refreshChartCache() {
         clearChartCache();
         update(getDatasets());
     }
@@ -563,7 +571,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
         clearChartCache(list);
         update(getDatasets());
     }
@@ -577,7 +586,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void clearTableCache() {
+    @Override
+	public synchronized void clearTableCache() {
         getTableCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearTableCache();
@@ -590,7 +600,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
         getTableCache().clear(list);
         if (this.hasSubPanels()) {
             for (TabPanel panel : this.subPanels) {
@@ -604,7 +615,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void refreshTableCache() {
+    @Override
+	public synchronized void refreshTableCache() {
         clearTableCache();
         update(getDatasets());
     }
@@ -615,7 +627,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
      * 
      * @param list
      */
-    public synchronized void refreshTableCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void refreshTableCache(final List<IAnalysisDataset> list) {
         clearTableCache(list);
         this.update(getDatasets());
     }
@@ -635,35 +648,43 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
         }
     }
 
-    public synchronized void addSignalChangeListener(EventListener l) {
+    @Override
+	public synchronized void addSignalChangeListener(EventListener l) {
         sh.addListener(l);
     }
 
-    public synchronized void removeSignalChangeListener(EventListener l) {
+    @Override
+	public synchronized void removeSignalChangeListener(EventListener l) {
         sh.removeListener(l);
     }
     
-    public synchronized void addDatasetEventListener(EventListener l) {
+    @Override
+	public synchronized void addDatasetEventListener(EventListener l) {
         dh.addListener(l);
     }
 
-    public synchronized void removeDatasetEventListener(EventListener l) {
+    @Override
+	public synchronized void removeDatasetEventListener(EventListener l) {
         dh.removeListener(l);
     }
     
-    public synchronized void addDatasetUpdateEventListener(EventListener l) {
+    @Override
+	public synchronized void addDatasetUpdateEventListener(EventListener l) {
         duh.addListener(l);
     }
 
-    public synchronized void removeDatasetUpdateEventListener(EventListener l) {
+    @Override
+	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
         duh.removeListener(l);
     }
 
-    public synchronized void addInterfaceEventListener(EventListener l) {
+    @Override
+	public synchronized void addInterfaceEventListener(EventListener l) {
         ih.addListener(l);
     }
 
-    public synchronized void removeInterfaceEventListener(EventListener l) {
+    @Override
+	public synchronized void removeInterfaceEventListener(EventListener l) {
         ih.removeListener(l);
     }
 

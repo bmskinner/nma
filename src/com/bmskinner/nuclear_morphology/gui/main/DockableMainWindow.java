@@ -92,7 +92,7 @@ public class DockableMainWindow extends AbstractMainWindow {
         try {
             
 
-            Dimension preferredSize = new Dimension(1012, 804);
+            Dimension preferredSize = new Dimension(1080, 804);
             this.setPreferredSize(preferredSize);
             setBounds(100, 100, 1012, 804);
             contentPane = new JPanel();

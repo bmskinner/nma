@@ -132,25 +132,37 @@ public class ImageAnnotator extends AbstractImageFilterer {
         
         try {
 
-            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK);
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 8);
+            
+            for(IBorderPoint p : n.getBorderList()) {
+            	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
+            }
+            
+            // Colour the border points for tags
+            annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), Color.ORANGE, 8);
+            annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER), Color.BLUE, 8);
+            
             
             annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
                     n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), 
-                    Color.ORANGE);
+                    Color.ORANGE, 3);
             annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
                     , n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER)
-                    , Color.BLUE);
+                    , Color.BLUE, 3);
             
             if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
                 annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
                         , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GRAY);
+                        , Color.GRAY, 3);
                 annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
                         , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GRAY);
+                        , Color.GRAY, 3);
+                
+                annotatePoint(n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GRAY, 8);
+                annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GRAY, 8);
             }
 
-            annotateSegments(n);
+//            annotateSegments(n);
             annotateSignals(n);
 
         } catch (Exception e) {
@@ -210,15 +222,25 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
 
     /**
-     * Draw a point on the image processor
+     * Draw a point on the image processor with the default size
      * 
-     * @param p
-     *            the point to draw
-     * @param c
-     *            the colour to draw
+     * @param p the point to draw
+     * @param c the colour to draw
      * @return the annotator
      */
     public ImageAnnotator annotatePoint(IPoint p, Color c) {
+    	return annotatePoint(p, c, 3);
+    }
+    
+    /**
+     * Draw a point on the image processor
+     * 
+     * @param p the point to draw
+     * @param c the colour to draw
+     * @param size the point size
+     * @return the annotator
+     */
+    public ImageAnnotator annotatePoint(IPoint p, Color c, int size) {
 
         if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth())
             throw new IllegalArgumentException("Point x "+p.getXAsInt()+" is out of image bounds "+ip.getWidth());
@@ -227,21 +249,20 @@ public class ImageAnnotator extends AbstractImageFilterer {
             throw new IllegalArgumentException("Point y "+p.getYAsInt()+" is out of image bounds"+ip.getHeight());
 
         ip.setColor(c);
-        ip.setLineWidth(3);
+        ip.setLineWidth(size);
         ip.drawDot( (int) (p.getX()*scale), (int) (p.getY()*scale));
         return this;
     }
+    
+    
 
     /**
      * Draw the border of the given component on the component image of the
      * template. These can be the same object.
      * 
-     * @param p
-     *            the points to draw
-     * @param template
-     *            the component to get the component image from
-     * @param c
-     *            the colour to draw the border
+     * @param p the points to draw
+     * @param template the component to get the component image from
+     * @param c the colour to draw the border
      * @return this annotator
      */
     public ImageAnnotator annotatePoint(IPoint p, Imageable template, Color c) {
@@ -250,19 +271,29 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
 
     /**
-     * Draw a line on the image processor
+     * Draw a line on the image processor with the default width
      * 
-     * @param p1
-     *            the first endpoint
-     * @param p1
-     *            the second endpoint
-     * @param c
-     *            the colour to draw
+     * @param p1 the first endpoint
+     * @param p1 the second endpoint
+     * @param c the colour to draw
      * @return the annotator
      */
     private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c) {
+        return annotateLine(p1, p2, c, 1);
+    }
+    
+    /**
+     * Draw a line on the image processor
+     * 
+     * @param p1 the first endpoint
+     * @param p1 the second endpoint
+     * @param c the colour to draw
+     * @param width the line width
+     * @return the annotator
+     */
+    private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c, int width) {
         ip.setColor(c);
-        ip.setLineWidth(1);
+        ip.setLineWidth(width);
         ip.drawLine( (int) (p1.getXAsInt()*scale), 
                 (int) (p1.getYAsInt()*scale), 
                 (int) (p2.getXAsInt()*scale), 
@@ -547,13 +578,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotateSegments(Profileable n) {
 
         try {
-
-            if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { // only
-                                                                            // draw
-                                                                            // if
-                                                                            // there
-                                                                            // are
-                                                                            // segments
+        	// only draw if there are segments
+            if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { 
                 for (int i = 0; i < n.getProfile(ProfileType.ANGLE).getSegments().size(); i++) {
 
                     IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
