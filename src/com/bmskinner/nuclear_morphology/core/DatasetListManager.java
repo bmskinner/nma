@@ -348,9 +348,8 @@ public final class DatasetListManager implements Loggable {
         if (d.isRoot()) {
             if (datasetHashcodeMap.containsKey(d.getId())) {
                 return d.hashCode() != datasetHashcodeMap.get(d.getId());
-            } else {
-                warn("Missing root dataset hashcode");
             }
+			warn("Missing root dataset hashcode");
 
         }
         return false;
@@ -366,9 +365,8 @@ public final class DatasetListManager implements Loggable {
     public synchronized final boolean hashCodeChanged(@NonNull IWorkspace w) {
     	if (workspaceHashcodeMap.containsKey(w.getId())) {
     		return w.hashCode() != workspaceHashcodeMap.get(w.getId());
-    	} else {
-    		warn("Missing workspace hashcode");
     	}
+		warn("Missing workspace hashcode");
 
     	return false;
     }

@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -188,13 +189,16 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 				private void updateTag(Tag tag, int newIndex) {
 					boolean wasLocked = cell.getNucleus().isLocked();
 					cell.getNucleus().setLocked(false);
-//					System.out.println(String.format("Setting tag %s to %s ", tag, newIndex));
+
 					cell.getNucleus().setBorderTag(tag, newIndex);
 					cell.getNucleus().updateVerticallyRotatedNucleus();
-					if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT))
-						cell.setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
-					
+
+					if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
+						cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
+					}
+					cell.getNucleus().updateDependentStats();
 					cell.getNucleus().setLocked(wasLocked);
+					dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
 					dh.fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
 				}
 

@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import ij.gui.Roi;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,9 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
-import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
@@ -58,6 +54,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
+
+import ij.gui.Roi;
 
 /**
  * The standard round nucleus, implementing {@link Nucleus}. All non-round
@@ -222,7 +220,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
                         this.getBorderTag(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
                 stack("Cannot get border tag", e);
-                result = 0;
+                result = ERROR_CALCULATING_STAT;
             }
         }
 
@@ -581,9 +579,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
                 return 0;
             }
 
-        } else {
-            return byName;
         }
+		return byName;
 
     }
 

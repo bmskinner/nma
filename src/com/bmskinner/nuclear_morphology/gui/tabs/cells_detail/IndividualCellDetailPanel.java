@@ -95,6 +95,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
             tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
             tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
             tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
+            tabPane.setSelectedComponent(outlinePanel);
             
             JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
             sp.setLeftComponent(westPanel);

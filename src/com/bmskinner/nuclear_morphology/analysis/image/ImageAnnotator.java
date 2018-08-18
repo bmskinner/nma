@@ -132,7 +132,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
         
         try {
 
-            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 8);
+            
             
             for(IBorderPoint p : n.getBorderList()) {
             	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
@@ -153,15 +153,15 @@ public class ImageAnnotator extends AbstractImageFilterer {
             if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
                 annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
                         , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GRAY, 3);
+                        , Color.GREEN, 3);
                 annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
                         , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GRAY, 3);
+                        , Color.GREEN, 3);
                 
-                annotatePoint(n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GRAY, 8);
-                annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GRAY, 8);
+                annotatePoint(n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, 8);
+                annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, 8);
             }
-
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 8);
 //            annotateSegments(n);
             annotateSignals(n);
 

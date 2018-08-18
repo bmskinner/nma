@@ -70,7 +70,7 @@ import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCre
  */
 public abstract class ProfileableCellularComponent extends DefaultCellularComponent implements Taggable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
     /**
      * The proportion of the perimeter to use for profiling
@@ -741,4 +741,43 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
 
     }
+    
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		long temp;
+		temp = Double.doubleToLongBits(angleWindowProportion);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((borderTags == null) ? 0 : borderTags.hashCode());
+		result = prime * result + ((profileMap == null) ? 0 : profileMap.hashCode());
+		result = prime * result + (segsLocked ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ProfileableCellularComponent other = (ProfileableCellularComponent) obj;
+		if (Double.doubleToLongBits(angleWindowProportion) != Double.doubleToLongBits(other.angleWindowProportion))
+			return false;
+		if (borderTags == null) {
+			if (other.borderTags != null)
+				return false;
+		} else if (!borderTags.equals(other.borderTags))
+			return false;
+		if (profileMap == null) {
+			if (other.profileMap != null)
+				return false;
+		} else if (!profileMap.equals(other.profileMap))
+			return false;
+		if (segsLocked != other.segsLocked)
+			return false;
+		return true;
+	}
 }

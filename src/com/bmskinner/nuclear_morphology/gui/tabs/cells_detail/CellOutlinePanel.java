@@ -23,6 +23,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -56,7 +57,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         super(context, model, PANEL_TITLE_LBL);
         // make the chart for each nucleus
         this.setLayout(new BorderLayout());
-        JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();
 
         JPanel settingsPanel = new JPanel(new FlowLayout());
 
@@ -72,6 +72,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         settingsPanel.add(makeMeshPanel);
         settingsPanel.add(warpMeshPanel);
+        settingsPanel.add(new JLabel("Click a border point to reassign tags"));
+        
         add(settingsPanel, BorderLayout.NORTH);
 
         imagePanel = new InteractiveAnnotatedCellPanel();
