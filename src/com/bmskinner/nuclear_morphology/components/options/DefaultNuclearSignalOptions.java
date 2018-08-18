@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The default implementation of the nuclear signal options interface
@@ -246,37 +247,32 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
 
 	@Override
 	public List<String> getBooleanKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getIntegerKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getDoubleKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getFloatKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public Set<String> getSubOptionKeys() {
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
     
-//    @Override
-//    public Map<String, Object> getEntries(){
-//    	Map<String, Object> result = new HashMap<>();
-//    	return result;
-//    }
-//
-//	@Override
-//	public Object getValue(String key) {
-//		return null;
-//	}
-
 }

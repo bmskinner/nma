@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -198,8 +200,16 @@ public class ProfileIndexFinder implements Loggable {
 
         if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
+        
+        try {
         return identifyIndex(collection, list);
-
+        } catch(NoDetectedIndexException e) {
+        	// No index was found, fall back 
+        	warn("No reference point could be found using the default rules; falling back on longest diameter");
+        	List<RuleSet> rules = new ArrayList<>();
+        	rules.add(RuleSet.roundRPRuleSet());
+        	return identifyIndex(collection, rules);
+        }
     }
 
     /**
@@ -221,13 +231,10 @@ public class ProfileIndexFinder implements Loggable {
 
         // Find the first true in the result profile
         for (int i = 0; i < indexes.size(); i++) {
-
-            if (indexes.get(i)) {
+            if (indexes.get(i)) 
                 return i;
-            }
         }
         throw new NoDetectedIndexException();
-
     }
 
     /**

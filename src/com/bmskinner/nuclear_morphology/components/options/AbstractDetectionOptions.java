@@ -291,6 +291,8 @@ public abstract class AbstractDetectionOptions implements IDetectionOptions {
         threshold = options.getThreshold();
         scale = options.getScale();
         isNormaliseContrast = options.isNormaliseContrast();
+        
+
 
         folder = new File(options.getFolder().getAbsolutePath());
 

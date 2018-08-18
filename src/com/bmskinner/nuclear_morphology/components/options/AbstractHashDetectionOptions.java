@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -99,6 +100,11 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
         dblMap.put(MIN_CIRC, min);
         dblMap.put(MAX_CIRC, max);
         return this;
+    }
+    
+    @Override
+    public Set<String> getSubOptionKeys(){
+    	return subMap.keySet();
     }
 
     @Override

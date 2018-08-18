@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -76,6 +77,8 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
         public static final String CANNY_OPTIONS      = "Canny";
         public static final String HOUGH_OPTIONS      = "Hough";
         public static final String BACKGROUND_OPTIONS = "Background";
+        
+        IDetectionSubOptions duplicate();
 
         List<String> getKeys();
 
@@ -231,6 +234,13 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * @return
      */
     IDetectionSubOptions getSubOptions(String s) throws MissingOptionException;
+    
+    
+    /**
+     * Get all the sub option types defined in this object
+     * @return
+     */
+    Set<String> getSubOptionKeys();
 
     /**
      * Get the Canny edge detection options for this object.

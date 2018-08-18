@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.components.options;
 
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
 
 /**
@@ -56,6 +57,11 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
         this.setNumberOfCircles(template.getNumberOfCircles());
         this.setHoughThreshold(template.getHoughThreshold());
     }
+    
+	@Override
+	public IDetectionSubOptions duplicate() {
+		return new DefaultHoughOptions(this);
+	}
 
     @Override
     public int getMinRadius() {
@@ -110,5 +116,7 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
 
         return "Hough options:" + IDetectionOptions.NEWLINE + super.toString();
     }
+
+
 
 }

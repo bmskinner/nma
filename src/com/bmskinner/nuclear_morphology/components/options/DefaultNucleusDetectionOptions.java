@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -66,7 +67,7 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
         super(template);
 
     }
-
+    
     @Override
     public DefaultNucleusDetectionOptions setSize(double min, double max) {
         super.setSize(min, max);
@@ -206,31 +207,37 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 
 	@Override
 	public Object getValue(String key) {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getBooleanKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getIntegerKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getDoubleKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getFloatKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public Set<String> getSubOptionKeys() {
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 

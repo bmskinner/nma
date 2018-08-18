@@ -71,10 +71,19 @@ public class DefaultNucleusHashDetectionOptions extends AbstractHashDetectionOpt
         super(template);
 
     }
+        
+    public void set(IDetectionOptions template) {
+    	super.set(template);
+    	for(String s : template.getSubOptionKeys()) {
+    		try {
+				this.setSubOptions(s, template.getSubOptions(s).duplicate());
+			} catch (MissingOptionException e) {
+				// That would be odd. Ignore.
+			}
+    	}
+    }
 
-//    public IMutableDetectionOptions unlock() {
-//        return this;
-//    }
+
 
     public IDetectionOptions lock() {
         return this;

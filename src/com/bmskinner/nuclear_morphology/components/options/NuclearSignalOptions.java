@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
@@ -480,6 +481,12 @@ public class NuclearSignalOptions implements INuclearSignalOptions {
 
 	@Override
 	public List<String> getFloatKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getSubOptionKeys() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -28,7 +28,7 @@ import java.util.Map;
  *
  */
 public interface HashOptions extends Serializable {
-
+	
     /**
      * Get the double value with the given key.
      * 

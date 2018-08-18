@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+
 /**
  * A base for all the options classes that need to store options as a key value
  * pair
@@ -50,7 +52,8 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
         dblMap = o.dblMap;
         boolMap = o.boolMap;
     }
-
+    
+    
     /**
      * Get the double value with the given key
      * 
