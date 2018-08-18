@@ -252,10 +252,9 @@ public class ProfileManager implements Loggable {
             finer("Updating core border tag");
             updateCoreBorderTagIndex(tag, index);
             return;
-        } else {
-            finer("Updating extended border tag");
-            updateExtendedBorderTagIndex(tag, index);
         }
+		finer("Updating extended border tag");
+		updateExtendedBorderTagIndex(tag, index);
 
     }
 
@@ -272,12 +271,49 @@ public class ProfileManager implements Loggable {
     private void updateExtendedBorderTagIndex(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
+    	int rpIndex  = collection.getProfileCollection().getIndex(Tag.REFERENCE_POINT);
         int oldIndex = collection.getProfileCollection().getIndex(tag);
 
-        if (oldIndex == -1) {
+        if (oldIndex == -1)
             finer("Border tag does not exist and will be created");
+        
+        // If the new index for the tag is the same as the RP, set directly
+        if(index==rpIndex) {
+        	finer("Setting " + tag + " to the RP index");
+        	updateProfileCollectionOffsets(tag, index);
+        	
+        	// update nuclei
+        	 collection.getNuclei().stream().forEach(n -> {
+                 if (!n.isLocked()) {
+                	 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
+                	 n.setBorderTag(tag, rp);
+                	 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
+                         n.updateVerticallyRotatedNucleus();
+                         n.updateDependentStats();
+                     }
+                 }
+        	 });
+        	
+        	//Update consensus
+        	 if (collection.hasConsensus()) {
+                 Nucleus n = collection.getConsensus();
+                 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
+                 n.setBorderTag(tag, rp);
+                 
+                 if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+                     n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
+                     if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
+                         n.flipXAroundPoint(n.getCentreOfMass());
+                 } else {
+                     n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
+                 }
+             }
+        	
+        	return;
         }
 
+        // The index was not the RP; find best fits
+        
         /*
          * Set the border tag in the median profile
          */

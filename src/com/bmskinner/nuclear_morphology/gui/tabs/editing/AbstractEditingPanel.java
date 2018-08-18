@@ -55,7 +55,8 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * editing. If so, ask the user whether to unlock all cells, or leave cells
      * locked.
      */
-    public void checkCellLock() {
+    @Override
+	public void checkCellLock() {
         ICellCollection collection = activeDataset().getCollection();
 
         if (collection.isVirtual()) {
@@ -82,7 +83,8 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * @param tag
      * @param newTagIndex
      */
-    public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
+    @Override
+	public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
 
         if (activeDataset().getCollection().isVirtual()) {
             warn("Cannot update core border tag for a child dataset");
@@ -135,7 +137,8 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * @param index
      * @throws Exception
      */
-    public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
+    @Override
+	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
 
         checkCellLock();
 

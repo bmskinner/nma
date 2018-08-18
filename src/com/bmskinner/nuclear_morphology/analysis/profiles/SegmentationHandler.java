@@ -250,15 +250,25 @@ public class SegmentationHandler implements Loggable {
      */
     public void setBorderTag(Tag tag, int index) {
 
-        if (tag == null) {
+        if (tag == null)
             throw new IllegalArgumentException("Tag is null");
-        }
-
-        if (dataset.getCollection().isVirtual()) {
+        if (dataset.getCollection().isVirtual())
             return;
-        }
-
         try {
+        	
+        // If a tag is to be updated to the RP, don't perform alignments; just set the index directly
+        if(index==0) {
+        	 dataset.getCollection().getProfileManager().updateBorderTag(tag, 0);
+        	 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+                 child.getCollection().getProfileManager().updateBorderTag(tag, 0);
+             }
+        	 return;
+        }
+        
+        // Otherwise, find the best fit for each child dataset
+
+
+
 
             double prop = dataset.getCollection().getProfileCollection()
                     .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
