@@ -67,7 +67,6 @@ public class DefaultProfileCollection implements IProfileCollection {
      */
     public DefaultProfileCollection() {
         indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
-
     }
     
     @Override

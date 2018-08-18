@@ -256,43 +256,47 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
      * @throws Exception
      */
     private void configureButtons(ChartOptions options) {
-        if (options.isSingleDataset()) {
+    	if(options.isMultipleDatasets()) {
+    		setButtonsEnabled(false);
+    		return;
+    	}
 
-            setButtonsEnabled(true);
-            ICellCollection collection = options.firstDataset().getCollection();
-            ISegmentedProfile medianProfile;
-            try {
-                medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                        Tag.REFERENCE_POINT, Stats.MEDIAN);
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
-                warn("Error getting profile");
-                stack("Error getting profile", e);
-                setButtonsEnabled(false);
-                return;
-            }
+    	ICellCollection collection = options.firstDataset().getCollection();
+    	setButtonsEnabled(true);
+    	if(!collection.getProfileCollection().hasSegments()) {
+    		unmergeButton.setEnabled(false);
+            mergeButton.setEnabled(false);
+            return;
+    	}
+    	
+    	ISegmentedProfile medianProfile;
+    	try {
+    		medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+    				Tag.REFERENCE_POINT, Stats.MEDIAN);
+    	} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
+    			| UnsegmentedProfileException e) {
+    		stack("Error getting profile", e);
+    		setButtonsEnabled(false);
+    		return;
+    	}
 
-            // Don't allow merging below 2 segments
-            mergeButton.setEnabled(medianProfile.getSegmentCount()>2);
+    	// Don't allow merging below 2 segments
+    	mergeButton.setEnabled(medianProfile.getSegmentCount()>2);
 
-            // Check if there are any merged segments
-            boolean hasMerges = medianProfile.getSegments().stream().anyMatch(s->s.hasMergeSources());
+    	// Check if there are any merged segments
+    	boolean hasMerges = medianProfile.getSegments().stream().anyMatch(s->s.hasMergeSources());
 
-            // If there are no merged segments, don't allow unmerging
-            unmergeButton.setEnabled(hasMerges);
+    	// If there are no merged segments, don't allow unmerging
+    	unmergeButton.setEnabled(hasMerges);
 
 
-            // set child dataset options
-            if (options.firstDataset() instanceof ChildAnalysisDataset) {
-                mergeButton.setEnabled(false);
-                unmergeButton.setEnabled(false);
-                splitButton.setEnabled(false);
-                updatewindowButton.setEnabled(false);
-            }
-
-        } else { // multiple collections
-            setButtonsEnabled(false);
-        }
+    	// set child dataset options
+    	if (options.firstDataset() instanceof ChildAnalysisDataset) {
+    		mergeButton.setEnabled(false);
+    		unmergeButton.setEnabled(false);
+    		splitButton.setEnabled(false);
+    		updatewindowButton.setEnabled(false);
+    	}
     }
 
     public void setButtonsEnabled(boolean b) {

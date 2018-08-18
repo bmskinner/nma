@@ -171,8 +171,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
             try {
 
-                ICellCollection failedNuclei = new DefaultCellCollection(folder, collection.getOutputFolderName(),
-                        collection.getName() + " - failed", collection.getNucleusType());
+//                ICellCollection failedNuclei = new DefaultCellCollection(folder, collection.getOutputFolderName(),
+//                        collection.getName() + " - failed", collection.getNucleusType());
 
 //                log("Filtering collection...");
 
@@ -193,20 +193,20 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
                  * Keep the failed nuclei - they can be manually assessed later
                  */
 
-                if (analysisOptions.isKeepFailedCollections()) {
-                    log("Keeping failed nuclei as new collection");
-                    IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-                    IAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
-                    failedOptions.setNucleusType(NucleusType.ROUND);
-                    failed.setAnalysisOptions(failedOptions);
-                    failed.setRoot(true);
-                    result.add(failed);
-                }
+//                if (analysisOptions.isKeepFailedCollections()) {
+//                    log("Keeping failed nuclei as new collection");
+//                    IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
+//                    IAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
+//                    failedOptions.setNucleusType(NucleusType.ROUND);
+//                    failed.setAnalysisOptions(failedOptions);
+//                    failed.setRoot(true);
+//                    result.add(failed);
+//                }
 
                 log(SPACER);
 
                 log("Population: " + collection.getName());
-                log("Passed: " + collection.size() + " nuclei");
+                log("Found " + collection.size() + " nuclei");
                 // log("Failed: "+failedNuclei.size()+" nuclei");
 
                 log(SPACER);
