@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
@@ -492,15 +493,35 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         	// Get the median profile for the population
         	ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
 
-        	/*
-        	 * Split the recombining task into chunks for multithreading
-        	 */
+//        	/*
+//        	 * Split the recombining task into chunks for multithreading
+//        	 */
+//
+//        	SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc,
+//        			collection.getNuclei().toArray(new Nucleus[0]));
+//        	task.addProgressListener(this);
+//
+//            task.invoke();
+        	SegmentFitter fitter = new SegmentFitter(medianProfile);
+        	
+        	collection.getNuclei().parallelStream().forEach(n->{
+        		if (n.isLocked())
+        			return;
 
-        	SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc,
-        			collection.getNuclei().toArray(new Nucleus[0]));
-        	task.addProgressListener(this);
+        		try {
+        			fitter.fit(n, pc);
+        			// recombine the segments to the lengths of the median profile segments
+        			IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 
-            task.invoke();
+        			ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
+        			n.setProfile(ProfileType.FRANKEN, segmented);
+        		} catch (IndexOutOfBoundsException | ProfileException | UnavailableComponentException
+        				| UnsegmentedProfileException e) {
+        			stack("Could not fit segments for nucleus "+n.getNameAndNumber()+": "+e.getMessage(), e);
+        		}
+        	});
+
+            
         } catch (RejectedExecutionException e) {
             error("Fork task rejected: " + e.getMessage(), e);
         } catch (UnavailableBorderTagException e1) {
