@@ -2,9 +2,11 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +55,9 @@ import ij.process.ImageProcessor;
 
 /**
  * Show annotated cell images, and allow selection of tags
- * or other elements of the cell
+ * or other elements of the cell.
+ * 
+ * The 'bulging' code was adapted from https://stackoverflow.com/questions/22824041/explanation-for-the-bulge-effect-algorithm
  * @author ben
  * @since 1.14.0
  *
@@ -69,6 +73,10 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	private CellularComponent component = null;
 	private boolean isShowMesh;
 	private boolean isWarpImage;
+	
+	private BufferedImage output;
+    private double bulgeStrength = 1.0;
+    private double bulgeRadius = 50;
 
 	public InteractiveAnnotatedCellPanel(){
 		setLayout(new BorderLayout());
@@ -103,7 +111,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	@Override
 	public void repaint() {
 		super.repaint();
-		createImage(); // ensure the imaage is always scaled properly to the panel
+//		createImage(); // ensure the imaage is always scaled properly to the panel
 	}
 	
 	public synchronized void addDatasetEventListener(EventListener l) {
@@ -126,6 +134,11 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		createCellImage();
 	}
 	
+	@Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+    }
+	
 	/**
 	 * Create the default annotated cell image, with border, segments and border tags highlighted
 	 * @param dataset
@@ -134,6 +147,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	 */
 	private void createCellImage() {
 		ThreadManager.getInstance().submit(() ->{
+			output= null;
 			ImageProcessor ip;
 			try{
 				ip = component.getImage();
@@ -160,9 +174,47 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			for(MouseListener l : imageLabel.getMouseListeners()) {
 				imageLabel.removeMouseListener(l);
 			}
+			for(MouseMotionListener l : imageLabel.getMouseMotionListeners()) {
+				imageLabel.removeMouseMotionListener(l);
+			}
+			
+			imageLabel.addMouseMotionListener(new MouseAdapter() {
+
+				private final BufferedImage input = an2.toProcessor().getBufferedImage();
+				
+				@Override
+				public void mouseMoved(MouseEvent e){
+					
+					// The rescaled dimensions
+					int iconWidth = imageLabel.getIcon().getIconWidth();
+					int iconHeight = imageLabel.getIcon().getIconHeight();
+					
+					// The image panel dimensions
+					int panelWidth = getWidth();
+					int panelHeight = getHeight();
+					
+					// The position of the click relative to the icon
+					int iconX = e.getX()-((panelWidth-iconWidth)/2);
+					int iconY = e.getY()-((panelHeight-iconHeight)/2);
+					updateImage(iconX, iconY);
+				}
+				
+				private void updateImage(int x, int y) {
+					if (output == null) 
+						output = new BufferedImage( input.getWidth(), input.getHeight(),  BufferedImage.TYPE_INT_ARGB);
+					
+					computeBulgeImage(input, x, y, bulgeStrength, bulgeRadius, output);
+					imageLabel.setIcon(new ImageIcon(output));
+					repaint();
+					
+				}
+			});
 
 			imageLabel.addMouseListener(new MouseAdapter() {
 				
+				// the undistorted image
+				
+
 				private IPoint getPositionInComponent(MouseEvent e) {
 					// The original image dimensions
 					int w = an.toProcessor().getWidth();
@@ -340,4 +392,46 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			}
 		});
 	}
+	
+	private static void computeBulgeImage(BufferedImage input, int cx, int cy, 
+	        double bulgeStrength, double bulgeRadius, BufferedImage output){
+	        int w = input.getWidth();
+	        int h = input.getHeight();
+	        for(int x = 0; x < w; x++) {
+	            for(int y = 0; y < h; y++) {
+	                int dx = x-cx;
+	                int dy = y-cy;
+	                double distanceSquared = dx * dx + dy * dy;;
+	                int sx = x;
+	                int sy = y;
+	                if (distanceSquared < bulgeRadius * bulgeRadius) {
+	                    double distance = Math.sqrt(distanceSquared);
+	                    boolean otherMethod = false;
+	                    otherMethod = true;
+	                    if (otherMethod) {
+	                        double r = distance / bulgeRadius;
+	                        double a = Math.atan2(dy, dx);
+	                        double rn = Math.pow(r, bulgeStrength)*distance; 
+	                        double newX = rn*Math.cos(a) + cx; 
+	                        double newY = rn*Math.sin(a) + cy;  
+	                        sx += (newX - x);
+	                        sy += (newY - y);
+	                    }
+	                    else  {
+	                        double dirX = dx / distance;
+	                        double dirY = dy / distance;
+	                        double alpha = distance / bulgeRadius;
+	                        double distortionFactor = 
+	                            distance * Math.pow(1-alpha, 1.0 / bulgeStrength);
+	                        sx -= distortionFactor * dirX;
+	                        sy -= distortionFactor * dirY;
+	                    }
+	                }
+	                if (sx >= 0 && sx < w && sy >= 0 && sy < h) {
+	                    int rgb = input.getRGB(sx, sy);
+	                    output.setRGB(x, y, rgb);
+	                }
+	            }
+	        }
+	    }
 }
