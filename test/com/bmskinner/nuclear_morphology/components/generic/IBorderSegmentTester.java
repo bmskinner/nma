@@ -233,7 +233,7 @@ public class IBorderSegmentTester {
 	public void testGetProportionalIndex() {
 		
 		for(int i=0; i<=100; i++) {
-			double d = (double)i/200d;
+			double d = i/200d;
 			double dist = segmentLength*d;
 			double exp  = Math.round(CellularComponent.wrapIndex(startIndex+dist, segment.getProfileLength()));
 			assertEquals("Testing "+d+": "+dist,  (int)exp, segment.getProportionalIndex(d));

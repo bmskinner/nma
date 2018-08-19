@@ -1,12 +1,19 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Stroke;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,9 +81,11 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	private boolean isShowMesh;
 	private boolean isWarpImage;
 	
+	// the undistorted image
+	private BufferedImage input;
 	private BufferedImage output;
-    private double bulgeStrength = 1.0;
-    private double bulgeRadius = 50;
+    private int smallRadius = 25;
+    private int bigRadius   = 50;
 
 	public InteractiveAnnotatedCellPanel(){
 		setLayout(new BorderLayout());
@@ -169,7 +178,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			}    
 			
 			imageLabel.setIcon(an2.toImageIcon());
-			
+			input = an2.toProcessor().getBufferedImage();
 			
 			for(MouseListener l : imageLabel.getMouseListeners()) {
 				imageLabel.removeMouseListener(l);
@@ -177,37 +186,37 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			for(MouseMotionListener l : imageLabel.getMouseMotionListeners()) {
 				imageLabel.removeMouseMotionListener(l);
 			}
+			for(MouseWheelListener l : imageLabel.getMouseWheelListeners()) {
+				imageLabel.removeMouseWheelListener(l);
+			}
 			
-			imageLabel.addMouseMotionListener(new MouseAdapter() {
-
-				// the undistorted image
-				private final BufferedImage input = an2.toProcessor().getBufferedImage();
+			imageLabel.addMouseWheelListener(new MouseAdapter() {
 				
 				@Override
+	            public void mouseWheelMoved(MouseWheelEvent e) {
+	                if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
+	                    InputEvent.CTRL_DOWN_MASK){
+	                	int temp = smallRadius +( 1*e.getWheelRotation());
+	                	temp = temp>100?100:temp;
+	                	temp = temp<5?5:temp;
+	                    smallRadius = temp;
+	                } else {
+	                	int temp = bigRadius +( 3 * e.getWheelRotation());
+	                	temp = temp>200?200:temp;
+	                	temp = temp<10?10:temp;
+	                	bigRadius = temp;
+	                }
+	                IPoint p = translateMousePointToImage(e); 
+					updateImage(p.getXAsInt(), p.getYAsInt());
+	            }
+			});
+			
+			
+			imageLabel.addMouseMotionListener(new MouseAdapter() {
+				@Override
 				public void mouseMoved(MouseEvent e){
-					
-					// The rescaled dimensions
-					int iconWidth = imageLabel.getIcon().getIconWidth();
-					int iconHeight = imageLabel.getIcon().getIconHeight();
-					
-					// The image panel dimensions
-					int panelWidth = getWidth();
-					int panelHeight = getHeight();
-					
-					// The position of the click relative to the icon
-					int iconX = e.getX()-((panelWidth-iconWidth)/2);
-					int iconY = e.getY()-((panelHeight-iconHeight)/2);
-					updateImage(iconX, iconY);
-				}
-				
-				private void updateImage(int x, int y) {
-					if (output == null) 
-						output = new BufferedImage( input.getWidth(), input.getHeight(),  BufferedImage.TYPE_INT_ARGB);
-					
-					computeBulgeImage(input, x, y, bulgeStrength, bulgeRadius, output);
-					imageLabel.setIcon(new ImageIcon(output));
-					repaint();
-					
+					IPoint p = translateMousePointToImage(e); 
+					updateImage(p.getXAsInt(), p.getYAsInt());
 				}
 			});
 
@@ -323,6 +332,29 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 
 		});
 	}
+	
+	private IPoint translateMousePointToImage(MouseEvent e) {
+		// The rescaled dimensions
+		int iconWidth = imageLabel.getIcon().getIconWidth();
+		int iconHeight = imageLabel.getIcon().getIconHeight();
+		
+		// The image panel dimensions
+		int panelWidth = getWidth();
+		int panelHeight = getHeight();
+		
+		// The position of the click relative to the icon
+		int iconX = e.getX()-((panelWidth-iconWidth)/2);
+		int iconY = e.getY()-((panelHeight-iconHeight)/2);
+		return IPoint.makeNew(iconX, iconY);
+	}
+	
+	private void updateImage(int x, int y) {
+		if (output == null) 
+			output = new BufferedImage( input.getWidth(), input.getHeight(),  BufferedImage.TYPE_INT_ARGB);
+		computeBulgeImage(input, x, y, smallRadius, bigRadius, output);
+		imageLabel.setIcon(new ImageIcon(output));
+		repaint();
+	}
 
 	private void createMeshImage() {
 		ThreadManager.getInstance().submit(() ->{
@@ -392,44 +424,31 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	}
 	
 	private static void computeBulgeImage(BufferedImage input, int cx, int cy, 
-	        double bulgeStrength, double bulgeRadius, BufferedImage output){
-	        int w = input.getWidth();
-	        int h = input.getHeight();
-	        for(int x = 0; x < w; x++) {
-	            for(int y = 0; y < h; y++) {
-	                int dx = x-cx;
-	                int dy = y-cy;
-	                double distanceSquared = dx * dx + dy * dy;;
-	                int sx = x;
-	                int sy = y;
-	                if (distanceSquared < bulgeRadius * bulgeRadius) {
-	                    double distance = Math.sqrt(distanceSquared);
-	                    boolean otherMethod = false;
-	                    otherMethod = true;
-	                    if (otherMethod) {
-	                        double r = distance / bulgeRadius;
-	                        double a = Math.atan2(dy, dx);
-	                        double rn = Math.pow(r, bulgeStrength)*distance; 
-	                        double newX = rn*Math.cos(a) + cx; 
-	                        double newY = rn*Math.sin(a) + cy;  
-	                        sx += (newX - x);
-	                        sy += (newY - y);
-	                    }
-	                    else  {
-	                        double dirX = dx / distance;
-	                        double dirY = dy / distance;
-	                        double alpha = distance / bulgeRadius;
-	                        double distortionFactor = 
-	                            distance * Math.pow(1-alpha, 1.0 / bulgeStrength);
-	                        sx -= distortionFactor * dirX;
-	                        sy -= distortionFactor * dirY;
-	                    }
-	                }
-	                if (sx >= 0 && sx < w && sy >= 0 && sy < h) {
-	                    int rgb = input.getRGB(sx, sy);
-	                    output.setRGB(x, y, rgb);
-	                }
-	            }
-	        }
-	    }
+	        int small, int big, BufferedImage output){
+		
+		int r2= small;
+		int r1 = big;
+		int dx1 = cx-r1; // the big rectangle
+		int dy1 = cy-r1;
+		int dx2 = cx+r1;
+		int dy2 = cy+r1;
+		
+		int sx1 = cx-r2; // the small source rectangle
+		int sy1 = cy-r2;
+		int sx2 = cx+r2;
+		int sy2 = cy+r2;
+		
+		Graphics2D g2 = output.createGraphics();
+		
+		g2.drawImage(input, 0, 0, null);
+
+		g2.drawImage(input, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
+		Color c = g2.getColor();
+		Stroke s = g2.getStroke();
+		g2.setColor(Color.BLACK);
+		g2.setStroke(new BasicStroke(2));
+		g2.drawRect(dx1, dy1, r1*2, r1*2);
+		g2.setColor(c);
+		g2.setStroke(s);
+	}
 }
