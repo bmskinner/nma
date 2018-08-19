@@ -59,8 +59,6 @@ public class DefaultCell implements ICell {
                                                                  // values
                                                                  // stored for
                                                                  // this object
-    
-    private transient int hashCode; // no need to recalculate all the time
 
     /**
      * Create a new cell with a random ID
@@ -81,7 +79,6 @@ public class DefaultCell implements ICell {
         tails = new ArrayList<>(0);
         acrosomes = new ArrayList<>(0);
         statistics = new HashMap<>();
-        recalculateHashCode();
     }
 
     /**
@@ -93,7 +90,6 @@ public class DefaultCell implements ICell {
     public DefaultCell(Nucleus n) {
         this();
         nuclei.add(n);
-        recalculateHashCode();
     }
 
     /**
@@ -105,7 +101,6 @@ public class DefaultCell implements ICell {
     public DefaultCell(ICytoplasm c) {
         this();
         cytoplasm = c;
-        recalculateHashCode();
     }
 
     /**
@@ -142,7 +137,6 @@ public class DefaultCell implements ICell {
             this.cytoplasm = c.getCytoplasm().duplicate();
 
         statistics = new HashMap<PlottableStatistic, Double>();
-        recalculateHashCode();
     }
 
     /*
@@ -224,8 +218,6 @@ public class DefaultCell implements ICell {
 
         if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat))
             return getNuclearRatio();
-
-        recalculateHashCode();
         return STAT_NOT_CALCULATED;
     }
 
@@ -242,7 +234,6 @@ public class DefaultCell implements ICell {
 
         if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)) 
             statistics.put(stat, d);
-        recalculateHashCode();
     }
 
     @Override
@@ -279,11 +270,6 @@ public class DefaultCell implements ICell {
      * 
      */
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#setNucleus(components.nuclei.Nucleus)
-     */
     @Override
     public void setNucleus(Nucleus nucleus) {
         if (nuclei.isEmpty()) {
@@ -291,124 +277,63 @@ public class DefaultCell implements ICell {
         } else {
             nuclei.set(0, nucleus);
         }
-        recalculateHashCode();
     }
 
     @Override
     public void addNucleus(Nucleus nucleus) {
         nuclei.add(nucleus);
-        recalculateHashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#getMitochondria()
-     */
     @Override
     public List<IMitochondrion> getMitochondria() {
         return mitochondria;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#setMitochondria(java.util.List)
-     */
     @Override
     public void setMitochondria(List<IMitochondrion> mitochondria) {
         this.mitochondria = mitochondria;
-        recalculateHashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#addMitochondrion(components.Mitochondrion)
-     */
     @Override
     public void addMitochondrion(IMitochondrion mitochondrion) {
         this.mitochondria.add(mitochondrion);
-        recalculateHashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#getTails()
-     */
     @Override
     public List<Flagellum> getFlagella() {
         return this.tails;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#addTail(components.Flagellum)
-     */
     @Override
     public void addFlagellum(Flagellum tail) {
         this.tails.add(tail);
-        recalculateHashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#getAcrosomes()
-     */
     @Override
     public List<IAcrosome> getAcrosomes() {
         return this.acrosomes;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#addAcrosome(components.Acrosome)
-     */
     @Override
     public void addAcrosome(IAcrosome acrosome) {
         this.acrosomes.add(acrosome);
-        recalculateHashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#hasNucleus()
-     */
     @Override
     public boolean hasAcrosome() {
         return !this.acrosomes.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#hasNucleus()
-     */
     @Override
     public boolean hasNucleus() {
         return !nuclei.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#hasTail()
-     */
     @Override
     public boolean hasFlagellum() {
         return !this.tails.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#hasMitochondria()
-     */
     @Override
     public boolean hasMitochondria() {
         return !this.mitochondria.isEmpty();
@@ -427,7 +352,6 @@ public class DefaultCell implements ICell {
     @Override
     public void setCytoplasm(ICytoplasm cytoplasm) {
         this.cytoplasm = cytoplasm;
-        recalculateHashCode();
     }
     
     
@@ -464,7 +388,6 @@ public class DefaultCell implements ICell {
         mitochondria.stream().forEach(n->n.setScale(scale));
         if(cytoplasm!=null)
         	cytoplasm.setScale(scale);
-        recalculateHashCode();
     }
     
     @Override
@@ -477,12 +400,6 @@ public class DefaultCell implements ICell {
         return getNuclei().stream().anyMatch(n->n.getSignalCollection().hasSignal(signalGroupId));
     }
         
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object o) {
 
@@ -528,25 +445,17 @@ public class DefaultCell implements ICell {
         out.defaultWriteObject();
     }
     
-    private void recalculateHashCode(){
+    @Override
+    public int hashCode() {
     	final int prime = 31;
-        hashCode = 1;
+    	int hashCode = 1;
         hashCode = prime * hashCode + ((acrosomes == null) ? 0 : acrosomes.hashCode());
         hashCode = prime * hashCode + ((mitochondria == null) ? 0 : mitochondria.hashCode());
         hashCode = prime * hashCode + ((nucleus == null) ? 0 : nucleus.hashCode());
         hashCode = prime * hashCode + ((tails == null) ? 0 : tails.hashCode());
         hashCode = prime * hashCode + ((uuid == null) ? 0 : uuid.hashCode());
         hashCode = prime * hashCode + ((nuclei == null) ? 0 : nuclei.hashCode());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#hashCode()
-     */
-    @Override
-    public int hashCode() {
-    	return hashCode;
+        return hashCode;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -561,7 +470,6 @@ public class DefaultCell implements ICell {
         // Add stats if missing
         if (statistics == null)
             statistics = new HashMap<>();
-        recalculateHashCode();
     }
 
 }
