@@ -43,7 +43,7 @@ public interface PlottableStatistic extends Serializable {
     static final PlottableStatistic ASPECT          = new GenericStatistic("Aspect", StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic CIRCULARITY     = new GenericStatistic("Circularity",
             StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic VARIABILITY     = new GenericStatistic("Similarity to median",
+    static final PlottableStatistic VARIABILITY     = new GenericStatistic("Difference from median",
             StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic("Bounding height",
             StatisticDimension.LENGTH);

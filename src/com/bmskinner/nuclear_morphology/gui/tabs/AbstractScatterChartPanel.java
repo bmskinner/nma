@@ -131,8 +131,10 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
     }
     
     private JPanel createHeader() {
-        statABox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));
-        statBBox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));
+        statABox = new JComboBox<>(PlottableStatistic.getStats(component));
+        statBBox = new JComboBox<>(PlottableStatistic.getStats(component));
+        
+        statABox.setSelectedItem(PlottableStatistic.VARIABILITY); // default if present
 
         statABox.addActionListener(e->update(getDatasets()));
         statBBox.addActionListener(e->update(getDatasets()));

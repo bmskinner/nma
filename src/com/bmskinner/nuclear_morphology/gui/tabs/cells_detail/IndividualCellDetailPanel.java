@@ -100,6 +100,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
             JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
             sp.setLeftComponent(westPanel);
             sp.setRightComponent(tabPane);
+            sp.setResizeWeight(0.25);
             add(sp, BorderLayout.CENTER);
 
         } catch (Exception e) {
