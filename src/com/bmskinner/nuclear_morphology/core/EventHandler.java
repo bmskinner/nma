@@ -266,6 +266,9 @@ public class EventHandler implements Loggable, EventListener {
             if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
             	return () -> saveDataset(selectedDataset, true);
             	
+            if (event.type().equals(SignalChangeEvent.SAVE_ALL_DATASETS))
+                return () -> saveRootDatasets();
+            	
         	if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) )
         		return () -> fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
         		

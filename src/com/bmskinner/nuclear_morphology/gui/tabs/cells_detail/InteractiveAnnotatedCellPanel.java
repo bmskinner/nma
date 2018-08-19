@@ -180,6 +180,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			
 			imageLabel.addMouseMotionListener(new MouseAdapter() {
 
+				// the undistorted image
 				private final BufferedImage input = an2.toProcessor().getBufferedImage();
 				
 				@Override
@@ -211,9 +212,6 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			});
 
 			imageLabel.addMouseListener(new MouseAdapter() {
-				
-				// the undistorted image
-				
 
 				private IPoint getPositionInComponent(MouseEvent e) {
 					// The original image dimensions

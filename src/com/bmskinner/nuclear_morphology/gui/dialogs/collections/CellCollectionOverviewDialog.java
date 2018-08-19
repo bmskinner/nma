@@ -62,12 +62,14 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         super(dataset);
     }
 
+	@Override
 	protected void createWorker(){
 		worker = new ImageImportWorker(dataset, table.getModel(), true);
         worker.addPropertyChangeListener(this);
         worker.execute();
 	}
 	
+	@Override
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
 
@@ -111,6 +113,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 		
 	}
 
+	@Override
 	protected void createUI() {
 
         this.setLayout(new BorderLayout());
@@ -136,7 +139,8 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         table = new JTable(model) {
             // Returning the Class of each column will allow different
             // renderers to be used based on Class
-            public Class<?> getColumnClass(int column) {
+            @Override
+			public Class<?> getColumnClass(int column) {
                 return JLabel.class;
             }
         };

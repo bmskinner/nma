@@ -81,6 +81,7 @@ public class DockableMainWindow extends AbstractMainWindow {
         createEventHandling();
                
         this.setJMenuBar(new MainWindowMenuBar(this));
+        
 
     }
 
