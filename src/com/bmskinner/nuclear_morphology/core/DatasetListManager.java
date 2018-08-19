@@ -287,7 +287,7 @@ public final class DatasetListManager implements Loggable {
     }
 
     /**
-     * Add the given dataset to the manager
+     * Add the given dataset to the manager if not already present
      * @param d
      */
     public synchronized final void addDataset(@NonNull IAnalysisDataset d) {

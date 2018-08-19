@@ -155,13 +155,18 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         if (sourceCollection == null) {
             warn("Cannot copy: source collection is null");
             return null;
-        } else {
-
-            fine("Copying segmentation pattern");
-            reapplyProfiles(dataset.getCollection(), sourceCollection);
-            fine("Copying complete");
-            return new DefaultAnalysisResult(dataset);
         }
+        
+        if(!sourceCollection.getProfileCollection().hasSegments()) {
+        	 fine("Cannot copy segments: source collection has no segments");
+        	 dataset.getCollection().createProfileCollection(); // ensure profiles are set
+        	 return new DefaultAnalysisResult(dataset);
+        }
+        
+		fine("Copying segmentation pattern");
+		reapplyProfiles(dataset.getCollection(), sourceCollection);
+		fine("Copying complete");
+		return new DefaultAnalysisResult(dataset);
     }
 
     private IAnalysisResult runRefreshAnalysis() throws Exception {
@@ -170,7 +175,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     }
 
     /*
-     * ////////////////////////////////////////////////// Analysis methods
+     * ////////////////////////////////////////////////// 
+     * Analysis methods
      * //////////////////////////////////////////////////
      */
 
