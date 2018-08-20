@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -256,14 +257,32 @@ public class SegmentationHandler implements Loggable {
             return;
         try {
         	
-        // If a tag is to be updated to the RP, don't perform alignments; just set the index directly
-        if(index==0) {
-        	 dataset.getCollection().getProfileManager().updateBorderTag(tag, 0);
-        	 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-                 child.getCollection().getProfileManager().updateBorderTag(tag, 0);
-             }
-        	 return;
+        
+        	
+        // If a tag is to be updated to an index with an existing tag, don't perform alignments; just set the index directly
+        // The user is expecting the tags to become the same
+        	
+        List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+        for(Tag existingTag : tags) {
+        	if(existingTag.equals(tags))
+        		continue;
+        	int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
+        	if(index==existingTagIndex) {
+        		 dataset.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+            	 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+                     child.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+                 }
+            	 return;
+        	}
         }
+        	
+//        if(index==0) {
+//        	 dataset.getCollection().getProfileManager().updateBorderTag(tag, 0);
+//        	 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+//                 child.getCollection().getProfileManager().updateBorderTag(tag, 0);
+//             }
+//        	 return;
+//        }
         
         // Otherwise, find the best fit for each child dataset
 

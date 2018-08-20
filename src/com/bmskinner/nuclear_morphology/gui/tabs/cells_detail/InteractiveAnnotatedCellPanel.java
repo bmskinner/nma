@@ -423,7 +423,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		});
 	}
 	
-	private static void computeBulgeImage(BufferedImage input, int cx, int cy, 
+	private void computeBulgeImage(BufferedImage input, int cx, int cy, 
 	        int small, int big, BufferedImage output){
 		
 		int r2= small;
@@ -437,11 +437,10 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		int sy1 = cy-r2;
 		int sx2 = cx+r2;
 		int sy2 = cy+r2;
-		
+
 		Graphics2D g2 = output.createGraphics();
 		
 		g2.drawImage(input, 0, 0, null);
-
 		g2.drawImage(input, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
 		Color c = g2.getColor();
 		Stroke s = g2.getStroke();

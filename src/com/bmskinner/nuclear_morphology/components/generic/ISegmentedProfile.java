@@ -102,11 +102,13 @@ public interface ISegmentedProfile extends IProfile {
     List<IBorderSegment> getOrderedSegments();
 
     /**
-     * Get the segment with the given name.     * 
+     * Get the segment with the given name.
      * @param name the segment name to find
      * @return the segment
      * @throws UnavailableComponentException if there is no segment with the given name
+     * @deprecated since 1.14.0. Start replacing calls with indexes or UUIDs
      */
+    @Deprecated
     IBorderSegment getSegment(@NonNull String name) throws UnavailableComponentException;
 
     /**

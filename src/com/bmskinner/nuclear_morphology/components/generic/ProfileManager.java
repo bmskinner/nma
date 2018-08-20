@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
@@ -278,42 +279,84 @@ public class ProfileManager implements Loggable {
             finer("Border tag does not exist and will be created");
         
         // If the new index for the tag is the same as the RP, set directly
-        if(index==rpIndex) {
-        	finer("Setting " + tag + " to the RP index");
-        	updateProfileCollectionOffsets(tag, index);
-        	
-        	// update nuclei
-        	 collection.getNuclei().stream().forEach(n -> {
-                 if (!n.isLocked()) {
-                	 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
-                	 n.setBorderTag(tag, rp);
-                	 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-                         n.updateVerticallyRotatedNucleus();
-                         n.updateDependentStats();
-                     }
-                 }
-        	 });
-        	
-        	//Update consensus
-        	 if (collection.hasConsensus()) {
-                 Nucleus n = collection.getConsensus();
-                 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
-                 n.setBorderTag(tag, rp);
-                 
-                 if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-                     n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
-                     if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
-                         n.flipXAroundPoint(n.getCentreOfMass());
-                 } else {
-                     n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
-                 }
-             }
-        	 
-        	// Update signals as needed
-             collection.getSignalManager().recalculateSignalAngles();
-        	
-        	return;
+        
+        List<Tag> tags = collection.getProfileCollection().getBorderTags();
+        for(Tag existingTag : tags) {
+        	if(existingTag.equals(tags))
+        		continue;
+        	int existingTagIndex = collection.getProfileCollection().getIndex(existingTag);
+        	if(index==existingTagIndex) {
+        		updateProfileCollectionOffsets(tag, index);
+        		// update nuclei
+        		collection.getNuclei().stream().forEach(n -> {
+        			if (!n.isLocked()) {
+        				int existingIndex = n.getBorderIndex(existingTag);
+        				n.setBorderTag(tag, existingIndex);
+        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
+        					n.updateVerticallyRotatedNucleus();
+        					n.updateDependentStats();
+        				}
+        			}
+        		});
+        		
+        		//Update consensus
+        		if (collection.hasConsensus()) {
+        			Nucleus n = collection.getConsensus();
+        			int existingIndex = n.getBorderIndex(existingTag);
+        			n.setBorderTag(tag, existingIndex);
+
+        			if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+        				n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
+        				if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
+        					n.flipXAroundPoint(n.getCentreOfMass());
+        			} else {
+        				n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
+        			}
+        		}
+
+        		// Update signals as needed
+        		collection.getSignalManager().recalculateSignalAngles();
+            	return;
+        	}
         }
+        
+        
+//        if(index==rpIndex) {
+//        	finer("Setting " + tag + " to the RP index");
+//        	updateProfileCollectionOffsets(tag, index);
+//        	
+//        	// update nuclei
+//        	 collection.getNuclei().stream().forEach(n -> {
+//                 if (!n.isLocked()) {
+//                	 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
+//                	 n.setBorderTag(tag, rp);
+//                	 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
+//                         n.updateVerticallyRotatedNucleus();
+//                         n.updateDependentStats();
+//                     }
+//                 }
+//        	 });
+//        	
+//        	//Update consensus
+//        	 if (collection.hasConsensus()) {
+//                 Nucleus n = collection.getConsensus();
+//                 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
+//                 n.setBorderTag(tag, rp);
+//                 
+//                 if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+//                     n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
+//                     if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
+//                         n.flipXAroundPoint(n.getCentreOfMass());
+//                 } else {
+//                     n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
+//                 }
+//             }
+//        	 
+//        	// Update signals as needed
+//             collection.getSignalManager().recalculateSignalAngles();
+//        	
+//        	return;
+//        }
 
         // The index was not the RP; find best fits
         

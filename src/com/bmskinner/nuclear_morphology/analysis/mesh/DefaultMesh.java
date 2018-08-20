@@ -625,54 +625,36 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
      */
     private void determineVertexProportions() throws MeshCreationException {
 
-        finer("Determining vertex proportions");
-        List<IBorderSegment> list;
+    	finer("Determining vertex proportions");
 
-        try {
-            list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
-        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-            throw new MeshCreationException("Unable to get segments from template nucleus", e);
-        }
+    	try {
+    		List<IBorderSegment> segments = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 
-        int segNumber = 0;
+    		for(int segNumber=0; segNumber<segments.size(); segNumber++) {
+    			IBorderSegment seg = segments.get(segNumber);
+    			List<Double> proportions = new ArrayList<Double>();
 
-        for (IBorderSegment seg : list) {
+    			double div = (double) seg.length() / (double) vertexSpacing;
 
-            List<Double> proportions = new ArrayList<Double>();
+    			// the closest number of divisions to a spacing of vertexSpacing
+    			long divisions = Math.round(div); 
 
-            double div = (double) seg.length() / (double) vertexSpacing;
+    			finest("Dividing segment into " + divisions + " parts");
 
-            long divisions = Math.round(div); // the closest number of divisions
-                                              // to a spacing of vertexSpacing
-            // int divisions = seg.length() / vertexSpacing; // find the number
-            // of divisions to make
+    			for (int i = 0; i < divisions; i++) {
 
-            finest("Dividing segment into " + divisions + " parts");
+    				double proportion = (double) i / (double) divisions;
+    				finest("Fetching point at proportion " + proportion);
+    				proportions.add(proportion);
+    			}
 
-            for (int i = 0; i < divisions; i++) {
+    			// Store the  proportion through the segment of each vertex
+    			segmentVertexProportions.put(segNumber, proportions);
+    		}
+    	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+    		throw new MeshCreationException("Unable to get segments from template nucleus", e);
+    	}
 
-                double proportion = (double) i / (double) divisions;
-                finest("Fetching point at proportion " + proportion);
-                proportions.add(proportion);
-            }
-
-            //
-            // finest("Dividing segment into "+divisions+" parts");
-            //
-            // double proportion = 1d / (double) divisions;
-            //
-            // for(double d=0; d<1; d+=proportion){
-            // finest("Fetching point at proportion "+d);
-            // proportions.add(d);
-            // }
-            segmentVertexProportions.put(segNumber++, proportions); // Store the
-                                                                    // proportion
-                                                                    // through
-                                                                    // the
-                                                                    // segment
-                                                                    // of each
-                                                                    // vertex
-        }
     }
 
     /**

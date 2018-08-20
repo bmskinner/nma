@@ -511,20 +511,23 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         	SegmentFitter fitter = new SegmentFitter(medianProfile);
         	
         	collection.getNuclei().parallelStream().forEach(n->{
-        		if (n.isLocked())
-        			return;
 
         		try {
-        			fitter.fit(n, pc);
-        			// recombine the segments to the lengths of the median profile segments
-        			IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+        			if (! n.isLocked()) {
+        				fitter.fit(n, pc);
+        				// recombine the segments to the lengths of the median profile segments
+        				IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 
-        			ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
-        			n.setProfile(ProfileType.FRANKEN, segmented);
+        				ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
+        				n.setProfile(ProfileType.FRANKEN, segmented);
+        			}
         		} catch (IndexOutOfBoundsException | ProfileException | UnavailableComponentException
         				| UnsegmentedProfileException e) {
         			stack("Could not fit segments for nucleus "+n.getNameAndNumber()+": "+e.getMessage(), e);
+        		} finally {
+        			fireProgressEvent();
         		}
+        		
         	});
 
             

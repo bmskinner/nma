@@ -38,13 +38,13 @@ public interface IProfileCollection extends Serializable, Loggable {
     }
 
     /**
-     * Get the offset needed to transform a profile to start from the given
-     * point type. Returns -1 if the border tag is not found
+     * Get the index of the tag in the profile, zeroed on the reference point
      * 
-     * @param pointType
-     * @return the offset
+     * @param pointType the tag to find
+     * @return the index of the tag
+     * @throws UnavailableBorderTagException if the tag is not present
      */
-    int getIndex(@NonNull Tag pointType) throws UnavailableBorderTagException;
+    int getIndex(@NonNull Tag tag) throws UnavailableBorderTagException;
 
     /**
      * Get all the offset keys attached to this profile collection
@@ -198,22 +198,19 @@ public interface IProfileCollection extends Serializable, Loggable {
     IBorderSegment getSegmentContaining(@NonNull Tag tag) throws ProfileException, UnsegmentedProfileException;
 
     /**
-     * Add an offset for the given point type. The offset is used to fetch
-     * profiles the begin at the point of interest.
+     * Add an index for the given tag. Note that setting the index of the RP
+     * will have no effect; the RP is always index zero.
      * 
-     * @param pointType
-     *            the point
-     * @param offset
-     *            the position of the point in the profile
+     * @param tag the tag
+     * @param index the index of the point in the profile
      */
-    void addIndex(@NonNull Tag tag, int offset);
+    void addIndex(@NonNull Tag tag, int index);
 
     /**
      * Add a list of segments for the profile. The segments must have the
      * correct offset to be added directly
      * 
-     * @param n
-     *            the segment list
+     * @param n the segments
      */
     void addSegments(@NonNull List<IBorderSegment> n);
 

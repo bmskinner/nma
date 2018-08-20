@@ -124,9 +124,6 @@ public class ThreadManager implements Loggable {
     		try {
 				Object o = r.call();
 				queueLength.decrementAndGet();
-//				if(queueLength.decrementAndGet()==0){
-////	    			log("Queue is empty");
-//	    		}
 	    		return o;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

@@ -198,29 +198,31 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-
         if (o == null)
             return false;
-
         if (!(o instanceof IAnalysisOptions))
             return false;
-
         IAnalysisOptions other = (IAnalysisOptions) o;
+        
+        Set<String> thisKeys  =  detectionOptions.keySet();
+        Set<String> otherKeys =  other.getDetectionOptionTypes();
+        
+        if(!thisKeys.equals(otherKeys))
+        	return false;
 
-        for (String s : detectionOptions.keySet()) {
-            IDetectionOptions d = detectionOptions.get(s);
-            Optional<IDetectionOptions> otherSub = other.getDetectionOptions(s);
-            if((d!=null && !otherSub.isPresent()) || d==null && otherSub.isPresent())
+        for (String key : thisKeys) {
+            IDetectionOptions subOptions = detectionOptions.get(key);
+            if(!other.hasDetectionOptions(key))
             	return false;
+            Optional<IDetectionOptions> otherSubOp = other.getDetectionOptions(key);
+            if(!otherSubOp.isPresent())
+            	return false;
+            IDetectionOptions otherSub = otherSubOp.get();
             
-            if(d==null)
-            	continue;
-            
-            if (!d.equals(otherSub.get())){
-
+            if (!subOptions.equals(otherSub)){
             	System.out.println("Inequality in suboptions:");
-            	System.out.println(d.getClass().getName());
-            	System.out.println(other.getDetectionOptions(s).getClass().getName());
+            	System.out.println(subOptions.getClass().getName());
+            	System.out.println(otherSub.getClass().getName());
             	return false;
             }
         }

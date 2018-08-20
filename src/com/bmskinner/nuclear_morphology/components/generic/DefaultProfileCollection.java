@@ -55,15 +55,15 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<Tag, Integer> indexes  = new HashMap<Tag, Integer>();
+    private Map<Tag, Integer> indexes  = new HashMap<>(); // indexes of tags in the profile. Assumes the RP is at zero.
     private IBorderSegment[]  segments = null;
 
     private transient int                                 length;
-    private transient Map<ProfileType, IProfileAggregate> map   = new HashMap<ProfileType, IProfileAggregate>();
-    private transient ProfileCache                        cache = new ProfileCache();
+    private transient Map<ProfileType, IProfileAggregate> map   = new HashMap<>(); // the aggregates for each profile type
+    private transient ProfileCache                        cache = new ProfileCache(); // cached median profiles etc
 
     /**
-     * Create an empty profile collection
+     * Create an empty profile collection. The RP is set to the zero index by default.
      */
     public DefaultProfileCollection() {
         indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
