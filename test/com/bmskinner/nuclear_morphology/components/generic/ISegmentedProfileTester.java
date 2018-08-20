@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,9 +117,6 @@ public class ISegmentedProfileTester {
 	public void testReverse() throws Exception {
 	    ISegmentedProfile testProfile = createInstance(source);
 	    profile.reverse();
-//	    
-//	    System.out.println(testProfile.toString());
-//	    System.out.println(profile.toString());
 	    	    
 	    for(UUID id : profile.getSegmentIDs()) {
 	    	IBorderSegment fwd = testProfile.getSegment(id);
@@ -193,6 +191,19 @@ public class ISegmentedProfileTester {
 	public void testGetOrderedSegments() throws ProfileException {
 	    List<IBorderSegment> test = makeTestSegments();
 	    List<IBorderSegment> result = profile.getOrderedSegments();
+
+	    for(int i=0; i<test.size(); i++){
+            assertEquals(test.get(i).toString(), result.get(i).toString());
+        }
+	}
+	
+	@Test
+	public void testGetOrderedSegmentsSucceedsWhenProfileIsOffsetByOneSegment() throws ProfileException {
+	    List<IBorderSegment> test = makeTestSegments();
+	    test.add(test.get(0));
+	    test.remove(0);
+	    ISegmentedProfile testProfile = profile.offset(20); // Now start on segment 1
+	    List<IBorderSegment> result = testProfile.getOrderedSegments();
 
 	    for(int i=0; i<test.size(); i++){
             assertEquals(test.get(i).toString(), result.get(i).toString());
@@ -569,6 +580,59 @@ public class ISegmentedProfileTester {
 		int newEnd   = offsetProfile.getSegment(segId).getEndIndex();
 		assertEquals("Old start "+oldStart+" + "+offset, expStart, newStart);
 		assertEquals("Old end "+oldEnd+" + "+offset, expEnd, newEnd);
+	}
+	
+	@Test
+	public void testOffsetOnStatelessProfiles() throws Exception {
+
+		// Test that offsetting the profile offsets each individual segment properly
+		for(int i=-profile.size()-1; i<profile.size()*2; i++) {
+			System.out.println(String.format("Testing offset of %s", i));
+			ISegmentedProfile testProfile = profile.copy().offset(i);
+
+			 List<IBorderSegment> testSegments = testProfile.getSegments();
+
+			 List<IBorderSegment> expectedSegments = makeTestSegments();
+			 
+			 for(IBorderSegment testSeg : testSegments){
+				 UUID segId = testSeg.getID();
+				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
+				 expSeg.offset(-i);
+				 
+				 assertEquals(expSeg.toString(), testSeg.toString());
+			 }
+		}
+	}
+	
+	@Test
+	public void testOffsetOnStatefulProfiles() throws Exception {
+
+		// Test that offsetting the profile offsets each individual segment properly.
+		// The difference to the test above is that the profile is not explicitly copied.
+		// Note that this SHOULD NOT make a difference because ISegmentedProfile::offset()
+		// returns a new profile; it does not change the template profile state
+		
+		for(int i=-profile.size(); i<profile.size()*2; i++) {
+
+			ISegmentedProfile testProfile = profile.offset(i);
+
+			 List<IBorderSegment> testSegments = testProfile.getSegments();
+
+			 List<IBorderSegment> expectedSegments = makeTestSegments();
+			 
+			 for(IBorderSegment testSeg : testSegments){
+				 UUID segId = testSeg.getID();
+				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
+				 expSeg.offset(-i);
+				 
+				 if(!expSeg.toString().equals(testSeg.toString())) {
+					 System.out.println(String.format("Offset: %s Exp: %s", i, expSeg.getDetail()));
+					 System.out.println(String.format("Offset: %s Act: %s", i, testSeg.getDetail()));
+				 }
+				 assertEquals("Index "+i, expSeg.toString(), testSeg.toString());
+			 }
+
+		}
 	}
 			
 	@Test

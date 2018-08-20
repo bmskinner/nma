@@ -1227,8 +1227,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		@Override
 		public List<IBorderSegment> getOrderedSegments() {
 
-			IBorderSegment firstSeg = null; // default to the first segment in the
-			// profile
+			IBorderSegment firstSeg = null; // default to the first segment in the profile
 
 			/*
 			 * Choose the first segment of the profile to be the segment starting at
@@ -1236,9 +1235,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 */
 			for (IBorderSegment seg : getSegments()) {
 
-				if (seg.getStartIndex() == ZERO_INDEX) {
+				if (seg.getStartIndex() == ZERO_INDEX)
 					firstSeg = seg;
-				}
 			}
 
 			if (firstSeg == null) {
@@ -1246,24 +1244,17 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				/*
 				 * A subset of nuclei do not produce segment boundaries
 				 */
-				//                  fine("Cannot get ordered segments");
-				//                  fine("Profile is " + this.toString());
-				//                  fine("Using the first segment in the profile");
 				firstSeg = this.getSegments().get(0); // default to the first
 				// segment in the profile
 			}
 
-			List<IBorderSegment> result;
 			try {
-				result = getSegmentsFrom(firstSeg);
+				return getSegmentsFrom(firstSeg);
 			} catch (UnavailableComponentException e) {
 				warn("Profile error getting segments");
 				fine("Profile error getting segments", e);
-				result = new ArrayList<IBorderSegment>();
+				return new ArrayList<>();
 			}
-
-			return result;
-
 		}
 
 		@Override
@@ -1413,10 +1404,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * The new profile starts at index 'offset' in the original profile This
 			 * means that we must subtract 'offset' from the segment positions to
 			 * make them line up.
-			 * 
-			 * The nudge function in IBorderSegment moves endpoints by a specified
-			 * amount
-			 * 
+
 			 */
 			
 			/*
@@ -1425,7 +1413,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			DefaultSegmentedProfile result = new DefaultSegmentedProfile(offsetProfile);
 			for(BorderSegmentTree s : segments.leaves) {
-				result.segments.addMergeSource(s);
+				result.segments.addMergeSource(new BorderSegmentTree(s, result.segments));
 			}
 			
 			// root segment update
@@ -2246,7 +2234,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public String getDetail() {
-				return getStartIndex()+"-"+getEndIndex();
+				return String.format("Segment %s | %s | %s | %s - %s | %s of %s | %s ", 
+						getName(), getID(), getPosition(), getStartIndex(), getEndIndex(), length(), getProfileLength(), wraps());
 			}
 
 			@Override
