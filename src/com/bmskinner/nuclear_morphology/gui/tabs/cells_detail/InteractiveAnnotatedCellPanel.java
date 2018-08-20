@@ -86,6 +86,8 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	private BufferedImage output;
     private int smallRadius = 25;
     private int bigRadius   = 50;
+    private int sourceWidth;
+    private int sourceHeight;
 
 	public InteractiveAnnotatedCellPanel(){
 		setLayout(new BorderLayout());
@@ -179,6 +181,8 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			
 			imageLabel.setIcon(an2.toImageIcon());
 			input = an2.toProcessor().getBufferedImage();
+			sourceWidth = an.toProcessor().getWidth();
+			sourceHeight = an.toProcessor().getHeight();
 			
 			for(MouseListener l : imageLabel.getMouseListeners()) {
 				imageLabel.removeMouseListener(l);
@@ -206,7 +210,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	                	temp = temp<10?10:temp;
 	                	bigRadius = temp;
 	                }
-	                IPoint p = translateMousePointToImage(e); 
+	                IPoint p = translatePanelLocationToRenderedImage(e); 
 					updateImage(p.getXAsInt(), p.getYAsInt());
 	            }
 			});
@@ -215,35 +219,37 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			imageLabel.addMouseMotionListener(new MouseAdapter() {
 				@Override
 				public void mouseMoved(MouseEvent e){
-					IPoint p = translateMousePointToImage(e); 
+					IPoint p = translatePanelLocationToRenderedImage(e); 
 					updateImage(p.getXAsInt(), p.getYAsInt());
 				}
 			});
 
 			imageLabel.addMouseListener(new MouseAdapter() {
 
-				private IPoint getPositionInComponent(MouseEvent e) {
-					// The original image dimensions
-					int w = an.toProcessor().getWidth();
-					int h = an.toProcessor().getHeight();
-					
-					// The rescaled dimensions
-					int iconWidth = imageLabel.getIcon().getIconWidth();
-					int iconHeight = imageLabel.getIcon().getIconHeight();
-					
-					// The image panel dimensions
-					int panelWidth = getWidth();
-					int panelHeight = getHeight();
-					
-					// The position of the click relative to the icon
-					int iconX = e.getX()-((panelWidth-iconWidth)/2);
-					int iconY = e.getY()-((panelHeight-iconHeight)/2);
-					
-					// The position  of the click within the original image
-					double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
-					double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
-					return IPoint.makeNew(xPositionInImage, yPositionInImage);
-				}
+//				private IPoint getPositionInComponent(MouseEvent e) {
+//					// The original image dimensions
+////					int w = an.toProcessor().getWidth();
+////					int h = an.toProcessor().getHeight();
+//					int w = sourceWidth;
+//					int h = sourceHeight;
+//					
+//					// The rescaled dimensions
+//					int iconWidth = imageLabel.getIcon().getIconWidth();
+//					int iconHeight = imageLabel.getIcon().getIconHeight();
+//					
+//					// The image panel dimensions
+//					int panelWidth = getWidth();
+//					int panelHeight = getHeight();
+//					
+//					// The position of the click relative to the icon
+//					int iconX = e.getX()-((panelWidth-iconWidth)/2);
+//					int iconY = e.getY()-((panelHeight-iconHeight)/2);
+//					
+//					// The position  of the click within the original image
+//					double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
+//					double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
+//					return IPoint.makeNew(xPositionInImage, yPositionInImage);
+//				}
 				
 				private void updateTag(Tag tag, int newIndex) {
 					boolean wasLocked = cell.getNucleus().isLocked();
@@ -313,11 +319,18 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 
-					IPoint clickedPoint = getPositionInComponent(e);
+					IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
 //					System.out.println(String.format("Mouse clicked at %s - %s ", e.getX(), e.getY()));
 
 					Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
-							.stream().filter(p->clickedPoint.overlaps(p))
+							.stream().filter(p->{
+//								clickedPoint.overlaps(p)
+								return clickedPoint.getX()>=p.getX()-0.4 && 
+										clickedPoint.getX()<=p.getX()+0.4 &&
+										clickedPoint.getY()>=p.getY()-0.4 && 
+										clickedPoint.getY()<=p.getY()+0.4;
+								
+							})
 							.findFirst();
 
 					if(point.isPresent()) {
@@ -333,7 +346,30 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		});
 	}
 	
-	private IPoint translateMousePointToImage(MouseEvent e) {
+	private IPoint translatePanelLocationToSourceImage(int x, int y) {
+		// The original image dimensions
+		int w = sourceWidth;
+		int h = sourceHeight;
+		
+		// The rescaled dimensions
+		int iconWidth = imageLabel.getIcon().getIconWidth();
+		int iconHeight = imageLabel.getIcon().getIconHeight();
+		
+		// The image panel dimensions
+		int panelWidth = getWidth();
+		int panelHeight = getHeight();
+		
+		// The position of the click relative to the icon
+		int iconX = x-((panelWidth-iconWidth)/2);
+		int iconY = y-((panelHeight-iconHeight)/2);
+		
+		// The position  of the click within the original image
+		double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
+		double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
+		return IPoint.makeNew(xPositionInImage, yPositionInImage);
+	}
+		
+	private IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
 		// The rescaled dimensions
 		int iconWidth = imageLabel.getIcon().getIconWidth();
 		int iconHeight = imageLabel.getIcon().getIconHeight();
@@ -347,6 +383,18 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		int iconY = e.getY()-((panelHeight-iconHeight)/2);
 		return IPoint.makeNew(iconX, iconY);
 	}
+	
+	private IPoint translateRenderedLocationToSourceImage(double x, double y) {		
+		// The rescaled dimensions
+		int iconWidth = imageLabel.getIcon().getIconWidth();
+		int iconHeight = imageLabel.getIcon().getIconHeight();
+						
+		// The position  of the click within the original image
+		double xPositionInImage = ((x/(double) iconWidth)*sourceWidth)-Imageable.COMPONENT_BUFFER;
+		double yPositionInImage = ((y/(double) iconHeight)*sourceHeight)-Imageable.COMPONENT_BUFFER;
+		return IPoint.makeNew(xPositionInImage, yPositionInImage);
+	}
+	
 	
 	private void updateImage(int x, int y) {
 		if (output == null) 
@@ -426,17 +474,29 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	private void computeBulgeImage(BufferedImage input, int cx, int cy, 
 	        int small, int big, BufferedImage output){
 		
-		int r2= small;
-		int r1 = big;
-		int dx1 = cx-r1; // the big rectangle
-		int dy1 = cy-r1;
-		int dx2 = cx+r1;
-		int dy2 = cy+r1;
+		int dx1 = cx-big; // the big rectangle
+		int dy1 = cy-big;
+		int dx2 = cx+big;
+		int dy2 = cy+big;
 		
-		int sx1 = cx-r2; // the small source rectangle
-		int sy1 = cy-r2;
-		int sx2 = cx+r2;
-		int sy2 = cy+r2;
+		int sx1 = cx-small; // the small source rectangle
+		int sy1 = cy-small;
+		int sx2 = cx+small;
+		int sy2 = cy+small;
+		
+		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
+//		System.out.println(String.format("Mouse clicked at %s - %s ", e.getX(), e.getY()));
+
+		Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
+				.stream().filter(p->{
+//					clickedPoint.overlaps(p)
+					return clickedPoint.getX()>=p.getX()-0.4 && 
+							clickedPoint.getX()<=p.getX()+0.4 &&
+							clickedPoint.getY()>=p.getY()-0.4 && 
+							clickedPoint.getY()<=p.getY()+0.4;
+					
+				})
+				.findFirst();
 
 		Graphics2D g2 = output.createGraphics();
 		
@@ -444,9 +504,17 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		g2.drawImage(input, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
 		Color c = g2.getColor();
 		Stroke s = g2.getStroke();
-		g2.setColor(Color.BLACK);
-		g2.setStroke(new BasicStroke(2));
-		g2.drawRect(dx1, dy1, r1*2, r1*2);
+		
+		if(point.isPresent()) {
+			g2.setColor(Color.CYAN);
+			g2.setStroke(new BasicStroke(3));
+		} else {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(new BasicStroke(2));
+		}
+
+		g2.drawRect(dx1, dy1, big*2, big*2);
+		
 		g2.setColor(c);
 		g2.setStroke(s);
 	}
