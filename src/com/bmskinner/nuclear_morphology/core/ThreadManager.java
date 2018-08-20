@@ -87,7 +87,6 @@ public class ThreadManager implements Loggable {
     }
 
     public synchronized Future<?> submit(Runnable r) {
-        queueLength.incrementAndGet(); // Increment queue when submitting task.
         return executorService.submit(new TrackedRunnable(r));
     }
 
@@ -115,7 +114,7 @@ public class ThreadManager implements Loggable {
     		});
     	}
 
-        queueLength.incrementAndGet(); // Increment queue when submitting task.
+       
         executorService.execute(new TrackedRunnable(r));
     }
     
@@ -134,40 +133,7 @@ public class ThreadManager implements Loggable {
     		
     	};
     }
-    
-    /**
-     * Request an update of a cencellable process. If an update is already in
-     * progress, it will be cancelled. Designed for dataset updates - cancel an
-     * in progress update in favour of the new dataset list
-     */
-    public synchronized Future<?> submitAndCancelUpdate(CancellableRunnable r) {
-
-        // Cancel previous updates
-        for (CancellableRunnable c : cancellableFutures.keySet()) {
-            c.cancel();
-            cancellableFutures.remove(c);
-        }
-        Future<?> future = executorService.submit(r);
-        cancellableFutures.put(r, future);
-        return future;
-
-    }
-
-    /**
-     * Request an update of a cencellable process. If an update is already in
-     * progress, it will be cancelled.
-     */
-    public void executeAndCancelUpdate(CancellableRunnable r) {
-
-        // Cancel previous updates
-        for (CancellableRunnable c : cancellableFutures.keySet()) {
-            c.cancel();
-            cancellableFutures.remove(c);
-        }
-        Future<?> future = executorService.submit(r);
-        cancellableFutures.put(r, future);
-    }
-    
+        
     /**
      * Wrap a Runnable in another Runnable that updates the job queue
      * when done, and allows access to the original Runnable for checking
@@ -179,6 +145,7 @@ public class ThreadManager implements Loggable {
     	private Runnable r;
     	
 		public TrackedRunnable(Runnable r) {
+			queueLength.incrementAndGet(); // Increment queue when submitting task.
 			this.r = r;
 		}
     	

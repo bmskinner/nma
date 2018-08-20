@@ -394,7 +394,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             warper = new SignalWarper(sourceDataset, target, signalBox.getSelectedID(), cellsWithSignals, SignalWarper.REGULAR_MESH);
             warper.addPropertyChangeListener(this);
-            warper.execute();
+            ThreadManager.getInstance().execute(warper);
+//            warper.execute();
 
         } catch (Exception e) {
             error("Error running warping", e);

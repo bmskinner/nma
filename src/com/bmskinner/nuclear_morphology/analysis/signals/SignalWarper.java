@@ -58,7 +58,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	public static final boolean STRAIGHTEN_MESH = true;
 	public static final boolean REGULAR_MESH = false;
 	
-
     private IAnalysisDataset sourceDataset;
     private Nucleus          target;
     private UUID             signalGroup;
@@ -66,7 +65,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                                                // detected signals
     private boolean          straighten;       // Straighten the meshes
     ImageProcessor[]         warpedImages;
-    // private ChartPanel chartPanel;
     private int totalCells;
 
     ImageProcessor mergedImage = null;
@@ -74,16 +72,11 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
     /**
      * Constructor
      * 
-     * @param source
-     *            the dataset with signals to be warped
-     * @param target
-     *            the nucleus to warp signals onto
-     * @param signalGroup
-     *            the signal group id to be warped
-     * @param cellsWithSignals
-     *            if true, only cells with defined signals will be included
-     * @param straighten
-     *            if true, the signals will be warped onto a straightened mesh
+     * @param source the dataset with signals to be warped
+     * @param target the nucleus to warp signals onto
+     * @param signalGroup the signal group id to be warped
+     * @param cellsWithSignals if true, only cells with defined signals will be included
+     * @param straighten if true, the signals will be warped onto a straightened mesh
      */
     public SignalWarper(IAnalysisDataset source, Nucleus target, UUID signalGroup, boolean cellsWithSignals,
             boolean straighten) {
@@ -149,18 +142,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                 setProgress(percent); // the integer representation of the
                                       // percent
 
-                // if(progressBar.isIndeterminate()){
-                // progressBar.setIndeterminate(false);
-                // }
-                // progressBar.setValue(percent);
-                // int cellNumber = i+1;
-                // progressBar.setString(cellNumber+" of "+totalCells);
             }
-
         }
-
-        // updateChart();
-
     }
 
     @Override
@@ -185,56 +168,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         }
 
     }
-
-    // private void updateChart(){
-    //
-    // Runnable task = () -> {
-    //
-    // Color colour = Color.WHITE;
-    // try {
-    // colour =
-    // sourceDataset.getCollection().getSignalGroup(signalGroup).getGroupColour();
-    // if(colour==null){
-    // colour = Color.WHITE;
-    // }
-    // } catch (UnavailableSignalGroupException e) {
-    // stack(e);
-    // colour = Color.WHITE;
-    // }
-    //
-    // ImageProcessor recoloured = ImageFilterer.recolorImage(mergedImage,
-    // colour);
-    //
-    // boolean straighten = straightenMeshBox.isSelected();
-    //
-    // ChartOptions options = new ChartOptionsBuilder()
-    // .setDatasets(datasetBoxTwo.getSelectedDataset())
-    // .setShowXAxis(false)
-    // .setShowYAxis(false)
-    // .setShowBounds(false)
-    // .setStraightenMesh(straighten)
-    // .build();
-    //
-    //
-    // if(!isAddToImage){
-    // mergableImages.clear();
-    // }
-    //
-    // mergableImages.add(recoloured);
-    // ImageProcessor averaged =
-    // ImageConverter.averageRGBImages(mergableImages);
-    //
-    // final JFreeChart chart = new
-    // OutlineChartFactory(options).makeSignalWarpChart(averaged);
-    //
-    // chartPanel.setChart(chart);
-    // chartPanel.restoreAutoBounds();
-    //
-    //
-    // };
-    // Thread thr = new Thread(task);
-    // thr.start();
-    // }
 
     private void generateImages() {
         finer("Generating warped images for " + sourceDataset.getName());
