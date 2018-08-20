@@ -43,6 +43,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     private Tag              tag              = Tag.REFERENCE_POINT;
     private boolean          showMarkers      = false;
     private boolean          hideProfiles     = false;
+    private boolean          isShowIQR        = true;
     private ProfileType      type             = ProfileType.ANGLE;
     private UUID             signalGroup      = null;
     private boolean          useDensity       = false;
@@ -178,6 +179,15 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 
     public void setShowLines(boolean showLines) {
         this.showLines = showLines;
+    }
+    
+    @Override
+    public boolean isShowIQR() {
+        return isShowIQR;
+    }
+
+    public void setShowIQR(boolean b) {
+        this.isShowIQR = b;
     }
 
     @Override
@@ -367,6 +377,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     			.append("Hide profiles: "+hideProfiles+newline)
     			.append("Show points: "+showPoints+newline)
     			.append("Show lines: "+showLines+newline)
+    			.append("Show IQR: "+isShowIQR+newline)
     			.append("Show annotations: "+showAnnotations+newline)
     			.append("Show markers: "+showMarkers+newline)
     			.append("Show mesh: "+showMesh+newline)
@@ -398,6 +409,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
         result = prime * result + (hideProfiles ? 1231 : 1237);
         result = prime * result + (showPoints ? 1231 : 1237);
         result = prime * result + (showLines ? 1231 : 1237);
+        result = prime * result + (isShowIQR ? 1231 : 1237);
         result = prime * result + (showAnnotations ? 1231 : 1237);
 
         result = prime * result + (showMesh ? 1231 : 1237);
@@ -438,49 +450,31 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-
-        // log("Equals reached level 0");
-
         if (!super.equals(obj))
             return false;
-
         if (getClass() != obj.getClass())
             return false;
 
         DefaultChartOptions other = (DefaultChartOptions) obj;
-        // log("Equals reached level 0.5");
-
         if (alignment != other.alignment)
             return false;
-
         if (Double.doubleToLongBits(modalityPosition) != Double.doubleToLongBits(other.modalityPosition))
             return false;
 
         if (normalised != other.normalised)
             return false;
-
-        // log("Equals reached level 0.6");
-
         if (showMarkers != other.showMarkers)
             return false;
-
+        if (isShowIQR != other.isShowIQR)
+            return false;
         if (hideProfiles != other.hideProfiles)
             return false;
-
-        // log("Equals reached level 0.7");
-
         if (showPoints != other.showPoints)
             return false;
         if (showLines != other.showLines)
             return false;
-
-        // log("Equals reached level 0.8");
-
         if (showAnnotations != other.showAnnotations)
             return false;
-
-        // log("Equals reached level 1");
-
         if (showMesh != other.showMesh)
             return false;
         if (showMeshEdges != other.showMeshEdges)
@@ -493,9 +487,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
             return false;
         if (straightenMesh != other.straightenMesh)
             return false;
-
-        // log("Equals reached level 2");
-
         if (showXAxis != other.showXAxis)
             return false;
         if (showYAxis != other.showYAxis)
@@ -504,46 +495,31 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
             return false;
         if (invertYAxis != other.invertYAxis)
             return false;
-
-        // log("Equals reached level 3");
-
         if (signalGroup != other.signalGroup)
             return false;
-
         if (tag == null) {
             if (other.tag != null)
                 return false;
         } else if (!tag.equals(other.tag))
             return false;
-
         if (type != other.type)
             return false;
         if (useDensity != other.useDensity)
             return false;
-
         if (rotateMode != other.rotateMode)
             return false;
-
-        // log("Equals reached level 4");
-
-        // log("Equals reached level 5");
-
         if (component == null) {
             if (other.component != null)
                 return false;
         } else if (!component.equals(other.component))
             return false;
-        // log("Equals reached level 6");
 
         if (showWarp != other.showWarp)
             return false;
-
         if (showSignals != other.showSignals)
             return false;
-
         if (showBorderTags != other.showBorderTags)
             return false;
-
         return true;
     }
 

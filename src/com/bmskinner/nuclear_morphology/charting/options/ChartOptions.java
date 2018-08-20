@@ -104,6 +104,12 @@ public interface ChartOptions extends DisplayOptions {
      * @return
      */
     boolean isShowPoints();
+    
+    /**
+     * Should the interquartile range be displayed in a profile chart?
+     * @return
+     */
+    boolean isShowIQR();
 
     /**
      * Check if lines in an XY chart should be displayed

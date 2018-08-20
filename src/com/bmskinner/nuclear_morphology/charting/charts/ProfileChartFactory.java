@@ -86,7 +86,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 
 		plot.getDomainAxis().setLabel("Position");
-		plot.getDomainAxis().setRange(0, 100);
+		plot.getDomainAxis().setRange(0, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
 
 		plot.getRangeAxis().setLabel(type.getLabel());
 
@@ -114,12 +114,10 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		if(options.isSingleDataset() && options.getCell() != null)
 			return makeIndividualNucleusProfileChart();
 		
-//		return makeDatasetProfileChart();
-
-		if (options.isSingleDataset() && !options.isHideProfiles())
+		if (options.isSingleDataset())
 			return makeSingleDatasetProfileChart();
 
-		if (options.isMultipleDatasets() || options.isHideProfiles())
+		if (options.isMultipleDatasets())
 			return makeMultiDatasetProfileChart();
 		return makeEmptyProfileChart(options.getType());
 	}
@@ -215,7 +213,9 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return makeErrorChart();
 		}
 
-		int length = options.isNormalised() ? 100 : collection.getMaxProfileLength(); // default if normalised
+		
+		int length = options.isHideProfiles() ? collection.getMedianArrayLength() : collection.getMaxProfileLength();
+		length = options.isNormalised() ? ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH : length; // default if normalised
 
 		JFreeChart chart = makeProfileChart(ds, length);
 
@@ -337,8 +337,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				rangeRenderer.setSeriesVisibleInLegend(series, false);
 
 			}
-		}
-		
+		}		
 		return chart;
 	}
 	
@@ -390,7 +389,6 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			addMarkerToXYPlot(plot, tag, (double) index);
 		}
 	}
-
 
 	/**
 	 * Add annotations of segment names from the given profile to the plot

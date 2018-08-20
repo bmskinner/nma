@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 
-	private static final int DEFAULT_PROFILE_LENGTH = 100;
+	public static final int DEFAULT_PROFILE_LENGTH = 100;
 
 	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
 	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
@@ -175,7 +175,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		boolean isSegmented        = collection.getProfileCollection().hasSegments();
 		boolean isShowSegments     = !options.isHideProfiles() && options.isSingleDataset();
 		boolean isShowNuclei       = options.isSingleDataset() && !options.isHideProfiles();
-		boolean isShowIQR          = !options.isShowPoints(); // points only displayed for single lines
+		boolean isShowIQR          = options.isShowIQR(); // points only displayed for single lines
 
 		int maxNucleusLength    = getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = collection.getMedianArrayLength();

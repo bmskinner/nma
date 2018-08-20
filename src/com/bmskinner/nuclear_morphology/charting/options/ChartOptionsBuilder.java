@@ -126,6 +126,11 @@ public class ChartOptionsBuilder {
         options.setShowLines(b);
         return this;
     }
+    
+    public ChartOptionsBuilder setShowIQR(boolean b) {
+        options.setShowIQR(b);
+        return this;
+    }
 
     public ChartOptionsBuilder setShowAnnotations(boolean showAnnotations) {
         options.setShowAnnotations(showAnnotations);
