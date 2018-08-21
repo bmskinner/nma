@@ -463,8 +463,8 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         if (list == null)
             throw new IllegalArgumentException("List of segments is null");
 
-        if (list.length < 2)
-            throw new IllegalArgumentException(String.format("Must have at least two segments (have %d)",list.length));
+//        if (list.length < 2)
+//            throw new IllegalArgumentException(String.format("Must have at least two segments (have %d)",list.length));
 
         for (int i = 0; i < list.length; i++) {
             IBorderSegment s = list[i];

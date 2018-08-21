@@ -385,7 +385,12 @@ public class DefaultProfileCollection implements IProfileCollection {
         this.length = length;
         if (segments != null && length != segments[0].getProfileLength()) 
             throw new ProfileException("Creating profile aggregate will invalidate segments");
-
+        
+        if(segments==null) {
+        	segments = new IBorderSegment[1];
+        	segments[0] = new DefaultBorderSegment(0, 0, length, UUID.randomUUID());
+        }
+        
         for (ProfileType type : ProfileType.values()) {
 
             IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());

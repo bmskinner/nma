@@ -92,10 +92,9 @@ public class DatasetValidator implements Loggable {
         if (errors == 0) {
             errorList.add("Dataset OK");
             return true;
-        } else {
-            errorList.add("Dataset failed validation");
-            return false;
         }
+		errorList.add("Dataset failed validation");
+		return false;
 
     }
 
@@ -116,21 +115,26 @@ public class DatasetValidator implements Loggable {
         for (IAnalysisDataset child : children) {
 
             List<UUID> childList = child.getCollection().getProfileCollection().getSegmentIDs();
+            
+            if(idList.size()!=childList.size())
+            	errorList.add(String.format("Root dataset %s segments; child dataset has %s", idList.size(), childList.size()));
 
-            // check all parent segments are in child
-            for (UUID id : idList) {
-                if (!childList.contains(id)) {
-                    errorList.add("Segment " + id + " not found in child " + child.getName());
-                    return false;
-                }
-            }
+            if(idList.size()>1) {
+            	// check all parent segments are in child
+            	for (UUID id : idList) {
+            		if (!childList.contains(id)) {
+            			errorList.add("Segment " + id + " not found in child " + child.getName());
+            			return false;
+            		}
+            	}
 
-            // Check all child segments are in parent
-            for (UUID id : childList) {
-                if (!idList.contains(id)) {
-                    errorList.add(child.getName() + " segment " + id + " not found in parent");
-                    return false;
-                }
+            	// Check all child segments are in parent
+            	for (UUID id : childList) {
+            		if (!idList.contains(id)) {
+            			errorList.add(child.getName() + " segment " + id + " not found in parent");
+            			return false;
+            		}
+            	}
             }
 
         }
@@ -147,7 +151,8 @@ public class DatasetValidator implements Loggable {
     private boolean checkSegmentsAreConsistentInAllCells(IAnalysisDataset d) {
 
         List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
-
+        
+        boolean hasSegments = d.getCollection().getProfileCollection().hasSegments();
         int errorCount = 0;
         
         for(ICell c : d.getCollection().getCells()){
@@ -156,44 +161,59 @@ public class DatasetValidator implements Loggable {
 
                 ISegmentedProfile p;
                 try {
-                    p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+                	p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+                	if(p.hasSegments()!=hasSegments) {
+                		errorList.add(String.format("Profile collection segments is %s; nucleus is %s", hasSegments, p.hasSegments()));
+                		errorCount++;
+                	}
+
                     List<UUID> childList = p.getSegmentIDs();
+
+                    if(idList.size()!=childList.size()) {
+                    	errorList.add(String.format("Profile collection has %s segments; nucleus has %s", idList.size(), childList.size()));
+                    	errorCount++;
+                    }
 
                     // Check all nucleus segments are in root dataset
                     for (UUID id : childList) {
-                        if (!idList.contains(id)) {
-                            errorList.add("Nucleus " + n.getNameAndNumber() + " has segment " + id + " not found in parent");
-                            cellErrors++;
-                        }
+                    	if (!idList.contains(id) && !id.equals(n.getID())) {
+                    		errorList.add(String.format("Nucleus %s has segment %s not found in parent", n.getID(), id));
+                    		cellErrors++;
+                    	}
                     }
+
 
                     // Check all root dataset segments are in nucleus
-                    for (UUID id : idList) {
-                        if (!childList.contains(id)) {
-                            errorList.add("Segment " + id + " not found in child " + n.getNameAndNumber());
-                            cellErrors++;
-                        }
-                    }
+                    if(idList.size()>1) { // every collection has a segment by default since 1.14.0
+                    	for (UUID id : idList) {
+                    		if (!childList.contains(id)) {
+                    			errorList.add(String.format("Profile collection segment %s not found in nucleus %s", id, n.getNameAndNumber()));
+                    			cellErrors++;
+                    		}
+                    	}
 
-                    // Check each profile index in only covered once by a segment
-                    for (UUID id1 : idList) {
-                        IBorderSegment s1 = p.getSegment(id1);
-                        for (UUID id2 : idList) {
-                            if(id1==id2)
-                                continue;
 
-                            IBorderSegment s2 = p.getSegment(id2);
-                            if(s1.overlaps(s2)){
-                                errorList.add("Segment " + id1 + " overlaps segment " + id2 + " in "+n.getNameAndNumber());
-                                cellErrors++;
-                            }
+                    	// Check each profile index in only covered once by a segment
+                    	for (UUID id1 : idList) {
+                    		IBorderSegment s1 = p.getSegment(id1);
+                    		for (UUID id2 : idList) {
+                    			if(id1==id2)
+                    				continue;
 
-                        }
+                    			IBorderSegment s2 = p.getSegment(id2);
+                    			if(s1.overlaps(s2)){
+                    				errorList.add(String.format("Segment %s overlaps segment %s in %s", id1, id2, n.getNameAndNumber()));
+                    				cellErrors++;
+                    			}
+
+                    		}
+                    	}
                     }
 
                 } catch (ProfileException | UnavailableComponentException e) {
-                    errorList.add("Error getting segments");
+                    errorList.add(String.format("Error getting segments for nucleus %s: %s", n.getNameAndNumber(), e.getMessage()));
                     stack(e);
+                    e.printStackTrace();
                     cellErrors++;
                 }
 
@@ -210,23 +230,25 @@ public class DatasetValidator implements Loggable {
                 if(idList.size()!=p.getSegmentCount())
                     errorList.add("Consensus does not have the same number of segments as the root dataset");
                 
-                for (UUID id : idList) {
-                    if (!p.hasSegment(id)) {
-                        errorList.add("Segment " + id + " not found in consensus");
-                        errorCount++;
-                    }
-                }
-                
-                for(UUID id : p.getSegmentIDs()){
-                    if (!idList.contains(id)) {
-                        errorList.add("Segment " + id + " in consensus not found in root");
-                        errorCount++;
-                    }
+                if(idList.size()>1) {
+                	for (UUID id : idList) {
+                		if (!p.hasSegment(id)) {
+                			errorList.add("Segment " + id + " not found in consensus");
+                			errorCount++;
+                		}
+                	}
+
+                	for(UUID id : p.getSegmentIDs()){
+                		if (!idList.contains(id)) {
+                			errorList.add("Segment " + id + " in consensus not found in root");
+                			errorCount++;
+                		}
+                	}
                 }
                 
             } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-                errorList.add("Error getting segments");
-                stack(e);
+            	errorList.add(String.format("Error getting segments for consensus nucleus: %s", e.getMessage()));
+            	e.printStackTrace();
                 errorCount++;
             }
         }
