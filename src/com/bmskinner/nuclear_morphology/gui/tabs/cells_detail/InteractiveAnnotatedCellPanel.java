@@ -227,31 +227,6 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			});
 
 			imageLabel.addMouseListener(new MouseAdapter() {
-
-//				private IPoint getPositionInComponent(MouseEvent e) {
-//					// The original image dimensions
-////					int w = an.toProcessor().getWidth();
-////					int h = an.toProcessor().getHeight();
-//					int w = sourceWidth;
-//					int h = sourceHeight;
-//					
-//					// The rescaled dimensions
-//					int iconWidth = imageLabel.getIcon().getIconWidth();
-//					int iconHeight = imageLabel.getIcon().getIconHeight();
-//					
-//					// The image panel dimensions
-//					int panelWidth = getWidth();
-//					int panelHeight = getHeight();
-//					
-//					// The position of the click relative to the icon
-//					int iconX = e.getX()-((panelWidth-iconWidth)/2);
-//					int iconY = e.getY()-((panelHeight-iconHeight)/2);
-//					
-//					// The position  of the click within the original image
-//					double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
-//					double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
-//					return IPoint.makeNew(xPositionInImage, yPositionInImage);
-//				}
 				
 				private void updateTag(Tag tag, int newIndex) {
 					boolean wasLocked = cell.getNucleus().isLocked();
@@ -510,8 +485,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			try {
 				
 				Set<Tag> tags = cell.getNucleus().getBorderTags().keySet();
-				
-				
+
 				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
 						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(Color.GREEN);
