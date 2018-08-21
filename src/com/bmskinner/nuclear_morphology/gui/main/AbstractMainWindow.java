@@ -180,9 +180,10 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
                 panel.refreshChartCache(list);
                 panel.refreshTableCache(list);
             }
-            eventReceived(new DatasetUpdateEvent(this, list));//DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
+            ThreadManager.getInstance().execute(new PanelUpdater(list));
+//            eventReceived(new DatasetUpdateEvent(this, list));//DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
         };
-        ThreadManager.getInstance().submit(task);
+        ThreadManager.getInstance().execute(task);
 
     }
     

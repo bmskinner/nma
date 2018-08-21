@@ -85,7 +85,7 @@ public class TableCache implements Cache {
      * @param list
      */
     @Override
-    public void clear(List<IAnalysisDataset> list) {
+    public synchronized void clear(List<IAnalysisDataset> list) {
 
         if (list == null || list.isEmpty()) {
             purge();

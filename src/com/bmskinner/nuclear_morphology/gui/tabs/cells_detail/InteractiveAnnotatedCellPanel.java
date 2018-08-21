@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Stroke;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
@@ -18,7 +17,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,7 +54,6 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -199,7 +196,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			imageLabel.addMouseWheelListener(new MouseAdapter() {
 				
 				@Override
-	            public void mouseWheelMoved(MouseWheelEvent e) {
+	            public synchronized void mouseWheelMoved(MouseWheelEvent e) {
 	                if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
 	                    InputEvent.CTRL_DOWN_MASK){
 	                	int temp = smallRadius +( 1*e.getWheelRotation());
@@ -220,7 +217,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			
 			imageLabel.addMouseMotionListener(new MouseAdapter() {
 				@Override
-				public void mouseMoved(MouseEvent e){
+				public synchronized void mouseMoved(MouseEvent e){
 					IPoint p = translatePanelLocationToRenderedImage(e); 
 					updateImage(p.getXAsInt(), p.getYAsInt());
 				}
@@ -228,7 +225,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 
 			imageLabel.addMouseListener(new MouseAdapter() {
 				
-				private void updateTag(Tag tag, int newIndex) {
+				private synchronized void updateTag(Tag tag, int newIndex) {
 					boolean wasLocked = cell.getNucleus().isLocked();
 					cell.getNucleus().setLocked(false);
 
@@ -244,7 +241,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 					dh.fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
 				}
 
-				private JPopupMenu createPopup(IBorderPoint point) {
+				private synchronized JPopupMenu createPopup(IBorderPoint point) {
 					List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
 					JPopupMenu popupMenu = new JPopupMenu("Popup");
 					Collections.sort(tags);
@@ -294,7 +291,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 				}
 
 				@Override
-				public void mouseClicked(MouseEvent e) {
+				public synchronized void mouseClicked(MouseEvent e) {
 
 					IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
 //					System.out.println(String.format("Mouse clicked at %s - %s ", e.getX(), e.getY()));
@@ -323,7 +320,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		});
 	}
 	
-	private IPoint translatePanelLocationToSourceImage(int x, int y) {
+	private synchronized IPoint translatePanelLocationToSourceImage(int x, int y) {
 		// The original image dimensions
 		int w = sourceWidth;
 		int h = sourceHeight;
@@ -346,7 +343,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		return IPoint.makeNew(xPositionInImage, yPositionInImage);
 	}
 		
-	private IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
+	private synchronized IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
 		// The rescaled dimensions
 		int iconWidth = imageLabel.getIcon().getIconWidth();
 		int iconHeight = imageLabel.getIcon().getIconHeight();
@@ -361,19 +358,19 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		return IPoint.makeNew(iconX, iconY);
 	}
 	
-	private IPoint translateRenderedLocationToSourceImage(double x, double y) {		
+	private synchronized IPoint translateRenderedLocationToSourceImage(double x, double y) {		
 		// The rescaled dimensions
 		int iconWidth = imageLabel.getIcon().getIconWidth();
 		int iconHeight = imageLabel.getIcon().getIconHeight();
 						
 		// The position  of the click within the original image
-		double xPositionInImage = ((x/(double) iconWidth)*sourceWidth)-Imageable.COMPONENT_BUFFER;
-		double yPositionInImage = ((y/(double) iconHeight)*sourceHeight)-Imageable.COMPONENT_BUFFER;
+		double xPositionInImage = ((x/iconWidth)*sourceWidth)-Imageable.COMPONENT_BUFFER;
+		double yPositionInImage = ((y/iconHeight)*sourceHeight)-Imageable.COMPONENT_BUFFER;
 		return IPoint.makeNew(xPositionInImage, yPositionInImage);
 	}
 	
 	
-	private void updateImage(int x, int y) {
+	private synchronized void updateImage(int x, int y) {
 		if (output == null) 
 			output = new BufferedImage( input.getWidth(), input.getHeight(),  BufferedImage.TYPE_INT_ARGB);
 		computeBulgeImage(input, x, y, smallRadius, bigRadius, output);
@@ -448,7 +445,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		});
 	}
 	
-	private void computeBulgeImage(BufferedImage input, int cx, int cy, 
+	private synchronized void computeBulgeImage(BufferedImage input, int cx, int cy, 
 	        int small, int big, BufferedImage output){
 		
 		int dx1 = cx-big; // the big rectangle
@@ -484,8 +481,6 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			g2.setColor(Color.CYAN);
 			try {
 				
-				Set<Tag> tags = cell.getNucleus().getBorderTags().keySet();
-
 				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
 						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(Color.GREEN);
