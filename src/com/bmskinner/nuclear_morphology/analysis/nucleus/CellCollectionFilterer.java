@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,8 @@ import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
@@ -40,6 +43,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public class CellCollectionFilterer extends Filterer<ICellCollection> {
+	
+	private DecimalFormat df = new DecimalFormat("#.##");
 
     @Override
     public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta)
@@ -105,23 +110,40 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
 
     }
 
-    /**
-     * Filter the given collection to retain cells in which the given statistic
-     * is within the lower and upper bounds inclusive.
-     * 
-     * @param collection the collection to filter
-     * @param stat the statistic to filter on
-     * @param lower the lower bound
-     * @param upper the upper bound
-     * @return a new cell collection with copies of the original cells
-     * @throws CollectionFilteringException
-     */
+
     @Override
     public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException {
+    	return filter(collection, CellularComponent.NUCLEUS, stat, lower, upper, scale);
+    }
+    
+    @Override
+    public ICellCollection filter(ICellCollection collection, String component, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
+            throws CollectionFilteringException {
+    	
+    	 Predicate<ICell> pred = new Predicate<ICell>() {
+    		 @Override
+    		 public boolean test(ICell t) {
+    			 
+    			 if(CellularComponent.NUCLEUS.equals(component))
+    				 return t.getNuclei().stream().anyMatch(createNucleusFilter(collection, stat, lower, upper, scale));
+    			 
+    			 if(CellularComponent.NUCLEAR_SIGNAL.equals(component))
+    				 return t.getNuclei().stream().anyMatch(createNuclearSignalFilter(stat, lower, upper, scale));
+    			 return false;
+    		 }
 
-        ICellCollection filtered = collection.filterCollection(stat, scale, lower, upper);
+             @Override
+             public String toString() {
+                 return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
+             }
 
+         };
+         
+         ICellCollection filtered = collection.filter(pred);
+
+//        ICellCollection filtered = collection.filterCollection(stat, scale, lower, upper);
+//
         if (filtered == null)
             throw new CollectionFilteringException("No collection returned");
 
@@ -141,6 +163,36 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
         }
 
         return filtered;
+    }
+    
+    private Predicate<Nucleus> createNuclearSignalFilter(PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
+    	return (n) ->{
+    			return n.getSignalCollection().getAllSignals().stream().anyMatch(s->{
+    				 double value = s.getStatistic(stat, scale);
+					 if (value < lower)
+						 return false;
+					 if (value > upper)
+						 return false;
+					 return true;
+    			});
+    	};
+    }
+    
+    private Predicate<Nucleus> createNucleusFilter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
+    	
+    	return (n) ->{
+    		try {
+				 double value = stat.equals(PlottableStatistic.VARIABILITY)
+						 ? collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+						 if (value < lower)
+							 return false;
+						 if (value > upper)
+							 return false;
+			 } catch (UnavailableBorderTagException e) {
+				 return false;
+			 }
+			 return true;
+    	};
     }
 
 }

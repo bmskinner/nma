@@ -29,7 +29,7 @@ public class SignalScatterChartPanel extends AbstractScatterChartPanel {
 
     public SignalScatterChartPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEAR_SIGNAL);
-        gateButton.setVisible(false); // filtering not enabled
+//        gateButton.setVisible(false); // filtering not enabled
     }
 
 }

@@ -213,7 +213,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         return new ScatterChartFactory(options).createScatterChart(component);
     }
 
-    private void gateOnVisible() {
+
+    protected void gateOnVisible() {
 
      	int result;
 		try {
@@ -243,10 +244,10 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
             try {
 
-                ICellCollection stat1 = f.filter(d.getCollection(), statA, domain.getLowerBound(),
+                ICellCollection stat1 = f.filter(d.getCollection(), component, statA, domain.getLowerBound(),
                         domain.getUpperBound(), scale);
 
-                ICellCollection stat2 = f.filter(stat1, statB, range.getLowerBound(), range.getUpperBound(), scale);
+                ICellCollection stat2 = f.filter(stat1, component, statB, range.getLowerBound(), range.getUpperBound(), scale);
 
                 ICellCollection virt = new VirtualCellCollection(d, stat2.getName());
                 

@@ -67,7 +67,7 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
             throws CollectionFilteringException;
 
     /**
-     * Filter the given collection to retain elements in which the given
+     * Filter the given collection to retain nuclei in which the given
      * statistic is within the lower and upper bounds inclusive.
      * 
      * @param collection the collection to filter
@@ -78,6 +78,21 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
      * @throws CollectionFilteringException
      */
     public abstract E filter(E collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
+            throws CollectionFilteringException;
+    
+    /**
+     * Filter the given collection to retain nuclei in which the given
+     * statistic is within the lower and upper bounds inclusive.
+     * 
+     * @param collection the collection to filter
+     * @param component the cellular component to be filtered
+     * @param stat the statistic to filter on
+     * @param lower the lower bound
+     * @param upper the upper bound
+     * @return a new cell collection with copies of the original cells
+     * @throws CollectionFilteringException
+     */
+    public abstract E filter(E collection, String component, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException;
 
     /**
