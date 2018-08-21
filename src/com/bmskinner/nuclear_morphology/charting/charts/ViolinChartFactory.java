@@ -23,6 +23,7 @@ import java.awt.Paint;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -41,7 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 public class ViolinChartFactory extends AbstractChartFactory {
 
-    public ViolinChartFactory(ChartOptions o) {
+    public ViolinChartFactory(@NonNull ChartOptions o) {
         super(o);
     }
 

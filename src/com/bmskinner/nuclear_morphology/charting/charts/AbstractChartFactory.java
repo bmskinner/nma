@@ -23,6 +23,7 @@ import java.awt.Paint;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -44,19 +45,15 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public abstract class AbstractChartFactory implements Loggable {
-    // extends ChartFactoryWorker
-
-    protected static final ForkJoinPool mainPool = new ForkJoinPool();
 
     protected static final int DEFAULT_EMPTY_RANGE         = 10;
     protected static final int DEFAULT_PROFILE_START_INDEX = -1;
 
     protected final ChartOptions options;
 
-    public AbstractChartFactory(ChartOptions o) {
-        if (o == null) {
+    public AbstractChartFactory(@NonNull ChartOptions o) {
+        if (o == null)
             throw new IllegalArgumentException("Options cannot be null");
-        }
         options = o;
 
     }

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
@@ -50,7 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  */
 public class BoxplotChartFactory extends AbstractChartFactory {
 
-    public BoxplotChartFactory(ChartOptions o) {
+    public BoxplotChartFactory(@NonNull ChartOptions o) {
         super(o);
     }
 

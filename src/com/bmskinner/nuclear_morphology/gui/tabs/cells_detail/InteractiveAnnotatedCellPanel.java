@@ -18,7 +18,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -485,11 +487,9 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		int sy2 = cy+small;
 		
 		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
-//		System.out.println(String.format("Mouse clicked at %s - %s ", e.getX(), e.getY()));
 
 		Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
 				.stream().filter(p->{
-//					clickedPoint.overlaps(p)
 					return clickedPoint.getX()>=p.getX()-0.4 && 
 							clickedPoint.getX()<=p.getX()+0.4 &&
 							clickedPoint.getY()>=p.getY()-0.4 && 
@@ -507,6 +507,32 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		
 		if(point.isPresent()) {
 			g2.setColor(Color.CYAN);
+			try {
+				
+				Set<Tag> tags = cell.getNucleus().getBorderTags().keySet();
+				
+				
+				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
+						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.GREEN);
+				}
+				if(cell.getNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
+						cell.getNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.GREEN);
+				}
+				if(cell.getNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
+						cell.getNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.ORANGE);
+				}
+				if(cell.getNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
+						cell.getNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.BLUE);
+				}
+
+			} catch (UnavailableBorderTagException e) {
+				// no action needed, colour remains cyan
+			}
+
 			g2.setStroke(new BasicStroke(3));
 		} else {
 			g2.setColor(Color.BLACK);
