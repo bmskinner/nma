@@ -42,6 +42,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionListener;
@@ -186,7 +187,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         chartPanel.setFixedAspectRatio(true);
         this.add(chartPanel, BorderLayout.CENTER);
 
-        JPanel westPanel = createWestPanel();
+        JPanel westPanel = createWestPanel();        
         this.add(westPanel, BorderLayout.WEST);
 
     }
@@ -292,7 +293,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         tree = new JTree();
         selectionListener = createTreeListener();
         updateTree();
-        panel.add(tree, BorderLayout.CENTER);
+        JScrollPane sp = new JScrollPane(tree);
+        panel.add(sp, BorderLayout.CENTER);
         return panel;
     }
     
