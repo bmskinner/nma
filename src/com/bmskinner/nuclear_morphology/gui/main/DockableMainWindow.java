@@ -172,7 +172,7 @@ public class DockableMainWindow extends AbstractMainWindow {
      * Create the individual analysis tabs
      */
     private void createTabs() {
-    	
+
     	tabDock = new TabDock();
 
         // Create the top level tabs in the UI
@@ -219,8 +219,23 @@ public class DockableMainWindow extends AbstractMainWindow {
         
         signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
         editingDetailPanel.addSignalChangeListener(signalsDetailPanel);
-        
+
         tabDock.setSelectedDockable(tabDock.getDockable(0));
+        tabDock.getTabbedPane().addChangeListener(e->{ // listen for tab switches and update charts if cells have been edited
+        	boolean isUpdate = false;
+        	for(TabPanel t : detailPanels){
+        		isUpdate |= t.hasCellUpdate();
+        	}
+
+        	if(isUpdate) {
+        		recacheCharts();
+        		for(TabPanel t : detailPanels){
+        			t.setCellUpdate(false);
+        		}
+        	}
+        });
+
+
     }
 
     /**

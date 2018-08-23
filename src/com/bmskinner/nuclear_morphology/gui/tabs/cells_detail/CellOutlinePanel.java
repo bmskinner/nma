@@ -22,6 +22,8 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,6 +35,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFac
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
@@ -42,7 +45,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionS
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 
 @SuppressWarnings("serial")
-public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener {
+public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener, CellUpdatedEventListener {
 
     private static final String PANEL_TITLE_LBL = "Outline";
             
@@ -52,7 +55,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
     private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
     private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
-
+    
     public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
         super(context, model, PANEL_TITLE_LBL);
         // make the chart for each nucleus
@@ -76,11 +79,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         
         add(settingsPanel, BorderLayout.NORTH);
 
-        imagePanel = new InteractiveAnnotatedCellPanel();
-        imagePanel.addDatasetEventListener(this);
+        imagePanel = new InteractiveAnnotatedCellPanel(this);
+
         add(imagePanel, BorderLayout.CENTER);
-
-
     }
     
     private synchronized void updateSettingsPanels() {
@@ -170,4 +171,5 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
     @Override
     public void chartSetEventReceived(ChartSetEvent e) { }
+
 }

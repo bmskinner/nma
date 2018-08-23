@@ -64,6 +64,19 @@ public interface TabPanel extends EventListener {
      * @return
      */
     boolean isUpdating();
+    
+    
+    /**
+     * Check if any cells have been updated since the last UI change.
+     * @return
+     */
+    boolean hasCellUpdate();
+    
+    /**
+     * Set the cell update state for the panel
+     * @param b
+     */
+    void setCellUpdate(boolean b);
 
     /**
      * Add the given panel as a sub-panel of this. The sub panel will be

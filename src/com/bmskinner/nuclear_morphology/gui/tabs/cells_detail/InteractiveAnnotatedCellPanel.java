@@ -51,6 +51,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener;
+import com.bmskinner.nuclear_morphology.gui.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.EventListener;
@@ -73,6 +75,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 	private JLabel imageLabel;
 	
 	private DatasetEventHandler dh = new DatasetEventHandler(this);
+	private CelllUpdateEventHandler cellUpdateHandler = new CelllUpdateEventHandler(this);
 	
 	private IAnalysisDataset dataset = null;
 	private ICell cell = null;
@@ -88,7 +91,10 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
     private int sourceWidth;
     private int sourceHeight;
 
-	public InteractiveAnnotatedCellPanel(){
+	public InteractiveAnnotatedCellPanel(CellUpdatedEventListener parent){
+		
+		cellUpdateHandler.addCellUpdatedEventListener(parent);
+		
 		setLayout(new BorderLayout());
 		imageLabel = new JLabel();
 		imageLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -226,19 +232,23 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			imageLabel.addMouseListener(new MouseAdapter() {
 				
 				private synchronized void updateTag(Tag tag, int newIndex) {
-					boolean wasLocked = cell.getNucleus().isLocked();
-					cell.getNucleus().setLocked(false);
 
-					cell.getNucleus().setBorderTag(tag, newIndex);
-					cell.getNucleus().updateVerticallyRotatedNucleus();
+					ThreadManager.getInstance().execute(()->{
+						boolean wasLocked = cell.getNucleus().isLocked();
+						cell.getNucleus().setLocked(false);
 
-					if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
-						cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
-					}
-					cell.getNucleus().updateDependentStats();
-					cell.getNucleus().setLocked(wasLocked);
-					dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
-					dh.fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+						cell.getNucleus().setBorderTag(tag, newIndex);
+						cell.getNucleus().updateVerticallyRotatedNucleus();
+
+						if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
+							cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
+						}
+						cell.getNucleus().updateDependentStats();
+						cell.getNucleus().setLocked(wasLocked);
+						dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
+						cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+						createImage();
+					});
 				}
 
 				private synchronized JPopupMenu createPopup(IBorderPoint point) {
@@ -374,7 +384,8 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		if (output == null) 
 			output = new BufferedImage( input.getWidth(), input.getHeight(),  BufferedImage.TYPE_INT_ARGB);
 		computeBulgeImage(input, x, y, smallRadius, bigRadius, output);
-		imageLabel.setIcon(new ImageIcon(output));
+		if(imageLabel!=null)
+			imageLabel.setIcon(new ImageIcon(output));
 		repaint();
 	}
 

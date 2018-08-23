@@ -194,39 +194,4 @@ public class DatasetEvent extends EventObject {
     public IAnalysisDataset secondaryDataset() {
         return secondaryDataset;
     }
-
-    // public enum DatasetMethod {
-    //
-    // PROFILING_ACTION ("Profiling action"),
-    // NEW_MORPHOLOGY ("New morphology"),
-    // COPY_MORPHOLOGY ("Copy morphology"),
-    // REFRESH_MORPHOLOGY ("Refresh morphology"),
-    // REFOLD_CONSENSUS ("Refold consensus"),
-    // SELECT_DATASETS ("Select multiple datasets"),
-    // SELECT_ONE_DATASET ("Select single dataset"),
-    // EXTRACT_SOURCE ("Extract source"),
-    // CLUSTER ("Cluster"),
-    // BUILD_TREE ("Build tree"),
-    // TRAIN_CLASSIFIER ("Train classifier"),
-    // REFRESH_CACHE ("Refresh caches"),
-    // CLEAR_CACHE ("Clear caches"),
-    // SAVE ("Save selected"),
-    // SAVE_AS ("Save as new file"),
-    // ADD_DATASET ("Add dataset"),
-    // RESEGMENT ("Resegment dataset"),
-    // RECALCULATE_MEDIAN ("Recalculate median profiles");
-    //
-    // private final String name;
-    //
-    // DatasetMethod(String name){
-    // this.name = name;
-    // }
-    //
-    // public String toString(){
-    // return this.name;
-    // }
-    //
-    //
-    // }
-
 }

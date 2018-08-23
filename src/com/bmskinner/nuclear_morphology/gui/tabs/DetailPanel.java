@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
+import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
@@ -63,6 +64,7 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener.CellUpdatedEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -74,7 +76,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
+public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, CellUpdatedEventListener {
 
     private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
     
@@ -98,6 +100,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
     private final InterfaceEventHandler     ih  = new InterfaceEventHandler(this);
     private final DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
     private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
+    
+    private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
 
     public DetailPanel(@NonNull InputSupplier context) {
         this(context, DEFAULT_TAB_TITLE);
@@ -957,5 +961,29 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable {
         duh.fireDatasetUpdateEvent(e.getDatasets());
         this.update(e.getDatasets());
     }
+    
+
+	@Override
+	public void cellUpdatedEventReceived(CellUpdatedEvent event) {
+		isCellUpdateMade = true;
+	}
+	
+	@Override
+	public boolean hasCellUpdate() {
+		boolean result = isCellUpdateMade;
+		for(TabPanel t : getSubPanels()) {
+			result |= t.hasCellUpdate();
+		}
+		return result;
+	}
+
+	@Override
+	public void setCellUpdate(boolean b) {
+		isCellUpdateMade = b;
+		for(TabPanel t : getSubPanels()) {
+			t.setCellUpdate(b);
+		}
+		
+	}
 
 }

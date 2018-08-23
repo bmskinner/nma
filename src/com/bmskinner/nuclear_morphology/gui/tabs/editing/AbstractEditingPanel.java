@@ -31,20 +31,22 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
+import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener.CellUpdatedEvent;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel
-        implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {
-    
+        implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {  
     
     public AbstractEditingPanel(@NonNull InputSupplier context, String title){
         super(context, title);
@@ -59,19 +61,18 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	public void checkCellLock() {
         ICellCollection collection = activeDataset().getCollection();
 
-        if (collection.isVirtual()) {
+        if (collection.isVirtual())
             return;
-        }
 
         if (collection.hasLockedCells()) {
-            Object[] options = { "Keep manual values", "Overwrite manual values" };
-            int result = JOptionPane.showOptionDialog(null,
-                    "Some cells have been manually segmented. Keep manual values?",
-                    "Overwrite manually segmented cells?", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                    null, options, options[0]);
+            String[] options = { "Keep manual values", "Overwrite manual values" };
 
-            if (result != 0) {
-                collection.setCellsLocked(false);
+            try {
+            	int result = getInputSupplier().requestOption(options, 0, "Some cells have been manually segmented. Keep manual values?");
+            	if (result != 0)
+            		collection.setCellsLocked(false);
+            } catch(RequestCancelledException e) {
+            	// no action
             }
         }
     }
@@ -150,7 +151,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
         this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 
     }
-
+    
     @Override
     public void borderTagEventReceived(BorderTagEvent event) {
     }
@@ -158,5 +159,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
     @Override
     public void segmentEventReceived(SegmentEvent event) {
     }
+    
+    
 
 }
