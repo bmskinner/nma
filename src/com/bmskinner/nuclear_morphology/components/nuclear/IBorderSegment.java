@@ -373,10 +373,11 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     boolean wraps();
 
     /**
-     * Test if the segment contains the given index
+     * Test if the segment contains the given index. Returns true if the index is the
+     * first index, last index, or any index in between.
      * 
-     * @param index the index to test
-     * @return
+     * @param index the profile index to test
+     * @return true if the profile index is with the segment, false otherwise
      */
     boolean contains(int index);
 

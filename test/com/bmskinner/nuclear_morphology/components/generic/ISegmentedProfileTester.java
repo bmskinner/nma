@@ -198,16 +198,50 @@ public class ISegmentedProfileTester {
 	}
 	
 	@Test
-	public void testGetOrderedSegmentsSucceedsWhenProfileIsOffsetByOneSegment() throws ProfileException {
-	    List<IBorderSegment> test = makeTestSegments();
-	    test.add(test.get(0));
-	    test.remove(0);
-	    ISegmentedProfile testProfile = profile.offset(20); // Now start on segment 1
-	    List<IBorderSegment> result = testProfile.getOrderedSegments();
+	public void testGetOrderedSegmentsSucceedsWhenProfileIsOffset() throws ProfileException {
+		
+		// Get ordered segments should return the segments from the profile start
+		// The segments wrap, so an offset of zero begins with Seg_3.
+		// NOTE: This is testing the IDs of the segments are in the correct order. It does not
+		// check the segment start and end points are correct. 
 
-	    for(int i=0; i<test.size(); i++){
-            assertEquals(test.get(i).toString(), result.get(i).toString());
-        }
+		for(int i=0; i<10; i++) { // offset up to the end of segment 3
+			List<IBorderSegment> test = makeTestSegments();
+			test.add(test.get(0));
+			test.remove(0);
+			test.add(test.get(0));
+			test.remove(0);
+			test.add(test.get(0));
+			test.remove(0);
+			
+			ISegmentedProfile testProfile = profile.offset(i);
+		    List<IBorderSegment> result = testProfile.getOrderedSegments();
+		    for(int j=0; j<test.size(); j++){
+	            assertEquals("Offset "+i+": segment "+j,test.get(j).getID(), result.get(j).getID());
+	        }
+		}
+		
+		for(int i=10; i<20; i++) { // offset up to the end of segment 0
+			List<IBorderSegment> test = makeTestSegments();
+		   
+			ISegmentedProfile testProfile = profile.offset(i);
+		    List<IBorderSegment> result = testProfile.getOrderedSegments();
+		    for(int j=0; j<test.size(); j++){
+	            assertEquals("Offset "+i+": segment "+j,test.get(j).getID(), result.get(j).getID());
+	        }
+		}
+		
+		for(int i=20; i<100; i++) { // offset up to the end of segment 1
+			List<IBorderSegment> test = makeTestSegments();
+		    test.add(test.get(0));
+		    test.remove(0);
+			ISegmentedProfile testProfile = profile.offset(i);
+		    List<IBorderSegment> result = testProfile.getOrderedSegments();
+		    for(int j=0; j<test.size(); j++){
+	            assertEquals("Offset "+i+": segment "+j,test.get(j).getID(), result.get(j).getID());
+	        }
+		}   
+	    
 	}
 
 	@Test

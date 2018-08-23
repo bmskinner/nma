@@ -222,50 +222,56 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return IBorderSegment.copy(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getOrderedSegments()
-     */
     @Override
     public List<IBorderSegment> getOrderedSegments() {
+    	try {
+			for (IBorderSegment seg : getSegments()) {
+				if (seg.contains(ZERO_INDEX) && seg.getEndIndex()!=ZERO_INDEX)
+					return getSegmentsFrom(seg);
+			}
+		} catch (UnavailableComponentException | ProfileException e) {
+			warn("Profile error getting segments");
+			stack("Profile error getting segments", e);
+			return new ArrayList<>();
+		}
+		return new ArrayList<>();
 
-        IBorderSegment firstSeg = null; // default to the first segment in the
-                                        // profile
-
-        /*
-         * Choose the first segment of the profile to be the segment starting at
-         * the zero index
-         */
-        for (IBorderSegment seg : segments) {
-
-            if (seg.getStartIndex() == ZERO_INDEX) {
-                firstSeg = seg;
-            }
-        }
-
-        if (firstSeg == null) {
-
-            /*
-             * A subset of nuclei do not produce segment boundaries
-             */
-//            fine("Cannot get ordered segments");
-//            fine("Profile is " + this.toString());
-//            fine("Using the first segment in the profile");
-            firstSeg = this.getSegments().get(0); // default to the first
-                                                  // segment in the profile
-        }
-
-        List<IBorderSegment> result;
-        try {
-            result = getSegmentsFrom(firstSeg);
-        } catch (ProfileException | UnavailableComponentException e) {
-            warn("Profile error getting segments");
-            fine("Profile error getting segments", e);
-            result = new ArrayList<IBorderSegment>();
-        }
-
-        return result;
+//        IBorderSegment firstSeg = null; // default to the first segment in the
+//                                        // profile
+//
+//        /*
+//         * Choose the first segment of the profile to be the segment starting at
+//         * the zero index
+//         */
+//        for (IBorderSegment seg : segments) {
+//
+//            if (seg.getStartIndex() == ZERO_INDEX) {
+//                firstSeg = seg;
+//            }
+//        }
+//
+//        if (firstSeg == null) {
+//
+//            /*
+//             * A subset of nuclei do not produce segment boundaries
+//             */
+////            fine("Cannot get ordered segments");
+////            fine("Profile is " + this.toString());
+////            fine("Using the first segment in the profile");
+//            firstSeg = this.getSegments().get(0); // default to the first
+//                                                  // segment in the profile
+//        }
+//
+//        List<IBorderSegment> result;
+//        try {
+//            result = getSegmentsFrom(firstSeg);
+//        } catch (ProfileException | UnavailableComponentException e) {
+//            warn("Profile error getting segments");
+//            fine("Profile error getting segments", e);
+//            result = new ArrayList<IBorderSegment>();
+//        }
+//
+//        return result;
 
     }
 

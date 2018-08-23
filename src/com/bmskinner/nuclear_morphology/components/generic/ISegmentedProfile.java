@@ -95,7 +95,8 @@ public interface ISegmentedProfile extends IProfile {
 
     /**
      * Get a copy of the segments in this profile, ordered from the zero index
-     * of the profile
+     * of the profile. The first segment is the segment that starts with index zero or 
+     * contains index zero, but does not end with index zero.
      * 
      * @return
      */

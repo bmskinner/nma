@@ -1227,34 +1227,17 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		@Override
 		public List<IBorderSegment> getOrderedSegments() {
 
-			IBorderSegment firstSeg = null; // default to the first segment in the profile
-
-			/*
-			 * Choose the first segment of the profile to be the segment starting at
-			 * the zero index
-			 */
-			for (IBorderSegment seg : getSegments()) {
-
-				if (seg.getStartIndex() == ZERO_INDEX)
-					firstSeg = seg;
-			}
-
-			if (firstSeg == null) {
-
-				/*
-				 * A subset of nuclei do not produce segment boundaries
-				 */
-				firstSeg = this.getSegments().get(0); // default to the first
-				// segment in the profile
-			}
-
 			try {
-				return getSegmentsFrom(firstSeg);
+				for (IBorderSegment seg : getSegments()) {
+					if (seg.contains(ZERO_INDEX) && seg.getEndIndex()!=ZERO_INDEX)
+						return getSegmentsFrom(seg);
+				}
 			} catch (UnavailableComponentException e) {
 				warn("Profile error getting segments");
-				fine("Profile error getting segments", e);
+				stack("Profile error getting segments", e);
 				return new ArrayList<>();
 			}
+			return new ArrayList<>();
 		}
 
 		@Override
