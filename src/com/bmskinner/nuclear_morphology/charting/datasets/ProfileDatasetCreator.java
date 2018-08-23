@@ -183,7 +183,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		
 		double offset = 0;
 		try {
-			IProfile medianProfile = collection.getProfileCollection().getProfile(type, borderTag, Stats.MEDIAN);
+			IProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(type, borderTag, Stats.MEDIAN);
 
 			IProfile xpoints = createXPositions(medianProfile, isNormalised ? 100 : medianProfileLength);
 
@@ -197,10 +197,11 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 			// add the segments if any exist and there is only a single dataset
 			if(isSegmented && isShowSegments) {
-//				log("Drawing segments");
 				List<IBorderSegment> segments = collection.getProfileCollection()
 						.getSegmentedProfile(type, borderTag, Stats.MEDIAN)
 						.getOrderedSegments();
+				
+//				System.out.println(String.format("Fetched %s median segments", segments.size()));
 
 				if (isNormalised) {
 					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), DEFAULT_PROFILE_LENGTH, 0, 0);
@@ -208,7 +209,6 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), collection.getMedianArrayLength(), offset, 0);
 				}
 			} else {
-//				log("Drawing only median: isSegmented "+isSegmented+" isShowSegments "+isShowSegments);
 				// add the median profile
 				float[][] data50 = { xpoints.toFloatArray(), medianProfile.toFloatArray() };
 				ds.addLines(MEDIAN_SERIES_PREFIX+i, data50, i);

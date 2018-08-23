@@ -1212,12 +1212,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		temp = Double.doubleToLongBits(scale);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
-		if(statistics!=null) {
-			for(PlottableStatistic s : statistics.keySet()) {
-				temp = Double.doubleToLongBits(statistics.get(s));
-				result = prime * result + (int) (temp ^ (temp >>> 32));
-			}
-		}
+		result = prime * result + ((statistics == null) ? 0 : statistics.hashCode());
 		result = prime * result + Arrays.hashCode(xpoints);
 		result = prime * result + Arrays.hashCode(ypoints);
 		return result;

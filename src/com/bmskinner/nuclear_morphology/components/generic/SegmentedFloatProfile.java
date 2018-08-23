@@ -94,27 +94,28 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     public SegmentedFloatProfile(@NonNull final IProfile profile) {
         super(profile);
 
-        int midpoint = profile.size() / 2;
-        IBorderSegment segment1 = IBorderSegment.newSegment(0, midpoint, profile.size());
+//        int midpoint = profile.size() / 2;
+//        IBorderSegment segment1 = IBorderSegment.newSegment(0, midpoint, profile.size());
+//
+//        segment1.setPosition(0);
+//        IBorderSegment segment2 = IBorderSegment.newSegment(midpoint, 0, profile.size());
+//
+//        segment2.setPosition(1);
+//        List<IBorderSegment> segments = new ArrayList<>();
+//        segments.add(segment1);
+//        segments.add(segment2);
 
-        segment1.setPosition(0);
-        IBorderSegment segment2 = IBorderSegment.newSegment(midpoint, 0, profile.size());
+//        try {
+//            IBorderSegment.linkSegments(segments);
+//        } catch (ProfileException e) {
+//            warn("Error linking segments");
+//        }
 
-        segment2.setPosition(1);
-        List<IBorderSegment> segments = new ArrayList<>();
-        segments.add(segment1);
-        segments.add(segment2);
-
-        try {
-            IBorderSegment.linkSegments(segments);
-        } catch (ProfileException e) {
-            warn("Error linking segments");
-        }
-
-        this.segments = new IBorderSegment[segments.size()];
-        for (int i = 0; i < segments.size(); i++) {
-            this.segments[i] = segments.get(i);
-        }
+        segments = new IBorderSegment[1];
+        segments[0] = IBorderSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
+//        for (int i = 0; i < segments.size(); i++) {
+//            this.segments[i] = segments.get(i);
+//        }
     }
 
     /**
@@ -226,7 +227,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     public List<IBorderSegment> getOrderedSegments() {
     	try {
 			for (IBorderSegment seg : getSegments()) {
-				if (seg.contains(ZERO_INDEX) && seg.getEndIndex()!=ZERO_INDEX)
+				if (seg.contains(ZERO_INDEX) && (getSegmentCount()==1 || seg.getEndIndex()!=ZERO_INDEX))
 					return getSegmentsFrom(seg);
 			}
 		} catch (UnavailableComponentException | ProfileException e) {
@@ -235,44 +236,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			return new ArrayList<>();
 		}
 		return new ArrayList<>();
-
-//        IBorderSegment firstSeg = null; // default to the first segment in the
-//                                        // profile
-//
-//        /*
-//         * Choose the first segment of the profile to be the segment starting at
-//         * the zero index
-//         */
-//        for (IBorderSegment seg : segments) {
-//
-//            if (seg.getStartIndex() == ZERO_INDEX) {
-//                firstSeg = seg;
-//            }
-//        }
-//
-//        if (firstSeg == null) {
-//
-//            /*
-//             * A subset of nuclei do not produce segment boundaries
-//             */
-////            fine("Cannot get ordered segments");
-////            fine("Profile is " + this.toString());
-////            fine("Using the first segment in the profile");
-//            firstSeg = this.getSegments().get(0); // default to the first
-//                                                  // segment in the profile
-//        }
-//
-//        List<IBorderSegment> result;
-//        try {
-//            result = getSegmentsFrom(firstSeg);
-//        } catch (ProfileException | UnavailableComponentException e) {
-//            warn("Profile error getting segments");
-//            fine("Profile error getting segments", e);
-//            result = new ArrayList<IBorderSegment>();
-//        }
-//
-//        return result;
-
     }
 
     /*
@@ -294,12 +257,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         throw new UnavailableComponentException("Requested segment name is not present");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegment(components.nuclear.
-     * IBorderSegment)
-     */
     @Override
     public IBorderSegment getSegment(@NonNull IBorderSegment segment) {
         if (!this.contains(segment)) {
@@ -315,11 +272,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentAt(int)
-     */
     @Override
     public IBorderSegment getSegmentAt(int position) {
 

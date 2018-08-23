@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
@@ -1119,7 +1120,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		protected DefaultSegmentedProfile(@NonNull final IProfile p, @NonNull final List<IBorderSegment> list) throws ProfileException {
 			super(p);
 			// The root segment is one segment covering the whole profile. See single spotted pigs.
-			segments = new BorderSegmentTree(getID());
+			segments = new BorderSegmentTree(IProfileCollection.DEFAULT_SEGMENT_ID);
 			for(IBorderSegment s : list){
 				segments.addMergeSource(s);
 			}
@@ -1154,7 +1155,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 */
 		public DefaultSegmentedProfile(float[] values) {
 			super(values);
-			segments = new BorderSegmentTree(getID());
+			segments = new BorderSegmentTree(IProfileCollection.DEFAULT_SEGMENT_ID);
 		}
 		
 		@Override
@@ -1229,7 +1230,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			try {
 				for (IBorderSegment seg : getSegments()) {
-					if (seg.contains(ZERO_INDEX) && seg.getEndIndex()!=ZERO_INDEX)
+					if (seg.contains(ZERO_INDEX) && (getSegmentCount()==1 || seg.getEndIndex()!=ZERO_INDEX))
 						return getSegmentsFrom(seg);
 				}
 			} catch (UnavailableComponentException e) {

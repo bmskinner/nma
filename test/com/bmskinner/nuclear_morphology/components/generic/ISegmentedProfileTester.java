@@ -186,15 +186,18 @@ public class ISegmentedProfileTester {
         exception.expect(UnavailableComponentException.class);
         List<IBorderSegment> result = profile.getSegmentsFrom(notPresent);
     }
-
+	
 	@Test
-	public void testGetOrderedSegments() throws ProfileException {
-	    List<IBorderSegment> test = makeTestSegments();
-	    List<IBorderSegment> result = profile.getOrderedSegments();
-
-	    for(int i=0; i<test.size(); i++){
-            assertEquals(test.get(i).toString(), result.get(i).toString());
-        }
+	public void testGetOrderedSegmentsSucceedsWhenProfileHasOneSegmentStartingAndEndingAtIndexZero() throws ProfileException {
+		ISegmentedProfile testProfile = profile.copy();
+		List<IBorderSegment> segments = new ArrayList<>();
+		segments.add(new DefaultBorderSegment(0, 0, profile.size(), UUID.fromString(SEG_0)));
+		testProfile.setSegments(segments);
+		assertTrue(testProfile.getSegmentCount()==1);
+		
+		 List<IBorderSegment> result = testProfile.getOrderedSegments();
+		 assertTrue(result.size()==1);
+		 assertEquals(SEG_0, result.get(0).getID().toString());
 	}
 	
 	@Test
@@ -339,7 +342,7 @@ public class ISegmentedProfileTester {
         list.add(new DefaultBorderSegment(60, 90, profile.size(), UUID.randomUUID()));
         list.add(new DefaultBorderSegment(90, 5,  profile.size(), UUID.randomUUID()));
         IBorderSegment.linkSegments(list);
-        System.out.println("Setting segments");
+//        System.out.println("Setting segments");
         profile.setSegments(list);
         
         for(int i=0; i<list.size(); i++){
@@ -621,7 +624,7 @@ public class ISegmentedProfileTester {
 
 		// Test that offsetting the profile offsets each individual segment properly
 		for(int i=-profile.size()-1; i<profile.size()*2; i++) {
-			System.out.println(String.format("Testing offset of %s", i));
+//			System.out.println(String.format("Testing offset of %s", i));
 			ISegmentedProfile testProfile = profile.copy().offset(i);
 
 			 List<IBorderSegment> testSegments = testProfile.getSegments();

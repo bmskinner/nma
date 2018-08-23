@@ -140,13 +140,8 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         // get the profile array
         IProfile p = getProfile(type, tag, quartile);
-
-        try {
-            if (segments[0] == null)
-                throw new UnsegmentedProfileException("No segments assigned to profile collection");
-        } catch (NullPointerException e) {
-            throw new UnsegmentedProfileException("No segments assigned to profile collection", e);
-        }
+        if (segments[0] == null)
+        	throw new UnsegmentedProfileException("No segments assigned to profile collection");
 
         try {
             return new SegmentedFloatProfile(p, getSegments(tag));
@@ -189,8 +184,8 @@ public class DefaultProfileCollection implements IProfileCollection {
         // of the array
         int offset = -getIndex(tag);
 
-        if (segments == null) 
-        	return new ArrayList<>(0);
+//        if (segments == null) 
+//        	return new ArrayList<>(0);
 
         try {
         	IBorderSegment[] result = IBorderSegment.copy(segments);
@@ -241,9 +236,8 @@ public class DefaultProfileCollection implements IProfileCollection {
     public IBorderSegment getSegmentEndingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
         List<IBorderSegment> segments = this.getSegments(tag);
 
-        if (segments.size() == 0) {
+        if (segments.size() == 0)
             throw new UnsegmentedProfileException("No segments assigned to profile collection");
-        }
 
         IBorderSegment result = null;
         // get the name of the segment with the tag at the start
@@ -262,17 +256,14 @@ public class DefaultProfileCollection implements IProfileCollection {
     public IBorderSegment getSegmentContaining(int index) throws UnsegmentedProfileException {
         List<IBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
 
-        if (segments.size() == 0) {
+        if (segments.size() == 0) 
             throw new UnsegmentedProfileException("No segments assigned to profile collection");
-        }
 
         IBorderSegment result = null;
-        // get the name of the segment with the tag at the start
         for (IBorderSegment seg : segments) {
 
-            if (seg.contains(index)) {
-                result = seg;
-            }
+            if (seg.contains(index))
+            	return seg;
         }
 
         return result;
@@ -284,12 +275,9 @@ public class DefaultProfileCollection implements IProfileCollection {
         List<IBorderSegment> segments = this.getSegments(tag);
 
         IBorderSegment result = null;
-        // get the name of the segment with the tag at the start
         for (IBorderSegment seg : segments) {
-
-            if (seg.contains(ZERO_INDEX)) {
-                result = seg;
-            }
+            if (seg.contains(ZERO_INDEX)) 
+                return seg;
         }
 
         return result;
@@ -388,7 +376,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         
         if(segments==null) {
         	segments = new IBorderSegment[1];
-        	segments[0] = new DefaultBorderSegment(0, 0, length, UUID.randomUUID());
+        	segments[0] = new DefaultBorderSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID);
         }
         
         for (ProfileType type : ProfileType.values()) {

@@ -32,6 +32,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public interface IProfileCollection extends Serializable, Loggable {
 
     static final int ZERO_INDEX = 0;
+    
+    /**
+     * If a profile is created without segments, this is the ID of the default segment spanning the entire profile.
+     */
+    static final UUID DEFAULT_SEGMENT_ID = UUID.fromString("11111111-2222-3333-4444-555566667777");
+    
 
     static IProfileCollection makeNew() {
         return new DefaultProfileCollection();
@@ -93,7 +99,7 @@ public interface IProfileCollection extends Serializable, Loggable {
 
     /**
      * Get the length of the profile aggregate (this is the integer value of the
-     * median CellCollection array length)
+     * median ICellCollection array length)
      * 
      * @return Length, or zero if the aggregate is not yet created
      */

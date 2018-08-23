@@ -1056,10 +1056,8 @@ public class DefaultCellCollection implements ICellCollection {
      * Calculate the length of the segment with the given name in each nucleus
      * of the collection
      * 
-     * @param segName
-     *            the segment name
-     * @param scale
-     *            the scale to use
+     * @param segName the segment name
+     * @param scale the scale to use
      * @return a list of segment lengths
      * @throws Exception
      */
@@ -1087,11 +1085,11 @@ public class DefaultCellCollection implements ICellCollection {
     			}
     			return perimeterLength;
 
-    		}).toArray();
-    		Arrays.sort(result);
+    		}).sorted().toArray();
+
     		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
     		if(errorCount.get()>0)
-              warn(String.format("%d nuclei had errors getting segments", errorCount.get()));
+              warn(String.format("Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment", id, errorCount.get()));
 
     	}
     	return result;

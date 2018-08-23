@@ -46,7 +46,6 @@ public class SegmentsDetailPanel extends DetailPanel {
 
         DetailPanel segmentProfilePanel = new SegmentProfilePanel(context);
         DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel(context);
-        DetailPanel segmentHistogramsPanel = new SegmentHistogramsPanel(context);
         DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel(context);
         DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel(context);
         DetailPanel segmentStatsPanel = new SegmentStatsPanel(context);
@@ -56,7 +55,6 @@ public class SegmentsDetailPanel extends DetailPanel {
         segmentProfilePanel.setMinimumSize(minimumChartSize);
         segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
-        segmentHistogramsPanel.setMinimumSize(minimumChartSize);
         segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
         segmentMagnitudePanel.setMinimumSize(minimumChartSize);
         segmentStatsPanel.setMinimumSize(minimumChartSize);
@@ -64,13 +62,11 @@ public class SegmentsDetailPanel extends DetailPanel {
 
         this.addSubPanel(segmentProfilePanel);
         this.addSubPanel(segmentBoxplotsPanel);
-        this.addSubPanel(segmentHistogramsPanel);
         this.addSubPanel(segmentWilcoxonPanel);
         this.addSubPanel(segmentMagnitudePanel);
         this.addSubPanel(segmentStatsPanel);
 
         tabPanel.addTab(segmentBoxplotsPanel.getPanelTitle(), segmentBoxplotsPanel);
-        tabPanel.addTab(segmentHistogramsPanel.getPanelTitle(), segmentHistogramsPanel);
         tabPanel.addTab(segmentWilcoxonPanel.getPanelTitle(), segmentWilcoxonPanel);
         tabPanel.addTab(segmentMagnitudePanel.getPanelTitle(), segmentMagnitudePanel);
 
