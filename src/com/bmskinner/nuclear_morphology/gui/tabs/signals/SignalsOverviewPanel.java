@@ -56,12 +56,11 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 

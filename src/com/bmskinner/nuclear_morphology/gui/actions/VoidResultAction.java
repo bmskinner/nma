@@ -33,9 +33,9 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

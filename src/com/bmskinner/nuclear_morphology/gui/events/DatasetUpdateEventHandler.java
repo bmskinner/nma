@@ -16,53 +16,34 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
 
-import java.util.ArrayList;
-import java.util.EventObject;
+import java.util.Iterator;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
- * Send a list of datasets to registered listeners to draw charts and tables
+ * Handle selected dataset list update events
  * 
  * @author ben
+ * @since 1.13.7
  *
  */
-@SuppressWarnings("serial")
-public class DatasetUpdateEvent extends EventObject {
+public class DatasetUpdateEventHandler extends AbstractEventHandler {
 
-    private final List<IAnalysisDataset> list;
-
+    public DatasetUpdateEventHandler(Object parent) {
+        super(parent);
+    }
+    
     /**
-     * Get the datasets in the event
+     * Signal listeners that the given datasets should be displayed.
      * 
-     * @return
+     * @param list the list of datasets include in the event
      */
-    public List<IAnalysisDataset> getDatasets() {
-        return list;
+    public void fireDatasetUpdateEvent(List<IAnalysisDataset> list) {
+        DatasetUpdateEvent e = new DatasetUpdateEvent(parent, list);
+        fire(e);
     }
 
-    /**
-     * Construct from an existing event. Use to pass messages on.
-     * 
-     * @param event
-     */
-    public DatasetUpdateEvent(Object source, final List<IAnalysisDataset> list) {
-        super(source);
-        this.list = new ArrayList<IAnalysisDataset>(list);
-    }
-
-    /**
-     * Construct from a single dataset. Use to pass messages on.
-     * 
-     * @param event
-     */
-    public DatasetUpdateEvent(Object source, final IAnalysisDataset dataset) {
-        super(source);
-
-        this.list = new ArrayList<IAnalysisDataset>();
-        this.list.add(dataset);
-    }
 }

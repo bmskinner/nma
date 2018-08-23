@@ -35,9 +35,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDatase
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {

@@ -27,10 +27,10 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class SegmentationDualChartPanel extends DualChartPanel {
 

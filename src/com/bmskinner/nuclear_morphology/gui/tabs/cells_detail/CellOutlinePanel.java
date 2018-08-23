@@ -22,30 +22,24 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 @SuppressWarnings("serial")
-public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener, CellUpdatedEventListener {
+public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, CellUpdatedEventListener {
 
     private static final String PANEL_TITLE_LBL = "Outline";
             
@@ -168,8 +162,5 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     public void eventReceived(ChartOptionsRenderedEvent e) {
         update();
     }
-
-    @Override
-    public void chartSetEventReceived(ChartSetEvent e) { }
 
 }

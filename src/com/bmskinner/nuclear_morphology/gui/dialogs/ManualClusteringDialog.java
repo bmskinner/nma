@@ -20,8 +20,8 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 /**
  * This dialog allows for manual clustering of nuclei

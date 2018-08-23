@@ -46,9 +46,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkTy
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**

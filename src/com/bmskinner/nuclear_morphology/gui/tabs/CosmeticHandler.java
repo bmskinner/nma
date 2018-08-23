@@ -37,10 +37,10 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

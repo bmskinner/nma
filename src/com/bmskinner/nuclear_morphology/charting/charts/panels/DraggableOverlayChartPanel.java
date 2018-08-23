@@ -42,11 +42,11 @@ import org.jfree.ui.RectangleEdge;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This chart panel provides a list of draggable markers as crosshair overlays,

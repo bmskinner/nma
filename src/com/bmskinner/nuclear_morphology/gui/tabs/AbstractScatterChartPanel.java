@@ -58,8 +58,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 /**
  * An abstract class implementing the plottable statistic header on a detail

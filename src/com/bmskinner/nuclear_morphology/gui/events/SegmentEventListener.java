@@ -16,25 +16,9 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
 
-import java.util.Iterator;
+public interface SegmentEventListener {
 
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-
-/**
- * Store listeners for interface events, and allows firing of interface events
- * @author bms41
- * @since 1.13.7
- *
- */
-public class InterfaceEventHandler extends AbstractEventHandler {
-
-    public InterfaceEventHandler(final Object parent){
-        super(parent);
-    }
-    
-    public void fireInterfaceEvent(InterfaceMethod method) {
-    	fire(InterfaceEvent.of(parent, method));
-    }
+    public void segmentEventReceived(SegmentEvent event);
 }

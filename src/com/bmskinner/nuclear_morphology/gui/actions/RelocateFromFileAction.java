@@ -29,9 +29,9 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocationMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**

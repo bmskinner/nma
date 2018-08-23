@@ -18,9 +18,9 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSamp
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled.ActiveCountContext;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenu;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenuItem;
 

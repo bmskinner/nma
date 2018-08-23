@@ -28,16 +28,16 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * Action for constructing hierarchical trees based on dataset parameters

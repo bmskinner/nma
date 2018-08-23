@@ -25,12 +25,12 @@ import java.util.List;
 import javax.swing.JDialog;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

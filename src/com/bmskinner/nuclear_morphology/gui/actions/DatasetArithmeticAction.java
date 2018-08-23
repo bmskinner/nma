@@ -29,10 +29,10 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 public class DatasetArithmeticAction extends MultiDatasetResultAction {

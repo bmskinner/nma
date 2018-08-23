@@ -52,6 +52,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SVGWriter;
@@ -125,7 +127,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
          * Used for debugging only - do not include in releases
          */
         JPanel meshPanel = createMeshPanel();
-//         panel.add(meshPanel, BorderLayout.CENTER);
+        panel.add(meshPanel, BorderLayout.CENTER);
 
         JPanel offsetPanel = createTranslatePanel();
         panel.add(offsetPanel, BorderLayout.SOUTH);

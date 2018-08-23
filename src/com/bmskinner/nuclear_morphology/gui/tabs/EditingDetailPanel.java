@@ -25,7 +25,7 @@ import javax.swing.JTabbedPane;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;

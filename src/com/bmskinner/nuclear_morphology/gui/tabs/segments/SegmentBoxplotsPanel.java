@@ -47,9 +47,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 
 @SuppressWarnings("serial")

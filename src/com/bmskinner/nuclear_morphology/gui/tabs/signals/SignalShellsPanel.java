@@ -51,10 +51,10 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregat
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 /**

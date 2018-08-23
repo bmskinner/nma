@@ -32,8 +32,8 @@ import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlay;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This class takes a chart and adds a single draggable rectangle overlay. The

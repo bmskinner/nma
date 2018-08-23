@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -51,11 +50,10 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.CelllUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 

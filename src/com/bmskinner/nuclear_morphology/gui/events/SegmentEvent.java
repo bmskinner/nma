@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
 
 import java.util.EventObject;
 import java.util.UUID;

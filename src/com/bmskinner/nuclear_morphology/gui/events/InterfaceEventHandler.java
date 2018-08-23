@@ -16,16 +16,25 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
+
+import java.util.Iterator;
+
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 /**
- * This listener receives ChartSetEvents. These events are fired by
- * ExportableChartPanels when setChart() is invoked, and allows the UI to update
- * chart panels as soon as the new chart is in place
- * 
+ * Store listeners for interface events, and allows firing of interface events
  * @author bms41
+ * @since 1.13.7
  *
  */
-public interface ChartSetEventListener {
-    void chartSetEventReceived(ChartSetEvent e);
+public class InterfaceEventHandler extends AbstractEventHandler {
+
+    public InterfaceEventHandler(final Object parent){
+        super(parent);
+    }
+    
+    public void fireInterfaceEvent(InterfaceMethod method) {
+    	fire(InterfaceEvent.of(parent, method));
+    }
 }

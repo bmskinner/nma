@@ -33,10 +33,10 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**

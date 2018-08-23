@@ -25,8 +25,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 import ij.io.DirectoryChooser;

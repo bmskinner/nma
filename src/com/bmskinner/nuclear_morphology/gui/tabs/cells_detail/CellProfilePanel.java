@@ -42,14 +42,13 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 
 @SuppressWarnings("serial")
 public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSetEventListener {

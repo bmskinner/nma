@@ -61,13 +61,13 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AngleWindowSizeExplorer;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")

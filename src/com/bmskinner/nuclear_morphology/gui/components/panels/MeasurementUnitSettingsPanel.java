@@ -27,7 +27,7 @@ import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 @SuppressWarnings("serial")
 public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {

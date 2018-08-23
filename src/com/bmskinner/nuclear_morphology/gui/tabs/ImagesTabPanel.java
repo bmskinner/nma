@@ -62,9 +62,9 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 import ij.process.ImageProcessor;

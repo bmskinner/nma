@@ -63,12 +63,12 @@ import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.DraggableTreeViewer;
 import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;

@@ -27,8 +27,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MessagingDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 /**
  * This dialog contins a CellViewModel and is used as a base for any dialogs

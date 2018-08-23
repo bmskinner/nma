@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
 
 @SuppressWarnings("serial")

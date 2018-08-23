@@ -16,16 +16,8 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
 
-import java.util.EventObject;
-
-@SuppressWarnings("serial")
-public class ChartSetEvent extends EventObject {
-
-    public ChartSetEvent(Object source) {
-        super(source);
-
-    }
-
+public interface ChartOptionsRenderedEventListener {
+    public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e);
 }

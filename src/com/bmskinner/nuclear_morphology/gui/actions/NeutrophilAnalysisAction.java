@@ -40,9 +40,9 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 

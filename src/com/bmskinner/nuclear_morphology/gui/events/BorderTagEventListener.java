@@ -16,36 +16,23 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
 
-import java.util.EventObject;
-
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 
 /**
- * This event is fired when a chart has been rendered for a given set of options
+ * Listen for BorderTag events
  * 
  * @author ben
  *
  */
-@SuppressWarnings("serial")
-public class ChartOptionsRenderedEvent extends EventObject {
-
-    private ChartOptions options;
+public interface BorderTagEventListener {
 
     /**
-     * Create with a source component and the options that have been rendered
+     * Send an event to be handled.
      * 
-     * @param source
-     * @param options
+     * @param event
      */
-    public ChartOptionsRenderedEvent(Object source, ChartOptions options) {
-        super(source);
-        this.options = options;
+    public void borderTagEventReceived(BorderTagEvent event);
 
-    }
-
-    public ChartOptions getOptions() {
-        return options;
-    }
 }

@@ -44,8 +44,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
 
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This extension of the ChartPanel provides a new MouseAdapter to mark selected

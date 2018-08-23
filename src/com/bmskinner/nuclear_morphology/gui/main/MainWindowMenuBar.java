@@ -19,18 +19,18 @@ import javax.swing.JRadioButtonMenuItem;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 	

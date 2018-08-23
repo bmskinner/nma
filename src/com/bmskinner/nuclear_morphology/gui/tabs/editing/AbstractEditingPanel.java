@@ -33,14 +33,14 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagTy
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
-import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.CellUpdatedEventListener.CellUpdatedEvent;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener.CellUpdatedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 

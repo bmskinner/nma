@@ -5,7 +5,6 @@ import java.util.EventObject;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 
 /**
  * Listener for events setting which datasets are selected

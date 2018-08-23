@@ -42,11 +42,11 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 
 @SuppressWarnings("serial")

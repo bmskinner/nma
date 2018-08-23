@@ -18,11 +18,11 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class CellBorderDualPanel extends DualChartPanel {
 

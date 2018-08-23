@@ -22,11 +22,11 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 
 public interface TabPanel extends EventListener {
 

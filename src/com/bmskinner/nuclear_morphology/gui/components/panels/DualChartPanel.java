@@ -31,14 +31,13 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.PositionSelection
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.EventListener;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable

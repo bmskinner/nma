@@ -35,14 +35,14 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -231,6 +231,20 @@ public class MainWindow extends AbstractMainWindow {
  
         signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
         editingDetailPanel.addSignalChangeListener(signalsDetailPanel);
+        
+        tabbedPane.addChangeListener(e->{ // listen for tab switches and update charts if cells have been edited
+        	boolean isUpdate = false;
+        	for(TabPanel t : detailPanels){
+        		isUpdate |= t.hasCellUpdate();
+        	}
+
+        	if(isUpdate) {
+        		recacheCharts();
+        		for(TabPanel t : detailPanels){
+        			t.setCellUpdate(false);
+        		}
+        	}
+        });
 
     }
 

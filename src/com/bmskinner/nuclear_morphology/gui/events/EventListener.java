@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
 
 /**
  * Global interface for the event listeners

@@ -16,23 +16,24 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.events;
 
-import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import java.util.Iterator;
 
 /**
- * Listen for BorderTag events
+ * Handle selected signal change events
  * 
  * @author ben
+ * @since 1.13.7
  *
  */
-public interface BorderTagEventListener {
+public class SignalChangeEventHandler extends AbstractEventHandler {
 
-    /**
-     * Send an event to be handled.
-     * 
-     * @param event
-     */
-    public void borderTagEventReceived(BorderTagEvent event);
-
+    public SignalChangeEventHandler(Object parent) {
+        super(parent);
+    }
+    
+    public void fireSignalChangeEvent(String method) {
+    	fire(new SignalChangeEvent(parent, method, parent.getClass().getName()));
+    }
 }

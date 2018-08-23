@@ -82,8 +82,6 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
@@ -102,7 +100,7 @@ import ij.process.FloatPolygon;
  */
 @SuppressWarnings("serial")
 public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implements BorderPointEventListener,
-        ChartSetEventListener, MouseListener, MouseMotionListener, MouseWheelListener {
+         MouseListener, MouseMotionListener, MouseWheelListener {
 
     private DualChartPanel dualPanel;
 
@@ -568,12 +566,6 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             // panel.updateUI();
             // initialMovePointY = finalMovePointY;
         }
-    }
-
-    @Override
-    public void chartSetEventReceived(ChartSetEvent e) {
-        // This is required in the setup for ExportableChartPanel
-
     }
 
     @Override
