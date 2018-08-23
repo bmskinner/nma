@@ -350,21 +350,21 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         // MorphologyAnalysisMode.NEW, programLogger);
 
         // Make a fitter
-        SegmentFitter fitter = new SegmentFitter(medianProfile);
+//        SegmentFitter fitter = new SegmentFitter(medianProfile);
 
-        for (Nucleus n : activeDataset().getCollection().getNuclei()) {
-
-            // recombine the segments at the lengths of the median profile
-            // segments
-            ISegmentedProfile frankenProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
-
-            n.setProfile(ProfileType.FRANKEN, frankenProfile.copy());
-
-        }
+//        for (Nucleus n : activeDataset().getCollection().getNuclei()) {
+//
+//            // recombine the segments at the lengths of the median profile
+//            // segments
+//            ISegmentedProfile frankenProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+//
+//            n.setProfile(ProfileType.FRANKEN, frankenProfile.copy());
+//
+//        }
 
         pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
 
-        fitter = null; // clean up
+//        fitter = null; // clean up
 
         Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
         if(op.isPresent())

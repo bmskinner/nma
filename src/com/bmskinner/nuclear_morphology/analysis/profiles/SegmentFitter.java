@@ -79,13 +79,13 @@ public class SegmentFitter implements Loggable {
     }
 
     /**
-     * Run the segment fitter on the given nucleus. It will take the segments
-     * loaded into the fitter upon construction, and apply them to the nucleus
-     * angle profile.
+     * Run the segment fitter on the given nucleus. It will take the segments from
+     * the template profile loaded into the fitter upon construction, and apply them 
+     * to the nucleus angle profile. Border tags are updated to the best matching location
+     * in the template profile.
      * 
      * @param n the nucleus to fit to the current median profile
-     * @param pc the ProfileCollection from the CellCollection the nucleus
-     *            belongs to
+     * @param pc the IProfileCollection the nucleus is to be matched with
      * @throws UnavailableComponentException 
      * @throws ProfileException 
      * @throws IndexOutOfBoundsException 
@@ -95,18 +95,19 @@ public class SegmentFitter implements Loggable {
         // Input checks
         if (n == null)
             throw new IllegalArgumentException("Test nucleus is null");
+        
+        if(!n.hasProfile(ProfileType.ANGLE))
+        	throw new IllegalArgumentException("Nucleus has no angle profile");
+        
+        ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE);
+        
+        if(!angleProfile.hasSegments())
+        	throw new UnsegmentedProfileException(String.format("Nucleus %s has no segments", n.getNameAndNumber()));
 
-        if (n.getProfile(ProfileType.ANGLE).getSegments() == null
-                || n.getProfile(ProfileType.ANGLE).getSegments().isEmpty())
-            throw new IllegalArgumentException("Nucleus has no segments");
-
-        // Begin fitting the segments to the median
-        // get the best fit of segments to the median
-        ISegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.ANGLE));
+        ISegmentedProfile newProfile = remapSegmentEndpoints(angleProfile);
 
         n.setProfile(ProfileType.ANGLE, newProfile);
 
-        // modify tail and head/tip point to nearest segment end
         remapBorderPoints(n, pc);
     }
 
@@ -121,37 +122,36 @@ public class SegmentFitter implements Loggable {
      * @throws UnavailableBorderTagException 
      * @throws Exception
      */
-    public ISegmentedProfile recombine(@NonNull final Nucleus n, Tag tag) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-        if (n == null)
-            throw new IllegalArgumentException("Test nucleus is null");
-
-        if (!n.getProfile(ProfileType.ANGLE).hasSegments())
-            throw new IllegalArgumentException("Test nucleus has no segments");
-
-        /*
-         * Generate a segmented profile from the angle profile of the point
-         * type. The zero index of the profile is the border tag. The segment
-         * list for the profile begins with seg 0 at the border tag.
-         */
-        ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, tag).copy();
-//        ISegmentedProfile nucleusProfile = new SegmentedFloatProfile(n.getProfile(ProfileType.ANGLE, tag));
-
-
-        // stretch or squeeze the segments to match the length of the median
-        // profile of the collection
-        try {
-            return nucleusProfile.frankenNormaliseToProfile(medianProfile);
-        } catch (ProfileException e) {
-            error("Malformed profile in frankenprofiling", e);
-            finest("Median profile:");
-            finest(medianProfile.toString());
-            finest("Nucleus profile:");
-            finest(nucleusProfile.toString());
-
-        }
-
-        return null;
-    }
+//    public ISegmentedProfile recombine(@NonNull final Nucleus n, Tag tag) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+//        if (n == null)
+//            throw new IllegalArgumentException("Test nucleus is null");
+//
+//        if (!n.getProfile(ProfileType.ANGLE).hasSegments())
+//            throw new IllegalArgumentException("Test nucleus has no segments");
+//
+//        /*
+//         * Generate a segmented profile from the angle profile of the point
+//         * type. The zero index of the profile is the border tag. The segment
+//         * list for the profile begins with seg 0 at the border tag.
+//         */
+//        ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, tag).copy();
+//
+//
+//        // stretch or squeeze the segments to match the length of the median
+//        // profile of the collection
+//        try {
+//            return nucleusProfile.frankenNormaliseToProfile(medianProfile);
+//        } catch (ProfileException e) {
+//            error("Malformed profile in frankenprofiling", e);
+//            finest("Median profile:");
+//            finest(medianProfile.toString());
+//            finest("Nucleus profile:");
+//            finest(nucleusProfile.toString());
+//
+//        }
+//
+//        return null;
+//    }
 
     /**
      * Move core border points within a nucleus to the end of their appropriate
@@ -234,7 +234,7 @@ public class SegmentFitter implements Loggable {
      * @throws UnavailableComponentException 
      * @throws Exception
      */
-    private ISegmentedProfile runFitter(@NonNull ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException, UnavailableComponentException {
+    private ISegmentedProfile remapSegmentEndpoints(@NonNull ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException, UnavailableComponentException {
         // Input check
         if (profile == null)
             throw new IllegalArgumentException("Input profile is null");

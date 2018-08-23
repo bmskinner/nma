@@ -30,8 +30,6 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 //import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -48,7 +46,6 @@ import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -67,9 +64,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
-import com.bmskinner.nuclear_morphology.stats.KruskalTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.process.FloatPolygon;
@@ -1153,55 +1148,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         ds.addSeries("Q-Q", data, 0);
         return ds;
 
-    }
-
-    /**
-     * Create a Kruskal-Wallis comparison along the angle profiles for two
-     * analysis datasets
-     * 
-     * @param options
-     * @return
-     * @throws Exception
-     */
-    public XYDataset createKruskalProfileDataset() throws ChartDatasetCreationException {
-
-        FloatXYDataset ds = new FloatXYDataset();
-
-        IAnalysisDataset setOne = options.getDatasets().get(0);
-        IAnalysisDataset setTwo = options.getDatasets().get(1);
-
-        IProfile pvalues = new KruskalTester().testCollectionGetPValues(setOne, setTwo, options.getTag(),
-                options.getType());
-
-        float[] yvalues = pvalues.toFloatArray();
-        float[] xvalues = createXPositions(pvalues, 100).toFloatArray();
-
-        float[][] data = { xvalues, yvalues };
-        ds.addSeries(setOne.getCollection().getName(), data, 0);
-
-        return ds;
-    }
-
-    /**
-     * Create a Kruskal-Wallis comparison along the angle profiles for two
-     * analysis datasets
-     * 
-     * @param options
-     * @return
-     * @throws Exception
-     */
-    public XYDataset createFrankenKruskalProfileDataset() throws ChartDatasetCreationException {
-
-        FloatXYDataset ds = new FloatXYDataset();
-        IProfile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);
-
-        float[] yvalues = pvalues.toFloatArray();
-        float[] xvalues = createXPositions(pvalues, 100).toFloatArray();
-
-        float[][] data = { xvalues, yvalues };
-        ds.addSeries(options.firstDataset().getCollection().getName(), data, 0);
-
-        return ds;
     }
 
     /**

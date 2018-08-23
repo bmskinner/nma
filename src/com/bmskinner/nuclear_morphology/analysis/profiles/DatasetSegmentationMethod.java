@@ -489,38 +489,16 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         try {
         	List<IBorderSegment> segments = pc.getSegments(pointType);
 
-        	/*
-        	 * At this point, the FrankenCollection is identical to the
-        	 * ProfileCollection, but has no ProfileAggregate. We need to add the
-        	 * individual recombined frankenProfiles to the internal profile list,
-        	 * and build a ProfileAggregate
-        	 */
-
         	// Get the median profile for the population
         	ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
 
-//        	/*
-//        	 * Split the recombining task into chunks for multithreading
-//        	 */
-//
-//        	SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc,
-//        			collection.getNuclei().toArray(new Nucleus[0]));
-//        	task.addProgressListener(this);
-//
-//            task.invoke();
         	SegmentFitter fitter = new SegmentFitter(medianProfile);
         	
         	collection.getNuclei().parallelStream().forEach(n->{
 
         		try {
-        			if (! n.isLocked()) {
+        			if (! n.isLocked())
         				fitter.fit(n, pc);
-        				// recombine the segments to the lengths of the median profile segments
-        				IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
-
-        				ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
-        				n.setProfile(ProfileType.FRANKEN, segmented);
-        			}
         		} catch (IndexOutOfBoundsException | ProfileException | UnavailableComponentException
         				| UnsegmentedProfileException e) {
         			stack("Could not fit segments for nucleus "+n.getNameAndNumber()+": "+e.getMessage(), e);
@@ -530,27 +508,15 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         		
         	});
 
-            
-        } catch (RejectedExecutionException e) {
-            error("Fork task rejected: " + e.getMessage(), e);
         } catch (UnavailableBorderTagException e1) {
         	error("Unavailable border tag in segment recombining task: " + e1.getMessage(), e1);
-		} catch (ProfileException e1) {
-			error("Profile error in segment recombining task: " + e1.getMessage(), e1);
-		} catch (UnavailableProfileTypeException e1) {
+        } catch (UnavailableProfileTypeException e1) {
 			error("Unavailable profile type in segment recombining task: " + e1.getMessage(), e1);
 		} catch (UnsegmentedProfileException e1) {
 			error("Unsegmented profile in segment recombining task: " + e1.getMessage(), e1);
-		} catch (Exception e) {
-			error("Unknown exception in segment recombining task: " + e.getMessage(), e);
 		}
 
-        /*
-         * Build a profile aggregate in the new frankencollection by taking the
-         * stored frankenprofiles from each nucleus in the collection
-         */
         pc.createProfileAggregate(collection, pc.length());
-
 
         if (!checkRPmatchesSegments(collection))
             warn("Segments do not all start on reference point after recombining");
