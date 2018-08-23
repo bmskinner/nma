@@ -28,9 +28,11 @@ import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCre
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.TestDatasetFactory;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -213,23 +215,31 @@ public class ProfileChartFactoryTest {
 	}
 	
 	@Test
-	public void testSingleNucleusDatasetProfile() throws Exception {
-		IAnalysisDataset d = TestDatasetFactory.squareDataset(1);
-		DatasetProfilingMethod m = new DatasetProfilingMethod(d);
-		m.call();
+	public void testSingleNucleusDatasetProfileWithSingleSegment() throws Exception {
+		
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+				.profiled().build();
 		generateChartsforOptions(d);
 	}
 	
 	@Test
-	public void testMultipleNucleusDatasetProfile() throws Exception {
-		IAnalysisDataset d = TestDatasetFactory.profileDataset(TestDatasetFactory.variableRectangularDataset(100, 4));
+	public void testSingleNucleusDatasetProfileWithMultipleSegments() throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.OTHER_ASYMMETRIC)
+				.segmented().build();
 		generateChartsforOptions(d);
 	}
 	
 	@Test
-	public void testMultipleDatasetsProfile() throws Exception {
-		IAnalysisDataset d1 = TestDatasetFactory.profileDataset(TestDatasetFactory.variableRectangularDataset(100, 4));
-		IAnalysisDataset d2 = TestDatasetFactory.profileDataset(TestDatasetFactory.variableRectangularDataset(100, 10));
+	public void testMultipleNucleusDatasetProfileWithSingleSegment() throws Exception {
+		
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(100).withMaxSizeVariation(4).profiled().build();
+		generateChartsforOptions(d);
+	}
+	
+	@Test
+	public void testMultipleDatasetsProfileWithSingleSegment() throws Exception {
+		IAnalysisDataset d1 = new TestDatasetBuilder().cellCount(100).withMaxSizeVariation(4).profiled().build();
+		IAnalysisDataset d2 = new TestDatasetBuilder().cellCount(100).withMaxSizeVariation(10).profiled().build();
 		
 		List<IAnalysisDataset> list = new ArrayList<>();
 		list.add(d1);

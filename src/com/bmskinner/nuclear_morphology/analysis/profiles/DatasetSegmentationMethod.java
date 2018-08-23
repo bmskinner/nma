@@ -105,12 +105,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
             // Ensure segments are copied appropriately to verticals
             // Ensure hook statistics are generated appropriately
-            // log("Updating verticals");
             for (Nucleus n : dataset.getCollection().getNuclei()) {
-                // log("Updating "+n.getNameAndNumber());
                 n.updateVerticallyRotatedNucleus();
                 n.updateDependentStats();
-
             }
             fine("Updated verticals and stats");
 
@@ -136,6 +133,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         dataset.getCollection().setConsensus(null); // clear if present
         runSegmentation(dataset.getCollection(), pointType);
         
+        fine("Validating dataset after segmentation");
         if(dataset.hasChildren()){
         	DatasetValidator v = new DatasetValidator();
         	for(IAnalysisDataset child: dataset.getAllChildDatasets()){
@@ -223,7 +221,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      * @param collection
      * @param pointType
      */
-    private void runSegmentation(ICellCollection collection, Tag pointType) throws Exception {
+    private void runSegmentation(ICellCollection collection, Tag pointType) throws Exception {    	
         createSegmentsInMedian(collection);
         assignMedianSegmentsToNuclei(collection, pointType);
     }
@@ -395,6 +393,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
             	ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
             	boolean hit = false;
                 for (IBorderSegment s : profile.getSegments()) {
+                	finer("Segment: "+s.getDetail());
                 	hit |= s.getStartIndex()==0;
                 }
                 
@@ -462,14 +461,12 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
             segments = segmenter.segment();
 
         } else {
-
-            segments = new ArrayList<>(2);
-            IBorderSegment seg1 = IBorderSegment.newSegment(0, opIndex, median.size());
-            IBorderSegment seg2 = IBorderSegment.newSegment(opIndex, median.size() - 1, median.size());
+        	fine(String.format("Nucleus type is %s, defaulting to single segments", collection.getNucleusType()));
+            segments = new ArrayList<>(1);
+            IBorderSegment seg1 = IBorderSegment.newSegment(0, 0, median.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
             segments.add(seg1);
-            segments.add(seg2);
         }
-
+        fine(String.format("Creating %s segments in median profile", segments.size()));
         pc.addSegments(Tag.REFERENCE_POINT, segments);
 
     }

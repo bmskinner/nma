@@ -3,6 +3,8 @@ package com.bmskinner.nuclear_morphology.components;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -15,6 +17,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  */
 public class TestDatasetFactory {
 	
+	public static final int DEFAULT_VARIATION  = 0;
 	public static final int DEFAULT_BASE_WIDTH = 40;
 	public static final int DEFAULT_BASE_HEIGHT = 50;
 	public static final int DEFAULT_X_BASE = 100;
@@ -23,17 +26,6 @@ public class TestDatasetFactory {
 	public static final int DEFAULT_BORDER_OFFSET = 20;
 	public static final boolean DEFAULT_IS_BORDER_OFFSET = true;
 	
-	/**
-	 * Run profiling on the given dataset and return the same dataset
-	 * @param d
-	 * @return
-	 * @throws Exception
-	 */
-	public static IAnalysisDataset profileDataset(IAnalysisDataset d) throws Exception {
-		DatasetProfilingMethod m = new DatasetProfilingMethod(d);
-		m.call();
-		return d;
-	}
 	
 	/**
 	 * Create a dataset consisting of square nuclei.
@@ -41,8 +33,17 @@ public class TestDatasetFactory {
 	 * @throws ComponentCreationException 
 	 */
 	public static IAnalysisDataset squareDataset(int nCells) throws ComponentCreationException {
+		return squareDataset(nCells, NucleusType.ROUND);
+	}
+	
+	/**
+	 * Create a dataset consisting of square nuclei.
+	 * @return
+	 * @throws ComponentCreationException 
+	 */
+	public static IAnalysisDataset squareDataset(int nCells, NucleusType type) throws ComponentCreationException {
 		
-		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", NucleusType.ROUND);
+		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", type);
 		
 		for(int i=0; i<nCells; i++) {
 			collection.addCell(TestComponentFactory.squareCell(40));
@@ -80,7 +81,7 @@ public class TestDatasetFactory {
 	 * @throws ComponentCreationException
 	 */
 	public static IAnalysisDataset variableRectangularDataset(int nCells, int maxVariation) throws ComponentCreationException {
-		return variableRectangularDataset(nCells, maxVariation, DEFAULT_BASE_WIDTH, DEFAULT_BASE_HEIGHT,
+		return variableRectangularDataset(nCells,NucleusType.ROUND, maxVariation, DEFAULT_BASE_WIDTH, DEFAULT_BASE_HEIGHT,
 				DEFAULT_X_BASE, DEFAULT_Y_BASE, DEFAULT_ROTATION, DEFAULT_IS_BORDER_OFFSET, DEFAULT_BORDER_OFFSET);
 	}
 	
@@ -100,9 +101,9 @@ public class TestDatasetFactory {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public static IAnalysisDataset variableRectangularDataset(int nCells, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
+	public static IAnalysisDataset variableRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
 		
-		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", NucleusType.ROUND);
+		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", type);
 
 		for(int i=0; i<nCells; i++) {
 			

@@ -16,6 +16,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.TestDatasetFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -46,7 +47,6 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 	}
 	
 	private void testProfilingIsConsistent(IAnalysisDataset dataset) throws Exception {
-		dataset = TestDatasetFactory.profileDataset(dataset);
 
 		// Check the collection
 		IProfile median = dataset.getCollection()
@@ -75,15 +75,13 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 	
 	@Test
 	public void testMultiCellIdenticalRectangularDatasetIsNotAffectedByFixedBorderOffset() throws Exception {
-		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, TestDatasetFactory.DEFAULT_BASE_WIDTH, 
-				TestDatasetFactory.DEFAULT_BASE_HEIGHT, TestDatasetFactory.DEFAULT_X_BASE, TestDatasetFactory.DEFAULT_Y_BASE, 
-				TestDatasetFactory.DEFAULT_ROTATION, false, TestDatasetFactory.DEFAULT_BORDER_OFFSET);
+		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(10).withMaxSizeVariation(0).build();
 		testProfilingIsConsistent(dataset);
 	}
 	
 	@Test
 	public void testMultiCellVariableRectangularDataset() throws Exception {
-
+//		TODO - this test makes no sense, the profiles will not be identical in variable cells
 		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 20);
 		testProfilingIsConsistent(dataset);
 	}
@@ -100,7 +98,12 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 			for(int yBase = -10; yBase<10; yBase++) {
 				
 				System.out.println("xBase "+xBase+"; yBase "+yBase);
-				IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, 0, false, 20);
+				
+				IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(10)
+						.xBase(xBase).yBase(yBase).baseWidth(40).baseHeight(50)
+						.maxRotation(0).offsetProfiles(false).fixedProfileOffset(20)
+						.profiled()
+						.build();
 				
 				Nucleus loopCell = null;
 				
@@ -117,10 +120,7 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 					assertEquals(globalCell.getBounds().getWidth(), n.getBounds().getWidth(), 0.001);
 					assertEquals(globalCell.getBounds().getHeight(), n.getBounds().getHeight(), 0.001);
 				}
-				
-				IAnalysisMethod m = new DatasetProfilingMethod(dataset);
-				m.call();
-				
+							
 				
 				// Check the collection
 				IProfile median = dataset.getCollection()
@@ -151,18 +151,14 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 		// Allow variation in angles from none to 90 degrees
 		for(int angle=0; angle<90; angle++) {
 
-			IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, angle, false, 20);
+			IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(10)
+					.xBase(xBase).yBase(yBase).baseWidth(40).baseHeight(50)
+					.maxRotation(angle).offsetProfiles(false).fixedProfileOffset(20)
+					.profiled()
+					.build();
 
-			IAnalysisMethod m = new DatasetProfilingMethod(dataset);
-			m.call();
+
 			
-//			for(ICell cell : dataset.getCollection().getCells()) {
-//				System.out.println("Cell\n");
-//				for(IBorderPoint b : cell.getNucleus().getBorderList()) {
-//					System.out.println(b.toString());
-//				}
-//			}
-
 			// Check the collection
 			IProfile median = dataset.getCollection()
 					.getProfileCollection()
@@ -179,7 +175,8 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 	
 	@Test
 	public void testSingleSquareCellMedianProfileHasExpectedValuesForQuartiles() throws Exception {
-		IAnalysisDataset dataset = TestDatasetFactory.profileDataset(TestDatasetFactory.squareDataset(1));
+		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1).baseHeight(40).baseWidth(40).profiled().build();
+
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
@@ -198,7 +195,8 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 	
 	@Test
 	public void testMultipleSquareCellMedianProfileHasExpectedValuesForQuartiles() throws Exception {
-		IAnalysisDataset dataset = TestDatasetFactory.profileDataset(TestDatasetFactory.squareDataset(100));
+		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1).baseHeight(40).baseWidth(40).profiled().build();
+
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);

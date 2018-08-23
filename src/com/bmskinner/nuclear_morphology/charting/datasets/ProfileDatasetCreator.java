@@ -1,6 +1,9 @@
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -318,63 +321,43 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param length the profile length
 	 * @param offset an offset to the x position. Used to align plots to the right
 	 * @param datasetIndex the index of the dataset for adding to the chart dataset
-	 * @return the updated dataset
 	 * @throws ProfileException
 	 */
 	private void addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, FloatXYDataset ds,
 			int length, double offset, int datasetIndex) throws ProfileException {
 
-		IProfile xpoints = createXPositions(profile, length);
-		xpoints = xpoints.add(offset);
+		IProfile xpoints = createXPositions(profile, length).add(offset);
+		
+		float[] xvalues = xpoints.toFloatArray();
+		float[] yvalues = profile.toFloatArray();
+		
 		for (IBorderSegment seg : segments) {
+			int prevIndex = -1;
+						
+			Iterator<Integer> it = seg.iterator();
+			
+			int start = seg.getStartIndex();
+			while(it.hasNext()){
 
-			if (seg.wraps()) { // case when array wraps. We need to plot the two
-				// ends as separate series
+				int index = it.next();
 
-				if (seg.getEndIndex() == 0) {
-					// no need to make two sections
-					IProfile subProfile = profile.getSubregion(seg.getStartIndex(), profile.size() - 1);
-					IProfile subPoints = xpoints.getSubregion(seg.getStartIndex(), profile.size() - 1);
-
-					float[][] data = { subPoints.toFloatArray(), subProfile.toFloatArray() };
-
-					// check if the series key is taken
-					String seriesName = checkSeriesName(ds, seg.getName());
-
-					ds.addSeries(seriesName, data, datasetIndex);
-
-				} else {
-
-					int lowerIndex = Math.min(seg.getEndIndex(), seg.getStartIndex());
-					int upperIndex = Math.max(seg.getEndIndex(), seg.getStartIndex());
-
-					// beginning of array
-					IProfile subProfileA = profile.getSubregion(0, lowerIndex);
-					IProfile subPointsA = xpoints.getSubregion(0, lowerIndex);
-
-					float[][] dataA = { subPointsA.toFloatArray(), subProfileA.toFloatArray() };
-					ds.addSeries(seg.getName() + "_A", dataA, 0);
-
-					// end of array
-					IProfile subProfileB = profile.getSubregion(upperIndex, profile.size() - 1);
-					IProfile subPointsB = xpoints.getSubregion(upperIndex, profile.size() - 1);
-
-					float[][] dataB = { subPointsB.toFloatArray(), subProfileB.toFloatArray() };
-					ds.addSeries(seg.getName() + "_B", dataB, datasetIndex);
+				if(index<prevIndex) {
+					// Start a new block if the segment is wrapping
+					float[][] data = {Arrays.copyOfRange(xvalues, start, prevIndex+1),
+							          Arrays.copyOfRange(yvalues, start, prevIndex+1)};
+					start = index;
+					
+					ds.addSeries(seg.getName() + "_A", data, datasetIndex);
+					
 				}
-
-				continue; // move on to the next segment
-
+				
+				prevIndex = index;
 			}
-			IProfile subProfile = profile.getSubregion(seg);
-			IProfile subPoints = xpoints.getSubregion(seg);
-
-			float[][] data = { subPoints.toFloatArray(), subProfile.toFloatArray() };
-
-			// check if the series key is taken
-			String seriesName = checkSeriesName(ds, seg.getName());
-
-			ds.addSeries(seriesName, data, datasetIndex);
+			
+			float[][] data = {Arrays.copyOfRange(xvalues, start, prevIndex+1),
+			                  Arrays.copyOfRange(yvalues, start, prevIndex+1)};
+			
+			ds.addSeries(seg.getName(), data, datasetIndex);
 		}
 
 	}
