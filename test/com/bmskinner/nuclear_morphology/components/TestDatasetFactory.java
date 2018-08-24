@@ -25,66 +25,6 @@ public class TestDatasetFactory {
 	public static final int DEFAULT_ROTATION = 0;
 	public static final int DEFAULT_BORDER_OFFSET = 20;
 	public static final boolean DEFAULT_IS_BORDER_OFFSET = true;
-	
-	
-	/**
-	 * Create a dataset consisting of square nuclei.
-	 * @return
-	 * @throws ComponentCreationException 
-	 */
-	public static IAnalysisDataset squareDataset(int nCells) throws ComponentCreationException {
-		return squareDataset(nCells, NucleusType.ROUND);
-	}
-	
-	/**
-	 * Create a dataset consisting of square nuclei.
-	 * @return
-	 * @throws ComponentCreationException 
-	 */
-	public static IAnalysisDataset squareDataset(int nCells, NucleusType type) throws ComponentCreationException {
-		
-		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", type);
-		
-		for(int i=0; i<nCells; i++) {
-			collection.addCell(TestComponentFactory.squareCell(40));
-		}
-		
-		
-		return new DefaultAnalysisDataset(collection);
-		
-	}
-	
-	/**
-	 * Create a dataset consisting of identical rectangular nuclei. Values are set to the factory
-	 * defaults.
-	 * @param nCells the number of cells in the dataset
-	 * @return
-	 * @throws ComponentCreationException
-	 */
-	public static IAnalysisDataset identicalRectangularDataset(int nCells) throws ComponentCreationException {
-		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", NucleusType.ROUND);
-
-		for(int i=0; i<nCells; i++) {
-			ICell cell = TestComponentFactory.rectangularCell(DEFAULT_BASE_WIDTH, DEFAULT_BASE_HEIGHT, 
-					DEFAULT_X_BASE, DEFAULT_Y_BASE, DEFAULT_ROTATION, false, DEFAULT_BORDER_OFFSET);
-			collection.addCell(cell);
-		}
-		return new DefaultAnalysisDataset(collection);
-	}
-	
-	/**
-	 * Create a dataset consisting of rectangular nuclei. Each nucleus has a random width and
-	 * size constrained by the variation factor
-	 * @param nCells
-	 * @param maxVariation
-	 * @return
-	 * @throws ComponentCreationException
-	 */
-	public static IAnalysisDataset variableRectangularDataset(int nCells, int maxVariation) throws ComponentCreationException {
-		return variableRectangularDataset(nCells,NucleusType.ROUND, maxVariation, DEFAULT_BASE_WIDTH, DEFAULT_BASE_HEIGHT,
-				DEFAULT_X_BASE, DEFAULT_Y_BASE, DEFAULT_ROTATION, DEFAULT_IS_BORDER_OFFSET, DEFAULT_BORDER_OFFSET);
-	}
-	
 
 	/**
 	 * Create a dataset consisting of rectangular nuclei. Each nucleus has a random width and

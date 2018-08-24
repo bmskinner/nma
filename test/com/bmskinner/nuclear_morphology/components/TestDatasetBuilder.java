@@ -29,12 +29,22 @@ public class TestDatasetBuilder {
 	private boolean segment = false;
 	private boolean offset  = TestDatasetFactory.DEFAULT_IS_BORDER_OFFSET;
 	
+	private TestComponentShape nucleusShape = TestComponentShape.SQUARE;
+	
+	
+	public enum TestComponentShape {
+		SQUARE, ROUND
+	}
+	
 	public TestDatasetBuilder() {}
 	
 		
 	public IAnalysisDataset build() throws Exception {
 				
-		d = TestDatasetFactory.variableRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
+		switch(nucleusShape) {
+		case SQUARE: 
+		default: d = TestDatasetFactory.variableRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
+		}
 		
 		if(segment || profile)
 			new DatasetProfilingMethod(d).call();
@@ -50,6 +60,11 @@ public class TestDatasetBuilder {
 	
 	public TestDatasetBuilder segmented() throws Exception {
 		segment = true;
+		return this;
+	}
+	
+	public TestDatasetBuilder withNucleusShape(TestComponentShape shape) throws Exception {
+		nucleusShape = shape;
 		return this;
 	}
 	

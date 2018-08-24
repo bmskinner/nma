@@ -11,12 +11,14 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.TestDatasetFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -40,10 +42,11 @@ public class ProfileSegmenterTest {
 	@Test
 	public void testSingleCellSquareDatasetHasFourSegmentsWithNoForcing() throws Exception {
 
-		IAnalysisDataset dataset = TestDatasetFactory.squareDataset(1);
-		new DatasetProfilingMethod(dataset).call();
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+				.baseHeight(40).baseWidth(40).build();
+		new DatasetProfilingMethod(d).call();
 
-		IProfile median = dataset.getCollection()
+		IProfile median = d.getCollection()
 				.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 		

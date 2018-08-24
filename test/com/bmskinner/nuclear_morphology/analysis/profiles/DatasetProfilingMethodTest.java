@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
@@ -62,15 +63,16 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 
 	@Test
 	public void testSingleCellDataset() throws Exception {
-		IAnalysisDataset dataset = TestDatasetFactory.squareDataset(1);
-		testProfilingIsConsistent(dataset);
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+				.baseHeight(40).baseWidth(40).build();
+		testProfilingIsConsistent(d);
 	}
 	
 	@Test
 	public void testMultiCellIdenticalRectangularDataset() throws Exception {
-		int nCells = 10;
-		IAnalysisDataset dataset = TestDatasetFactory.identicalRectangularDataset(nCells);
-		testProfilingIsConsistent(dataset);
+
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(10).ofType(NucleusType.ROUND).build();
+		testProfilingIsConsistent(d);
 	}
 	
 	@Test
@@ -82,7 +84,7 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 	@Test
 	public void testMultiCellVariableRectangularDataset() throws Exception {
 //		TODO - this test makes no sense, the profiles will not be identical in variable cells
-		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 20);
+		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(10).withMaxSizeVariation(20).build();
 		testProfilingIsConsistent(dataset);
 	}
 	

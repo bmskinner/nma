@@ -36,12 +36,14 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.TestDatasetFactory;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -64,9 +66,10 @@ public class SegmentFitterTest {
 	
 	@Test
 	public void testFittingOnUnprofiledDatasetThrowsException() throws Exception {
-		IAnalysisDataset dataset = TestDatasetFactory.squareDataset(1);
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+				.baseHeight(40).baseWidth(40).build();
 		expectedException.expect(UnavailableProfileTypeException.class);
-		fitter = new SegmentFitter(dataset.getCollection().getProfileCollection()
+		fitter = new SegmentFitter(d.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN));
 		
 	}

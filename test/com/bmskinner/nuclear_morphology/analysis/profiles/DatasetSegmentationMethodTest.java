@@ -45,9 +45,10 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 	
 	@Test
 	public void testSegmentationMethodExceptsOnUnprofiledDataset() throws Exception {
-		IAnalysisDataset dataset = TestDatasetFactory.squareDataset(1);
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+				.baseHeight(40).baseWidth(40).build();
 		expectedException.expect(UnavailableProfileTypeException.class);
-		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
+		new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
 	}
 	
 	/**
