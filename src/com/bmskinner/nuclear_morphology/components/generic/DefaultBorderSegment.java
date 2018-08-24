@@ -55,7 +55,7 @@ public class DefaultBorderSegment implements IBorderSegment {
     private UUID uuid; // allows keeping a consistent track of segment IDs with
                        // a profile
 
-    private int startIndex, endIndex, totalLength;
+    private int startIndex, endIndex, totalLength; // the start and end indexes inclusive
 
     private short positionInProfile = 0; // for future refactor
 
@@ -149,6 +149,11 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         this.isLocked = n.isLocked();
     }
+    
+    @Override
+	public IBorderSegment copy() {
+		return new DefaultBorderSegment(this);
+	}
 
     @Override
     public @NonNull UUID getID() {

@@ -201,26 +201,36 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @throws ProfileException 
      * @throws Exception
      */
-    private List<IBorderSegment> getSegmentsFrom(IBorderSegment firstSeg) throws UnavailableComponentException, ProfileException {
+    private List<IBorderSegment> getSegmentsFrom(@NonNull IBorderSegment firstSeg) throws UnavailableComponentException, ProfileException {
 
-        if (firstSeg == null) {
+        if (firstSeg == null)
             throw new IllegalArgumentException("Requested first segment is null");
-        }
 
-        List<IBorderSegment> result = new ArrayList<IBorderSegment>();
-        int i = segments.length - 1; // the number of segments
+        List<IBorderSegment> result = new ArrayList<>();
+        
         result.add(firstSeg);
-        while (i > 0) {
-
-            if (firstSeg.hasNextSegment()) {
-                firstSeg = firstSeg.nextSegment();
-                result.add(firstSeg);
-                i--;
-            } else {
-                throw new UnavailableComponentException(i + ": No next segment in " + firstSeg.toString());
-            }
+        
+        IBorderSegment nextSeg = firstSeg.nextSegment();
+        while(nextSeg!=firstSeg){
+        	result.add(nextSeg);
+        	nextSeg = nextSeg.nextSegment();
         }
         return IBorderSegment.copy(result);
+        
+//        List<IBorderSegment> result = new ArrayList<IBorderSegment>();
+//        int i = segments.length - 1; // the number of segments
+//        result.add(firstSeg);
+//        while (i > 0) {
+//
+//            if (firstSeg.hasNextSegment()) {
+//                firstSeg = firstSeg.nextSegment();
+//                result.add(firstSeg);
+//                i--;
+//            } else {
+//                throw new UnavailableComponentException(i + ": No next segment in " + firstSeg.toString());
+//            }
+//        }
+//        return IBorderSegment.copy(result);
     }
 
     @Override
@@ -235,6 +245,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			stack("Profile error getting segments", e);
 			return new ArrayList<>();
 		}
+    	System.out.println("Found segment count is "+getSegmentCount());
 		return new ArrayList<>();
     }
 

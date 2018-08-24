@@ -1882,7 +1882,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 */
 			protected BorderSegmentTree(@NonNull IBorderSegment seg, @Nullable BorderSegmentTree parent) {
 				this(seg.getID(), seg.getStartIndex(), seg.wraps()?seg.length()-1:seg.length(), parent);
-			}			
+			}	
+			
+			@Override
+			public IBorderSegment copy() {
+				return new BorderSegmentTree(this, parent);
+			}
 
 			@Override
 			public @NonNull UUID getID() {

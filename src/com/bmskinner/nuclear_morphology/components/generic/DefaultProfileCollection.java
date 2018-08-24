@@ -183,20 +183,34 @@ public class DefaultProfileCollection implements IProfileCollection {
         // since we are moving the pointIndex back to the beginning
         // of the array
         int offset = -getIndex(tag);
-
-//        if (segments == null) 
-//        	return new ArrayList<>(0);
-
-        try {
-        	IBorderSegment[] result = IBorderSegment.copy(segments);
-        	for(IBorderSegment s : result) {
-        		s.offset(offset);
-        	}
-        	return Arrays.asList(result);
-        } catch (ProfileException e) {
-        	e.printStackTrace();
+        
+        System.out.println(tag+" offset is "+offset);
+        List<IBorderSegment> result = new ArrayList<>();        
+        
+        for(IBorderSegment s : segments) {
+        	
+        	IBorderSegment sc = s.copy(); 
+        	sc.offset(offset);
+        	result.add(sc);
         }
-        return new ArrayList<>(0);        
+        
+        try {
+        	IBorderSegment.linkSegments(result);
+        	System.out.println("Found "+result.size()+" segments after linking");
+        	return result;
+
+//        try {
+//        	IBorderSegment[] result = IBorderSegment.copy(segments);
+//        	for(IBorderSegment s : result) {
+//        		s.offset(offset);
+//        	}
+//        	return Arrays.asList(result);
+        } catch (ProfileException e) {
+        	error("Could not get segments from "+tag, e);
+        	e.printStackTrace();
+        	 return new ArrayList<>();     
+        }
+     
     }
 
 

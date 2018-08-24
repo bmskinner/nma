@@ -38,6 +38,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 
 @Deprecated
@@ -126,6 +127,11 @@ public class NucleusBorderSegment implements IBorderSegment {
         this.mergeSources = n.getMergeSources();
         this.startPositionLocked = n.isLocked();
     }
+    
+    @Override
+	public IBorderSegment copy() {
+		return new NucleusBorderSegment(this);
+	}
 
     /*
      * ---------------- Getters ----------------

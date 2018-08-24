@@ -155,6 +155,7 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @return
      */
+    @Deprecated
     List<String> getSegmentNames();
 
     /**

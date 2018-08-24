@@ -138,6 +138,12 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     static IBorderSegment newSegment(int startIndex, int endIndex, int total) {
         return IBorderSegment.newSegment(startIndex, endIndex, total, java.util.UUID.randomUUID());
     }
+    
+    /**
+     * Create a copy of the current segment
+     * @return
+     */
+    IBorderSegment copy();
 
     /**
      * Get the segment ID
@@ -716,19 +722,20 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     }
     
     /**
-     * Test if a segment would contain the given index if it had the specified
-     * start and end indexes.
+     * Test if a segment with the specified start and end indexes
+     * would contain the given index.
      * 
-     * @param start the start to test
-     * @param end the end to test
-     * @param index the index to test
-     * @return
+     * @param start the start index of the segment (inclusive)
+     * @param end the end index of the segment (inclusive)
+     * @param index the profile index to test
+     * @param total the total profile length
+     * @return true if the index lies on or between the start and end indexes 
      */
     static boolean contains(int start, int end, int index, int total){
         if (index < 0 || index > total)
             return false;
 
-        if (end<start)// wrapped
+        if (end<=start)// wrapped
             return (index <= end || index >= start);
 //      regular
         return (index >= start && index <= end);

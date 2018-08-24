@@ -83,10 +83,11 @@ public interface IProfileCollection extends Serializable, Loggable {
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
 
     /**
-     * Get the requested segmented profile. Generates it dynamically from the
-     * appropriate ProfileAggregate.
+     * Get a segmented profile offset to start from the given tag. 
      * 
-     * @param  s the pointType of the profile to find
+     * @param  type the profile type to fetch
+     * @param tag the starting index of the profile
+     * @param quartile the quartile to fetch
      * @return the profile
      * @throws ProfileException
      * @throws UnavailableBorderTagException when the tag is not present as an offset
@@ -119,9 +120,12 @@ public interface IProfileCollection extends Serializable, Loggable {
     boolean hasSegments();
 
     /**
-     * Create a list of segments based on an offset of existing segments.
+     * Get a copy of the segments in the collection ordered from the given tag. The first 
+     * segment in the list will contain the tag at any index except the end index. The
+     * segments will have their positions offset such that the tag is at the zero index
+     * of the underlying profile. 
      * 
-     * @param s the name of the tag
+     * @param tag the tag to offset by
      * @return a copy of the segments in the profile, offset to start at the tag
      * @throws ProfileException
      */

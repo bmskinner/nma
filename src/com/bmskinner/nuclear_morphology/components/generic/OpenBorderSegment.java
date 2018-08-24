@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
 /**
@@ -126,6 +127,11 @@ public class OpenBorderSegment implements IBorderSegment {
 
         this.isLocked = n.isLocked();
     }
+    
+    @Override
+	public IBorderSegment copy() {
+		return new OpenBorderSegment(this);
+	}
 
     /*
      * ---------------- Getters ----------------
