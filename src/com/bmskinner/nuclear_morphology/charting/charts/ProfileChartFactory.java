@@ -156,19 +156,21 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		for (int i = 0; i < seriesCount; i++) {
 
 			renderer.setSeriesVisibleInLegend(i, false);
+			renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 
 			String name = ds.getLines().getSeriesKey(i).toString();
 
 			// segments along the median profile
-			if (name.startsWith("Seg_")) {
+			if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX)) {
 				int colourIndex = getIndexFromLabel(name);
 				renderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 
 				Paint colour = ColourSelecter.getColor(colourIndex);
 
 				renderer.setSeriesPaint(i, colour);
-				renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
+				
 			}
+			
 		}
 
 		// Add markers
@@ -214,7 +216,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		}
 
 		
-		int length = options.isHideProfiles() ? collection.getMedianArrayLength() : collection.getMaxProfileLength();
+		int length = options.isShowProfiles() ? collection.getMaxProfileLength() : collection.getMedianArrayLength();
 		length = options.isNormalised() ? ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH : length; // default if normalised
 
 		JFreeChart chart = makeProfileChart(ds, length);
@@ -317,12 +319,15 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		
 		// Format the line charts
 		for (int i=0; i<ds.getLines().getSeriesCount(); i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, false);
+			lineRenderer.setSeriesVisibleInLegend(i, false);
+			
+			
 			String name = ds.getLines().getSeriesKey(i).toString();
 			int index   = ds.getLines().getDatasetIndex(name);
 			
 			lineRenderer.setSeriesStroke(i, chooseSeriesStroke(name));
 			lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()));
+			lineRenderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 		}
 		
 		// Format the range charts

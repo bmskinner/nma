@@ -186,7 +186,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
                 .setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setHideProfiles(true)
+                .setShowProfiles(false)
                 .setShowPoints(true).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getMainPanel())
                 .build();
 
@@ -202,7 +202,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
                 .setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setHideProfiles(true)
+                .setShowProfiles(false)
                 .setShowPoints(false).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getRangePanel())
                 .build();
 

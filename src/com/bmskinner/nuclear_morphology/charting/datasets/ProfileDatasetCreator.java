@@ -176,8 +176,8 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		Tag borderTag              = options.getTag();
 		ProfileType type           = options.getType();
 		boolean isSegmented        = collection.getProfileCollection().hasSegments();
-		boolean isShowSegments     = !options.isHideProfiles() && options.isSingleDataset();
-		boolean isShowNuclei       = options.isSingleDataset() && !options.isHideProfiles();
+		boolean isShowSegments     = isSegmented && options.isSingleDataset();
+		boolean isShowNuclei       = options.isSingleDataset() && options.isShowProfiles();
 		boolean isShowIQR          = options.isShowIQR(); // points only displayed for single lines
 
 		int maxNucleusLength    = getMaximumNucleusProfileLength(collection);
@@ -199,12 +199,12 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			// rendering order will be first on top
 
 			// add the segments if any exist and there is only a single dataset
-			if(isSegmented && isShowSegments) {
+			if(isShowSegments) {
 				List<IBorderSegment> segments = collection.getProfileCollection()
 						.getSegmentedProfile(type, borderTag, Stats.MEDIAN)
 						.getOrderedSegments();
 				
-//				System.out.println(String.format("Fetched %s median segments", segments.size()));
+//				System.out.println(String.format("Fetched %s median segments for %s", segments.size(), borderTag));
 
 				if (isNormalised) {
 					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), DEFAULT_PROFILE_LENGTH, 0, 0);

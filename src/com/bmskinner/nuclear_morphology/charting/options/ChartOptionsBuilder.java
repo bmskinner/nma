@@ -112,8 +112,8 @@ public class ChartOptionsBuilder {
         return this;
     }
 
-    public ChartOptionsBuilder setHideProfiles(boolean b) {
-        options.setHideProfiles(b);
+    public ChartOptionsBuilder setShowProfiles(boolean b) {
+        options.setShowProfiles(b);
         return this;
     }
 

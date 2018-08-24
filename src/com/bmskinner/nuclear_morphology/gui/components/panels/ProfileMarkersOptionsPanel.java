@@ -24,7 +24,7 @@ import javax.swing.JCheckBox;
 public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 
     private JCheckBox checkBox       = new JCheckBox("Show markers");
-    private JCheckBox hideRawProfile = new JCheckBox("Hide profiles");
+    private JCheckBox showNucleiBox = new JCheckBox("Show nuclei");
 
     public ProfileMarkersOptionsPanel() {
         super();
@@ -35,9 +35,9 @@ public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
         this.add(checkBox);
 
         // checkbox to show or hide individual nucleus profiles
-        hideRawProfile.setSelected(false);
-        hideRawProfile.addActionListener(this);
-        this.add(hideRawProfile);
+        showNucleiBox.setSelected(true);
+        showNucleiBox.addActionListener(this);
+        this.add(showNucleiBox);
 
     }
 
@@ -55,14 +55,14 @@ public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
      * 
      * @return
      */
-    public boolean isHideProfiles() {
-        return hideRawProfile.isSelected();
+    public boolean isShowNuclei() {
+        return showNucleiBox.isSelected();
     }
 
     public void setEnabled(boolean b) {
 
         this.checkBox.setEnabled(b);
-        this.hideRawProfile.setEnabled(b);
+        this.showNucleiBox.setEnabled(b);
     }
 
 }

@@ -178,7 +178,7 @@ public class SegmentFitter implements Loggable {
          * updated though - members of the core border tag population
          */
 
-        for (BorderTagObject tag : BorderTagObject.values(BorderTagType.CORE)) {
+        for (Tag tag : BorderTagObject.values(BorderTagType.CORE)) {
 
             // get the segments the point should lie between
             // from the median profile

@@ -155,11 +155,11 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     }
 
     @Override
-    public boolean isHideProfiles() {
+    public boolean isShowProfiles() {
         return hideProfiles;
     }
 
-    public void setHideProfiles(boolean hideProfiles) {
+    public void setShowProfiles(boolean hideProfiles) {
         this.hideProfiles = hideProfiles;
     }
 

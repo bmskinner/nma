@@ -96,7 +96,7 @@ public interface ChartOptions extends DisplayOptions {
      * 
      * @return
      */
-    boolean isHideProfiles();
+    boolean isShowProfiles();
 
     /**
      * Check if individual points in an XY chart should be displayed

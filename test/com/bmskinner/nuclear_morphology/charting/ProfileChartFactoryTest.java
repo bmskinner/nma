@@ -77,7 +77,7 @@ public class ProfileChartFactoryTest {
 	 * @param panels
 	 * @throws InterruptedException
 	 */
-	private void showCharts(List<JPanel> panels) throws InterruptedException {
+	private void showCharts(List<JPanel> panels, String title) throws InterruptedException {
 		JFrame f = new JFrame();
 		
 		JPanel content = new JPanel();
@@ -90,7 +90,7 @@ public class ProfileChartFactoryTest {
 		ScrollPane sp = new ScrollPane();
 		sp.add(content);
 		sp.setPreferredSize(new Dimension(1000, 600));
-		
+		f.setTitle(title);
 		f.getContentPane().add(sp, BorderLayout.CENTER);
 		f.pack();
 		f.setVisible(true);
@@ -104,10 +104,10 @@ public class ProfileChartFactoryTest {
 	 * @param d
 	 * @throws InterruptedException
 	 */
-	private void generateChartsforOptions(IAnalysisDataset d) throws InterruptedException {
+	private void generateChartsforOptions(IAnalysisDataset d, String title) throws InterruptedException {
 		List<IAnalysisDataset> list = new ArrayList<>();
 		list.add(d);
-		generateChartsforOptions(list);
+		generateChartsforOptions(list, title);
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class ProfileChartFactoryTest {
 	 * @param datasets
 	 * @throws InterruptedException
 	 */
-	private void generateChartsforOptions(List<IAnalysisDataset> datasets) throws InterruptedException {
+	private void generateChartsforOptions(List<IAnalysisDataset> datasets, String title) throws InterruptedException {
 		List<JPanel> panels = new ArrayList<>();
 		for(Tag tag : BorderTagObject.values()) {
 			ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets)
@@ -162,6 +162,7 @@ public class ProfileChartFactoryTest {
 				.setShowMarkers(false)
 				.setProfileType(ProfileType.ANGLE)
 				.setSwatch(ColourSwatch.REGULAR_SWATCH)
+				.setShowIQR(false)
 				.setShowAnnotations(false)
 				.setShowPoints(false)
 				.setShowXAxis(false)
@@ -169,12 +170,13 @@ public class ProfileChartFactoryTest {
 				.build();
 
 		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false"));
-		showCharts(panels);
+		showCharts(panels, title);
 	}
 	
 	@Test
-	public void testSingleNucleusProfile() throws ComponentCreationException, InterruptedException {
-		IAnalysisDataset d = TestDatasetFactory.squareDataset(1);
+	public void testSingleNucleusProfile() throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+				.baseHeight(40).baseWidth(40).build();
 		ICell c = d.getCollection().getCells().stream().findFirst().get();
 		d.setDatasetColour(Color.BLUE);
 
@@ -211,7 +213,7 @@ public class ProfileChartFactoryTest {
 				.build();
 
 		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false"));
-		showCharts(panels);
+		showCharts(panels, "Single nucleus, no dataset");
 	}
 	
 	@Test
@@ -219,21 +221,21 @@ public class ProfileChartFactoryTest {
 		
 		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
 				.profiled().build();
-		generateChartsforOptions(d);
+		generateChartsforOptions(d, "Single nucleus dataset, no segments");
 	}
 	
 	@Test
 	public void testSingleNucleusDatasetProfileWithMultipleSegments() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.OTHER_ASYMMETRIC)
 				.segmented().build();
-		generateChartsforOptions(d);
+		generateChartsforOptions(d, "Single nucleus, segmented");
 	}
 	
 	@Test
 	public void testMultipleNucleusDatasetProfileWithSingleSegment() throws Exception {
 		
 		IAnalysisDataset d = new TestDatasetBuilder().cellCount(100).withMaxSizeVariation(4).profiled().build();
-		generateChartsforOptions(d);
+		generateChartsforOptions(d, "Single dataset, multiple nuclei, single segment");
 	}
 	
 	@Test
@@ -245,7 +247,7 @@ public class ProfileChartFactoryTest {
 		list.add(d1);
 		list.add(d2);
 		
-		generateChartsforOptions(list);
+		generateChartsforOptions(list, "Multiple datasets, multiple nuclei, single segment");
 	}
 
 }

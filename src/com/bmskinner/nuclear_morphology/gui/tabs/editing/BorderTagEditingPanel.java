@@ -137,7 +137,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
                 .setTag(Tag.REFERENCE_POINT)
                 .setShowMarkers(true)
                 .setProfileType(ProfileType.ANGLE)
-                .setHideProfiles(true)
+                .setShowProfiles(false)
                 .setShowIQR(false)
                 .setShowPoints(true)
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -155,7 +155,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
         ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
                 .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(true)
-                .setProfileType(ProfileType.ANGLE).setHideProfiles(true).setShowIQR(false).setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false).setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowPoints(false).setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false)
                 .setTarget(dualPanel.getRangePanel()).build();
 

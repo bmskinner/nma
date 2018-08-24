@@ -82,7 +82,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
         ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
         // BorderTagObject tag = borderTagOptionsPanel.getSelected();
         boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-        boolean hideProfiles = profileMarkersOptionsPanel.isHideProfiles();
+        boolean hideProfiles = profileMarkersOptionsPanel.isShowNuclei();
 
         // log("Creating options: normalised: "+normalised);
 
@@ -91,7 +91,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
                 .setAlignment(alignment)
                 .setTag(Tag.REFERENCE_POINT)
                 .setShowMarkers(showMarkers)
-                .setHideProfiles(hideProfiles)
+                .setShowProfiles(hideProfiles)
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setProfileType(type)
                 .setTarget(chartPanel)
