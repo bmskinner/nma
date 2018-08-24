@@ -454,18 +454,19 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 
         List<IBorderSegment> segments;
-        if (!collection.getNucleusType().equals(NucleusType.ROUND)
-                && !collection.getNucleusType().equals(NucleusType.NEUTROPHIL)) {
-
+        
+//        if (!collection.getNucleusType().equals(NucleusType.ROUND)
+//                && !collection.getNucleusType().equals(NucleusType.NEUTROPHIL)) {
+        	
             ProfileSegmenter segmenter = new ProfileSegmenter(median, map);
             segments = segmenter.segment();
 
-        } else {
-        	fine(String.format("Nucleus type is %s, defaulting to single segments", collection.getNucleusType()));
-            segments = new ArrayList<>(1);
-            IBorderSegment seg1 = IBorderSegment.newSegment(0, 0, median.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
-            segments.add(seg1);
-        }
+//        } else {
+//        	fine(String.format("Nucleus type is %s, defaulting to single segments", collection.getNucleusType()));
+//            segments = new ArrayList<>(1);
+//            IBorderSegment seg1 = IBorderSegment.newSegment(0, 0, median.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
+//            segments.add(seg1);
+//        }
         fine(String.format("Creating %s segments in median profile", segments.size()));
         pc.addSegments(Tag.REFERENCE_POINT, segments);
 

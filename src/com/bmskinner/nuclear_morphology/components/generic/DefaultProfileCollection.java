@@ -184,7 +184,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         // of the array
         int offset = -getIndex(tag);
         
-        System.out.println(tag+" offset is "+offset);
         List<IBorderSegment> result = new ArrayList<>();        
         
         for(IBorderSegment s : segments) {
@@ -196,7 +195,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         
         try {
         	IBorderSegment.linkSegments(result);
-        	System.out.println("Found "+result.size()+" segments after linking");
         	return result;
 
 //        try {

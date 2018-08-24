@@ -39,10 +39,10 @@ import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpe
  *
  */
 public enum NucleusType {
-    ROUND("Round nucleus", "Head", "Tail", DefaultNucleus.class), RODENT_SPERM("Rodent sperm nucleus", "Tip", "Tail",
-            DefaultRodentSpermNucleus.class), PIG_SPERM("Pig sperm nucleus", "Tail", "Tail",
-                    DefaultPigSpermNucleus.class), NEUTROPHIL("Lobed nucleus", "Head", "Tail",
-                            DefaultLobedNucleus.class);
+    ROUND("Round nucleus", "Head", "Tail", DefaultNucleus.class), 
+    RODENT_SPERM("Rodent sperm nucleus", "Tip", "Tail", DefaultRodentSpermNucleus.class), 
+    PIG_SPERM("Pig sperm nucleus", "Tail", "Tail", DefaultPigSpermNucleus.class), 
+    NEUTROPHIL("Lobed nucleus", "Head", "Tail", DefaultLobedNucleus.class);
 
     private final String   name;
     private final Class<?> nucleusClass;

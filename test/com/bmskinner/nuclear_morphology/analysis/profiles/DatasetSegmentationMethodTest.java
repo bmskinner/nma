@@ -80,7 +80,7 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 	 */
 	@Test
 	public void testSingleCellSquareDatasetProducesFourSegmentMedianWhenSetToAysmmetric() throws Exception {
-		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.OTHER_ASYMMETRIC)
+		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
 				.baseHeight(40).baseWidth(40).profiled().build();
 
 		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();

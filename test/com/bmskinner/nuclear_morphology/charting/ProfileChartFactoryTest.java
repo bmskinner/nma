@@ -226,7 +226,7 @@ public class ProfileChartFactoryTest {
 	
 	@Test
 	public void testSingleNucleusDatasetProfileWithMultipleSegments() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.OTHER_ASYMMETRIC)
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
 				.segmented().build();
 		generateChartsforOptions(d, "Single nucleus, segmented");
 	}
