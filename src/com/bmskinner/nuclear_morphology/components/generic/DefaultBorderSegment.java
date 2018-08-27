@@ -466,7 +466,12 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         // also test the effect on the next and previous segments
         if (this.hasPrevSegment()) {
-            if (this.prevSegment().getStartIndex() > startIndex) {
+        	
+        	if( !contains(startIndex) && !prevSegment().contains(startIndex))
+        		
+				throw new SegmentUpdateException(String.format("Neither this nor previous segment %s contain the new start index %d", prevSegment().getDetail(), startIndex));
+            
+        	if (this.prevSegment().getStartIndex() > startIndex) {
 
                 if (!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex))
                 	throw new SegmentUpdateException(String.format("Previous segment would convert to wrapping"));
@@ -479,6 +484,9 @@ public class DefaultBorderSegment implements IBorderSegment {
         }
 
         if (this.hasNextSegment()) {
+        	if( !contains(endIndex) && !nextSegment().contains(endIndex))
+	        	throw new SegmentUpdateException(String.format("Neither this nor next segment %s contain the new end index %d", nextSegment().getDetail(), endIndex));
+
             if (endIndex > nextSegment.getEndIndex()) {
 
                 // if the next segment goes from not wrapping to wrapping when
@@ -512,7 +520,7 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         if (!canUpdateSegment(startIndex, endIndex))
             throw new SegmentUpdateException("Unable to update segment");
-
+        
         // All checks have been passed; the update can proceed
 
         // Remove any merge sources - we cannot guarantee that these can be

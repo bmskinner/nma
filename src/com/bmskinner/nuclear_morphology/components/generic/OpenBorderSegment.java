@@ -508,7 +508,7 @@ public class OpenBorderSegment implements IBorderSegment {
         return (startIndex != this.startIndex || endIndex != this.endIndex);
     }
 
-    private boolean canUpdateSegment(int startIndex, int endIndex) {
+    private boolean canUpdateSegment(int startIndex, int endIndex) throws SegmentUpdateException {
         if (this.isLocked) { // don't allow locked segments to update
             return false;
         }
@@ -559,6 +559,10 @@ public class OpenBorderSegment implements IBorderSegment {
 
         // also test the effect on the next and previous segments
         if (this.hasPrevSegment()) {
+        	
+        	if( !contains(startIndex) && !prevSegment().contains(startIndex))
+				throw new SegmentUpdateException(String.format("Neither this nor previous segment %s contain the new start index %d", prevSegment().getDetail(), startIndex));
+	        
             if (this.prevSegment().getStartIndex() > startIndex) {
 
                 if (!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex)) {
@@ -574,7 +578,12 @@ public class OpenBorderSegment implements IBorderSegment {
         }
 
         if (this.hasNextSegment()) {
+        	
+        	if( !contains(endIndex) && !nextSegment().contains(endIndex))
+	        	throw new SegmentUpdateException(String.format("Neither this nor next segment %s contain the new end index %d", nextSegment().getDetail(), endIndex));
+
             if (endIndex > nextSegment.getEndIndex()) {
+            	
 
                 // if the next segment goes from not wrapping to wrapping when
                 // this segment is altered,

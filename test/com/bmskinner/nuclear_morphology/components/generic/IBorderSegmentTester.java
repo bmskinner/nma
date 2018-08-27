@@ -539,6 +539,34 @@ public class IBorderSegmentTester {
 		// We need to subtract 2 rather than 1 because we are specifying the end index, not the length
 		segment.update(startIndex, startIndex+IBorderSegment.MINIMUM_SEGMENT_LENGTH-2);
 	}
+	
+	@Test
+	public void testUpdateSegmentFailsIfStartIndexNotWithinPrevOrCurrentSegment() throws SegmentUpdateException {
+		exception.expect(SegmentUpdateException.class);
+		int testStart = segment.prevSegment().getStartIndex()-1;
+		segment.update(testStart, segment.getEndIndex());
+	}
+	
+	@Test
+	public void testUpdateSegmentFailsIfEndIndexNotWithinNextOrCurrentSegment() throws SegmentUpdateException {
+		exception.expect(SegmentUpdateException.class);
+		int testEnd = segment.nextSegment().getEndIndex()+1;
+		segment.update(segment.getStartIndex(), testEnd);
+	}
+	
+	@Test
+	public void testUpdateSegmentFailsIfPrevSegmentWillBecomeTooShort() throws SegmentUpdateException {
+		exception.expect(SegmentUpdateException.class);
+		int testStart = segment.prevSegment().getStartIndex()+1;
+		segment.update(testStart, segment.getEndIndex());
+	}
+	
+	@Test
+	public void testUpdateSegmentFailsIfNextSegmentWillBecomeTooShort() throws SegmentUpdateException {
+		exception.expect(SegmentUpdateException.class);
+		int testEnd = segment.nextSegment().getEndIndex()-1;
+		segment.update(segment.getStartIndex(), testEnd);
+	}
 
 	@Test
 	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsLow() throws SegmentUpdateException {
