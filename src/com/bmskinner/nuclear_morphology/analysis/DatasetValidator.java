@@ -202,7 +202,7 @@ public class DatasetValidator implements Loggable {
 									continue;
 								IBorderSegment s2 = p.getSegment(id2);
 								if(s1.overlapsBeyondEndpoints(s2)){
-									errorList.add(String.format("Segment %s overlaps segment %s in %s", id1, id2, n.getNameAndNumber()));
+									errorList.add(String.format("Segment %s overlaps segment %s in %s", s1.getDetail(), s2.getDetail(), n.getNameAndNumber()));
 									cellErrors++;
 								}
 

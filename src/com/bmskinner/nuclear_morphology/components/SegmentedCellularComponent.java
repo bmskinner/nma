@@ -2217,8 +2217,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			@Override
 			public Iterator<Integer> iterator() {
 				if(wraps())
-					return IntStream.concat(IntStream.range(startIndex, size()), IntStream.range(0, getEndIndex()+1)).iterator();
-				return IntStream.range(startIndex, wrap(startIndex+length+1)).iterator();
+					return IntStream.concat(IntStream.range(startIndex, size()), IntStream.range(0, getEndIndex())).iterator();
+				return IntStream.range(startIndex, wrap(startIndex+length)).iterator();
 			}
 
 			@Override
@@ -2234,10 +2234,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		    	if(seg.getProfileLength()!=getProfileLength())
 					return false;
 		    	
-		    	Iterator<Integer> it = this.iterator();
+		    	Iterator<Integer> it = iterator();
 		    	while(it.hasNext()) {
 		    		int index = it.next();
-		    		if(index==getStartIndex() || index==getEndIndex())
+		    		if(index==startIndex || index==getEndIndex())
 		    			continue;
 		    		if(seg.contains(index))
 		    			return true;
