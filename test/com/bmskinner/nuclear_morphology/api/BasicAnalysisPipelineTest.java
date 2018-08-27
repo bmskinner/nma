@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.analysis.nucleus;
+package com.bmskinner.nuclear_morphology.api;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,12 +33,14 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
@@ -61,7 +63,7 @@ import ij.Prefs;
  * @since 1.13.8
  *
  */
-public class NucleusDetectionMethodTest {
+public class BasicAnalysisPipelineTest {
     
 	private static final String IMAGE_FOLDER = "test/com/bmskinner/nuclear_morphology/samples/images/";
 	
@@ -70,7 +72,7 @@ public class NucleusDetectionMethodTest {
     private static final String TESTING_PIG_FOLDER = IMAGE_FOLDER +"Testing_pig";    
     private static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER +"Testing_round";
     
-    private static final String OUT_FOLDER = "UnitTest_"+com.bmskinner.nuclear_morphology.components.generic.Version.currentVersion();
+    private static final String OUT_FOLDER = "UnitTest_"+Version.currentVersion();
    
     
     @Before
