@@ -924,32 +924,33 @@ public class NucleusBorderSegment implements IBorderSegment {
     }
     
     @Override
+    public boolean overlapsBeyondEndpoints(@NonNull IBorderSegment seg){
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+    	
+    	Iterator<Integer> it = this.iterator();
+    	while(it.hasNext()) {
+    		int index = it.next();
+    		if(index==getStartIndex() || index==getEndIndex())
+    			continue;
+    		if(seg.contains(index))
+    			return true;
+    	}
+    	return false;
+    }
+    
+    @Override
     public boolean overlaps(@NonNull IBorderSegment seg){
-        if(seg==null)
-            throw new IllegalArgumentException("Segment is null");
-        
-        if(startIndex==seg.getStartIndex())
-            return true;
-        
-        if(endIndex==seg.getEndIndex())
-            return true;
-        
-        if(startIndex==seg.getEndIndex())
-            return false;
-        
-        if(endIndex==seg.getStartIndex())
-            return false;
-        
-        Iterator<Integer> it = seg.iterator();
-        while(it.hasNext()){
-            Integer i = it.next();
-            if(i==seg.getStartIndex() || i==seg.getEndIndex())
-                continue;
-            
-            if(seg.contains(i))
-                return true;
-        }
-        return false;
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+		return seg.contains(startIndex) 
+				|| seg.contains(getEndIndex()) 
+				|| contains(seg.getStartIndex()) 
+				|| contains(seg.getEndIndex());
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -189,7 +190,7 @@ public class Version implements Serializable {
         in.defaultReadObject();
 
         if(!versionIsSupported(this)){
-        	throw new UnsupportedVersionException(this.toString());
+        	throw new UnsupportedVersionException(this);
         }
     }
         
@@ -201,10 +202,17 @@ public class Version implements Serializable {
     public class UnsupportedVersionException extends IOException {
     	
         private static final long serialVersionUID = 1L;
+        
+        private Version detectedVersion = null;
 
-        public UnsupportedVersionException(String s){
-    		super(s);
+        public UnsupportedVersionException(Version v){
+    		super(v.toString());
+    		detectedVersion = v;
     	}
+        
+        public Version getDetectedVersion() {
+        	return detectedVersion;
+        }
     }
 
 }

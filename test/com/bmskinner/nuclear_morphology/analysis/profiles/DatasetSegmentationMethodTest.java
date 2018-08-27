@@ -52,11 +52,11 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 	}
 	
 	/**
-	 * The square dataset is a round nucleus type, so there should not be any segmentation by default
+	 * The square dataset is a round nucleus type, so there should be default segmentation at each corner
 	 * @throws Exception
 	 */
 	@Test
-	public void testSingleCellSquareDatasetProducesSingleSegmentMedianWhenRound() throws Exception {
+	public void testSingleCellSquareDatasetProducesSegmentedMedianWhenRound() throws Exception {
 		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1).baseHeight(40).baseWidth(40).profiled().build();
 
 		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
@@ -65,7 +65,7 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 				.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-		assertEquals("Median segment count", 1, median.getSegmentCount());
+		assertEquals("Median segment count", 4, median.getSegmentCount());
 		
 		ICell cell = dataset.getCollection().getCells().stream().findFirst().get();
 		
@@ -74,36 +74,12 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 		assertEquals("Cell segment count", median.getSegmentCount(), cellProfile.getSegmentCount());
 	}
 	
-	/**
-	 * Force the nucleus type to segment
-	 * @throws Exception
-	 */
 	@Test
-	public void testSingleCellSquareDatasetProducesFourSegmentMedianWhenSetToAysmmetric() throws Exception {
-		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
-				.baseHeight(40).baseWidth(40).profiled().build();
-
-		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
-
-		ISegmentedProfile median = dataset.getCollection()
-				.getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-		assertEquals("Median segment count", 4, median.getSegmentCount());
-		ICell cell = dataset.getCollection().getCells().stream().findFirst().get();
-		
-		ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		
-		assertEquals("Cell segment count", median.getSegmentCount(), cellProfile.getSegmentCount());
-	}
-
-	@Test
-	public void testSingleCellSquareDatasetHasFourSegments() throws Exception {
+	public void testSingleCellInSquareDatasetHasSameSegmentsAsMedian() throws Exception {
 		
 		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1)
 				.baseHeight(40).baseWidth(40).profiled().build();
 
-		
 		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
 		
 		// Check the collection
@@ -115,32 +91,33 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 		
 		ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		
+		assertEquals(median.getSegmentCount(), cellProfile.getSegmentCount());
 		for(IBorderSegment s : median.getSegments()) {
-			System.out.println(s.toString());
+			assertTrue(cellProfile.hasSegment(s.getID()));
 		}
-		assertEquals(4, median.getSegmentCount());
 	}
 	
 	@Test
-	public void testMultiCellSquareDatasetHasFourSegments() throws Exception {
+	public void testMultipleCellsInSquareDatasetHasSameSegmentsAsMedian() throws Exception {
 
-		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(50)
+		IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(1)
 				.baseHeight(40).baseWidth(40).profiled().build();
-						
+
 		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
-		
+
 		// Check the collection
 		ISegmentedProfile median = dataset.getCollection()
 				.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		
-		ICell cell = dataset.getCollection().getCells().stream().findFirst().get();
-		
-		ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);		
-		for(IBorderSegment s : median.getSegments()) {
-			System.out.println(s.toString());
-		}
-		assertEquals(4, median.getSegmentCount());
+
+		for(ICell cell : dataset.getCollection().getCells()) {
+			ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+
+			assertEquals(median.getSegmentCount(), cellProfile.getSegmentCount());
+			for(IBorderSegment s : median.getSegments()) {
+				assertTrue(cellProfile.hasSegment(s.getID()));
+			}
+		}	
 	}
 
 }

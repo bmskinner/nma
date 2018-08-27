@@ -1984,7 +1984,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					if(s.hasMergeSource(uuid))
 						return s.getMergeSource(uuid);
 				}
-				throw new UnavailableComponentException("Merge source not present");
+				throw new UnavailableComponentException("Merge source not present: "+uuid);
 			}
 
 			@Override
@@ -2227,15 +2227,35 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 						getName(), getID(), getPosition(), getStartIndex(), getEndIndex(), length(), getProfileLength(), wraps());
 			}
 
-			@Override
-			public boolean overlaps(@NonNull IBorderSegment seg) {
-				if(seg.getProfileLength()!=size())
+		    @Override
+		    public boolean overlapsBeyondEndpoints(@NonNull IBorderSegment seg){
+		    	if(seg==null)
+		    		return false;
+		    	if(seg.getProfileLength()!=getProfileLength())
+					return false;
+		    	
+		    	Iterator<Integer> it = this.iterator();
+		    	while(it.hasNext()) {
+		    		int index = it.next();
+		    		if(index==getStartIndex() || index==getEndIndex())
+		    			continue;
+		    		if(seg.contains(index))
+		    			return true;
+		    	}
+		    	return false;
+		    }
+		    
+		    @Override
+		    public boolean overlaps(@NonNull IBorderSegment seg){
+		    	if(seg==null)
+		    		return false;
+		    	if(seg.getProfileLength()!=getProfileLength())
 					return false;
 				return seg.contains(startIndex) 
 						|| seg.contains(getEndIndex()) 
 						|| contains(seg.getStartIndex()) 
 						|| contains(seg.getEndIndex());
-			}
+		    }
 			
 			@Override
 			public String toString() {

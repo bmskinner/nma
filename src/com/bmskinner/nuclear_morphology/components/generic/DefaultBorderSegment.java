@@ -78,10 +78,10 @@ public class DefaultBorderSegment implements IBorderSegment {
      * Construct with an existing UUID. This allows nucleus segments to directly
      * track median profile segments
      * 
-     * @param startIndex
-     * @param endIndex
-     * @param total
-     * @param id
+     * @param startIndex the start index of the segment
+     * @param endIndex the end index of the segment (inclusive)
+     * @param total the length of the profile that generated the segment
+     * @param id the id of the segment
      */
     public DefaultBorderSegment(int startIndex, int endIndex, int total, UUID id) {
     
@@ -101,9 +101,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         if (startIndex!=endIndex && !IBorderSegment.isShortEnough(startIndex, endIndex, total))
             throw new IllegalArgumentException(String.format("Segment is too long for the profile: %s - %s of %s", startIndex, endIndex, total));
         
-//        if(IBorderSegment.calculateSegmentLength(startIndex, endIndex, total)==total)
-//            throw new IllegalArgumentException("Segment cannot occupy entire profile");
-
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.totalLength = total;
@@ -114,9 +111,9 @@ public class DefaultBorderSegment implements IBorderSegment {
     /**
      * Construct with a default random id
      * 
-     * @param startIndex
-     * @param endIndex
-     * @param total
+     * @param startIndex the start index of the segment
+     * @param endIndex the end index of the segment (inclusive)
+     * @param total the length of the profile that generated the segment
      */
     public DefaultBorderSegment(int startIndex, int endIndex, int total) {
         this(startIndex, endIndex, total, java.util.UUID.randomUUID());
@@ -623,26 +620,40 @@ public class DefaultBorderSegment implements IBorderSegment {
     @Override
     public Iterator<Integer> iterator() {
 
-        List<Integer> indexes = new ArrayList<Integer>();
-
+        List<Integer> indexes = new ArrayList<>();
         if (this.wraps()) {
 
             for (int i = this.getStartIndex(); i < this.getProfileLength(); i++) {
                 indexes.add(i);
             }
-            for (int i = 0; i < this.getEndIndex(); i++) {
+            for (int i = 0; i <= this.getEndIndex(); i++) {
                 indexes.add(i);
             }
-
         } else {
 
             for (int i = this.getStartIndex(); i <= this.getEndIndex(); i++) {
                 indexes.add(i);
             }
-
         }
-
         return indexes.iterator();
+    }
+    
+    @Override
+    public boolean overlapsBeyondEndpoints(@NonNull IBorderSegment seg){
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+    	
+    	Iterator<Integer> it = this.iterator();
+    	while(it.hasNext()) {
+    		int index = it.next();
+    		if(index==getStartIndex() || index==getEndIndex())
+    			continue;
+    		if(seg.contains(index))
+    			return true;
+    	}
+    	return false;
     }
     
     @Override

@@ -151,12 +151,12 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testOverlaps() throws UnavailableComponentException, ProfileException {
-		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).overlaps(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1)));
-		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlaps(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0)));
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1)));
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0)));
 		
 		doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegmentContaining(1), 25, DOUBLE_SEG_ID_2, DOUBLE_SEG_ID_3);
 		
-		assertFalse(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlaps(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_2)));
+		assertFalse(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_2)));
 		fail("Not yet implemented");
 	}
 

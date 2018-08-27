@@ -22,6 +22,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.OptionalDataException;
 import java.util.HashMap;
@@ -112,10 +113,10 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     		run(); 
     	} catch (UnsupportedVersionException e) {
     		throw(e);
-    	}
+    	}  
 
         if (dataset == null)
-            throw new UnloadableDatasetException("Could not load file '" + file.getAbsolutePath() + "'");
+            throw new UnloadableDatasetException(String.format("Could not load file '%s'", file.getAbsolutePath()));
 
         DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
         r.setBoolean(WAS_CONVERTED_BOOL, wasConverted);
@@ -133,13 +134,17 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 dataset = readDataset(file);
             } catch (UnsupportedVersionException e) {
             	warn("Version "+e.getMessage()+" not supported");
-            	warn("Dataset is too old");
+            	if(e.getDetectedVersion().isNewerThan(Version.currentVersion()))
+            		warn(String.format("Dataset version %s is from a newer software version; upgrade to view", e.getDetectedVersion()));
+            	if(e.getDetectedVersion().isOlderThan(Version.currentVersion()))
+            		warn(String.format("Dataset version %s is too old to read in this software", e.getDetectedVersion()));
             	throw(e);
                 
             } catch (UnloadableDatasetException e) {
                 warn(e.getMessage());
                 stack("Error reading dataset", e);
             }
+            
             if(dataset==null)
                 return; // Exception will be thrown in call() method
             

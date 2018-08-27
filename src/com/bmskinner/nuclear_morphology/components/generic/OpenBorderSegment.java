@@ -775,11 +775,6 @@ public class OpenBorderSegment implements IBorderSegment {
         return builder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#iterator()
-     */
     @Override
     public Iterator<Integer> iterator() {
 
@@ -790,7 +785,7 @@ public class OpenBorderSegment implements IBorderSegment {
             for (int i = this.getStartIndex(); i < this.getProfileLength(); i++) {
                 indexes.add(i);
             }
-            for (int i = 0; i < this.getEndIndex(); i++) {
+            for (int i = 0; i <= this.getEndIndex(); i++) {
                 indexes.add(i);
             }
 
@@ -803,6 +798,24 @@ public class OpenBorderSegment implements IBorderSegment {
         }
 
         return indexes.iterator();
+    }
+    
+    @Override
+    public boolean overlapsBeyondEndpoints(@NonNull IBorderSegment seg){
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+    	
+    	Iterator<Integer> it = this.iterator();
+    	while(it.hasNext()) {
+    		int index = it.next();
+    		if(index==getStartIndex() || index==getEndIndex())
+    			continue;
+    		if(seg.contains(index))
+    			return true;
+    	}
+    	return false;
     }
     
     @Override

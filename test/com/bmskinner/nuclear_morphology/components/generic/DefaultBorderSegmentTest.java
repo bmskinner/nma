@@ -732,14 +732,14 @@ public class DefaultBorderSegmentTest {
 	    DefaultBorderSegment s2 = new DefaultBorderSegment(20,  0, 100);
         DefaultBorderSegment s3 = new DefaultBorderSegment(10, 50, 100);
 	    
-        assertFalse(s1.overlaps(s2));
-        assertFalse(s2.overlaps(s1));
+        assertFalse(s1.overlapsBeyondEndpoints(s2));
+        assertFalse(s2.overlapsBeyondEndpoints(s1));
         
-        assertTrue(s1.overlaps(s3));
-        assertTrue(s3.overlaps(s1));
+        assertTrue(s1.overlapsBeyondEndpoints(s3));
+        assertTrue(s3.overlapsBeyondEndpoints(s1));
         
-        assertTrue(s2.overlaps(s3));
-        assertTrue(s3.overlaps(s2));
+        assertTrue(s2.overlapsBeyondEndpoints(s3));
+        assertTrue(s3.overlapsBeyondEndpoints(s2));
 	}
 	
 }

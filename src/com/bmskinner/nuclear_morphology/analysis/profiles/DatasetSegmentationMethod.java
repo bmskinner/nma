@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -293,25 +295,21 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
             }
         });
 
-        if (!checkRPmatchesSegments(collection))
-            warn("Segments do not all start on reference point after offsetting");
-
+        // If any nuclei do not have a segment starting on the RP, correct this
+        ensureRPatSegmentBoundary(collection);
     }
 
     /**
      * Assign the median segments to the nucleus, finding the best match of the
      * nucleus profile to the median profile
      * 
-     * @param n
-     *            the nucleus to segment
-     * @param median
-     *            the segmented median profile
+     * @param n the nucleus to segment
+     * @param median the segmented median profile
      */
-    private void assignSegmentsToNucleus(ISegmentedProfile median, Nucleus n) throws ProfileException {
+    private void assignSegmentsToNucleus(@NonNull ISegmentedProfile median, @NonNull Nucleus n) throws ProfileException {
 
-        if (n.isLocked()) {
+        if (n.isLocked())
             return;
-        }
 
         // remove any existing segments in the nucleus
         ISegmentedProfile nucleusProfile;
@@ -379,57 +377,39 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
     /**
      * Check if the reference point of the nuclear profiles is at a segment
-     * boundary for all nuclei
+     * boundary for all nuclei. If the RP is not at a segment boundary, move
+     * the start segment boundary of the segment containing the RP.
      * 
      * @param collection
      * @return
      */
-    private boolean checkRPmatchesSegments(ICellCollection collection) {
+    private void ensureRPatSegmentBoundary(@NonNull ICellCollection collection) {
     	finer("Checking RP is at a segment boundary in all nuclei");
-        return collection.getNuclei().stream().allMatch(n -> {
-            try {
-            	
-            	// Profile with RP at zero
-            	ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-            	boolean hit = false;
-                for (IBorderSegment s : profile.getSegments()) {
-                	finer("Segment: "+s.getDetail());
-                	hit |= s.getStartIndex()==0;
-                }
-                
-                if (!hit) {
-                	finer("Moving RP to segment boundary");
-                    // The RP is not at the start of a segment
-                    // Update the segment start to zero
-                	IBorderSegment seg = profile.getSegmentContaining(0);
-                	seg.update(0, seg.getEndIndex());
-                	finer("Applying profile with updated RP: "+profile.toString());
-                    n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-                }
-            	
-//                boolean hit = false;
-//                for (IBorderSegment s : n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments()) {
-//                	hit |= s.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT);
-//                }
-//                
-//                if (!hit) {
-//                    // The RP is not at the start of a segment
-//                    // Update the segment boundary closest to the zero index RP
-//                    int end = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentContaining(0).getSegmentAt(0).getEndIndex();
-//
-//                    ISegmentedProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-//
-//                    p.getSegmentAt(0).update(0, end);
-//
-//                    n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, p);
-//                }
-                return n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentAt(0).getStartIndex() == 0;
-            } catch (UnavailableComponentException | ProfileException | SegmentUpdateException e) {
-                warn("Error updating nucleus segment to RP ");
-                stack(e);
-                return false;
-            }
-        });
+    	collection.getNuclei().stream().forEach(n -> {
+    		try {
+
+    			// Profile with RP at zero
+    			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+    			boolean hit = false;
+    			for (IBorderSegment s : profile.getSegments()) {
+    				hit |= s.getStartIndex()==0;
+    			}
+
+    			if (!hit) {
+    				finer("Moving RP to segment boundary");
+    				// The RP is not at the start of a segment
+    				// Update the segment start to zero
+    				IBorderSegment seg = profile.getSegmentContaining(0);
+    				seg.update(0, seg.getEndIndex());
+    				finer("Applying profile with updated RP: "+profile.toString());
+    				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+    			}
+
+    		} catch (UnavailableComponentException | ProfileException | SegmentUpdateException e) {
+    			warn("Error updating nucleus segment to RP ");
+    			stack(e);
+    		}
+    	});
     }
 
     /**
@@ -516,8 +496,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
         pc.createProfileAggregate(collection, pc.length());
 
-        if (!checkRPmatchesSegments(collection))
-            warn("Segments do not all start on reference point after recombining");
+        ensureRPatSegmentBoundary(collection);
+//            warn("Segments do not all start on reference point after recombining");
 
     }
 

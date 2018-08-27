@@ -88,7 +88,7 @@ public class IBorderSegmentTester {
 			
 			IBorderSegment borderSegmentTree = null;
 			try {
-				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(comp.getID()), middleSegmentEnd, tempId, finalSegmentId);
+				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID), middleSegmentEnd, tempId, finalSegmentId);
 				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(tempId), endIndex, SEG_ID_0, middleSegmentId);
 				
 				borderSegmentTree = doubleSegmentProfile.getSegment(SEG_ID_0);
@@ -351,7 +351,7 @@ public class IBorderSegmentTester {
 	}
 	
 	@Test
-	public void testIterator() {
+	public void testIteratorOnNonWrappingSegment() {
 
 		int[] segIndexes = IntStream.range(startIndex, endIndex+1).toArray();
 		
@@ -361,7 +361,23 @@ public class IBorderSegmentTester {
 			int index = it.next();
 			assertEquals("Testing "+i, segIndexes[i], index);
 		}
+	}
+	
+	@Test
+	public void testIteratorOnWrappingSegment() throws SegmentUpdateException {
 
+		segment.update(profileLength-10, 10);
+		
+		int[] exp = { 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		
+		Iterator<Integer> it =  segment.iterator();
+		
+		for(int i=0; i<exp.length; i++) {
+			System.out.println("Testing "+i);
+			int index = it.next();
+			
+			assertEquals("Testing "+i, exp[i], index);
+		}
 	}
 	
 	@Test
@@ -378,6 +394,27 @@ public class IBorderSegmentTester {
 		
 		IBorderSegment nonoverlapping = new DefaultBorderSegment(endIndex+10, profileLength-10, profileLength);
 		assertFalse("Testing overlap of "+segment.toString()+" and "+nonoverlapping.toString(), segment.overlaps(nonoverlapping));
+	}
+	
+	@Test
+	public void overlapsBeyondEndpoints() {
+		IBorderSegment endOnly = new DefaultBorderSegment(endIndex, endIndex+10, profileLength);
+		assertFalse("Testing overlap of "+segment.toString()+" and "+endOnly.toString(), segment.overlapsBeyondEndpoints(endOnly));
+		
+		IBorderSegment startOnly = new DefaultBorderSegment(endIndex+10, startIndex, profileLength);
+		assertFalse("Testing overlap of "+segment.toString()+" and "+startOnly.toString(), segment.overlapsBeyondEndpoints(startOnly));
+		
+		IBorderSegment both = new DefaultBorderSegment(endIndex, startIndex, profileLength);
+		assertFalse("Testing overlap of "+segment.toString()+" and "+both.toString(), segment.overlapsBeyondEndpoints(both));
+
+		IBorderSegment neither = new DefaultBorderSegment(endIndex+10, profileLength-10, profileLength);
+		assertFalse("Testing overlap of "+segment.toString()+" and "+neither.toString(), segment.overlapsBeyondEndpoints(neither));
+		
+		IBorderSegment endMinusOne = new DefaultBorderSegment(endIndex-1, endIndex+10, profileLength);
+		assertTrue("Testing overlap of "+segment.toString()+" and "+endMinusOne.toString(), segment.overlapsBeyondEndpoints(endMinusOne));
+		
+		IBorderSegment startPlusOne = new DefaultBorderSegment(endIndex+10, startIndex+1, profileLength);
+		assertTrue("Testing overlap of "+segment.toString()+" and "+startPlusOne.toString(), segment.overlapsBeyondEndpoints(startPlusOne));
 	}
 	
 	@Test

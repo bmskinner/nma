@@ -392,7 +392,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * next segments.
      * 
      * @param startIndex the new start index
-     * @param endIndex the new end index
+     * @param endIndex the new end index (inclusive)
      * @throws SegmentUpdateException if the update cannot proceed. The exception message gives detail on why the update failed
      */
     boolean update(int startIndex, int endIndex) throws SegmentUpdateException;
@@ -443,6 +443,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     int getPosition();
 
+
     Iterator<Integer> iterator();
   
     /**
@@ -458,7 +459,20 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param seg
      * @return true if an index other than the start and end index is shared
      */
+    boolean overlapsBeyondEndpoints(@NonNull IBorderSegment seg);
+    
+    /**
+     * Test if the given segment overlaps this segment.
+     * Formally, returns true if any indexes are shared in the
+     * segments, including the start and end indexes. If you want
+     * to test that segments only overlap at the endpoints, use 
+     * {@link overlapsBeyondEndpoints}
+     * @param seg
+     * @return true if an index other than the start and end index is shared
+     * @see IBorderSegment::overlapsBeyondEndpoints
+     */
     boolean overlaps(@NonNull IBorderSegment seg);
+
     
     /**
      * Given a list of segments, link them together into a circle.

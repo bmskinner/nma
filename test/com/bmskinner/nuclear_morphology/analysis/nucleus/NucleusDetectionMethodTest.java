@@ -25,6 +25,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +47,9 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 import ij.Prefs;
@@ -70,8 +75,11 @@ public class NucleusDetectionMethodTest {
     
     @Before
     public void setUp(){
-       Prefs.blackBackground = true;
-       IJ.setBackgroundColor(0, 0, 0);
+    	Prefs.blackBackground = true;
+    	IJ.setBackgroundColor(0, 0, 0);
+    	Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+    	logger.setLevel(Level.FINER);
+    	logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
     }
     
     /**
