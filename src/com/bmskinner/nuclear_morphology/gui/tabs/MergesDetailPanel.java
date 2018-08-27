@@ -176,7 +176,7 @@ public class MergesDetailPanel extends DetailPanel {
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         sourceParametersTable.setModel(AbstractTableCreator.createLoadingTable());
     }

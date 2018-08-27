@@ -241,7 +241,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 					double indexToDraw = index; // convert to a double to allow normalised positioning
 
 					if (options.isNormalised()) // set to the proportion of the point along the profile
-						indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * 100);
+						indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
 
 					if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
 						int maxX = DatasetUtilities.findMaximumDomainValue(ds.getLines()).intValue();
@@ -281,7 +281,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
     	int xLength = 100;
     	if (!options.isNormalised())	
     		xLength = options.getDatasets().stream().mapToInt(d->d.getCollection()
-    				.getMedianArrayLength()).max().orElse(100);
+    				.getMedianArrayLength()).max().orElse(ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
 
 		
 		JFreeChart chart = makeProfileChart(profiles, xLength);
@@ -407,7 +407,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 			double x = midPoint;
 			if (options.isNormalised()) {
-				x = ((double) midPoint / (double) seg.getProfileLength()) * 100;
+				x = ((double) midPoint / (double) seg.getProfileLength()) * ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
 			}
 			XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
 
@@ -450,7 +450,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
             return makeErrorChart();
         }
 
-        JFreeChart chart = makeProfileChart(ds, 100);
+        JFreeChart chart = makeProfileChart(ds, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
         XYPlot plot = chart.getXYPlot();
         plot.getRangeAxis().setLabel("IQR");
         plot.getRangeAxis().setAutoRange(true);
@@ -467,7 +467,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
             // add any regions with bimodal distribution to the chart
             float[] xPositions = new float[modes.size()];
             for (int i = 0; i < xPositions.length; i++) {
-            	xPositions[i] = (float) i / (float) xPositions.length * 100f;
+            	xPositions[i] = (float) i / (float) xPositions.length * ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
             }
 
             for (int i = 0; i < modes.size(); i++) {

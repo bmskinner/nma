@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 
-	public static final int DEFAULT_PROFILE_LENGTH = 100;
+	public static final int DEFAULT_PROFILE_LENGTH = 200;
 
 	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
 	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
@@ -188,7 +188,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		try {
 			IProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(type, borderTag, Stats.MEDIAN);
 
-			IProfile xpoints = createXPositions(medianProfile, isNormalised ? 100 : medianProfileLength);
+			IProfile xpoints = createXPositions(medianProfile, isNormalised ? DEFAULT_PROFILE_LENGTH : medianProfileLength);
 
 			// Offset the x positions depending on the alignment setting a
 			if (alignment.equals(ProfileAlignment.RIGHT))
