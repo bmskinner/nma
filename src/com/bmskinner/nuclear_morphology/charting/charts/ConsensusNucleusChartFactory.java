@@ -256,8 +256,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     /**
      * Create a consensus nucleus chart with IQR and segments drawn on it.
      * 
-     * @param dataset
-     *            the dataset to draw
+     * @param dataset the dataset to draw
      * @return a chart
      */
     private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) {

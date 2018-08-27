@@ -59,7 +59,7 @@ public class TestDatasetFactory {
 			Nucleus n = cell.getNucleus();
 			
 			collection.addCell(cell);
-			System.out.println("Nucleus "+i);
+//			System.out.println("Nucleus "+i);
 //			for(IBorderPoint b : n.getBorderList()) {
 //				System.out.println(b.toString());
 //			}

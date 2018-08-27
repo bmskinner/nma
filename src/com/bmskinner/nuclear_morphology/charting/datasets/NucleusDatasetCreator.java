@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
@@ -521,6 +522,51 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         double scale = Math.min(Math.abs(min), Math.abs(max));
         return scale;
     }
+    
+//    /**
+//     * Create an outline of the given nucleus, and apply segments as
+//     * separate series. If the nucleus has no segments, draw a single
+//     * series with the border
+//     * 
+//     * @param collection
+//     * @return
+//     * @throws Exception
+//     */
+//    public XYDataset createSegmentedOutline(@NonNull Taggable n) throws ChartDatasetCreationException {
+//
+//    	try {
+//    		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+//
+//    		if (!profile.hasSegments()) // only draw if there are segments
+//    			return createBareNucleusOutline(n);
+//
+//    		ComponentOutlineDataset ds = new ComponentOutlineDataset();
+//
+//    		List<IBorderSegment> segments = profile.getSegments();
+//    		for(IBorderSegment seg : segments) {
+//
+//    			double[] xpoints = new double[seg.length()];
+//    			double[] ypoints = new double[seg.length()];
+//    			int i=0;
+//    			Iterator<Integer> it = seg.iterator();
+//    			while(it.hasNext()) {
+//    				int index = it.next();
+//    				IBorderPoint p = n.getBorderPoint(index);
+//    				xpoints[i] = p.getX();
+//    				ypoints[i] = p.getY();
+//    				i++;
+//    			}
+//    			double[][] data = { xpoints, ypoints };
+//    			ds.addSeries(seg.getName(), data);
+//
+//    		}
+//    		ds.setComponent(0, n);
+//    		return ds;
+//    	}catch(UnavailableProfileTypeException | UnavailableBorderPointException | UnavailableBorderTagException | ProfileException e) {
+//    		throw new ChartDatasetCreationException("Cannot make segmented object outline", e);
+//    	}
+//
+//    }
 
     /**
      * Create an outline of the consensus nucleus, and apply segments as

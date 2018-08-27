@@ -48,56 +48,10 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.14.0
  *
  */
-public class ProfileChartFactoryTest {
+public class ProfileChartFactoryTest extends ChartFactoryTest {
 	
-	@Before
-	public void setUp(){
-		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
-		logger.setLevel(Level.FINEST);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-	}
+	private static final boolean IS_FIXED_ASPECT = false;
 	
-	/**
-	 * Create a panel with a chart and the options used to create the chart
-	 * @param chart
-	 * @param options
-	 * @return
-	 * @throws InterruptedException
-	 */
-	private JPanel makeChartPanel(JFreeChart chart, ChartOptions options, String variable) throws InterruptedException {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(new JLabel(variable), BorderLayout.NORTH);
-		panel.add(new ChartPanel(chart), BorderLayout.CENTER);
-		panel.add(new JTextArea(options.toString()), BorderLayout.WEST);
-		return panel;
-	}
-	
-	/**
-	 * Show the charts in the given panels, and wait until the window has been closed
-	 * @param panels
-	 * @throws InterruptedException
-	 */
-	private void showCharts(List<JPanel> panels, String title) throws InterruptedException {
-		JFrame f = new JFrame();
-		
-		JPanel content = new JPanel();
-		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-		
-		for(JPanel panel : panels) {
-			content.add(panel);
-		}
-		
-		ScrollPane sp = new ScrollPane();
-		sp.add(content);
-		sp.setPreferredSize(new Dimension(1000, 600));
-		f.setTitle(title);
-		f.getContentPane().add(sp, BorderLayout.CENTER);
-		f.pack();
-		f.setVisible(true);
-		while(f.isVisible()) {
-			Thread.sleep(1000);
-		}
-	}
 	
 	/**
 	 * Create charts with a default range of options variables for the given dataset
@@ -123,7 +77,7 @@ public class ProfileChartFactoryTest {
 					.setShowMarkers(true)
 					.setNormalised(true)
 					.build();
-			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Tag: "+tag));
+			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Tag: "+tag, IS_FIXED_ASPECT));
 		}
 		
 		for(ProfileAlignment p : ProfileAlignment.values()) {
@@ -131,14 +85,14 @@ public class ProfileChartFactoryTest {
 					.setAlignment(p)
 					.setNormalised(false)
 					.build();
-			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Alignment: "+p));
+			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Alignment: "+p, IS_FIXED_ASPECT));
 		}
 		
 		for(ColourSwatch p : ColourSwatch.values()) {
 			ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets)
 					.setSwatch(p)
 					.build();
-			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Swatch: "+p));
+			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Swatch: "+p, IS_FIXED_ASPECT));
 		}
 		ChartOptions trueOptions = new ChartOptionsBuilder().setDatasets(datasets)
 				.setNormalised(true)
@@ -153,7 +107,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(true)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions, "All true"));
+		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions, "All true", IS_FIXED_ASPECT));
 		
 		ChartOptions falseOptions = new ChartOptionsBuilder().setDatasets(datasets)
 				.setNormalised(false)
@@ -169,7 +123,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(false)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false"));
+		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false", IS_FIXED_ASPECT));
 		showCharts(panels, title);
 	}
 	
@@ -196,7 +150,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(true)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions, "All true"));
+		panels.add(makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions, "All true", IS_FIXED_ASPECT));
 		
 		ChartOptions falseOptions = new ChartOptionsBuilder().setDatasets(d)
 				.setCell(c)
@@ -212,7 +166,7 @@ public class ProfileChartFactoryTest {
 				.setShowYAxis(false)
 				.build();
 
-		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false"));
+		panels.add(makeChartPanel(new ProfileChartFactory(falseOptions).createProfileChart(), falseOptions, "All false", IS_FIXED_ASPECT));
 		showCharts(panels, "Single nucleus, no dataset");
 	}
 	

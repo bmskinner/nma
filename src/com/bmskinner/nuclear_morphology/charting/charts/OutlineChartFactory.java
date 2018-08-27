@@ -454,12 +454,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * Get a chart contaning the details of the given cell from the given
      * dataset
      * 
-     * @param cell
-     *            the cell to draw
-     * @param dataset
-     *            the dataset the cell came from
-     * @param rotateMode
-     *            the orientation of the image
+     * @param cell the cell to draw
+     * @param dataset the dataset the cell came from
+     * @param rotateMode the orientation of the image
      * @return
      * @throws Exception
      */
