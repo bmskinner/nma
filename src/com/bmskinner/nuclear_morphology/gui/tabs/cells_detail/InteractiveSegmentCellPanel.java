@@ -154,26 +154,39 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				private synchronized JPopupMenu createPopup(IBorderPoint point) {
 					JPopupMenu popupMenu = new JPopupMenu("Popup");
 					try {
-						int index = cell.getNucleus().getBorderIndex(point);
-						IBorderSegment seg = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
-								.getSegmentContaining(index);
-						IBorderSegment next = seg.nextSegment();
-
-						JMenuItem item = new JMenuItem("Move start of "+seg.getName()+" here");
-						item.setForeground(ColourSelecter.getColor(seg.getPosition()));
-						item.addActionListener(e->{
-//							fireSegmentEvent(seg.getID(), index, SegmentEvent.MOVE_START_INDEX);
-						});
-						popupMenu.add(item);
-
-						JMenuItem item1 = new JMenuItem("Move start of "+next.getName()+" here");
-						item1.setForeground(ColourSelecter.getColor(next.getPosition()));
-						item1.addActionListener(e->{
-//							fireSegmentEvent(next.getID(), index, SegmentEvent.MOVE_START_INDEX);
-						});
-						popupMenu.add(item1);
 						
-					} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+						int raw = cell.getNucleus().getBorderIndex(point);
+						int index = cell.getNucleus().getOffsetBorderIndex(Tag.REFERENCE_POINT, raw);
+						IBorderSegment seg = cell.getNucleus().getProfile(ProfileType.ANGLE)
+								.getSegmentContaining(raw);
+
+						
+						IBorderSegment prev = seg.prevSegment();
+						IBorderSegment next = seg.nextSegment();
+						
+						JMenuItem segThis = new JMenuItem("This: "+seg.getName());
+						segThis.setForeground(ColourSelecter.getColor(seg.getPosition()));
+
+						JMenuItem prevItem = new JMenuItem("Prev: "+prev.getName());
+						prevItem.setForeground(ColourSelecter.getColor(prev.getPosition()));
+						prevItem.addActionListener(e->{
+							fireSegmentEvent(seg.getID(), index, SegmentEvent.MOVE_START_INDEX);
+							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+							createImage();
+						});
+						popupMenu.add(prevItem);
+						popupMenu.add(segThis);
+
+						JMenuItem nextItem = new JMenuItem("Next: "+next.getName());
+						nextItem.setForeground(ColourSelecter.getColor(next.getPosition()));
+						nextItem.addActionListener(e->{
+//							fireSegmentEvent(next.getID(), index, SegmentEvent.MOVE_START_INDEX);
+//							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+//							createImage();
+						});
+						popupMenu.add(nextItem);
+						
+					} catch (UnavailableProfileTypeException e) {
 						e.printStackTrace();
 					}
 					return popupMenu;

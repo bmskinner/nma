@@ -187,23 +187,21 @@ public class ImageAnnotator extends AbstractImageFilterer {
             }
             
             // Colour the border points for segments    
-            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
+            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
             if (profile.hasSegments()) { 
-            	int i=0;
+
             	for(IBorderSegment seg : profile.getOrderedSegments()) {
-            		Paint color = ColourSelecter.getColor(i);
+            		Paint color = ColourSelecter.getColor(seg.getPosition());
             		Iterator<Integer> it = seg.iterator();
             		while(it.hasNext()) {
-            			int k = it.next();
-            			IPoint p = n.getBorderPoint(k).plus(Imageable.COMPONENT_BUFFER);
+            			int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, it.next());
+            			IPoint p = n.getBorderPoint(index).plus(Imageable.COMPONENT_BUFFER);
             			annotatePoint(p, (Color) color, 3);
             		}
-            		
-            		int start = seg.getStartIndex();
-            		IPoint p = n.getBorderPoint(start).plus(Imageable.COMPONENT_BUFFER);
-            		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
-                            p,  (Color) color, 3);
-            		i++;
+//            		int start = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getStartIndex());
+//            		IPoint p = n.getBorderPoint(start).plus(Imageable.COMPONENT_BUFFER);
+//            		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
+//                            p,  (Color) color, 3);
             	}
             }
             annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);

@@ -1361,7 +1361,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return testSeg.update(startIndex, endIndex);
 				
 			} catch (UnavailableComponentException e) {
-				throw new SegmentUpdateException(String.format("Segment %s is available in this profile", segment.toString()));
+				throw new SegmentUpdateException(String.format("Segment %s is not available in this profile", segment.toString()));
 			}
 		}
 
@@ -2139,10 +2139,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		            throw new SegmentUpdateException("End index is outside the profile range: " + endIndex);
 
 				// Ensure next and prev segments cannot be 'jumped over'
-				if( startIndex < getStartIndex() && !prevSegment().contains(startIndex))
-					throw new SegmentUpdateException(String.format("Previous segment %s does not contain start index %d when decreasing", prevSegment().getDetail(), startIndex));
-				if( endIndex > getEndIndex() && !nextSegment().contains(endIndex))
-					throw new SegmentUpdateException(String.format("Next segment %s does not contain end index %d when increasing", nextSegment().getDetail(), endIndex));
+		        if( !contains(startIndex) && !prevSegment().contains(startIndex))
+					throw new SegmentUpdateException(String.format("Neither this nor previous segment %s contain the new start index %d", prevSegment().getDetail(), startIndex));
+		        if( !contains(endIndex) && !nextSegment().contains(endIndex))
+		        	throw new SegmentUpdateException(String.format("Neither this nor next segment %s contain the new end index %d", nextSegment().getDetail(), endIndex));
 
 				 // Ensure previous and next segments are not locked
 		        if(startIndex!=this.startIndex && prevSegment().isLocked())
@@ -2163,7 +2163,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				// All checks passed
 				
-				fine(String.format("Updating segment to %d to %d", startIndex, endIndex));
+				fine(String.format("Updating segment from %d-%d to %d-%d", this.startIndex, getEndIndex(), startIndex, endIndex));
 				this.startIndex = startIndex;
 				this.length = newLength;
 				

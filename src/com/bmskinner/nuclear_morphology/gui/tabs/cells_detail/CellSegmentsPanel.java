@@ -261,6 +261,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         if (event.getType() == SegmentEvent.MOVE_START_INDEX) {
             try {
 
+            	System.out.println("Updating segment start index");
                 // This is a manual change, so disable any lock
                 this.getCellModel().getCell().getNucleus().setLocked(false);
 
@@ -274,6 +275,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
 
                 // Recache necessary charts
                 refreshChartCache();
+
                 this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
             } catch (Exception e) {
                 error("Error updating segment", e);

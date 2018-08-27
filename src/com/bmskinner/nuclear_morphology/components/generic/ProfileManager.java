@@ -728,8 +728,10 @@ public class ProfileManager implements Loggable {
      * @param cell the cell to alter
      * @param id the segment id
      * @param index the new start index of the segment
+     * @throws ProfileException 
+     * @throws UnavailableComponentException 
      */
-    public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws Exception {
+    public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws ProfileException, UnavailableComponentException {
 
         if (collection.isVirtual())
             return;
@@ -745,7 +747,9 @@ public class ProfileManager implements Loggable {
 
         int rawOldIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, startPos);
 
+        try {
         if (profile.update(seg, newStart, newEnd)) {
+        	fine("Updating profile is possible");
             n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
             finest("Updated nucleus profile with new segment boundaries");
 
@@ -769,9 +773,6 @@ public class ProfileManager implements Loggable {
                     n.setBorderTag(Tag.INTERSECTION_POINT,
                             n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(Tag.ORIENTATION_POINT))));
                 }
-
-            } else {
-                finest("No border tag needing update at index " + rawOldIndex + " from reference point");
             }
 
             n.updateVerticallyRotatedNucleus();
@@ -779,6 +780,9 @@ public class ProfileManager implements Loggable {
 
         } else {
             log("Updating " + seg.getStartIndex() + " to index " + index + " failed");
+        }
+        } catch(SegmentUpdateException e) {
+        	log("Updating " + seg.getStartIndex() + " to index " + index + " failed");
         }
     }
 
