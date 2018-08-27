@@ -214,12 +214,6 @@ public class IBorderSegmentTester {
 	}
 	
 	@Test
-	public void testAddMergeSourceExceptsOnNull() {
-		exception.expect(IllegalArgumentException.class);
-		segment.addMergeSource(null);
-	}
-
-	@Test
 	public void testGetStartIndex() throws SegmentUpdateException {
 		assertEquals(startIndex, segment.getStartIndex());
 	}

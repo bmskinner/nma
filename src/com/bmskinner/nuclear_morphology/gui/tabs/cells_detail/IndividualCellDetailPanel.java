@@ -45,7 +45,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
 
     protected CellsListPanel       cellsListPanel;       // the list of cells in
                                                          // the active dataset
-    protected CellProfilePanel     segmentProfilePanel;  // = new
+    protected CellSegmentsPanel     segmentProfilePanel;  // = new
                                                          // CellProfilePanel();
                                                          // // the nucleus angle
                                                          // profile
@@ -117,7 +117,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
     }
 
     private void createSubPanels(@NonNull InputSupplier context) {
-        segmentProfilePanel = new CellProfilePanel(context, model); // the nucleus angle
+        segmentProfilePanel = new CellSegmentsPanel(context, model); // the nucleus angle
                                                            // profile
         cellBorderTagPanel = new CellBorderTagPanel(context, model);
         outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell

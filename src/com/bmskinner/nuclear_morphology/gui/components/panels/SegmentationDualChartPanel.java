@@ -18,6 +18,9 @@
 
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
@@ -33,6 +36,8 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class SegmentationDualChartPanel extends DualChartPanel {
+	
+	protected List<Object> listeners = new ArrayList<>();
 
     public SegmentationDualChartPanel() {
         super();

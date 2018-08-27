@@ -1,9 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.InputEvent;
@@ -19,13 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
@@ -38,9 +31,6 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.charting.image.MeshAnnotator;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -51,11 +41,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -68,75 +54,14 @@ import ij.process.ImageProcessor;
  * @since 1.14.0
  *
  */
-public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
+public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 
-	private JLabel imageLabel;
-	
-	private DatasetEventHandler dh = new DatasetEventHandler(this);
-	private CelllUpdateEventHandler cellUpdateHandler = new CelllUpdateEventHandler(this);
-	
-	private IAnalysisDataset dataset = null;
-	private ICell cell = null;
-	private CellularComponent component = null;
-	private boolean isShowMesh;
-	private boolean isWarpImage;
-	
-	// the undistorted image
-	private BufferedImage input;
-	private BufferedImage output;
-    private int smallRadius = 25;
-    private int bigRadius   = 50;
-    private int sourceWidth;
-    private int sourceHeight;
-
-	public InteractiveAnnotatedCellPanel(CellUpdatedEventListener parent){
-		
-		cellUpdateHandler.addCellUpdatedEventListener(parent);
-		
-		setLayout(new BorderLayout());
-		imageLabel = new JLabel();
-		imageLabel.setHorizontalAlignment(JLabel.CENTER);
-		imageLabel.setVerticalAlignment(JLabel.CENTER);
-		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
-		imageLabel.setVerticalTextPosition(JLabel.CENTER);
-		add(imageLabel, BorderLayout.CENTER);
+	public InteractiveBorderTagCellPanel(CellUpdatedEventListener parent){
+		super(parent);
 	}
 
-	/**
-	 * Set the panel to a null state with no cell showing
-	 */
-	public void setNull() {
-		setCell(null, null, null, false, false);
-	}
-
-	public void setCell(@Nullable IAnalysisDataset dataset, @Nullable ICell cell, @Nullable CellularComponent component, boolean isShowMesh, boolean isWarpImage) {
-		if(dataset==null || cell==null || component==null) {
-			imageLabel.setIcon(null);
-			return;
-		}
-		this.dataset     = dataset;
-		this.cell        = cell;
-		this.component   = component;
-		this.isShowMesh  = isShowMesh;
-		this.isWarpImage = isWarpImage;
-		createImage();
-	}
-	
 	@Override
-	public void repaint() {
-		super.repaint();
-//		createImage(); // ensure the imaage is always scaled properly to the panel
-	}
-	
-	public synchronized void addDatasetEventListener(EventListener l) {
-        dh.addListener(l);
-    }
-
-	public synchronized void removeDatasetEventListener(EventListener l) {
-        dh.removeListener(l);
-    }
-	
-	private void createImage() {
+	protected void createImage() {
 		if(isShowMesh) {
 			createMeshImage();
 			return;
@@ -147,11 +72,6 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		}
 		createCellImage();
 	}
-	
-	@Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-    }
 	
 	/**
 	 * Create the default annotated cell image, with border, segments and border tags highlighted
@@ -179,7 +99,7 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
 
 			for(Nucleus n : cell.getNuclei()){
-				an2.annotateCroppedNucleus(n.duplicate());
+				an2.annotateTagsOnCroppedNucleus(n.duplicate());
 			}    
 			
 			imageLabel.setIcon(an2.toImageIcon());
@@ -328,65 +248,6 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		});
 	}
 	
-	private synchronized IPoint translatePanelLocationToSourceImage(int x, int y) {
-		// The original image dimensions
-		int w = sourceWidth;
-		int h = sourceHeight;
-		
-		// The rescaled dimensions
-		int iconWidth = imageLabel.getIcon().getIconWidth();
-		int iconHeight = imageLabel.getIcon().getIconHeight();
-		
-		// The image panel dimensions
-		int panelWidth = getWidth();
-		int panelHeight = getHeight();
-		
-		// The position of the click relative to the icon
-		int iconX = x-((panelWidth-iconWidth)/2);
-		int iconY = y-((panelHeight-iconHeight)/2);
-		
-		// The position  of the click within the original image
-		double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
-		double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
-		return IPoint.makeNew(xPositionInImage, yPositionInImage);
-	}
-		
-	private synchronized IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
-		// The rescaled dimensions
-		int iconWidth = imageLabel.getIcon().getIconWidth();
-		int iconHeight = imageLabel.getIcon().getIconHeight();
-		
-		// The image panel dimensions
-		int panelWidth = getWidth();
-		int panelHeight = getHeight();
-		
-		// The position of the click relative to the icon
-		int iconX = e.getX()-((panelWidth-iconWidth)/2);
-		int iconY = e.getY()-((panelHeight-iconHeight)/2);
-		return IPoint.makeNew(iconX, iconY);
-	}
-	
-	private synchronized IPoint translateRenderedLocationToSourceImage(double x, double y) {		
-		// The rescaled dimensions
-		int iconWidth = imageLabel.getIcon().getIconWidth();
-		int iconHeight = imageLabel.getIcon().getIconHeight();
-						
-		// The position  of the click within the original image
-		double xPositionInImage = ((x/iconWidth)*sourceWidth)-Imageable.COMPONENT_BUFFER;
-		double yPositionInImage = ((y/iconHeight)*sourceHeight)-Imageable.COMPONENT_BUFFER;
-		return IPoint.makeNew(xPositionInImage, yPositionInImage);
-	}
-	
-	
-	private synchronized void updateImage(int x, int y) {
-		if (output == null) 
-			output = new BufferedImage( input.getWidth(), input.getHeight(),  BufferedImage.TYPE_INT_ARGB);
-		computeBulgeImage(input, x, y, smallRadius, bigRadius, output);
-		if(imageLabel!=null)
-			imageLabel.setIcon(new ImageIcon(output));
-		repaint();
-	}
-
 	private void createMeshImage() {
 		ThreadManager.getInstance().submit(() ->{
 			try {
@@ -454,7 +315,8 @@ public class InteractiveAnnotatedCellPanel extends JPanel implements Loggable {
 		});
 	}
 	
-	private synchronized void computeBulgeImage(BufferedImage input, int cx, int cy, 
+	@Override
+	protected synchronized void computeBulgeImage(BufferedImage input, int cx, int cy, 
 	        int small, int big, BufferedImage output){
 		
 		int dx1 = cx-big; // the big rectangle

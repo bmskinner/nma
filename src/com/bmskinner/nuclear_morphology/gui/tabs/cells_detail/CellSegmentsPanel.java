@@ -35,6 +35,8 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -51,17 +53,19 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 
 @SuppressWarnings("serial")
-public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSetEventListener {
+public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartSetEventListener {
 
     private static final String PANEL_TITLE_LBL = "Segments";
     
-    private SegmentationDualChartPanel dualPanel;
+//    private SegmentationDualChartPanel dualPanel;
 
     private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
 
     private JPanel buttonsPanel;
 
     private JButton resegmentButton;
+    
+    private InteractiveSegmentCellPanel imagePanel;
 
     // A JDialog is a top level container, and these are not subject to GC on
     // disposal according to
@@ -70,41 +74,46 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
     // loading the active cell in when needed
 //    private final CellResegmentationDialog resegDialog;
 
-    public CellProfilePanel(@NonNull InputSupplier context, final CellViewModel model) {
+    public CellSegmentsPanel(@NonNull InputSupplier context, final CellViewModel model) {
         super(context, model, PANEL_TITLE_LBL);
 
 //        resegDialog = new CellResegmentationDialog(model);
 
         this.setLayout(new BorderLayout());
         this.setBorder(null);
+        
+        imagePanel = new InteractiveSegmentCellPanel(this);
+        imagePanel.addSegmentEventListener(this);
+        
+        add(imagePanel, BorderLayout.CENTER);
 
-        dualPanel = new SegmentationDualChartPanel();
-        dualPanel.addSegmentEventListener(this);
-        dualPanel.getMainPanel().addChartSetEventListener(this);
+//        dualPanel = new SegmentationDualChartPanel();
+//        dualPanel.addSegmentEventListener(this);
+//        dualPanel.getMainPanel().addChartSetEventListener(this);
 
-        JPanel chartPanel = new JPanel();
-        chartPanel.setLayout(new GridBagLayout());
+//        JPanel chartPanel = new JPanel();
+//        chartPanel.setLayout(new GridBagLayout());
+//
+//        GridBagConstraints c = new GridBagConstraints();
+//        c.anchor = GridBagConstraints.EAST;
+//        c.gridx = 0;
+//        c.gridy = 0;
+//        c.gridwidth = 1;
+//        c.gridheight = 1;
+//        c.fill = GridBagConstraints.BOTH; // reset to default
+//        c.weightx = 1.0;
+//        c.weighty = 0.7;
+//
+//        chartPanel.add(dualPanel.getMainPanel(), c);
+//        c.weighty = 0.3;
+//        c.gridx = 0;
+//        c.gridy = 1;
+//        chartPanel.add(dualPanel.getRangePanel(), c);
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.EAST;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.fill = GridBagConstraints.BOTH; // reset to default
-        c.weightx = 1.0;
-        c.weighty = 0.7;
-
-        chartPanel.add(dualPanel.getMainPanel(), c);
-        c.weighty = 0.3;
-        c.gridx = 0;
-        c.gridy = 1;
-        chartPanel.add(dualPanel.getRangePanel(), c);
-
-        this.add(chartPanel, BorderLayout.CENTER);
+//        this.add(chartPanel, BorderLayout.CENTER);
 
         buttonsPanel = makeButtonPanel();
-        this.add(buttonsPanel, BorderLayout.NORTH);
+        add(buttonsPanel, BorderLayout.NORTH);
 
 //        resegDialog.addDatasetEventListener(this);
 
@@ -139,59 +148,66 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
     }
 
-    public void setEnabled(boolean b) {
+    @Override
+	public void setEnabled(boolean b) {
         super.setEnabled(b);
         profileOptions.setEnabled(b);
 //        resegmentButton.setEnabled(b);
     }
 
-    public synchronized void update() {
+    @Override
+	public synchronized void update() {
 
         try {
+        	
+        	 final ICell cell = getCellModel().getCell();
+             final CellularComponent component = getCellModel().getComponent();
+        	
+        	imagePanel.setCell(activeDataset(), cell, component, false, false);
 
-            ProfileType type = profileOptions.getSelected();
-
-            if (this.getCellModel().hasCell()) {
-
-                ISegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type,
-                        Tag.REFERENCE_POINT);
-
-                ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-                        .setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
-                        .setTag(Tag.REFERENCE_POINT).setShowMarkers(false).setProfileType(type)
-                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(true).setShowXAxis(false)
-                        .setShowYAxis(false).setTarget(dualPanel.getMainPanel()).build();
-
-                setChart(options);
-
-                /*
-                 * Create the chart for the range panel
-                 */
-
-                ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
-                        .setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
-                        .setTag(Tag.REFERENCE_POINT).setShowMarkers(false).setProfileType(type)
-                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(false).setShowXAxis(false)
-                        .setShowYAxis(false).setTarget(dualPanel.getRangePanel()).build();
-
-                setChart(rangeOptions);
-
-                setEnabled(true);
-
-            } else {
-                JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
-                JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
-
-                dualPanel.setCharts(chart1, chart2);
-                setEnabled(false);
-
-            }
+//            ProfileType type = profileOptions.getSelected();
+//
+//            if (this.getCellModel().hasCell()) {
+//
+//                ISegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type,
+//                        Tag.REFERENCE_POINT);
+//
+//                ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+//                        .setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
+//                        .setTag(Tag.REFERENCE_POINT).setShowMarkers(false).setProfileType(type)
+//                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(true).setShowXAxis(false)
+//                        .setShowYAxis(false).setTarget(dualPanel.getMainPanel()).build();
+//
+//                setChart(options);
+//
+//                /*
+//                 * Create the chart for the range panel
+//                 */
+//
+//                ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
+//                        .setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
+//                        .setTag(Tag.REFERENCE_POINT).setShowMarkers(false).setProfileType(type)
+//                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(false).setShowXAxis(false)
+//                        .setShowYAxis(false).setTarget(dualPanel.getRangePanel()).build();
+//
+//                setChart(rangeOptions);
+//
+//                setEnabled(true);
+//
+//            } else {
+//                JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
+//                JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
+//
+//                dualPanel.setCharts(chart1, chart2);
+//                setEnabled(false);
+//
+//            }
 
         } catch (Exception e) {
             error("Error updating cell panel", e);
             JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
             JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
-            dualPanel.setCharts(chart1, chart2);
+//            dualPanel.setCharts(chart1, chart2);
             setEnabled(false);
         }
 
@@ -203,7 +219,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
         JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
         JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
 
-        dualPanel.setCharts(chart1, chart2);
+//        dualPanel.setCharts(chart1, chart2);
     }
 
     @Override
@@ -212,7 +228,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
         try {
             profile = this.getCellModel().getCell().getNucleus().getProfile(profileOptions.getSelected(),
                     Tag.REFERENCE_POINT);
-            dualPanel.setProfile(profile, false);
+//            dualPanel.setProfile(profile, false);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
             fine("Error getting profile", e1);
         }

@@ -725,19 +725,14 @@ public class ProfileManager implements Loggable {
      * Update the start index of a segment in the angle profile of the given
      * cell.
      * 
-     * @param cell
-     *            the cell to alter
-     * @param id
-     *            the segment id
-     * @param index
-     *            the new start position of the segment
-     * @throws Exception
+     * @param cell the cell to alter
+     * @param id the segment id
+     * @param index the new start index of the segment
      */
-    public void updateCellSegmentStartIndex(ICell cell, UUID id, int index) throws Exception {
+    public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws Exception {
 
-        if (collection.isVirtual()) {
+        if (collection.isVirtual())
             return;
-        }
 
         Nucleus n = cell.getNucleus();
         ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);

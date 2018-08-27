@@ -28,8 +28,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
 import java.text.DecimalFormat;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
@@ -38,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
@@ -128,12 +132,9 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param n the nucleus to draw
      * @return this annotator
      */
-    public ImageAnnotator annotateCroppedNucleus(Nucleus n) {
+    public ImageAnnotator annotateTagsOnCroppedNucleus(Nucleus n) {
         
         try {
-
-            
-            
             for(IBorderPoint p : n.getBorderList()) {
             	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
             }
@@ -165,6 +166,47 @@ public class ImageAnnotator extends AbstractImageFilterer {
 //            annotateSegments(n);
             annotateSignals(n);
 
+        } catch (Exception e) {
+            error("Error annotating nucleus", e);
+        }
+        return this;
+    }
+    
+    /**
+     * Draw the outline of the given nucleus and any signals marked.
+     * The image is assumed to be cropped to the nuclear border.
+     * 
+     * @param n the nucleus to draw
+     * @return this annotator
+     */
+    public ImageAnnotator annotateSegmentsOnCroppedNucleus(@NonNull Nucleus n) {
+        
+        try {
+            for(IBorderPoint p : n.getBorderList()) {
+            	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
+            }
+            
+            // Colour the border points for segments    
+            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
+            if (profile.hasSegments()) { 
+            	int i=0;
+            	for(IBorderSegment seg : profile.getOrderedSegments()) {
+            		Paint color = ColourSelecter.getColor(i);
+            		Iterator<Integer> it = seg.iterator();
+            		while(it.hasNext()) {
+            			int k = it.next();
+            			IPoint p = n.getBorderPoint(k).plus(Imageable.COMPONENT_BUFFER);
+            			annotatePoint(p, (Color) color, 3);
+            		}
+            		
+            		int start = seg.getStartIndex();
+            		IPoint p = n.getBorderPoint(start).plus(Imageable.COMPONENT_BUFFER);
+            		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
+                            p,  (Color) color, 3);
+            		i++;
+            	}
+            }
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);
         } catch (Exception e) {
             error("Error annotating nucleus", e);
         }

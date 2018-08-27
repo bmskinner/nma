@@ -503,7 +503,6 @@ public class DefaultBorderSegmentTest {
 		
 		// Add null and invalid segments
 		exception.expect(IllegalArgumentException.class);
-		s1.setNextSegment(null);
 		s1.setNextSegment(s3);
 		s1.setNextSegment(s4);
 	}
@@ -525,7 +524,6 @@ public class DefaultBorderSegmentTest {
 		
 		// Add null and invalid segments
 		exception.expect(IllegalArgumentException.class);
-		s2.setPrevSegment(null);
 		s2.setPrevSegment(s3);
 		s2.setPrevSegment(s4);
 	}
