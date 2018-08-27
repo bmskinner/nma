@@ -239,6 +239,13 @@ public class ProfileChartFactoryTest {
 	}
 	
 	@Test
+	public void testMultipleNucleusDatasetProfileWithMultipleSegments() throws Exception {
+		
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(100).withMaxSizeVariation(4).segmented().build();
+		generateChartsforOptions(d, "Single dataset, multiple nuclei, multiple segments");
+	}
+	
+	@Test
 	public void testMultipleDatasetsProfileWithSingleSegment() throws Exception {
 		IAnalysisDataset d1 = new TestDatasetBuilder().cellCount(100).withMaxSizeVariation(4).profiled().build();
 		IAnalysisDataset d2 = new TestDatasetBuilder().cellCount(100).withMaxSizeVariation(10).profiled().build();

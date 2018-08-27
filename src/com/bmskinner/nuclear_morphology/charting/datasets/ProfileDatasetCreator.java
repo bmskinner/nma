@@ -54,6 +54,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	/**
 	 * Combine line series for profiles and difference series (for IQRs) in one class
 	 * @author bms41
+	 * @since 1.14.0
 	 *
 	 */
 	public class ProfileChartDataset {
@@ -110,7 +111,17 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			StringBuilder b = new StringBuilder("ProfileChartDataset:\nLines:\n");
 			for(int i=0; i<lines.getSeriesCount(); i++) {
 				Comparable seriesKey = lines.getSeriesKey(i);
-				b.append("\tSeries "+i+": "+seriesKey+"\tDataset "+lines.getDatasetIndex(seriesKey)+"\n");				
+				
+				int items = lines.getItemCount(i);
+				
+				double min=Double.MAX_VALUE, max=-Double.MAX_VALUE;
+				
+				for(int j=0; j<items; j++) {
+					min = Math.min(lines.getX(i, j).doubleValue(), min);
+					max = Math.max(lines.getX(i, j).doubleValue(), max);
+				}
+				
+				b.append(String.format("\tSeries %s: %s\tDataset %s\tItems: %s\tX-range: %s-%s\n", i, seriesKey, lines.getDatasetIndex(seriesKey), items, min, max ));		
 			}
 			b.append("Ranges:\n");
 			for(int i : ranges.keySet()) {
@@ -127,7 +138,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param list the datasets to check
 	 * @return the maximum length
 	 */
-	private int getMaximumMedianProfileLength(final List<IAnalysisDataset> list) {
+	private int getMaximumMedianProfileLength(@NonNull final List<IAnalysisDataset> list) {
 		return list.stream().mapToInt(d->d.getCollection().getMedianArrayLength())
 				.max().orElse(DEFAULT_PROFILE_LENGTH);
 	}
@@ -138,7 +149,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param collection
 	 * @return
 	 */
-	private int getMaximumNucleusProfileLength(final ICellCollection collection) {
+	private int getMaximumNucleusProfileLength(@NonNull final ICellCollection collection) {
 		return collection.streamCells().flatMap(c->c.getNuclei().stream())
 				.mapToInt(n->n.getBorderLength())
 				.max().orElse(DEFAULT_PROFILE_LENGTH);
@@ -168,7 +179,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	private void appendProfileDataset(final ProfileChartDataset ds, int i, int maxMedianLength) throws ChartDatasetCreationException {
+	private void appendProfileDataset(@NonNull final ProfileChartDataset ds, int i, int maxMedianLength) throws ChartDatasetCreationException {
 
 		ICellCollection collection = options.getDatasets().get(i).getCollection();
 		boolean isNormalised       = options.isNormalised();
@@ -200,6 +211,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 			// add the segments if any exist and there is only a single dataset
 			if(isShowSegments) {
+//				System.out.println(String.format("Drawing segments for %s", borderTag));
 				List<IBorderSegment> segments = collection.getProfileCollection()
 						.getSegmentedProfile(type, borderTag, Stats.MEDIAN)
 						.getOrderedSegments();
@@ -348,7 +360,6 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					start = index;
 					
 					ds.addSeries(seg.getName() + "_A", data, datasetIndex);
-					
 				}
 				
 				prevIndex = index;

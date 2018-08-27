@@ -5,7 +5,10 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.text.DecimalFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.ValueMarker;
@@ -278,12 +281,12 @@ public class ProfileChartFactory extends AbstractChartFactory {
     	}
     	    	
     	// Set x-axis length
-    	int xLength = 100;
+    	int xLength = ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
     	if (!options.isNormalised())	
-    		xLength = options.getDatasets().stream().mapToInt(d->d.getCollection()
-    				.getMedianArrayLength()).max().orElse(ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+    		xLength = options.getDatasets().stream()
+    		.mapToInt(d->d.getCollection() .getMedianArrayLength())
+    		.max().orElse(ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
 
-		
 		JFreeChart chart = makeProfileChart(profiles, xLength);
 		applyAxisOptions(chart);
 		return chart;
@@ -297,13 +300,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param xLength the maximum of the x-axis
 	 * @return a chart
 	 */
-	private JFreeChart makeProfileChart(ProfileChartDataset ds, int xLength) {
+	private JFreeChart makeProfileChart(@NonNull ProfileChartDataset ds, int xLength) {
 
 		JFreeChart chart = makeEmptyProfileChart(options.getType());
 		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(0, ds.getLines());
+		plot.setDataset(0, ds.getLines()); // line charts are always in dataset 0
 
-		for(int i=0; i<ds.getDatasetCount(); i++) {
+		for(int i=0; i<ds.getDatasetCount(); i++) { // IQR range charts are added above
 			plot.setDataset(i+1, ds.getRanges(i));
 		}
 
@@ -313,20 +316,25 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		lineRenderer.setBaseShapesVisible(options.isShowPoints());
 		lineRenderer.setBaseLinesVisible(options.isShowLines());
 		lineRenderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		lineRenderer.setBaseToolTipGenerator(null);
 		plot.setRenderer(0, lineRenderer);
-		plot.getRenderer().setBaseToolTipGenerator(null);
-		
-		
+
 		// Format the line charts
 		for (int i=0; i<ds.getLines().getSeriesCount(); i++) {
 			lineRenderer.setSeriesVisibleInLegend(i, false);
-			
-			
+
 			String name = ds.getLines().getSeriesKey(i).toString();
 			int index   = ds.getLines().getDatasetIndex(name);
 			
 			lineRenderer.setSeriesStroke(i, chooseSeriesStroke(name));
-			lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()));
+			
+			if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX)) { // segments must be coloured separate to profiles
+				int segIndex = findSegmentIndex(name);
+				lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, segIndex, options.getSwatch()));
+			} else {
+				lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()));
+			}
+			
 			lineRenderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 		}
 		
@@ -336,6 +344,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			Paint profileColour = options.getDatasets().get(i).getDatasetColour().orElse(ColourSelecter.getColor(i, options.getSwatch()));
 			Paint colour = ColourSelecter.getTransparentColour((Color) profileColour, true, 128);
 			XYDifferenceRenderer rangeRenderer = new XYDifferenceRenderer(colour, colour, false);
+			rangeRenderer.setBaseToolTipGenerator(null);
 			plot.setRenderer(i+1, rangeRenderer);
 			for (int series = 0; series<ds.getRanges(i).getSeriesCount(); series++) {
 				rangeRenderer.setSeriesPaint(series, colour);
@@ -344,6 +353,15 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			}
 		}		
 		return chart;
+	}
+	
+	private int findSegmentIndex(String name) {
+		String regex = ProfileDatasetCreator.SEGMENT_SERIES_PREFIX+"(\\d+)_?.*";
+		Pattern p = Pattern.compile(regex);
+		Matcher matcher = p.matcher(name);
+		if(matcher.matches())
+			return Integer.parseInt(matcher.group(1));
+		return 0;
 	}
 	
 	private Stroke chooseSeriesStroke(String name) {
