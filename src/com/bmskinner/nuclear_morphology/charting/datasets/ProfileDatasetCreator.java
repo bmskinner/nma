@@ -367,11 +367,13 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 			
 			try {
-			float[][] data = {Arrays.copyOfRange(xvalues, start, prevIndex+1),
-			                  Arrays.copyOfRange(yvalues, start, prevIndex+1)};
-			ds.addSeries(seg.getName(), data, datasetIndex);
+				if(prevIndex>-1) { // only happens when segmentation has gone wrong - but those are the times we need to check the charts
+					float[][] data = {Arrays.copyOfRange(xvalues, start, prevIndex+1),
+							          Arrays.copyOfRange(yvalues, start, prevIndex+1)};
+					ds.addSeries(seg.getName(), data, datasetIndex);
+				}
 			} catch(IllegalArgumentException e) {
-				throw new ChartDatasetCreationException("Cannot copy profile range for segment chart: "+start+ " - "+prevIndex);
+				throw new ChartDatasetCreationException(String.format("Cannot make segment range for indexes %s to %s in segment %s", start, prevIndex, seg.getDetail()));
 			}
 			
 			

@@ -1,7 +1,5 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.logging.Level;
@@ -14,10 +12,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
-import com.bmskinner.nuclear_morphology.analysis.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -25,14 +22,13 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class DatasetSegmentationMethodTest extends FloatArrayTester {
+public class DatasetSegmentationMethodTest {
 	
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
@@ -44,13 +40,17 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 	
-	private void testDatasetMedianAndCellsAreSegmentedConsistently(@NonNull IAnalysisDataset d) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
+	private void testDatasetMedianAndCellsAreSegmentedConsistently(@NonNull IAnalysisDataset d) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException, InterruptedException {
 
 		DatasetValidator v = new DatasetValidator();
 		boolean ok = v.validate(d);
 		for(String s : v.getErrors()){
 			System.out.println(s);
 		}
+		
+		if(!ok)
+			ChartFactoryTest.showProfiles(v.getErrorCells(), d);
+		
 		assertTrue(ok);
 
 		ISegmentedProfile median = d.getCollection()
@@ -67,7 +67,7 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 	public void testSegmentationOfSingleCellDataset() throws Exception {
 		long seed = 1234;
 		IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(1)
-				.baseHeight(40).baseWidth(40).offsetProfiles(true).profiled().build();
+				.baseHeight(40).baseWidth(40).randomOffsetProfiles(true).profiled().build();
 		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
 		testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
 
@@ -87,17 +87,19 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 			IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(i)
 					.baseHeight(40).baseWidth(40)
 					.ofType(NucleusType.ROUND)
+					.randomOffsetProfiles(false)
 					.segmented().build();
 			testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
 		}
 	}
 	
 	/**
-	 * Test multiple identical cells segmentation, with the variable border offset
+	 * Test multiple identical cells segmentation, with the same (fixed) border offset
 	 * @throws Exception
 	 */
 	@Test
-	public void testSegmentationOfMultiCellDatasetWithBorderOffset() throws Exception {
+	public void testSegmentationOfMultiCellDatasetWithFixedOffset() throws Exception {
+
 		long seed = 1234;
 		int maxCells = 50;		
 		for(int i=1; i<=maxCells; i++) {
@@ -105,7 +107,27 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 			IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(i)
 					.baseHeight(40).baseWidth(40)
 					.ofType(NucleusType.ROUND)
-					.offsetProfiles(true)
+					.randomOffsetProfiles(false)
+					.fixedProfileOffset(50)
+					.segmented().build();
+			testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
+		}
+	}
+	
+	/**
+	 * Test multiple identical cells segmentation, with a variable border offset
+	 * @throws Exception
+	 */
+	@Test
+	public void testSegmentationOfMultiCellDatasetWithVariableOffset() throws Exception {
+		long seed = 1234;
+		int maxCells = 50;		
+		for(int i=1; i<=maxCells; i++) {
+			System.out.println(String.format("Testing %s cells", i));
+			IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(i)
+					.baseHeight(40).baseWidth(40)
+					.ofType(NucleusType.ROUND)
+					.randomOffsetProfiles(true)
 					.segmented().build();
 			testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
 		}
@@ -130,7 +152,7 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 				IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(i)
 						.withMaxSizeVariation(var)
 						.baseHeight(40).baseWidth(40)
-						.offsetProfiles(true)
+						.randomOffsetProfiles(true)
 						.segmented().build();
 				testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
 			}

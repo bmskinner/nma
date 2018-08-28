@@ -92,7 +92,7 @@ public class SegmentFitter implements Loggable {
      * @throws IndexOutOfBoundsException 
      * @throws UnsegmentedProfileException 
      */
-    public void fit(@NonNull final Nucleus n, @NonNull final IProfileCollection pc) throws IndexOutOfBoundsException, ProfileException, UnavailableComponentException, UnsegmentedProfileException {
+    public void fit(@NonNull final Nucleus n, @Nullable final IProfileCollection pc) throws IndexOutOfBoundsException, ProfileException, UnavailableComponentException, UnsegmentedProfileException {
         // Input checks
         if (n == null)
             throw new IllegalArgumentException("Test nucleus is null");

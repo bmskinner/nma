@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.ScrollPane;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +22,11 @@ import org.junit.Before;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -41,7 +47,51 @@ public abstract class ChartFactoryTest {
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 	
-	protected void showSingleChart(JFreeChart chart, ChartOptions options, String variable, boolean fixedAspect) throws InterruptedException {
+	/**
+	 * Show the median profile for the given dataset
+	 * @param d
+	 * @param title
+	 * @throws InterruptedException
+	 */
+	public static void showMedianProfile(IAnalysisDataset d, String title) throws InterruptedException {
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
+				.setShowAnnotations(true)
+				.build();
+		showSingleChart(new ProfileChartFactory(options).createProfileChart(), options, title, false);
+	}
+	
+	/**
+	 * Show the profiles for the given cells from a dataset
+	 * @param cells the cells to show
+	 * @param d the dataset the cells belong to
+	 * @throws InterruptedException
+	 */
+	public static void showProfiles(Collection<ICell> cells, IAnalysisDataset d) throws InterruptedException {
+		
+		List<JPanel> panels = new ArrayList<>();
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
+				.setShowAnnotations(true)
+				.build();
+		makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset", false);
+		
+
+		for(ICell cell : cells) {
+			// show the profile corresponding to the chart
+			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
+					.setCell(cell)
+					.setTag(Tag.REFERENCE_POINT)
+					.setShowMarkers(true)
+					.setShowAnnotations(true)
+					.setProfileType(ProfileType.ANGLE)
+					.build();
+			panels.add(makeChartPanel(new ProfileChartFactory(profileOptions).createProfileChart(), profileOptions, "Cell profile", false));
+		}
+		
+		panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset profile", false));
+		showCharts(panels, "Improperly segmented cells");
+	}
+	
+	protected static void showSingleChart(JFreeChart chart, ChartOptions options, String variable, boolean fixedAspect) throws InterruptedException {
 		List<JPanel> panels = new ArrayList<>();
 		panels.add(makeChartPanel(chart, options, variable, fixedAspect));
 		showCharts(panels, variable);
@@ -55,7 +105,7 @@ public abstract class ChartFactoryTest {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	protected JPanel makeChartPanel(JFreeChart chart, ChartOptions options, String variable, boolean fixedAspect) throws InterruptedException {
+	protected static JPanel makeChartPanel(JFreeChart chart, ChartOptions options, String variable, boolean fixedAspect) throws InterruptedException {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel(variable), BorderLayout.NORTH);
 		ExportableChartPanel exp = new ExportableChartPanel(chart);
@@ -71,7 +121,7 @@ public abstract class ChartFactoryTest {
 	 * @param the title of the window
 	 * @throws InterruptedException
 	 */
-	protected void showCharts(List<JPanel> panels, String title) throws InterruptedException {
+	protected static void showCharts(List<JPanel> panels, String title) throws InterruptedException {
 		JFrame f = new JFrame();
 		
 		JPanel content = new JPanel();

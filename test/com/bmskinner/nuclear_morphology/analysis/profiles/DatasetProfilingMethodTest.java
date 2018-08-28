@@ -96,7 +96,7 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 				
 				IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(10)
 						.xBase(xBase).yBase(yBase).baseWidth(40).baseHeight(50)
-						.maxRotation(0).offsetProfiles(false).fixedProfileOffset(20)
+						.maxRotation(0).randomOffsetProfiles(false).fixedProfileOffset(20)
 						.profiled()
 						.build();
 				
@@ -148,7 +148,7 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 
 			IAnalysisDataset dataset = new TestDatasetBuilder().cellCount(10)
 					.xBase(xBase).yBase(yBase).baseWidth(40).baseHeight(50)
-					.maxRotation(angle).offsetProfiles(false).fixedProfileOffset(20)
+					.maxRotation(angle).randomOffsetProfiles(false).fixedProfileOffset(20)
 					.profiled()
 					.build();
 

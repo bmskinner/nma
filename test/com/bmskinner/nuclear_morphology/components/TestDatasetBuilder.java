@@ -24,8 +24,8 @@ public class TestDatasetBuilder {
 	public static final int DEFAULT_X_BASE      = 100;
 	public static final int DEFAULT_Y_BASE      = 100;
 	public static final int DEFAULT_ROTATION    = 0;
-	public static final int DEFAULT_BORDER_OFFSET = 20;
-	public static final boolean DEFAULT_IS_BORDER_OFFSET = true;
+	public static final int DEFAULT_BORDER_OFFSET = 0;
+	public static final boolean DEFAULT_IS_RANDOM_OFFSET = true;
 	
 	private IAnalysisDataset d;
 	private NucleusType type = NucleusType.ROUND;
@@ -40,7 +40,7 @@ public class TestDatasetBuilder {
 	
 	private boolean profile = false;
 	private boolean segment = false;
-	private boolean offset  = DEFAULT_IS_BORDER_OFFSET;
+	private boolean offset  = DEFAULT_IS_RANDOM_OFFSET;
 	
 	private TestComponentShape nucleusShape = TestComponentShape.SQUARE;
 	
@@ -134,7 +134,7 @@ public class TestDatasetBuilder {
 		return this;
 	}	
 	
-	public TestDatasetBuilder offsetProfiles(boolean b) {
+	public TestDatasetBuilder randomOffsetProfiles(boolean b) {
 		offset = b;
 		return this;
 	}	
@@ -172,7 +172,7 @@ public class TestDatasetBuilder {
 			double degreeRot = (rng.nextDouble()*maxRotationDegrees);
 			
 			int borderLength = w*2+h*2;
-			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*(double)borderLength) : 0;
+			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*(double)borderLength) : fixedStartOffset;
 			
 			ICell cell = TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
 					borderOffset);
