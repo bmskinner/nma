@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -153,109 +154,94 @@ public class DatasetValidator implements Loggable {
 
 		List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
 
-		boolean hasSegments = d.getCollection().getProfileCollection().hasSegments();
 		int errorCount = 0;
 
 		for(ICell c : d.getCollection().getCells()){
 			int cellErrors = 0;
 			for (Nucleus n :c.getNuclei()) {
-
-				ISegmentedProfile p;
-				try {
-					p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-					if(p.hasSegments()!=hasSegments) {
-						errorList.add(String.format("Profile collection segments is %s; nucleus is %s", hasSegments, p.hasSegments()));
-						errorCount++;
-					}
-
-					List<UUID> childList = p.getSegmentIDs();
-
-					if(idList.size()!=childList.size()) {
-						errorList.add(String.format("Profile collection has %s segments; nucleus has %s", idList.size(), childList.size()));
-						errorCount++;
-					}
-
-					// Check all nucleus segments are in root dataset
-					for (UUID id : childList) {
-						if (!idList.contains(id) && !id.equals(n.getID())) {
-							errorList.add(String.format("Nucleus %s has segment %s not found in parent", n.getID(), id));
-							cellErrors++;
-						}
-					}
-
-
-					// Check all root dataset segments are in nucleus
-
-					for (UUID id : idList) {
-						if (!childList.contains(id)) {
-							errorList.add(String.format("Profile collection segment %s not found in nucleus %s", id, n.getNameAndNumber()));
-							cellErrors++;
-						}
-					}
-
-
-
-					// Check each profile index in only covered once by a segment
-					for (UUID id1 : idList) {
-						IBorderSegment s1 = p.getSegment(id1);
-						for (UUID id2 : idList) {
-							if(id1==id2)
-								continue;
-							IBorderSegment s2 = p.getSegment(id2);
-							if(s1.overlapsBeyondEndpoints(s2)){
-								errorList.add(String.format("Segment %s overlaps segment %s in %s", s1.getDetail(), s2.getDetail(), n.getNameAndNumber()));
-								cellErrors++;
-							}
-
-						}
-					}
-
-
-				} catch (ProfileException | UnavailableComponentException e) {
-					errorList.add(String.format("Error getting segments for nucleus %s: %s", n.getNameAndNumber(), e.getMessage()));
-					stack(e);
-					e.printStackTrace();
-					cellErrors++;
-				}
-
+				cellErrors += checkSegmentation(n, idList);
 			}
+			
 			if(cellErrors>0)
 				errorCells.add(c);
 			errorCount+=cellErrors;
 		}
 
-		if(d.getCollection().hasConsensus()){
-			try {
-				ISegmentedProfile p = d.getCollection().getConsensus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-
-				if(idList.size()!=p.getSegmentCount()) {
-					errorList.add("Consensus does not have the same number of segments as the root dataset");
-					errorCount++;
-				}
-
-				for (UUID id : idList) {
-					if (!p.hasSegment(id)) {
-						errorList.add("Segment " + id + " not found in consensus");
-						errorCount++;
-					}
-				}
-
-				for(UUID id : p.getSegmentIDs()){
-					if (!idList.contains(id)) {
-						errorList.add("Segment " + id + " in consensus not found in root");
-						errorCount++;
-					}
-				}
-
-
-			} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-				errorList.add(String.format("Error getting segments for consensus nucleus: %s", e.getMessage()));
-				e.printStackTrace();
-				errorCount++;
-			}
-		}
+		if(d.getCollection().hasConsensus())
+			errorCount += checkSegmentation(d.getCollection().getConsensus(), idList);
 
 		return errorCount==0;
+	}
+	
+	/**
+	 * Check a nucleus segmentation matches the expected list of segments,
+	 * and that segmentation patterns are internally consistent
+	 * @param n the object to check
+	 * @param expectedSegments the expected segment ids
+	 * @return the number of errors found
+	 */
+	private int checkSegmentation(Taggable n, List<UUID> expectedSegments) {
+		
+		int errorCount = 0;
+		boolean hasSegments = expectedSegments.size()>0;
+		ISegmentedProfile p;
+		try {
+			p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			if(p.hasSegments()!=hasSegments) {
+				errorList.add(String.format("Profile collection segments is %s; nucleus is %s", hasSegments, p.hasSegments()));
+				errorCount++;
+			}
+
+			List<UUID> childList = p.getSegmentIDs();
+
+			if(expectedSegments.size()!=childList.size()) {
+				errorList.add(String.format("Profile collection has %s segments; nucleus has %s", expectedSegments.size(), childList.size()));
+				errorCount++;
+			}
+
+			// Check all nucleus segments are in root dataset
+			for (UUID id : childList) {
+				if (!expectedSegments.contains(id) && !id.equals(n.getID())) {
+					errorList.add(String.format("Nucleus %s has segment %s not found in parent", n.getID(), id));
+					errorCount++;
+				}
+			}
+
+
+			// Check all root dataset segments are in nucleus
+
+			for (UUID id : expectedSegments) {
+				if (!childList.contains(id)) {
+					errorList.add(String.format("Profile collection segment %s not found in object %s", id, n.getID()));
+					errorCount++;
+				}
+			}
+
+
+
+			// Check each profile index in only covered once by a segment
+			for (UUID id1 : expectedSegments) {
+				IBorderSegment s1 = p.getSegment(id1);
+				for (UUID id2 : expectedSegments) {
+					if(id1==id2)
+						continue;
+					IBorderSegment s2 = p.getSegment(id2);
+					if(s1.overlapsBeyondEndpoints(s2)){
+						errorList.add(String.format("%s overlaps %s in object %s", s1.getDetail(), s2.getDetail(), n.getID()));
+						errorCount++;
+					}
+
+				}
+			}
+
+
+		} catch (ProfileException | UnavailableComponentException e) {
+			errorList.add(String.format("Error getting segments for object %s: %s", n.getID(), e.getMessage()));
+			stack(e);
+			e.printStackTrace();
+			errorCount++;
+		}
+		return errorCount;
 	}
 
 }
