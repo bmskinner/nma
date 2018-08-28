@@ -334,9 +334,10 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param offset an offset to the x position. Used to align plots to the right
 	 * @param datasetIndex the index of the dataset for adding to the chart dataset
 	 * @throws ProfileException
+	 * @throws ChartDatasetCreationException 
 	 */
 	private void addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, FloatXYDataset ds,
-			int length, double offset, int datasetIndex) throws ProfileException {
+			int length, double offset, int datasetIndex) throws ProfileException, ChartDatasetCreationException {
 
 		IProfile xpoints = createXPositions(profile, length).add(offset);
 		
@@ -365,10 +366,15 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				prevIndex = index;
 			}
 			
+			try {
 			float[][] data = {Arrays.copyOfRange(xvalues, start, prevIndex+1),
 			                  Arrays.copyOfRange(yvalues, start, prevIndex+1)};
-			
 			ds.addSeries(seg.getName(), data, datasetIndex);
+			} catch(IllegalArgumentException e) {
+				throw new ChartDatasetCreationException("Cannot copy profile range for segment chart: "+start+ " - "+prevIndex);
+			}
+			
+			
 		}
 
 	}

@@ -78,7 +78,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     }
 
     @Override
-    public void setChart(final JFreeChart chart) {
+    public synchronized void setChart(final JFreeChart chart) {
         finest("Setting new chart");
         double oldXPct = 0;
         double oldYPct = 0;
@@ -135,7 +135,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     /**
      * Update the domain width of the rectangle overlay based on the set percent
      */
-    private void updateDomainWidth() {
+    private synchronized void updateDomainWidth() {
 
         // Get the x bounds of the plot
         double max = getChart().getXYPlot().getDomainAxis().getUpperBound();
@@ -151,7 +151,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     /**
      * Update the range width of the rectangle overlay based on the set percent
      */
-    private void updateRangeWidth() {
+    private synchronized void updateRangeWidth() {
 
         // Get the bounds of the plot
         double max = getChart().getXYPlot().getRangeAxis().getUpperBound();

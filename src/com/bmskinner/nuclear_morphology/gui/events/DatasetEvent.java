@@ -60,7 +60,15 @@ public class DatasetEvent extends EventObject {
     public static final String CLUSTER_FROM_FILE  = "ClusterFromFile";
     public static final String BUILD_TREE         = "Build tree";
     public static final String TRAIN_CLASSIFIER   = "Train classifier";
-    public static final String REFRESH_CACHE      = "Refresh caches"; // signal the chart cache should be refreshed for given datasets
+        
+    /**
+     * Clear charts containing the associated datasets from caches, and recreate them. 
+     */
+    public static final String RECACHE_CHARTS      = "Refresh caches"; // signal the chart cache should be refreshed for given datasets
+    
+    /**
+     * Clear charts containing the associated datasets from caches, but do not recreate them. 
+     */
     public static final String CLEAR_CACHE        = "Clear caches";
     public static final String SAVE               = "Save selected";
     public static final String SAVE_AS            = "Save as new file";

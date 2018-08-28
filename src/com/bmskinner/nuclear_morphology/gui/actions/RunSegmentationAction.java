@@ -71,7 +71,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         this.mode = mode;
     }
 
-    public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, Integer downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
+    public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
             CountDownLatch latch) {
         super(dataset, "Copying morphology to " + dataset.getName(), acceptor, eh);
         this.downFlag = downFlag;
@@ -87,7 +87,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
      * @param list
      * @param source
      */
-    public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, Integer downFlag,
+    public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, int downFlag,
     		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(list, PROGRESS_LBL, acceptor, eh);
         this.downFlag = downFlag;
@@ -97,29 +97,12 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 
     @Override
     public void run() {
-
         setProgressBarIndeterminate();
-
         switch (mode) {
-        case NEW: {
-            runNewAnalysis();
-            break;
-        }
-
-        case COPY: {
-            runCopyAnalysis();
-            break;
-        }
-
-        case REFRESH: {
-            runRefreshAnalysis();
-            break;
-        }
-
-        default: {
-            runNewAnalysis();
-            break;
-        }
+	        case COPY:    runCopyAnalysis(); return;
+	        case REFRESH: runRefreshAnalysis(); return;
+	        case NEW:
+	        default:      runNewAnalysis(); return;
         }
     }
 
@@ -153,6 +136,9 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 
         // ensure the progress bar gets hidden even if it is not removed
         setProgressBarVisible(false);
+        
+        finer("Firing clear cache event");
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
 
         // The analysis takes place in a new thread to accomodate refolding.
         // See specific comment below
@@ -166,13 +152,8 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                  * dataset. Also force the consensus nucleus to be refolded at
                  * the next step.
                  */
-                if (mode.equals(MorphologyAnalysisMode.REFRESH)) {
+                if (mode.equals(MorphologyAnalysisMode.REFRESH)) 
                     dataset.getCollection().updateVerticalNuclei();
-
-                    // if(dataset.getCollection().hasConsensusNucleus()){
-                    // downFlag |= MainWindow.CURVE_REFOLD;
-                    // }
-                }
 
                 /*
                  * The refold action is a progressable action, so must not block
@@ -197,12 +178,6 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                 }
 
                 /*
-                 * Recache charts if the dataset exists
-                 */
-                finer("Firing clear cache event");
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, dataset);
-
-                /*
                  * Ideally, wait for the charts to clear before firing the
                  * selection request
                  */
@@ -210,24 +185,18 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                 /*
                  * Save the dataset, regardless of flags
                  */
-                finer("Saving the dataset");
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
+//                finer("Saving the dataset");
+//                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
 
-                if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
-                    DatasetListManager.getInstance().addDataset(dataset);
+                if ((downFlag & ADD_POPULATION) == ADD_POPULATION)
                     getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-
-                }
 
                 // if no list was provided, or no more entries remain,
                 // call the finish
                 if (!hasRemainingDatasetsToProcess()) {
                     finest("No more datasets remain to process");
-                    if (latch != null) {
+                    if (latch != null) 
                         latch.countDown();
-                    }
-                    // finer("Firing refresh cache event");
-                    // fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 
                     finer("Firing select dataset event");
                     getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);

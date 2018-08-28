@@ -136,7 +136,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
             throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) for %s", profile.size(), getBorderLength(), type));
         
         try {
-        	finest("Setting profile of type "+type);
+//        	finest("Setting profile of type "+type);
     		assignProfile(type, new DefaultSegmentedProfile(profile));
 		} catch (IndexOutOfBoundsException | ProfileException e) {
 			stack("Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
@@ -1454,7 +1454,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 
 			// assign new segments
-			finer("Creating new SegmentedFloatProfile to pass interpolated profile out of component");
+//			finer("Creating new SegmentedFloatProfile to pass interpolated profile out of component");
 			return new SegmentedFloatProfile(newProfile, newSegs);
 		}
 
@@ -1757,7 +1757,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public ISegmentedProfile copy() throws ProfileException{
-			finer("Copying profile "+toString());
 			return new DefaultSegmentedProfile(this);
 		}
 
@@ -1856,7 +1855,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param parent the parent segment (can be null)
 			 */
 			protected BorderSegmentTree(@NonNull UUID id, int start, int length, @Nullable BorderSegmentTree parent){
-				finer(String.format("Creating new segment at %d of length %d with parent %s", start, length, parent));
+//				finest(String.format("Creating new segment at %d of length %d with parent %s", start, length, parent));
 				if(start<0 || start > size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
 				if(length<0 || length > size()+1)
@@ -2160,7 +2159,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				// All checks passed
 				
-				fine(String.format("Updating segment from %d-%d to %d-%d", this.startIndex, getEndIndex(), startIndex, endIndex));
+//				finest(String.format("Updating segment from %d-%d to %d-%d", this.startIndex, getEndIndex(), startIndex, endIndex));
 				this.startIndex = startIndex;
 				this.length = newLength;
 				

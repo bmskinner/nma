@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.charting;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.ScrollPane;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.junit.Before;
 
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
@@ -37,6 +39,12 @@ public abstract class ChartFactoryTest {
 		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
 		logger.setLevel(Level.FINEST);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+	}
+	
+	protected void showSingleChart(JFreeChart chart, ChartOptions options, String variable, boolean fixedAspect) throws InterruptedException {
+		List<JPanel> panels = new ArrayList<>();
+		panels.add(makeChartPanel(chart, options, variable, fixedAspect));
+		showCharts(panels, variable);
 	}
 	
 	/**

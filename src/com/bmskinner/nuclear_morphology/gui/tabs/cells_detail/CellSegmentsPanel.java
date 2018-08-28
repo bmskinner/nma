@@ -165,49 +165,11 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         	
         	imagePanel.setCell(activeDataset(), cell, component, false, false);
 
-//            ProfileType type = profileOptions.getSelected();
-//
-//            if (this.getCellModel().hasCell()) {
-//
-//                ISegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type,
-//                        Tag.REFERENCE_POINT);
-//
-//                ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-//                        .setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
-//                        .setTag(Tag.REFERENCE_POINT).setShowMarkers(false).setProfileType(type)
-//                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(true).setShowXAxis(false)
-//                        .setShowYAxis(false).setTarget(dualPanel.getMainPanel()).build();
-//
-//                setChart(options);
-//
-//                /*
-//                 * Create the chart for the range panel
-//                 */
-//
-//                ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
-//                        .setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
-//                        .setTag(Tag.REFERENCE_POINT).setShowMarkers(false).setProfileType(type)
-//                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(false).setShowXAxis(false)
-//                        .setShowYAxis(false).setTarget(dualPanel.getRangePanel()).build();
-//
-//                setChart(rangeOptions);
-//
-//                setEnabled(true);
-//
-//            } else {
-//                JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
-//                JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
-//
-//                dualPanel.setCharts(chart1, chart2);
-//                setEnabled(false);
-//
-//            }
-
         } catch (Exception e) {
             error("Error updating cell panel", e);
-            JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
-            JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
-//            dualPanel.setCharts(chart1, chart2);
+//            JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
+//            JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
+////            dualPanel.setCharts(chart1, chart2);
             setEnabled(false);
         }
 
@@ -216,22 +178,22 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     @Override
     public void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
-        JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
-        JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
-
-//        dualPanel.setCharts(chart1, chart2);
+//        JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
+//        JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
+//
+////        dualPanel.setCharts(chart1, chart2);
     }
 
     @Override
     public void chartSetEventReceived(ChartSetEvent e) {
-        ISegmentedProfile profile;
-        try {
-            profile = this.getCellModel().getCell().getNucleus().getProfile(profileOptions.getSelected(),
-                    Tag.REFERENCE_POINT);
+//        ISegmentedProfile profile;
+//        try {
+//            profile = this.getCellModel().getCell().getNucleus().getProfile(profileOptions.getSelected(),
+//                    Tag.REFERENCE_POINT);
 //            dualPanel.setProfile(profile, false);
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
-            fine("Error getting profile", e1);
-        }
+//        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
+//            fine("Error getting profile", e1);
+//        }
 
     }
 
@@ -276,7 +238,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
                 // Recache necessary charts
                 refreshChartCache();
 
-                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
             } catch (Exception e) {
                 error("Error updating segment", e);
             }

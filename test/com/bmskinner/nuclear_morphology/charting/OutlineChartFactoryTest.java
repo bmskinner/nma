@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
  *
  */
 public class OutlineChartFactoryTest extends ChartFactoryTest {
-	
+		
 	private static final boolean IS_FIXED_ASPECT = true;
 	
 	/**
@@ -48,13 +48,14 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 			JPanel outline = makeChartPanel(new OutlineChartFactory(options).makeCellOutlineChart(), options, title, IS_FIXED_ASPECT);
 			
 			// show the profile corresponding to the chart
-			ChartOptions trueOptions = new ChartOptionsBuilder().setDatasets(dataset)
+			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset)
 					.setCell(cell)
 					.setTag(Tag.REFERENCE_POINT)
 					.setShowMarkers(true)
+					.setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE)
 					.build();
-			JPanel profile = makeChartPanel(new ProfileChartFactory(trueOptions).createProfileChart(), trueOptions, "Profile", false);
+			JPanel profile = makeChartPanel(new ProfileChartFactory(profileOptions).createProfileChart(), profileOptions, "Profile", false);
 			
 			JPanel bothPanel = new JPanel();
 			bothPanel.add(outline);
@@ -68,7 +69,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	
 	@Test
 	public void testOutlineChartOfSingleCellNonSegmentedDataset() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1)
+		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(1)
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
@@ -77,7 +78,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	
 	@Test
 	public void testOutlineChartOfSingleCellSegmentedDataset() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1)
+		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(1)
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.segmented().build();
@@ -86,7 +87,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	
 	@Test
 	public void testOutlineChartOfMultiCellNonSegmentedDataset() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(10)
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(10)
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
@@ -95,16 +96,17 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	
 	@Test
 	public void testOutlineChartOfMultiCellSegmentedDataset() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(10)
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(10)
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
+				.withMaxSizeVariation(10)
 				.segmented().build();
 		generateChartsForAllCells(d, "Multiple nuclei, square, segmented");
 	}
 	
 	@Test
 	public void testOutlineChartOfRotatedMultiCellSegmentedDataset() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(20)
+		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(20)
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.maxRotation(90)

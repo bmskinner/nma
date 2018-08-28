@@ -192,7 +192,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         
     	ch.changeDatasetScale(activeDataset());
         refreshTableCache();
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
     }
 
     @Override

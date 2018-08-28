@@ -69,7 +69,7 @@ public class DatasetValidator implements Loggable {
 	 * 
 	 * @param d
 	 */
-	public boolean validate(final IAnalysisDataset d) {
+	public boolean validate(final @NonNull IAnalysisDataset d) {
 
 		errorList.clear();
 		errorCells.clear();
@@ -95,7 +95,7 @@ public class DatasetValidator implements Loggable {
 			errorList.add("Dataset OK");
 			return true;
 		}
-		errorList.add("Dataset failed validation");
+		errorList.add(String.format("Dataset failed validation: %s out of %s cells have errors", errorCells.size(), d.getCollection().getCells().size()));
 		return false;
 
 	}
@@ -191,24 +191,25 @@ public class DatasetValidator implements Loggable {
 							errorList.add(String.format("Profile collection segment %s not found in nucleus %s", id, n.getNameAndNumber()));
 							cellErrors++;
 						}
+					}
 
 
 
-						// Check each profile index in only covered once by a segment
-						for (UUID id1 : idList) {
-							IBorderSegment s1 = p.getSegment(id1);
-							for (UUID id2 : idList) {
-								if(id1==id2)
-									continue;
-								IBorderSegment s2 = p.getSegment(id2);
-								if(s1.overlapsBeyondEndpoints(s2)){
-									errorList.add(String.format("Segment %s overlaps segment %s in %s", s1.getDetail(), s2.getDetail(), n.getNameAndNumber()));
-									cellErrors++;
-								}
-
+					// Check each profile index in only covered once by a segment
+					for (UUID id1 : idList) {
+						IBorderSegment s1 = p.getSegment(id1);
+						for (UUID id2 : idList) {
+							if(id1==id2)
+								continue;
+							IBorderSegment s2 = p.getSegment(id2);
+							if(s1.overlapsBeyondEndpoints(s2)){
+								errorList.add(String.format("Segment %s overlaps segment %s in %s", s1.getDetail(), s2.getDetail(), n.getNameAndNumber()));
+								cellErrors++;
 							}
+
 						}
 					}
+
 
 				} catch (ProfileException | UnavailableComponentException e) {
 					errorList.add(String.format("Error getting segments for nucleus %s: %s", n.getNameAndNumber(), e.getMessage()));

@@ -106,7 +106,7 @@ public class CosmeticHandler implements Loggable {
     	try {
     		Color newColor = parent.getInputSupplier().requestColor("Choose dataset colour", (Color) oldColour);
     		dataset.setDatasetColour(newColor);
-    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
     		parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
     	} catch(RequestCancelledException e) {
@@ -180,7 +180,7 @@ public class CosmeticHandler implements Loggable {
     		Color newColor = parent.getInputSupplier().requestColor(Labels.Signals.CHOOSE_SIGNAL_COLOUR, (Color) oldColour);
 
     		d.getCollection().getSignalGroup(signalGroupId).get().setGroupColour(newColor);
-    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
     	} catch(RequestCancelledException e) {
     		return;
     	}
@@ -199,7 +199,7 @@ public class CosmeticHandler implements Loggable {
     		String oldName = d.getCollection().getSignalGroup(signalGroup).get().getGroupName();
     		String newName = parent.getInputSupplier().requestString("Choose a new name", oldName);
     		d.getCollection().getSignalGroup(signalGroup).get().setGroupName(newName);
-    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
     	} catch(RequestCancelledException e) {
     		return;
     	}

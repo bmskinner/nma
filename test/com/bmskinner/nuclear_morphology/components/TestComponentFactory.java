@@ -58,13 +58,12 @@ public class TestComponentFactory {
 	 * @param xBase the starting x value
 	 * @param yBase the starting y value
 	 * @param rotation the rotation of the nuclei
-	 * @param randomOffsetStart should an offset be applied to the border array
-	 * @param fixedStartOffset an offset to apply to the border array; has no effect if randomOffsetStart is true
+	 * @param fixedStartOffset an offset to apply to the border array
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
-		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation, randomOffsetStart, fixedStartOffset));
+	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
+		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation, fixedStartOffset));
 	}
 	
 	/**
@@ -78,7 +77,7 @@ public class TestComponentFactory {
 	}
 	
 	public static Nucleus rectangularNucleus(int w,int h) throws ComponentCreationException {
-		return rectangularNucleus(w, h, DEFAULT_X_BASE, DEFAULT_Y_BASE, 0, false, 0);
+		return rectangularNucleus(w, h, DEFAULT_X_BASE, DEFAULT_Y_BASE, 0, 0);
 	}
 	
 	/**
@@ -86,14 +85,12 @@ public class TestComponentFactory {
 	 * and height. The border may be drawn from any starting position in the object
 	 * @param w
 	 * @param h
-	 * @param randomOffsetStart should an offset be applied to the border array
-	 * @param fixedStartOffset an offset to apply to the border array; has no effect if randomOffsetStart is true
+	 * @param fixedStartOffset an offset to apply to the border array
 	 * @return
 	 * @throws ComponentCreationException 
 	 */
-	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
+	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
 
-//		System.out.println("Creating cell: w"+w+" h"+h+" xbase:"+xBase+" yBase"+yBase+" rot"+rotation);
 		int[] xpoints = new int[(w+h)*2];
 		int[] ypoints = new int[(w+h)*2];
 				
@@ -107,14 +104,8 @@ public class TestComponentFactory {
 		}
 
 		// Choose offset so not all objects will start on the RP
-		if(randomOffsetStart) {
-			int offset = (int) (Math.random()*(double)xpoints.length);
-			xpoints = offsetArray(xpoints, offset);
-			ypoints = offsetArray(ypoints, offset);
-		} else {
 			xpoints = offsetArray(xpoints, fixedStartOffset);
 			ypoints = offsetArray(ypoints, fixedStartOffset);
-		}
 				
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));

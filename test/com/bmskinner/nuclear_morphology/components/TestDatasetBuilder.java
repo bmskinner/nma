@@ -18,12 +18,12 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  */
 public class TestDatasetBuilder {
 	
-	public static final int DEFAULT_VARIATION  = 0;
-	public static final int DEFAULT_BASE_WIDTH = 40;
+	public static final int DEFAULT_VARIATION   = 0;
+	public static final int DEFAULT_BASE_WIDTH  = 40;
 	public static final int DEFAULT_BASE_HEIGHT = 50;
-	public static final int DEFAULT_X_BASE = 100;
-	public static final int DEFAULT_Y_BASE = 100;
-	public static final int DEFAULT_ROTATION = 0;
+	public static final int DEFAULT_X_BASE      = 100;
+	public static final int DEFAULT_Y_BASE      = 100;
+	public static final int DEFAULT_ROTATION    = 0;
 	public static final int DEFAULT_BORDER_OFFSET = 20;
 	public static final boolean DEFAULT_IS_BORDER_OFFSET = true;
 	
@@ -71,13 +71,11 @@ public class TestDatasetBuilder {
 		case SQUARE: 
 		default: d = variableRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
 		}
-		
+		d.setRoot(true);
 		if(segment || profile)
 			new DatasetProfilingMethod(d).call();
 		if(segment)
 			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
-		
-		d.setRoot(true);
 		return d;
 	}
 	
@@ -161,7 +159,7 @@ public class TestDatasetBuilder {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public IAnalysisDataset variableRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
+	private IAnalysisDataset variableRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
 		
 		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", type);
 
@@ -173,16 +171,16 @@ public class TestDatasetBuilder {
 			int height = (rng.nextDouble()<0.5)?baseHeight-hVar:baseHeight+hVar;
 			double degreeRot = (rng.nextDouble()*maxRotationDegrees);
 			
+			int borderLength = w*2+h*2;
+			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*(double)borderLength) : 0;
+			
 			ICell cell = TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
-					randomOffsetStart, fixedStartOffset);
+					borderOffset);
 			
 			Nucleus n = cell.getNucleus();
 			
 			collection.addCell(cell);
 		}
-		
-		
 		return new DefaultAnalysisDataset(collection);
-		
 	}
 }

@@ -47,6 +47,11 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
                              // aggregate
 
 
+    /**
+     * Create specifying the length of the profile, and the number of profiles expected
+     * @param length
+     * @param profileCount
+     */
     public DefaultProfileAggregate(final int length, final int profileCount) {
         if (profileCount <= 0)
             throw new IllegalArgumentException("Cannot have zero profiles in aggregate");

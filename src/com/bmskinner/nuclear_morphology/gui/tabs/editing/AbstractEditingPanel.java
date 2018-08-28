@@ -127,7 +127,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
         list.addAll(getDatasets());
         list.addAll(activeDataset().getAllChildDatasets());
 
-        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
+        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, list);
     }
 
     /**

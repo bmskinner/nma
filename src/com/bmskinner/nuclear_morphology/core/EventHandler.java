@@ -509,7 +509,7 @@ public class EventHandler implements Loggable, EventListener {
                 saveDataset(event.firstDataset(), false);
             }
 
-            if (event.method().equals(DatasetEvent.REFRESH_CACHE))
+            if (event.method().equals(DatasetEvent.RECACHE_CHARTS))
             	fireDatasetEvent(event);
 
             if (event.method().equals(DatasetEvent.CLEAR_CACHE))

@@ -101,12 +101,13 @@ public final class DatasetListManager implements Loggable {
     }
 
     /**
-     * Get the first of the selected datasets
+     * Get the first of the selected datasets, or null if there are no
+     * datasets selected
      * 
      * @return
      */
-    public synchronized final IAnalysisDataset getActiveDataset() {
-        return selected.get(0);
+    @Nullable public synchronized final IAnalysisDataset getActiveDataset() {
+        return selected.isEmpty() ? null : selected.get(0);
     }
 
     /**

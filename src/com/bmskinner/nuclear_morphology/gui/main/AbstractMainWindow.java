@@ -218,7 +218,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
     @Override
 	public void eventReceived(DatasetEvent event) {
 
-		if (event.method().equals(DatasetEvent.REFRESH_CACHE))
+		if (event.method().equals(DatasetEvent.RECACHE_CHARTS))
             recacheCharts(event.getDatasets());
 
         if (event.method().equals(DatasetEvent.CLEAR_CACHE))

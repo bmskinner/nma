@@ -277,18 +277,19 @@ public class DockableMainWindow extends AbstractMainWindow {
      * @param dataset
      */
     private synchronized void addDataset(final IAnalysisDataset dataset) {
+    	DatasetListManager.getInstance().addDataset(dataset);
     	fine("Adding dataset to populations panel: "+dataset.getName());
     	getPopulationsPanel().addDataset(dataset);
-        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-        	getPopulationsPanel().addDataset(child);
-        }
+    	for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+    		getPopulationsPanel().addDataset(child);
+    	}
 
-        // This will also trigger a dataset update event as the dataset
-        // is selected, so don't trigger another update here.
-        getPopulationsPanel().update(dataset);
-        
-        //Force all panels to update with the new datasets
-        eh.eventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
+    	// This will also trigger a dataset update event as the dataset
+    	// is selected, so don't trigger another update here.
+    	getPopulationsPanel().update(dataset);
+
+    	//Force all panels to update with the new datasets
+    	eh.eventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
     }
 
 	@Override

@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Create profile charts. The majority of methods are private, preferring explicit options
@@ -260,6 +262,18 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 			}
 		}
+		
+		// Add segment name annotations
+		if (options.isShowAnnotations() && collection.getProfileCollection().hasSegments()) {
+			try {
+				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN);
+				addSegmentAnnotations(profile, plot);
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
+				fine("Error adding segment annotations", e);
+				return makeErrorChart();
+			}
+		}
+				
 		applyAxisOptions(chart);
 		return chart;
 	}

@@ -141,7 +141,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 			}
             cellModel.swapCell(workingCell);
 
-            fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+            fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
         }
     }
 

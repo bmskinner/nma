@@ -227,7 +227,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
         }
         this.setAnalysing(false);
         this.refreshChartCache();
-        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
 
     }
 
