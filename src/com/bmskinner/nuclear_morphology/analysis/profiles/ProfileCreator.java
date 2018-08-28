@@ -159,14 +159,10 @@ public class ProfileCreator implements Loggable {
     }
 
     private void reapplySegments(List<IBorderSegment> segments, ISegmentedProfile profile) {
-//    	fine("Detected preexisting segments to apply");
-//    	for(IBorderSegment s : segments) {
-//    		fine(s.toString());
-//    	}
+
         // If the border list has changed, the profile lengths will be different
         // In this case, add and normalise the segment lengths
         if (segments.get(0).getProfileLength() != target.getBorderLength()) {
-//        	fine("Rescaling preexisting segments from "+segments.get(0).getProfileLength()+" to "+target.getBorderLength());
             try {
                 segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());
             } catch (ProfileException e) {

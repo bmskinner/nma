@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -164,7 +165,7 @@ public class SegmentFitter implements Loggable {
      * @throws UnavailableComponentException 
      * @throws UnavailableProfileTypeException 
      */
-    private void remapBorderPoints(@NonNull final Nucleus n, IProfileCollection pc) throws ProfileException, UnsegmentedProfileException, UnavailableProfileTypeException, UnavailableComponentException {
+    private void remapBorderPoints(@NonNull final Nucleus n, @Nullable IProfileCollection pc) throws ProfileException, UnsegmentedProfileException, UnavailableProfileTypeException, UnavailableComponentException {
 
         if (pc == null) {
             warn("No profile collection found, skipping remapping");

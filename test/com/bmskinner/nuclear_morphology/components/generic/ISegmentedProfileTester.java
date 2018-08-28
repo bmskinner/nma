@@ -867,7 +867,7 @@ public class ISegmentedProfileTester {
         exception.expect(IllegalArgumentException.class);
         profile.splitSegment(s1, mid, id1, id2);
     }
-
+	
 	@Test
 	public void testValueString() { 
 	    StringBuilder builder = new StringBuilder();

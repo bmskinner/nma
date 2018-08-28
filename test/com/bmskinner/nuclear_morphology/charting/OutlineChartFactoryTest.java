@@ -33,8 +33,9 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	private static final boolean IS_FIXED_ASPECT = true;
 	
 	/**
-	 * Create charts with a default range of options variables for the given datasets
-	 * @param datasets
+	 * Create and display outline and profile charts for all cells in the dataset
+	 * @param dataset
+	 * @param title
 	 * @throws InterruptedException
 	 */
 	private void generateChartsForAllCells(IAnalysisDataset dataset, String title) throws InterruptedException {

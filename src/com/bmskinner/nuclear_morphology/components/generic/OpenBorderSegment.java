@@ -45,8 +45,7 @@ public class OpenBorderSegment implements IBorderSegment {
 
     private static final long serialVersionUID = 1L;
 
-    private UUID uuid; // allows keeping a consistent track of segment IDs with
-                       // a profile
+    private UUID uuid;
 
     private int startIndex, endIndex, totalLength;
 
@@ -58,29 +57,24 @@ public class OpenBorderSegment implements IBorderSegment {
      * TRANSIENT FIELDS
      */
 
-    private transient IBorderSegment prevSegment = null;  // track the previous
-                                                          // segment in the
-                                                          // profile
-    private transient IBorderSegment nextSegment = null;  // track the next
-                                                          // segment in the
-                                                          // profile
-    private transient boolean        isLocked    = false; // allow the start
-                                                          // index to be fixed
+    private transient IBorderSegment prevSegment = null;
+    private transient IBorderSegment nextSegment = null;
+    private transient boolean        isLocked    = false;
+                                                         
 
     /**
      * Construct with an existing UUID. This allows nucleus segments to directly
      * track median profile segments
      * 
-     * @param startIndex
-     * @param endIndex
-     * @param total
-     * @param id
+     * @param startIndex the start index of the segment
+     * @param endIndex the end index of the segment (inclusive)
+     * @param total the length of the profile that generated the segment
+     * @param id the id of the segment
      */
     public OpenBorderSegment(int startIndex, int endIndex, int total, UUID id) {
 
-        if (id == null) {
+        if (id == null)
             throw new IllegalArgumentException("Segment ID cannot be null");
-        }
 
         this.startIndex = startIndex;
         this.endIndex = endIndex;
@@ -170,21 +164,22 @@ public class OpenBorderSegment implements IBorderSegment {
     @Override
     public void addMergeSource(IBorderSegment seg) {
 
-        if (seg == null) {
+        if (seg == null)
             throw new IllegalArgumentException("Merge source segment is null");
-        }
-
-        if (seg.getProfileLength() != totalLength) {
+        if(seg.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID)) // never replace or chain the default segment
+			return;
+		if(seg.getID().equals(getID()))
+			throw new IllegalArgumentException(String.format("Cannot add merge source with same id as parent: %s", seg.getID()));
+		if(getMergeSources().stream().anyMatch(s->s.getID().equals(seg.getID())))
+			throw new IllegalArgumentException(String.format("Segment with id %s is already a merge source", seg.getID()));
+        if (seg.getProfileLength() != totalLength)
             throw new IllegalArgumentException("Merge source length does not match");
-        }
 
-        if (!this.contains(seg.getStartIndex())) {
+        if (!this.contains(seg.getStartIndex()))
             throw new IllegalArgumentException("Start index of source is not in this segment");
-        }
 
-        if (!this.contains(seg.getEndIndex())) {
+        if (!this.contains(seg.getEndIndex()))
             throw new IllegalArgumentException("End index of source is not in this segment");
-        }
 
         mergeSources = Arrays.copyOf(mergeSources, mergeSources.length + 1);
         mergeSources[mergeSources.length - 1] = seg;

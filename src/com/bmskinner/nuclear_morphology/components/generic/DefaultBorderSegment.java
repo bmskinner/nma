@@ -170,6 +170,12 @@ public class DefaultBorderSegment implements IBorderSegment {
     public void addMergeSource(@NonNull IBorderSegment seg) {
         if (seg == null)
             throw new IllegalArgumentException("Merge source segment is null");
+        if(seg.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID)) // never replace or chain the default segment
+			return;
+		if(seg.getID().equals(getID()))
+			throw new IllegalArgumentException(String.format("Cannot add merge source with same id as parent: %s", seg.getID()));
+		if(getMergeSources().stream().anyMatch(s->s.getID().equals(seg.getID())))
+			throw new IllegalArgumentException(String.format("Segment with id %s is already a merge source", seg.getID()));
 
         if (seg.getProfileLength() != totalLength)
             throw new IllegalArgumentException("Merge source length does not match");

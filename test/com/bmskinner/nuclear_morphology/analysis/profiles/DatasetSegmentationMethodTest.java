@@ -65,7 +65,7 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 	 */
 	@Test
 	public void testSegmentationOfSingleCellDataset() throws Exception {
-		long seed = 12345;
+		long seed = 1234;
 		IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(1)
 				.baseHeight(40).baseWidth(40).offsetProfiles(true).profiled().build();
 		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
@@ -74,24 +74,41 @@ public class DatasetSegmentationMethodTest extends FloatArrayTester {
 	}
 	
 	/**
-	 * Test a single cell dataset segmentation
+	 * Test multiple identical cells segmentation, with the same (zero) border offset
 	 * @throws Exception
 	 */
 	@Test
 	public void testSegmentationOfMultiCellDataset() throws Exception {
-		long seed = 1234;
-//		IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(100)
-//				.baseHeight(40).baseWidth(40).offsetProfiles(false).profiled().build();
-//		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
-		
-		IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(10)
-				.baseHeight(40).baseWidth(40)
-				.withMaxSizeVariation(10)
-				.ofType(NucleusType.ROUND)
-				.segmented().build();
-		
-		testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
 
+		long seed = 1234;
+		int maxCells = 50;		
+		for(int i=1; i<=maxCells; i++) {
+			System.out.println(String.format("Testing %s cells", i));
+			IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(i)
+					.baseHeight(40).baseWidth(40)
+					.ofType(NucleusType.ROUND)
+					.segmented().build();
+			testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
+		}
+	}
+	
+	/**
+	 * Test multiple identical cells segmentation, with the variable border offset
+	 * @throws Exception
+	 */
+	@Test
+	public void testSegmentationOfMultiCellDatasetWithBorderOffset() throws Exception {
+		long seed = 1234;
+		int maxCells = 50;		
+		for(int i=1; i<=maxCells; i++) {
+			System.out.println(String.format("Testing %s cells", i));
+			IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(i)
+					.baseHeight(40).baseWidth(40)
+					.ofType(NucleusType.ROUND)
+					.offsetProfiles(true)
+					.segmented().build();
+			testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
+		}
 	}
 		
 	/**

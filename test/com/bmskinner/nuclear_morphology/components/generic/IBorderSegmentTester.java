@@ -214,6 +214,13 @@ public class IBorderSegmentTester {
 	}
 	
 	@Test
+    public void testAddMergeSourceExceptsWhenSegmentIdAlreadyExists() {
+		IBorderSegment s = new DefaultBorderSegment(5,  10, profileLength, SEG_ID_0);
+		exception.expect(IllegalArgumentException.class);
+		segment.addMergeSource(s);
+	}
+	
+	@Test
 	public void testGetStartIndex() throws SegmentUpdateException {
 		assertEquals(startIndex, segment.getStartIndex());
 	}

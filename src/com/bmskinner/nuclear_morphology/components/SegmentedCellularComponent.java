@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.OpenBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -1122,7 +1123,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			// The root segment is one segment covering the whole profile. See single spotted pigs.
 			segments = new BorderSegmentTree(IProfileCollection.DEFAULT_SEGMENT_ID);
 			for(IBorderSegment s : list){
-				segments.addMergeSource(s);
+				if(!s.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID))
+					segments.addMergeSource(s);
 			}
 		}
 
@@ -1294,7 +1296,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			if (list == null || list.isEmpty())
 				throw new IllegalArgumentException("Segment list is null or empty");
 
-			if (list.get(0).getProfileLength() != size())
+			if(!list.stream().allMatch(s->s.getProfileLength()==size()))
 				throw new IllegalArgumentException("Segment list is from a different total length");
 			
 			segments.clearMergeSources();
@@ -1420,7 +1422,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			// single segment
 			if(!segments.hasMergeSources()) {
-				newSegs.add(new DefaultBorderSegment(0, length, length, segments.getID()));
+				newSegs.add(new OpenBorderSegment(0, length-1, length, segments.getID()));
 				return new SegmentedFloatProfile(newProfile, newSegs);
 			}
 			
@@ -1935,9 +1937,15 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			public void addMergeSource(@NonNull IBorderSegment seg) {
 				if(seg==null)
 					throw new IllegalArgumentException("Segment is null");
+				if(seg.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID)) // never replace or chain the default segment
+					return;
+				if(seg.getID().equals(id))
+					throw new IllegalArgumentException(String.format("Cannot add merge source with same id as parent: %s", seg.getID()));
+				if(leaves.stream().anyMatch(s->s.getID().equals(seg.getID())))
+					throw new IllegalArgumentException(String.format("Segment with id %s is already a merge source", seg.getID()));
 				if(seg.getProfileLength()!=size())
-					throw new IllegalArgumentException("Segment does not come from the same profile");
-				if(!contains(seg.getStartIndex()) || !contains(seg.getEndIndex()))
+					throw new IllegalArgumentException("Segment does not come from the same length profile");
+				if(!(contains(seg.getStartIndex()) && contains(seg.getEndIndex())))
 					throw new IllegalArgumentException(String.format("Potential merge source (%s) is not contained within this segment (%s)", seg.getDetail(), getDetail()));
 				
 				if(!leaves.isEmpty()) {
