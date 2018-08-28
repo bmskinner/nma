@@ -623,8 +623,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         // Recombine the segment profiles
         IProfile mergedProfile = IProfile.merge(finalSegmentProfiles);
 
-        if(mergedProfile.size()!=size())
-        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), size()));
+        if(mergedProfile.size()!=template.size())
+        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), template.size()));
         
         return new SegmentedFloatProfile(mergedProfile, template.getSegments());
     }

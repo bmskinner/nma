@@ -1499,12 +1499,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 
 			// Recombine the segment profiles
-			IProfile mergedProfile = new DefaultProfile(IProfile.merge(finalSegmentProfiles));
-	        if(mergedProfile.size()!=size())
-	        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), size()));
+			IProfile mergedProfile = IProfile.merge(finalSegmentProfiles);
+			
+	        if(mergedProfile.size()!=template.size())
+	        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), template.size()));
 	        
-			ISegmentedProfile result = new DefaultSegmentedProfile(mergedProfile, template.getSegments());
-			return result;
+	        return new SegmentedFloatProfile(mergedProfile, template.getSegments());
 		}
 
 		/**
@@ -1518,9 +1518,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @throws ProfileException
 		 */
 		private IProfile interpolateSegment(IBorderSegment testSeg, int newLength) throws ProfileException {
-			
-			
-			
 
 			// get the region within the segment as a new profile
 			// Exclude the last index of each segment to avoid duplication
@@ -2224,7 +2221,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			@Override
 			public String getDetail() {
 				return String.format("Segment %s | %s | %s | %s - %s | %s of %s | %s ", 
-						getName(), getID(), getPosition(), getStartIndex(), getEndIndex(), length(), getProfileLength(), wraps());
+						getName(), getID(), getPosition(), getStartIndex(), getEndIndex(), 
+						length(), getProfileLength(), wraps());
 			}
 
 		    @Override

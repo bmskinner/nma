@@ -1,10 +1,14 @@
 package com.bmskinner.nuclear_morphology.components;
 
+import java.io.File;
+import java.util.Random;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * Simplify the creation of test datasets using a builder pattern
@@ -14,42 +18,66 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  */
 public class TestDatasetBuilder {
 	
+	public static final int DEFAULT_VARIATION  = 0;
+	public static final int DEFAULT_BASE_WIDTH = 40;
+	public static final int DEFAULT_BASE_HEIGHT = 50;
+	public static final int DEFAULT_X_BASE = 100;
+	public static final int DEFAULT_Y_BASE = 100;
+	public static final int DEFAULT_ROTATION = 0;
+	public static final int DEFAULT_BORDER_OFFSET = 20;
+	public static final boolean DEFAULT_IS_BORDER_OFFSET = true;
+	
 	private IAnalysisDataset d;
 	private NucleusType type = NucleusType.ROUND;
 	private int nCells = 1;
-	private int maxVariation = TestDatasetFactory.DEFAULT_VARIATION;
-	private int xBase = TestDatasetFactory.DEFAULT_X_BASE;
-	private int yBase = TestDatasetFactory.DEFAULT_Y_BASE;
-	private int w = TestDatasetFactory.DEFAULT_BASE_WIDTH;
-	private int h = TestDatasetFactory.DEFAULT_BASE_HEIGHT;
-	private int fixedOffset = TestDatasetFactory.DEFAULT_BORDER_OFFSET;
-	private int maxRotation = TestDatasetFactory.DEFAULT_ROTATION;
+	private int maxVariation = DEFAULT_VARIATION;
+	private int xBase = DEFAULT_X_BASE;
+	private int yBase = DEFAULT_Y_BASE;
+	private int w = DEFAULT_BASE_WIDTH;
+	private int h = DEFAULT_BASE_HEIGHT;
+	private int fixedOffset = DEFAULT_BORDER_OFFSET;
+	private int maxRotation = DEFAULT_ROTATION;
 	
 	private boolean profile = false;
 	private boolean segment = false;
-	private boolean offset  = TestDatasetFactory.DEFAULT_IS_BORDER_OFFSET;
+	private boolean offset  = DEFAULT_IS_BORDER_OFFSET;
 	
 	private TestComponentShape nucleusShape = TestComponentShape.SQUARE;
 	
+	private Random rng;
 	
 	public enum TestComponentShape {
 		SQUARE, ROUND
 	}
 	
-	public TestDatasetBuilder() {}
+	/**
+	 * Construct with a randomly chosen seed
+	 */
+	public TestDatasetBuilder() {
+		this(new Random().nextLong());
+	}
 	
+	/**
+	 * Construct with a given seed for the random number
+	 * generator
+	 */
+	public TestDatasetBuilder(long seed) {
+		rng = new Random(seed);
+	}
 		
 	public IAnalysisDataset build() throws Exception {
 				
 		switch(nucleusShape) {
 		case SQUARE: 
-		default: d = TestDatasetFactory.variableRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
+		default: d = variableRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
 		}
 		
 		if(segment || profile)
 			new DatasetProfilingMethod(d).call();
 		if(segment)
 			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
+		
+		d.setRoot(true);
 		return d;
 	}
 	
@@ -117,5 +145,44 @@ public class TestDatasetBuilder {
 		fixedOffset = i;
 		return this;
 	}	
+	
+	/**
+	 * Create a dataset consisting of rectangular nuclei. Each nucleus has a random width and
+	 * size constrained by the variation factor
+	 * @param nCells the number of cells to create
+	 * @param maxSizeVariation the maximum variation from the base width and height for a cell
+	 * @param baseWidth the starting width for a cell, before variation
+	 * @param baseHeight the starting heigth for a cell, before variation
+	 * @param xBase the starting x position
+	 * @param yBase the starting y position
+	 * @param maxRotationDegrees the maximum rotation to be applied to a cell 
+	 * @param randomOffsetStart should an offset be applied to the border array
+	 * @param fixedStartOffset an offset to apply to the border array; has no effect if randomOffsetStart is true
+	 * @return
+	 * @throws ComponentCreationException
+	 */
+	public IAnalysisDataset variableRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
+		
+		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", type);
 
+		for(int i=0; i<nCells; i++) {
+			
+			int wVar = (int)(rng.nextDouble()*maxSizeVariation);
+			int hVar = (int)(rng.nextDouble()*maxSizeVariation);
+			int width = (rng.nextDouble()<0.5)?baseWidth-wVar:baseWidth+wVar;
+			int height = (rng.nextDouble()<0.5)?baseHeight-hVar:baseHeight+hVar;
+			double degreeRot = (rng.nextDouble()*maxRotationDegrees);
+			
+			ICell cell = TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
+					randomOffsetStart, fixedStartOffset);
+			
+			Nucleus n = cell.getNucleus();
+			
+			collection.addCell(cell);
+		}
+		
+		
+		return new DefaultAnalysisDataset(collection);
+		
+	}
 }

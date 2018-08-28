@@ -78,17 +78,10 @@ public class ISegmentedProfileTester {
 			return profile;
 		}
 
-		if(source==SegmentedFloatProfile.class){
-			try {
-				return new SegmentedFloatProfile(new FloatProfile(data), segments);
-			} catch (ProfileException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		throw new Exception("Unable to create instance of "+source);
+		if(source==SegmentedFloatProfile.class)
+			return new SegmentedFloatProfile(new FloatProfile(data), segments);
 
+		throw new Exception("Unable to create instance of "+source);
 	}
 	
 	private static List<IBorderSegment> makeTestSegments() throws ProfileException{
@@ -324,7 +317,6 @@ public class ISegmentedProfileTester {
         list.add(new DefaultBorderSegment(60, 90, profile.size(), UUID.randomUUID()));
         list.add(new DefaultBorderSegment(90, 0,  profile.size(), UUID.randomUUID()));
         IBorderSegment.linkSegments(list);
-        System.out.println("Setting segments");
         profile.setSegments(list);
         
         for(int i=0; i<list.size(); i++){
@@ -342,7 +334,6 @@ public class ISegmentedProfileTester {
         list.add(new DefaultBorderSegment(60, 90, profile.size(), UUID.randomUUID()));
         list.add(new DefaultBorderSegment(90, 5,  profile.size(), UUID.randomUUID()));
         IBorderSegment.linkSegments(list);
-//        System.out.println("Setting segments");
         profile.setSegments(list);
         
         for(int i=0; i<list.size(); i++){
@@ -435,91 +426,7 @@ public class ISegmentedProfileTester {
 	    IBorderSegment s1 = new DefaultBorderSegment(5,  10, 110, UUID.randomUUID());
         assertFalse(profile.contains(s1));
     }
-	
-//	@Test
-//	public void testAdjustSegmentStartPositive() throws SegmentUpdateException {
-//	    IBorderSegment s1 = profile.getSegmentAt(1);
-//	    int expStart = s1.getStartIndex()+5;
-//	    assertTrue(profile.adjustSegmentStart(s1.getID(), 5));  
-//	    assertEquals(expStart, s1.getStartIndex());   
-//	}
-//	
-//	@Test
-//	public void testAdjustSegmentStartNegative() throws SegmentUpdateException {
-//	    IBorderSegment s1 = profile.getSegmentAt(1);
-//
-//	    int expStart = s1.getStartIndex()-5;
-//	    assertTrue(profile.adjustSegmentStart(s1.getID(), -5));
-//	    assertEquals(expStart, s1.getStartIndex()); 
-//	}
-//	
-//	@Test
-//    public void testAdjustSegmentStartPositiveDoesNothingWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
-//        IBorderSegment s1 = profile.getSegmentAt(1);
-//        int length = s1.length();
-//        int expStart = s1.getStartIndex();
-//        exception.expect(SegmentUpdateException.class);
-//        profile.adjustSegmentStart(s1.getID(), length-1);
-//    }
-//	
-//	@Test
-//    public void testAdjustSegmentStartNegativeDoesNothingWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
-//        IBorderSegment s1 = profile.getSegmentAt(1);
-//        int length = s1.prevSegment().length();
-//        int expStart = s1.getStartIndex();
-//        exception.expect(SegmentUpdateException.class);
-//        profile.adjustSegmentStart(s1.getID(), -(length-1));
-//    }
-//		
-//	@Test
-//    public void testAdjustSegmentStartExceptsWhenIdIsInvalid() throws SegmentUpdateException {
-//	    UUID id = UUID.fromString("00000001-1000-1000-1000-100000000000");
-//        exception.expect(IllegalArgumentException.class);
-//        profile.adjustSegmentStart(id, 5);
-//    }
-//	
-//	@Test
-//    public void testAdjustSegmentEndPositive() throws SegmentUpdateException {
-//        IBorderSegment s1 = profile.getSegmentAt(1);
-//        int exp = s1.getEndIndex()+5;
-//        assertTrue(profile.adjustSegmentEnd(s1.getID(), 5));  
-//        assertEquals(exp, s1.getEndIndex());   
-//    }
-//    
-//    @Test
-//    public void testAdjustSegmentEndNegative() throws SegmentUpdateException {
-//        IBorderSegment s1 = profile.getSegmentAt(1);
-//
-//        int expStart = s1.getEndIndex()-5;
-//        assertTrue(profile.adjustSegmentEnd(s1.getID(), -5));
-//        assertEquals(expStart, s1.getEndIndex()); 
-//    }
-//    
-//    @Test
-//    public void testAdjustSegmentEndPositiveExceptsWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
-//        IBorderSegment s1 = profile.getSegmentAt(1);
-//        int nextSeglength = s1.nextSegment().length();
-//
-//        exception.expect(SegmentUpdateException.class);
-//        profile.adjustSegmentEnd(s1.getID(), nextSeglength-1);
-//    }
-//    
-//    @Test
-//    public void testAdjustSegmentEndNegativeExceptsWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
-//        IBorderSegment s1 = profile.getSegmentAt(1);
-//        int length = s1.length();
-//        int expStart = s1.getEndIndex();
-//        exception.expect(SegmentUpdateException.class);
-//        profile.adjustSegmentEnd(s1.getID(), -(length-1));
-//    }
-//        
-//    @Test
-//    public void testAdjustSegmentEndExceptsWhenIdIsInvalid() throws SegmentUpdateException {
-//        UUID id = UUID.fromString("00000001-1000-1000-1000-100000000000");
-//        exception.expect(IllegalArgumentException.class);
-//        profile.adjustSegmentEnd(id, 5);
-//    }
-    
+	    
     @Test
     public void testNudgeSegmentsWithZeroOffset() throws ProfileException, UnavailableComponentException {
         testSegmentOffset(0);
@@ -648,6 +555,7 @@ public class ISegmentedProfileTester {
 		// The difference to the test above is that the profile is not explicitly copied.
 		// Note that this SHOULD NOT make a difference because ISegmentedProfile::offset()
 		// returns a new profile; it does not change the template profile state
+		// This test was added to diagnose a bug in the SegmentedCellularComponent
 		
 		for(int i=-profile.size(); i<profile.size()*2; i++) {
 
@@ -671,35 +579,117 @@ public class ISegmentedProfileTester {
 
 		}
 	}
-			
+	
 	@Test
-	public void testFrankenNormaliseToProfileWorksWhenProfilesAreSameLength() throws ProfileException, UnavailableComponentException {
-	    
-	    ISegmentedProfile test = createTemplateProfile(profile.size());
-        ISegmentedProfile result = profile.frankenNormaliseToProfile(test);
-        
-        assertEquals(result.size(), profile.size());
-        
-        for(IBorderSegment s : test.getSegments()){
-            assertEquals(s.toString(), result.getSegment(s.getID()).toString());
+	public void testSegmentTotalLengthsMatchProfileSize() {
+		for(IBorderSegment s : profile.getSegments()){
+            assertEquals(s.getName(), profile.size(), s.getProfileLength());
         }
 	}
 	
 	/**
-	 * Create a template profile for franken-normalising
-	 * @return
+	 * Create a new profile with the same size, segment lengths and positions
+	 * as the template. Test that franken-profiling has no effect.
 	 * @throws ProfileException
+	 * @throws UnavailableComponentException
 	 */
-	private ISegmentedProfile createTemplateProfile(int length) throws ProfileException{
-        List<IBorderSegment> list = new ArrayList<>();
-        list.add(new DefaultBorderSegment(5,  10, length, UUID.fromString(SEG_0)));
-        list.add(new DefaultBorderSegment(10, 20, length, UUID.fromString(SEG_1)));
-        list.add(new DefaultBorderSegment(20, 60, length, UUID.fromString(SEG_2)));
-        list.add(new DefaultBorderSegment(60, 5, length,  UUID.fromString(SEG_3)));
+	@Test
+	public void testFrankenNormaliseToProfileHsaNoEffectWhenProfilesAreIdentical() throws ProfileException, UnavailableComponentException {
+		List<IBorderSegment> list = makeTestSegments();
+        ISegmentedProfile test = new SegmentedFloatProfile(new FloatProfile(10, profileLength), list);
+
+        ISegmentedProfile result = profile.frankenNormaliseToProfile(test);
+        
+        assertEquals(result.size(), profileLength);
+        assertEquals(test.size(), profileLength);
+
+        for(IBorderSegment s : test.getSegments()){
+            assertEquals(s.getName(), s.getDetail(), result.getSegment(s.getID()).getDetail());
+        }
+	}
+			
+	/**
+	 * Create a new profile with the same size and segment lengths as the template, 
+	 * but different positions. Test that franken-profiling generates equal
+	 * segment boundaries
+	 * @throws ProfileException
+	 * @throws UnavailableComponentException
+	 */
+	@Test
+	public void testFrankenNormaliseToProfileWorksWhenProfilesAreSameLength() throws ProfileException, UnavailableComponentException {
+
+		List<IBorderSegment> list = new ArrayList<>();
+        list.add(new DefaultBorderSegment(5,  10, profileLength, UUID.fromString(SEG_0)));
+        list.add(new DefaultBorderSegment(10, 20, profileLength, UUID.fromString(SEG_1)));
+        list.add(new DefaultBorderSegment(20, 60, profileLength, UUID.fromString(SEG_2)));
+        list.add(new DefaultBorderSegment(60, 5, profileLength,  UUID.fromString(SEG_3)));
         IBorderSegment.linkSegments(list);
-        return new SegmentedFloatProfile(new FloatProfile(10, length), list);
+        ISegmentedProfile test = new SegmentedFloatProfile(new FloatProfile(10, profileLength), list);
+
+        ISegmentedProfile result = profile.frankenNormaliseToProfile(test);
+        
+        assertEquals(result.size(), profileLength);
+        assertEquals(test.size(), profileLength);
+
+        for(IBorderSegment s : test.getSegments()){
+            assertEquals(s.getName(), s.getDetail(), result.getSegment(s.getID()).getDetail());
+        }
 	}
 	
+	/**
+	 * Create a new profile as the template, longer than the test profile. Test that 
+	 * franken-profiling generates equivalent segment boundaries
+	 * @throws ProfileException
+	 * @throws UnavailableComponentException
+	 */
+	@Test
+	public void testFrankenNormaliseToProfileWorksWhenTargetProfileIsLonger() throws ProfileException, UnavailableComponentException {
+		int targetLength = profileLength+50;
+		List<IBorderSegment> list = new ArrayList<>();
+        list.add(new DefaultBorderSegment(5,  10, targetLength, UUID.fromString(SEG_0)));
+        list.add(new DefaultBorderSegment(10, 20, targetLength, UUID.fromString(SEG_1)));
+        list.add(new DefaultBorderSegment(20, 60, targetLength, UUID.fromString(SEG_2)));
+        list.add(new DefaultBorderSegment(60, 5, targetLength,  UUID.fromString(SEG_3)));
+        IBorderSegment.linkSegments(list);
+        ISegmentedProfile test = new SegmentedFloatProfile(new FloatProfile(10, targetLength), list);
+
+        ISegmentedProfile result = profile.frankenNormaliseToProfile(test);
+        
+        assertEquals(result.size(), targetLength);
+        assertEquals(test.size(), targetLength);
+
+        for(IBorderSegment s : test.getSegments()){
+            assertEquals(s.getName(), s.getDetail(), result.getSegment(s.getID()).getDetail());
+        }
+	}
+	
+	/**
+	 * Create a new profile as the template, shorter than the test profile. Test that 
+	 * franken-profiling generates equivalent segment boundaries
+	 * @throws ProfileException
+	 * @throws UnavailableComponentException
+	 */
+	@Test
+	public void testFrankenNormaliseToProfileWorksWhenTargetProfileIsShorter() throws ProfileException, UnavailableComponentException {
+		int targetLength = profileLength-50;
+		List<IBorderSegment> list = new ArrayList<>();
+        list.add(new DefaultBorderSegment(5,  10, targetLength, UUID.fromString(SEG_0)));
+        list.add(new DefaultBorderSegment(10, 20, targetLength, UUID.fromString(SEG_1)));
+        list.add(new DefaultBorderSegment(20, 60, targetLength, UUID.fromString(SEG_2)));
+        list.add(new DefaultBorderSegment(60, 5, targetLength,  UUID.fromString(SEG_3)));
+        IBorderSegment.linkSegments(list);
+        ISegmentedProfile test = new SegmentedFloatProfile(new FloatProfile(10, targetLength), list);
+
+        ISegmentedProfile result = profile.frankenNormaliseToProfile(test);
+        
+        assertEquals(result.size(), targetLength);
+        assertEquals(test.size(), targetLength);
+
+        for(IBorderSegment s : test.getSegments()){
+            assertEquals(s.getName(), s.getDetail(), result.getSegment(s.getID()).getDetail());
+        }
+	}
+		
 	
 	@Test
     public void testFrankenNormaliseToProfileExceptsOnDifferentSegmentCountTemplate() throws ProfileException {
@@ -888,9 +878,13 @@ public class ISegmentedProfileTester {
 	}
 
 	@Test
-	public void testCopy() throws ProfileException {
+	public void testCopy() throws ProfileException, UnavailableComponentException {
 	    ISegmentedProfile copy = profile.copy();
-		assertEquals(profile.toString(), copy.toString());
+	    assertEquals(profile.getSegmentCount(), copy.getSegmentCount());
+	    for (UUID id : profile.getSegmentIDs()) {
+	        assertEquals(profile.getSegment(id).getDetail(), copy.getSegment(id).getDetail());
+	    }  
+		assertEquals(profile.valueString(), copy.valueString());
 	}
 
 	@Test

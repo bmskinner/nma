@@ -19,12 +19,9 @@
 
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 
 public class ProfileIndexFinderTest {
 

@@ -602,27 +602,9 @@ public class DefaultBorderSegment implements IBorderSegment {
     }
 
     public String getDetail() {
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("Segment ");
-        builder.append(this.getName());
-        builder.append(" | ");
-        builder.append(this.getID());
-        builder.append(" | ");
-        builder.append(this.getPosition());
-        builder.append(" | ");
-        builder.append(this.startIndex);
-        builder.append(" - ");
-        builder.append(this.endIndex);
-        builder.append(" | ");
-        builder.append(this.length());
-        builder.append(" of ");
-        builder.append(this.getProfileLength() - 1);
-        builder.append(" | ");
-        builder.append(this.wraps());
-
-        return builder.toString();
+    	return String.format("Segment %s | %s | %s | %s - %s | %s of %s | %s ", 
+				getName(), getID(), getPosition(), getStartIndex(), getEndIndex(), 
+				length(), getProfileLength(), wraps());
     }
 
     @Override
