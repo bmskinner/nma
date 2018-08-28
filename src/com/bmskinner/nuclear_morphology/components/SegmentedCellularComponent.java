@@ -434,7 +434,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 		/**
-		 * Offset the array by the given amount
+		 * Offset an array by the given amount
 		 * 
 		 * @param arr
 		 * @param j

@@ -395,6 +395,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * Assign segments from a template to a target, finding the best match of the
 	 * target profile to the template profile. Segments are matched using a sliding
 	 * window offset of the entire profile.
+	 * 
+	 * Step 1 is to create segments in the target at the proportional indexes of the template.
+	 * Step 2 is to adjust the segment boundaries based on the best-fit offsets 
 	 *  
 	 * @param template the segmented template profile
 	 * @param target the profile to be segmented
@@ -404,33 +407,49 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	private ISegmentedProfile bestFitAlignSegments(@NonNull ISegmentedProfile template, @NonNull ISegmentedProfile target) throws ProfileException, UnavailableProfileTypeException {
 
 		target.clearSegments();
+		
+		//TODO: What happens when an object is symmetric about at least one axis?
+		// The offset could land in two places, causing segments to be placed on top
+		// of each other. See the test method with varying border offsets.
+		
+		// Step 1 is designed to avoid this, by ensuring the segments are all present
+		// and non-overlapping. Once in place, Step 2 involves updating the boundaries to a 
+		// valid best fit index.
 
 		List<IBorderSegment> segments = new ArrayList<>();
 
+		int prevEnd = 0; // Always start at the RP
 		for (IBorderSegment segment : template.getSegments()) {
 
-			// get the indexes the segment begins and ends in the median
-			int medianStart = segment.getStartIndex();
 			int medianEnd   = segment.getEndIndex();
+			double propEnd  = template.getFractionOfIndex(medianEnd);
+			
+			int targetStart = prevEnd;
+			int targetEnd   = target.getIndexOfFraction(propEnd);
+			
+			IBorderSegment seg = IBorderSegment.newSegment(targetStart, targetEnd, target.size(),
+					segment.getID());
+			
+			segments.add(seg);
+			prevEnd = targetEnd;
 
-			// Offset the median profile to these indexes
-			IProfile startOffsetMedian = template.offset(medianStart);
-			IProfile endOffsetMedian = template.offset(medianEnd);
-
-			try {
-
-				// Find the best fit in the nucleus profile for each endpoint
-				int startIndex = target.getSlidingWindowOffset(startOffsetMedian);
-				int endIndex   = target.getSlidingWindowOffset(endOffsetMedian);
-
-				IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, target.size(),
-						segment.getID());
-
-				segments.add(seg);
-
-			} catch (IllegalArgumentException e) {
-				throw new ProfileException("Unable to create segment for nucleus using best-fit alignments", e);
-			}
+//			// Offset the median profile to these indexes
+//			IProfile startOffsetMedian = template.offset(medianStart);
+//			IProfile endOffsetMedian = template.offset(medianEnd);
+//
+//			try {
+//
+//				// Find the best fit in the nucleus profile for each endpoint
+//				int startIndex = target.getSlidingWindowOffset(startOffsetMedian);
+//				int endIndex   = target.getSlidingWindowOffset(endOffsetMedian);
+//
+//				IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, target.size(),
+//						segment.getID());
+//
+//				segments.add(seg);
+//			} catch (IllegalArgumentException e) {
+//				throw new ProfileException("Unable to create segment for nucleus using best-fit alignments", e);
+//			}
 		}
 
 		IBorderSegment.linkSegments(segments);

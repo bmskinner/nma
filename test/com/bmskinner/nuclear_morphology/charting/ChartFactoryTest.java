@@ -69,12 +69,6 @@ public abstract class ChartFactoryTest {
 	public static void showProfiles(Collection<ICell> cells, IAnalysisDataset d) throws InterruptedException {
 		
 		List<JPanel> panels = new ArrayList<>();
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
-				.setShowAnnotations(true)
-				.build();
-		makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset", false);
-		
-
 		for(ICell cell : cells) {
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
@@ -87,6 +81,11 @@ public abstract class ChartFactoryTest {
 			panels.add(makeChartPanel(new ProfileChartFactory(profileOptions).createProfileChart(), profileOptions, "Cell profile", false));
 		}
 		
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
+				.setShowAnnotations(true)
+				.setShowProfiles(true)
+				.build();
+		makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset", false);
 		panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset profile", false));
 		showCharts(panels, "Improperly segmented cells");
 	}
