@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
-    public ConsensusNucleusChartFactory(ChartOptions o) {
+    public ConsensusNucleusChartFactory(@NonNull ChartOptions o) {
         super(o);
     }
 
@@ -264,7 +264,6 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
         } catch (ChartDatasetCreationException e) {
             stack("Error making segmented outline", e);
-//            fine("Error making segmented outline", e);
             return makeNucleusOutlineChart();
         }
 
@@ -300,14 +299,14 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             String name = (String) ds.getSeriesKey(i);
 
             // colour the segments
-            if (name.startsWith("Seg_")) {
+            if (name.startsWith(NucleusDatasetCreator.SEGMENT_SERIES_PREFIX)) {
 
                 plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
                 plot.getRenderer().setSeriesPaint(i, Color.BLACK);
             }
 
             // colour the quartiles
-            if (name.startsWith("Q")) {
+            if (name.startsWith(NucleusDatasetCreator.QUARTILE_SERIES_PREFIX)) {
 
                 // get the segment component
                 // The dataset series name is Q25_Seg_1 etc
@@ -369,8 +368,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
             // get the group id from the name, and make colour
             plot.getRenderer().setSeriesPaint(i, colour);
-            if (name.startsWith("Q")) {
-
+            if (name.startsWith(NucleusDatasetCreator.QUARTILE_SERIES_PREFIX)) {
                 // make the IQR distinct from the median
                 plot.getRenderer().setSeriesPaint(i, ((Color) colour).darker());
             }

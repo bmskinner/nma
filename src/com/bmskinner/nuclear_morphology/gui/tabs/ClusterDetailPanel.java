@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
@@ -175,43 +176,25 @@ public class ClusterDetailPanel extends DetailPanel {
         });
         
         manualClusterBtn.addActionListener(e -> {
-        	
         	try {
-        		final String chooseLbl  = "Number of groups";
+        		int maxGroups = activeDataset().getCollection().getCells().size()-1; // more would be silly, fewer restrictive
+        		int groups = getInputSupplier().requestInt("Number of groups", 2,2,maxGroups,1);
 
-    			SpinnerNumberModel sModel = new SpinnerNumberModel(2,2,5,1);
+        		List<String> groupNames = new ArrayList<>();
 
-    			JSpinner spinner = new JSpinner(sModel);
+        		for(int i=1; i<=groups; i++){
+        			String name = getInputSupplier().requestString("Name for group "+i);
+        			groupNames.add(name); 
+        		}
 
-    			int option = JOptionPane.showOptionDialog(null, spinner, chooseLbl, 
-    					JOptionPane.OK_CANCEL_OPTION,
-    					JOptionPane.QUESTION_MESSAGE, null, null, null);
+        		ManualClusteringDialog mc = new ManualClusteringDialog(activeDataset(), groupNames);
+        		mc.addInterfaceEventListener(this);
+        		mc.run();
+        		getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 
-    			if (option == JOptionPane.OK_OPTION) {
-
-    				int groups = (int) spinner.getModel().getValue();
-    				
-    				List<String> groupNames = new ArrayList<>();
-    				
-    				for(int i=0; i<groups; i++){
-    					groupNames.add(JOptionPane.showInputDialog("Name for group "+i)); 
-    				}
-
-    				if (groups > 1) {
-    					ManualClusteringDialog mc = new ManualClusteringDialog(getDatasets().get(0), groupNames);
-    					mc.addInterfaceEventListener(this);
-    					mc.run();
-    					getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-    				} else {
-    					warn("Must have at least two groups");
-    				}
-    			}
-    		}catch(Exception ex){
-    			warn("Error getting manual cluster count");
-    			stack("Error getting manual cluster count", ex);
-    		}
-        	
-            
+        	} catch (RequestCancelledException e1) {
+        		return;
+        	}
         });
         
         fileClusterBtn.addActionListener(e -> {

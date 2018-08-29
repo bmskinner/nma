@@ -41,12 +41,6 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 	public static final int DEFAULT_PROFILE_LENGTH = 200;
 
-	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
-	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
-	public static final String QUARTILE_SERIES_PREFIX = "Q";
-	public static final String PROFILE_SERIES_PREFIX  = "Profile_";
-	public static final String MEDIAN_SERIES_PREFIX   = "Median_";
-
 	public ProfileDatasetCreator(@NonNull ChartOptions options) {
 		super(options);
 	}

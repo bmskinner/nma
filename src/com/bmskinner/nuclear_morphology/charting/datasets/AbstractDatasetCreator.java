@@ -26,6 +26,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {
 
     protected final E options;
+    
+	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
+	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
+	public static final String QUARTILE_SERIES_PREFIX = "Q";
+	public static final String PROFILE_SERIES_PREFIX  = "Profile_";
+	public static final String MEDIAN_SERIES_PREFIX   = "Median_";
 
     protected static final String EMPTY_STRING = "";
     protected static final int MAX_SCATTER_CHART_ITEMS = 2000;
