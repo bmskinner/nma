@@ -242,26 +242,40 @@ public interface IProfile extends Serializable, Loggable {
     void reverse();
 
     /**
-     * Make this profile the length specified.
+     * Interpolate this profile to the length specified and return as a new profile.
      * 
-     * @param newLength
-     *            the new array length
-     * @return an interpolated profile
+     * @param newLength the new profile length
+     * @return the profile interpolated to the new length
      * @throws ProfileException
      */
     IProfile interpolate(int newLength) throws ProfileException;
 
     /**
-     * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return the
-     * offset.  It will always return a positive value.
+     * Find the offset that best matches this profile to the test profile.
+     * Interpolates the profiles to the length of this profile.
+     * Finds the point of least difference, and return the
+     * offset. It will always return a positive value.
      * 
      * @param testProfile
      * @return the offset to this profile that must be applied to match the test
      *         profile
      * @throws ProfileException
      */
-    int getSlidingWindowOffset(@NonNull IProfile testProfile) throws ProfileException;
+    int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException;
+    
+    /**
+     * Find the offset that best matches this profile to the test profile, within
+     * a defined range.
+     * Interpolates the profiles to the length of this profile.
+     * Finds the point of least difference, and return the
+     * offset. It will always return a positive value.
+     * 
+     * @param testProfile
+     * @return the offset to this profile that must be applied to match the test
+     *         profile
+     * @throws ProfileException
+     */
+    int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException;
 
     /**
      * For each point in the array, test for a local minimum. The values of the
@@ -439,6 +453,21 @@ public interface IProfile extends Serializable, Loggable {
      * @return the new profile
      */
     IProfile subtract(double value);
+    
+    /**
+     * Rescale the values in the profile to fit the given scale.
+     * The lowest value in the profile will be adjusted to the given
+     * minimum, and the maximum value will be adjusted to the given 
+     * maximum. All values in between will be scaled appropriately to
+     * preserve the shape of the profile.
+     * 
+     * For example, a profile 0-2-4-6-8-10 with normaliseAmplitude(0, 5)
+     * would result in a profile 0-1-2-3-4-5
+     * @param minValue the minimum value in the profile
+     * @param maxValue the maximum value in the profile
+     * @return a new profile with all values scaled to fit the range.
+     */
+    IProfile normaliseAmplitude(double minValue, double maxValue);
 
     
     /**

@@ -18,7 +18,10 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
@@ -45,37 +48,29 @@ public abstract class AbstractProfile implements IProfile {
         BooleanProfile b = new BooleanProfile(this, true);
         return getIndexOfMin(b);
     }
-
-    /*
-     * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return this
-     * offset. Returns the positive offset to this profile
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfile#getSlidingWindowOffset(components.generic.
-     * IProfile)
-     */
+    
     @Override
-    public int getSlidingWindowOffset(IProfile testProfile) throws ProfileException {
+	public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
+		return findBestFitOffset(testProfile, 0, size());
+	}
+	
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
+		double lowestScore = Double.MAX_VALUE;
+      int index = 0;
+      for (int i=minOffset; i <maxOffset; i++) {
 
-        double lowestScore = this.absoluteSquareDifference(testProfile);
-        int index = 0;
-        for (int i = 0; i < this.size(); i++) {
+          IProfile offsetProfile = this.offset(i);
 
-            IProfile offsetProfile = this.offset(i);
+          double score = offsetProfile.absoluteSquareDifference(testProfile);
+          if (score < lowestScore) {
+              lowestScore = score;
+              index = i;
+          }
 
-            double score = offsetProfile.absoluteSquareDifference(testProfile);
-            if (score < lowestScore) {
-                lowestScore = score;
-                index = i;
-            }
-
-        }
-        return index;
-    }
+      }
+      return index;
+	}
 
     /**
      * Check the lengths of the two profiles. Return the first profile

@@ -14,6 +14,7 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
+import com.bmskinner.nuclear_morphology.charting.OutlineChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -50,12 +51,14 @@ public class DatasetSegmentationMethodTest {
 		
 		if(!ok)
 			ChartFactoryTest.showProfiles(v.getErrorCells(), d);
-		
+				
 		assertTrue(ok);
 
 		ISegmentedProfile median = d.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 		
+		if(!median.hasSegments() || median.getSegmentCount()==1)
+			ChartFactoryTest.showProfiles(d.getCollection().getCells(), d);
 		assertTrue(median.hasSegments() && median.getSegmentCount()>1);	
 	}
 	
@@ -67,12 +70,11 @@ public class DatasetSegmentationMethodTest {
 	public void testSegmentationOfSingleCellDataset() throws Exception {
 		long seed = 1234;
 		IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(1)
-				.baseHeight(40).baseWidth(40).randomOffsetProfiles(true).profiled().build();
-		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
+				.baseHeight(40).baseWidth(40).randomOffsetProfiles(true).segmented().build();
 		testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
 
 	}
-	
+		
 	/**
 	 * Test multiple identical cells segmentation, with the same (zero) border offset
 	 * @throws Exception
@@ -130,8 +132,49 @@ public class DatasetSegmentationMethodTest {
 					.randomOffsetProfiles(true)
 					.segmented().build();
 			testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
+			if(i==maxCells)
+				ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
 		}
 	}
+	
+	
+	@Test
+	public void testSegmentationCanAccountForVariationInCells() throws Exception {
+		long seed = 1234;
+		int cells = 50;
+		int var   = 20;
+
+		System.out.println(String.format("Testing variability %s on %s cells", var, cells));
+		IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(cells)
+				.withMaxSizeVariation(var)
+				.baseHeight(40).baseWidth(40)
+				.randomOffsetProfiles(false)
+				.segmented().build();
+		testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
+
+		ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
+
+
+	}
+	
+	
+	@Test
+	public void testSegmentationIsIndependentOfCellCountInVaryingDatasetWithKnownError() throws Exception {
+		long seed = 1234;
+		System.out.println(String.format("Testing variability %s on %s cells", 16, 3));
+		IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(3)
+				.withMaxSizeVariation(16)
+				.baseHeight(40).baseWidth(40)
+				.randomOffsetProfiles(false)
+				.segmented().build();
+		OutlineChartFactoryTest.generateOutlineChartsForAllCells(dataset, "Known error");
+		testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
+		
+//		ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
+
+
+	}
+	
 		
 	/**
 	 * Test that increasing numbers of varying cells does not affect segment fitting.
@@ -152,9 +195,11 @@ public class DatasetSegmentationMethodTest {
 				IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(i)
 						.withMaxSizeVariation(var)
 						.baseHeight(40).baseWidth(40)
-						.randomOffsetProfiles(true)
+						.randomOffsetProfiles(false)
 						.segmented().build();
 				testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
+				if(i==maxCells)
+					ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
 			}
 		}
 	}

@@ -56,33 +56,23 @@ public interface Loggable {
     /**
      * Log the given message to the program log window.
      * 
-     * @param level
-     *            the log level
-     * @param message
-     *            the message to log
+     * @param level the log level
+     * @param message the message to log
      */
     default void log(Level level, String message) {
-        // Logger l = Logger.getLogger( this.getClass().getName());
-        // l.setUseParentHandlers(true);
-        // l.log(level, message); // will be passed upwards to root logger
         Logger.getLogger(PROGRAM_LOGGER).log(level, message);
-//        System.out.println(message);
     }
 
     /**
      * Log an error to the program log window and to the error log file with
      * Level.SEVERE
      * 
-     * @param message
-     *            the error messsage
-     * @param t
-     *            the exception
+     * @param message the error messsage
+     * @param t the exception
      */
     default void error(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(Level.SEVERE, message, t);
-//        System.err.println(message);
-        t.printStackTrace();
     }
 
     /**
@@ -90,16 +80,12 @@ public interface Loggable {
      * stack trace. The TRACE error level has a level value of 600, so will
      * display ahead of FINE.
      * 
-     * @param message
-     *            the error messsage
-     * @param t
-     *            the exception
+     * @param message the error messsage
+     * @param t the exception
      */
     default void stack(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
-//        System.err.println(message);
-//        t.printStackTrace();
     }
 
     /**
@@ -124,7 +110,6 @@ public interface Loggable {
      */
     default void fine(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
-//        System.out.println(message);
     }
 
     /**
@@ -136,7 +121,6 @@ public interface Loggable {
      */
     default void fine(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
-//        System.out.println(message);
     }
 
     /**
@@ -147,14 +131,12 @@ public interface Loggable {
      */
     default void finer(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINER, message);
-        // System.out.println(message);
     }
 
     /**
      * Log a message to the program log window with Level.FINEST
      * 
-     * @param message
-     *            the error messsage
+     * @param message the error messsage
      */
     default void finest(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
@@ -163,12 +145,10 @@ public interface Loggable {
     /**
      * Log an error to the program log window with Level.WARNING
      * 
-     * @param message
-     *            the error messsage
+     * @param message the error messsage
      */
     default void warn(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.WARNING, message);
-//        System.err.println(message);
     }
 
     /**
@@ -184,17 +164,12 @@ public interface Loggable {
     /**
      * Log a message to the program log window and to the dataset debug file.
      * 
-     * @param level
-     *            the logging level
-     * @param message
-     *            the error messsage
-     * @param t
-     *            the exception
+     * @param level the logging level
+     * @param message the error messsage
+     * @param t the exception
      */
     default void log(Level level, String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(level, message, t);
-//        System.err.println(message);
-        t.printStackTrace();
     }
 
     /**

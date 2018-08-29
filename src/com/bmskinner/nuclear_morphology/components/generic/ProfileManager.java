@@ -102,7 +102,7 @@ public class ProfileManager implements Loggable {
                 // matches the median profile
                 int newIndex;
                 try {
-                    newIndex = n.getProfile(type).getSlidingWindowOffset(median);
+                    newIndex = n.getProfile(type).findBestFitOffset(median);
 
                 } catch (ProfileException | UnavailableProfileTypeException e1) {
                     warn("Error getting offset from nucleus " + n.getNameAndNumber());
@@ -381,7 +381,7 @@ public class ProfileManager implements Loggable {
         if (collection.hasConsensus()) {
             Nucleus n = collection.getConsensus();
             int oldNIndex = n.getBorderIndex(tag);
-            int newIndex = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
+            int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
             n.setBorderTag(tag, newIndex);
 
             if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {

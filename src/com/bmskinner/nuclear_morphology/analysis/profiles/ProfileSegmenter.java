@@ -126,7 +126,7 @@ public class ProfileSegmenter implements Loggable {
          * Prepare segment start index
          */
         int segmentStart = 0;
-        log("Profile length "+profile.size());
+        finer("Profile length "+profile.size());
         
         /*
          * Iterate through the profile, looking for breakpoints The reference
@@ -224,24 +224,7 @@ public class ProfileSegmenter implements Loggable {
         // Find second derivative rates of change
         IProfile secondDiff = firstDiff.calculateDeltas(DELTA_WINDOW);
         secondDifferentialMinOrMax = secondDiff.getLocalMaxima(MAXIMA_WINDOW, 0)
-        		.or(secondDiff.getLocalMinima(MAXIMA_WINDOW, 0));
-        
-//        fine("First diff: " + secondDifferentialMinOrMax.toString());
-        
-//        deltaProfile =  deltas.calculateDeltas(DELTA_WINDOW);
-//        deltaProfile = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW).absolute(); // second
-//        deltaProfile.absolute();                                                                       // differential
-//        fine("Deltas: " + deltas.toString());
-////        fine("Second diff: " + deltaProfile.toString());
-//        /*
-//         * Find levels of variation within the complete profile
-//         */
-//        double dMax = deltaProfile.getMax();
-//        double dMin = deltaProfile.getMin();
-//        double variationRange = Math.abs(dMax - dMin);
-//
-//        minRateOfChange = variationRange * MIN_RATE_OF_CHANGE;
-//        deltaProfile = deltaProfile.absolute();     
+        		.or(secondDiff.getLocalMinima(MAXIMA_WINDOW, 0)); 
 
     }
 

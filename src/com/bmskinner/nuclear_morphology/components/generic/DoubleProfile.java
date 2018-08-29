@@ -22,8 +22,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultProfile;
 
 /**
  * A profile with double precision
@@ -282,7 +285,7 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         }
         return difference;
     }
-
+    
     /*
      * -------------------- Profile manipulation --------------------
      */
@@ -404,8 +407,7 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
      * Take an index position from a non-normalised profile. Normalise it Find
      * the corresponding angle in the median curve. Interpolate as needed
      * 
-     * @param normIndex
-     *            the fractional index position to find within this profile
+     * @param normIndex the fractional index position to find within this profile
      * @return an interpolated value
      */
     private double interpolateValue(double normIndex) {
@@ -826,6 +828,24 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         }
         return new DoubleProfile(result);
     }
+    
+	@Override
+	public IProfile normaliseAmplitude(double min, double max) {
+		if(Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max))
+			throw new IllegalArgumentException("New range cannot be NaN or infinite");
+		if(min>=max)
+			throw new IllegalArgumentException("Min must be less than max in new amplitude");
+		
+		double oldMin = getMin();
+		double oldMax = getMax();
+		double newRange = max-min;
+		double[] result = new double[array.length];
+		
+		for (int i = 0; i < array.length; i++) {
+			result[i] = (((array[i]/(oldMax-oldMin))*newRange)+min);
+		}
+		return new DoubleProfile(result);
+	}
 
     @Override
     public String toString() {

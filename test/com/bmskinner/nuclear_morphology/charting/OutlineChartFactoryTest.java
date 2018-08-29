@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
@@ -38,7 +39,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	 * @param title
 	 * @throws InterruptedException
 	 */
-	private void generateChartsForAllCells(IAnalysisDataset dataset, String title) throws InterruptedException {
+	public static void generateOutlineChartsForAllCells(@NonNull IAnalysisDataset dataset, @NonNull String title) throws InterruptedException {
 		List<JPanel> panels = new ArrayList<>();
 		
 		
@@ -74,7 +75,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
-		generateChartsForAllCells(d, "Single nucleus, square, not segmented");
+		generateOutlineChartsForAllCells(d, "Single nucleus, square, not segmented");
 	}
 	
 	@Test
@@ -83,7 +84,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.segmented().build();
-		generateChartsForAllCells(d, "Single nucleus, square, segmented");
+		generateOutlineChartsForAllCells(d, "Single nucleus, square, segmented");
 	}
 	
 	@Test
@@ -92,7 +93,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
-		generateChartsForAllCells(d, "Multiple nuclei, square, not segmented");
+		generateOutlineChartsForAllCells(d, "Multiple nuclei, square, not segmented");
 	}
 	
 	@Test
@@ -102,7 +103,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.ofType(NucleusType.ROUND)
 				.withMaxSizeVariation(10)
 				.segmented().build();
-		generateChartsForAllCells(d, "Multiple nuclei, square, segmented");
+		generateOutlineChartsForAllCells(d, "Multiple nuclei, square, segmented");
 	}
 	
 	@Test
@@ -112,7 +113,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.ofType(NucleusType.ROUND)
 				.maxRotation(90)
 				.segmented().build();
-		generateChartsForAllCells(d, "Multiple nuclei, square, rotated, segmented");
+		generateOutlineChartsForAllCells(d, "Multiple nuclei, square, rotated, segmented");
 	}
 
 }

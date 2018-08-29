@@ -310,17 +310,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public void addSegments(@NonNull List<IBorderSegment> n) {
-        if (n == null || n.isEmpty())
-            throw new IllegalArgumentException("Segment list is null or empty");
-
-        if (this.length() != n.get(0).getProfileLength())
-            throw new IllegalArgumentException(String.format("Segment profile length (%d) does not fit aggregate length (%d)", n.get(0).getProfileLength(), length()));
-
-        this.segments = new IBorderSegment[n.size()];
-
-        for (int i = 0; i < segments.length; i++) {
-            segments[i] = n.get(i);
-        }
+    	addSegments(Tag.REFERENCE_POINT, n);
     }
 
     @Override
@@ -343,16 +333,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     	for(IBorderSegment s : n) {
     		s.offset(offset);
     	}
-    	
-//        List<IBorderSegment> result;
-//        try {
-//            result = IBorderSegment.nudge(n, offset);
-//        } catch (ProfileException e) {
-//            stack("Error offsetting segments", e);
-//            return;
-//        }
-
-        this.segments = new IBorderSegment[n.size()];
+    	this.segments = new IBorderSegment[n.size()];
 
         for (int i = 0; i < segments.length; i++) {
             segments[i] = n.get(i);

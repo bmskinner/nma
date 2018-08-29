@@ -515,23 +515,23 @@ public class IProfileTester {
 	
 
 	@Test
-	public void testGetSlidingWindowOffsetZero() throws ProfileException {
+	public void testFindBestFitOffsetHasNoEffectWithZeroOffset() throws ProfileException {
 		int exp = 0;
 		IProfile test = profile.offset(exp);
-		int offset = profile.getSlidingWindowOffset(test);
+		int offset = profile.findBestFitOffset(test);
 		assertEquals(exp, offset);
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#findBestFitOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetSlidingWindowOffsetPositive() throws ProfileException {
+	public void testFindBestFitOffsetWithPositiveOffsetIdenticalProfile() throws ProfileException {
 		
 		for(int exp=1; exp<profile.size(); exp++){
 			IProfile test = profile.offset(exp);
-			int offset = profile.getSlidingWindowOffset(test);
+			int offset = profile.findBestFitOffset(test);
 			IProfile recovered = test.offset(-offset);
 			assertEquals(exp, offset);
 			assertEquals(profile, recovered);
@@ -539,15 +539,15 @@ public class IProfileTester {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#findBestFitOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetSlidingWindowOffsetNegative() throws ProfileException {
+	public void testFindBestFitOffsetWithNegativeOffsetIdenticalProfile() throws ProfileException {
 		
 		for(int exp=-1; exp>-profile.size(); exp--){
 			IProfile test = profile.offset(exp);
-			int offset = profile.getSlidingWindowOffset(test);
+			int offset = profile.findBestFitOffset(test);
 			IProfile recovered = test.offset(-offset);
 			
 			int posExp = profile.size()+exp;
@@ -556,19 +556,30 @@ public class IProfileTester {
 		}
 	}
 	
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
-	 * @throws ProfileException 
-	 */
 	@Test
-	public void testGetSlidingWindowOffseZero() throws ProfileException {
+	public void testFindBestFitOffsetHasNoEffectWithZeroOffsetWithLongerInterpolatedProfile() throws ProfileException {
 		int exp = 0;
-		IProfile test = profile.offset(exp);
-		int offset = profile.getSlidingWindowOffset(test);
+		IProfile test = profile.interpolate(profile.size()*2).offset(exp);
+		int offset = profile.findBestFitOffset(test);
 		assertEquals(exp, offset);
 	}
-
 	
+	@Test
+	public void testFindBestFitOffsetHasNoEffectWithZeroOffsetWithShorterInterpolatedProfile() throws ProfileException {
+		int exp = 0;
+		IProfile test = profile.interpolate(profile.size()/2).offset(exp);
+		int offset = profile.findBestFitOffset(test);
+		assertEquals(exp, offset);
+	}
+	
+//	@Test
+//	public void testFindBestFitOffsetWithPositiveOffsetIdenticalProfileRestrictedRange() throws ProfileException {
+//		// Profile is a sine wave, repeats at 180 TODO
+//		IProfile test = profile.offset(0);
+//		int offset = profile.findBestFitOffset(test, 160, 190);
+//		assertEquals(180, offset);
+//	}
+			
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getLocalMinima(int)}.
 	 * @throws ProfileException 
@@ -1189,6 +1200,68 @@ public class IProfileTester {
 		}
 	}
 	
+	@Test
+	public void testNomaliseAmplitude(){
+		
+		IProfile result = profile.normaliseAmplitude(0, 100);
+		
+		double mid = profile.get(0.5);
+		
+		double scaled = (mid/(profile.getMax()-profile.getMin()))*100;
+		
+		assertEquals(0, result.getMin(), 0);
+		assertEquals(100, result.getMax(), 0);
+		assertEquals(scaled, result.get(0.5), 0.0001);
+	}
+	
+	@Test
+	public void testNomaliseAmplitudeExceptsOnNanMin(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(Double.NaN, 100);
+	}
+
+	@Test
+	public void testNomaliseAmplitudeExceptsOnNanMax(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(100, Double.NaN);
+	}
+
+	@Test
+	public void testNomaliseAmplitudeExceptsOnInfiniteMin(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(Double.POSITIVE_INFINITY, 100);
+	}
+
+	@Test
+	public void testNomaliseAmplitudeExceptsOnNegInfiniteMin(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(Double.NEGATIVE_INFINITY, 100);
+	}
+
+	@Test
+	public void testNomaliseAmplitudeExceptsOnInfiniteMax(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(100, Double.POSITIVE_INFINITY);
+	}
+
+	@Test
+	public void testNomaliseAmplitudeExceptsOnNegInfiniteMax(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(100, Double.NEGATIVE_INFINITY);
+	}
+	
+	@Test
+	public void testNomaliseAmplitudeExceptsMinGreaterThanMax(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(101, 100);
+	}
+	
+	@Test
+	public void testNomaliseAmplitudeExceptsMinEqualToMax(){
+		exception.expect(IllegalArgumentException.class);
+		profile.normaliseAmplitude(100, 100);
+	}
+	
 	/**
 	 * Test float array equality. Not in junit.
 	 * @param exp
@@ -1224,8 +1297,7 @@ public class IProfileTester {
         }
         return equal;
 	}
-	
-	
+
 	/**
 	 * Test float array equality. Not in junit. Uses the default epsilon.
 	 * @param exp

@@ -284,7 +284,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	public ProfileChartDataset createProfileDataset(Nucleus nucleus) throws ChartDatasetCreationException {
+	public ProfileChartDataset createProfileDataset(@NonNull Nucleus nucleus) throws ChartDatasetCreationException {
 		ProfileType type = options.getType();
 		ProfileChartDataset ds = new ProfileChartDataset();
 
@@ -305,6 +305,34 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 			throw new ChartDatasetCreationException("Cannot get segmented profile for " + nucleus.getNameAndNumber(), e);
+		}
+		return ds;
+	}
+	
+	/**
+	 * Create a profile chart dataset for the given profile 
+	 * @param profile
+	 * @return
+	 * @throws ChartDatasetCreationException 
+	 */
+	public ProfileChartDataset createProfileDataset(@NonNull IProfile profile) throws ChartDatasetCreationException {
+		ProfileChartDataset ds = new ProfileChartDataset();
+		try {
+			if(profile instanceof ISegmentedProfile) {
+				
+				ISegmentedProfile segProfile = (ISegmentedProfile)profile;
+				if(segProfile.hasSegments()) {
+					List<IBorderSegment> segments = segProfile.getOrderedSegments();
+					addSegmentsFromProfile(segments, segProfile, ds.getLines(), segProfile.size(), 0, 0);
+				} 
+			} else {
+				IProfile xpoints = createXPositions(profile, profile.size());
+				float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
+				ds.addLines(PROFILE_SERIES_PREFIX, data, 0);
+			} 
+
+		} catch (ProfileException e) {
+			throw new ChartDatasetCreationException("Cannot get segmented profile for profile", e);
 		}
 		return ds;
 	}

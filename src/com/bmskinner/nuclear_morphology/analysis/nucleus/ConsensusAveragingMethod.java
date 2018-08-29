@@ -116,7 +116,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
                         Stats.MEDIAN);
-                int newIndex = cons.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
+                int newIndex = cons.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
                 cons.setBorderTag(tag, newIndex);
             }
 

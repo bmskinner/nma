@@ -217,24 +217,25 @@ public interface IProfileCollection extends Serializable, Loggable {
     void addIndex(@NonNull Tag tag, int index);
 
     /**
-     * Add a list of segments for the profile. The segments must have the
-     * correct offset to be added directly
+     * Set the segments in the profile collection to the given list,
+     * where the segments are zeroed to the reference point. Any
+     * existing segments are replaced.
      * 
-     * @param n the segments
+     * @param segments the segments to add
      */
-    void addSegments(@NonNull List<IBorderSegment> n);
+    void addSegments(@NonNull List<IBorderSegment> segments);
 
     /**
-     * Add a list of segments for the profile, where the segments are zeroed to
-     * the given point type. The indexes will be corrected for storage. I
-     * previously disabled this - unknown why.
+     * Set the segments in the profile collection to the given list,
+     * where the segments are zeroed to the given point type. Any
+     * existing segments are replaced.
      * 
-     * @param pointType the point with the zero index in the segments
-     * @param n the segment list
+     * @param tag the tag with the zero index in the collection
+     * @param segments the segments to add
      * @throws ProfileException
      * @throws UnavailableBorderTagException
      */
-    void addSegments(@NonNull Tag tag, @NonNull List<IBorderSegment> n) throws ProfileException, UnavailableBorderTagException;
+    void addSegments(@NonNull Tag tag, @NonNull List<IBorderSegment> segments) throws ProfileException, UnavailableBorderTagException;
 
     /**
      * Create profile aggregates from the given collection, with a set length.

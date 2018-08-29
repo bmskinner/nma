@@ -23,8 +23,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
@@ -555,26 +559,18 @@ public class Profile implements IProfile {
         return linearInterpolatedValue;
     }
 
-    /*
-     * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return this
-     * offset. Returns the positive offset to this profile
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfile#getSlidingWindowOffset(components.generic.
-     * IProfile)
-     */
-    @Override
-    public int getSlidingWindowOffset(IProfile testProfile) {
-
-        int index = 0;
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
+		return findBestFitOffset(testProfile, 0, array.length);
+	}
+	
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
+		int index = 0;
         try {
             double lowestScore = this.absoluteSquareDifference(testProfile);
 
-            for (int i = 0; i < this.size(); i++) {
+            for (int i = minOffset; i < maxOffset; i++) {
 
                 IProfile offsetProfile;
 
@@ -593,7 +589,7 @@ public class Profile implements IProfile {
         }
 
         return index;
-    }
+	}
 
 
     /*
@@ -1070,12 +1066,26 @@ public class Profile implements IProfile {
         }
         return new DoubleProfile(result);
     }
+    
+	@Override
+	public IProfile normaliseAmplitude(double min, double max) {
+		if(Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max))
+			throw new IllegalArgumentException("New range cannot be NaN or infinite");
+		if(min>=max)
+			throw new IllegalArgumentException("Min must be less than max in new amplitude");
+		
+		double oldMin = getMin();
+		double oldMax = getMax();
+		double newRange = max-min;
+		double[] result = new double[array.length];
+		
+		for (int i = 0; i < array.length; i++) {
+			result[i] = (((array[i]/(oldMax-oldMin))*newRange)+min);
+		}
+		return new Profile(result);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#toString()
-     */
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

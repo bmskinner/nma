@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
@@ -48,6 +49,40 @@ public abstract class ChartFactoryTest {
 	}
 	
 	/**
+	 * Show a single profile, with any segments if present
+	 * @param profile
+	 * @throws InterruptedException
+	 */
+	public static void showProfile(IProfile profile, String title) throws InterruptedException {
+		
+		ChartOptions options = new ChartOptionsBuilder()
+				.setShowAnnotations(true)
+				.setShowProfiles(true)
+				.build();
+		
+		showSingleChart(new ProfileChartFactory(options).createProfileChart(profile), options, title, false);
+	}
+	
+	/**
+	 * Show a panel of profiles, with any segments if present
+	 * @param profile
+	 * @throws InterruptedException
+	 */
+	public static void showProfiles(List<IProfile> profiles, List<String> names, String title) throws InterruptedException {
+		
+		ChartOptions options = new ChartOptionsBuilder()
+				.setShowAnnotations(true)
+				.setShowProfiles(true)
+				.build();
+		
+		List<JPanel> panels = new ArrayList<>();
+		for(int i=0; i<profiles.size(); i++) {
+			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(profiles.get(i)), options, names.get(i), false));
+		}
+		showCharts(panels, title);
+	}
+	
+	/**
 	 * Show the median profile for the given dataset
 	 * @param d
 	 * @param title
@@ -67,8 +102,17 @@ public abstract class ChartFactoryTest {
 	 * @throws InterruptedException
 	 */
 	public static void showProfiles(Collection<ICell> cells, IAnalysisDataset d) throws InterruptedException {
-		
+
 		List<JPanel> panels = new ArrayList<>();
+		
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
+				.setShowAnnotations(true)
+				.setShowProfiles(true)
+				.setNormalised(true)
+				.build();
+		makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset", false);
+		panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset profile", false));
+		
 		for(ICell cell : cells) {
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
@@ -80,14 +124,8 @@ public abstract class ChartFactoryTest {
 					.build();
 			panels.add(makeChartPanel(new ProfileChartFactory(profileOptions).createProfileChart(), profileOptions, "Cell profile", false));
 		}
-		
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
-				.setShowAnnotations(true)
-				.setShowProfiles(true)
-				.build();
-		makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset", false);
-		panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options, "Dataset profile", false));
-		showCharts(panels, "Improperly segmented cells");
+
+		showCharts(panels, "Cells in dataset "+d.getName());
 	}
 	
 	protected static void showSingleChart(JFreeChart chart, ChartOptions options, String variable, boolean fixedAspect) throws InterruptedException {

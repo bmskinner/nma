@@ -28,6 +28,8 @@ import java.util.logging.Level;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
@@ -497,17 +499,10 @@ public class FloatProfile implements IProfile {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#interpolate(int)
-     */
     @Override
     public IProfile interpolate(int newLength) throws ProfileException {
-        
         if(newLength < 1)
             throw new IllegalArgumentException("New length must be longer than 1");
-        
         return new FloatProfile( interpolate(array, newLength) );
     }
 
@@ -573,39 +568,19 @@ public class FloatProfile implements IProfile {
 
     }
 
-    /*
-     * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return this
-     * offset. Returns the positive offset to this profile
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfile#getSlidingWindowOffset(components.generic.
-     * IProfile)
-     */
-    @Override
-    public int getSlidingWindowOffset(IProfile testProfile) throws ProfileException {
-
-        /*
-         * NEW CODE VERSION - FAIL. GIVES ERROR IN getSubRegion() during segment
-         * fitting
-         */
-
-        float[] test = testProfile.toFloatArray();
-
-        if (array.length == test.length) {
-            return getBestFitOffset(array, test);
-        } else {
-
-            // Change the test array to fit
-            test = interpolate(test, array.length);
-            return getBestFitOffset(array, test);
-
-        }
-    }
-
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
+		return findBestFitOffset(testProfile, 0, array.length);
+	}
+	
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
+		float[] test = testProfile.toFloatArray();  
+		if (array.length != test.length) 
+			test = interpolate(test, array.length);
+		return CellularComponent.getBestFitOffset(array, test, minOffset, maxOffset);
+	}
+	
     /**
      * Get the sliding window offset of array 1 that best matches array 2. The
      * arrays must be the same length
@@ -1070,11 +1045,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#subtract(components.generic.IProfile)
-     */
     @Override
     public IProfile subtract(IProfile sub) {
         if (this.size() != sub.size())
@@ -1101,12 +1071,26 @@ public class FloatProfile implements IProfile {
         }
         return new FloatProfile(result);
     }
+    
+	@Override
+	public IProfile normaliseAmplitude(double min, double max) {
+		if(Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max))
+			throw new IllegalArgumentException("New range cannot be NaN or infinite");
+		if(min>=max)
+			throw new IllegalArgumentException("Min must be less than max in new amplitude");
+		
+		double oldMin = getMin();
+		double oldMax = getMax();
+		double newRange = max-min;
+		float[] result = new float[array.length];
+		
+		for (int i = 0; i < array.length; i++) {
+			result[i] = (float) (((array[i]/(oldMax-oldMin))*newRange)+min);
+		}
+		return new FloatProfile(result);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#toString()
-     */
+    
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

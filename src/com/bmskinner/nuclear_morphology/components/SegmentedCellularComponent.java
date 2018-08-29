@@ -395,32 +395,16 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			float[] arr2 = testProfile.toFloatArray();
 
 			if (array.length == arr2.length)
-				return squareDifference(array, arr2);
+				return CellularComponent.squareDifference(array, arr2);
 
 			if (array.length > arr2.length) {
 				arr2 = interpolate(arr2, array.length);
-				return squareDifference(array, arr2);
+				return CellularComponent.squareDifference(array, arr2);
 			} 
 
 			float[] arr1 = this.toFloatArray();
 			arr1 = interpolate(arr1, arr2.length);
-			return squareDifference(arr1, arr2);
-		}
-
-		/**
-		 * Calculate the absolute square difference between two arrays of equal
-		 * length. Note - array lengths are not checked.
-		 * 
-		 * @param arr1
-		 * @param arr2
-		 * @return
-		 */
-		private double squareDifference(float[] arr1, float[] arr2) {
-			double difference = 0;
-			for (int j = 0; j < arr1.length; j++) {
-				difference += Math.pow(arr1[j] - arr2[j], 2);
-			}
-			return difference;
+			return CellularComponent.squareDifference(arr1, arr2);
 		}
 
 		@Override
@@ -430,22 +414,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public IProfile offset(int j) throws ProfileException {	
-			return new DefaultProfile(offset(array, j));
-		}
-
-		/**
-		 * Offset an array by the given amount
-		 * 
-		 * @param arr
-		 * @param j
-		 * @return
-		 */
-		private float[] offset(float[] arr, int j) {
-			float[] newArray = new float[arr.length];
-			for (int i = 0; i < arr.length; i++) {
-				newArray[i] = arr[CellularComponent.wrapIndex(i + j, arr.length)];
-			}
-			return newArray;
+			return new DefaultProfile(CellularComponent.offset(array, j));
 		}
 
 		@Override
@@ -550,8 +519,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * Get the interpolated value at the given fraction along the given array
 		 * 
 		 * @param arr
-		 * @param fraction
-		 *            the fraction, from 0-1
+		 * @param fraction the fraction, from 0-1
 		 * @return
 		 */
 		private float getInterpolatedValue(float[] arr, float fraction) {
@@ -614,34 +582,16 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 
 		@Override
-		public int getSlidingWindowOffset(@NonNull IProfile testProfile) throws ProfileException {
+		public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
+			return findBestFitOffset(testProfile, 0, array.length);
+		}
+		
+		@Override
+		public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
 			float[] test = testProfile.toFloatArray();  
 			if (array.length != test.length) 
-				test = interpolate(test, array.length);      
-			return getBestFitOffset(array, test);
-		}
-
-		/**
-		 * Get the sliding window offset of array 1 that best matches array 2. The
-		 * arrays must be the same length
-		 * 
-		 * @param arr1
-		 * @param arr2
-		 * @return
-		 */
-		private int getBestFitOffset(float[] arr1, float[] arr2) {
-
-			double bestScore = Double.MAX_VALUE;
-			int bestIndex = 0;
-
-			for (int i = 0; i < arr1.length; i++) {
-				double score = squareDifference(offset(arr1, i), arr2);
-				if (score < bestScore) {
-					bestScore = score;
-					bestIndex = i;
-				}
-			}
-			return bestIndex;
+				test = interpolate(test, array.length);
+			return CellularComponent.getBestFitOffset(array, test, minOffset, maxOffset);
 		}
 
 		/*
@@ -1008,14 +958,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public IProfile add(double value) {
-
-			if (Double.isNaN(value) || Double.isInfinite(value)) {
+			if (Double.isNaN(value) || Double.isInfinite(value))
 				throw new IllegalArgumentException("Cannot add NaN or infinity");
-			}
 
 			float[] result = new float[array.length];
 
-			for (int i = 0; i < array.length; i++) { // for each position in sperm
+			for (int i = 0; i < array.length; i++) { 
 				result[i] = (float) (array[i] + value);
 			}
 			return new DefaultProfile(result);
@@ -1028,7 +976,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 			float[] result = new float[this.size()];
 
-			for (int i = 0; i < array.length; i++) { // for each position in sperm
+			for (int i = 0; i < array.length; i++) {
 				result[i] = (float) (array[i] - sub.get(i));
 			}
 			return new DefaultProfile(result);
@@ -1041,8 +989,26 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			float[] result = new float[array.length];
 
-			for (int i = 0; i < array.length; i++) { // for each position in sperm
+			for (int i = 0; i < array.length; i++) {
 				result[i] = (float) (array[i] - value);
+			}
+			return new DefaultProfile(result);
+		}
+		
+		@Override
+		public IProfile normaliseAmplitude(double min, double max) {
+			if(Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max))
+				throw new IllegalArgumentException("New range cannot be NaN or infinite");
+			if(min>=max)
+				throw new IllegalArgumentException("Min must be less than max in new amplitude");
+			
+			double oldMin = getMin();
+			double oldMax = getMax();
+			double newRange = max-min;
+			float[] result = new float[array.length];
+			
+			for (int i = 0; i < array.length; i++) {
+				result[i] = (float) (((array[i]/(oldMax-oldMin))*newRange)+min);
 			}
 			return new DefaultProfile(result);
 		}
@@ -1829,7 +1795,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			private int startIndex = 0;
 			private int length = 0;
 			private boolean isLocked = false;
-
 
 			/**
 			 * Construct a segment covering the entire profile

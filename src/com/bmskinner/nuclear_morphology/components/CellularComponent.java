@@ -29,7 +29,10 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
@@ -471,5 +474,76 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
         return i % length;
 
     }
+    
+    /**
+	 * Offset an array by the given amount
+	 * 
+	 * @param arr the array
+	 * @param j the offset
+	 * @return
+	 */
+	static float[] offset(float[] arr, int j) {
+		float[] newArray = new float[arr.length];
+		for (int i = 0; i < arr.length; i++) {
+			newArray[i] = arr[CellularComponent.wrapIndex(i + j, arr.length)];
+		}
+		return newArray;
+	}
+	
+	/**
+	 * Get the sliding window offset of array 1 that best matches array 2. The
+	 * arrays must be the same length
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 */
+	static int getBestFitOffset(float[] arr1, float[] arr2) {
+		return getBestFitOffset(arr1, arr2, 0, arr1.length);
+	}
+	
+	/**
+	 * Get the sliding window offset of array 1 that best matches array 2. The
+	 * arrays must be the same length. The best offset within the specified range
+	 * of indexes will be returned.
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @minOffset the minimum offset to apply
+	 * @maxOffset the maximum offset to apply
+	 * @return
+	 */
+	static int getBestFitOffset(float[] arr1, float[] arr2, int minOffset, int maxOffset) {
+		if(arr1.length!=arr2.length)
+			throw new IllegalArgumentException("Arrays must be equal length");
+		double bestScore = Double.MAX_VALUE;
+		int bestIndex = 0;
 
+		for (int i=minOffset; i<maxOffset; i++) {
+			double score = squareDifference(CellularComponent.offset(arr1, i), arr2);
+			if (score < bestScore) {
+				bestScore = score;
+				bestIndex = i;
+				
+			}
+//			System.out.println(String.format("Offset %s has score %s", i, score));
+		}
+		return bestIndex;
+	}
+	
+	/**
+	 * Calculate the absolute square difference between two arrays of equal
+	 * length. Note - array lengths are not checked.
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 */
+	static double squareDifference(float[] arr1, float[] arr2) {
+		double difference = 0;
+		for (int j = 0; j < arr1.length; j++) {
+			difference += Math.pow(arr1[j] - arr2[j], 2);
+		}
+		return difference;
+	}
 }

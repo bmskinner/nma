@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -126,6 +127,60 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return makeMultiDatasetProfileChart();
 		return makeEmptyProfileChart(options.getType());
 	}
+	
+	/**
+	 * Create a profile chart for the given profile.
+	 * @param profile
+	 * @return
+	 */
+	public JFreeChart createProfileChart(@NonNull IProfile profile) {
+		ProfileChartDataset ds;
+		try {
+			ds = new ProfileDatasetCreator(options).createProfileDataset(profile);
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating profile chart", e);
+			return makeErrorChart();
+		}
+
+		JFreeChart chart = makeProfileChart(ds, profile.size());
+		// Add segment name annotations
+
+		if(profile instanceof ISegmentedProfile) {
+			ISegmentedProfile segProfile = (ISegmentedProfile)profile;
+			if (options.isShowAnnotations())
+				addSegmentAnnotations(segProfile, chart.getXYPlot());
+		}
+		return chart;
+	}
+	
+	private JFreeChart makeIndividualNucleusProfileChart() {
+		Nucleus n = options.getCell().getNucleus();
+		ProfileChartDataset ds;
+		try {
+			ds = new ProfileDatasetCreator(options).createProfileDataset(n);
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating profile chart", e);
+			return makeErrorChart();
+		}
+		JFreeChart chart = makeProfileChart(ds, options.getCell().getNucleus().getBorderLength());
+		
+		// Add markers
+		if (options.isShowMarkers())
+			addBorderTagMarkers(n, chart.getXYPlot());
+		
+		// Add segment name annotations
+		if (options.isShowAnnotations()) {
+			finest("Adding segment annotations");
+			try {
+				ISegmentedProfile profile = n.getProfile(options.getType(), options.getTag());
+				addSegmentAnnotations(profile, chart.getXYPlot());
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				fine("Error adding segment annotations", e);
+				return makeErrorChart();
+			}
+		}
+		return chart;
+	}
 
 	/**
 	 * Make a profile chart for a single nucleus. If the profile is segmented,
@@ -134,19 +189,11 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart makeIndividualNucleusProfileChart() {
+	private JFreeChart makeProfileChart(ProfileChartDataset ds) {
 
-		Nucleus n = options.getCell().getNucleus();
+		JFreeChart chart = makeEmptyProfileChart(options.getType());
 
-		ProfileChartDataset ds;
-		try {
-			ds = new ProfileDatasetCreator(options).createProfileDataset(n);
-		} catch (ChartDatasetCreationException e) {
-			fine("Error creating profile chart", e);
-			return makeErrorChart();
-		}
-		JFreeChart chart = makeProfileChart(ds, n.getBorderLength());
-
+		
 		XYPlot plot = chart.getXYPlot();
 
 		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
@@ -176,22 +223,6 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				
 			}
 			
-		}
-
-		// Add markers
-		if (options.isShowMarkers())
-			addBorderTagMarkers(n, plot);
-
-		// Add segment name annotations
-		if (options.isShowAnnotations()) {
-			finest("Adding segment annotations");
-			try {
-				ISegmentedProfile profile = n.getProfile(options.getType(), options.getTag());
-				addSegmentAnnotations(profile, plot);
-			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-				fine("Error adding segment annotations", e);
-				return makeErrorChart();
-			}
 		}
 
 		applyAxisOptions(chart);
