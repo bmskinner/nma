@@ -444,6 +444,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			return;
 		ISegmentedProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		nucleusProfile = bestFitAlignSegments(template, nucleusProfile);
+		SegmentFitter fitter = new SegmentFitter(template);
+		nucleusProfile = fitter.fit(nucleusProfile);
 		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, nucleusProfile);
 	}
 	
