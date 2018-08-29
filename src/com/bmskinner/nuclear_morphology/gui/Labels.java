@@ -43,6 +43,31 @@ public class Labels {
     public static final String MULTIPLE_DATASETS           = "Multiple datasets selected";
     public static final String NULL_DATASETS               = "No datasets selected";
     
+    
+    public static class Consensus {
+    	
+    	public static final String RESET_LBL = "!";
+    	public static final String RESET_ROTATION_TOOLTIP  = "Reset rotation to orientation point";
+    	public static final String RESET_COM_TOOLTIP       = "Reset centre of mass to 0,0";
+    	
+    	public static final String INCREASE_X_LBL  = "+x";
+    	public static final String DECREASE_X_LBL  = "-x";
+    	public static final String INCREASE_Y_LBL  = "+y";
+    	public static final String DECREASE_Y_LBL  = "-y";
+    	
+    	public static final String INCREASE_X_TOOLTIP       = "Move centre of mass x+1";
+    	public static final String DECREASE_X_TOOLTIP       = "Move centre of mass x-1";
+    	public static final String INCREASE_Y_TOOLTIP       = "Move centre of mass y+1";
+    	public static final String DECREASE_Y_TOOLTIP       = "Move centre of mass y-1";
+    	
+    	public static final String INCREASE_ROTATION_LBL = "+r";
+    	public static final String DECREASE_ROTATION_LBL = "-r";
+    	
+    	public static final String INCREASE_ROTATION_TOOLTIP = "Rotate anti-clockwise 1 degree";
+    	public static final String DECREASE_ROTATION_TOOLTIP = "Rotate clockwise 1 degree";
+    	
+    	public static final String RE_REFOLD_LBL  = "Re-Refold";
+    }
 
     public static class Populations {
     	

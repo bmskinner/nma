@@ -92,9 +92,6 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      */
     public ProfileRefoldMethod(IAnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
         super(dataset);
-
-        dataset.getCollection().setRefolding(true);
-
         collection = dataset.getCollection();
 
         // make an entirely new nucleus to play with
@@ -164,8 +161,6 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         } catch (Exception e) {
             warn("Unable to refold nucleus");
             stack("Unable to refold nucleus", e);
-        } finally {
-            collection.setRefolding(false);
         }
     }
 

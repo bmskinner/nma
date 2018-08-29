@@ -325,16 +325,6 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setRefolding(boolean b) {
-        isRefolding = b;
-    }
-
-    @Override
-    public boolean isRefolding() {
-        return isRefolding;
-    }
-
-    @Override
     public boolean hasCells() {
         return !cellIDs.isEmpty();
     }

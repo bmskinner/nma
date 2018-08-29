@@ -124,7 +124,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
 
         setButtonsEnabled(true);
 

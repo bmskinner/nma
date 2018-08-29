@@ -158,7 +158,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
 
         PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
         PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
@@ -185,12 +185,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         updateSingle();
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
 
         chartPanel.setChart(AbstractChartFactory.createEmptyChart());
         rhoTable.setModel(AbstractTableCreator.createBlankTable());
@@ -204,12 +204,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected synchronized TableModel createPanelTableType(TableOptions options) {
         return new ScatterTableDatasetCreator(options).createSpearmanCorrlationTable(component);
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(ChartOptions options) {
         return new ScatterChartFactory(options).createScatterChart(component);
     }
 

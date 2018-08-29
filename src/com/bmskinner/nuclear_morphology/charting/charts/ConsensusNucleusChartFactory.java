@@ -22,6 +22,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -113,41 +114,32 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             return makeEmptyChart();
 
         if (options.isMultipleDatasets()) {
-
-            boolean oneHasConsensus = false;
-            for (IAnalysisDataset d : options.getDatasets()) {
-                if (d.getCollection().hasConsensus())
-                    oneHasConsensus = true;
-            }
-
+            boolean oneHasConsensus = options.getDatasets().stream().anyMatch(d->d.getCollection().hasConsensus());
             if (oneHasConsensus) 
                 return makeMultipleConsensusChart();
 			return makeEmptyChart();
         }
+        
+        // Single dataset
+        
+        fine("Single dataset, making consenusus chart");
+        
+        if (options.isShowMesh()) {
+        	try {
+        		Mesh<Nucleus> mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
+        				options.getMeshSize());
 
-        if (options.isSingleDataset()) {
-            if (options.isShowMesh()) {
-                try {
-                    Mesh<Nucleus> mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
-                            options.getMeshSize());
+        		//                    if (options.isStraightenMesh()) {
+        		//                        mesh = mesh.straighten();
+        		//                    }
 
-//                    if (options.isStraightenMesh()) {
-//                        mesh = mesh.straighten();
-//                    }
-
-                    return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
-                } catch (ChartCreationException e) {
-                    stack("Error making mesh chart", e);
-                    return makeErrorChart();
-                } catch (MeshCreationException e) {
-                    stack("Error creating mesh", e);
-                    return makeErrorChart();
-                }
-            }
-			return makeSegmentedConsensusChart(options.firstDataset());
-
+        		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
+        	} catch (ChartCreationException | MeshCreationException e) {
+        		stack("Error making mesh chart", e);
+        		return makeErrorChart();
+        	}
         }
-        return makeEmptyChart();
+        return makeSegmentedConsensusChart(options.firstDataset());
     }
 
     /**
@@ -259,11 +251,12 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * @param dataset the dataset to draw
      * @return a chart
      */
-    private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) {
+    private JFreeChart makeSegmentedConsensusChart(@NonNull IAnalysisDataset dataset) {
 
-        if (!dataset.getCollection().hasConsensus()) {
+        if (!dataset.getCollection().hasConsensus())
             return makeEmptyChart();
-        }
+        
+        fine("Making segmented consenusus chart");
         XYDataset ds = null;
 
         ICellCollection collection = dataset.getCollection();

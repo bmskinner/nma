@@ -610,39 +610,20 @@ public class EventHandler implements Loggable, EventListener {
     private synchronized void refoldConsensus(final IAnalysisDataset dataset) {
 
         Runnable r = () -> {
-            /*
-             * The refold action needs to be able to hold up a series of
-             * following actions, when it is being used in a New Analysis. The
-             * countdown latch does nothing here, but must be retained for
-             * compatibility.
-             */
 
-            final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+            final List<IAnalysisDataset> list = new ArrayList<>();
             list.add(dataset);
-            fireDatasetEvent(new DatasetEvent(this, DatasetEvent.CLEAR_CACHE, "EventHandler", list));
-//            for (TabPanel p : mw.getTabPanels()) {
-//                if (p instanceof SegmentsDetailPanel || p instanceof NuclearStatisticsPanel
-//                        || p instanceof SignalsDetailPanel || p instanceof ConsensusNucleusPanel) {
-//                    p.clearChartCache(list);
-//                }
-//            }
+//            fireDatasetEvent(new DatasetEvent(this, DatasetEvent.CLEAR_CACHE, "EventHandler", list));
             
-
             final CountDownLatch latch = new CountDownLatch(1);
 
             Runnable task = new RefoldNucleusAction(dataset, acceptor, EventHandler.this, latch);
             task.run();
 
             try {
-
             	latch.await();
-            	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
-            	if(op.isPresent())
-            		op.get().setRefoldNucleus(true);
-            	fireDatasetUpdateEvent(list);
-
-//            	mw.getPopulationsPanel().selectDataset(dataset);
-
+//            	fireDatasetUpdateEvent(list);
+            	fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", list));
             } catch (InterruptedException e) {
                 error("Interruption to thread", e);
             }

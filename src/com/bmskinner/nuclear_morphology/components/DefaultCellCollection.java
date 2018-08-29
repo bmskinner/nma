@@ -372,16 +372,6 @@ public class DefaultCellCollection implements ICellCollection {
         return this.consensusNucleus;
     }
 
-    @Override
-    public synchronized boolean isRefolding() {
-        return this.isRefolding;
-    }
-
-    @Override
-    public synchronized void setRefolding(boolean b) {
-        this.isRefolding = b;
-    }
-
     /**
      * Get the profile collection of the given type
      * 

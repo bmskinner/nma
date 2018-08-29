@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
@@ -186,24 +187,22 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         constraints.gridy = 0;
         constraints.anchor = GridBagConstraints.CENTER;
 
-        JButton moveUp = new JButton("+y");
-        moveUp.setToolTipText("Move centre of mass y+1");
+        JButton moveUp = new JButton(Labels.Consensus.INCREASE_Y_LBL);
+        moveUp.setToolTipText(Labels.Consensus.INCREASE_Y_TOOLTIP);
 
         moveUp.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
                 activeDataset().getCollection().getConsensus().offset(0, 1);
-                ;
                 refreshChartCache(getDatasets());
             }
         });
         panel.add(moveUp, constraints);
 
-        JButton moveDown = new JButton("-y");
-        moveDown.setToolTipText("Move centre of mass y-1");
+        JButton moveDown = new JButton(Labels.Consensus.DECREASE_Y_LBL);
+        moveDown.setToolTipText(Labels.Consensus.DECREASE_Y_TOOLTIP);
         moveDown.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
                 activeDataset().getCollection().getConsensus().offset(0, -1);
-                ;
                 refreshChartCache(getDatasets());
             }
         });
@@ -212,12 +211,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         constraints.gridy = 2;
         panel.add(moveDown, constraints);
 
-        JButton moveLeft = new JButton("-x");
-        moveLeft.setToolTipText("Move centre of mass x-1");
+        JButton moveLeft = new JButton(Labels.Consensus.DECREASE_X_LBL);
+        moveLeft.setToolTipText(Labels.Consensus.DECREASE_X_TOOLTIP);
         moveLeft.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
                 activeDataset().getCollection().getConsensus().offset(-1, 0);
-                ;
                 refreshChartCache(getDatasets());
             }
         });
@@ -226,12 +224,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         constraints.gridy = 1;
         panel.add(moveLeft, constraints);
 
-        JButton moveRight = new JButton("+x");
-        moveRight.setToolTipText("Move centre of mass x+1");
+        JButton moveRight = new JButton(Labels.Consensus.INCREASE_X_LBL);
+        moveRight.setToolTipText(Labels.Consensus.INCREASE_X_TOOLTIP);
         moveRight.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
                 activeDataset().getCollection().getConsensus().offset(1, 0);
-                ;
                 refreshChartCache(getDatasets());
             }
         });
@@ -240,8 +237,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         constraints.gridy = 1;
         panel.add(moveRight, constraints);
 
-        JButton moveRst = new JButton("!");
-        moveRst.setToolTipText("Reset centre of mass to 0,0");
+        JButton moveRst = new JButton(Labels.Consensus.RESET_LBL);
+        moveRst.setToolTipText(Labels.Consensus.RESET_COM_TOOLTIP);
         moveRst.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
                 double x = 0;
@@ -249,7 +246,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                 IPoint point = IPoint.makeNew(x, y);
 
                 activeDataset().getCollection().getConsensus().moveCentreOfMass(point);
-                ;
                 refreshChartCache(getDatasets());
             }
         });
@@ -271,8 +267,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         constraints.gridy = 0;
         constraints.anchor = GridBagConstraints.CENTER;
 
-        JButton rotateFwd = new JButton("-r");
-        rotateFwd.setToolTipText("Rotate anti-clockwise 1 degree");
+        JButton rotateFwd = new JButton(Labels.Consensus.DECREASE_ROTATION_LBL);
+        rotateFwd.setToolTipText(Labels.Consensus.DECREASE_ROTATION_TOOLTIP);
         rotateFwd.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
                 activeDataset().getCollection().getConsensus().rotate(-89);
@@ -283,8 +279,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         panel.add(rotateFwd, constraints);
 
-        JButton rotateBck = new JButton("+r");
-        rotateBck.setToolTipText("Rotate clockwise 1 degree");
+        JButton rotateBck = new JButton(Labels.Consensus.INCREASE_ROTATION_LBL);
+        rotateBck.setToolTipText(Labels.Consensus.INCREASE_ROTATION_TOOLTIP);
 
         rotateBck.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
@@ -297,20 +293,12 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         constraints.gridy = 0;
         panel.add(rotateBck, constraints);
 
-        JButton rotateRst = new JButton("!");
-        rotateRst.setToolTipText("Reset rotation to orientation point");
+        JButton rotateRst = new JButton(Labels.Consensus.RESET_LBL);
+        rotateRst.setToolTipText(Labels.Consensus.RESET_ROTATION_TOOLTIP);
 
         rotateRst.addActionListener(e -> {
             if (activeDataset().getCollection().hasConsensus()) {
-                IBorderPoint orientationPoint;
-                try {
-                    orientationPoint = activeDataset().getCollection().getConsensus()
-                            .getBorderTag(Tag.ORIENTATION_POINT);
-                    activeDataset().getCollection().getConsensus().rotatePointToBottom(orientationPoint);
-                } catch (UnavailableBorderTagException e1) {
-                    stack("Cannot get OP index in nucleus profile", e1);
-                }
-
+                activeDataset().getCollection().getConsensus().alignVertically();
                 refreshChartCache(getDatasets());
             }
         });
@@ -319,9 +307,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         constraints.gridy = 0;
         panel.add(rotateRst, constraints);
 
-        JButton refoldBtn = new JButton("Re-Refold");
+        JButton refoldBtn = new JButton(Labels.Consensus.RE_REFOLD_LBL);
         refoldBtn.addActionListener(e -> {
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDataset());
+            getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDataset());
         });
 
         constraints.gridwidth = 3;
@@ -334,14 +322,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return new ConsensusNucleusChartFactory(options).makeConsensusChart();
     }
 
     @Override
     protected synchronized void updateSingle() {
         super.updateSingle();
-        runRefoldingButton.setVisible(false);
+        runRefoldingButton.setVisible(true);
 
         showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
         showMeshFacesBox.setEnabled(showMeshBox.isSelected());
@@ -362,18 +350,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         setChart(options);
 
         ICellCollection collection = activeDataset().getCollection();
-        if (collection.hasConsensus()) {
 
-            // hide the refold button
-            runRefoldingButton.setVisible(false);
-            offsetsPanel.setVisible(true);
-            consensusChartPanel.restoreAutoBounds();
-
-        } else {
-
-            runRefoldingButton.setVisible(!collection.isRefolding());
-            offsetsPanel.setVisible(false);
-        }
+        // hide the refold button when not needed
+        runRefoldingButton.setVisible(!collection.hasConsensus());
+        offsetsPanel.setVisible(collection.hasConsensus());
+        consensusChartPanel.restoreAutoBounds();
     }
 
     @Override
@@ -400,158 +381,93 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     }
 
     private void rotateConsensusNucleus() {
-        if (activeDataset() != null) {
+        if (activeDataset()== null)
+        	return;
+        if (!activeDataset().getCollection().hasConsensus())
+    		return;
 
-            if (activeDataset().getCollection().hasConsensus()) {
-
-                SpinnerNumberModel sModel = new SpinnerNumberModel(0, -360, 360, 1.0);
-                JSpinner spinner = new JSpinner(sModel);
-
-                int option = JOptionPane.showOptionDialog(null, spinner, "Choose the amount to rotate",
-                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-                if (option == JOptionPane.CANCEL_OPTION) {
-                    // user hit cancel
-                } else if (option == JOptionPane.OK_OPTION) {
-
-                    // offset by 90 because reasons?
-                    double angle = (Double) spinner.getModel().getValue();
-                    activeDataset().getCollection().getConsensus().rotate(angle - 90);
-
-                    this.update(activeDataset());
-                }
-            }
-        } else {
-            log(Level.WARNING, "Cannot rotate: must have one dataset selected");
-        }
+        try {
+        	double angle = getInputSupplier().requestDouble("Choose the amount to rotate", 0, -360, 360, 1.0);
+        	activeDataset().getCollection().getConsensus().rotate(angle - 90);
+        	update(activeDataset());
+        	
+		} catch (RequestCancelledException e) {
+			return;
+		}
     }
 
-    private void resetConsensusNucleusRotationToOrientationPoint() {
-        if (activeDataset() != null) {
-
-            if (activeDataset().getCollection().hasConsensus()) {
-
-                Nucleus cons = activeDataset().getCollection().getConsensus();
-
-                if (cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.TOP_VERTICAL)) {
-                    alignConsensusAlongVerticalPoints();
-                    this.update(activeDataset());
-                    return;
-                }
-
-                try {
-                    IBorderPoint orientationPoint = cons.getBorderTag(Tag.ORIENTATION_POINT);
-
-                    cons.rotatePointToBottom(orientationPoint);
-                    this.update(activeDataset());
-                    return;
-                } catch (UnavailableBorderTagException e) {
-                    fine("Cannot get OP index in nucleus profile", e);
-                }
-
-            }
-        } else {
-            warn("Cannot rotate: must have one dataset selected");
-        }
-    }
-
-    private void alignConsensusAlongVerticalPoints() {
-        if (activeDataset() != null) {
-
-            if (activeDataset().getCollection().hasConsensus()) {
-
-                Nucleus nucleus = activeDataset().getCollection().getConsensus();
-
-                if (nucleus.hasBorderTag(Tag.TOP_VERTICAL) && nucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-
-                    try {
-                        nucleus.alignPointsOnVertical(nucleus.getBorderTag(Tag.TOP_VERTICAL),
-                                nucleus.getBorderTag(Tag.BOTTOM_VERTICAL));
-                    } catch (UnavailableBorderTagException e) {
-                        fine("Cannot align points on vertical", e);
-                    }
-
-                    this.update(activeDataset());
-
-                } else {
-                    log(Level.WARNING, "Top and bottom vertical points are not available");
-                }
-
-            } else {
-                log(Level.WARNING, "No consensus nucleus available");
-            }
-        } else {
-            log(Level.WARNING, "Cannot align: must have one dataset selected");
-        }
+    private void resetConsensusNucleusRotation() {
+    	if (activeDataset()==null) 
+    		return;
+    	if (!activeDataset().getCollection().hasConsensus())
+    		return;
+    	Nucleus nucleus = activeDataset().getCollection().getConsensus();
+    	nucleus.alignVertically();
+    	update(activeDataset());
     }
 
     private void offsetConsensusNucleus() {
-        if (activeDataset() != null) {
+    	if (activeDataset()==null) 
+    		return;
+    	if (!activeDataset().getCollection().hasConsensus())
+    		return;
 
-            if (activeDataset().getCollection().hasConsensus()) {
 
-                // get the x and y offset
-                SpinnerNumberModel xModel = new SpinnerNumberModel(0, -100, 100, 0.1);
-                SpinnerNumberModel yModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+    	// get the x and y offset
+    	SpinnerNumberModel xModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+    	SpinnerNumberModel yModel = new SpinnerNumberModel(0, -100, 100, 0.1);
 
-                JSpinner xSpinner = new JSpinner(xModel);
-                JSpinner ySpinner = new JSpinner(yModel);
+    	JSpinner xSpinner = new JSpinner(xModel);
+    	JSpinner ySpinner = new JSpinner(yModel);
 
-                JSpinner[] spinners = { xSpinner, ySpinner };
+    	JSpinner[] spinners = { xSpinner, ySpinner };
 
-                int option = JOptionPane.showOptionDialog(null, spinners, "Choose the amount to offset x and y",
-                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-                if (option == JOptionPane.CANCEL_OPTION) {
-                    // user hit cancel
-                } else if (option == JOptionPane.OK_OPTION) {
+    	int option = JOptionPane.showOptionDialog(null, spinners, "Choose the amount to offset x and y",
+    			JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+    	if (option == JOptionPane.CANCEL_OPTION) {
+    		// user hit cancel
+    	} else if (option == JOptionPane.OK_OPTION) {
 
-                    // offset by 90 because reasons?
-                    double x = (Double) xSpinner.getModel().getValue();
-                    double y = (Double) ySpinner.getModel().getValue();
+    		// offset by 90 because reasons?
+    		double x = (Double) xSpinner.getModel().getValue();
+    		double y = (Double) ySpinner.getModel().getValue();
 
-                    activeDataset().getCollection().getConsensus().offset(x, y);
-                    
-                    this.update(activeDataset());
-                }
+    		activeDataset().getCollection().getConsensus().offset(x, y);
 
-            }
-        } else {
-            warn("Cannot offset: must have one dataset selected");
-        }
+    		this.update(activeDataset());
+    	}
     }
 
     private void resetConsensusNucleusOffset() {
-        if (activeDataset() != null) {
+    	if (activeDataset()==null) 
+    		return;
+    	if (!activeDataset().getCollection().hasConsensus())
+    		return;
 
-            if (activeDataset().getCollection().hasConsensus()) {
-
-                double x = 0;
-                double y = 0;
-                IPoint point = IPoint.makeNew(x, y);
-
-                activeDataset().getCollection().getConsensus().moveCentreOfMass(point);
-                ;
-                this.update(activeDataset());
-            }
-        } else {
-            warn("Cannot offset: must have one dataset selected");
-        }
+    	double x = 0;
+    	double y = 0;
+    	IPoint point = IPoint.makeNew(x, y);
+    	activeDataset().getCollection().getConsensus().moveCentreOfMass(point);
+    	update(activeDataset());
     }
 
     private void exportConsensusNuclei() {
     	
         String defaultFileName = this.isMultipleDatasets() ? "Outlines.svg" : activeDataset().getName()+".svg";
-    	File exportFile = FileSelector.chooseSaveFile(null, new FileNameExtensionFilter("SVG file", "svg"),defaultFileName);
-    	
-    	if(exportFile==null)
-    		return;
-    	
-    	if(!exportFile.getName().endsWith(Io.SVG_FILE_EXTENSION))
-    		exportFile = new File(exportFile.getParentFile(), exportFile.getName()+Io.SVG_FILE_EXTENSION);
+        
+        try {
+        	File exportFile = getInputSupplier().requestFileSave(null, defaultFileName, "svg");
+        	
+        	if(!exportFile.getName().endsWith(Io.SVG_FILE_EXTENSION))
+        		exportFile = new File(exportFile.getParentFile(), exportFile.getName()+Io.SVG_FILE_EXTENSION);
 
-    	if(exportFile!=null){
-    		SVGWriter wr = new SVGWriter(exportFile);
-    		wr.exportConsensusOutlines(getDatasets()); 
-    	}
+        	if(exportFile!=null){
+        		SVGWriter wr = new SVGWriter(exportFile);
+        		wr.exportConsensusOutlines(getDatasets()); 
+        	}
+		} catch (RequestCancelledException e) {
+			return;
+		}
     }
 
     @Override
@@ -566,25 +482,18 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                 getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
             }
 
-            if (event.type().equals("RotateConsensus")) {
+            if (event.type().equals("RotateConsensus"))
                 rotateConsensusNucleus();
-            }
 
-            if (event.type().equals("RotateReset")) {
-                resetConsensusNucleusRotationToOrientationPoint();
-            }
+            if (event.type().equals("RotateReset"))
+                resetConsensusNucleusRotation();
 
-            if (event.type().equals("AlignVertical")) {
-                alignConsensusAlongVerticalPoints();
-            }
-
-            if (event.type().equals("OffsetAction")) {
+            if (event.type().equals("OffsetAction"))
                 offsetConsensusNucleus();
-            }
 
-            if (event.type().equals("OffsetReset")) {
+            if (event.type().equals("OffsetReset"))
                 resetConsensusNucleusOffset();
-            }
+            
             if (event.type().equals(ConsensusNucleusChartPanel.EXPORT_SVG_LBL)) {
                 exportConsensusNuclei();
             }

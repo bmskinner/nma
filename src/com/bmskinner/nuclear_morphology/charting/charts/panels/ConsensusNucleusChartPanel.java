@@ -84,7 +84,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
     }
 
     @Override
-    public void setChart(JFreeChart chart) {
+    public synchronized void setChart(JFreeChart chart) {
 
         super.setChart(chart);
 

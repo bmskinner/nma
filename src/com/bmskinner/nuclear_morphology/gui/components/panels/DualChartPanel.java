@@ -110,7 +110,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
         rangePanel.restoreAutoBounds();
     }
 
-    public void setCharts(JFreeChart chart, JFreeChart rangeChart) {
+    public synchronized void setCharts(JFreeChart chart, JFreeChart rangeChart) {
 
         if (chart == rangeChart)
             throw new IllegalArgumentException("Charts cannot be the same object");

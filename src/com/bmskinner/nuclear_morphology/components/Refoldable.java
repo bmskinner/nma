@@ -52,19 +52,4 @@ public interface Refoldable<E extends CellularComponent> {
      * @return the consensus, or null if not present
      */
     E getConsensus();
-
-    /**
-     * Set the refolding state
-     * 
-     * @param b
-     */
-    void setRefolding(boolean b);
-
-    /**
-     * Test if the consensus is being refolded
-     * 
-     * @return
-     */
-    boolean isRefolding();
-
 }
