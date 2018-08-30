@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.bmskinner</groupId>
   <artifactId>nuclear_morphology</artifactId>
-  <version>1.14.0</version>
+  <version>1.14.0a1</version>
   <properties>
     <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
     <jar.finalName>Nuclear_Morphology_${project.version}</jar.finalName>
@@ -58,7 +58,7 @@
 			  <archive>
 			    <manifest>
 					<addClasspath>true</addClasspath>
-					<mainClass>com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis</mainClass>
+					<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
 					<classpathPrefix>dependency-jars/</classpathPrefix>
 			    </manifest>
 			  </archive>
@@ -105,7 +105,7 @@
                      <appendAssemblyId>false</appendAssemblyId>
                      <archive>
                          <manifest>
-                             <mainClass>com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis</mainClass>
+                             <mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
                          </manifest>
                      </archive>
                  </configuration>
