@@ -719,7 +719,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     static boolean isLongEnough(int start, int end, int total) {
         int testLength = calculateSegmentLength(start, end, total);
-        return testLength >= MINIMUM_SEGMENT_LENGTH;
+        return testLength >= INTERPOLATION_MINIMUM_LENGTH;
     }
     
     /**
@@ -732,7 +732,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     static boolean isShortEnough(int start, int end, int total) {
         int testLength = calculateSegmentLength(start, end, total);
-        return total-testLength >= MINIMUM_SEGMENT_LENGTH;
+        return total-testLength >= INTERPOLATION_MINIMUM_LENGTH;
     }
     
     /**

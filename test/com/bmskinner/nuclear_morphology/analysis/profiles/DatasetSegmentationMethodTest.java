@@ -182,7 +182,6 @@ public class DatasetSegmentationMethodTest {
 
 	}
 	
-		
 	/**
 	 * Test that increasing numbers of varying cells does not affect segment fitting.
 	 * The number of segments may change in variable dataset, since the median may become distorted,
@@ -212,7 +211,7 @@ public class DatasetSegmentationMethodTest {
 	}
 	
 	@Test
-	public void testMedianFindingInRodentDataset() throws Exception {
+	public void testSegmentationOfRodentDataset() throws Exception {
 		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH, "Unsegmented_mouse.nmd");
 		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
 		ISegmentedProfile template = dataset.getCollection()

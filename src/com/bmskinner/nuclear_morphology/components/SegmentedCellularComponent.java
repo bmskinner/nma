@@ -1416,7 +1416,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				int newLength = newStart<newEnd ? newEnd-newStart : newEnd + length-newStart;
 				
-				if(newLength<IBorderSegment.MINIMUM_SEGMENT_LENGTH)
+				if(newLength<IBorderSegment.INTERPOLATION_MINIMUM_LENGTH)
 					throw new ProfileException(String.format("Cannot interpolate profile to %d: segment length of %d would be too short", length, newLength));
 				newSegs.add(new DefaultBorderSegment(newStart, newEnd, length, segments.leaves.get(i).getID()));
 			}

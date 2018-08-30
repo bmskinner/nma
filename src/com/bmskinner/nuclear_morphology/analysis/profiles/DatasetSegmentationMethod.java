@@ -445,7 +445,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		if (n.isLocked())
 			return;
 		ISegmentedProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		nucleusProfile = bestFitAlignSegments(template, nucleusProfile);
+//		nucleusProfile = bestFitAlignSegments(template, nucleusProfile);
 		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
 		nucleusProfile = fitter.fit(nucleusProfile);
 		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, nucleusProfile);

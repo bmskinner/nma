@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 
-	public static final int DEFAULT_PROFILE_LENGTH = 200;
+	public static final int DEFAULT_PROFILE_LENGTH = 1000;
 
 	public ProfileDatasetCreator(@NonNull ChartOptions options) {
 		super(options);

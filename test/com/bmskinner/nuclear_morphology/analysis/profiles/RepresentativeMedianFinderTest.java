@@ -85,19 +85,8 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(d.getCollection());
 		
 		IProfile result = finder.findMedian();
-		
-		List<IProfile> profiles = new ArrayList<>();
-		profiles.add(template);
-		profiles.add(result);
-		
-		List<String> names = new ArrayList<>();
-		names.add("Overall median");
-		names.add("Representative median");
-		
-//		if(!template.equals(result))
-//			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
-		
-//		equals(template.toFloatArray(), result.toFloatArray(), 0);
+			
+		equals(template.toFloatArray(), result.toFloatArray(), 0);
 	}
 	
 	@Test
@@ -139,19 +128,29 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());
 		
-		IProfile nucleus = finder.findMostConsistentNucleusProfile();
+//		IProfile nucleus = finder.findMostConsistentNucleusProfile();
 				
 		IProfile result = finder.findMedian();
 		
+		List<IProfile> profilesInMedian = finder.findBestProfiles(result);
+		
 		List<IProfile> profiles = new ArrayList<>();
 		profiles.add(template);
-		profiles.add(nucleus);
+//		profiles.add(nucleus);
 		profiles.add(result);
+		
+		for(IProfile p : profilesInMedian) {
+			profiles.add(p);
+		}
 		
 		List<String> names = new ArrayList<>();
 		names.add("Overall median");
 		names.add("Nucleus template");
 		names.add("Representative median");
+		for(IProfile p : profilesInMedian) {
+			names.add("Profile");
+		}
+		
 		
 //		if(!template.equals(result))
 			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");

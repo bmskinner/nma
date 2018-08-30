@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,12 +12,15 @@ import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -86,6 +90,23 @@ public class ProfileSegmenterTest {
 
 		segmentMedianProfile(d);
 		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells");
+	}
+	
+	@Test
+	public void testSegmentationOfRodentDataset() throws Exception{
+		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH, "Unsegmented_mouse.nmd");
+		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
+		ISegmentedProfile template = dataset.getCollection()
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+
+		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());				
+		IProfile result = finder.findMedian();
+		ProfileSegmenter segmenter = new ProfileSegmenter(result);
+		
+		List<IBorderSegment> segments = segmenter.segment();
+		for(IBorderSegment s : segments) {
+			System.out.println(s.getDetail());
+		}
 	}
 
 }

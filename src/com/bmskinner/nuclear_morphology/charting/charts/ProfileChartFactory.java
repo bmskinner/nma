@@ -148,7 +148,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		if(profile instanceof ISegmentedProfile) {
 			ISegmentedProfile segProfile = (ISegmentedProfile)profile;
 			if (options.isShowAnnotations())
-				addSegmentAnnotations(segProfile, chart.getXYPlot());
+				addSegmentTextAnnotations(segProfile, chart.getXYPlot());
 		}
 		return chart;
 	}
@@ -173,7 +173,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			finest("Adding segment annotations");
 			try {
 				ISegmentedProfile profile = n.getProfile(options.getType(), options.getTag());
-				addSegmentAnnotations(profile, chart.getXYPlot());
+				addSegmentTextAnnotations(profile, chart.getXYPlot());
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				fine("Error adding segment annotations", e);
 				return makeErrorChart();
@@ -189,7 +189,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart makeProfileChart(ProfileChartDataset ds) {
+	private JFreeChart makeProfileChart(@NonNull ProfileChartDataset ds) {
 
 		JFreeChart chart = makeEmptyProfileChart(options.getType());
 
@@ -298,7 +298,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		if (options.isShowAnnotations() && collection.getProfileCollection().hasSegments()) {
 			try {
 				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN);
-				addSegmentAnnotations(profile, plot);
+				addSegmentTextAnnotations(profile, plot);
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 				fine("Error adding segment annotations", e);
 				return makeErrorChart();
@@ -443,9 +443,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param plot
 	 */
 	private void addBorderTagMarkers(Nucleus n, XYPlot plot) {
-		finest("Adding tag markers");
 		for (Tag tag : n.getBorderTags().keySet()) {
-
 			// get the index of the tag
 			int index = n.getBorderIndex(tag);
 
@@ -463,15 +461,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param profile
 	 * @param plot
 	 */
-	private void addSegmentAnnotations(ISegmentedProfile profile, XYPlot plot) {
+	private void addSegmentTextAnnotations(ISegmentedProfile profile, XYPlot plot) {
 		for (IBorderSegment seg : profile.getOrderedSegments()) {
 
 			int midPoint = seg.getMidpointIndex();
 
 			double x = midPoint;
-			if (options.isNormalised()) {
+			if (options.isNormalised())
 				x = ((double) midPoint / (double) seg.getProfileLength()) * ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
-			}
 			XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
 
 			Paint colour = ColourSelecter.getColor(seg.getPosition());

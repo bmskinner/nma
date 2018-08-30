@@ -159,8 +159,6 @@ public class ProfileSegmenter implements Loggable {
          * cannot be called within MIN_SIZE of the profile end, there is enough
          * space to make a segment running from the current segment start back
          * to index 0
-         * TODO: Sometimes this fails because there is not enough space left in the profile.
-         * See IssuePigFail.nmd
          */
         IBorderSegment seg = IBorderSegment.newSegment(segmentStart, 0, profile.size());
         segments.add(seg);
@@ -173,8 +171,6 @@ public class ProfileSegmenter implements Loggable {
         }
 
         finer("Segments linked");
-
-        finer(this.toString());
         fine(String.format("Created %s segments in profile", segments.size()));
         return segments;
     }
@@ -282,8 +278,9 @@ public class ProfileSegmenter implements Loggable {
 
         
         //the value must be distinct from its surroundings.
-        if(!secondDifferentialMinOrMax.get(index))
-        	return false;
+        //TODO - this is impairing normal segmentation
+//        if(!secondDifferentialMinOrMax.get(index))
+//        	return false;
 //        if(deltaProfile.get(index) < minRateOfChange)
 //            return false;
         return true;

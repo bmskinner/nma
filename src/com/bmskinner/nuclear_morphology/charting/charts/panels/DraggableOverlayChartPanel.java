@@ -40,6 +40,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
+import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -134,7 +135,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                             ChartComponents.MARKER_STROKE, seg);
                     xCrosshair.setLabelVisible(false);
 
-                    double value = isChartNormalised ? getRescaledIndex(seg, 100)
+                    double value = isChartNormalised ? getRescaledIndex(seg, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH)
                             : seg.getStartIndex();
 
                     xCrosshair.setValue(value);
@@ -167,7 +168,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         clearOverlays();
         this.profile = profile;
         this.isChartNormalised = normalised;
-        crosses = new ArrayList<SegmentCrosshair>();
+        crosses = new ArrayList<>();
         overlay = null;
         updateOverlays();
         finer("Profile has been set");
