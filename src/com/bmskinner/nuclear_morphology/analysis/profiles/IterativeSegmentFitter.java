@@ -49,9 +49,9 @@ public class IterativeSegmentFitter implements Loggable {
      * @return the profile with fitted segments, or on error, the original profile
      */
     public ISegmentedProfile fit(@NonNull final IProfile target) {
-    	fine("-------------------------");
-    	fine("Beginning segment fitting");
-    	fine("-------------------------");
+    	finer("-------------------------");
+    	finer("Beginning segment fitting");
+    	finer("-------------------------");
     	
         if (target==null)
             throw new IllegalArgumentException("Target profile is null");
@@ -143,9 +143,9 @@ public class IterativeSegmentFitter implements Loggable {
         newSegments.add(newSeg);
         
         if(templateSegment.getPosition()==0) {
-        	fine("Adding first segment "+newSeg.getDetail());
+        	finer("Adding first segment "+newSeg.getDetail());
         } else {
-        	fine("Adding interior segment "+newSeg.getDetail());
+        	finer("Adding interior segment "+newSeg.getDetail());
         }
         return newSegments;
     }
@@ -168,7 +168,7 @@ public class IterativeSegmentFitter implements Loggable {
     	double bestScore = Double.MAX_VALUE;
         int bestIndex = 0;
         
-        fine(String.format("Testing variation of end index from %s to %s", minIndex, maxIndex));
+        finer(String.format("Testing variation of end index from %s to %s", minIndex, maxIndex));
         
         for (int endIndex=minIndex; endIndex <maxIndex; endIndex+=stepSize) {
         	
@@ -182,7 +182,7 @@ public class IterativeSegmentFitter implements Loggable {
             	bestScore = score;
             }
         }
-        fine(String.format("Best offset is %s with score %s", bestIndex, bestScore));
+        finer(String.format("Best offset is %s with score %s", bestIndex, bestScore));
         return bestIndex;
     }
 }

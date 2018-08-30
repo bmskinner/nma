@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,6 +20,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -32,9 +34,11 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class RepresentativeMedianFinderTest extends FloatArrayTester {
 	
+	private Logger logger;
+	
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+		logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 
@@ -124,6 +128,33 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
 		
 //		equals(template.toFloatArray(), result.toFloatArray(), 0);
+	}
+	
+	@Test
+	public void testMedianFindingInRodentDataset() throws Exception {
+		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH, "Unsegmented_mouse.nmd");
+		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
+		ISegmentedProfile template = dataset.getCollection()
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+
+		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());
+		
+		IProfile nucleus = finder.findMostConsistentNucleusProfile();
+				
+		IProfile result = finder.findMedian();
+		
+		List<IProfile> profiles = new ArrayList<>();
+		profiles.add(template);
+		profiles.add(nucleus);
+		profiles.add(result);
+		
+		List<String> names = new ArrayList<>();
+		names.add("Overall median");
+		names.add("Nucleus template");
+		names.add("Representative median");
+		
+//		if(!template.equals(result))
+			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");
 	}
 	
 	@Test

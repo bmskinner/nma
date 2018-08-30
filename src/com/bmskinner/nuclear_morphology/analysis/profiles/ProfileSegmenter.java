@@ -69,14 +69,14 @@ public class ProfileSegmenter implements Loggable {
      * The minimum rate of change required in the profile (first differential)
      * as a proportion of the total differential within the profile.
      */
-    private static final double MIN_RATE_OF_CHANGE = 0.02;
+    private static final double MIN_RATE_OF_CHANGE = 0.01;
 
     private final IProfile profile; // the profile to segment
-    private final List<IBorderSegment> segments = new ArrayList<>(8);
+    private final List<IBorderSegment> segments = new ArrayList<>();
 
     private BooleanProfile minOrMax = null;
     private BooleanProfile secondDifferentialMinOrMax = null;
-//    private IProfile       deltaProfile     = null;
+
     private double         minRateOfChange  = 1;
 
     /**
@@ -121,7 +121,9 @@ public class ProfileSegmenter implements Loggable {
      * @return a list of segments
      */
     public List<IBorderSegment> segment() throws UnsegmentableProfileException {
-
+    	fine("-------------------------");
+    	fine("Beginning segmentation   ");
+    	fine("-------------------------");
         /*
          * Prepare segment start index
          */
@@ -173,6 +175,7 @@ public class ProfileSegmenter implements Loggable {
         finer("Segments linked");
 
         finer(this.toString());
+        fine(String.format("Created %s segments in profile", segments.size()));
         return segments;
     }
 

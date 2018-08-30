@@ -2,6 +2,9 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +20,7 @@ import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.charting.OutlineChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -24,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -31,12 +36,14 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class DatasetSegmentationMethodTest {
 	
+	private Logger logger;
+	
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
 	
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+		logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
@@ -202,5 +209,29 @@ public class DatasetSegmentationMethodTest {
 					ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
 			}
 		}
+	}
+	
+	@Test
+	public void testMedianFindingInRodentDataset() throws Exception {
+		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH, "Unsegmented_mouse.nmd");
+		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
+		ISegmentedProfile template = dataset.getCollection()
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
+
+		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
+		
+		ISegmentedProfile result = dataset.getCollection()
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
+				
+		List<IProfile> profiles = new ArrayList<>();
+		profiles.add(template);
+		profiles.add(result);
+		
+		List<String> names = new ArrayList<>();
+		names.add("Overall median");
+		names.add("Final median");
+		
+//		if(!template.equals(result))
+			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");
 	}
 }

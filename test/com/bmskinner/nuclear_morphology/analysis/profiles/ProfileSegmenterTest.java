@@ -29,10 +29,10 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileSegmenterTest {
-	
+	private Logger logger;
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+		logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
@@ -53,7 +53,7 @@ public class ProfileSegmenterTest {
 	@Test
 	public void testSingleCellSquareDatasetSegmentation() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(1)
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1)
 				.ofType(NucleusType.ROUND)
 				.baseHeight(40).baseWidth(40)
 				.profiled().build();
@@ -65,7 +65,7 @@ public class ProfileSegmenterTest {
 	@Test
 	public void testMultiCellSquareDatasetSegmentation() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(50).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(50).ofType(NucleusType.ROUND)
 				.baseHeight(40).baseWidth(40).profiled().build();
 
 		IProfile median = d.getCollection()
@@ -79,8 +79,9 @@ public class ProfileSegmenterTest {
 	@Test
 	public void testMultiCellVariableSquareDatasetSegmentation() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(50).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(50).ofType(NucleusType.ROUND)
 				.withMaxSizeVariation(20)
+				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).profiled().build();
 
 		segmentMedianProfile(d);

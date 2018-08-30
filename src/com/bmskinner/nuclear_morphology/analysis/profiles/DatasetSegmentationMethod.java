@@ -120,9 +120,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-		fine("-------------------------");
-    	fine("Beginning segmentation");
-    	fine("-------------------------");
+		fine("-----------------------------");
+    	fine("Beginning segmentation method");
+    	fine("-----------------------------");
 		try {
 
 			switch (mode) {
@@ -172,7 +172,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		dataset.getCollection().setConsensus(null); // clear if present
 
 		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
-		fine("Segmented median profile: "+median.toString());
 		
 		if(median.getSegmentCount()<=1) {
 			warn("Unable to find segments in median profile");
@@ -183,12 +182,14 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		
 		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei by best-fit
 		
+		
+		
 		// 5 - Generate frankenprofiles for each nucleus against the median
 		// 6 - Profile the frankencollection
 		// 7 - Create a new frankenmedian
 		// 8 - Fit the frankensegments to the nuclei
 		// 9 - Measure the sum of profile differences between the nuclei and the frankenmedian
-		iterateFrankenprofiles();
+//		iterateFrankenprofiles();
 		
 		// The best segmentation pattern has been found
 		// Copy segmentation to child datasets and invalidate 
@@ -275,7 +276,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private ISegmentedProfile createSegmentsInMedian() throws Exception {
 
-		fine("Creating segments in median profile");
 		IProfileCollection pc = collection.getProfileCollection();
 
 		// the reference point is always index 0, so the segments will match
@@ -289,23 +289,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		List<IBorderSegment> segments = segmenter.segment();
-
-		fine(String.format("Creating %s segments in median profile", segments.size()));
 		return new SegmentedFloatProfile(median, segments);
 	}
-
-	/**
-	 * Assign the segments in the median profile to the nuclei within the
-	 * collection
-	 * 
-	 * @param collection
-	 * @throws Exception
-	 */
-//	private void assignMedianSegmentsToNuclei(@NonNull ISegmentedProfile median) throws Exception {
-////		IProfileCollection pc = collection.getProfileCollection();
-////		ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-//		assignSegmentsToNuclei(median);
-//	}
 	
 	/**
 	 * Assign the segments in the given profile to the nuclei within the
@@ -370,80 +355,80 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	}
 	
 	
-	private void iterateFrankenprofiles() throws ProfileException, UnsegmentedProfileException, UnsegmentableProfileException, SegmentUpdateException, UnavailableComponentException {
-		
-		// Debugging charts only
-		List<IProfile> profiles = new ArrayList<>();
-		List<String> names = new ArrayList<>();
-
-		// Calculate new difference scores
-		ISegmentedProfile median = collection.getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-		
-		List<IBorderSegment> frankenSegments = median.getSegments(); // to restore from if frankenprofiling fails
-		double score = calculateDifferenceScoresToProfile(median);
-		profiles.add(median.copy());
-		names.add("Starting median: score "+score);
-		
-		fine(String.format("Starting median has %s segments", median.getSegmentCount()));
-		
-		fine("Starting score: "+score);
-		double prevScore = Double.MAX_VALUE;
-		while(score<prevScore) {
-			prevScore = score;
-			// 5 - Generate frankenprofiles for each nucleus against the median
-			// 6 - Profile the frankencollection
-			// 7 - Create a new frankenmedian
-			ISegmentedProfile frankenMedian = createFrankenMedianFromNuclei(median);
-
-			// 8 - Segment the frankenmedian
-			ProfileSegmenter segmenter = new ProfileSegmenter(frankenMedian);
-			List<IBorderSegment> testFrankenSegments = segmenter.segment();
-			if(testFrankenSegments.size()==1)
-				break; // that went wrong, we should get more segments out, not fewer/equal
-			
-			
-			frankenMedian.setSegments(testFrankenSegments);
-			median.setSegments(testFrankenSegments);
-
-			profiles.add(frankenMedian.copy());
-
-			fine(String.format("Frankenmedian has %s segments", testFrankenSegments.size()));
-
-			// 9 - Fit the frankensegments to each nucleus
-			assignSegmentsToNuclei(frankenMedian);
-			
-			// Calculate new difference scores
-			score = calculateDifferenceScoresToProfile(frankenMedian);
-			fine("Score after frankenprofiling: "+score);
-			
-			if(score>=prevScore) { // go back to the previous segments
-
-				frankenMedian.setSegments(frankenSegments);
-				median.setSegments(frankenSegments);
-				assignSegmentsToNuclei(frankenMedian);
-				profiles.add(frankenMedian.copy());
-				fine(String.format("Final frankenmedian has %s segments", frankenSegments.size()));
-				score = calculateDifferenceScoresToProfile(frankenMedian);
-			} else {
-				frankenSegments = testFrankenSegments;
-			}
-			
-			names.add("Frankenmedian iteration: score "+score);
-		}
-		fine("Final score: "+score);
-		// Add the new segments back to the profile collection
-		collection.getProfileCollection().addSegments(frankenSegments);
-		
-		
-		
-//		try {
-//			ChartFactoryTest.showProfiles(profiles, names, "Segmentation method");
-//		} catch (InterruptedException e) {
-//			throw new ProfileException("Charting error", e);
+//	private void iterateFrankenprofiles() throws ProfileException, UnsegmentedProfileException, UnsegmentableProfileException, SegmentUpdateException, UnavailableComponentException {
+//		
+//		// Debugging charts only
+//		List<IProfile> profiles = new ArrayList<>();
+//		List<String> names = new ArrayList<>();
+//
+//		// Calculate new difference scores
+//		ISegmentedProfile median = collection.getProfileCollection()
+//				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+//
+//		
+//		List<IBorderSegment> frankenSegments = median.getSegments(); // to restore from if frankenprofiling fails
+//		double score = calculateDifferenceScoresToProfile(median);
+//		profiles.add(median.copy());
+//		names.add("Starting median: score "+score);
+//		
+//		fine(String.format("Starting median has %s segments", median.getSegmentCount()));
+//		
+//		fine("Starting score: "+score);
+//		double prevScore = Double.MAX_VALUE;
+//		while(score<prevScore) {
+//			prevScore = score;
+//			// 5 - Generate frankenprofiles for each nucleus against the median
+//			// 6 - Profile the frankencollection
+//			// 7 - Create a new frankenmedian
+//			ISegmentedProfile frankenMedian = createFrankenMedianFromNuclei(median);
+//
+//			// 8 - Segment the frankenmedian
+//			ProfileSegmenter segmenter = new ProfileSegmenter(frankenMedian);
+//			List<IBorderSegment> testFrankenSegments = segmenter.segment();
+//			if(testFrankenSegments.size()==1)
+//				break; // that went wrong, we should get more segments out, not fewer/equal
+//			
+//			
+//			frankenMedian.setSegments(testFrankenSegments);
+//			median.setSegments(testFrankenSegments);
+//
+//			profiles.add(frankenMedian.copy());
+//
+//			fine(String.format("Frankenmedian has %s segments", testFrankenSegments.size()));
+//
+//			// 9 - Fit the frankensegments to each nucleus
+//			assignSegmentsToNuclei(frankenMedian);
+//			
+//			// Calculate new difference scores
+//			score = calculateDifferenceScoresToProfile(frankenMedian);
+//			fine("Score after frankenprofiling: "+score);
+//			
+//			if(score>=prevScore) { // go back to the previous segments
+//
+//				frankenMedian.setSegments(frankenSegments);
+//				median.setSegments(frankenSegments);
+//				assignSegmentsToNuclei(frankenMedian);
+//				profiles.add(frankenMedian.copy());
+//				fine(String.format("Final frankenmedian has %s segments", frankenSegments.size()));
+//				score = calculateDifferenceScoresToProfile(frankenMedian);
+//			} else {
+//				frankenSegments = testFrankenSegments;
+//			}
+//			
+//			names.add("Frankenmedian iteration: score "+score);
 //		}
-	}
+//		fine("Final score: "+score);
+//		// Add the new segments back to the profile collection
+//		collection.getProfileCollection().addSegments(frankenSegments);
+//		
+//		
+//		
+////		try {
+////			ChartFactoryTest.showProfiles(profiles, names, "Segmentation method");
+////		} catch (InterruptedException e) {
+////			throw new ProfileException("Charting error", e);
+////		}
+//	}
 	
 	/**
 	 * Assign segments to a nucleus, finding the best match of the

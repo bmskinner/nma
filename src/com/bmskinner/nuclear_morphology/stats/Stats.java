@@ -85,17 +85,27 @@ public class Stats implements Loggable {
      * @return
      */
     public static double stderr(double[] m) {
-        if (m == null || m.length == 0) {
+        if (m == null || m.length == 0)
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-        }
-
-        if (m.length < 2) {
+        if (m.length < 2)
             return 0;
-        }
-
         return stdev(m) / Math.sqrt(m.length);
     }
 
+    /**
+     * Calculate the standard deviation of an array of values
+     * 
+     * @param m
+     * @return
+     */
+    public static double stdev(float[] m) {
+        if (m == null || m.length == 0)
+            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+        if (m.length < 2)
+            return 0;
+        return Math.sqrt(variance(m));
+    }
+    
     /**
      * Calculate the standard deviation of an array of values
      * 
@@ -120,14 +130,34 @@ public class Stats implements Loggable {
      * @return the variance
      */
     public static double variance(double[] m) {
-        if (m == null || m.length == 0) {
+        if (m == null || m.length == 0)
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-        }
-
-        if (m.length < 2) {
+        if (m.length < 2)
             return 0;
-        }
         double mean = DoubleStream.of(m).average().orElse(0);
+        double temp = 0;
+        for (double d : m){
+            temp += Math.pow(mean - d, 2);
+        }
+        return temp / m.length;
+    }
+    
+    /**
+     * Calculate the variance of an array of values.
+     * 
+     * @param m the array
+     * @return the variance
+     */
+    public static double variance(float[] m) {
+        if (m == null || m.length == 0)
+            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+        if (m.length < 2)
+            return 0;
+        double total = 0;
+        for(float f : m) {
+        	total+=f;
+        }
+        double mean = total/m.length;
         double temp = 0;
         for (double d : m){
             temp += Math.pow(mean - d, 2);

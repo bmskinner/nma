@@ -22,7 +22,11 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * A highly variable dataset may not produce a median profile
  * that is cleanly segmentable. This class finds the least 
  * variable subset of nuclei, and generates a segmentable
- * profile
+ * profile.
+ * 
+ * The assumption is that there is a population of profiles within
+ * the collection that are more similar to each other than noisy
+ * profiles.
  * @author bms41
  * @since 1.14.0
  *
@@ -50,28 +54,49 @@ public class RepresentativeMedianFinder implements Loggable {
     	fine("-------------------------");
 		
 		try {
-			// Find the pairwise differences between all nucleus profiles
-			float[][] matrix = buildDifferenceMatrix();
 			
-			// Convert to a distance matrix of all profiles to the first of each column
-			float[][] dist   = buildDistanceMatrix(matrix);
+			float[] differences = calculateDistancesToDatasetMedian();
 			
-			// Calculate the median of each column
-			float[] medians = calculateDistanceColumnMedian(dist);
-			
-			// The column with the lowest median has the largest number of similar nuclei
-			int index = findIndexOfLowestValue(medians);
+			float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
+						
+			// The column with the lowest stdev has the largest number of similar nuclei
+			int index = findIndexOfLowestValue(differences);
+			float lowest = differences[index];
+			fine("Lowest difference index is "+index+" with value "+lowest);
 			
 			// Get this best profile
-			ISegmentedProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			IProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);		
 			
-			// Subset the collection to nuclei with a difference lower than that median 
-			float median = medians[index];
-			fine("Identified best profile to base median on");
-			
+			// Subset the collection to nuclei with a difference lower than the lower quartile of the variability 			
 			// Return the median profile of this subset
-			return buildProfileFromValuesBelowThreshold(medians, median, bestProfile.size());
+			return buildProfileFromValuesBelowThreshold(differences, medianDiff, collection.getMedianArrayLength());
 			
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+			error("Error creating matrix, returning default median", e);
+			return collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		}
+	}
+	
+	public IProfile findMostConsistentNucleusProfile() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		try {
+//			// Find the pairwise differences between all nucleus profiles
+//			float[][] matrix = buildDifferenceMatrix();
+//			
+//			// Convert to a distance matrix of all profiles to the first of each column
+//			float[][] dist   = buildSimilarityMatrix(matrix);
+			
+			float[] differences = calculateDistancesToDatasetMedian();
+			float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
+			// Calculate the median of each column
+//			float[] medians = calculateDistanceColumnDeviation(dist);
+//			fine("stdev array is "+Arrays.toString(medians));
+			
+			// The column with the lowest stdev has the largest number of similar nuclei
+			int index = findIndexOfLowestValue(differences);
+			float median = differences[index];
+			
+			// Get this best profile
+			return nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);			
 		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
 			error("Error creating matrix, returning default median", e);
 			return collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
@@ -84,7 +109,8 @@ public class RepresentativeMedianFinder implements Loggable {
 		for(int i=0; i<array.length; i++) {
 			if(array[i]<=threshold)
 				expectedProfiles++;
-		}		
+		}	
+		fine("Group size for new median is "+expectedProfiles);
 		DefaultProfileAggregate agg = new DefaultProfileAggregate(collection.getMedianArrayLength(), expectedProfiles);
 		
 		for(int i=0; i<array.length; i++) {
@@ -108,32 +134,57 @@ public class RepresentativeMedianFinder implements Loggable {
 		return index;
 	}
 	
-	private float[] calculateDistanceColumnMedian(float[][] matrix) {
+	private float[] calculateDistanceColumnDeviation(float[][] matrix) {
 		float[] result = new float[matrix[0].length];
 		for(int i=0; i<matrix[0].length; i++) {
-			result[i] = Stats.quartile(matrix[i], Stats.MEDIAN);
+			result[i] = (float)Stats.stdev(matrix[i]);
 		}
 		return result;
 	}
 	
+	
+	
+	private float[] calculateDistancesToDatasetMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		
+		IProfile template = collection.getProfileCollection().
+				getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		
+		float[] result = new float[collection.getNucleusCount()];
+		for(int i=0; i<result.length; i++) {
+			result[i] = (float) nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(template);
+		}
+		return result;
+	}
+	
+	/**
+	 * Create a matrix containing the pairwise differences between nuclear profiles
+	 * @return
+	 * @throws UnavailableBorderTagException
+	 * @throws UnavailableProfileTypeException
+	 * @throws ProfileException
+	 */
 	private float[][] buildDifferenceMatrix() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
 		float[][] matrix = new float[collection.getNucleusCount()][collection.getNucleusCount()];
 		
 		for(int i=0; i<nuclei.size(); i++) {
+			IProfile pI = nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 			for(int j=0; j<nuclei.size(); j++) {
-				matrix[i][j] = (float) nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
-						.absoluteSquareDifference(nuclei.get(j).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
+				matrix[i][j] = (float) pI.absoluteSquareDifference(nuclei.get(j).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
 			}
+			System.out.println("Difference");
+			System.out.println(Arrays.toString(matrix[i]));
 		}
 		return matrix;
 	}
 	
-	private float[][] buildDistanceMatrix(float[][] matrix) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+	private float[][] buildSimilarityMatrix(float[][] matrix) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
 		float[][] dist = new float[matrix[0].length][matrix[0].length];
 		for(int i=0; i<matrix[0].length; i++) {
 			for(int j=0; j<matrix[0].length; j++) {
-				dist[i][j] = matrix[i][0] - matrix[i][j];
+				dist[i][j] = matrix[0][j] - matrix[i][j];
 			}
+			System.out.println("Distance");
+			System.out.println(Arrays.toString(matrix[i]));
 		}		
 		return dist;
 	}
