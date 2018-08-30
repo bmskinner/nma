@@ -82,13 +82,13 @@ public class SegmentStatsPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         TableOptions options = makeOptions();
         setTable(options);
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         TableOptions options = makeOptions();
         setTable(options);
 
@@ -101,14 +101,14 @@ public class SegmentStatsPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         table.setModel(AbstractTableCreator.createBlankTable());
         table.setToolTipText(null);
 
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
 
         table.setModel(AbstractTableCreator.createLoadingTable());
 

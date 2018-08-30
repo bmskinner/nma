@@ -383,7 +383,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * actual update when a single dataset is selected
      */
     protected synchronized void updateSingle() {
-//        finest(this.getClass().getName() + ": Updating single dataset");
+
     }
 
     /**
@@ -391,7 +391,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * actual update when multiple datasets are selected
      */
     protected synchronized void updateMultiple() {
-//        finest(this.getClass().getName() + ": Updating multiple datasets");
     }
 
     /**
@@ -399,7 +398,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * actual update when no datasets are selected
      */
     protected synchronized void updateNull() {
-//        finest(this.getClass().getName() + ": Updating null dataset");
     }
 
     /**

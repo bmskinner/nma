@@ -9,6 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
@@ -35,7 +36,9 @@ public class IterativeSegmentFitter implements Loggable {
     @SuppressWarnings("null")
 	public IterativeSegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
         if (template == null)
-            throw new IllegalArgumentException("Median profile is null");
+            throw new IllegalArgumentException("Template profile is null");
+        if(template.getSegmentCount()<=1)
+        	throw new IllegalArgumentException("Template profile does not have segments");
         templateProfile = template.copy();
     }
 
@@ -45,20 +48,22 @@ public class IterativeSegmentFitter implements Loggable {
      * @param target the profile to fit to the current template profile 
      * @return the profile with fitted segments, or on error, the original profile
      */
-    public ISegmentedProfile fit(@NonNull final ISegmentedProfile target) {
+    public ISegmentedProfile fit(@NonNull final IProfile target) {
     	fine("-------------------------");
     	fine("Beginning segment fitting");
     	fine("-------------------------");
     	
         if (target==null)
             throw new IllegalArgumentException("Target profile is null");
-        if(!target.hasSegments())
-        	return target;
+//        if(!target.hasSegments())
+//        	return target;
 		try {
 			return remapSegmentEndpoints(target);
 		} catch (UnavailableComponentException | ProfileException e) {
 			fine("Unable to remap segments in profile: "+e.getMessage(), e);
-			return target;
+			if(target instanceof ISegmentedProfile)
+				return (ISegmentedProfile)target;
+			throw new IllegalArgumentException("Could not segment profile");
 		}
     }
 
@@ -69,16 +74,16 @@ public class IterativeSegmentFitter implements Loggable {
      * @throws ProfileException 
      * @throws UnavailableComponentException 
      */
-    private ISegmentedProfile remapSegmentEndpoints(@NonNull ISegmentedProfile profile) throws ProfileException, UnavailableComponentException {
-        ISegmentedProfile tempProfile = profile.copy();
+    private ISegmentedProfile remapSegmentEndpoints(@NonNull IProfile profile) throws ProfileException, UnavailableComponentException {
+//    	IProfile tempProfile = profile.copy();
         List<IBorderSegment> newSegments = new ArrayList<>();
         // fit each segment in turn
         for(int i=0; i<templateProfile.getSegmentCount(); i++) {
         	IBorderSegment templateSegment = templateProfile.getSegments().get(i);
-        	newSegments = bestFitSegment(tempProfile, newSegments, templateSegment.getID());
+        	newSegments = bestFitSegment(profile, newSegments, templateSegment.getID());
         }
-        tempProfile.setSegments(newSegments);
-        return tempProfile;
+//        tempProfile.setSegments(newSegments);
+        return new SegmentedFloatProfile(profile, newSegments);
     }
 
     /**
@@ -93,7 +98,7 @@ public class IterativeSegmentFitter implements Loggable {
      * @throws ProfileException 
      * @throws UnavailableComponentException 
      */
-    private List<IBorderSegment> bestFitSegment(@NonNull ISegmentedProfile profile, List<IBorderSegment> segmentsSoFar, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
+    private List<IBorderSegment> bestFitSegment(@NonNull IProfile profile, List<IBorderSegment> segmentsSoFar, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
     	
     	// Start by adding locked segments back to the profile
     	List<IBorderSegment> newSegments = new ArrayList<>();
@@ -118,37 +123,29 @@ public class IterativeSegmentFitter implements Loggable {
     	// Add the segment to the result profile
     	// Lock the segment
 
-        IBorderSegment segment = profile.getSegment(id); // the segment in the input profile to work on
+        // The start index for the segment is fixed
+        int startIndex = segmentsSoFar.size()>0 ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex():0;
+        
+        // the lowest index that can be applied to the end of this segment
+        int minEnd = segmentsSoFar.size()>0 ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex() + IBorderSegment.MINIMUM_SEGMENT_LENGTH :IBorderSegment.MINIMUM_SEGMENT_LENGTH;
 
-        // the most extreme negative offset that can be applied to the end of this segment
-        // find the end point of the previously locked segment
-
-        int minStartIndex = segmentsSoFar.size()>0 ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex() + IBorderSegment.MINIMUM_SEGMENT_LENGTH :IBorderSegment.MINIMUM_SEGMENT_LENGTH;
-        int minimumOffset = 0-(segment.getEndIndex()-minStartIndex);//0 - (prevSegment.getEndIndex() + IBorderSegment.MINIMUM_SEGMENT_LENGTH);
-
-        // the maximum offset that can be applied allowing all remaining segments to be added
-        int segsRemaining = profile.getSegmentCount()-segment.getPosition();
-        int distanceToEnd = profile.size()-segment.getEndIndex()-1;
-        int maximumChange = distanceToEnd - (segsRemaining*IBorderSegment.MINIMUM_SEGMENT_LENGTH);
+        // the maximum index that can be applied allowing all remaining segments to be added
+        int segsRemaining = templateProfile.getSegmentCount()-templateSegment.getPosition();
+        int maxEnd = profile.size() - (segsRemaining*IBorderSegment.MINIMUM_SEGMENT_LENGTH);
 
         int stepSize   = 10;
         int halfStep   = stepSize / 2;
-        int bestChange = findBestScoringSegmentEndpoint(profile, id, minimumOffset, maximumChange, 1);
-        // now we have the right general area, drop down to single values
-//        bestChange = findBestScoringSegmentEndpoint(profile, id, bestChange-halfStep, bestChange+halfStep, 1);
+        int bestEnd = findBestScoringSegmentEndpoint(profile, id, startIndex, minEnd, maxEnd, 1);
 
-        // Create a new segment with the change applied
-        if(segment.getPosition()==0) {
-        	IBorderSegment newSeg = new DefaultBorderSegment(0, segment.getEndIndex()+bestChange, profile.size(), id);
-        	newSeg.setLocked(true);
+        // Create a new segment with the endpoint applied
+        IBorderSegment newSeg = new DefaultBorderSegment(startIndex, bestEnd, profile.size(), id);
+        newSeg.setLocked(true);
+        newSegments.add(newSeg);
+        
+        if(templateSegment.getPosition()==0) {
         	fine("Adding first segment "+newSeg.getDetail());
-        	newSegments.add(newSeg);
         } else {
-        	IBorderSegment prevSegment = newSegments.get(newSegments.size()-1);
-        	IBorderSegment newSeg = new DefaultBorderSegment(prevSegment.getEndIndex(), segment.getEndIndex()+bestChange, profile.size(), id);
-        	newSeg.setLocked(true);
-        	fine("Adding segment "+newSeg.getDetail());
-        	newSegments.add(newSeg);
+        	fine("Adding interior segment "+newSeg.getDetail());
         }
         return newSegments;
     }
@@ -165,34 +162,27 @@ public class IterativeSegmentFitter implements Loggable {
      * @throws UnavailableComponentException
      * @throws ProfileException
      */
-    private int findBestScoringSegmentEndpoint(@NonNull ISegmentedProfile testProfile, @NonNull UUID segId, int negOffset, int posOffset, int stepSize) throws UnavailableComponentException, ProfileException {
+    private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId, int startIndex, int minIndex, int maxIndex, int stepSize) throws UnavailableComponentException, ProfileException {
 
-    	ISegmentedProfile tempProfile = testProfile.copy();
+    	IProfile tempProfile = testProfile.copy();
     	double bestScore = Double.MAX_VALUE;
-        int bestChange = 0;
+        int bestIndex = 0;
         
-        int start = testProfile.getSegment(segId).getStartIndex();
-        int oldEnd =  testProfile.getSegment(segId).getEndIndex();
-        int minEnd = oldEnd+negOffset;
-        int maxEnd = oldEnd+posOffset;
+        fine(String.format("Testing variation of end index from %s to %s", minIndex, maxIndex));
         
-        fine(String.format("Testing variation of end index from %s to %s", minEnd, maxEnd));
-        
-        for (int offset = negOffset; offset < posOffset; offset += stepSize) {
+        for (int endIndex=minIndex; endIndex <maxIndex; endIndex+=stepSize) {
         	
-        	IProfile segmentProfile = testProfile.getSubregion(start, oldEnd+offset);
+        	IProfile segmentProfile = testProfile.getSubregion(startIndex, endIndex);
         	IProfile template = templateProfile.getSubregion(templateProfile.getSegment(segId));
         	
         	double score =  template.absoluteSquareDifference(segmentProfile);
-//        	fine(String.format("Score with offset %s and end at %s: %s", offset, oldEnd+offset, score));
-//        	score *= 1+((double)segmentProfile.size()/(double)template.size());
 
             if (score < bestScore) {
-            	bestChange = offset;
+            	bestIndex = endIndex;
             	bestScore = score;
             }
         }
-        fine(String.format("Best offset is %s with score %s", bestChange, bestScore));
-        return bestChange;
+        fine(String.format("Best offset is %s with score %s", bestIndex, bestScore));
+        return bestIndex;
     }
 }

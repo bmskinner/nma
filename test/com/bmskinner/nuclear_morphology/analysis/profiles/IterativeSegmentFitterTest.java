@@ -48,6 +48,21 @@ public class IterativeSegmentFitterTest {
 	}
 	
 	@Test
+	public void testFitterExceptsOnTemplateWithNoSegments() throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1).ofType(NucleusType.ROUND)
+				.randomOffsetProfiles(false)
+				.baseHeight(40).baseWidth(40).profiled().build();
+		
+		ISegmentedProfile template = d.getCollection()
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		
+		ISegmentedProfile target = template.copy();
+		
+		expectedException.expect(IllegalArgumentException.class);
+		fitter = new IterativeSegmentFitter(template.copy());
+	}
+	
+	@Test
 	public void testFittingIdenticalProfileMakesNoChange() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1).ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(false)

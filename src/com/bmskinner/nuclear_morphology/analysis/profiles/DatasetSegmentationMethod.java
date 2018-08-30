@@ -171,8 +171,17 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		dataset.getCollection().setConsensus(null); // clear if present
 
-		createSegmentsInMedian(); // 3 - segment the median profile
-		assignMedianSegmentsToNuclei(); // 4 - fit the segments to nuclei by best-fit
+		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
+		fine("Segmented median profile: "+median.toString());
+		
+		if(median.getSegmentCount()<=1) {
+			warn("Unable to find segments in median profile");
+			return new DefaultAnalysisResult(dataset);
+		}
+		
+		dataset.getCollection().getProfileCollection().addSegments(median.getSegments());
+		
+		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei by best-fit
 		
 		// 5 - Generate frankenprofiles for each nucleus against the median
 		// 6 - Profile the frankencollection
@@ -229,7 +238,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @return
 	 */
 	private IAnalysisResult runRefreshAnalysis() throws Exception {
-		assignMedianSegmentsToNuclei();
+		ISegmentedProfile median = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		assignSegmentsToNuclei(median);
 		return new DefaultAnalysisResult(dataset);
 	}
 
@@ -263,20 +273,25 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param collection
 	 */
-	private void createSegmentsInMedian() throws Exception {
+	private ISegmentedProfile createSegmentsInMedian() throws Exception {
 
 		fine("Creating segments in median profile");
 		IProfileCollection pc = collection.getProfileCollection();
 
 		// the reference point is always index 0, so the segments will match
 		// the profile
-		IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+//		IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		
+		// choose the best subset of nuclei to make a median
+		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
+		
+		IProfile median = finder.findMedian();
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		List<IBorderSegment> segments = segmenter.segment();
 
 		fine(String.format("Creating %s segments in median profile", segments.size()));
-		pc.addSegments(segments);
+		return new SegmentedFloatProfile(median, segments);
 	}
 
 	/**
@@ -286,11 +301,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @param collection
 	 * @throws Exception
 	 */
-	private void assignMedianSegmentsToNuclei() throws Exception {
-		IProfileCollection pc = collection.getProfileCollection();
-		ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		assignSegmentsToNuclei(median);
-	}
+//	private void assignMedianSegmentsToNuclei(@NonNull ISegmentedProfile median) throws Exception {
+////		IProfileCollection pc = collection.getProfileCollection();
+////		ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+//		assignSegmentsToNuclei(median);
+//	}
 	
 	/**
 	 * Assign the segments in the given profile to the nuclei within the
@@ -564,54 +579,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		fine(String.format("Completed segment assignment for target profile"));
 		return target;
 	}
-
-	/**
-	 * Update segment assignments in individual nuclei by stretching each
-	 * segment to the best possible fit along the median profile
-	 * 
-	 * @param collection
-	 * @param pointType
-	 * @throws ProfileException 
-	 */
-//	private void reviseSegments(@NonNull ISegmentedProfile targetProfile) throws ProfileException {
-
-//		IProfileCollection pc = collection.getProfileCollection();
-
-//		try {
-//			List<IBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
-//
-//			// Get the median profile for the population
-//			ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-//			SegmentFitter fitter = new SegmentFitter(targetProfile);
-//
-//			collection.getNuclei().parallelStream().forEach(n->{
-//
-//				try {
-//					if (! n.isLocked())
-//						fitter.fit(n, null);
-////						fitter.fit(n, pc); // disabled because this is not a segmentation feature; it's a profiling feature. 
-//				} catch (IndexOutOfBoundsException | ProfileException | UnavailableComponentException
-//						| UnsegmentedProfileException e) {
-//					stack("Could not fit segments for nucleus "+n.getNameAndNumber()+": "+e.getMessage(), e);
-//				} finally {
-//					fireProgressEvent();
-//				}
-//
-//			});
-
-//		} catch (UnavailableBorderTagException e1) {
-//			error("Unavailable border tag in segment recombining task: " + e1.getMessage(), e1);
-//		} catch (UnavailableProfileTypeException e1) {
-//			error("Unavailable profile type in segment recombining task: " + e1.getMessage(), e1);
-//		} catch (UnsegmentedProfileException e1) {
-//			error("Unsegmented profile in segment recombining task: " + e1.getMessage(), e1);
-//		}
-
-//		pc.createProfileAggregate(collection, pc.length());
-
-//		ensureRPatSegmentBoundary();
-//	}
 
 	@Override
 	public void progressEventReceived(ProgressEvent event) {

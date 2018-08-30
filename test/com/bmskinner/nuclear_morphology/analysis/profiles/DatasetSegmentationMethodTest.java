@@ -170,7 +170,7 @@ public class DatasetSegmentationMethodTest {
 		OutlineChartFactoryTest.generateOutlineChartsForAllCells(dataset, "Known error");
 		testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
 		
-//		ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
+		ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
 
 
 	}
