@@ -120,7 +120,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-
+		fine("-------------------------");
+    	fine("Beginning segmentation");
+    	fine("-------------------------");
 		try {
 
 			switch (mode) {
@@ -444,7 +446,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			return;
 		ISegmentedProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		nucleusProfile = bestFitAlignSegments(template, nucleusProfile);
-		SegmentFitter fitter = new SegmentFitter(template);
+		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
 		nucleusProfile = fitter.fit(nucleusProfile);
 		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, nucleusProfile);
 	}
