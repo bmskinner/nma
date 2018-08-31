@@ -611,8 +611,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
                 
                 // For each segment, 1 must be subtracted from the length because the
                 // segment lengths include the overlapping end and start indexes.
-                // The final segment has 2 subtracted to account for the overlapping start index of the profile.
-                int newLength = counter==template.getSegmentCount()-1 ? templateSeg.length()-2 : templateSeg.length()-1;
+                int newLength = templateSeg.length()-1;
 
                 // Interpolate the segment region to the new length
                 IProfile revisedProfile = interpolateSegment(thisSeg, newLength);
@@ -801,33 +800,24 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     @Override
     public boolean isSplittable(@NonNull UUID id, int splitIndex) {
-        if (!this.hasSegment(id)) {
-            throw new IllegalArgumentException("No segment with the given id");
-        }
+        if (!this.hasSegment(id))
+            return false;
 
-        IBorderSegment segment;
         try {
-            segment = getSegment(id);
+        	IBorderSegment segment = getSegment(id);
+        	
+        	if (!segment.contains(splitIndex))
+                return false;
+
+            return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getProfileLength())
+                    && IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getProfileLength());
         } catch (UnavailableComponentException e) {
             stack(e);
             return false;
         }
 
-        if (!segment.contains(splitIndex)) {
-            throw new IllegalArgumentException("Splitting index is not within the segment");
-        }
-
-        return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getProfileLength())
-                && IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getProfileLength());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#splitSegment(components.nuclear.
-     * IBorderSegment, int, java.util.UUID, java.util.UUID)
-     */
     @Override
     public void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException {
         // Check the segments belong to the profile

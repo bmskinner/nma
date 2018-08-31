@@ -1195,7 +1195,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public List<IBorderSegment> getOrderedSegments() {
-
+//			if(getSegmentCount()==1)
+//				return getSegments();
 			try {
 				for (IBorderSegment seg : getSegments()) {
 					if (seg.contains(ZERO_INDEX) && (getSegmentCount()==1 || seg.getEndIndex()!=ZERO_INDEX))
@@ -1452,8 +1453,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	                
 	                // For each segment, 1 must be subtracted from the length because the
 	                // segment lengths include the overlapping end and start indexes.
-	                // The final segment has 2 subtracted to account for the overlapping start index of the profile.
-	                int newLength = counter==template.getSegmentCount()-1 ? templateSeg.length()-2 : templateSeg.length()-1;
+	                int newLength = templateSeg.length()-1;
 
 	                // Interpolate the segment region to the new length
 	                IProfile revisedProfile = interpolateSegment(thisSeg, newLength);
@@ -1571,16 +1571,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			IBorderSegment firstSegment  = seg1.nextSegment().equals(seg2) ? seg1 : seg2;
 			IBorderSegment secondSegment = seg2.nextSegment().equals(seg1) ? seg1 : seg2;
 			
-			
-//			System.out.println(String.format("Atttempting to merge segment 1 (%s) with segment 2 (%s)",seg1.toString(), seg2.toString() ));
-			
-
 			// Create the new segment
 			int startIndex = firstSegment.getStartIndex();
 			int endIndex   = secondSegment.getEndIndex();
-			
-			int newLength = firstSegment.testLength(startIndex, endIndex);
-			BorderSegmentTree mergedSegment = new BorderSegmentTree(id, startIndex, newLength, segments);
+			BorderSegmentTree mergedSegment = new BorderSegmentTree(id, startIndex, endIndex, segments);
 			
 			mergedSegment.addMergeSource(firstSegment);
 			mergedSegment.addMergeSource(secondSegment);
@@ -1643,44 +1637,38 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public boolean isSplittable(@NonNull UUID id, int splitIndex) {
-			if (!this.hasSegment(id)) {
+			if (!this.hasSegment(id))
 				throw new IllegalArgumentException("No segment with the given id");
-			}
 
-			IBorderSegment segment;
 			try {
-				segment = getSegment(id);
+				IBorderSegment segment = getSegment(id);
+				if (!segment.contains(splitIndex))
+					return false;
+				return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, this.size())
+						&& IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), this.size());
 			} catch (UnavailableComponentException e) {
 				stack(e);
 				return false;
 			}
-
-			if (!segment.contains(splitIndex)) {
-				throw new IllegalArgumentException("Splitting index is not within the segment");
-			}
-
-			return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, this.size())
-					&& IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), this.size());
 		}
 
 		@Override
 		public void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException {
-
+//			System.out.println(String.format("Attempting to split %s at index %s",  segment.getDetail(), splitIndex));
 			if (!this.contains(segment))
-				throw new IllegalArgumentException("Input segment is not part of this profile");
+				throw new IllegalArgumentException("Segment to split is not part of this profile: "+segment.getDetail());
 
 			if (!segment.contains(splitIndex))
-				throw new IllegalArgumentException("Splitting index is not within the segment");
+				throw new IllegalArgumentException(String.format("Splitting index %s is not within the segment %s", splitIndex, segment.getDetail()));
 						
-			if(segments.id.equals(segment.getID())) {
+			if(!isSplittable(segment.getID(), splitIndex))
+				throw new IllegalArgumentException(String.format("Splitting at index %s is not possible for segment %s", splitIndex, segment.getDetail()));
+			
+			if(IProfileCollection.DEFAULT_SEGMENT_ID.equals(segment.getID())) {
 				// splitting the single root segment, clean the slate
-				segments.clearMergeSources();
-				
-				int length1 = segments.testLength(segments.startIndex, splitIndex);
-				int length2 = segments.testLength(splitIndex, segments.getEndIndex());
-				
-				segments.addMergeSource(new BorderSegmentTree(id1, segments.startIndex, length1, segments));
-				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, length2, segments));	
+				segments.clearMergeSources();			
+				segments.addMergeSource(new BorderSegmentTree(id1, segments.startIndex, splitIndex, segments));
+				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, segments.endIndex, segments));	
 				return;
 			}
 			
@@ -1690,13 +1678,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			// Replace the two segments in this profile
 			for (BorderSegmentTree oldSegment : segments.leaves) {
-				if (oldSegment.equals(segment)) {
-					
-					int length1 = segments.testLength(oldSegment.startIndex, splitIndex);
-					int length2 = segments.testLength(splitIndex, oldSegment.getEndIndex());
-					
-					newSegs.add(new BorderSegmentTree(id1, oldSegment.getStartIndex(), length1, segments));
-					newSegs.add(new BorderSegmentTree(id2, splitIndex, length2, segments));	
+				if (oldSegment.equals(segment)) {					
+					newSegs.add(new BorderSegmentTree(id1, oldSegment.startIndex, splitIndex, segments));
+					newSegs.add(new BorderSegmentTree(id2, splitIndex, oldSegment.endIndex, segments));	
 				} else {
 					newSegs.add(oldSegment);
 				}
@@ -1793,7 +1777,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			private final List<BorderSegmentTree> leaves = new LinkedList<>();
 			private final UUID id;
 			private int startIndex = 0;
-			private int length = 0;
+			private int endIndex   = 0;
 			private boolean isLocked = false;
 
 			/**
@@ -1801,7 +1785,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param id
 			 */
 			protected BorderSegmentTree(@NonNull UUID id){
-				this(id, 0, size()+1, null);
+				this(id, 0, 0, null);
 			}
 			
 			/**
@@ -1810,8 +1794,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param start the start index
 			 * @param length the segment length
 			 */
-			protected BorderSegmentTree(@NonNull UUID id, int start, int length){
-				this(id, start, length, null);
+			protected BorderSegmentTree(@NonNull UUID id, int start, int end){
+				this(id, start, end, null);
 			}
 			
 			/**
@@ -1821,18 +1805,19 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param length the segment length
 			 * @param parent the parent segment (can be null)
 			 */
-			protected BorderSegmentTree(@NonNull UUID id, int start, int length, @Nullable BorderSegmentTree parent){
-//				finest(String.format("Creating new segment at %d of length %d with parent %s", start, length, parent));
-				if(start<0 || start > size())
+			protected BorderSegmentTree(@NonNull UUID id, int start, int end, @Nullable BorderSegmentTree parent){
+//				System.out.println(String.format("Creating new segment from %d-%d with parent %s", start, end, parent));
+				if(start<0 || start>=size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
-				if(length<0 || length > size()+1)
-					throw new IllegalArgumentException(String.format("Segment length %d is outside profile bounds", length));
-				if(length<IBorderSegment.MINIMUM_SEGMENT_LENGTH)
-					throw new IllegalArgumentException(String.format("Segment length %d is below minimum %d", length, MINIMUM_SEGMENT_LENGTH));
+				if(end<0 || end>=size())
+					throw new IllegalArgumentException(String.format("Segment end %d is outside profile bounds %d", end, size()));
+				int length = testLength(start, end);
+				if(length<IBorderSegment.INTERPOLATION_MINIMUM_LENGTH)
+					throw new IllegalArgumentException(String.format("Segment length %d is below minimum %d", length, INTERPOLATION_MINIMUM_LENGTH));
 				
 				this.id = id;
 				this.startIndex = start;
-				this.length = length;
+				this.endIndex = end;
 				this.parent = parent;
 				leaves.clear();
 			}
@@ -1844,7 +1829,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param parent
 			 */
 			protected BorderSegmentTree(@NonNull IBorderSegment seg, @Nullable BorderSegmentTree parent) {
-				this(seg.getID(), seg.getStartIndex(), seg.wraps()?seg.length()-1:seg.length(), parent);
+				this(seg.getID(), seg.getStartIndex(), seg.getEndIndex(), parent);
 			}	
 			
 			@Override
@@ -1867,9 +1852,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @return
 			 */
 			private BorderSegmentTree reverse(BorderSegmentTree parent) {
-				int oldEnd = getEndIndex();
-				int newStart = size()-1-oldEnd;
-				BorderSegmentTree reversed = new BorderSegmentTree(id, newStart, length, parent);
+				int newStart = size()-1-endIndex;
+				int newEnd   = size()-1-startIndex;
+				BorderSegmentTree reversed = new BorderSegmentTree(id, newStart, newEnd, parent);
 				for(BorderSegmentTree s : leaves) {
 					reversed.addMergeSource(s.reverse(reversed));
 				}
@@ -1963,7 +1948,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public int getEndIndex() {
-				return wrap(startIndex+length-1);
+				return endIndex;
 			}
 
 			@Override
@@ -1971,7 +1956,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				if (d < 0 || d > 1)
 					throw new IllegalArgumentException("Proportion must be between 0-1: " + d);
 
-				double targetLength = length * d;
+				double targetLength = length() * d;
 				int absLength = (int) Math.round(targetLength);
 				return wrap(startIndex + absLength);
 			}
@@ -1980,7 +1965,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			public double getIndexProportion(int index) {
 				if (!contains(index))
 					throw new IllegalArgumentException("Index out of segment bounds: " + index);
-				return (double) getShortestDistanceToStart(index) / (double) length;
+				return (double) getShortestDistanceToStart(index) / (double) length();
 			}
 
 
@@ -1995,7 +1980,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				// If a segment is length 3 covering 0-1-2, the midpoint is 1
 				// If a segment is length 4 covering 0-1-2-3, the midpoint is 1 (lower of the two possible indices)
 				
-				int mid = length%2==0 ? ((length-1)/2) : length/2;
+				int mid = length()%2==0 ? ((length()-1)/2) : length()/2;
 				return wrap(startIndex+mid); 
 			}
 
@@ -2016,16 +2001,16 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			@Override
 			public int getShortestDistanceToEnd(int index) {
 				
-				int d1 = wrap(index-getEndIndex());
-				int d2 = wrap(getEndIndex()-index);
+				int d1 = wrap(index-endIndex);
+				int d2 = wrap(endIndex-index);
 				return d1<d2?d1:d2;
 			}
 			
 			@Override
 			public int getInternalDistanceToEnd(int index) {
-				if(wraps() && getEndIndex()<index)
-					return getEndIndex() + (getBorderLength()-index);
-				return index-getEndIndex();
+				if(wraps() && endIndex<index)
+					return endIndex + (getBorderLength()-index);
+				return index-endIndex;
 			}
 
 			@Override
@@ -2041,6 +2026,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			@Override
 			public void offset(int amount) {
 				this.startIndex = wrapIndex(startIndex+amount);
+				this.endIndex   = wrapIndex(endIndex+amount);
 				for(BorderSegmentTree s : leaves) {
 					s.offset(amount);
 				}
@@ -2073,27 +2059,31 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public int length() {
-				return testLength(startIndex, getEndIndex());
+				return testLength(startIndex, endIndex);
 			}
 
 			@Override
 			public int testLength(int start, int end) {
+				if(start==end)
+					return size()+1;
+				
 				if(wraps(start, end))
-					return end+size()+1-start+1; // add total of 2; one for index 0 and one for segment end
+					return end+size()+1-start; // add one for index 0
 				return end-start+1; // add one for segment end
 			}
 
 			@Override
 			public boolean wraps() {
-				return getEndIndex()<=startIndex;
+				return endIndex<=startIndex;
 			}
 
 			@Override
 			public boolean contains(int index) {
-				if(startIndex==getEndIndex())
+				if(startIndex==endIndex) // single segment
 					return true;
-				return wraps() ? index<=getEndIndex() || index>=getStartIndex() 
-						: index>=getStartIndex() && index <=getEndIndex();
+				if(wraps())
+					return index<=endIndex || index>=startIndex;
+				return index>=startIndex && index<=endIndex;
 			}
 
 			@Override
@@ -2116,7 +2106,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				 // Ensure previous and next segments are not locked
 		        if(startIndex!=this.startIndex && prevSegment().isLocked())
 		        	throw new SegmentUpdateException(String.format("Update from %s to %d-%d affects previous segment (%s), which is locked", getDetail(), startIndex, endIndex, prevSegment().getDetail()));
-		        if(endIndex!=this.getEndIndex() && nextSegment().isLocked())
+		        if(endIndex!=this.endIndex && nextSegment().isLocked())
 		        	throw new SegmentUpdateException(String.format("Update from %s to %d-%d affects next segment (%s), which is locked", getDetail(), startIndex, endIndex, nextSegment().getDetail()));
 				
 				// Ensure next and previous segments will not become too short
@@ -2134,17 +2124,16 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 //				finest(String.format("Updating segment from %d-%d to %d-%d", this.startIndex, getEndIndex(), startIndex, endIndex));
 				this.startIndex = startIndex;
-				this.length = newLength;
+				this.endIndex   = endIndex;
 				
 				// Pass on the updated positions to the surrounding segments
 				int segIndex = segments.leaves.indexOf(this);
 				
 				BorderSegmentTree nextSeg = segments.leaves.get(wrapSegmentIndex(segIndex+1));
-				nextSeg.startIndex = getEndIndex();
-				nextSeg.length = testLength(endIndex, nextSeg.getEndIndex());
+				nextSeg.startIndex = endIndex;
 				
 				BorderSegmentTree prevSeg = segments.leaves.get(wrapSegmentIndex(segIndex-1));
-				prevSeg.length = testLength(prevSeg.getStartIndex(), endIndex);
+				prevSeg.endIndex = startIndex;
 				
 				return true;
 			}
@@ -2186,8 +2175,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			@Override
 			public Iterator<Integer> iterator() {
 				if(wraps())
-					return IntStream.concat(IntStream.range(startIndex, size()), IntStream.range(0, getEndIndex())).iterator();
-				return IntStream.range(startIndex, wrap(startIndex+length)).iterator();
+					return IntStream.concat(IntStream.range(startIndex, size()), IntStream.range(0, endIndex+1)).iterator();
+				return IntStream.range(startIndex, endIndex+1).iterator();
 			}
 
 			@Override
@@ -2207,7 +2196,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		    	Iterator<Integer> it = iterator();
 		    	while(it.hasNext()) {
 		    		int index = it.next();
-		    		if(index==startIndex || index==getEndIndex())
+		    		if(index==startIndex || index==endIndex)
 		    			continue;
 		    		if(seg.contains(index))
 		    			return true;
@@ -2222,14 +2211,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		    	if(seg.getProfileLength()!=getProfileLength())
 					return false;
 				return seg.contains(startIndex) 
-						|| seg.contains(getEndIndex()) 
+						|| seg.contains(endIndex) 
 						|| contains(seg.getStartIndex()) 
 						|| contains(seg.getEndIndex());
 		    }
 			
 			@Override
 			public String toString() {
-				return String.format("%d - %d of %d", startIndex, getEndIndex(), size());
+				return String.format("%d - %d of %d", startIndex, endIndex, size());
 			}
 		}
 

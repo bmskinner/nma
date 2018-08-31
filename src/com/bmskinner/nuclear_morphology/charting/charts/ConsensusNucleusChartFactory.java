@@ -128,11 +128,6 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         	try {
         		Mesh<Nucleus> mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
         				options.getMeshSize());
-
-        		//                    if (options.isStraightenMesh()) {
-        		//                        mesh = mesh.straighten();
-        		//                    }
-
         		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
         	} catch (ChartCreationException | MeshCreationException e) {
         		stack("Error making mesh chart", e);
@@ -263,7 +258,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
         } catch (ChartDatasetCreationException e) {
-            stack("Error making segmented outline", e);
+            fine("Unable to make segmented outline, creating base outline instead: "+e.getMessage());
             return makeNucleusOutlineChart();
         }
 

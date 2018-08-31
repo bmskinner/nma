@@ -397,7 +397,7 @@ public class DefaultBorderSegment implements IBorderSegment {
     @Override
     public int testLength(int start, int end) {
         if(wraps(start, end))
-			return end+totalLength+1-start+1; // add total of 2; one for index 0 and one for segment end
+			return end+totalLength+1-start; // add total of 2; one for index 0 and one for segment end
 		return end-start+1; // add one for segment end
     }
 

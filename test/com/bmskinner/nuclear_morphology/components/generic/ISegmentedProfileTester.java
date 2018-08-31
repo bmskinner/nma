@@ -793,15 +793,13 @@ public class ISegmentedProfileTester {
 	@Test
 	public void testIsSplittableReturnsFalseOnOutOfBoundsIndex() {
 	    IBorderSegment s1 = profile.getSegmentAt(1);
-	    exception.expect(IllegalArgumentException.class);
 	    assertFalse(profile.isSplittable(s1.getID(), s1.getEndIndex()+1));
 	}
 
 	@Test
 	public void testIsSplittableExceptsOnOutOfBoundsProfileIndex() {
 	    IBorderSegment s1 = profile.getSegmentAt(1);
-	    exception.expect(IllegalArgumentException.class);
-	    profile.isSplittable(s1.getID(), profile.size()+1);
+	    assertFalse(profile.isSplittable(s1.getID(), profile.size()+1));
 	}
 
 	@Test
@@ -833,13 +831,13 @@ public class ISegmentedProfileTester {
     public void testSplitSegmentExceptsOnInvalidIndex() throws ProfileException {
         IBorderSegment s1 = profile.getSegmentAt(1);
         
-        int mid = s1.getStartIndex()+1;
+        int indexTooCloseToStart = s1.getStartIndex()+1;
         
         UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
         UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
         
         exception.expect(IllegalArgumentException.class);
-        profile.splitSegment(s1, mid, id1, id2);
+        profile.splitSegment(s1, indexTooCloseToStart, id1, id2);
     }
 	
 	@Test

@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -78,16 +80,13 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
      * @param cellsWithSignals if true, only cells with defined signals will be included
      * @param straighten if true, the signals will be warped onto a straightened mesh
      */
-    public SignalWarper(IAnalysisDataset source, Nucleus target, UUID signalGroup, boolean cellsWithSignals,
+    public SignalWarper(@NonNull final IAnalysisDataset source, @NonNull final Nucleus target, @NonNull final UUID signalGroup, boolean cellsWithSignals,
             boolean straighten) {
 
-        if (source == null) {
+        if (source == null)
             throw new IllegalArgumentException("Must have source dataset");
-        }
-
-        if (target == null) {
+        if (target == null)
             throw new IllegalArgumentException("Must have target nucleus");
-        }
 
         this.sourceDataset = source;
         this.target = target;
@@ -96,21 +95,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         this.straighten = straighten;
 
         // Count the number of cells to include
-
-        Set<ICell> cells;
-        if (cellsWithSignals) {
-            SignalManager m = sourceDataset.getCollection().getSignalManager();
-            cells = m.getCellsWithNuclearSignals(signalGroup, true);
-
-        } else {
-            cells = sourceDataset.getCollection().getCells();
-        }
+        SignalManager m = sourceDataset.getCollection().getSignalManager();
+        Set<ICell> cells = cellsWithSignals ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
         totalCells = cells.size();
 
         warpedImages = new ImageProcessor[totalCells];
 
-        fine("Created signal warper for " + sourceDataset.getName() + " signal group " + signalGroup + " with "
-                + totalCells + " cells");
+        fine(String.format("Created signal warper for %s signal group %s with %s cells",
+        		sourceDataset.getName(), signalGroup, totalCells));
     }
 
     @Override
@@ -118,7 +110,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 
         try {
             finer("Running warper");
-
             generateImages();
 
         } catch (Exception e) {
@@ -126,29 +117,21 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             stack("Error in signal warper", e);
             return null;
         }
-
         return mergedImage;
 
     }
 
     @Override
     protected void process(List<Integer> chunks) {
-
         for (Integer i : chunks) {
-
             int percent = (int) ((double) i / (double) totalCells * 100);
-
-            if (percent >= 0 && percent <= 100) {
-                setProgress(percent); // the integer representation of the
-                                      // percent
-
-            }
+            if (percent >= 0 && percent <= 100)
+                setProgress(percent);
         }
     }
 
     @Override
     public void done() {
-
         finest("Worker completed task");
         try {
             if (this.get() != null) {

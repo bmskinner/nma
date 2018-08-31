@@ -48,6 +48,8 @@ public class IBorderSegmentTester {
 	protected final static UUID SEG_ID_0 = UUID.fromString("00000000-0000-0000-0000-000000000001");
 	
 	private IBorderSegment segment;
+	
+	private IBorderSegment singleSegment; // for profiles with one segment
 
 	
 	@Rule
@@ -78,19 +80,27 @@ public class IBorderSegmentTester {
 		UUID finalSegmentId  = UUID.fromString("00000000-0000-0000-0000-000000000005");
 		
 		// The component from which profiles will be generated
+//		System.out.println("Generating base component for "+source.getSimpleName());
 		DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
 		float[] data = new float[comp.getBorderLength()];
 		Arrays.fill(data, 1);
 		
 		if(source==BorderSegmentTree.class){
-
+//			System.out.println("Beginning");
 			DefaultSegmentedProfile doubleSegmentProfile = comp.new DefaultSegmentedProfile(data);
-			
+//			System.out.println("Profile: "+doubleSegmentProfile.toString());
 			IBorderSegment borderSegmentTree = null;
 			try {
-				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID), middleSegmentEnd, tempId, finalSegmentId);
-				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(tempId), endIndex, SEG_ID_0, middleSegmentId);
-				
+//				System.out.println("Fetching root segment");
+				IBorderSegment rootSegment = doubleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+//				System.out.println("Root: "+rootSegment.getDetail());
+				doubleSegmentProfile.splitSegment(rootSegment, middleSegmentEnd, tempId, finalSegmentId);
+//				System.out.println("Profile: "+doubleSegmentProfile.toString());
+				IBorderSegment tempSegment = doubleSegmentProfile.getSegment(tempId);
+//				System.out.println("Temp: "+tempSegment.getDetail());
+//				System.out.println("Profile: "+doubleSegmentProfile.toString());
+				doubleSegmentProfile.splitSegment(tempSegment, endIndex, SEG_ID_0, middleSegmentId);
+//				System.out.println("Fetching test segment");
 				borderSegmentTree = doubleSegmentProfile.getSegment(SEG_ID_0);
 			} catch (UnavailableComponentException | ProfileException e) {
 				// TODO Auto-generated catch block
@@ -229,6 +239,27 @@ public class IBorderSegmentTester {
 	public void testGetEndIndex() throws SegmentUpdateException {
 		assertEquals(endIndex, segment.getEndIndex());
 	}
+	
+	@Test 
+	public void testGetEndIndexOnWrappingSegment() throws SegmentUpdateException {
+		segment.update(profileLength-10, 10);
+		assertEquals(profileLength-10, segment.getStartIndex());
+		assertEquals(10, segment.getEndIndex());
+	}
+	
+	@Test 
+	public void testGetEndIndexOnSingleSegmentProfile() throws SegmentUpdateException {
+		segment.update(0, 0);
+		assertEquals(0, segment.getStartIndex());
+		assertEquals(0, segment.getEndIndex());
+	}
+	
+	@Test 
+	public void testGetEndIndexOnSingleSegmentProfileWrapping() throws SegmentUpdateException {
+		segment.update(1, 1);
+		assertEquals(1, segment.getStartIndex());
+		assertEquals(1, segment.getEndIndex());
+	}
 
 	@Test
 	public void testGetProportionalIndex() {
@@ -363,6 +394,7 @@ public class IBorderSegmentTester {
 			int index = it.next();
 			assertEquals("Testing "+i+": index "+index, exp[i], index);
 		}
+		assertEquals("Segment length equals iterator size", segment.length(), exp.length);
 		assertFalse("Iterator has more entries", it.hasNext());
 	}
 	
@@ -379,6 +411,24 @@ public class IBorderSegmentTester {
 			int index = it.next();
 			assertEquals("Testing "+i+": index "+index, exp[i], index);
 		}
+		assertEquals("Segment length equals iterator size", segment.length(), exp.length);
+		assertFalse("Iterator has more entries", it.hasNext());
+	}
+	
+	@Test
+	public void testIteratorOnSegmentStartingAtZero() throws SegmentUpdateException {
+
+		segment.update(0, 10);
+		
+		int[] exp = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		
+	
+		Iterator<Integer> it =  segment.iterator();
+		for(int i=0; i<exp.length; i++) {
+			int index = it.next();
+			assertEquals("Testing "+i+": index "+index, exp[i], index);
+		}
+		assertEquals("Segment length equals iterator size", segment.length(), exp.length);
 		assertFalse("Iterator has more entries", it.hasNext());
 	}
 	

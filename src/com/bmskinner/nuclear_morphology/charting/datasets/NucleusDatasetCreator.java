@@ -554,72 +554,67 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         // find the range of the iqr, and scale the values in the iqr profile to
         // 1/10 of the total range of the plot
         // The scaled IQR is a profile beginning from the orientation point
-        IProfile iqrRange = q75.subtract(q25);
-        IProfile scaledRange = iqrRange.divide(iqrRange.getMax()); // iqr as
-                                                                   // fraction
-                                                                   // of total
-                                                                   // variability
-        scaledRange = scaledRange.multiply(scale / 10); // set to 10% min radius
-                                                        // of the chart
+        IProfile iqrRange    = q75.subtract(q25);
+        IProfile scaledRange = iqrRange.divide(iqrRange.getMax()); // iqr as fraction of total variability
+        scaledRange = scaledRange.multiply(scale / 10); // set to 10% min radius of the chart
 
-
-        ISegmentedProfile angleProfile;
         try {
-            angleProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            fine("Error getting nucleus angle profile from " + Tag.REFERENCE_POINT);
-            throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
+        	ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+
+        	// At this point, the angle profile and the iqr profile should be in sync
+        	// The following set of checks confirms this.
+        	int pointIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
+
+        	if (angleProfile.hasSegments()) { // only draw if there are segments
+        		fine("Found "+angleProfile.getSegmentCount()+" segments in profile");
+        		// go through each segment
+        		for (IBorderSegment seg : angleProfile.getOrderedSegments()) {
+
+        			addSegmentIQRToConsensus(seg, ds, n, scaledRange, Tag.REFERENCE_POINT);
+
+        			// draw the segment
+        			float[] xpoints = new float[seg.length()];
+        			float[] ypoints = new float[seg.length()];
+
+        			fine("Segment has "+seg.length()+" indexes");
+
+        			Iterator<Integer> it = seg.iterator();
+        			int i = 0;
+        			while(it.hasNext()) {
+        				int index = it.next();
+        				IBorderPoint p = n.getBorderPoint(index);
+        				xpoints[i] = (float) p.getX();
+        				ypoints[i++] = (float) p.getY();
+//        				fine(p.toString());
+        			}
+        			fine(i+": "+seg.length());
+
+        			// go through each index in the segment.
+        			//        			for (int j = 0; j <= seg.length(); j++) {
+        			//        				// get the corresponding border index.
+        			//        				int borderIndex = n.wrapIndex(seg.getStartIndex() + j + pointIndex);
+        			//
+        			//        				IBorderPoint p = n.getBorderPoint(borderIndex);
+        			//
+        			//        				xpoints[j] = (float) p.getX();
+        			//        				ypoints[j] = (float) p.getY();
+        			//        			}
+
+        			float[][] data = { xpoints, ypoints };
+        			ds.addSeries(seg.getName(), data, 0);
+        			
+//        			fine(Arrays.toString(xpoints));
+//        			fine(Arrays.toString(ypoints));
+        		}
+        	}
+
+        	if(ds.getSeriesCount()<angleProfile.getSegmentCount())
+        		throw new ChartDatasetCreationException("Cannot make segmented nucleus outline: too few series in chart dataset");
+        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnavailableBorderPointException e) {
+        	fine("Error getting nucleus angle profile from " + Tag.REFERENCE_POINT);
+        	throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
-
-        // At this point, the angle profile and the iqr profile should be in
-        // sync
-        // The following set of checks confirms this.
-        int pointIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
-
-        if (angleProfile.hasSegments()) { // only draw if there are segments
-
-            // go through each segment
-            for (IBorderSegment seg : angleProfile.getOrderedSegments()) {
-
-            	// add the segment, taking the indexes from the segment, and
-                // drawing the values
-                // in the scaled IQR profile at these positions
-
-                // The segment start and end indexes should be in correspondence
-                // with the offsets
-                // That is, the zero index in a segment start / end is the
-                // pointType
-
-                // log("Adding IQR for segment "+seg.getName());
-                addSegmentIQRToConsensus(seg, ds, n, scaledRange, Tag.REFERENCE_POINT);
-
-                // draw the segment itself
-                float[] xpoints = new float[seg.length() + 1];
-                float[] ypoints = new float[seg.length() + 1];
-
-                // go through each index in the segment.
-                for (int j = 0; j <= seg.length(); j++) {
-
-                    // get the corresponding border index. The segments are
-                    // zeroed at the tail point
-                    // so the correct border point needs to be offset
-                    int borderIndex = n.wrapIndex(seg.getStartIndex() + j + pointIndex);
-
-                    IBorderPoint p;
-                    try {
-                        p = n.getBorderPoint(borderIndex);
-                    } catch (UnavailableBorderPointException e) {
-                        throw new ChartDatasetCreationException("Unable to get border point", e);
-                    } // get the border points in the segment
-                    xpoints[j] = (float) p.getX();
-                    ypoints[j] = (float) p.getY();
-                }
-
-                float[][] data = { xpoints, ypoints };
-                ds.addSeries(seg.getName(), data, 0);
-            }
-        }
-
+        fine("Segmented outline dataset has "+ds.getSeriesCount()+" series");
         return ds;
     }
 
@@ -713,9 +708,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         }
 
         float[][] inner = { innerIQRX, innerIQRY };
-        ds.addSeries("Q25_" + segment.getName(), inner, 0);
+        ds.addSeries(QUARTILE_SERIES_PREFIX+"25_" + segment.getName(), inner, 0);
         float[][] outer = { outerIQRX, outerIQRY };
-        ds.addSeries("Q75_" + segment.getName(), outer, 0);
+        ds.addSeries(QUARTILE_SERIES_PREFIX+"75_" + segment.getName(), outer, 0);
     }
 
     /**
