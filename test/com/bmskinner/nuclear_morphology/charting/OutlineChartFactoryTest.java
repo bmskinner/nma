@@ -6,22 +6,19 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
-import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 /**
  * Test that individual components are drawn correctly in outline charts.
@@ -39,7 +36,10 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	 * @param title
 	 * @throws InterruptedException
 	 */
-	public static void generateOutlineChartsForAllCells(@NonNull IAnalysisDataset dataset, @NonNull String title) throws InterruptedException {
+	public static void generateOutlineChartsForAllCells(@NonNull IAnalysisDataset dataset, @Nullable String title) throws InterruptedException {
+		if(title==null)
+			title = new Exception().getStackTrace()[0].getMethodName();
+		
 		List<JPanel> panels = new ArrayList<>();
 		
 		
@@ -69,13 +69,14 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 		showCharts(panels, title);
 	}
 	
+		
 	@Test
 	public void testOutlineChartOfSingleCellNonSegmentedDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(1)
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
-		generateOutlineChartsForAllCells(d, "Single nucleus, square, not segmented");
+		generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -84,7 +85,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.segmented().build();
-		generateOutlineChartsForAllCells(d, "Single nucleus, square, segmented");
+		generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -93,7 +94,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
-		generateOutlineChartsForAllCells(d, "Multiple nuclei, square, not segmented");
+		generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -103,7 +104,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.ofType(NucleusType.ROUND)
 				.withMaxSizeVariation(10)
 				.segmented().build();
-		generateOutlineChartsForAllCells(d, "Multiple nuclei, square, segmented");
+		generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -113,7 +114,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.ofType(NucleusType.ROUND)
 				.maxRotation(90)
 				.segmented().build();
-		generateOutlineChartsForAllCells(d, "Multiple nuclei, square, rotated, segmented");
+		generateOutlineChartsForAllCells(d, null);
 	}
 
 }

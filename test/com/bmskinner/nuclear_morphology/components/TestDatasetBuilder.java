@@ -155,7 +155,7 @@ public class TestDatasetBuilder {
 	 * @param yBase the starting y position
 	 * @param maxRotationDegrees the maximum rotation to be applied to a cell 
 	 * @param randomOffsetStart should an offset be applied to the border array
-	 * @param fixedStartOffset an offset to apply to the border array; has no effect if randomOffsetStart is true
+	 * @param fixedStartOffset the offset to apply to the border array if randomOffsetStart is false
 	 * @return
 	 * @throws ComponentCreationException
 	 */
@@ -171,8 +171,8 @@ public class TestDatasetBuilder {
 			int height = (rng.nextDouble()<0.5)?baseHeight-hVar:baseHeight+hVar;
 			double degreeRot = (rng.nextDouble()*maxRotationDegrees);
 			
-			int borderLength = w*2+h*2;
-			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*(double)borderLength) : fixedStartOffset;
+			int borderLength = (width+height)*2;
+			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
 			
 			ICell cell = TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
 					borderOffset);

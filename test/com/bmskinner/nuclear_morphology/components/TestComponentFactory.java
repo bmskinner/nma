@@ -91,6 +91,9 @@ public class TestComponentFactory {
 	 */
 	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
 
+		if(fixedStartOffset<0 || fixedStartOffset>=(w+h)*2)
+			throw new ComponentCreationException("Offset cannot be less than zero or more than perimeter: "+fixedStartOffset);
+		
 		int[] xpoints = new int[(w+h)*2];
 		int[] ypoints = new int[(w+h)*2];
 				
@@ -124,7 +127,7 @@ public class TestComponentFactory {
 	/**
 	 * Offset the int array by the given amount with wrapping
 	 * @param array
-	 * @param offset the offset. Positive integer only.
+	 * @param offset the offset. Positive integer only between 0 and array length.
 	 * @return
 	 */
 	private static int[] offsetArray(int[] array, int offset) {

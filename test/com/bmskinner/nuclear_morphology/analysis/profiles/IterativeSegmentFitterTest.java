@@ -37,6 +37,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class IterativeSegmentFitterTest {
 	
+	private Logger logger;
+	
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
 	
@@ -44,7 +46,7 @@ public class IterativeSegmentFitterTest {
 	
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+		logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 
@@ -127,8 +129,15 @@ public class IterativeSegmentFitterTest {
 		names.add("Template");
 		names.add("Target");
 		names.add("Result");
+		
+		
+		for(int i=0; i<target.getSegmentCount(); i++) {
+			IBorderSegment targetSeg = target.getOrderedSegments().get(i);
+			IBorderSegment resultSeg = result.getOrderedSegments().get(i);	
+			assertEquals("Segments should match", targetSeg.toString(), resultSeg.toString());
+		}
 
-		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
+//		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
 	}
 	
 	

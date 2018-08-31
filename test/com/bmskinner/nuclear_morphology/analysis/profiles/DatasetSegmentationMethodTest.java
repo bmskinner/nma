@@ -56,8 +56,10 @@ public class DatasetSegmentationMethodTest {
 			System.out.println(s);
 		}
 		
-		if(!ok)
+		if(!ok) {
 			ChartFactoryTest.showProfiles(v.getErrorCells(), d);
+			OutlineChartFactoryTest.generateOutlineChartsForAllCells(d, "Known error");
+		}
 				
 		assertTrue(ok);
 
@@ -174,10 +176,10 @@ public class DatasetSegmentationMethodTest {
 				.baseHeight(40).baseWidth(40)
 				.randomOffsetProfiles(false)
 				.segmented().build();
-		OutlineChartFactoryTest.generateOutlineChartsForAllCells(dataset, "Known error");
+//		
 		testDatasetMedianAndCellsAreSegmentedConsistently(dataset);
-		
-		ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
+		OutlineChartFactoryTest.generateOutlineChartsForAllCells(dataset, "Known error");
+//		ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
 
 
 	}

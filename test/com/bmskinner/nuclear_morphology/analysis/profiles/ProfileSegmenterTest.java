@@ -17,7 +17,6 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -69,13 +68,11 @@ public class ProfileSegmenterTest {
 	@Test
 	public void testMultiCellSquareDatasetSegmentation() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(50).ofType(NucleusType.ROUND)
-				.baseHeight(40).baseWidth(40).profiled().build();
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(50)
+				.ofType(NucleusType.ROUND)
+				.baseHeight(40).baseWidth(40)
+				.profiled().build();
 
-		IProfile median = d.getCollection()
-				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		
 		segmentMedianProfile(d);
 		ChartFactoryTest.showMedianProfile(d, "Multiple identical cells");
 	}
@@ -90,6 +87,31 @@ public class ProfileSegmenterTest {
 
 		segmentMedianProfile(d);
 		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells");
+	}
+	
+	@Test
+	public void testMultiCellVariableOffsetSquareDatasetSegmentation() throws Exception {
+
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(50).ofType(NucleusType.ROUND)
+				.withMaxSizeVariation(20)
+				.randomOffsetProfiles(true)
+				.baseHeight(40).baseWidth(40).profiled().build();
+
+		segmentMedianProfile(d);
+		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells with offsets");
+	}
+	
+	@Test
+	public void testMultiCellVariableOffsetSquareDatasetSegmentationAndRotation() throws Exception {
+
+		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(50).ofType(NucleusType.ROUND)
+				.withMaxSizeVariation(20)
+				.maxRotation(270)
+				.randomOffsetProfiles(true)
+				.baseHeight(40).baseWidth(40).profiled().build();
+
+		segmentMedianProfile(d);
+		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells with offsets and rotation");
 	}
 	
 	@Test
