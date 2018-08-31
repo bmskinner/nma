@@ -205,6 +205,16 @@ public interface IProfile extends Serializable, Loggable {
      * @throws ProfileException if interpolation cannot be performed
      */
     double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException;
+    
+    /**
+     * Calculate the absolute square difference between profiles, but interpolate each 
+     * to a fixed length
+     * @param testProfile the profile to compare to this
+     * @param interpolationLength the length to interplate both profiles to
+     * @return
+     * @throws ProfileException
+     */
+    double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException;
 
     /**
      * Alternative to the constructor from profile

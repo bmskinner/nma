@@ -572,15 +572,7 @@ public class IProfileTester {
 		int offset = profile.findBestFitOffset(test);
 		assertEquals(exp, offset);
 	}
-	
-//	@Test
-//	public void testFindBestFitOffsetWithPositiveOffsetIdenticalProfileRestrictedRange() throws ProfileException {
-//		// Profile is a sine wave, repeats at 180 TODO
-//		IProfile test = profile.offset(0);
-//		int offset = profile.findBestFitOffset(test, 160, 190);
-//		assertEquals(180, offset);
-//	}
-			
+				
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getLocalMinima(int)}.
 	 * @throws ProfileException 
@@ -611,12 +603,19 @@ public class IProfileTester {
         	boolean isMax = ((Math.sin(Math.toRadians(i))+1)*180)==0f;
         	assertEquals(isMax, b.get(i));
         }
-	    
 	    b = profile.getLocalMinima(3, -1);
 	    for(int i=0; i<data.length; i++) {
         	assertFalse(b.get(i));
         }
-	    
+	}
+	
+	@Test
+	public void testGetLocalMinimaWorksOnZeroIndex() throws ProfileException {
+		System.out.println(Arrays.toString(profile.toFloatArray()));
+		IProfile offset = profile.offset(270);
+		System.out.println(Arrays.toString(offset.toFloatArray()));
+	    BooleanProfile b = offset.getLocalMinima(3, 180);
+	    assertTrue("Expecting minima at "+offset.get(0), b.get(0));
 	}
 	
 

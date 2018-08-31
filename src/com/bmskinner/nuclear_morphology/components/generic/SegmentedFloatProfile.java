@@ -485,6 +485,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 //        List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -offset);
         return new SegmentedFloatProfile(offsetProfile, segments);
     }
+    
+    
 
     @Override
     public ISegmentedProfile interpolate(int length) throws ProfileException {

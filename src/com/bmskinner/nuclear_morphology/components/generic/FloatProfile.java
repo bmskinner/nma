@@ -336,6 +336,13 @@ public class FloatProfile implements IProfile {
             return squareDifference(arr1, arr2);
         }
     }
+    
+    @Override
+  	public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException {
+  		float[] arr1 = interpolate(array, interpolationLength);
+  		float[] arr2 = interpolate(testProfile.toFloatArray(), interpolationLength);
+  		return CellularComponent.squareDifference(arr1, arr2);
+  	}
 
     /**
      * Calculate the absolute square difference between two arrays of equal
@@ -483,11 +490,6 @@ public class FloatProfile implements IProfile {
         return values;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#reverse()
-     */
     @Override
     public void reverse() {
 
@@ -498,39 +500,38 @@ public class FloatProfile implements IProfile {
             this.array[this.array.length - 1 - i] = tmp;
         }
     }
-
+    
     @Override
-    public IProfile interpolate(int newLength) throws ProfileException {
-        if(newLength < 1)
-            throw new IllegalArgumentException("New length must be longer than 1");
-        return new FloatProfile( interpolate(array, newLength) );
-    }
+	public IProfile interpolate(int newLength) throws ProfileException {
+		if(newLength<MINIMUM_PROFILE_LENGTH)
+			throw new IllegalArgumentException(String.format("New length %d below minimum %d",newLength,MINIMUM_PROFILE_LENGTH));
+		return new FloatProfile(interpolate(array, newLength));
+	}
 
-    /**
-     * Interpolate the array to the given length, and return as a new array
-     * 
-     * @return
-     */
-    private static float[] interpolate(float[] array, int length) {
+	/**
+	 * Interpolate the array to the given length, and return as a new array
+	 * 
+	 * @param arr the array to interpolate
+	 * @param length the new length
+	 * @return
+	 */
+	private float[] interpolate(float[] arr, int length) {
 
-        float[] result = new float[length];
+		float[] result = new float[length];
 
-        // where in the old curve index is the new curve index?
-        for (int i = 0; i < length; i++) {
-            // we have a point in the new array.
-            // we want to know which points it lies between in the old profile
-            float fraction = ((float) i / (float) length); // get the fractional
-                                                           // index position
-                                                           // needed
+		// where in the old curve index is the new curve index?
+		for (int i=0; i<length-1; i++) {
+			// we have a point in the new array.
+			// we want to know which points it lies between in the old profile
+			float fraction = ((float) i / (float) length);
 
-            // get the value in the old profile at the given fractional index
-            // position
-            result[i] = 
-            result[i] = getInterpolatedValue(array, fraction);
-        }
-        return result;
+			// get the value in the old profile at the given position
+			result[i] = getInterpolatedValue(arr, fraction);
+		}
+		result[length-1] = getInterpolatedValue(arr, 1.0f);
+		return result;
 
-    }
+	}
 
     /**
      * Get the interpolated value at the given fraction along the given array

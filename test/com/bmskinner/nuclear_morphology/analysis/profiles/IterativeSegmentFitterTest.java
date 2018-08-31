@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +16,13 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
@@ -125,9 +128,7 @@ public class IterativeSegmentFitterTest {
 		names.add("Target");
 		names.add("Result");
 
-			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
-		
-//		assertEquals("Identical profiles", template, result);
+		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
 	}
 	
 	

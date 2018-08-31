@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,10 +30,10 @@ public class IterativeSegmentFitter implements Loggable {
 
     /**
      * Construct with a profile containing segments. The originals will
-     * not be modified
+     * not be modified.
      * 
-     * @param profile the median profile of the collection
-     * @throws ProfileException if the profile to be segmented cannot be copied
+     * @param profile the template profile with segments to be fitted
+     * @throws ProfileException if the template profile cannot be copied
      */
     @SuppressWarnings("null")
 	public IterativeSegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
@@ -56,8 +57,7 @@ public class IterativeSegmentFitter implements Loggable {
     	
         if (target==null)
             throw new IllegalArgumentException("Target profile is null");
-//        if(!target.hasSegments())
-//        	return target;
+
 		try {
 			return remapSegmentEndpoints(target);
 		} catch (UnavailableComponentException | ProfileException e) {
@@ -76,14 +76,13 @@ public class IterativeSegmentFitter implements Loggable {
      * @throws UnavailableComponentException 
      */
     private ISegmentedProfile remapSegmentEndpoints(@NonNull IProfile profile) throws ProfileException, UnavailableComponentException {
-//    	IProfile tempProfile = profile.copy();
+
         List<IBorderSegment> newSegments = new ArrayList<>();
+        
         // fit each segment in turn
-        for(int i=0; i<templateProfile.getSegmentCount(); i++) {
-        	IBorderSegment templateSegment = templateProfile.getSegments().get(i);
+        for(IBorderSegment templateSegment : templateProfile.getOrderedSegments())
         	newSegments = bestFitSegment(profile, newSegments, templateSegment.getID());
-        }
-//        tempProfile.setSegments(newSegments);
+
         return new SegmentedFloatProfile(profile, newSegments);
     }
 
@@ -166,7 +165,12 @@ public class IterativeSegmentFitter implements Loggable {
     private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId, int startIndex, int minIndex, int maxIndex, int stepSize) throws UnavailableComponentException, ProfileException {
 
     	IProfile tempProfile = testProfile.copy();
-    	IProfile template = templateProfile.getSubregion(templateProfile.getSegment(segId));
+    	IBorderSegment templateSegment = templateProfile.getSegment(segId);
+    	IProfile template = templateProfile.getSubregion(templateSegment);
+    	
+    	fine("Template end index: "+templateProfile.get(templateSegment.getEndIndex()));
+    	fine(String.format("Template segment length %s, profile length %s, from %s",templateSegment.length(), template.size(), templateSegment.toString()));
+    	fine(String.format("Target profile length %s",tempProfile.size()));
     	
     	// Find indexes that are minima or maxima. 
     	// If these are clear, they should be retained
@@ -179,19 +183,24 @@ public class IterativeSegmentFitter implements Loggable {
         for (int endIndex=minIndex; endIndex <maxIndex; endIndex+=stepSize) {
         	
         	IProfile segmentProfile = testProfile.getSubregion(startIndex, endIndex);
-        	double score =  template.absoluteSquareDifference(segmentProfile);
+        	
+        	double score =  template.absoluteSquareDifference(segmentProfile, 100);
         	
         	if(minimaMaxima.get(endIndex)) {
         		score *= 0.25; //TODO: formalise this rule and find the best value to use
-        		fine(String.format("End index %s is a local min or max! Score altered to %s", endIndex, score));
+//        		fine(String.format("End index %s is a local min or max! Score altered to %s", endIndex, score));
         	}
+        	
+        	if(startIndex==11)
+        		fine(endIndex+"\t"+score+"\t"+tempProfile.get(endIndex));
 
             if (score < bestScore) {
             	bestIndex = endIndex;
             	bestScore = score;
             }
         }
-        fine(String.format("Best offset is %s with score %s", bestIndex, bestScore));
+        fine(Arrays.toString(testProfile.getSubregion(startIndex, bestIndex).toFloatArray()));
+        fine(String.format("Best end index is %s with score %s", bestIndex, bestScore));
         return bestIndex;
     }
 }

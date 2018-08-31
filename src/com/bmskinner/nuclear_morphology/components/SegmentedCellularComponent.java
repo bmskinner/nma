@@ -407,6 +407,13 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			arr1 = interpolate(arr1, arr2.length);
 			return CellularComponent.squareDifference(arr1, arr2);
 		}
+		
+		@Override
+		public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException {
+			float[] arr1 = interpolate(array, interpolationLength);
+			float[] arr2 = interpolate(testProfile.toFloatArray(), interpolationLength);
+			return CellularComponent.squareDifference(arr1, arr2);
+		}
 
 		@Override
 		public IProfile copy() throws ProfileException {
@@ -468,25 +475,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public IProfile interpolate(int newLength) throws ProfileException {
-
 			if(newLength<MINIMUM_PROFILE_LENGTH)
 				throw new IllegalArgumentException(String.format("New length %d below minimum %d",newLength,MINIMUM_PROFILE_LENGTH));
-
-			float[] newArray = new float[newLength];
-
-			// where in the old curve index is the new curve index?
-			for (int i = 0; i < newLength; i++) {
-				// we have a point in the new curve.
-				// we want to know which points it lay between in the old curve
-				float oldIndex = ((float) i / (float) newLength) * array.length;
-
-				// get the value in the old profile at the given fractional index
-				// position
-				newArray[i] = interpolateValue(oldIndex);
-			}
-			
-			// We can't use a DefaultProfile for this because the length is tied to the component border
-			return new FloatProfile(newArray);
+			return new FloatProfile(interpolate(array, newLength));
 		}
 
 		/**
@@ -501,17 +492,15 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			float[] result = new float[length];
 
 			// where in the old curve index is the new curve index?
-			for (int i = 0; i < length; i++) {
+			for (int i=0; i<length-1; i++) {
 				// we have a point in the new array.
 				// we want to know which points it lies between in the old profile
-				float fraction = ((float) i / (float) length); // get the fractional
-				// index position
-				// needed
+				float fraction = ((float) i / (float) length);
 
-				// get the value in the old profile at the given fractional index
-				// position
+				// get the value in the old profile at the given position
 				result[i] = getInterpolatedValue(arr, fraction);
 			}
+			result[length-1] = getInterpolatedValue(arr, 1.0f);
 			return result;
 
 		}
@@ -609,78 +598,44 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 */
 		@Override
 		public BooleanProfile getLocalMinima(int windowSize) {
-
 			if(windowSize<1)
 				throw new IllegalArgumentException(String.format("Window size %d must be >=1",windowSize));
 
-			// go through angle array (with tip at start)
-			// look at 1-2-3-4-5 points ahead and behind.
-			// if all greater, local minimum
 			double[] prevValues = new double[windowSize]; // slots for previous
-			// angles
 			double[] nextValues = new double[windowSize]; // slots for next angles
-
-			// int count = 0;
-			// List<Integer> result = new ArrayList<Integer>(0);
 
 			boolean[] minima = new boolean[this.size()];
 
 			for (int i = 0; i < array.length; i++) { // for each position in sperm
-
+				
 				// go through each lookup position and get the appropriate angles
 				for (int j = 0; j < prevValues.length; j++) {
 
 					int prev_i = CellularComponent.wrapIndex(i - (j + 1), this.size()); // the
-					// index
-					// j+1
-					// before
-					// i
 					int next_i = CellularComponent.wrapIndex(i + (j + 1), this.size()); // the
-					// index
-					// j+1
-					// after
-					// i
 
 					// fill the lookup array
 					prevValues[j] = array[prev_i];
 					nextValues[j] = array[next_i];
 				}
 
-				// with the lookup positions, see if minimum at i
-				// return a 1 if all higher than last, 0 if not
-				// prev_l = 0;
 				boolean ok = true;
 				for (int k = 0; k < prevValues.length; k++) {
 
-					// for the first position in prevValues, compare to the current
-					// index
 					if (k == 0) {
 						if (prevValues[k] <= array[i] || nextValues[k] <= array[i]) {
 							ok = false;
 						}
-					} else { // for the remainder of the positions in prevValues,
-						// compare to the prior prevAngle
+					} else {
 
 						if (prevValues[k] <= prevValues[k - 1] || nextValues[k] <= nextValues[k - 1]) {
 							ok = false;
 						}
 					}
 				}
-
-				if (ok) {
-					// count++;
-					minima[i] = true;
-				} else {
-					minima[i] = false;
-				}
-
-				// result.add(i);
-
+				minima[i] = ok;
 			}
-			BooleanProfile minimaProfile = new BooleanProfile(minima);
-			// this.minimaCalculated = true;
-			// this.minimaCount = count;
-			return minimaProfile;
+			return new BooleanProfile(minima);
 		}
 
 		@Override
