@@ -116,12 +116,20 @@ public class RepresentativeMedianFinder implements Loggable {
 	public List<IProfile> findBestProfiles(IProfile target) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
 		float[] differences = calculateDistancesToTemplate(target);
 		float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
-		
 		List<IProfile> result = new ArrayList<>();
+		
+		
+		if(nuclei.size()<=2) {
+			for(Nucleus n : nuclei)
+				result.add(n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
+			return result;
+		}
+
+		
+		
 		for(int i=0; i<differences.length; i++) {
-			if(differences[i]<medianDiff) {
+			if(differences[i]<medianDiff)
 				result.add(nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
-			}
 		}
 		return result;
 	}

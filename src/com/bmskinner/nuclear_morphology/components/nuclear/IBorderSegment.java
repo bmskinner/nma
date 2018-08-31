@@ -193,14 +193,14 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     IBorderSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException;
 
     /**
-     * Get the index at the start of the segment
+     * Get the index at the start of the segment  (inclusive)
      * 
      * @return
      */
     int getStartIndex();
 
     /**
-     * Get the index at the end of the segment
+     * Get the index at the end of the segment (inclusive)
      * 
      * @return
      */

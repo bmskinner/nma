@@ -901,5 +901,5 @@ public class ISegmentedProfileTester {
 	    exception.expect(IllegalArgumentException.class);
         profile.interpolate(-1);
     }
-
+	
 }

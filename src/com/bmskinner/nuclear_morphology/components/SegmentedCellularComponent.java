@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -802,38 +803,34 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			} 
 			// case when array wraps
 
-			float[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
+			float[] resultA = Arrays.copyOfRange(array, indexStart, array.length+1);
 			float[] resultB = Arrays.copyOfRange(array, 0, indexEnd+1);
-
 			float[] result = new float[resultA.length + resultB.length];
 			int index = 0;
-			for (float d : resultA) {
-				result[index] = d;
-				index++;
-			}
-			for (float d : resultB) {
-				result[index] = d;
-				index++;
-			}
-
-			if (result.length == 0) {
+			for (float d : resultA)
+				result[index++] = d;
+			for (float d : resultB)
+				result[index++] = d;
+			if (result.length == 0)
 				warn("Subregion length zero: " + indexStart + " - " + indexEnd);
-			}
 			return new FloatProfile(result);
-
 		}
 
 
 		@Override
 		public IProfile getSubregion(@NonNull IBorderSegment segment) {
-
 			if (segment == null)
 				throw new IllegalArgumentException("Segment is null");
-
 			if (segment.getProfileLength() != array.length) {
 				throw new IllegalArgumentException("Segment comes from a different length profile");
 			}
-			return getSubregion(segment.getStartIndex(), segment.getEndIndex());
+			float[] result = new float[segment.length()];
+			Iterator<Integer> it = segment.iterator();
+			int i=0;
+			while(it.hasNext()) {
+				result[i++] = array[it.next()];
+			}
+			return new FloatProfile(result);
 		}
 
 		@Override

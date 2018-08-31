@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -165,6 +166,11 @@ public class IterativeSegmentFitter implements Loggable {
     private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId, int startIndex, int minIndex, int maxIndex, int stepSize) throws UnavailableComponentException, ProfileException {
 
     	IProfile tempProfile = testProfile.copy();
+    	IProfile template = templateProfile.getSubregion(templateProfile.getSegment(segId));
+    	
+    	// Find indexes that are minima or maxima. 
+    	// If these are clear, they should be retained
+    	BooleanProfile minimaMaxima = tempProfile.getLocalMaxima(5, 180).or(tempProfile.getLocalMinima(5, 180));
     	double bestScore = Double.MAX_VALUE;
         int bestIndex = 0;
         
@@ -173,16 +179,19 @@ public class IterativeSegmentFitter implements Loggable {
         for (int endIndex=minIndex; endIndex <maxIndex; endIndex+=stepSize) {
         	
         	IProfile segmentProfile = testProfile.getSubregion(startIndex, endIndex);
-        	IProfile template = templateProfile.getSubregion(templateProfile.getSegment(segId));
-        	
         	double score =  template.absoluteSquareDifference(segmentProfile);
+        	
+        	if(minimaMaxima.get(endIndex)) {
+        		score *= 0.25; //TODO: formalise this rule and find the best value to use
+        		fine(String.format("End index %s is a local min or max! Score altered to %s", endIndex, score));
+        	}
 
             if (score < bestScore) {
             	bestIndex = endIndex;
             	bestScore = score;
             }
         }
-        finer(String.format("Best offset is %s with score %s", bestIndex, bestScore));
+        fine(String.format("Best offset is %s with score %s", bestIndex, bestScore));
         return bestIndex;
     }
 }

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.DoubleStream;
@@ -707,16 +708,38 @@ public class IProfileTester {
 	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetSubregionIBorderSegment() throws ProfileException {
+	public void testGetSubregionIBorderSegmentFromNonWrappingSegment() throws ProfileException {
+
 	    int start = 0;
         int stop  = 3;
         IBorderSegment s = new DefaultBorderSegment(start, stop, data.length);
         IProfile p = profile.getSubregion(s);
         
-        for(int i=start; i<stop; i++){
+        assertEquals(s.length(), p.size());
+        
+        for(int i=start; i<=stop; i++){
             assertEquals(data[i], p.get(i), 0);
         }
 	}
+	
+	@Test
+	public void testGetSubregionIBorderSegmentFromWrappingSegment() throws ProfileException {
+
+        IBorderSegment s = new DefaultBorderSegment(profile.size()-10, 10, profile.size());
+        IProfile p = profile.getSubregion(s);
+        
+        assertEquals(s.length(), p.size());
+        
+        Iterator<Integer> it = s.iterator();
+        int j=0;
+        while(it.hasNext()) {
+        	int i = it.next();
+        	assertEquals(data[i], p.get(j++), 0);
+        }
+        assertFalse(it.hasNext());
+	}
+	
+	
 			
 	@Test
     public void testGetSubregionIBorderSegmentExceptsOnSegmentOutOfUpperBounds() throws ProfileException{
