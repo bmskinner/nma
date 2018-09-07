@@ -19,23 +19,42 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer.ShellResultFilterOperation;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.NuclearSignalChartFactory;
@@ -47,14 +66,22 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 /**
@@ -74,6 +101,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private static final String DAPI_NORM_LBL      = "DAPI normalise";
     private static final String SHOW_RANDOM_LBL    = "Show random";
     private static final String SHOW_SHELLS_LBL    = "Show nuclei";
+    private static final String FILTER_LBL         = "Filter nuclei";
 
     private static final String RUN_ANALYSIS_TOOLTIP   = "Run a shell analysis on all signal groups, replacing any existing analysis";
     private static final String WITHIN_SIGNALS_TOOLTIP = "Analyse only pixels that are within defined signals";
@@ -93,6 +121,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     private JButton newAnalysis = new JButton(RUN_ANALYSIS_LBL);
     private JButton showNuclei  = new JButton(SHOW_SHELLS_LBL);
+    
+    private JButton filterBtn = new JButton(FILTER_LBL);
 
     private JCheckBox dapiNormalise      = new JCheckBox(DAPI_NORM_LBL, true);
     private JCheckBox showRandomCheckbox = new JCheckBox(SHOW_RANDOM_LBL, false);
@@ -121,6 +151,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         dapiNormalise.setEnabled(b);
         showRandomCheckbox.setEnabled(b);
         showNuclei.setEnabled(b);
+        filterBtn.setEnabled(b);
     }
 
     /**
@@ -235,6 +266,15 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         });
         showNuclei.setToolTipText(SHOW_NUCLEI_TOOLTIP);
         panel.add(showNuclei);
+        
+        filterBtn.addActionListener(e->{
+        	ShellFilteringSetupDialog dialog = new ShellFilteringSetupDialog(activeDataset());
+        	if(dialog.isReadyToRun()) {
+        		dialog.filter();
+        	}
+        	
+        });
+        panel.add(filterBtn);
         
         setEnabled(false);
 
@@ -356,22 +396,133 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         if (options.getTarget() == chartPanel) {
             return new NuclearSignalChartFactory(options).createShellChart();
-        } else {
-            return new NuclearSignalChartFactory(options).createShellConsensusChart();
         }
+		return new NuclearSignalChartFactory(options).createShellConsensusChart();
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
         return new NuclearSignalTableCreator(options).createShellChiSquareTable();
     }
 
     @Override
     public void actionPerformed(ActionEvent arg0) {
         updateChartAndTable();
+    }
+    
+    @SuppressWarnings("serial")
+    private class ShellFilteringSetupDialog extends SettingsDialog {
 
+        private static final String DIALOG_TITLE = "Shell filtering options";
+        
+        private double proportion =0;
+        private int shell = 0;
+        private ShellResultFilterOperation op = ShellResultFilterOperation.SPECIFIC_SHELL_IS_LESS_THAN;
+        private UUID id;
+
+        protected JPanel headingPanel;
+        protected JPanel optionsPanel;
+        protected JPanel footerPanel;
+
+        public ShellFilteringSetupDialog(final IAnalysisDataset dataset) {
+            this(dataset, DIALOG_TITLE);
+        }
+
+        /**
+         * Constructor that does not make panel visible
+         * 
+         * @param mw
+         * @param title
+         */
+        protected ShellFilteringSetupDialog(final IAnalysisDataset dataset, final String title) {
+            super(true);
+            createUI();
+            pack();
+            setVisible(true);
+        }
+
+        protected JPanel createHeader() {
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            return panel;
+        }
+        
+        public void filter() {
+        	log("Filtering");
+        	ICellCollection filtered = new ShellResultCellFilterer(id)
+        			.setFilter(op, shell, proportion)
+        			.filter(activeDataset().getCollection());
+			if(!filtered.hasCells()) {
+				log("No cells found");
+				return;
+			}
+			log("Found "+filtered.size()+" cells");
+			ICellCollection virt = new VirtualCellCollection(activeDataset(), "Filtered_on_shell");
+			filtered.getCells().forEach(c->virt.addCell(c));
+            activeDataset().addChildCollection(virt);
+            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+        }
+
+
+        protected void createUI() {
+
+            setLayout(new BorderLayout());
+            setBorder(new EmptyBorder(5, 5, 5, 5));
+
+            headingPanel = createHeader();
+            getContentPane().add(headingPanel, BorderLayout.NORTH);
+
+            footerPanel = createFooter();
+            getContentPane().add(footerPanel, BorderLayout.SOUTH);
+            
+            ICellCollection collection = activeDataset().getCollection();
+            
+            optionsPanel = new JPanel();
+            GridBagLayout layout = new GridBagLayout();
+            optionsPanel.setLayout(layout);
+            
+            List<JLabel> labels = new ArrayList<>();
+            List<Component> fields = new ArrayList<>();
+            
+            Set<UUID> groupSet = activeDataset().getCollection().getSignalGroupIDs();
+			List<UUID> ids = groupSet.stream().collect(Collectors.toList());
+			
+			String[] names = ids.stream().map(id->activeDataset().getCollection().getSignalGroup(id).get().getGroupName())
+			.toArray(String[]::new);
+			JComboBox<String> idBox = new JComboBox<>(names);
+
+			idBox.addActionListener(e -> id= ids.get(idBox.getSelectedIndex()));
+			idBox.setSelectedIndex(0);
+            
+            labels.add(new JLabel("Signal group"));
+            fields.add(idBox);
+            
+            JComboBox<ShellResultFilterOperation> typeBox = new JComboBox<>(ShellResultFilterOperation.values());
+            typeBox.setSelectedItem(ShellResultFilterOperation.SPECIFIC_SHELL_IS_LESS_THAN);
+            typeBox.addActionListener(e -> op = (ShellResultFilterOperation) typeBox.getSelectedItem());
+            
+            labels.add(new JLabel("Filtering operation"));
+            fields.add(typeBox);
+            
+            SpinnerNumberModel sModel = new SpinnerNumberModel(0, 0, collection.getSignalManager().getShellCount(), 1);
+            JSpinner spinner = new JSpinner(sModel);
+            spinner.addChangeListener(e-> shell = (int) sModel.getValue());
+            
+            labels.add(new JLabel("Shell"));
+            fields.add(spinner);
+            
+            SpinnerNumberModel pModel = new SpinnerNumberModel(0.5d, 0d, 1d, 0.1d);
+            JSpinner pSpinner = new JSpinner(pModel);
+            pSpinner.addChangeListener(e-> proportion = (double) pModel.getValue());
+            
+            labels.add(new JLabel("Proportion"));
+            fields.add(pSpinner);
+            
+            this.addLabelTextRows(labels, fields, layout, optionsPanel);
+            getContentPane().add(optionsPanel, BorderLayout.CENTER);
+        }
     }
 }
