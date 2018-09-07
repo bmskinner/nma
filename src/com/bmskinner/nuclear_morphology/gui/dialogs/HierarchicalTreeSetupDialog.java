@@ -50,13 +50,11 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 
 /**
@@ -92,7 +90,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
     protected Map<UUID, JCheckBox> segmentBoxMap;
 
-    protected final IMutableClusteringOptions options;
+    protected final IClusteringOptions options;
 
     public HierarchicalTreeSetupDialog(final IAnalysisDataset dataset) {
 

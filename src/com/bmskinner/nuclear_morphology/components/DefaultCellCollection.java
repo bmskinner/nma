@@ -251,11 +251,6 @@ public class DefaultCellCollection implements ICellCollection {
 
     @Override
 	public void addCell(final @NonNull ICell r) {
-
-        if (r == null) {
-            throw new IllegalArgumentException("Cell is null");
-        }
-
         cells.add(r);
     }
 

@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class SignalsColocalisationPanel extends DetailPanel {
 
-    private static final String PANEL_TITLE_LBL = "Colocalistion";
+    private static final String PANEL_TITLE_LBL = "Colocalisation";
     private static final String HEADER_LBL    = "Pairwise distances between the closest signal pairs";
 //    private static final String TABLE_TOOLTIP = "Median distance between closest signal pairs";
 

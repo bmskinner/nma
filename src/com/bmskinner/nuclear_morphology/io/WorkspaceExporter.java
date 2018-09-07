@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public abstract class WorkspaceExporter implements Loggable, Exporter {
+public abstract class WorkspaceExporter extends XMLWriter implements Exporter {
 	
 	private static final String VERSION_1_13_x = "1.13.x";
 	private static final String VERSION_1_14_0 = "1.14.0";
@@ -75,31 +75,20 @@ public abstract class WorkspaceExporter implements Loggable, Exporter {
 		
 		private static final String NEWLINE = System.getProperty("line.separator");
 		
-	    public void exportWorkspace(final IWorkspace w) {
+	    @Override
+		public void exportWorkspace(final @NonNull IWorkspace w) {
 
 	        File exportFile = w.getSaveFile();
-
-	        if (exportFile.exists()) {
+	        if (exportFile.exists())
 	            exportFile.delete();
-	        }
 
 	        StringBuilder builder = new StringBuilder();
 
-	        /*
-	         * Add the save paths of nmds
-	         */
-	        for (File f : w.getFiles()) {
-	            builder.append(f.getAbsolutePath());
-	            builder.append(NEWLINE);
-	        }
+	        for (File f : w.getFiles()) 
+	            builder.append(f.getAbsolutePath()+NEWLINE);
 
-	        try {
-
-	            PrintWriter out;
-	            out = new PrintWriter(exportFile);
+	        try(PrintWriter out = new PrintWriter(exportFile)) {
 	            out.print(builder.toString());
-	            out.close();
-
 	        } catch (FileNotFoundException e) {
 	            warn("Cannot export workspace file");
 	            fine("Error writing file", e);
@@ -115,13 +104,14 @@ public abstract class WorkspaceExporter implements Loggable, Exporter {
 	 */
 	private static class v_1_14_0_WorkspaceExporter extends WorkspaceExporter {
 		
-	    public void exportWorkspace(@NonNull final IWorkspace w) {
+	    @Override
+		public void exportWorkspace(@NonNull final IWorkspace w) {
 
 	        File exportFile = w.getSaveFile();
 	        if (exportFile.exists())
 	            exportFile.delete();
 	        
-	        try{
+	        try {
 	            //root element
 	            Element rootElement = new Element(IWorkspace.WORKSPACE_ELEMENT);
 	            
@@ -159,14 +149,7 @@ public abstract class WorkspaceExporter implements Loggable, Exporter {
 	            
 	            Document doc = new Document(rootElement);
 
-	            XMLOutputter xmlOutput = new XMLOutputter();
-
-	            OutputStream os = new FileOutputStream(exportFile);
-	            
-	            xmlOutput.setFormat(Format.getPrettyFormat());
-	            xmlOutput.output(doc, os);
-	            xmlOutput.output(doc, System.out); 
-	            os.close();
+	            writeXML(doc, exportFile);
 	         } catch(IOException e) {
 	            e.printStackTrace();
 	         }

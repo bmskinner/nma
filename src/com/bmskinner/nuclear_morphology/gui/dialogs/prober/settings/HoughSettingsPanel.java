@@ -27,8 +27,9 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
 
 /**
  * Set parameters for Hough circle detection
@@ -66,10 +67,10 @@ public class HoughSettingsPanel extends SettingsPanel {
     private JSpinner numCirclesSpinner;
     private JSpinner thresholdSpinner;
 
-    private IMutableHoughDetectionOptions options;
+    private IHoughDetectionOptions options;
 
-    public HoughSettingsPanel(final IHoughDetectionOptions options) {
-        this.options = options.unlock();
+    public HoughSettingsPanel(@NonNull final IHoughDetectionOptions options) {
+        this.options = options;
         createSpinners();
         createPanel();
     }
@@ -98,10 +99,6 @@ public class HoughSettingsPanel extends SettingsPanel {
                 JSpinner j = (JSpinner) e.getSource();
                 minRadiusSpinner.commitEdit();
 
-                // if( (Double) j.getValue() > (Double)
-                // maxRadiusSpinner.getValue() ){
-                // minRadiusSpinner.setValue( maxRadiusSpinner.getValue() );
-                // }
                 Integer value = (Integer) j.getValue();
                 options.setMinRadius(value.intValue());
                 fireOptionsChangeEvent();
@@ -117,11 +114,6 @@ public class HoughSettingsPanel extends SettingsPanel {
             try {
                 JSpinner j = (JSpinner) e.getSource();
                 j.commitEdit();
-
-                // if( (Double) j.getValue() < (Double)
-                // minRadiusSpinner.getValue() ){
-                // j.setValue( minRadiusSpinner.getValue() );
-                // }
                 Integer value = (Integer) j.getValue();
                 options.setMaxRadius(value.intValue());
                 fireOptionsChangeEvent();
@@ -138,13 +130,7 @@ public class HoughSettingsPanel extends SettingsPanel {
                 j.commitEdit();
                 Integer value = (Integer) j.getValue();
                 options.setNumberOfCircles(value.intValue());
-
-                if (value > 0) {
-                    thresholdSpinner.setEnabled(false);
-                } else {
-                    thresholdSpinner.setEnabled(true);
-                }
-
+                thresholdSpinner.setEnabled(value==0);
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 warn("Parsing exception");
@@ -208,10 +194,10 @@ public class HoughSettingsPanel extends SettingsPanel {
     /**
      * Update the display to the given options
      * 
-     * @param options
-     *            the options values to be used
+     * @param options the options values to be used
      */
-    protected void update() {
+    @Override
+	protected void update() {
         super.update();
 
         minRadiusSpinner.setValue(Double.valueOf(options.getMinRadius()));

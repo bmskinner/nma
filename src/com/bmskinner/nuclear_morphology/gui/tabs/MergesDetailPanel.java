@@ -24,7 +24,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;

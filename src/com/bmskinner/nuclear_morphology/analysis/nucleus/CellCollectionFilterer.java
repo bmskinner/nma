@@ -124,6 +124,7 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
     	 Predicate<ICell> pred = new Predicate<ICell>() {
     		 @Override
     		 public boolean test(ICell t) {
+    			
     			 
     			 if(CellularComponent.NUCLEUS.equals(component))
     				 return t.getNuclei().stream().anyMatch(createNucleusFilter(collection, stat, lower, upper, scale));

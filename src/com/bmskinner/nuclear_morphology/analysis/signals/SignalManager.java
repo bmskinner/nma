@@ -61,14 +61,6 @@ import ij.process.ImageProcessor;
  * @author bms41
  *
  */
-/**
- * @author bms41
- *
- */
-/**
- * @author bms41
- *
- */
 public class SignalManager implements Loggable {
 
     private ICellCollection collection;
@@ -350,12 +342,7 @@ public class SignalManager implements Loggable {
      * @return
      */
     public boolean hasSignals(@NonNull final UUID signalGroupId) {
-        if (this.getSignalCount(signalGroupId) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return this.getSignalCount(signalGroupId) > 0;
     }
 
     /**
@@ -449,23 +436,6 @@ public class SignalManager implements Loggable {
                     .getStatistics(stat, scale, signalGroupId)
                     .stream()  )
             .mapToDouble(d->d.doubleValue()).toArray();
-        
-//        for (ICell c : cells) {
-//            for (Nucleus n : c.getNuclei()) {
-//                a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroupId));
-//            }
-//
-//        }
-//
-//        double[] values;
-//
-//        try {
-//            values = new ArrayConverter(a).toDoubleArray();
-//
-//        } catch (ArrayConversionException e) {
-//            values = new double[0];
-//        }
-//        return values;
     }
 
     /**
@@ -662,5 +632,4 @@ public class SignalManager implements Loggable {
         }
         return result;
     }
-
 }

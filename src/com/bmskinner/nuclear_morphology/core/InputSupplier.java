@@ -150,8 +150,7 @@ public interface InputSupplier {
 	 * @return the chosen option
 	 */
 	int requestOption( String[] options, int defaultOption, String message) throws RequestCancelledException;
-	
-	
+		
 	/**
 	 * Exception thwown when the user cancels the input request
 	 * @author bms41

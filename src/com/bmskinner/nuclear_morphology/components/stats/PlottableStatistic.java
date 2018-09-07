@@ -63,6 +63,10 @@ public interface PlottableStatistic extends Serializable {
     static final PlottableStatistic CELL_NUCLEAR_AREA  = new GenericStatistic("Nuclear area", StatisticDimension.AREA);
     static final PlottableStatistic CELL_NUCLEAR_RATIO = new GenericStatistic("Nucleus : Cytoplasm area ratio",
             StatisticDimension.DIMENSIONLESS);
+    
+    // Signal count in nuclei
+    static final PlottableStatistic NUCLEUS_SIGNAL_COUNT = new GenericStatistic("Signals per nucleus",
+            StatisticDimension.DIMENSIONLESS);
 
     // Old signal statistics minus overlaps with nucleus stats
     static final PlottableStatistic ANGLE                   = new GenericStatistic("Angle", StatisticDimension.ANGLE);
@@ -85,17 +89,12 @@ public interface PlottableStatistic extends Serializable {
      * @return applicable stats, or null if the component was not recognised
      */
     static PlottableStatistic[] getStats(String component) {
-        if (CellularComponent.NUCLEUS.equals(component)) {
+        if (CellularComponent.NUCLEUS.equals(component))
             return getNucleusStats().toArray(new PlottableStatistic[0]);
-        }
-
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
             return getSignalStats().toArray(new PlottableStatistic[0]);
-        }
-
-        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
             return getSegmentStats().toArray(new PlottableStatistic[0]);
-        }
         return null;
     }
 
@@ -105,7 +104,7 @@ public interface PlottableStatistic extends Serializable {
      * @return
      */
     static List<PlottableStatistic> getComponentStats() {
-        List<PlottableStatistic> list = new ArrayList<PlottableStatistic>(12);
+        List<PlottableStatistic> list = new ArrayList<>();
         list.add(AREA);
         list.add(PERIMETER);
         list.add(MAX_FERET);
@@ -114,7 +113,7 @@ public interface PlottableStatistic extends Serializable {
     }
 
     static List<PlottableStatistic> getCellStats() {
-        List<PlottableStatistic> list = new ArrayList<PlottableStatistic>();
+        List<PlottableStatistic> list = new ArrayList<>();
         list.add(CELL_NUCLEUS_COUNT);
         list.add(CELL_NUCLEAR_AREA);
         list.add(CELL_NUCLEAR_RATIO);

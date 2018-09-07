@@ -60,7 +60,6 @@ public class NucleusImageProber extends IntegratedImageProber {
                     .addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS).addImageChannelPanel(IAnalysisOptions.NUCLEUS)
                     .addImageProcessingPanel(IAnalysisOptions.NUCLEUS)
                     .addEdgeThresholdSwitchPanel(IAnalysisOptions.NUCLEUS).addSizePanel(IAnalysisOptions.NUCLEUS)
-                    .addMiscNucleusSettingsPanel(IAnalysisOptions.NUCLEUS)
                     .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS).build();
 
             Finder<List<ICell>> finder = new FluorescentNucleusFinder(options);
@@ -74,13 +73,8 @@ public class NucleusImageProber extends IntegratedImageProber {
 
             this.setTitle(DIALOG_TITLE_BAR_LBL);
 
-            optionsSettingsPanel.addProberReloadEventListener(imageProberPanel); // inform
-                                                                                 // update
-                                                                                 // needed
-            imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable
-                                                                                  // settings
-                                                                                  // while
-                                                                                  // working
+            optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
+            imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
 
         } catch (Exception e) {
             warn("Error launching analysis window");

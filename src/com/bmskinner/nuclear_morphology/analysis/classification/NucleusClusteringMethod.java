@@ -24,13 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import weka.clusterers.Clusterer;
-import weka.clusterers.EM;
-import weka.clusterers.HierarchicalClusterer;
-import weka.core.EuclideanDistance;
-import weka.core.Instance;
-import weka.core.Instances;
-
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -39,8 +32,15 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+
+import weka.clusterers.Clusterer;
+import weka.clusterers.EM;
+import weka.clusterers.HierarchicalClusterer;
+import weka.core.EuclideanDistance;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Run clustering of nuclei in a dataset based on a given set of options

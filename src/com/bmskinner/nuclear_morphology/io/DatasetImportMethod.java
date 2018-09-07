@@ -62,16 +62,9 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
 public class DatasetImportMethod extends AbstractAnalysisMethod implements Importer {
 
     private final File       file;
-    private IAnalysisDataset dataset      = null; // the active dataset of an
-                                                  // AnalysisWorker is private
-                                                  // and immutable, so have a
-                                                  // new field here
+    private IAnalysisDataset dataset      = null;
     private boolean          wasConverted = false;
-
-    public static final int WAS_CONVERTED_BOOL = 0; // the IAnalysisResult
-                                                    // boolean index for
-                                                    // conversion state
-    
+    public static final int WAS_CONVERTED_BOOL = 0;
     
     /**
      * Store a map of signal image locations if necessary 
@@ -349,6 +342,10 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 
         	throw(e1);
 
+        } catch (ClassNotFoundException e1) {
+        	warn("Missing class: "+e1.getMessage());
+        	stack("Class not found reading '" + file.getAbsolutePath() + "': ", e1);
+        	throw new UnloadableDatasetException("Missing class "+e1.getMessage());
         } catch (NullPointerException e1) {
             // holdover from deserialisation woes when migrating packages
             stack("NPE Error reading '" + file.getAbsolutePath() + "': ", e1);

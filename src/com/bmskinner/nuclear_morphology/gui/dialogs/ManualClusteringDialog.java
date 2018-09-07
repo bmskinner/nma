@@ -17,8 +17,8 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
@@ -128,7 +128,7 @@ public class ManualClusteringDialog extends LoadingIconDialog {
     	// Save the clusters to the dataset
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
         
-        IMutableClusteringOptions op = OptionsFactory.makeClusteringOptions();
+        IClusteringOptions op = OptionsFactory.makeClusteringOptions();
         op.setType(ClusteringMethod.MANUAL);
         
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);

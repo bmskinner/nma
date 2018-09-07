@@ -184,6 +184,16 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.IMutableCell",
                 com.bmskinner.nuclear_morphology.components.ICell.class); 
         
+        /*
+         * Changes from 1.13.8 to 1.14.0
+         */
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.ClusteringOptions$ClusteringMethod",
+        		com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.ClusteringOptions$HierarchicalClusterMethod",
+        		com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod.class); 
+        
+        
     }
 
     /**
