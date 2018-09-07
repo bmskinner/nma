@@ -22,7 +22,6 @@ import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,15 +42,14 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.KeyedShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.RandomShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 import ij.ImageStack;
 
@@ -67,15 +65,13 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	public static final int MINIMUM_AREA_PER_SHELL = 100;
 	public static final double MINIMUM_CIRCULARITY = 0.3;
 	
-    private final int shells;
-    private final ShrinkType type;
+	private final IShellOptions options;
 
-    private final Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
+    private final Map<UUID, KeyedShellResult> counters = new HashMap<>();
 
-    public ShellAnalysisMethod(IAnalysisDataset dataset, int shells, ShrinkType t) {
+    public ShellAnalysisMethod(@NonNull IAnalysisDataset dataset, @NonNull IShellOptions o) {
         super(dataset);
-        this.shells = shells;
-        type = t;
+        options = o;
     }
 
     @Override
@@ -85,6 +81,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, dataset.getCollection().size() - 1);
         fireProgressEvent(e);
         run();
+                
         IAnalysisResult r = new DefaultAnalysisResult(dataset);
         return r;
     }
@@ -96,7 +93,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         if (!collection.getSignalManager().hasSignals()) 
             return;
 
-        log("Performing "+type+" shell analysis with " + shells + " shells...");
+        log(String.format("Performing %s shell analysis with %s shells...", options.getErosionMethod(), options.getShellNumber()));
 
         try {
 
@@ -104,7 +101,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
                 if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                     continue;
-                counters.put(signalGroup, new KeyedShellResult(shells, type));
+                counters.put(signalGroup, new KeyedShellResult( options.getShellNumber(), options.getErosionMethod()));
+                
+                // Assign the options to each signal group
+                dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup).setShellOptions(options);
             }
 
             // make the shells and measure the values
@@ -153,7 +153,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         private void analyseNucleus(Nucleus n) {
 
             try {
-                shellDetector = new ShellDetector(n, shells, type, true);
+                shellDetector = new ShellDetector(n,  options.getShellNumber(), options.getErosionMethod(), true);
             } catch (ShellAnalysisException e1) {
                 warn("Unable to make shells for " + n.getNameAndNumber());
                 stack("Error in shell detector", e1);
@@ -248,7 +248,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             long[] c = sr.getCounts();
             
-			RandomShellResult randomResult = new RandomShellResult(shells, type, c);
+			RandomShellResult randomResult = new RandomShellResult( options.getShellNumber(), options.getErosionMethod(), c);
 			
 			dataset.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
 			        .setShellResult(randomResult);
@@ -269,8 +269,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             if(iterations<=0)
                 throw new IllegalArgumentException("Must have at least one iteration");
             
-            counts = new long[shells];
-            for(int i=0; i<shells; i++){
+            counts = new long[ options.getShellNumber()];
+            for(int i=0; i< options.getShellNumber(); i++){
                 counts[i] = 0;
             }
 
@@ -282,7 +282,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             // Find the shell for these points in the template
             try {
-                ShellDetector detector = new ShellDetector(template, shells, type, true);
+                ShellDetector detector = new ShellDetector(template,  options.getShellNumber(), options.getErosionMethod(), true);
                 for (IPoint p : list) {
                     int shell = detector.findShell(p);
                     if(shell>=0) // -1 for point not found
@@ -318,12 +318,9 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             IPoint p = IPoint.makeNew(rx, ry);
 
-            if (template.containsPoint(p)) {
+            if (template.containsPoint(p))
                 return p;
-            } else {
-                return createRandomPoint(template);
-            }
-
+			return createRandomPoint(template);
         }
     }
     

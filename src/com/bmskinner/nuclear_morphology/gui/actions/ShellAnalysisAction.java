@@ -38,18 +38,18 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Prepare and run a shell analysis on the provided dataset.
@@ -79,12 +79,12 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
     	ShellAnalysisSetupDialog sd = new ShellAnalysisSetupDialog(dataset);
     	if(sd.isReadyToRun()) {
     		
-    		int shellCount = sd.getShellCount();
-    		if(! datasetParametersOk(shellCount)){
+    		IShellOptions op = sd.getOptions();
+    		if(! datasetParametersOk(op.getShellNumber())){
             	this.cancel();
             	return;
             }
-    		    		
+    		    		    		
     		IAnalysisMethod m = sd.getMethod();
     		worker = new DefaultAnalysisWorker(m);
     		worker.addPropertyChangeListener(this);
@@ -140,8 +140,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
         private static final String DIALOG_TITLE = "Shell analysis options";
         
-        private int nShells = ShellDetector.DEFAULT_SHELL_COUNT;
-        private ShrinkType type = ShrinkType.AREA;
+        IShellOptions o = new DefaultShellOptions();
 
 
         protected JPanel headingPanel;
@@ -152,10 +151,10 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             this(dataset, DIALOG_TITLE);
         }
         
-        public int getShellCount() {
-        	return nShells;
+        public IShellOptions getOptions() {
+        	return o;
         }
-
+        
         /**
          * Constructor that does not make panel visible
          * 
@@ -177,7 +176,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
         @Override
         public IAnalysisMethod getMethod() {
-        	return new ShellAnalysisMethod(dataset, nShells, type);
+        	return new ShellAnalysisMethod(dataset, o);
         }
 
         @Override
@@ -203,16 +202,16 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             List<Component> fields = new ArrayList<>();
             
             JComboBox<ShrinkType> typeBox = new JComboBox<>(ShrinkType.values());
-            typeBox.setSelectedItem(ShrinkType.AREA);
-            typeBox.addActionListener(e -> type = (ShrinkType) typeBox.getSelectedItem());
+            typeBox.setSelectedItem(IShellOptions.DEFAULT_EROSION_METHOD);
+            typeBox.addActionListener(e -> o.setErosionMethod( (ShrinkType) typeBox.getSelectedItem()));
             
             labels.add(new JLabel("Erosion method"));
             fields.add(typeBox);
             
             
-            SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
+            SpinnerNumberModel sModel = new SpinnerNumberModel(IShellOptions.DEFAULT_SHELL_COUNT, 2, 10, 1);
             JSpinner spinner = new JSpinner(sModel);
-            spinner.addChangeListener(e-> nShells = (int) sModel.getValue());
+            spinner.addChangeListener(e-> o.setShellNumber( (int)sModel.getValue()));
             
             labels.add(new JLabel("Number of shells"));
             fields.add(spinner);

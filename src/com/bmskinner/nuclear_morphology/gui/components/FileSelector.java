@@ -99,6 +99,40 @@ public class FileSelector {
     }
     
     /**
+     * Choose the folder to export dataset stats.
+     * @param datasets the datasets to be exported
+     * @return the file to export to
+     */
+    public static @Nullable File chooseOptionsExportFile(@NonNull IAnalysisDataset dataset) {
+
+
+    	File dir = dataset.getSavePath().getParentFile();
+    	String defaultName = dataset.getName()+Io.XML_FILE_EXTENSION;
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
+        
+        File file = chooseSaveFile(dir, filter, defaultName);
+        if(file==null)
+            return null;
+
+        // Add extension if needed
+        if (!file.getAbsolutePath().endsWith(Io.XML_FILE_EXTENSION))
+            file = new File(file.getAbsolutePath() + Io.XML_FILE_EXTENSION);
+        return file;
+    }
+    
+    /**
+     * Choose the folder to export dataset stats.
+     * @param datasets the datasets to be exported
+     * @return the file to export to
+     */
+    public static @Nullable File chooseOptionsImportFile() {
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
+        return chooseFile(null, filter);
+    }
+    
+    /**
      * Get the remapping file to be loaded.
      * 
      * @return the file

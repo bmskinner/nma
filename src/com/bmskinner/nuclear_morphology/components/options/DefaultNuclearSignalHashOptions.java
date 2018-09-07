@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * A hash based replacement for the nuclear signal detection options
  * 
@@ -32,13 +34,13 @@ public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOption
 
     private static final long serialVersionUID = 1L;
 
+    @Deprecated
     private SignalDetectionMode mode;
 
-    public DefaultNuclearSignalHashOptions(File folder) {
+    public DefaultNuclearSignalHashOptions(@NonNull File folder) {
         super(folder);
         setDouble(MAX_FRACTION, DEFAULT_MAX_SIGNAL_FRACTION);
-        mode = DEFAULT_METHOD;
-
+        setString(DETECTION_MODE_KEY, DEFAULT_METHOD.name());
         setMinSize(DEFAULT_MIN_SIGNAL_SIZE);
         setMaxSize(DEFAULT_MAX_SIGNAL_SIZE);
         setMinCirc(INuclearSignalOptions.DEFAULT_MIN_CIRC);
@@ -56,19 +58,18 @@ public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOption
      * 
      * @param template
      */
-    public DefaultNuclearSignalHashOptions(INuclearSignalOptions template) {
+    public DefaultNuclearSignalHashOptions(@NonNull INuclearSignalOptions template) {
         super(template);
-        this.setMaxFraction(template.getMaxFraction());
-        this.mode = template.getDetectionMode();
-
     }
 
-    public DefaultNuclearSignalHashOptions setSize(double min, double max) {
+    @Override
+	public DefaultNuclearSignalHashOptions setSize(double min, double max) {
         super.setSize(min, max);
         return this;
     }
 
-    public DefaultNuclearSignalHashOptions setCircularity(double min, double max) {
+    @Override
+	public DefaultNuclearSignalHashOptions setCircularity(double min, double max) {
         super.setCircularity(min, max);
         return this;
     }
@@ -80,7 +81,7 @@ public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOption
 
     @Override
     public SignalDetectionMode getDetectionMode() {
-        return mode;
+        return stringMap.containsKey(DETECTION_MODE_KEY) ? SignalDetectionMode.valueOf(getString(DETECTION_MODE_KEY)) : mode;
     }
 
     @Override
@@ -91,9 +92,23 @@ public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOption
 
     @Override
     public void setDetectionMode(SignalDetectionMode detectionMode) {
-        mode = detectionMode;
-
+        setString(DETECTION_MODE_KEY, detectionMode.name());
     }
+    
+	@Override
+	public void setShellOptions(@NonNull IShellOptions o) {
+		subMap.put(IDetectionSubOptions.SHELL_OPTIONS, o);
+	}
+
+	@Override
+	public boolean hasShellOptions() {
+		return subMap.containsKey(IDetectionSubOptions.SHELL_OPTIONS);
+	}
+
+	@Override
+	public IShellOptions getShellOptions() {
+		return (IShellOptions) subMap.get(IDetectionSubOptions.SHELL_OPTIONS);
+	}
 
     @Override
     public IDetectionOptions duplicate() {
@@ -107,7 +122,8 @@ public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOption
 
         long temp = Double.doubleToLongBits(this.getMaxFraction());
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + mode.hashCode();
+        if(mode!=null)
+        	result = prime * result + mode.hashCode();
         return result;
     }
 
@@ -116,20 +132,14 @@ public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOption
 
         if (!super.equals(o))
             return false;
-
         if (!(o instanceof INuclearSignalOptions))
             return false;
-
         INuclearSignalOptions other = (INuclearSignalOptions) o;
-
         if (Double.doubleToLongBits(getMaxFraction()) != Double.doubleToLongBits(other.getMaxFraction()))
             return false;
-
-        if (mode != other.getDetectionMode())
+        if (!getDetectionMode().equals(other.getDetectionMode()))
             return false;
-
         return true;
 
     }
-
 }

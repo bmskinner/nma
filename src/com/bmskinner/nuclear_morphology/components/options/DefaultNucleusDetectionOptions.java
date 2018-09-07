@@ -32,8 +32,10 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDe
  * 
  * @author bms41
  * @since 1.13.3
+ * @deprecated since 1.14.0
  *
  */
+@Deprecated
 public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 
     public static final int     DEFAULT_MIN_NUCLEUS_SIZE  = 2000;
@@ -84,14 +86,13 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
     public boolean isValid(CellularComponent c) {
         if (c instanceof Nucleus) {
             return super.isValid(c);
-        } else {
-            return false;
         }
+		return false;
     }
 
     @Override
     public IDetectionOptions duplicate() {
-        return new DefaultNucleusDetectionOptions(this);
+        return new DefaultNucleusHashDetectionOptions(this);
     }
 
 //    @Override
@@ -239,6 +240,29 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 	public Set<String> getSubOptionKeys() {
 		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
+	}
+
+	@Override
+	public String getString(String s) {
+		 warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void setString(String k, String v) {
+		 warn("Unimplemented method in " + this.getClass().getName());
+	}
+
+	@Override
+	public List<String> getStringKeys() {
+		 warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void set(HashOptions o) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

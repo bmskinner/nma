@@ -18,7 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.options;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 
 /**
@@ -90,6 +89,7 @@ public class PreprocessingOptions extends AbstractHashOptions implements IPrepro
         setInt(MAX_BRI, DEFAULT_MAX_BRI);
     }
     
+	@Override
 	public PreprocessingOptions duplicate() {
 		PreprocessingOptions result = new PreprocessingOptions();
 		for(String key : getBooleanKeys()) {
@@ -107,21 +107,25 @@ public class PreprocessingOptions extends AbstractHashOptions implements IPrepro
 		return result;
 	}
 
-    public void setUseColourThreshold(boolean b) {
+    @Override
+	public void setUseColourThreshold(boolean b) {
         setBoolean(USE_COLOUR_THRESHOLD, b);
     }
 
-    public void setHueThreshold(int min, int max) {
+    @Override
+	public void setHueThreshold(int min, int max) {
         setInt(MIN_HUE, min);
         setInt(MAX_HUE, max);
     }
 
-    public void setSaturationThreshold(int min, int max) {
+    @Override
+	public void setSaturationThreshold(int min, int max) {
         setInt(MIN_SAT, min);
         setInt(MAX_SAT, max);
     }
 
-    public void setBrightnessThreshold(int min, int max) {
+    @Override
+	public void setBrightnessThreshold(int min, int max) {
         setInt(MIN_BRI, min);
         setInt(MAX_BRI, max);
     }

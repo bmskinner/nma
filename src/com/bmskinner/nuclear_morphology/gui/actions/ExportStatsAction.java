@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;

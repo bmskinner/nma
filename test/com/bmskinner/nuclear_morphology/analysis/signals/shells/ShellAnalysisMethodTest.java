@@ -19,21 +19,18 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class ShellAnalysisMethodTest {
     
     private ShellAnalysisMethod m;
     private IAnalysisDataset d;
-    private static final int DEFAULT_SHELL_COUNT = 5;
     
     @Before
     public void setUp() throws Exception{
@@ -42,7 +39,8 @@ public class ShellAnalysisMethodTest {
 
     @Test
     public void testAreaMethodOnRodentDatasetWithNoSignals() throws Exception {
-        m = new ShellAnalysisMethod(d, DEFAULT_SHELL_COUNT, ShrinkType.AREA);
+    	IShellOptions o = new DefaultShellOptions();
+        m = new ShellAnalysisMethod(d, o);
         m.call();
     }
 

@@ -27,13 +27,15 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * The abstract implementation of IMutableDetectionOptions, which is extended
+ * The abstract implementation of IDetectionOptions, which is extended
  * for all component types
  * 
  * @author bms41
  * @since 1.13.3
+ * @deprecated since 1.14.0
  *
  */
+@Deprecated
 public abstract class AbstractDetectionOptions implements IDetectionOptions {
 
     private static final long serialVersionUID = 1L;

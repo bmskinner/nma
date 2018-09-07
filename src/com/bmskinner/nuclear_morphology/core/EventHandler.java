@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportOptionsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportShellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportSignalsAction;
@@ -253,6 +254,9 @@ public class EventHandler implements Loggable, EventListener {
             
             if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
                 return new ExportShellsAction(selectedDatasets, acceptor, EventHandler.this);
+            
+            if (event.type().equals(SignalChangeEvent.EXPORT_OPTIONS))
+                return new ExportOptionsAction(selectedDataset, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.LOBE_DETECTION))
                 return new LobeDetectionAction(selectedDataset, acceptor, EventHandler.this);

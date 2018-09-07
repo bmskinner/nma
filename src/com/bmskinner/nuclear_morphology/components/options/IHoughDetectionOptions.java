@@ -30,45 +30,11 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDe
  */
 public interface IHoughDetectionOptions extends IDetectionSubOptions {
 
-    /**
-     * Adds the mutable settings to the options
-     * 
-     * @author ben
-     *
-     */
-    public interface IMutableHoughDetectionOptions extends IHoughDetectionOptions {
-
-        IHoughDetectionOptions lock();
-
-        void setMinRadius(int d);
-
-        void setMaxRadius(int d);
-
-        /**
-         * Set the maximum number of circles to return. This will have no effect
-         * if the hough threshold is greater than -1.
-         * 
-         * @param i
-         */
-        void setNumberOfCircles(int i);
-
-        /**
-         * Set the Hough space threshold for circle detection. Alternative to
-         * setting the max number of circles.
-         * 
-         * @param i
-         *            the threshold from 0-255. Set to -1 to disable and use max
-         *            circles
-         */
-        void setHoughThreshold(int i);
-    }
-
     public static final String MIN_RADIUS      = "Min radius";
     public static final String MAX_RADIUS      = "Max radius";
     public static final String NUM_CIRCLES     = "Number of circles";
     public static final String HOUGH_THRESHOLD = "Hough threshold";
 
-    IMutableHoughDetectionOptions unlock();
 
     /**
      * Get the minimum radius circle detected
@@ -98,5 +64,27 @@ public interface IHoughDetectionOptions extends IDetectionSubOptions {
      * @return
      */
     int getHoughThreshold();
+    
+    void setMinRadius(int d);
+
+    void setMaxRadius(int d);
+
+    /**
+     * Set the maximum number of circles to return. This will have no effect
+     * if the hough threshold is greater than -1.
+     * 
+     * @param i
+     */
+    void setNumberOfCircles(int i);
+
+    /**
+     * Set the Hough space threshold for circle detection. Alternative to
+     * setting the max number of circles.
+     * 
+     * @param i
+     *            the threshold from 0-255. Set to -1 to disable and use max
+     *            circles
+     */
+    void setHoughThreshold(int i);
 
 }

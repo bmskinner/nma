@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**

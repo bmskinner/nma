@@ -53,6 +53,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     private PopupMenuItem exportSignalsItem;
     private PopupMenuItem exportShellsItem;
     private PopupMenuItem saveCellsMenuItem;
+    private PopupMenuItem exportOptionsMenuItem;
     
     private PopupMenuItem saveMenuItem;
     private PopupMenuItem relocateMenuItem;
@@ -348,11 +349,13 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         exportSignalsItem   = fact.makeBothMenuItem(Labels.Populations.EXPORT_SIGNALS, SignalChangeEvent.EXPORT_SIGNALS);
         exportShellsItem    = fact.makeBothMenuItem(Labels.Populations.EXPORT_SHELLS, SignalChangeEvent.EXPORT_SHELLS);
         saveCellsMenuItem   = fact.makeBothMenuItem(Labels.Populations.EXPORT_CELL_LOCS, SignalChangeEvent.EXPORT_CELL_LOCS);
+        exportOptionsMenuItem = fact.makeSingleMenuItem(Labels.Populations.EXPORT_OPTIONS, SignalChangeEvent.EXPORT_OPTIONS);
 
         exportSubMenu.add(exportStatsMenuItem);
         exportSubMenu.add(exportSignalsItem);
         exportSubMenu.add(exportShellsItem);
         exportSubMenu.add(saveCellsMenuItem);
+        exportSubMenu.add(exportOptionsMenuItem);
         
         addNuclearSignalMenuItem = fact.makeSingleMenuItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, SignalChangeEvent.ADD_NUCLEAR_SIGNAL);
         addNuclearSignalMenuItem.setToolTipText(Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP);

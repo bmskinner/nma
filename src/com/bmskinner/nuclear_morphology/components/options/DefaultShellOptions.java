@@ -1,0 +1,64 @@
+package com.bmskinner.nuclear_morphology.components.options;
+
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+
+/**
+ * The default implementation of the shell options
+ * @author ben
+ * @since 1.14.0
+ *
+ */
+public class DefaultShellOptions extends AbstractHashOptions implements IShellOptions {
+	
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Create with default options
+	 */
+	public DefaultShellOptions() {
+		intMap.put(SHELL_COUNT_KEY, DEFAULT_SHELL_COUNT);
+		stringMap.put(EROSION_METHOD_KEY, DEFAULT_EROSION_METHOD.name());
+	}
+	
+	/**
+	 * Create from an existing set of options
+	 * @param s the options to copy
+	 */
+	public DefaultShellOptions(@NonNull IShellOptions s) {
+		setShellNumber(s.getShellNumber());
+		setErosionMethod(s.getErosionMethod());
+	}
+
+	@Override
+	public int getShellNumber() {
+		if(intMap.containsKey(SHELL_COUNT_KEY))
+			return intMap.get(SHELL_COUNT_KEY);
+		return -1;
+	}
+
+	@Override
+	public void setShellNumber(int i) {
+		intMap.put(SHELL_COUNT_KEY, i);
+	}
+
+	@Override
+	public ShrinkType getErosionMethod() {
+		if(stringMap.containsKey(EROSION_METHOD_KEY))
+			return(ShrinkType.valueOf(stringMap.get(EROSION_METHOD_KEY)));
+		return null;
+	}
+
+	@Override
+	public void setErosionMethod(@NonNull ShrinkType s) {
+		stringMap.put(EROSION_METHOD_KEY, s.name());
+	}
+
+	@Override
+	public IDetectionSubOptions duplicate() {
+		return new DefaultShellOptions(this);
+	}
+
+}

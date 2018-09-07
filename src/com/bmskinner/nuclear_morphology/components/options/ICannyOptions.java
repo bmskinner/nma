@@ -76,7 +76,8 @@ public interface ICannyOptions extends IDetectionSubOptions, Serializable, Logga
      * 
      * @return
      */
-    ICannyOptions duplicate();
+    @Override
+	ICannyOptions duplicate();
 
     /**
      * Should edge detection be run?

@@ -92,6 +92,10 @@ public interface HashOptions extends Serializable {
      * @param f
      */
     void setFloat(String s, float f);
+    
+    String getString(String s);
+    
+    void setString(String k, String v);
 
     /**
      * Get the keys to all the boolean values in this options.
@@ -122,6 +126,13 @@ public interface HashOptions extends Serializable {
     List<String> getFloatKeys();
     
     /**
+     * Get the keys to all the straing values in this options.
+     * 
+     * @return
+     */
+    List<String> getStringKeys();
+    
+    /**
      * Get the keys to all the values in this options.
      * 
      * @return
@@ -135,10 +146,17 @@ public interface HashOptions extends Serializable {
     Map<String, Object> getEntries();
 
      /**
-     * Get the object stored with the given key as a string.
+     * Get the object stored with the given key
      * @param key
      * @return
      */
      Object getValue(String key);
+     
+     /**
+      * Set to the values in the given options. Shared keys will be updated,
+      * keys not present will be added. Keys not shared will be unaffected.
+     * @param o
+     */
+    void set(HashOptions o);
 
 }

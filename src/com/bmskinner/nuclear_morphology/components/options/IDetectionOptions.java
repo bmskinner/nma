@@ -23,6 +23,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -73,16 +75,13 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * @since 1.13.4
      *
      */
-    public interface IDetectionSubOptions extends Serializable, Loggable {
-        public static final String CANNY_OPTIONS      = "Canny";
-        public static final String HOUGH_OPTIONS      = "Hough";
-        public static final String BACKGROUND_OPTIONS = "Background";
+    public interface IDetectionSubOptions extends HashOptions, Serializable, Loggable {
+        static final String CANNY_OPTIONS      = "Canny";
+        static final String HOUGH_OPTIONS      = "Hough";
+        static final String BACKGROUND_OPTIONS = "Background";
+        static final String SHELL_OPTIONS      = "Shell";
         
         IDetectionSubOptions duplicate();
-
-        List<String> getKeys();
-
-        Object getValue(String key);
 
         /**
          * Interface for image preprocessing, such as colour thresholding and
@@ -118,13 +117,6 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
         }
 
     }
-
-    /**
-     * Unlock the options to allow modification
-     * 
-     * @return
-     */
-//    IMutableDetectionOptions unlock();
 
     /**
      * Create a copy of these options
@@ -259,7 +251,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * @return true if the component would be detected with these options, false
      *         otherwise
      */
-    boolean isValid(CellularComponent c);
+    boolean isValid(@NonNull CellularComponent c);
 
     List<String> getKeys();
     
@@ -324,7 +316,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * 
      * @param canny
      */
-    void setCannyOptions(ICannyOptions canny);
+    void setCannyOptions(@NonNull ICannyOptions canny);
 
     void setNormaliseContrast(boolean b);
 
@@ -333,14 +325,14 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * 
      * @param options
      */
-    void set(IDetectionOptions options);
+    void set(@NonNull IDetectionOptions options);
 
     /**
      * Set the hough options
      * 
      * @param hough
      */
-    void setHoughOptions(IHoughDetectionOptions hough);
+    void setHoughOptions(@NonNull IHoughDetectionOptions hough);
 
     /**
      * Set arbitrary sub options
@@ -349,7 +341,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      *            the options key
      * @param sub
      */
-    void setSubOptions(String s, IDetectionSubOptions sub);
+    void setSubOptions(String s, @NonNull IDetectionSubOptions sub);
 
     /**
      * Set if the image is RGB or greyscale

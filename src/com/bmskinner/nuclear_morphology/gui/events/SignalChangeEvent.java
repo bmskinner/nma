@@ -39,6 +39,8 @@ public class SignalChangeEvent extends EventObject {
     public static final String EXPORT_SIGNALS              = "ExportSignalsAction";
     public static final String EXPORT_SHELLS               = "ExportShellsAction";
     public static final String EXPORT_CELL_LOCS            = "SaveCellLocations";
+    public static final String EXPORT_OPTIONS              = "ExportOptionsAction";
+    
     public static final String CHANGE_SCALE                = "ChangeScaleAction";
     public static final String RELOCATE_CELLS              = "RelocateCellsAction";
     

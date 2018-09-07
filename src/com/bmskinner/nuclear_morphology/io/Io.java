@@ -64,6 +64,9 @@ public interface Io {
      */
     static final String WRK_FILE_EXTENSION_NODOT  = "wrk";
     static final String WRK_FILE_EXTENSION        = "."+WRK_FILE_EXTENSION_NODOT;
+    
+    static final String XML_FILE_EXTENSION_NODOT  = "xml";
+    static final String XML_FILE_EXTENSION        = "."+XML_FILE_EXTENSION_NODOT;
 
     static final String INVALID_FILE_ERROR       = "File is not valid for importing";
     static final String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";

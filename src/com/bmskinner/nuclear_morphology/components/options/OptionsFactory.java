@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
 /**
@@ -198,8 +197,8 @@ public class OptionsFactory {
      * {@link IClusteringOptions.DEFAULT_CLUSTER_METHOD}
      * @return
      */
-    public static IMutableClusteringOptions makeClusteringOptions() {
-        return new ClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
+    public static IClusteringOptions makeClusteringOptions() {
+        return new DefaultClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
     }
 
     /**
@@ -207,8 +206,8 @@ public class OptionsFactory {
      * @param template the tamplate options
      * @return
      */
-    public static IMutableClusteringOptions makeClusteringOptions(IClusteringOptions template) {
-        return new ClusteringOptions(template);
+    public static IClusteringOptions makeClusteringOptions(IClusteringOptions template) {
+        return new DefaultClusteringOptions(template);
     }
 
     /**

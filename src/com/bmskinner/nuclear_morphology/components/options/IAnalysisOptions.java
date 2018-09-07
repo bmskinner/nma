@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -90,6 +92,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * 
      * @return the refold option: true to refold, false to not refold
      */
+    @Deprecated
     boolean refoldNucleus();
 
     Set<UUID> getNuclearSignalGroups();
@@ -102,7 +105,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      *            the name to check
      * @return nuclear detection options
      */
-    INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup);
+    INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup);
 
     /**
      * Check if the given type name is already present
@@ -119,6 +122,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * 
      * @return
      */
+    @Deprecated
     boolean isKeepFailedCollections();
     
     /**
@@ -148,6 +152,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * 
      * @param refoldNucleus
      */
+    @Deprecated
     void setRefoldNucleus(boolean refoldNucleus);
 
     /**
@@ -156,6 +161,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * 
      * @param keepFailedCollections
      */
+    @Deprecated
     void setKeepFailedCollections(boolean keepFailedCollections);
 
 }

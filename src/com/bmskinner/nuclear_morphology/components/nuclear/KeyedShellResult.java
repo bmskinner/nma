@@ -114,13 +114,13 @@ public class KeyedShellResult implements IShellResult {
      * @param signal the signal
      * @return the pixel counts in that object per shell
      */
-    public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
+    @Override
+	public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
     	Key k = signal==null 
         		? new Key(cell.getId(), nucleus.getID()) 
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
     	return map.get(type).getPixelIntensities(k);
-    }
-       
+    }   
     
     @Override
     public double[] getProportions(@NonNull Aggregation agg, @NonNull Normalisation norm) {

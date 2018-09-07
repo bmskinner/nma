@@ -18,10 +18,14 @@
 
 package com.bmskinner.nuclear_morphology.components.options;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.gui.Labels;
 
 /**
- * The options that must be available for detecting nuclear signals
+ * The options that must be available for detecting nuclear signals.
+ * Rather than specifying maximum areas, this enables setting a maximum proportion 
+ * of the nucleus continaing the signal to be covered by the signal.
  * 
  * @author bms41
  * @since 1.13.3
@@ -29,7 +33,8 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
  */
 public interface INuclearSignalOptions extends IDetectionOptions {
 
-    static final String MAX_FRACTION = "Max fraction";
+    static final String MAX_FRACTION       = "Max fraction";
+    static final String DETECTION_MODE_KEY = "DETECTION_MODE";
 
     static final int                 DEFAULT_SIGNAL_THRESHOLD    = 70;
     static final int                 DEFAULT_MIN_SIGNAL_SIZE     = 5;
@@ -48,9 +53,9 @@ public interface INuclearSignalOptions extends IDetectionOptions {
      *
      */
     public enum SignalDetectionMode {
-        FORWARD("Forward", Labels.Signals.FORWARD_THRESHOLDING_RADIO_LABEL), REVERSE("Reverse",
-                Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL), ADAPTIVE("Adaptive",
-                        Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
+        FORWARD("Forward", Labels.Signals.FORWARD_THRESHOLDING_RADIO_LABEL), 
+        REVERSE("Reverse", Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL), 
+        ADAPTIVE("Adaptive", Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
 
         private String name;
         private String desc;
@@ -60,7 +65,8 @@ public interface INuclearSignalOptions extends IDetectionOptions {
             this.desc = desc;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return name;
         }
 
@@ -99,5 +105,11 @@ public interface INuclearSignalOptions extends IDetectionOptions {
      * @param detectionMode
      */
     void setDetectionMode(SignalDetectionMode detectionMode);
+    
+    void setShellOptions(@NonNull IShellOptions o);
+    
+    boolean hasShellOptions();
+    
+    IShellOptions getShellOptions();
 
 }

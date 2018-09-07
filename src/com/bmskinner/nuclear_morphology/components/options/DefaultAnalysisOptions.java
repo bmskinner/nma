@@ -19,10 +19,13 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
@@ -37,7 +40,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, IDetectionOptions> detectionOptions = new HashMap<String, IDetectionOptions>(0);
+    private Map<String, IDetectionOptions> detectionOptions = new HashMap<String, IDetectionOptions>();
 
     private double profileWindowProportion;
 
@@ -60,17 +63,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     /**
      * Construct from a template options
      * 
-     * @param template
-     *            the options to use as a template
+     * @param template the options to use as a template
      */
-    public DefaultAnalysisOptions(IAnalysisOptions template) {
-
-        if (template == null) {
-            throw new IllegalArgumentException("Template options is null");
-        }
+    public DefaultAnalysisOptions(@NonNull IAnalysisOptions template) {
 
         for (String key : template.getDetectionOptionTypes()) {
-
             Optional<IDetectionOptions> op  = template.getDetectionOptions(key);
             if(op.isPresent())
 	            setDetectionOptions(key, op.get().duplicate());
@@ -87,9 +84,8 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     public Optional<IDetectionOptions> getDetectionOptions(String key){
         if (detectionOptions.containsKey(key)) {
             return Optional.of(detectionOptions.get(key));
-        } else {
-        	return Optional.empty();
         }
+		return Optional.empty();
 
     }
 
@@ -120,8 +116,18 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     @Override
     public Set<UUID> getNuclearSignalGroups() {
-        // TODO Auto-generated method stub
-        return null;
+    	Set<UUID> result = new HashSet<>();
+    	for(String s : detectionOptions.keySet()) {
+    		if(s.equals(NUCLEUS) || s.equals(CYTOPLASM) || s.equalsIgnoreCase(SPERM_TAIL))
+    			continue;
+    		try {
+    			UUID id = UUID.fromString(s);
+    			result.add(id);
+    		} catch(IllegalArgumentException e) {
+    			// not a UUID
+    		}
+    	}
+        return result;
     }
 
     @Override
@@ -166,7 +172,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     }
 
     @Override
-    public INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup) {
+    public INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup) {
 
     	Optional<IDetectionOptions> op = getDetectionOptions(signalGroup.toString());
     	
@@ -223,6 +229,10 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
             	System.out.println("Inequality in suboptions:");
             	System.out.println(subOptions.getClass().getName());
             	System.out.println(otherSub.getClass().getName());
+            	System.out.println("This "+key);
+            	System.out.println(subOptions.toString());
+            	System.out.println("Other "+key);
+            	System.out.println(otherSub.toString());
             	return false;
             }
         }

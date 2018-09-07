@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -54,17 +55,15 @@ public class SignalImageProber extends IntegratedImageProber {
     private static final String NEW_NAME_LBL         = "Enter a signal group name";
 
     private final INuclearSignalOptions options;
-    final IAnalysisDataset                     dataset;
-    private UUID                               id;
+    private final IAnalysisDataset dataset;
+    private UUID id;
 
     /**
      * Create with a dataset (from which nuclei will be drawn) and a folder of
      * images to be analysed
      * 
-     * @param dataset
-     *            the analysis dataset
-     * @param folder
-     *            the folder of images
+     * @param dataset the analysis dataset
+     * @param folder the folder of images
      */
     public SignalImageProber(@NonNull final IAnalysisDataset dataset, @NonNull final File folder) {
         this.dataset = dataset;
@@ -130,24 +129,23 @@ public class SignalImageProber extends IntegratedImageProber {
 
         String name = getGroupName();
 
-        UUID signalGroup = java.util.UUID.randomUUID();
-        id = signalGroup;
+        id = java.util.UUID.randomUUID();
 
         // get the group name
 
-        SignalGroup group = new SignalGroup(name);
+        ISignalGroup group = new SignalGroup(name);
 
         group.setChannel(options.getChannel());
         group.setFolder(options.getFolder());
 
-        dataset.getCollection().addSignalGroup(signalGroup, group);
+        dataset.getCollection().addSignalGroup(id, group);
 
         // Set the default colour for the signal group
         int totalGroups = dataset.getCollection().getSignalGroups().size();
-        Color colour = (Color) ColourSelecter.getColor(totalGroups);
+        Color colour = ColourSelecter.getColor(totalGroups);
         group.setGroupColour(colour);
 
-        dataset.getAnalysisOptions().get().setDetectionOptions(signalGroup.toString(), options);
+        dataset.getAnalysisOptions().get().setDetectionOptions(id.toString(), options);
     }
 
     /**
@@ -156,7 +154,7 @@ public class SignalImageProber extends IntegratedImageProber {
      * @return a valid name
      */
     private String getGroupName() {
-    	return (String) JOptionPane.showInputDialog(NEW_NAME_LBL);
+    	return JOptionPane.showInputDialog(NEW_NAME_LBL);
     }
 
 }

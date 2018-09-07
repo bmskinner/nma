@@ -106,6 +106,7 @@ public class Labels {
         public static final String EXPORT_SIGNALS         = "Nuclear signals";
         public static final String EXPORT_SHELLS          = "Signal shell data";
         public static final String EXPORT_CELL_LOCS       = "Cell locations";
+        public static final String EXPORT_OPTIONS         = "Analysis options";
     }
     
     /**

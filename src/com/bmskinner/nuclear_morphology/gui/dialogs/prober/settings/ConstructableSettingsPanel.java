@@ -368,33 +368,33 @@ public class ConstructableSettingsPanel extends SettingsPanel {
         return this;
     }
 
-    /**
-     * Add a panel for misc settings. E.g. keep filtered nuclei
-     * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @return
-     */
-    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey) {
-        return addMiscNucleusSettingsPanel(optionsKey, MISC_LBL);
-    }
-
-    /**
-     * Add a panel for misc settings. E.g. keep filtered nuclei
-     * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @param label
-     *            the label to give the panel
-     * @return
-     */
-    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey, String label) {
-        SettingsPanel panel = new MiscNucleusSettingsPanel(options);
-        panel.setBorder(BorderFactory.createTitledBorder(label));
-        this.addSubPanel(panel);
-        mainPanel.add(panel);
-        return this;
-    }
+//    /**
+//     * Add a panel for misc settings. E.g. keep filtered nuclei
+//     * 
+//     * @param optionsKey
+//     *            the options subtype to select
+//     * @return
+//     */
+//    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey) {
+//        return addMiscNucleusSettingsPanel(optionsKey, MISC_LBL);
+//    }
+//
+//    /**
+//     * Add a panel for misc settings. E.g. keep filtered nuclei
+//     * 
+//     * @param optionsKey
+//     *            the options subtype to select
+//     * @param label
+//     *            the label to give the panel
+//     * @return
+//     */
+//    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey, String label) {
+//        SettingsPanel panel = new MiscNucleusSettingsPanel(options);
+//        panel.setBorder(BorderFactory.createTitledBorder(label));
+//        this.addSubPanel(panel);
+//        mainPanel.add(panel);
+//        return this;
+//    }
 
     /**
      * Add a panel for image channel selection with the default label

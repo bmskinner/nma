@@ -22,6 +22,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * The default implementation of the nuclear signal options interface
  * 
@@ -140,21 +142,21 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
 
     @Override
     public boolean isUseHoughTransform() {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
         return false;
     }
 
 //    @Override
 //    public IDetectionOptions lock() {
-//        // TODO Auto-generated method stub
+//        warn("Unimplemented method in " + this.getClass().getName());
 //        warn("Unimplemented method in " + this.getClass().getName());
 //        return null;
 //    }
 
     @Override
     public void setHoughOptions(IHoughDetectionOptions hough) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
     }
 
@@ -182,28 +184,28 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
 
     @Override
     public List<String> getKeys() {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 
     @Override
     public boolean hasSubOptions(String key) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
         return false;
     }
 
     @Override
     public double getDouble(String s) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
         return 0;
     }
 
     @Override
     public int getInt(String s) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         return 0;
     }
 
@@ -221,26 +223,26 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
 
     @Override
     public void setInt(String s, int i) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
     public void setBoolean(String s, boolean b) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
     public float getFloat(String s) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
         return 0;
     }
 
     @Override
     public void setFloat(String s, float f) {
-        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
         warn("Unimplemented method in " + this.getClass().getName());
 
     }
@@ -273,6 +275,47 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
 	public Set<String> getSubOptionKeys() {
 		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
+	}
+
+	@Override
+	public String getString(String s) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void setString(String k, String v) {
+		warn("Unimplemented method in " + this.getClass().getName());
+	}
+
+	@Override
+	public List<String> getStringKeys() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void setShellOptions(@NonNull IShellOptions o) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		
+	}
+
+	@Override
+	public boolean hasShellOptions() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return false;
+	}
+
+	@Override
+	public IShellOptions getShellOptions() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void set(HashOptions o) {
+		// TODO Auto-generated method stub
+		
 	}
     
 }

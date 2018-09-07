@@ -214,7 +214,8 @@ public class AnalysisOptions implements IAnalysisOptions {
      * 
      * @see analysis.IAnalysisOptions#getAngleWindowProportion()
      */
-    public double getProfileWindowProportion() {
+    @Override
+	public double getProfileWindowProportion() {
         return this.angleWindowProportion;
     }
 
@@ -224,7 +225,8 @@ public class AnalysisOptions implements IAnalysisOptions {
      * @see analysis.IAnalysisOptions#getNucleusType()
      */
 
-    public NucleusType getNucleusType() {
+    @Override
+	public NucleusType getNucleusType() {
         return this.nucleusType;
     }
 
@@ -408,7 +410,8 @@ public class AnalysisOptions implements IAnalysisOptions {
      * 
      * @see analysis.IAnalysisOptions#setRefoldNucleus(boolean)
      */
-    public void setRefoldNucleus(boolean refoldNucleus) {
+    @Override
+	public void setRefoldNucleus(boolean refoldNucleus) {
         this.refoldNucleus = refoldNucleus;
     }
 
@@ -1087,21 +1090,123 @@ public class AnalysisOptions implements IAnalysisOptions {
 
         @Override
         public void set(ICannyOptions options) {
-            // TODO Auto-generated method stub
+            warn("Unimplemented method in " + this.getClass().getName());
 
         }
 
         @Override
         public List<String> getKeys() {
-            // TODO Auto-generated method stub
+            warn("Unimplemented method in " + this.getClass().getName());
             return null;
         }
 
         @Override
         public Object getValue(String key) {
-            // TODO Auto-generated method stub
+            warn("Unimplemented method in " + this.getClass().getName());
             return null;
         }
+
+		@Override
+		public double getDouble(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return 0;
+		}
+
+		@Override
+		public int getInt(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return 0;
+		}
+
+		@Override
+		public boolean getBoolean(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return false;
+		}
+
+		@Override
+		public void setDouble(String s, double d) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public void setInt(String s, int i) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public void setBoolean(String s, boolean b) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public float getFloat(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return 0;
+		}
+
+		@Override
+		public void setFloat(String s, float f) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public List<String> getBooleanKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public List<String> getIntegerKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public List<String> getDoubleKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public List<String> getFloatKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public Map<String, Object> getEntries() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public String getString(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public void setString(String k, String v) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public List<String> getStringKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public void set(HashOptions o) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     @Override

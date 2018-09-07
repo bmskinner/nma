@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -246,17 +247,12 @@ public class ShellDetectorTest {
     @Test
     public void testRealSignalsDetectedInMouseSpermDataset() throws Exception{
         IAnalysisDataset dataset = SampleDatasetReader.openTestMouseSignalsDataset();
-        IAnalysisMethod m = new ShellAnalysisMethod(dataset, 5, ShrinkType.AREA);
+        IAnalysisMethod m = new ShellAnalysisMethod(dataset, new DefaultShellOptions());
         m.call();
         IAnalysisMethod s = new DatasetExportMethod(dataset, dataset.getSavePath());
         s.call();
     }
-    
-//    @Test
-//    public void testValueRangesForRoundNucleusShellDetectionArea() throws Exception {
-//    	new ShellRangeValidator().testValueRangesForRoundNucleusShellDetection(ShrinkType.AREA);
-//    } 
-    
+        
     private class ShellRangeValidator {
         
         public ShellRangeValidator(){

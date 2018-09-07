@@ -30,6 +30,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
 
 /**
  * A copy button that allows nuclear detection options to be copied from an open
@@ -42,12 +44,18 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 @SuppressWarnings("serial")
 public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
-    private static final String COPY_FROM_OPEN_LBL     = "Copy from open dataset";
+    private static final String COPY_FROM_OPEN_LBL     = "Copy dataset";
     private static final String COPY_FROM_OPEN_TOOLTIP = "Copy from existing open dataset";
+    
+    private static final String OPEN_SETTINGS_LBL     = "Open file";
+    private static final String OPEN_SETTINGS_TOOLTIP = "Choose a saved options file";
+
     private static final String CHOOSE_DATASET_MSG_LBL = "Choose source dataset";
     private static final String CHOOSE_DATASET_TTL_LBL = "Source dataset";
 
-    private JButton copyBtn;
+    private JButton copyBtn = new JButton(COPY_FROM_OPEN_LBL);
+    
+    private JButton openBtn = new JButton(OPEN_SETTINGS_LBL);
     
     private IAnalysisOptions parent;
 
@@ -70,9 +78,8 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
     private void createSpinners() {
 
         // Button to copy existing dataset options
-        copyBtn = new JButton(COPY_FROM_OPEN_LBL);
         copyBtn.addActionListener(e -> {
-            IAnalysisDataset[] nameArray = DatasetListManager.getInstance().getAllDatasets()
+            IAnalysisDataset[] nameArray = DatasetListManager.getInstance().getRootDatasets()
                     .toArray(new IAnalysisDataset[0]);
 
             IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null,
@@ -98,8 +105,18 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         });
 
         copyBtn.setEnabled(DatasetListManager.getInstance().hasDatasets());
-
         copyBtn.setToolTipText(COPY_FROM_OPEN_TOOLTIP);
+        
+        openBtn.addActionListener(e ->{
+        	
+        	File f = FileSelector.chooseOptionsImportFile();
+        	if(f==null)
+        		return;
+        	IAnalysisOptions o = new OptionsXMLReader(f).read(); //read
+        	options.set(o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
+        	fireOptionsChangeEvent();
+        });
+        openBtn.setToolTipText(OPEN_SETTINGS_TOOLTIP);
 
     }
 
@@ -112,6 +129,7 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         panel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         panel.add(copyBtn);
+        panel.add(openBtn);
 
         return panel;
     }

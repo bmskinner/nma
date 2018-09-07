@@ -19,7 +19,6 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
 
 /**
  * The default implementation of the IHoughDetectionOptions interface.
@@ -28,7 +27,7 @@ import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOption
  * @since 1.13.4
  *
  */
-public class DefaultHoughOptions extends AbstractHashOptions implements IMutableHoughDetectionOptions {
+public class DefaultHoughOptions extends AbstractHashOptions implements IHoughDetectionOptions {
 
     private static final long serialVersionUID        = 1L;
     public static final int   DEFAULT_MIN_RADIUS      = 5;
@@ -52,10 +51,7 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
      * @param template
      */
     public DefaultHoughOptions(IHoughDetectionOptions template) {
-        this.setMinRadius(template.getMinRadius());
-        this.setMaxRadius(template.getMaxRadius());
-        this.setNumberOfCircles(template.getNumberOfCircles());
-        this.setHoughThreshold(template.getHoughThreshold());
+    	set(template);
     }
     
 	@Override
@@ -68,7 +64,8 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
         return getInt(MIN_RADIUS);
     }
 
-    public void setMinRadius(int i) {
+    @Override
+	public void setMinRadius(int i) {
         setInt(MIN_RADIUS, i);
     }
 
@@ -77,7 +74,8 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
         return getInt(MAX_RADIUS);
     }
 
-    public void setMaxRadius(int i) {
+    @Override
+	public void setMaxRadius(int i) {
         setInt(MAX_RADIUS, i);
     }
 
@@ -86,13 +84,9 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
         return getInt(NUM_CIRCLES);
     }
 
-    public void setNumberOfCircles(int i) {
-        setInt(NUM_CIRCLES, i);
-    }
-
     @Override
-    public IHoughDetectionOptions lock() {
-        return this;
+	public void setNumberOfCircles(int i) {
+        setInt(NUM_CIRCLES, i);
     }
 
     @Override
@@ -108,12 +102,7 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
     }
 
     @Override
-    public IMutableHoughDetectionOptions unlock() {
-        return this;
-    }
-
-    public String toString() {
-
+	public String toString() {
         return "Hough options:" + IDetectionOptions.NEWLINE + super.toString();
     }
 
