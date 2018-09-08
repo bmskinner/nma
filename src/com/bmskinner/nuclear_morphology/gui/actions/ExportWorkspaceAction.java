@@ -56,8 +56,16 @@ public class ExportWorkspaceAction extends VoidResultAction {
     	WorkspaceExporter exp = WorkspaceExporter.createExporter();
     	for(IWorkspace w : workspaces) {
     		log("Saving workspace "+w.getName()+"...");
-    		exp.exportWorkspace(w);
-    		log("Exported workspace file to " + w.getSaveFile().getAbsolutePath());
+            if(w.getSaveFile()==null) {
+                try {
+                	File defaultFolder = w.getFiles().size()>0 ? IAnalysisDataset.commonPathOfFiles(w.getFiles()) : null;
+                    File f = eh.getInputSupplier().requestFileSave(defaultFolder, w.getName(), Io.WRK_FILE_EXTENSION_NODOT);
+                    w.setSaveFile(f);
+                } catch(RequestCancelledException e) {
+                    continue;
+                }
+            }
+            exp.exportWorkspace(w);
     	}
         this.cancel();
     }

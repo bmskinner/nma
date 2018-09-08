@@ -117,7 +117,7 @@ public interface IWorkspace {
      * Get the save file of the workspace
      * @return
      */
-    @NonNull File getSaveFile();
+    @Nullable File getSaveFile();
         
     /**
      * This describes the information available for 
