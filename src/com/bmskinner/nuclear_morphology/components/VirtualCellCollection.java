@@ -684,29 +684,27 @@ public class VirtualCellCollection implements ICellCollection {
 
         ICellCollection subCollection = new DefaultCellCollection(this, name);
 
-        List<ICell> list = getCells().parallelStream().filter(predicate).collect(Collectors.toList());
+        List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
 
         finest("Adding cells to new collection");
-        for (ICell cell : list) {
+        for (ICell cell : list)
             subCollection.addCell(new DefaultCell(cell));
-        }
 
         if (subCollection.size() == 0) {
             warn("No cells in collection");
+        } else {
+        	try {
+
+                // TODO - this fails on converted collections from (at least) 1.13.0
+                // with no profiles in aggregate
+                this.getProfileManager().copyCollectionOffsets(subCollection);
+                this.getSignalManager().copySignalGroups(subCollection);
+
+            } catch (ProfileException e) {
+                warn("Error copying collection offsets");
+                stack("Error in offsetting", e);
+            }
         }
-
-        try {
-
-            // TODO - this fails on converted collections from (at least) 1.13.0
-            // with no profiles in aggregate
-            this.getProfileManager().copyCollectionOffsets(subCollection);
-            this.getSignalManager().copySignalGroups(subCollection);
-
-        } catch (ProfileException e) {
-            warn("Error copying collection offsets");
-            stack("Error in offsetting", e);
-        }
-
         return subCollection;
     }
 

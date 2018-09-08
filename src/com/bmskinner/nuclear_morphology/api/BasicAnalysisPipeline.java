@@ -1,14 +1,13 @@
 package com.bmskinner.nuclear_morphology.api;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
@@ -34,13 +33,13 @@ public class BasicAnalysisPipeline {
 		
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(folder);
 
-    	Date startTime = Calendar.getInstance().getTime();
-        String outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(startTime);
-    	File outFolder = new File(folder+File.separator+outputFolderName);
+    	Instant inst = Instant.ofEpochMilli(op.getAnalysisTime());
+		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
+    	File outFolder = new File(folder, outputFolderName);
     	outFolder.mkdirs();
     	File saveFile = new File(outFolder, folder.getName()+Io.SAVE_FILE_EXTENSION);
     	runNewAnalysis(folder.getAbsolutePath(), op, saveFile);
-		
 	}
 
 	

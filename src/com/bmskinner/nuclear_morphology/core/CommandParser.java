@@ -5,6 +5,7 @@ import java.io.File;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
+import com.bmskinner.nuclear_morphology.api.SavedOptionsAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
@@ -35,6 +36,7 @@ public class CommandParser implements Loggable {
 	    
 	    boolean headless = false;
 	    File folder = null; 
+	    File options = null;
 	    for(String s : arr){
 	    	log("Argument: "+s);
 	    	if(s.startsWith("-folder=")) {
@@ -42,17 +44,28 @@ public class CommandParser implements Loggable {
 	    		String path = s.replace("-folder=", "");
 	    		folder = new File(path); 
 	    	}
+	    	
+	    	if(s.startsWith("-options=")) {
+	    		headless=true;
+	    		String path = s.replace("-options=", "");
+	    		options = new File(path); 
+	    	}
 	        
 	    }
 	    // load the config file
 	    new ConfigFileReader();
-	    
+
 	    if(headless){
-	    	
+
 	    	if(folder!=null) {
 	    		log("Running on folder: "+folder.getAbsolutePath());
 	    		try {
-	    			new BasicAnalysisPipeline(folder);
+	    			if(options!=null) {
+	    				new SavedOptionsAnalysisPipeline(folder, options).call();
+	    			} else {
+	    				new BasicAnalysisPipeline(folder);
+	    			}
+
 	    		} catch (Exception e) {
 	    			error("Error in pipeline", e);
 	    		}

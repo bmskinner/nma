@@ -100,19 +100,17 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 
     /**
      * Get the nuclear signal options associated with the given signal group id.
-     * If not present, the group is created
      * 
-     * @param type
-     *            the name to check
-     * @return nuclear detection options
+     * @param signalGroup the group id
+     * @return nuclear detection options for the group
      */
     INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup);
+    
 
     /**
      * Check if the given type name is already present
      * 
-     * @param type
-     *            the name to check
+     * @param type the name to check
      * @return present or not
      */
     boolean hasSignalDetectionOptions(@NonNull UUID signalGroup);

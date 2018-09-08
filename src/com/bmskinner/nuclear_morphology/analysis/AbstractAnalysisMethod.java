@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Stores the basic methods for an IAnalysisMethod. The logic for an analysis
  * should be written within the run() method. To signal progress through the task
@@ -55,9 +57,17 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     }
     
     @Override
-    public IAnalysisMethod then(IAnalysisMethod nextMethod) throws Exception {
+    public IAnalysisMethod then(@NonNull IAnalysisMethod nextMethod) throws Exception {
     	call();
     	return nextMethod;
+    }
+    
+    @Override
+    public IAnalysisMethod thenIf(boolean b, @NonNull IAnalysisMethod nextMethod) throws Exception {
+    	call();
+    	if(b)	
+    		return nextMethod;
+		return this;
     }
 
     protected void fireProgressEvent() {

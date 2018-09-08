@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
+import com.bmskinner.nuclear_morphology.api.SavedOptionsAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -37,7 +38,7 @@ import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
 public class ImportWorkflowAction  extends VoidResultAction {
 
     private File file;
-    private static final String PROGRESS_BAR_LABEL = "Opening workflow...";
+    private static final String PROGRESS_BAR_LABEL = "Running workflow...";
     private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology workflow";
     
     /**
@@ -71,27 +72,29 @@ public class ImportWorkflowAction  extends VoidResultAction {
     			if(file==null)
     				file = eh.getInputSupplier().requestFile("Choose analysis options", null, Importer.XML_FILE_EXTENSION_NODOT, "Analysis options file");
 
-    			OptionsXMLReader r = new OptionsXMLReader(file);
-    			IAnalysisOptions options = r.readAnalysisOptions();
-
+//    			OptionsXMLReader r = new OptionsXMLReader(file);
+//    			IAnalysisOptions options = r.readAnalysisOptions();
+//
     			File folder = eh.getInputSupplier().requestFolder("Choose image folder");    
+//    			
+//    			Optional<IDetectionOptions> nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//    			if(!nucleusOptions.isPresent()) {
+//    				cancel();
+//    				return;
+//    			}
     			
-    			Optional<IDetectionOptions> nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
-    			if(!nucleusOptions.isPresent()) {
-    				cancel();
-    				return;
-    			}
+    			IAnalysisMethod m = new SavedOptionsAnalysisPipeline(folder, file);
     			
-    			nucleusOptions.get().setFolder(folder);
-    			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
-    			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-    			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
-
-                File analysisFolder = new File(folder, outputFolderName);
-                if (!analysisFolder.exists())
-                    analysisFolder.mkdir();
-                
-    			IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
+//    			nucleusOptions.get().setFolder(folder);
+//    			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
+//    			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+//    			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
+//
+//                File analysisFolder = new File(folder, outputFolderName);
+//                if (!analysisFolder.exists())
+//                    analysisFolder.mkdir();
+//                
+//    			IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
                 
                 worker = new DefaultAnalysisWorker(m);
                 worker.addPropertyChangeListener(this);

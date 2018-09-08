@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
@@ -450,8 +451,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
          * 
          * -- ImageDir/ 
          * | -- DateTimeDir/ 
-         * | | -- dataset.nmd | 
-         * | -- dataset.log
+         * | | -- dataset.nmd
+         * | | -- dataset.log
          * | -- Image1.tiff 
          * | -- ImageN.tiff
          * 
@@ -459,66 +460,71 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
         dataset.setSavePath(inputFile);
 
-        if (!dataset.hasMergeSources()) {
-
-            // This should be /ImageDir/DateTimeDir/
-            File expectedAnalysisDirectory = inputFile.getParentFile();
-
-            // This should be /ImageDir/
-            File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
-
-            try {
-                dataset.updateSourceImageDirectory(expectedImageDirectory);
-            } catch (IllegalArgumentException e) {
-                fine("Cannot update image file paths: " + e.getMessage());
-                fine("Nucleus images will not be displayed");
-            }
-
-            fine("Checking if signal folders need updating");
-            if(!signalFileMap.isPresent()){
-                Map<UUID, File> map = new HashMap<>();
-                for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
-                    map.put(id, FileSelector.getSignalDirectory(dataset, id));
-                }
-                signalFileMap = Optional.of(map);
-            }
-            
-            updateSignalFolders(dataset, signalFileMap.get());
-
-        } else {
-            warn("Dataset is a merge");
+        if (dataset.hasMergeSources()) {
+        	warn("Dataset is a merge");
             warn("Unable to find single source image directory");
+            return;
         }
+
+        // This should be /ImageDir/DateTimeDir/
+        File expectedAnalysisDirectory = inputFile.getParentFile();
+
+        // This should be /ImageDir/
+        File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
+
+        try {
+        	dataset.updateSourceImageDirectory(expectedImageDirectory);
+        } catch (IllegalArgumentException e) {
+        	fine("Cannot update image file paths: " + e.getMessage());
+        	fine("Nucleus images will not be displayed");
+        }
+
+        fine("Checking if signal folders need updating");
+        if(!signalFileMap.isPresent()){
+        	Map<UUID, File> map = new HashMap<>();
+        	for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
+        		Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(id);
+        		if(group.isPresent() && group.get().getFolder().exists()) {
+        			map.put(id, group.get().getFolder());
+        		} else {
+        			map.put(id, FileSelector.getSignalDirectory(dataset, id));
+        		}        		
+        	}
+        	signalFileMap = Optional.of(map);
+        }
+
+        updateSignalFolders(dataset, signalFileMap.get());
     }
 
-    private void updateSignalFolders(IAnalysisDataset dataset, Map<UUID, File> newsignalMap) {
-        if (dataset.getCollection().getSignalManager().hasSignals()) {
-            fine("Updating signal locations");
+    /**
+     * Update the source folders for signal groups in a dataset using the given map
+     * @param dataset
+     * @param newSignalMap
+     */
+    private void updateSignalFolders(IAnalysisDataset dataset, Map<UUID, File> newSignalMap) {
+    	if (!dataset.getCollection().getSignalManager().hasSignals())
+    		return;
 
-            Set<UUID> signalGroups = dataset.getCollection().getSignalGroupIDs();
+    	fine("Updating signal locations");
+    	Set<UUID> signalGroups = dataset.getCollection().getSignalGroupIDs();
 
-            for (UUID signalID : signalGroups) {
+    	for (UUID signalID : signalGroups) {
 
-                // Get the new folder of images
-                File newsignalDir = newsignalMap.get(signalID);
+    		// Get the new folder of images
+    		File newsignalDir = newSignalMap.get(signalID);
+    		if(newsignalDir== null) {
+    			warn("Cannot update signal folder for group");
+    			continue;
+    		}
 
-                if (newsignalDir != null) {
+    		fine("Updating signal group to " + newsignalDir);
+    		// Update the folder
+    		dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
 
-                    fine("Updating signal group to " + newsignalDir);
-
-                    // Update the folder
-                    dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
-
-                    for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-                        child.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
-
-                    }
-                } else {
-                    warn("Cannot update signal folder for group");
-                }
-
-            }
-        }
+    		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+    			child.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
+    		}
+    	}
     }
 
 
@@ -528,15 +534,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         public UnloadableDatasetException() {
             super();
         }
-
         public UnloadableDatasetException(String message) {
             super(message);
         }
-
         public UnloadableDatasetException(String message, Throwable cause) {
             super(message, cause);
         }
-
         public UnloadableDatasetException(Throwable cause) {
             super(cause);
         }

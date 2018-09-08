@@ -45,6 +45,11 @@ public abstract class XMLWriter implements Loggable {
 		}
 	}
 	
+	/**
+	 * Test if the given string could be a UUID 
+	 * @param s
+	 * @return
+	 */
 	public static boolean isUUID(String s) {
 		if(s==null)
 			return false;

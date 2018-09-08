@@ -75,29 +75,8 @@ import ij.Prefs;
  * @since 1.13.8
  *
  */
-public class BasicAnalysisPipelineTest {
-    
-	private static final String IMAGE_FOLDER = "test/samples/images/";
-	
-    private static final String TESTING_RODENT_FOLDER = IMAGE_FOLDER +"Testing";
-    
-    private static final String TESTING_PIG_FOLDER = IMAGE_FOLDER +"Testing_pig";    
-    private static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER +"Testing_round";
-    
-    private static final String OUT_FOLDER = "UnitTest_"+Version.currentVersion();
-    
-    private static Logger logger;
-   
-    
-    @Before
-    public void setUp(){
-    	Prefs.blackBackground = true;
-    	IJ.setBackgroundColor(0, 0, 0);
-    	logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
-    	logger.setLevel(Level.FINER);
-    	logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-    }
-    
+public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
+
     /**
      * Run the current pipeline with default settings on the testing
      * rodent folder and check the created dataset matches expected values.

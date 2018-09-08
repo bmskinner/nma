@@ -180,6 +180,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     	
     	if(op.isPresent())
     		return (INuclearSignalOptions) op.get();
+    	
+    	// If is is the old format
+    	op = getDetectionOptions(signalGroup.toString());
+    	if(op.isPresent())
+    		return (INuclearSignalOptions) op.get();
 
         return null;
     }

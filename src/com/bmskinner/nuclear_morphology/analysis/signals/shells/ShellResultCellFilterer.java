@@ -69,26 +69,33 @@ public class ShellResultCellFilterer {
 		Predicate<ICell> pred = (cell)->{
 			boolean cellPasses = true;
 			for(Nucleus n : cell.getNuclei()) {
-				long[] pixels = s.getPixelValues(CountType.SIGNAL, cell, n, null);
-				long total = LongStream.of(pixels).sum();
-				double[] props = LongStream.of(pixels).mapToDouble(l->l/total).toArray();
-				switch(operation) {
-				case SPECIFIC_SHELL_IS_MORE_THAN: cellPasses &= props[shell]>proportion;
-				case SPECIFIC_SHELL_IS_LESS_THAN: cellPasses &= props[shell]<proportion;
-				case SHELL_PLUS_SHELLS_INTERIOR_TO_MORE_THAN: {
-					double sum = 0;
-					for(int i=shell;i<s.getNumberOfShells(); i++) {
-						sum+=props[i];
+				try {
+					long[] pixels = s.getPixelValues(CountType.SIGNAL, cell, n, null);
+					if(pixels==null)
+						return false;
+					long total = LongStream.of(pixels).sum();
+					double[] props = LongStream.of(pixels).mapToDouble(l->l/total).toArray();
+					switch(operation) {
+					case SPECIFIC_SHELL_IS_MORE_THAN: cellPasses &= props[shell]>proportion;
+					case SPECIFIC_SHELL_IS_LESS_THAN: cellPasses &= props[shell]<proportion;
+					case SHELL_PLUS_SHELLS_INTERIOR_TO_MORE_THAN: {
+						double sum = 0;
+						for(int i=shell;i<s.getNumberOfShells(); i++) {
+							sum+=props[i];
+						}
+						cellPasses &= sum>proportion;
 					}
-					cellPasses &= sum>proportion;
-				}
-				case SHELL_PLUS_SHELLS_PERIPHERAL_TO_MORE_THAN: {
-					double sum = 0;
-					for(int i=0; i<=shell; i++) {
-						sum+=props[i];
+					case SHELL_PLUS_SHELLS_PERIPHERAL_TO_MORE_THAN: {
+						double sum = 0;
+						for(int i=0; i<=shell; i++) {
+							sum+=props[i];
+						}
+						cellPasses &= sum>proportion;
 					}
-					cellPasses &= sum>proportion;
-				}
+					}
+				} catch(Exception e) {
+					System.out.println(e.getMessage());
+					e.printStackTrace();
 				}
 			}
 			return cellPasses;

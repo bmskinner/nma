@@ -20,6 +20,10 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -56,8 +60,7 @@ import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 public class NewAnalysisAction extends VoidResultAction {
 
     private IAnalysisOptions options;
-    private String                  outputFolderName;
-    IDetectionOptions nucleusOptions;
+    private IDetectionOptions nucleusOptions;
 
     private File folder = null;
 
@@ -137,8 +140,9 @@ public class NewAnalysisAction extends VoidResultAction {
 
             log("Directory: " + directory.getName());
 
-            Date startTime = Calendar.getInstance().getTime();
-            this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(startTime);
+            Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
+			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
 
             File analysisFolder = new File(directory, outputFolderName);
             if (!analysisFolder.exists())

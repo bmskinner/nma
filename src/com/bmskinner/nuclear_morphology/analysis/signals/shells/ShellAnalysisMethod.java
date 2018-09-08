@@ -62,8 +62,8 @@ import ij.ImageStack;
  */
 public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
-	public static final int MINIMUM_AREA_PER_SHELL = 100;
-	public static final double MINIMUM_CIRCULARITY = 0.3;
+	public static final int MINIMUM_AREA_PER_SHELL = 50;
+	public static final double MINIMUM_CIRCULARITY = 0.1;
 	
 	private final IShellOptions options;
 

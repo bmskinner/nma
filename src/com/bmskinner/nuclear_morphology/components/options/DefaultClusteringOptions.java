@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -7,6 +8,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.io.XMLWriter;
 
 /**
  * Clustering optins using the hash options interface
@@ -71,8 +73,12 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 
 	@Override
 	public Set<UUID> getSegments() {
-		// TODO Auto-generated method stub
-		return null;
+		Set<UUID> result = new HashSet<>();
+		for(String s : boolMap.keySet()) {
+			if(XMLWriter.isUUID(s))
+				result.add(UUID.fromString(s));
+		}
+		return result;
 	}
 
 	@Override
@@ -99,8 +105,8 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 
 	@Override
 	public ClusteringMethod getType() {
-		if(stringMap.containsKey(PROFILE_TYPE_KEY))
-			return ClusteringMethod.valueOf(stringMap.get(PROFILE_TYPE_KEY));
+		if(stringMap.containsKey(CLUSTER_METHOD_KEY))
+			return ClusteringMethod.valueOf(stringMap.get(CLUSTER_METHOD_KEY));
 		return null;
 	}
 

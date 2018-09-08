@@ -487,52 +487,28 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getCollection()
-     */
     @Override
     public ICellCollection getCollection() {
         return this.cellCollection;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getAnalysisOptions()
-     */
     @Override
     public Optional<IAnalysisOptions> getAnalysisOptions() {
         return Optional.ofNullable(analysisOptions);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasAnalysisOptions()
-     */
     @Override
     public boolean hasAnalysisOptions() {
         return analysisOptions != null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
-     */
+
     @Override
     public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#refreshClusterGroups()
-     */
+
     @Override
     public void refreshClusterGroups() {
 
