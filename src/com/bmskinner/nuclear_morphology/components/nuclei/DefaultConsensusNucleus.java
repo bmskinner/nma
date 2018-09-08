@@ -86,6 +86,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
         } else {
             moveCentreOfMass(IPoint.makeNew(0, 0));
         }
+        this.alignVertically();
     }
 
     public NucleusType getType() {
@@ -156,9 +157,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 
         in.defaultReadObject();
         try {
-        	if (hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL))
-        		alignPointsOnVertical(getBorderTag(Tag.TOP_VERTICAL), getBorderTag(Tag.BOTTOM_VERTICAL));
-
+        	alignVertically();
         	if (type.equals(NucleusType.RODENT_SPERM) && getBorderTag(Tag.REFERENCE_POINT).getX() > 0)
         			flipXAroundPoint(getCentreOfMass());
         } catch (UnavailableBorderTagException e1) {

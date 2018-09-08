@@ -56,19 +56,15 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Create a dataset with the outline of the current object.
      * 
-     * @param segmented
-     *            should the outline be segmented (where segments are available)
+     * @param segmented should the outline be segmented (where segments are available)
      * @return an XYDataset with the outline. Segments will be as separate
      *         series if segmented is true.
      * @throws ChartDatasetCreationException
      */
     public OutlineDataset<CellularComponent> createOutline(boolean segmented) throws ChartDatasetCreationException {
-
-        if (segmented) {
+        if (segmented)
             return createSegmentedOutline();
-        } else {
-            return createNonSegmentedOutline();
-        }
+		return createNonSegmentedOutline();
 
     }
 
@@ -144,9 +140,8 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     private void addSegmentedOutline(ComponentOutlineDataset<CellularComponent> ds)
             throws ChartDatasetCreationException {
 
-        if (!(component instanceof Taggable)) {
+        if (!(component instanceof Taggable))
             throw new ChartDatasetCreationException("Component is not segmentable");
-        }
 
         fine("Creating segmented outline");
 
