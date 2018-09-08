@@ -24,10 +24,17 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
  * @since 1.13.4
  */
 public enum DetectionImageType implements ImageType {
-    ORIGINAL("Input image"), KUWAHARA("Kuwahara filtering"), FLATTENED("Chromocentre flattening"), EDGE_DETECTION(
-            "Edge detection"), MORPHOLOGY_CLOSED("Gap closing"), FISH_IMAGE("FISH image"), DETECTED_OBJECTS(
-                    "Detected objects"), ANNOTAED_OBJECTS("Annotated objects"), CYTOPLASM("Cytoplasm"), NUCLEUS(
-                            "Nucleus"), CYTO_FLATTENED("Cytoplasm flattened"), NUCLEUS_FLATTENED("Nucleus flattened"),;
+    ORIGINAL("Input image"),
+    KUWAHARA("Kuwahara filtering"), 
+    FLATTENED("Chromocentre flattening"), 
+    EDGE_DETECTION( "Edge detection"), 
+    MORPHOLOGY_CLOSED("Gap closing"), 
+    FISH_IMAGE("FISH image"), 
+    DETECTED_OBJECTS( "Detected objects"), 
+    ANNOTAED_OBJECTS("Annotated objects"), 
+    CYTOPLASM("Cytoplasm"), NUCLEUS( "Nucleus"), 
+    CYTO_FLATTENED("Cytoplasm flattened"), 
+    NUCLEUS_FLATTENED("Nucleus flattened");
 
     private String name;
 
@@ -35,11 +42,13 @@ public enum DetectionImageType implements ImageType {
         this.name = name;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return this.name;
     }
 
-    public ImageType[] getValues() {
+    @Override
+	public ImageType[] getValues() {
         return DetectionImageType.values();
     }
 

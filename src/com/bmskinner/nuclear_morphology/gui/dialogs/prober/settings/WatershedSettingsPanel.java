@@ -119,12 +119,4 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
         erosionSpinner.setEnabled(b);
 
     }
-
-    @Override
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
-
-    }
-
 }

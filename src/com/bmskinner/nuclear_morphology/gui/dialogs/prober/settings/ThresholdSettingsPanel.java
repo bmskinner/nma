@@ -85,11 +85,4 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
         thresholdSpinner.setEnabled(b);
 
     }
-
-    @Override
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
-
-    }
 }

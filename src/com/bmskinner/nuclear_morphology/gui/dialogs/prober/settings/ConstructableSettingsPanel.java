@@ -341,10 +341,8 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     /**
      * Add a panel for nucleus type and angle window size
      * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @param label
-     *            the label to give the panel
+     * @param optionsKey the options subtype to select
+     * @param label the label to give the panel
      * @return
      */
     public ConstructableSettingsPanel addNucleusProfilePanel(String optionsKey) {
@@ -354,10 +352,8 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     /**
      * Add a panel for nucleus type and angle window size
      * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @param label
-     *            the label to give the panel
+     * @param optionsKey the options subtype to select
+     * @param label the label to give the panel
      * @return
      */
     public ConstructableSettingsPanel addNucleusProfilePanel(String optionsKey, String label) {
@@ -367,34 +363,6 @@ public class ConstructableSettingsPanel extends SettingsPanel {
         mainPanel.add(panel);
         return this;
     }
-
-//    /**
-//     * Add a panel for misc settings. E.g. keep filtered nuclei
-//     * 
-//     * @param optionsKey
-//     *            the options subtype to select
-//     * @return
-//     */
-//    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey) {
-//        return addMiscNucleusSettingsPanel(optionsKey, MISC_LBL);
-//    }
-//
-//    /**
-//     * Add a panel for misc settings. E.g. keep filtered nuclei
-//     * 
-//     * @param optionsKey
-//     *            the options subtype to select
-//     * @param label
-//     *            the label to give the panel
-//     * @return
-//     */
-//    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey, String label) {
-//        SettingsPanel panel = new MiscNucleusSettingsPanel(options);
-//        panel.setBorder(BorderFactory.createTitledBorder(label));
-//        this.addSubPanel(panel);
-//        mainPanel.add(panel);
-//        return this;
-//    }
 
     /**
      * Add a panel for image channel selection with the default label
@@ -472,18 +440,18 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     public void optionsChangeEventReceived(OptionsChangeEvent e) {
         super.optionsChangeEventReceived(e);
         if (this.hasSubPanel((SettingsPanel) e.getSource())) {
-            // update();
-
-            // if(e.getSource() instanceof EdgeThresholdSwitchPanel
-            // || e.getSource() instanceof ImagePreprocessingSettingsPanel
-            // || e.getSource() instanceof ImagePreprocessingSettingsPanel
-            // || e.getSource() instanceof ComponentSizeSettingsPanel
-            // || e.getSource() instanceof ImageChannelSettingsPanel){
-            fireProberReloadEvent(); // don't fire an update for values that
-                                     // have no effect on a prober
-            // }
+            fireProberReloadEvent();
         }
-
+    }
+    
+    /**
+     * Set the options values and update the spinners to match
+     * 
+     * @param options
+     */
+    public void set(IAnalysisOptions options) {
+    	this.options.set(options);
+    	update();
     }
 
 }

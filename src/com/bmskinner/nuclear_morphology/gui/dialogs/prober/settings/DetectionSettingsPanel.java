@@ -41,5 +41,8 @@ public abstract class DetectionSettingsPanel extends SettingsPanel {
      * 
      * @param options
      */
-    public abstract void set(IDetectionOptions options);
+    public void set(IDetectionOptions options) {
+    	this.options.set(options);
+    	update();
+    }
 }

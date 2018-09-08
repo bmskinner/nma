@@ -54,13 +54,14 @@ public class NucleusImageProber extends IntegratedImageProber {
         try {
             this.options = o;
 
-            // make the panel
-
             optionsSettingsPanel = new ConstructableSettingsPanel(options)
-                    .addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS).addImageChannelPanel(IAnalysisOptions.NUCLEUS)
+                    .addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS)
+                    .addImageChannelPanel(IAnalysisOptions.NUCLEUS)
                     .addImageProcessingPanel(IAnalysisOptions.NUCLEUS)
-                    .addEdgeThresholdSwitchPanel(IAnalysisOptions.NUCLEUS).addSizePanel(IAnalysisOptions.NUCLEUS)
-                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS).build();
+                    .addEdgeThresholdSwitchPanel(IAnalysisOptions.NUCLEUS)
+                    .addSizePanel(IAnalysisOptions.NUCLEUS)
+                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
+                    .build();
 
             Finder<List<ICell>> finder = new FluorescentNucleusFinder(options);
             imageProberPanel = new GenericImageProberPanel(folder, finder, this);

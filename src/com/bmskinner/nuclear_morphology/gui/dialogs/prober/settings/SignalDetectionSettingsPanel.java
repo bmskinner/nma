@@ -89,13 +89,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 
         if (this.hasSubPanel((SettingsPanel) e.getSource())) {
             update();
-
-            // if(e.getSource() instanceof ThresholdSettingsPanel
-            // || e.getSource() instanceof SignalSizeSettingsPanel
-            // || e.getSource() instanceof ImageChannelSettingsPanel){
-            fireProberReloadEvent(); // don't fire an update for values that
-                                     // have no effect on a prober
-            // }
+            fireProberReloadEvent();
         }
     }
 }

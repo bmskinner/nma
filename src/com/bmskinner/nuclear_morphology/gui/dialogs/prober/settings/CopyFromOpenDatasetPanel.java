@@ -44,10 +44,10 @@ import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
 @SuppressWarnings("serial")
 public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
-    private static final String COPY_FROM_OPEN_LBL     = "Copy dataset";
+    private static final String COPY_FROM_OPEN_LBL     = "From dataset";
     private static final String COPY_FROM_OPEN_TOOLTIP = "Copy from existing open dataset";
     
-    private static final String OPEN_SETTINGS_LBL     = "Open file";
+    private static final String OPEN_SETTINGS_LBL     = "From file";
     private static final String OPEN_SETTINGS_TOOLTIP = "Choose a saved options file";
 
     private static final String CHOOSE_DATASET_MSG_LBL = "Choose source dataset";
@@ -79,7 +79,8 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
         // Button to copy existing dataset options
         copyBtn.addActionListener(e -> {
-            IAnalysisDataset[] nameArray = DatasetListManager.getInstance().getRootDatasets()
+            IAnalysisDataset[] nameArray = DatasetListManager.getInstance()
+            		.getRootDatasets()
                     .toArray(new IAnalysisDataset[0]);
 
             IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null,
@@ -108,12 +109,15 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         copyBtn.setToolTipText(COPY_FROM_OPEN_TOOLTIP);
         
         openBtn.addActionListener(e ->{
-        	
+        	File folder = options.getFolder();
         	File f = FileSelector.chooseOptionsImportFile();
         	if(f==null)
         		return;
-        	IAnalysisOptions o = new OptionsXMLReader(f).read(); //read
+        	IAnalysisOptions o = new OptionsXMLReader(f).readAnalysisOptions(); //read
         	options.set(o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
+        	parent.setNucleusType(o.getNucleusType());
+        	parent.setAngleWindowProportion(o.getProfileWindowProportion());
+        	options.setFolder(folder);
         	fireOptionsChangeEvent();
         });
         openBtn.setToolTipText(OPEN_SETTINGS_TOOLTIP);
@@ -145,9 +149,4 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         }
 
     }
-
-    @Override
-    public void set(IDetectionOptions options) {
-    }
-
 }

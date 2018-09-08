@@ -155,15 +155,4 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
         scaleSpinner.setEnabled(b);
 
     }
-
-    /**
-     * Set the options values and update the spinners to match
-     * 
-     * @param options
-     */
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
-    }
-
 }

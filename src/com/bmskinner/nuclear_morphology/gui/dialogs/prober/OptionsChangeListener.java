@@ -18,6 +18,11 @@
 
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
+/**
+ * Listen for changes in selected analysis options
+ * @author ben
+ *
+ */
 public interface OptionsChangeListener {
 
     void optionsChangeEventReceived(OptionsChangeEvent e);

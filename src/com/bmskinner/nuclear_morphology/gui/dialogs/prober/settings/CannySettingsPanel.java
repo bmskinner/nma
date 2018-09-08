@@ -85,12 +85,11 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
     }
 
     /**
-     * Update the display to the given options
+     * Update the display to the options
      * 
-     * @param options
-     *            the options values to be used
      */
-    protected void update() {
+    @Override
+	protected void update() {
         super.update();
         isUpdating = true;
         cannyLowThreshold.setValue((double) options.getLowThreshold());

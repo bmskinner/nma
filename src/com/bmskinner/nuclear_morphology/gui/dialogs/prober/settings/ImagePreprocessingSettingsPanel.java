@@ -80,10 +80,9 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
     /**
      * Update the display to the given options
      * 
-     * @param options
-     *            the options values to be used
      */
-    protected void update() {
+    @Override
+	protected void update() {
         super.update();
 
         kuwaharaRadiusSpinner.setValue(options.getKuwaharaKernel());

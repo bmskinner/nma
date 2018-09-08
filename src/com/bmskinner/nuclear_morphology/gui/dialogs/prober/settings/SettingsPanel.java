@@ -51,9 +51,9 @@ public abstract class SettingsPanel extends JPanel
     protected static final int BOX_WIDTH  = 80;
     protected static final int BOX_HEIGHT = 20;
 
-    private List<SettingsPanel>     subPanels        = new ArrayList<SettingsPanel>();
-    List<OptionsChangeListener>     optionsListeners = new ArrayList<OptionsChangeListener>();
-    List<ProberReloadEventListener> proberListeners  = new ArrayList<ProberReloadEventListener>();
+    private List<SettingsPanel> subPanels = new ArrayList<>();
+    private List<OptionsChangeListener>     optionsListeners = new ArrayList<>();
+    private List<ProberReloadEventListener> proberListeners  = new ArrayList<>();
 
     protected String[] channelOptionStrings = { "Greyscale", "Red", "Green", "Blue" };
 
@@ -187,6 +187,10 @@ public abstract class SettingsPanel extends JPanel
         optionsListeners.remove(l);
     }
 
+    /**
+     * Fire an event to all listeners that the options in this panel have been
+     * changed via the GUI
+     */
     protected void fireOptionsChangeEvent() {
         if (!isUpdating) {
             OptionsChangeEvent e = new OptionsChangeEvent(this);

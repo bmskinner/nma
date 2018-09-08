@@ -620,6 +620,11 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
         }
     }
 
+    /**
+     * Used to alert settings panels that images are being updated
+     * @author ben
+     *
+     */
     public interface PanelUpdatingEventListener {
         void panelUpdatingEventReceived(PanelUpdatingEvent e);
     }

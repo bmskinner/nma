@@ -105,10 +105,10 @@ public class TophatPanel extends SettingsPanel {
     /**
      * Update the display to the given options
      * 
-     * @param options
-     *            the options values to be used
+     * @param options the options values to be used
      */
-    protected void update() {
+    @Override
+	protected void update() {
         super.update();
         isUpdating = true;
         radiusSpinner.setValue(options.getInt(IDetectionOptions.TOP_HAT_RADIUS));

@@ -32,6 +32,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 
@@ -154,15 +156,15 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
         maxCircSpinner.setEnabled(b);
 
     }
-
+    
     /**
      * Set the options values and update the spinners to match
      * 
      * @param options
      */
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
+    public void set(@NonNull INuclearSignalOptions options) {
+    	this.options.set(options);
+    	update();
     }
 
     @Override

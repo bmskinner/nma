@@ -150,16 +150,6 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
 
     }
 
-    /**
-     * Set the options values and update the spinners to match
-     * 
-     * @param options
-     */
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
-    }
-
     @Override
     public void stateChanged(ChangeEvent e) {
 

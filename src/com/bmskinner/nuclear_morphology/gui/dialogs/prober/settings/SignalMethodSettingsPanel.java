@@ -27,6 +27,9 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -111,6 +114,16 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
         super.setEnabled(b);
         box.setEnabled(b);
 
+    }
+    
+    /**
+     * Set the options values and update the spinners to match
+     * 
+     * @param options
+     */
+    public void set(@NonNull INuclearSignalOptions options) {
+    	this.options.set(options);
+    	update();
     }
 
 }

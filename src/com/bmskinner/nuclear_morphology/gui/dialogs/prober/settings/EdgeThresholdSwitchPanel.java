@@ -164,8 +164,10 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
         CardLayout cl = (CardLayout) (cardPanel.getLayout());
 
         if (showCanny) {
+        	edgeBtn.setSelected(true);
             cl.show(cardPanel, EDGE_LBL);
         } else {
+        	thresholdBtn.setSelected(true);
             cl.show(cardPanel, THRESHOLD_LBL);
         }
 
@@ -178,12 +180,4 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
         edgeBtn.setEnabled(b);
 
     }
-
-    @Override
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
-
-    }
-
 }
