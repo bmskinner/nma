@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
  */
 public class SampleDatasetReader {
     
-    public static final String SAMPLE_DATASET_PATH = "test/com/bmskinner/nuclear_morphology/samples/datasets/";
+    public static final String SAMPLE_DATASET_PATH = "test/samples/datasets/";
     
     public static final String RODENT_TEST_DATASET = "Testing_1_13_8.nmd";
     public static final String PIG_TEST_DATASET    = "Testing_pig_1_13_8.nmd";

@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,15 +14,16 @@ import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultHoughOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
@@ -40,11 +42,19 @@ public class OptionsXMLReader {
 	
 	private final File file;
 	
+	/**
+	 * Create with a file to be read
+	 * @param f
+	 */
 	public OptionsXMLReader(@NonNull final File f) {
 		file=f;
 	}
 
-	public IAnalysisOptions read() {
+	/**
+	 * Read the analysis options within the file
+	 * @return
+	 */
+	public IAnalysisOptions readAnalysisOptions() {
 
 		try {
 			SAXBuilder saxBuilder = new SAXBuilder();
@@ -62,7 +72,6 @@ public class OptionsXMLReader {
 			double windowSize = Double.parseDouble(rootElement.getChild(OptionsXMLWriter.PROFILE_WINDOW).getText());
 			op.setAngleWindowProportion(windowSize);
 
-
 			// should be single elements with options class
 			for(Element component : rootElement.getChildren(OptionsXMLWriter.DETECTION_METHOD))
 				addComponent(component, op);
@@ -77,13 +86,48 @@ public class OptionsXMLReader {
 	    return null;
 	}
 	
+	/**
+	 * Read the clustering options from file
+	 * @return the detected options, or an empty list
+	 */
+	public List<IClusteringOptions> readClusteringOptions(){
+		List<IClusteringOptions> result = new ArrayList<>();
+		SAXBuilder saxBuilder = new SAXBuilder();
+		Document document;
+		try {
+			document = saxBuilder.build(file);
+			Element rootElement = document.getRootElement();
+			Element clusters = rootElement.getChild(OptionsXMLWriter.CLUSTERS);
+			for(Element component : clusters.getChildren(OptionsXMLWriter.CLUSTER_GROUP)) {
+				IClusteringOptions o = buildClusteringOptions(component);
+				result.add(o);
+			}
+		} catch (JDOMException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	private IClusteringOptions buildClusteringOptions(Element e) {
+		IClusteringOptions o = new DefaultClusteringOptions();
+		addKeyedValues(e, o);
+		return o;
+	}
+	
+	private String replaceKeyModifications(String s) {
+		String r = s.replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ")
+				.replace(OptionsXMLWriter.UUID_PREFIX, "");
+		return r;
+	}
+	
 	private void addKeyedValues(Element e, HashOptions o) {
 		// Primary keys
 		List<Element> boolContainer = e.getChildren(OptionsXMLWriter.BOOLEAN_KEY);
 		if(!boolContainer.isEmpty()) {
 			for(Element el : boolContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
-				String key = el.getName().replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ");
+				String key = replaceKeyModifications(el.getName());
 				boolean b = Boolean.valueOf(el.getText());
 				o.setBoolean(key, b);
 			}
@@ -93,7 +137,7 @@ public class OptionsXMLReader {
 		if(!floatContainer.isEmpty()) {
 			for(Element el : floatContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
-				String key = el.getName().replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ");
+				String key = replaceKeyModifications(el.getName());
 				float b = Float.valueOf(el.getText());
 				o.setFloat(key, b);
 			}
@@ -102,7 +146,7 @@ public class OptionsXMLReader {
 		List<Element> intContainer = e.getChildren(OptionsXMLWriter.INT_KEY);
 		if(!intContainer.isEmpty()) {
 			for(Element el : intContainer.get(0).getChildren()) {
-				String key = el.getName().replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ");
+				String key = replaceKeyModifications(el.getName());
 				System.out.println(el.getName()+": "+el.getText());
 				int b = Integer.valueOf(el.getText());
 				o.setInt(key, b);
@@ -113,7 +157,7 @@ public class OptionsXMLReader {
 		if(!doubleContainer.isEmpty()) {
 			for(Element el : doubleContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
-				String key = el.getName().replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ");
+				String key = replaceKeyModifications(el.getName());
 				double b = Double.valueOf(el.getText());
 				o.setDouble(key, b);
 			}
@@ -123,7 +167,7 @@ public class OptionsXMLReader {
 		if(!stringContainer.isEmpty()) {
 			for(Element el : stringContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
-				String key = el.getName().replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ");
+				String key = replaceKeyModifications(el.getName());
 				o.setString(key, el.getText());
 			}
 		}
@@ -167,9 +211,9 @@ public class OptionsXMLReader {
 			op.setDetectionOptions(IAnalysisOptions.NUCLEUS, o);
 		}
 		
-		if(detectedObject.length()==36) { // probably signal group uuid
+		if(detectedObject.startsWith(IAnalysisOptions.SIGNAL_GROUP) || detectedObject.length()==36 ) { // probably signal group uuid
 			try {
-				UUID id = UUID.fromString(detectedObject);
+				UUID id = UUID.fromString(detectedObject.replace(IAnalysisOptions.SIGNAL_GROUP, ""));
 				INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
 				addKeyedValues(e, n);				
 				for(Element component : e.getChildren(OptionsXMLWriter.SUB_OPTION_KEY)) {
@@ -181,7 +225,7 @@ public class OptionsXMLReader {
 						n.setShellOptions(s);
 					}
 				}
-				op.setDetectionOptions(id.toString(), n);
+				op.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+id.toString(), n);
 			} catch(IllegalArgumentException e1) {
 				// it wasn't a uuid
 			}

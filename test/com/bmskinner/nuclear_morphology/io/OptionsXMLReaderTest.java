@@ -34,7 +34,7 @@ public class OptionsXMLReaderTest {
 		
 		
 		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
-		IAnalysisOptions o = r.read();
+		IAnalysisOptions o = r.readAnalysisOptions();
 		assertEquals(exp, o);
 	}
 

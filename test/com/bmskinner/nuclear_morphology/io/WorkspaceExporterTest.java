@@ -30,7 +30,6 @@ public class WorkspaceExporterTest {
 		
 		WorkspaceExporter exp = WorkspaceExporter.createExporter();
 		exp.exportWorkspace(w);
-//		fail("Not yet implemented");
 	}
 
 }

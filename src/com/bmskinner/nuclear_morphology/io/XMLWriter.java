@@ -45,5 +45,15 @@ public abstract class XMLWriter implements Loggable {
 			e.printStackTrace();
 		}
 	}
+	
+	public static boolean isUUID(String s) {
+		if(s==null)
+			return false;
+		if(s.length()!=36)
+			return false;
+		if(s.matches("[\\w|\\d]{8}-[\\w|\\d]{4}-[\\w|\\d]{4}-[\\w|\\d]{4}-[\\w|\\d]{12}"))
+			return true;
+		return false;
+	}
 
 }

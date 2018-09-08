@@ -12,7 +12,6 @@ import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -43,6 +42,12 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	public static final String SIGNAL_DETECTION_MODE_KEY   = "Detection_mode";
 	
 	public static final String SPACE_REPLACEMENT = "_sp_";
+	public static final String UUID_PREFIX = "UUID_";
+	
+	public static final String SIGNAL_GROUP_PREFIX = "SignalGroup_";
+	public static final String CLUSTERS = "Clusters";
+	public static final String CLUSTER_GROUP = "ClusterGroup";
+	public static final String CLUSTER_NAME  = "ClusterGroupName";
 	
 	public void write(@NonNull IAnalysisDataset dataset, @NonNull File outFile) {
 		Document doc = OptionsXMLWriter.createDocument(dataset);
@@ -58,13 +63,16 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		if(dataset.hasAnalysisOptions())
 			appendElement(dataset.getAnalysisOptions().get(), rootElement);
 		
+		Element clusters = new Element(CLUSTERS);
 		for(IClusterGroup g : dataset.getClusterGroups()) {
 			if(g.getOptions().isPresent()) {
-				Element cluster = new Element("Cluster");
-				cluster.setAttribute("Cluster_group", g.getName());
-				appendElement(g.getOptions().get(), cluster);
+				Element cluster = new Element(CLUSTER_GROUP);
+				cluster.setAttribute(CLUSTER_NAME, g.getName());
+				appendElement(g.getOptions().get().duplicate(), cluster);
+				clusters.addContent(cluster);
 			}
 		}
+		rootElement.addContent(clusters);
 		return new Document(rootElement);
 	}
 
@@ -83,7 +91,12 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	private static void appendElement(@NonNull IAnalysisOptions options, Element rootElement) {
 		for(String key : options.getDetectionOptionTypes()){
 			Element element = new Element(DETECTION_METHOD);
-			element.setAttribute(DETECTED_OBJECT, key);
+			if(isUUID(key)){ // signal group without prefix
+				element.setAttribute(DETECTED_OBJECT, IAnalysisOptions.SIGNAL_GROUP+key);
+			} else {
+				element.setAttribute(DETECTED_OBJECT, key);
+			}
+			
 			appendElement(options.getDetectionOptions(key).get(), element);
 			rootElement.addContent(element);
 		}
@@ -94,18 +107,10 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		Element anElement = new Element(PROFILE_WINDOW);
 		anElement.setText(String.valueOf(options.getProfileWindowProportion()));
 		rootElement.addContent(anElement);
-		
-//		for(UUID signalGroupId : options.getNuclearSignalGroups()) {
-//			Element signalElement = new Element("Signal_group");
-//			signalElement.setAttribute("ID", signalGroupId.toString());
-//			signalElement.addContent(createElement(options.getNuclearSignalOptions(signalGroupId)));
-//			rootElement.addContent(signalElement);
-//		}
 	}
 
 	private static void appendElement(@NonNull IDetectionOptions options, Element rootElement) {
 		appendElement( (HashOptions)options, rootElement);
-//		Element detElement = new Element("Detection_mode");
 		for(String key : options.getSubOptionKeys()){
 			Element element = new Element(SUB_OPTION_KEY);
 			element.setAttribute(SUB_TYPE_KEY, key);
@@ -118,24 +123,28 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 			}
 			
 		}
-//		rootElement.addContent(detElement);
 	}
 	
-	private static void appendElement(@NonNull INuclearSignalOptions options, Element rootElement) {
-		appendElement( (IDetectionOptions)options, rootElement);
-		Element detElement = new Element(SIGNAL_DETECTION_MODE_KEY);
-		detElement.setText(options.getDetectionMode().toString());
-		rootElement.addContent(detElement);
+	/**
+	 * Replace illegal characters for XML names
+	 * @param key
+	 * @return
+	 */
+	private static String createKeyModifications(String key) {
+		String r = key.replaceAll(" ", SPACE_REPLACEMENT);
+		if(isUUID(key))
+			r = UUID_PREFIX+r;
+		return r;
 	}
-	
+		
 	private static void appendElement(@NonNull HashOptions options, Element rootElement) {
 		
 		if(!options.getBooleanKeys().isEmpty()) {
 			Element boolElement = new Element(BOOLEAN_KEY);
 			for(String key : options.getBooleanKeys()){
-				Element keyElement = new Element(key.replaceAll(" ", SPACE_REPLACEMENT));
-				String s = String.valueOf(options.getBoolean(key)).replaceAll(" ", SPACE_REPLACEMENT);
-				keyElement.setText(s);
+				String elKey = createKeyModifications(key);	
+				Element keyElement = new Element(elKey);
+				keyElement.setText(String.valueOf(options.getBoolean(key)));
 				boolElement.addContent(keyElement);
 			}
 			rootElement.addContent(boolElement);
@@ -144,7 +153,8 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		if(!options.getIntegerKeys().isEmpty()) {
 			Element intElement = new Element(INT_KEY);
 			for(String key : options.getIntegerKeys()){
-				Element keyElement = new Element(key.replaceAll(" ", SPACE_REPLACEMENT));
+				String elKey = createKeyModifications(key);	
+				Element keyElement = new Element(elKey);
 				keyElement.setText(String.valueOf(options.getInt(key)));
 				intElement.addContent(keyElement);
 			}
@@ -154,7 +164,8 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		if(!options.getFloatKeys().isEmpty()) {
 			Element floatElement = new Element(FLOAT_KEY);
 			for(String key : options.getFloatKeys()){
-				Element keyElement = new Element(key.replaceAll(" ", SPACE_REPLACEMENT));
+				String elKey = createKeyModifications(key);	
+				Element keyElement = new Element(elKey);
 				keyElement.setText(String.valueOf(options.getFloat(key)));
 				floatElement.addContent(keyElement);
 			}
@@ -164,7 +175,8 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		if(!options.getDoubleKeys().isEmpty()) {
 			Element doubleElement = new Element(DOUBLE_KEY);
 			for(String key : options.getDoubleKeys()){
-				Element keyElement = new Element(key.replaceAll(" ", SPACE_REPLACEMENT));
+				String elKey = createKeyModifications(key);	
+				Element keyElement = new Element(elKey);
 				keyElement.setText(String.valueOf(options.getDouble(key)));
 				doubleElement.addContent(keyElement);
 			}
@@ -174,12 +186,13 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		if(!options.getStringKeys().isEmpty()) {
 			Element stringElement = new Element(STRING_KEY);
 			for(String key : options.getStringKeys()){
-				Element keyElement = new Element(key.replaceAll(" ", SPACE_REPLACEMENT));
+				String elKey = createKeyModifications(key);	
+				Element keyElement = new Element(elKey);
 				keyElement.setText(options.getString(key));
 				stringElement.addContent(keyElement);
 			}
 			rootElement.addContent(stringElement);
 		}
 	}
-
+	
 }
