@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  * Call an open dialog to choose a saved .nbd dataset. The opened dataset will
  * be added to the bottom of the dataset list.
  */
-public class PopulationImportAction extends VoidResultAction {
+public class ImportDatasetAction extends VoidResultAction {
 
     private final File          file;
     private static final String PROGRESS_BAR_LABEL = "Opening file...";
@@ -58,7 +58,7 @@ public class PopulationImportAction extends VoidResultAction {
      * 
      * @param mw the main window to which a progress bar will be attached
      */
-    public PopulationImportAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+    public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         this(acceptor, eh, null);
     }
 
@@ -69,7 +69,7 @@ public class PopulationImportAction extends VoidResultAction {
      * @param mw the main window to which a progress bar will be attached
      * @param file the dataset file to open
      */
-    public PopulationImportAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, @Nullable File file) {
+    public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, @Nullable File file) {
         super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.file = file==null ? selectFile() : file;
     }

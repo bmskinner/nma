@@ -38,7 +38,7 @@ import javax.swing.JPopupMenu;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
@@ -151,7 +151,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
         JButton btnLoadSavedDataset = new JButton(LOAD_DATASET_LBL);
 
         btnLoadSavedDataset.addActionListener(e -> {
-            Runnable r = new PopulationImportAction(mw.getProgressAcceptor(), mw.getEventHandler());
+            Runnable r = new ImportDatasetAction(mw.getProgressAcceptor(), mw.getEventHandler());
             r.run();
         });
 

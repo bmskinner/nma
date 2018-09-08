@@ -6,10 +6,17 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.OptionsXMLWriter;
 
+/**
+ * Export the options stored in a dataset
+ * @author ben
+ * @since 1.14.0
+ *
+ */
 public class ExportOptionsAction extends SingleDatasetResultAction {
 	
 	private static final String PROGRESS_LBL = "Exporting options";
@@ -20,7 +27,7 @@ public class ExportOptionsAction extends SingleDatasetResultAction {
 	
 	 @Override
      public void run() {
-
+		 setProgressBarIndeterminate();
          File file = FileSelector.chooseOptionsExportFile(dataset);
 
          if (file == null) {
@@ -28,9 +35,12 @@ public class ExportOptionsAction extends SingleDatasetResultAction {
              return;
          }
 
-         OptionsXMLWriter m = new OptionsXMLWriter();
-         m.write(dataset, file);
-         cancel();
+         Runnable r = () ->{
+        	 OptionsXMLWriter m = new OptionsXMLWriter();
+        	 m.write(dataset, file);
+        	 cancel();
+         };
+         ThreadManager.getInstance().submit(r);
      }
 
 }

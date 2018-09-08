@@ -51,7 +51,8 @@ import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
@@ -60,7 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
-import com.bmskinner.nuclear_morphology.gui.actions.WorkspaceImportAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -189,23 +190,31 @@ public class EventHandler implements Loggable, EventListener {
         	final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null
                     : selectedDatasets.get(0);
         	
+        	if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX)) {
+                String s = event.type().replace(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, "");
+                if(s.equals(""))
+                	return new ImportWorkflowAction(acceptor, EventHandler.this);
+                File f = new File(s);
+                return new ImportWorkflowAction(acceptor, EventHandler.this, f);
+            }
+        	
         	if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
                 String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
                 if(s.equals(""))
-                	return new PopulationImportAction(acceptor, EventHandler.this);
+                	return new ImportDatasetAction(acceptor, EventHandler.this);
                 File f = new File(s);
-                return new PopulationImportAction(acceptor, EventHandler.this, f);
+                return new ImportDatasetAction(acceptor, EventHandler.this, f);
             }
             
             if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
             	return () -> {
             		String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
             		if(s.equals("")) {
-            			new WorkspaceImportAction(acceptor, EventHandler.this).run();
+            			new ImportWorkspaceAction(acceptor, EventHandler.this).run();
             			return;
             		}
             		File f = new File(s);
-            		new WorkspaceImportAction(acceptor, EventHandler.this, f).run();
+            		new ImportWorkspaceAction(acceptor, EventHandler.this, f).run();
             	};
 
             	if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {

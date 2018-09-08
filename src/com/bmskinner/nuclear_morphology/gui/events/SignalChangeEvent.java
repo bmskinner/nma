@@ -46,6 +46,7 @@ public class SignalChangeEvent extends EventObject {
     
     public static final String NEW_ANALYSIS_PREFIX         = "New|";
     public static final String IMPORT_DATASET_PREFIX       = "Open|";
+    public static final String IMPORT_WORKFLOW_PREFIX      = "Flow|";
    
     public static final String IMPORT_WORKSPACE_PREFIX     = "Wrk|";
     public static final String EXPORT_WORKSPACE            = "ExportWorkspace";

@@ -160,7 +160,7 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    public static @Nullable File chooseFile(File defaultFolder, FileNameExtensionFilter filter){
+    public static @Nullable File chooseFile(File defaultFolder, @Nullable FileNameExtensionFilter filter){
         return chooseOpenFile(defaultFolder, filter);
     }
     

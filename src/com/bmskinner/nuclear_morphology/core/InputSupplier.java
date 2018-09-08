@@ -133,6 +133,16 @@ public interface InputSupplier {
 	File requestFile(@Nullable File defaultFolder) throws RequestCancelledException;
 	
 	/**
+	 * Request a file input with an extension filter
+	 * @param defaultFolder the default folder
+	 * @param extension the file extension filter
+	 * @param extensionMessage the textual description of the file extension
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	File requestFile(@Nullable File defaultFolder, @Nullable String extension, @Nullable String extensionMessage) throws RequestCancelledException;
+	
+	/**
 	 * Request a file to save to, with the default name and extension.
 	 * @param defaultFolder the default folder
 	 * 

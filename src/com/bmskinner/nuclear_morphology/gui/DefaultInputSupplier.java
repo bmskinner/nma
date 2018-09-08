@@ -14,6 +14,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 /**
  * Implements the input supplier for the default UI
@@ -100,6 +101,17 @@ public class DefaultInputSupplier implements InputSupplier {
 	@Override
 	public File requestFile(@Nullable File defaultFolder) throws RequestCancelledException {
 		File f = FileSelector.chooseFile(defaultFolder);
+		if(f==null)
+			throw new RequestCancelledException();
+		return f;
+	}
+	
+	@Override
+	public File requestFile(@Nullable File defaultFolder, @Nullable String extension, @Nullable String extensionMessage) throws RequestCancelledException {
+		FileNameExtensionFilter filter = null;
+		if(extension!=null)
+			filter = new FileNameExtensionFilter(extensionMessage, extension);
+		File f = FileSelector.chooseFile(defaultFolder, filter);
 		if(f==null)
 			throw new RequestCancelledException();
 		return f;

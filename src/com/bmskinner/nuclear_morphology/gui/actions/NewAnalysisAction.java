@@ -107,14 +107,15 @@ public class NewAnalysisAction extends VoidResultAction {
         
         // Files on USB drives are causing issues with path names on dataset opening.
         // Block for now.
-        USBDeviceDetectorManager usb = new USBDeviceDetectorManager();
-        for(USBStorageDevice u : usb.getRemovableDevices()) {
-        	if(folder.getAbsolutePath().startsWith(u.getRootDirectory().getName())) {
-        		warn("Unable to comply. Folder is on a USB stick. Copy images to hard disk.");
-        		cancel();
-        		return;
-        	}
-        }
+//        USBDeviceDetectorManager usb = new USBDeviceDetectorManager();
+//       
+//        for(USBStorageDevice u : usb.getRemovableDevices()) {
+//        	if(folder.getAbsolutePath().startsWith(u.getRootDirectory().getName())) {
+//        		warn("Unable to comply. Folder is on a USB stick. Copy images to hard disk.");
+//        		cancel();
+//        		return;
+//        	}
+//        }
 
         fine("Creating for " + folder.getAbsolutePath());
 
@@ -170,9 +171,7 @@ public class NewAnalysisAction extends VoidResultAction {
             if (datasets == null || datasets.isEmpty()) {
                 log("No datasets returned");
             } else {
-                // log("Fire profiling");
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
-
             }
 
         } catch (InterruptedException e) {
