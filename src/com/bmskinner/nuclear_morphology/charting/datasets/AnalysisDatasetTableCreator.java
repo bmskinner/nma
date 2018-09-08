@@ -458,7 +458,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         	long analysisTime = dataset.getAnalysisOptions().get().getAnalysisTime();
         	if(analysisTime>0) { // stored from 1.14.0
         		Instant inst = Instant.ofEpochMilli(analysisTime);
-        		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.UTC);
+        		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
         		date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM YYYY"));
         		time = anTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         	} else { // fall back to folder name method

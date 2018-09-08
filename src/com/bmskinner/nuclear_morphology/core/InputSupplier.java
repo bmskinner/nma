@@ -140,7 +140,7 @@ public interface InputSupplier {
 	 * @return
 	 * @throws RequestCancelledException
 	 */
-	File requestFile(@Nullable File defaultFolder, @Nullable String extension, @Nullable String extensionMessage) throws RequestCancelledException;
+	File requestFile(@Nullable String message, @Nullable File defaultFolder, @Nullable String extension, @Nullable String extensionMessage) throws RequestCancelledException;
 	
 	/**
 	 * Request a file to save to, with the default name and extension.

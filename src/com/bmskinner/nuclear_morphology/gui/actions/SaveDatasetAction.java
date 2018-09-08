@@ -50,7 +50,7 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
      * @param mw the main window, to access program logger
      * @param doneSignal a latch to hold threads until the save is complete
      */
-    public SaveDatasetAction(IAnalysisDataset dataset, File saveFile, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+    public SaveDatasetAction(@NonNull IAnalysisDataset dataset, File saveFile, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
         setLatch(doneSignal);
         this.setProgressBarIndeterminate();

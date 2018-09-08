@@ -127,9 +127,8 @@ public class FileSelector {
      * @return the file to export to
      */
     public static @Nullable File chooseOptionsImportFile() {
-
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
-        return chooseFile(null, filter);
+        return chooseFile(null, filter, "Choose options file");
     }
     
     /**
@@ -151,7 +150,7 @@ public class FileSelector {
         	return null;
 
         defaultDir = im.get().getFolder();
-        return chooseOpenFile(defaultDir, filter);
+        return chooseOpenFile(defaultDir, filter, "Choose remapping file");
     }
     
     /**
@@ -160,8 +159,8 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    public static @Nullable File chooseFile(File defaultFolder, @Nullable FileNameExtensionFilter filter){
-        return chooseOpenFile(defaultFolder, filter);
+    public static @Nullable File chooseFile(File defaultFolder, @Nullable FileNameExtensionFilter filter, @Nullable String message){
+        return chooseOpenFile(defaultFolder, filter, message);
     }
     
     /**
@@ -170,7 +169,7 @@ public class FileSelector {
      * @return the selected file, or null on cancel or error
      */
     public static @Nullable File chooseFile(File defaultFolder){
-        return chooseOpenFile(defaultFolder, null);
+        return chooseOpenFile(defaultFolder, null, null);
     }
         
     /**
@@ -179,11 +178,14 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    private static @Nullable File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter){
+    private static @Nullable File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter, @Nullable String message){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
         if(filter!=null)
             fc.setFileFilter(filter);
+        
+        if(message!=null)
+        	fc.setDialogTitle(message);;
 
         int returnVal = fc.showOpenDialog(fc);
         if (returnVal != 0)

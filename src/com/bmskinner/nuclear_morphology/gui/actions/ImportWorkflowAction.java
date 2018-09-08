@@ -2,6 +2,10 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -65,7 +69,7 @@ public class ImportWorkflowAction  extends VoidResultAction {
    
     		try {
     			if(file==null)
-    				file = eh.getInputSupplier().requestFile(null, Importer.XML_FILE_EXTENSION_NODOT, "Analysis options file");
+    				file = eh.getInputSupplier().requestFile("Choose analysis options", null, Importer.XML_FILE_EXTENSION_NODOT, "Analysis options file");
 
     			OptionsXMLReader r = new OptionsXMLReader(file);
     			IAnalysisOptions options = r.readAnalysisOptions();
@@ -79,9 +83,9 @@ public class ImportWorkflowAction  extends VoidResultAction {
     			}
     			
     			nucleusOptions.get().setFolder(folder);
-    			
-    			Date startTime = Calendar.getInstance().getTime();
-                String outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(startTime);
+    			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
+    			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+    			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
 
                 File analysisFolder = new File(folder, outputFolderName);
                 if (!analysisFolder.exists())

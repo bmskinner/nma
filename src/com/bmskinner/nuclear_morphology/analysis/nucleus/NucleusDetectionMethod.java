@@ -35,17 +35,14 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -59,7 +56,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     private static final String SPACER                  = "---------";
-    private static final double DEFAULT_FILTERING_DELTA = 1.6;
 
     private final String outputFolder;
 
@@ -74,7 +70,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * given output folder
      * 
      * @param outputFolder the name of the folder for results
-     * @param debugFile the dataset log file
      * @param options the options to detect with
      */
     public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
@@ -170,45 +165,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             log("Analysing: " + folder.getName());
 
             try {
-
-//                ICellCollection failedNuclei = new DefaultCellCollection(folder, collection.getOutputFolderName(),
-//                        collection.getName() + " - failed", collection.getNucleusType());
-
-//                log("Filtering collection...");
-
-
-//                Filterer<ICellCollection> filter = new CellCollectionFilterer();
-//                if(collection.getNucleusType()!=NucleusType.ROUND) {
-//                    filter.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
-//                    log("Filtered out "+failedNuclei.size()+" nuclei based on variance");
-//                }
-
-                
-                // Ensure medians do not include filtered nuclei
                 collection.clear(MeasurementScale.PIXELS);
                 collection.clear(MeasurementScale.MICRONS);
-                
 
-                /*
-                 * Keep the failed nuclei - they can be manually assessed later
-                 */
-
-//                if (analysisOptions.isKeepFailedCollections()) {
-//                    log("Keeping failed nuclei as new collection");
-//                    IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-//                    IAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
-//                    failedOptions.setNucleusType(NucleusType.ROUND);
-//                    failed.setAnalysisOptions(failedOptions);
-//                    failed.setRoot(true);
-//                    result.add(failed);
-//                }
 
                 log(SPACER);
-
                 log("Population: " + collection.getName());
                 log("Found " + collection.size() + " nuclei");
-                // log("Failed: "+failedNuclei.size()+" nuclei");
-
                 log(SPACER);
 
                 result.add(dataset);
@@ -275,15 +238,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      */
     private static int countSuitableImages(final File folder) {
 
-        if (folder == null) {
+        if (folder == null)
             throw new IllegalArgumentException("Folder cannot be null");
-        }
 
         final File[] listOfFiles = folder.listFiles();
 
-        if (listOfFiles == null) {
+        if (listOfFiles == null)
             return 0;
-        }
 
         int result = 0;
 
@@ -293,11 +254,9 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
             if (ok) {
                 result++;
-
             } else {
-                if (file.isDirectory()) { // recurse over any sub folders
+                if (file.isDirectory())// recurse over any sub folders
                     result += countSuitableImages(file);
-                }
             }
         }
         return result;
@@ -312,18 +271,14 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      */
     protected void processFolder(@NonNull final File folder) {
 
-        if (folder == null) {
+        if (folder == null)
             throw new IllegalArgumentException("Folder cannot be null");
-        }
         
         File[] arr = folder.listFiles();
-        if (arr == null) {
+        if (arr == null)
             return;
-        }
-        
-        if(Thread.interrupted()){
+        if(Thread.interrupted())
             return;
-        }
 
         // Recurse over all folders in the supplied folder
         for (File f : arr) {

@@ -31,17 +31,16 @@ public abstract class XMLWriter implements Loggable {
 			throw new IllegalArgumentException(String.format("File %s is a directory", outputFile.getName()));
 		if(outputFile.getParentFile()==null)
 			throw new IllegalArgumentException(String.format("Parent directory is null", outputFile.getAbsolutePath()));
-		
 		if(!outputFile.getParentFile().canWrite())
 			throw new IllegalArgumentException(String.format("Parent directory %s is not writable", outputFile.getParentFile().getName()));
-			
+
 		try(OutputStream os = new FileOutputStream(outputFile)){
 			XMLOutputter xmlOutput = new XMLOutputter();
 			xmlOutput.setFormat(Format.getPrettyFormat());
 			xmlOutput.output(doc, System.out); 
 			xmlOutput.output(doc, os);
 		} catch (IOException e) {
-//			warn(String.format("Unable to write to file %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
+			System.out.println(String.format("Unable to write to file %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
 			e.printStackTrace();
 		}
 	}

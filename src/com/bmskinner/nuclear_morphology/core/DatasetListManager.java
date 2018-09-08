@@ -22,12 +22,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,7 +33,6 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationTreeTableNode;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

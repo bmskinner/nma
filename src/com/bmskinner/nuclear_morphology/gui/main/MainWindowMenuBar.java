@@ -17,20 +17,19 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
-import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 	
@@ -42,6 +41,24 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 	final private JPanel monitorPanel;
 	
 	private JMenu contextMenu;
+	
+	private MenuFactory fact = new MenuFactory();
+	
+	private class MenuFactory {
+		public MenuFactory() {}
+		
+		public JMenuItem createSignalChangeMenuItem(String label, String action) {
+			return createSignalChangeMenuItem(label, action, null);
+		}
+		
+		public JMenuItem createSignalChangeMenuItem(String label, String action, @Nullable String tooltip) {
+			JMenuItem item = new JMenuItem(label);
+			item.addActionListener(e-> sh.fireSignalChangeEvent(action));
+			if(tooltip!=null)
+				item.setToolTipText(tooltip);
+			return item;
+		}
+	}
 	
 	public MainWindowMenuBar(MainView mw) {
 		super();
@@ -84,40 +101,33 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
         monitorPanel.setOpaque(false);
         return monitorPanel;
 	}
-	
+		
 	private JMenu createFileMenu() {
 		JMenu menu = new JMenu("File");
 		
 		JMenu newMenu = new JMenu("New analysis");
-		JMenuItem i1 = new JMenuItem("Fluorescent nuclei");
+		JMenuItem i1 = new JMenuItem("Use custom detection options");
+		i1.setToolTipText("Configure the nucleus detection options yourself");
 		i1.addActionListener(e-> new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler()).run() );
-		JMenuItem i2 = new JMenuItem("H&E granulocytes");
-		i2.addActionListener(e-> new NeutrophilAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler()).run() );
 		newMenu.add(i1);
-		newMenu.add(i2);
+		newMenu.add(fact.createSignalChangeMenuItem("Use saved detection options", 
+				SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, "Use options saved in a file for automatic nucleus detection"));
 		menu.add(newMenu);
 		
-		JMenuItem newWorkspace = new JMenuItem("New workspace");
-		newWorkspace.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.NEW_WORKSPACE));
-		menu.add(newWorkspace);
 		
-		JMenuItem openDataset = new JMenuItem("Open dataset");
-		openDataset.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX) );
-		menu.add(openDataset);
-		
-		JMenuItem openWorkspace = new JMenuItem("Open workspace");
-		openWorkspace.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX));
-		menu.add(openWorkspace);
+		menu.add(fact.createSignalChangeMenuItem("New workspace", SignalChangeEvent.NEW_WORKSPACE));
 		
 		
+		JMenu openMenu = new JMenu("Open");
+		
+		openMenu.add(fact.createSignalChangeMenuItem("Open dataset", SignalChangeEvent.IMPORT_DATASET_PREFIX));
+		openMenu.add(fact.createSignalChangeMenuItem("Open workspace", SignalChangeEvent.IMPORT_WORKSPACE_PREFIX));
+		menu.add(openMenu);
+		
+		menu.add(fact.createSignalChangeMenuItem("Save datasets", SignalChangeEvent.SAVE_ALL_DATASETS));
+		menu.add(fact.createSignalChangeMenuItem("Save workspaces", SignalChangeEvent.EXPORT_WORKSPACE));
 
-		JMenuItem save = new JMenuItem("Save datasets");
-		save.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.SAVE_ALL_DATASETS));
-		menu.add(save);
 		
-		JMenuItem saveWorkspaces = new JMenuItem("Save workspaces");
-		saveWorkspaces.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.EXPORT_WORKSPACE));
-		menu.add(saveWorkspaces);
 		
 		JMenuItem exit = new JMenuItem("Exit");
 		exit.addActionListener(e-> {

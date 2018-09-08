@@ -229,16 +229,13 @@ public class EventHandler implements Loggable, EventListener {
             	}
             
             if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
-            	return () ->{
-            		createWorkspace();
-            	};
+            	return () -> createWorkspace();
+            	
+        	if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
+                return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
         	
         	if(selectedDataset==null)
         		return null;
-        	
-
-            if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
-                return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC))
                 return new DatasetArithmeticAction(selectedDatasets, acceptor, EventHandler.this);
@@ -479,9 +476,8 @@ public class EventHandler implements Loggable, EventListener {
          */
         public synchronized void run(final SignalChangeEvent event) {
             Runnable r = create(event);
-            if (r != null) {
+            if (r != null)
                 r.run();
-            }
         }
 
         /**
@@ -491,9 +487,8 @@ public class EventHandler implements Loggable, EventListener {
          */
         public synchronized void run(final DatasetEvent event) {
             Runnable r = create(event);
-            if (r != null) {
+            if (r != null)
                 r.run();
-            }
         }
     }
 
