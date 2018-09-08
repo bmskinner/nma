@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -1246,4 +1248,16 @@ public class AnalysisOptions implements IAnalysisOptions {
     public void setDetectionOptions(String key, IDetectionOptions options) {
 
     }
+
+	@Override
+	public long getAnalysisTime() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void set(@NonNull IAnalysisOptions o) {
+		// TODO Auto-generated method stub
+		
+	}
 }

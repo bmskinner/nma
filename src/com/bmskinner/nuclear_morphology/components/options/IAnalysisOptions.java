@@ -42,6 +42,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
     static final String NUCLEUS    = "Nucleus";
     static final String CYTOPLASM  = "Cytoplasm";
     static final String SPERM_TAIL = "SpermTail";
+    static final String SIGNAL_GROUP = "SignalGroup_";
 
     static final boolean     DEFAULT_REFOLD            = true;
     static final boolean     DEFAULT_KEEP_FAILED       = false;
@@ -114,7 +115,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      *            the name to check
      * @return present or not
      */
-    boolean hasSignalDetectionOptions(UUID signalGroup);
+    boolean hasSignalDetectionOptions(@NonNull UUID signalGroup);
 
     /**
      * Check if nuclei that do not meet the detection parameters should be kept
@@ -124,6 +125,12 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      */
     @Deprecated
     boolean isKeepFailedCollections();
+    
+    /**
+     * Get the time the analysis was conducted
+     * @return the UNIX time
+     */
+    long getAnalysisTime();
     
     /**
      * Set the detection options for the given component
@@ -163,5 +170,11 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      */
     @Deprecated
     void setKeepFailedCollections(boolean keepFailedCollections);
+    
+    /**
+     * Set the values in this options to match the given options
+     * @param o
+     */
+    void set(@NonNull IAnalysisOptions o);
 
 }

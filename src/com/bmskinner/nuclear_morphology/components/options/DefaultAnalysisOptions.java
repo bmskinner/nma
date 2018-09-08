@@ -40,13 +40,16 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, IDetectionOptions> detectionOptions = new HashMap<String, IDetectionOptions>();
+    private Map<String, IDetectionOptions> detectionOptions = new HashMap<>();
 
     private double profileWindowProportion;
 
     private NucleusType type;
 
+    @Deprecated
     private boolean isRefoldNucleus, isKeepFailed;
+    
+    private final long analysisTime; 
 
     /**
      * The default constructor, which sets default options specified in
@@ -57,7 +60,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         type = DEFAULT_TYPE;
         isRefoldNucleus = DEFAULT_REFOLD;
         isKeepFailed = DEFAULT_KEEP_FAILED;
-
+        analysisTime = System.currentTimeMillis();
     }
 
     /**
@@ -66,18 +69,8 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
      * @param template the options to use as a template
      */
     public DefaultAnalysisOptions(@NonNull IAnalysisOptions template) {
-
-        for (String key : template.getDetectionOptionTypes()) {
-            Optional<IDetectionOptions> op  = template.getDetectionOptions(key);
-            if(op.isPresent())
-	            setDetectionOptions(key, op.get().duplicate());
-        }
-
-        this.profileWindowProportion = template.getProfileWindowProportion();
-        type = template.getNucleusType();
-        isRefoldNucleus = template.refoldNucleus();
-        isKeepFailed = template.isKeepFailedCollections();
-
+        set(template);
+        analysisTime = System.currentTimeMillis();
     }
 
     @Override
@@ -120,9 +113,13 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     	for(String s : detectionOptions.keySet()) {
     		if(s.equals(NUCLEUS) || s.equals(CYTOPLASM) || s.equalsIgnoreCase(SPERM_TAIL))
     			continue;
+    		
+    		
     		try {
-    			UUID id = UUID.fromString(s);
-    			result.add(id);
+    			if(s.startsWith(SIGNAL_GROUP)) {
+    				UUID id = UUID.fromString(s.replace(SIGNAL_GROUP, ""));
+    				result.add(id);
+    			}
     		} catch(IllegalArgumentException e) {
     			// not a UUID
     		}
@@ -131,14 +128,19 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     }
 
     @Override
-    public boolean hasSignalDetectionOptions(UUID signalGroup) {
-        String key = signalGroup.toString();
+    public boolean hasSignalDetectionOptions(@NonNull UUID signalGroup) {
+        String key = SIGNAL_GROUP+signalGroup.toString();
         return hasDetectionOptions(key);
     }
 
     @Override
     public boolean isKeepFailedCollections() {
         return isKeepFailed;
+    }
+    
+    @Override
+    public long getAnalysisTime() {
+    	return analysisTime;
     }
 
     @Override
@@ -174,12 +176,24 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     @Override
     public INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup) {
 
-    	Optional<IDetectionOptions> op = getDetectionOptions(signalGroup.toString());
+    	Optional<IDetectionOptions> op = getDetectionOptions(SIGNAL_GROUP+signalGroup.toString());
     	
     	if(op.isPresent())
     		return (INuclearSignalOptions) op.get();
 
         return null;
+    }
+    
+    @Override
+    public void set(@NonNull IAnalysisOptions template) {
+    	for (String key : template.getDetectionOptionTypes()) {
+            Optional<IDetectionOptions> op  = template.getDetectionOptions(key);
+            if(op.isPresent())
+	            setDetectionOptions(key, op.get().duplicate());
+        }
+
+        profileWindowProportion = template.getProfileWindowProportion();
+        type = template.getNucleusType();
     }
 
     @Override
@@ -243,13 +257,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
         if (type != other.getNucleusType())
             return false;
-
-        if (isRefoldNucleus != other.refoldNucleus())
-            return false;
-
-        if (isKeepFailed != other.isKeepFailedCollections())
-            return false;
-
         return true;
     }
     
@@ -257,6 +264,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder("Analysis options"+IDetectionOptions.NEWLINE);
+        b.append("Run at: "+analysisTime+IDetectionOptions.NEWLINE);
         for (String s : detectionOptions.keySet()) {
             b.append(s+IDetectionOptions.NEWLINE);
             IDetectionOptions d = detectionOptions.get(s);
@@ -264,9 +272,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         }
         b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
         b.append(IDetectionOptions.NEWLINE+type);
-        b.append(IDetectionOptions.NEWLINE+isRefoldNucleus);
-        b.append(IDetectionOptions.NEWLINE+isKeepFailed);
         return b.toString();
     }
+    
+//    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+//        in.defaultReadObject();
+//    }
 
 }

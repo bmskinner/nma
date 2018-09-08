@@ -17,11 +17,15 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 public class DefaultClusteringOptions extends AbstractHashOptions implements IClusteringOptions {
 
 	private static final long serialVersionUID = 1L;
+	
+	public DefaultClusteringOptions() {
+		this(ClusteringMethod.HIERARCHICAL);
+	}
 
 	public DefaultClusteringOptions(@NonNull ClusteringMethod method) {
-		setString(CLUSTER_METHOD_KEY, method.toString());
-		setString(HIERARCHICAL_METHOD_KEY, DEFAULT_HIERARCHICAL_METHOD.toString());
-		setString(PROFILE_TYPE_KEY, DEFAULT_PROFILE_TYPE.toString());
+		setString(CLUSTER_METHOD_KEY, method.name());
+		setString(HIERARCHICAL_METHOD_KEY, DEFAULT_HIERARCHICAL_METHOD.name());
+		setString(PROFILE_TYPE_KEY, DEFAULT_PROFILE_TYPE.name());
 
 		setBoolean(USE_SIMILARITY_MATRIX_KEY, DEFAULT_USE_SIMILARITY_MATRIX);
 		setBoolean(INCLUDE_PROFILE_KEY, DEFAULT_INCLUDE_PROFILE);
@@ -35,9 +39,9 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	}
 
 	public DefaultClusteringOptions(@NonNull IClusteringOptions oldOptions) {
-		setString(CLUSTER_METHOD_KEY, oldOptions.getType().toString());
-		setString(HIERARCHICAL_METHOD_KEY, oldOptions.getHierarchicalMethod().toString());
-		setString(PROFILE_TYPE_KEY, oldOptions.getProfileType().toString());
+		setString(CLUSTER_METHOD_KEY, oldOptions.getType().name());
+		setString(HIERARCHICAL_METHOD_KEY, oldOptions.getHierarchicalMethod().name());
+		setString(PROFILE_TYPE_KEY, oldOptions.getProfileType().name());
 
 		setBoolean(USE_SIMILARITY_MATRIX_KEY, oldOptions.isUseSimilarityMatrix());
 		setBoolean(INCLUDE_PROFILE_KEY, oldOptions.isIncludeProfile());

@@ -19,6 +19,10 @@
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -451,16 +455,23 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             folder = Labels.NA_MERGE;
 
         } else {
-            if (dataset.getCollection().getOutputFolderName() == null) {
-                date = Labels.NA;
-                time = Labels.NA;
-            } else {
-                String[] times = dataset.getCollection().getOutputFolderName().split("_");
-                date = times[0];
-                time = times[1];
-            }
-
-            folder = nO.isPresent() ? nO.get().getFolder().getAbsolutePath() : "Missing data";
+        	long analysisTime = dataset.getAnalysisOptions().get().getAnalysisTime();
+        	if(analysisTime>0) { // stored from 1.14.0
+        		Instant inst = Instant.ofEpochMilli(analysisTime);
+        		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.UTC);
+        		date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM YYYY"));
+        		time = anTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        	} else { // fall back to folder name method
+        		if (dataset.getCollection().getOutputFolderName() == null) {
+        			date = Labels.NA;
+        			time = Labels.NA;
+        		} else {
+        			String[] times = dataset.getCollection().getOutputFolderName().split("_");
+        			date = times[0];
+        			time = times[1];
+        		}
+        	}
+        	folder = nO.isPresent() ? nO.get().getFolder().getAbsolutePath() : "Missing data";
         }
 
         

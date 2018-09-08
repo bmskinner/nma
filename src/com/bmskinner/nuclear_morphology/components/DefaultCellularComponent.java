@@ -1190,17 +1190,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
                 .get();
     }
     
-    
-    
-
-    /*
-     * 
-     * SERIALIZATION METHODS
-     * 
-     */
-
     @Override
-	public int hashCode() {
+	public synchronized int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((centreOfMass == null) ? 0 : centreOfMass.hashCode());
@@ -1219,7 +1210,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public synchronized boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
