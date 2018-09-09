@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -67,20 +68,14 @@ public class SignalDetector extends Detector {
     /**
      * Create a detector with the desired options
      * 
-     * @param options
-     *            the size and circularity parameters
-     * @param channel
-     *            the RGB channel
+     * @param options the size and circularity parameters
+     * @param channel the RGB channel
      */
     public SignalDetector(INuclearSignalOptions options, int channel) {
-
-        if (options == null) {
+        if (options == null)
             throw new IllegalArgumentException("Detection options cannot be null");
-        }
-
-        if (channel < 0) {
+        if (channel < 0)
             throw new IllegalArgumentException("Channel must be greater or equal to 0");
-        }
         this.options = options;
         this.channel = channel;
         this.minThreshold = options.getThreshold();
@@ -90,15 +85,12 @@ public class SignalDetector extends Detector {
      * Call the appropriate signal detection method based on the analysis
      * options
      * 
-     * @param sourceFile
-     *            the file the image came from
-     * @param stack
-     *            the imagestack
-     * @param n
-     *            the nucleus
+     * @param sourceFile the file the image came from
+     * @param stack the imagestack
+     * @param n the nucleus
      * @throws Exception
      */
-    public List<INuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception {
+    public List<INuclearSignal> detectSignal(@NonNull File sourceFile, @NonNull ImageStack stack, @NonNull Nucleus n) {
 
         options.setThreshold(minThreshold); // reset to default;
 
@@ -147,16 +139,12 @@ public class SignalDetector extends Detector {
      * Detect a signal in a given stack by standard forward thresholding and add
      * to the given nucleus
      * 
-     * @param sourceFile
-     *            the file the image came from
-     * @param stack
-     *            the imagestack
-     * @param n
-     *            the nucleus
+     * @param sourceFile the file the image came from
+     * @param stack the imagestack
+     * @param n the nucleus
      * @throws Exception
      */
-    private List<INuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n)
-            throws Exception {
+    private List<INuclearSignal> detectForwardThresholdSignal(@NonNull File sourceFile, @NonNull ImageStack stack, @NonNull Nucleus n) {
 
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
@@ -168,22 +156,17 @@ public class SignalDetector extends Detector {
         setThreshold(options.getThreshold());
 
         Map<Roi, StatsMap> roiList = new HashMap<>();
-
+        List<INuclearSignal> signals = new ArrayList<>();
         try {
-
             ImageProcessor ip = stack.getProcessor(stackNumber);
             roiList = detectRois(ip);
-
-        } catch (Exception e) {
-            error("Error in signal detection", e);
-        }
-
-        List<INuclearSignal> signals = new ArrayList<INuclearSignal>(0);
-
-        if (roiList.isEmpty()) {
-            fine("No signal in stack " + stackNumber);
+        } catch (IllegalArgumentException e) {
+            fine("No signal channel in image "+sourceFile.getAbsolutePath());
             return signals;
         }
+
+        if (roiList.isEmpty())
+            return signals;
 
         fine(roiList.size() + " signals in stack " + stackNumber);
 
@@ -224,11 +207,11 @@ public class SignalDetector extends Detector {
                     signals.add(s);
 
                 }
-            } catch (IllegalArgumentException e) {
-                stack("Cannot make signal", e);
+            } catch (IllegalArgumentException | ComponentCreationException e) {
+                warn("Cannot make signal for component "+n.getNameAndNumber());
+                fine("Error detecting or making signal: "+e.getMessage(), e);
                 continue;
             }
-
         }
         return signals;
     }
@@ -249,8 +232,7 @@ public class SignalDetector extends Detector {
      *            the nucleus
      * @throws Exception
      */
-    private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n)
-            throws Exception {
+    private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) {
 
         // SignalCollection signalCollection = n.getSignalCollection();
         finest("Beginning reverse detection for nucleus");
@@ -319,8 +301,7 @@ public class SignalDetector extends Detector {
      * 
      * @throws Exception
      */
-    private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile, @NonNull final ImageStack stack, @NonNull final Nucleus n)
-            throws Exception {
+    private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile, @NonNull final ImageStack stack, @NonNull final Nucleus n) {
         fine("Beginning histogram detection for nucleus");
 
         // choose the right stack number for the channel

@@ -188,18 +188,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @return the number of analysable image files
      */
     private static int countSuitableImages(@NonNull final File folder) {
-
         final File[] listOfFiles = folder.listFiles();
-
         if (listOfFiles == null)
             return 0;
-
         int result = 0;
 
         for (File file : listOfFiles) {
-
             boolean ok = ImageImporter.fileIsImportable(file);
-
             if (ok) {
                 result++;
             } else {
@@ -226,10 +221,12 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         // Recurse over all folders in the supplied folder
         for (File f : arr) {
-            if (f.isDirectory()) {
+            if (f.isDirectory())
                 processFolder(f);
-            }
         }
+        
+        if(!containsImageFiles(folder))
+        	return;
 
         ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder, folder.getName(),
                 analysisOptions.getNucleusType());
@@ -265,6 +262,23 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         	if(output.mkdir())
         		return output;
         return folder;
+    }
+    
+    /**
+     * Test if the given folder has any image files that can be analysed
+     * @param folder
+     * @return
+     */
+    protected boolean containsImageFiles(File folder) {
+    	if(!folder.isDirectory())
+    		return false;
+    	File[] arr = folder.listFiles();
+        if (arr == null)
+            return false;
+        for(File f: arr)
+        	if(ImageImporter.fileIsImportable(f))
+        		return true;
+        return false;
     }
 
 }

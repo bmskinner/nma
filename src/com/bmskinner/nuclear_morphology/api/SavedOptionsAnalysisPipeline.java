@@ -17,7 +17,6 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
@@ -53,7 +52,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 	
 	private final File xmlFile;
 	private final File imageFolder;
-	private IAnalysisDataset dataset;
+	private List<IAnalysisDataset> datasets;
 	private final List<IAnalysisMethod> methodsToRun = new ArrayList<>();
 	
 	
@@ -71,7 +70,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 		run();
-		return new DefaultAnalysisResult(dataset);
+		return new DefaultAnalysisResult(datasets);
 	}
 
 	/**
@@ -95,7 +94,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
     		createRefoldingMethod(options);
     		createSignalDetectionMethods(options);
     		createClusteringMethods();
-    		methodsToRun.add(new DatasetExportMethod(dataset, saveFile)); 
+    		for(IAnalysisDataset dataset : datasets)
+    			methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath())); 
     	}
     	
     	run(methodsToRun);
@@ -109,9 +109,11 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 	
 	private void createNucleusDetectionMethod(@NonNull IAnalysisOptions options, @NonNull File outFolder) throws Exception {
 		options.getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(imageFolder);
-		dataset =  new NucleusDetectionMethod(outFolder.getName(), options).call().getFirstDataset();
-		methodsToRun.add(new DatasetProfilingMethod(dataset));
-		methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW));
+		datasets =  new NucleusDetectionMethod(outFolder.getName(), options).call().getDatasets();
+		for(IAnalysisDataset dataset : datasets)
+			methodsToRun.add(new DatasetProfilingMethod(dataset));
+		for(IAnalysisDataset dataset : datasets)
+			methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW));
 	}
 	
 	/**
@@ -120,66 +122,71 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 	 * @throws Exception
 	 */
 	private void createRefoldingMethod(@NonNull IAnalysisOptions options) throws Exception {
-		 // Refold
-		 NucleusType t = options.getNucleusType();
-        switch(t){
-            case ROUND:
-            case NEUTROPHIL: {
-            	if(!dataset.getCollection().hasConsensus())
-            		methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
-            	for(IAnalysisDataset d : dataset.getAllChildDatasets())
-            		if(!d.getCollection().hasConsensus())
-            			methodsToRun.add(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST));
-                break;
-            }
-            default: {
-            	if(!dataset.getCollection().hasConsensus())
-            		methodsToRun.add(new ConsensusAveragingMethod(dataset));
-            	for(IAnalysisDataset d : dataset.getAllChildDatasets())
-            		if(!d.getCollection().hasConsensus())
-            			methodsToRun.add(new ConsensusAveragingMethod(d));
-            }
-        }
+		for(IAnalysisDataset dataset : datasets) {
+			// Refold
+			NucleusType t = options.getNucleusType();
+			switch(t){
+				case ROUND:
+				case NEUTROPHIL: {
+					if(!dataset.getCollection().hasConsensus())
+						methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
+					for(IAnalysisDataset d : dataset.getAllChildDatasets())
+						if(!d.getCollection().hasConsensus())
+							methodsToRun.add(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST));
+					break;
+				}
+				default: {
+					if(!dataset.getCollection().hasConsensus())
+						methodsToRun.add(new ConsensusAveragingMethod(dataset));
+					for(IAnalysisDataset d : dataset.getAllChildDatasets())
+						if(!d.getCollection().hasConsensus())
+							methodsToRun.add(new ConsensusAveragingMethod(d));
+				}
+			}
+		}
 	}
 	
 	private void createSignalDetectionMethods(@NonNull IAnalysisOptions options) throws Exception {
-		 // Add signals
-		 boolean checkShell = true;
-		 IShellOptions shellOptions = null;
-		 for(UUID signalGroupId : options.getNuclearSignalGroups()) {
-			 INuclearSignalOptions nop = options.getNuclearSignalOptions(signalGroupId);
-			 nop.setFolder(imageFolder);
-			 ISignalGroup group = new SignalGroup("Channel "+nop.getChannel());
-			 group.setFolder(imageFolder);
-			 group.setGroupColour(ColourSelecter.getSignalColour(nop.getChannel()));
-			 dataset.getCollection().addSignalGroup(signalGroupId, group);
-			 methodsToRun.add(new SignalDetectionMethod(dataset, nop, signalGroupId));
-			if(checkShell) {
-				if(nop.hasShellOptions())
-					shellOptions = nop.getShellOptions();
-				checkShell = false;
+		for(IAnalysisDataset dataset : datasets) {
+			// Add signals
+			boolean checkShell = true;
+			IShellOptions shellOptions = null;
+			for(UUID signalGroupId : options.getNuclearSignalGroups()) {
+				INuclearSignalOptions nop = options.getNuclearSignalOptions(signalGroupId);
+				nop.setFolder(dataset.getCollection().getFolder());
+				ISignalGroup group = new SignalGroup("Channel "+nop.getChannel());
+				group.setFolder(dataset.getCollection().getFolder());
+				group.setGroupColour(ColourSelecter.getSignalColour(nop.getChannel()));
+				dataset.getCollection().addSignalGroup(signalGroupId, group);
+				methodsToRun.add(new SignalDetectionMethod(dataset, nop, signalGroupId));
+				if(checkShell) {
+					if(nop.hasShellOptions())
+						shellOptions = nop.getShellOptions();
+					checkShell = false;
+				}
 			}
-		 }
-		 if(shellOptions!=null) {
-			 // filter the dataset for cells that can have a shell analysis applied - if all pass, does nothing
-			 final int shellCount = shellOptions.getShellNumber();
-			 Predicate<ICell> p = (c)->{
-				 return c.getNuclei().stream().allMatch(n->{
-					 return (n.getStatistic(PlottableStatistic.AREA) > shellCount*ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL
-						 && n.getStatistic(PlottableStatistic.CIRCULARITY)>ShellAnalysisMethod.MINIMUM_CIRCULARITY);
-				 });
-			 };
-//			 methodsToRun.add(new CellCollectionFilteringMethod(dataset, p, "Suitable_for_shell_analysis"));
-			 methodsToRun.add(new ShellAnalysisMethod(dataset, shellOptions));
-		 }
-			 
+			if(shellOptions!=null) {
+				// filter the dataset for cells that can have a shell analysis applied - if all pass, does nothing
+				final int shellCount = shellOptions.getShellNumber();
+				Predicate<ICell> p = (c)->{
+					return c.getNuclei().stream().allMatch(n->{
+						return (n.getStatistic(PlottableStatistic.AREA) > shellCount*ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL
+								&& n.getStatistic(PlottableStatistic.CIRCULARITY)>ShellAnalysisMethod.MINIMUM_CIRCULARITY);
+					});
+				};
+				//			 methodsToRun.add(new CellCollectionFilteringMethod(dataset, p, "Suitable_for_shell_analysis"));
+				methodsToRun.add(new ShellAnalysisMethod(dataset, shellOptions));
+			}
+		} 
 	}
 	
 	private void createClusteringMethods() throws Exception {
 		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
 		List<IClusteringOptions> clusterOptions = r.readClusteringOptions();
 		 for(IClusteringOptions cluster : clusterOptions) {
-			 methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));
+			 for(IAnalysisDataset dataset : datasets) {
+				 methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));
+			 }
 		 }
 	}
 		

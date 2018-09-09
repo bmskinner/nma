@@ -26,6 +26,7 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -54,7 +55,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
  */
 public class DemoProber extends SettingsDialog {
 
-    private Finder<List<ICell>> test;
+    private Finder<Collection<ICell>> test;
     JButton                     runButton;
 
     public DemoProber(File folder) {
@@ -89,7 +90,7 @@ public class DemoProber extends SettingsDialog {
         Runnable r = () -> {
             try {
                 runButton.setEnabled(false);
-                List<ICell> cells = test.find();
+                Collection<ICell> cells = test.find();
                 runButton.setEnabled(true);
             } catch (Exception e) {
                 error("Error in prober", e);

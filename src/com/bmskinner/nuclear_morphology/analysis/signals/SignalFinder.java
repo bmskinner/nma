@@ -113,7 +113,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         // Ignore incorrect channel selections
         if (stack.getSize() < stackNumber) {
-            fine("Channel not available");
+            fine("Channel not present in image");
             return list;
         }
 
@@ -188,16 +188,17 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         detector = new SignalDetector(signalOptions, signalOptions.getChannel());
 
         List<INuclearSignal> list = new ArrayList<>();
-        ImageStack stack = new ImageImporter(imageFile).importToStack();
-
         try {
+        	ImageStack stack = new ImageImporter(imageFile).importToStack();
+
             // The detector also creates the signals currently
             List<INuclearSignal> temp = detector.detectSignal(imageFile, stack, n);
             for (INuclearSignal s : temp)
                 if (checkSignal(s, n)) 
                     list.add(s);
-        } catch (Exception e) {
-            error("Error in detector", e);
+        } catch (IllegalArgumentException | ImageImportException e) {
+        	warn("Unable to find images in image "+imageFile.getAbsolutePath()+": "+e.getMessage());
+            fine("Error in detector with image "+imageFile.getAbsolutePath(), e);
         }
         return list;
     }

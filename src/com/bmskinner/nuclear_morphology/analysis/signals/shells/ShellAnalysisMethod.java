@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -64,7 +63,7 @@ import ij.ImageStack;
 public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
 	public static final int MINIMUM_AREA_PER_SHELL = 50;
-	public static final double MINIMUM_CIRCULARITY = 0.1;
+	public static final double MINIMUM_CIRCULARITY = 0.07;
 	
 	private final IShellOptions options;
 	

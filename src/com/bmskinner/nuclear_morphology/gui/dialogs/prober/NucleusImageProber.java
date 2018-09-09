@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -63,7 +64,7 @@ public class NucleusImageProber extends IntegratedImageProber {
                     .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
                     .build();
 
-            Finder<List<ICell>> finder = new FluorescentNucleusFinder(options);
+            Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options);
             imageProberPanel = new GenericImageProberPanel(folder, finder, this);
 
             JPanel footerPanel = createFooter();
