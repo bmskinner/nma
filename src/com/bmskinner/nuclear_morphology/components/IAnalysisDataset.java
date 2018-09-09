@@ -195,7 +195,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the UUID to test
      * @return
      */
-    boolean hasMergeSource(UUID id);
+    boolean hasMergeSource(@NonNull UUID id);
 
     /**
      * Test if a dataset is present as a merge source
@@ -204,7 +204,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the dataset to test
      * @return
      */
-    boolean hasMergeSource(IAnalysisDataset dataset);
+    boolean hasMergeSource(@NonNull IAnalysisDataset dataset);
 
     /**
      * Test if the dataset has merge sources
@@ -277,7 +277,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param dataset
      */
-    void addClusterGroup(IClusterGroup group);
+    void addClusterGroup(@NonNull IClusterGroup group);
 
     /**
      * Check the list of cluster groups, and return the highest cluster group
@@ -293,7 +293,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param id
      * @return
      */
-    boolean hasCluster(UUID id);
+    boolean hasCluster(@NonNull UUID id);
 
     List<IClusterGroup> getClusterGroups();
 
@@ -317,7 +317,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param group
      * @return
      */
-    boolean hasClusterGroup(IClusterGroup group);
+    boolean hasClusterGroup(@NonNull IClusterGroup group);
 
     /**
      * Check that all cluster groups have child members present; if cluster
@@ -353,7 +353,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param id
      */
-    void deleteClusterGroup(IClusterGroup group);
+    void deleteClusterGroup(@NonNull IClusterGroup group);
 
     /**
      * Delete an associated dataset
@@ -369,7 +369,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the dataset to test
      * @return
      */
-    boolean hasChild(IAnalysisDataset child);
+    boolean hasChild(@NonNull IAnalysisDataset child);
 
     /**
      * Test if the given dataset is a child of this dataset or of one of its
@@ -378,7 +378,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param child
      * @return
      */
-    boolean hasRecursiveChild(IAnalysisDataset child);
+    boolean hasRecursiveChild(@NonNull IAnalysisDataset child);
 
     /**
      * Check if the given dataset is a child dataset of this
@@ -386,7 +386,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param child
      * @return
      */
-    boolean hasChild(UUID child);
+    boolean hasChild(@NonNull UUID child);
 
     /**
      * Set the dataset colour (used in comparisons between datasets)

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.bmskinner</groupId>
   <artifactId>nuclear_morphology</artifactId>
-  <version>1.14.0a1</version>
+  <version>1.14.0a2</version>
   <properties>
     <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
     <jar.finalName>Nuclear_Morphology_${project.version}</jar.finalName>

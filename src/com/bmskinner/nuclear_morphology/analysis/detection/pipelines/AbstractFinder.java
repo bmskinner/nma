@@ -124,11 +124,13 @@ public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
      * 
      */
 
-    public synchronized void addProgressListener(ProgressListener l) {
+    @Override
+	public synchronized void addProgressListener(ProgressListener l) {
         progressListeners.add(l);
     }
 
-    public synchronized void removeProgressListener(ProgressListener l) {
+    @Override
+	public synchronized void removeProgressListener(ProgressListener l) {
         progressListeners.remove(l);
     }
 

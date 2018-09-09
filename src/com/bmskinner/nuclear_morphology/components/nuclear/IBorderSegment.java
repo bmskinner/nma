@@ -570,23 +570,26 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     		return result;
     	}
 
-        int segStart = list.get(0).getStartIndex();
-        double segStartProportion = (double) segStart / (double) list.get(0).getProfileLength();
+    	// In case the start is not zero
+        int startIndex = list.get(0).getStartIndex();
+        double startProp = (double) startIndex / (double) list.get(0).getProfileLength();
         
-        segStart = (int) (((double) segStart) * segStartProportion);
+        int newStartIndex = (int) (startIndex * startProp);
+        startIndex = newStartIndex;
         
-        for (IBorderSegment segment : list) {
-        	
+        for (int i=0; i<list.size(); i++) {
+        	IBorderSegment segment = list.get(i);
             double proportion = (double) segment.length() / (double) segment.getProfileLength();
 
-            int newSegLength = (int) ((double) newLength * proportion);
+            int newSegLength = (int) (newLength * proportion);
 
-            int segEnd = CellularComponent.wrapIndex(segStart + newSegLength, newLength);
+            int segEnd = CellularComponent.wrapIndex(newStartIndex+newSegLength, newLength);
+            
+            if(i==list.size()-1)
+            	segEnd = startIndex;
 
-            IBorderSegment newSeg = IBorderSegment.newSegment(segStart, segEnd, newLength, segment.getID());
-
-            segStart = segEnd;
-
+            IBorderSegment newSeg = IBorderSegment.newSegment(newStartIndex, segEnd, newLength, segment.getID());
+            newStartIndex = segEnd;
             result.add(newSeg);
         }
 

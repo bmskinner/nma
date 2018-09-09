@@ -86,7 +86,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
         } else {
             moveCentreOfMass(IPoint.makeNew(0, 0));
         }
-        this.alignVertically();
     }
 
     public NucleusType getType() {

@@ -95,1128 +95,982 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DefaultCellCollection implements ICellCollection {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private final UUID uuid; // the collection id
+	private final UUID uuid; // the collection id
 
-    private File   folder;       // the source of the nuclei
-    private String outputFolder; // the location to save out data
-    private String name;         // the name of the collection
+	private File   folder;       // the source of the nuclei
+	private String outputFolder; // the location to save out data
+	private String name;         // the name of the collection
 
-    private NucleusType nucleusType; // the type of nuclei this collection
-                                     // contains
+	private NucleusType nucleusType; // the type of nuclei this collection
+	// contains
 
-    // this holds the mapping of tail indexes etc in the median profile arrays
-    private IProfileCollection profileCollection = IProfileCollection.makeNew();
+	// this holds the mapping of tail indexes etc in the median profile arrays
+	private IProfileCollection profileCollection = IProfileCollection.makeNew();
 
-    private Nucleus consensusNucleus; // the refolded consensus nucleus
+	private Nucleus consensusNucleus; // the refolded consensus nucleus
 
-    private Set<ICell> cells = new HashSet<ICell>(100); // store all the cells
-                                                        // analysed
+	private Set<ICell> cells = new HashSet<ICell>(100); // store all the cells
+	// analysed
 
-    private Map<UUID, ISignalGroup> signalGroups = new HashMap<UUID, ISignalGroup>(0);
+	private Map<UUID, ISignalGroup> signalGroups = new HashMap<UUID, ISignalGroup>(0);
 
-    private RuleSetCollection ruleSets = new RuleSetCollection();
+	private RuleSetCollection ruleSets = new RuleSetCollection();
 
-    /*
-     * 
-     * TRANSIENT FIELDS
-     * 
-     */
+	/*
+	 * 
+	 * TRANSIENT FIELDS
+	 * 
+	 */
 
-    /**
-     * Set when the consensus nucleus is refolding
-     */
-    private volatile transient boolean isRefolding = false;
+	/**
+	 * Set when the consensus nucleus is refolding
+	 */
+	private volatile transient boolean isRefolding = false;
 
-    /**
-     * Cache statistics from the cells in the collection. This should be updated
-     * if a cell is added or lost
-     */
-    private volatile transient StatsCache statsCache = new StatsCache();
+	/**
+	 * Cache statistics from the cells in the collection. This should be updated
+	 * if a cell is added or lost
+	 */
+	private volatile transient StatsCache statsCache = new StatsCache();
 
-    // cache the number of shared cells with other datasets
-    protected volatile transient VennCache vennCache = new VennCache();
+	// cache the number of shared cells with other datasets
+	protected volatile transient VennCache vennCache = new VennCache();
 
-    private transient SignalManager  signalManager  = new SignalManager(this);
-    private transient ProfileManager profileManager = new ProfileManager(this);
+	private transient SignalManager  signalManager  = new SignalManager(this);
+	private transient ProfileManager profileManager = new ProfileManager(this);
 
-    /**
-     * Constructor.
-     * 
-     * @param folder the folder of images
-     * @param outputFolder a name for the outputs (usually the analysis date). Can be
-     *            null
-     * @param name the name of the collection
-     * @param nucleusType the class of nucleus to be held
-     */
-    public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType) {
-        this(folder, outputFolder, name, nucleusType, java.util.UUID.randomUUID());
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param folder the folder of images
+	 * @param outputFolder a name for the outputs (usually the analysis date). Can be
+	 *            null
+	 * @param name the name of the collection
+	 * @param nucleusType the class of nucleus to be held
+	 */
+	public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType) {
+		this(folder, outputFolder, name, nucleusType, java.util.UUID.randomUUID());
+	}
 
-    /**
-     * Constructor with non-random id. Use only when copying an old collection.
-     * Can cause ID conflicts!
-     * 
-     * @param folder
-     *            the folder of images
-     * @param outputFolder
-     *            a name for the outputs (usually the analysis date). Can be
-     *            null
-     * @param name
-     *            the name of the collection
-     * @param nucleusClass
-     *            the class of nucleus to be held
-     * @param id
-     *            specify an id for the collection, rather than generating
-     *            randomly.
-     */
-    public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType, UUID id) {
+	/**
+	 * Constructor with non-random id. Use only when copying an old collection.
+	 * Can cause ID conflicts!
+	 * 
+	 * @param folder
+	 *            the folder of images
+	 * @param outputFolder
+	 *            a name for the outputs (usually the analysis date). Can be
+	 *            null
+	 * @param name
+	 *            the name of the collection
+	 * @param nucleusClass
+	 *            the class of nucleus to be held
+	 * @param id
+	 *            specify an id for the collection, rather than generating
+	 *            randomly.
+	 */
+	public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType, UUID id) {
 
-        this.uuid = id;
-        this.folder = folder;
-        this.outputFolder = outputFolder;
-        this.name = name == null ? folder.getName() : name;// if name is null,
-                                                           // use the image
-                                                           // folder name
-        this.nucleusType = nucleusType;
+		this.uuid = id;
+		this.folder = folder;
+		this.outputFolder = outputFolder;
+		this.name = name == null ? folder.getName() : name;// if name is null,
+		// use the image
+		// folder name
+		this.nucleusType = nucleusType;
 
-        // for(ProfileType type : ProfileType.values()){
-        // profileCollections.put(type, new DefaultProfileCollection());
-        // }
+		// for(ProfileType type : ProfileType.values()){
+		// profileCollections.put(type, new DefaultProfileCollection());
+		// }
 
-        ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
+		ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
 
-    }
+	}
 
-    /**
-     * Construct an empty collection from a template dataset
-     * 
-     * @param template
-     *            the dataset to base on for folders and type
-     * @param name
-     *            the collection name
-     */
-    public DefaultCellCollection(IAnalysisDataset template, String name) {
+	/**
+	 * Construct an empty collection from a template dataset
+	 * 
+	 * @param template
+	 *            the dataset to base on for folders and type
+	 * @param name
+	 *            the collection name
+	 */
+	public DefaultCellCollection(IAnalysisDataset template, String name) {
 
-        this(template.getCollection(), name);
-    }
+		this(template.getCollection(), name);
+	}
 
-    /**
-     * Construct an empty collection from a template collection
-     * 
-     * @param template
-     * @param name
-     */
-    public DefaultCellCollection(ICellCollection template, String name) {
-        this(template.getFolder(), template.getOutputFolderName(), name, template.getNucleusType());
-    }
+	/**
+	 * Construct an empty collection from a template collection
+	 * 
+	 * @param template
+	 * @param name
+	 */
+	public DefaultCellCollection(ICellCollection template, String name) {
+		this(template.getFolder(), template.getOutputFolderName(), name, template.getNucleusType());
+	}
 
-    @Override
+	@Override
 	public void setName(@NonNull String s) {
-        this.name = s;
-    }
+		this.name = s;
+	}
 
-    @Override
+	@Override
 	public String getName() {
-        return this.name;
-    }
+		return this.name;
+	}
 
-    @Override
+	@Override
 	public UUID getID() {
-        return this.uuid;
-    }
+		return this.uuid;
+	}
 
-    @Override
+	@Override
 	public boolean isReal() {
-        return true;
-    }
+		return true;
+	}
 
-    @Override
+	@Override
 	public boolean isVirtual() {
-        return false;
-    }
+		return false;
+	}
 
-    /**
-     * Get the UUIDs of all the cells in the collection
-     * 
-     * @return
-     */
-    @Override
+	/**
+	 * Get the UUIDs of all the cells in the collection
+	 * 
+	 * @return
+	 */
+	@Override
 	public Set<UUID> getCellIDs() {
 
-        return cells.parallelStream().map(c -> c.getId()).collect(Collectors.toSet());
+		return cells.parallelStream().map(c -> c.getId()).collect(Collectors.toSet());
 
-    }
+	}
 
-    @Override
+	@Override
 	public void addCell(final @NonNull ICell r) {
-        cells.add(r);
-    }
+		cells.add(r);
+	}
 
-    /**
-     * Replace the cell with the same ID as the given cell with the new copy
-     * 
-     * @param r
-     */
-    @Override
+	/**
+	 * Replace the cell with the same ID as the given cell with the new copy
+	 * 
+	 * @param r
+	 */
+	@Override
 	public void replaceCell(@NonNull ICell r) {
-        if (r == null) {
-            throw new IllegalArgumentException("Cell is null");
-        }
+		if (r == null)
+			throw new IllegalArgumentException("Cell is null");
 
-        boolean found = false;
-        Iterator<ICell> it = cells.iterator();
-        while (it.hasNext()) {
-            ICell test = it.next();
+		boolean found = false;
+		Iterator<ICell> it = cells.iterator();
+		while (it.hasNext()) {
+			ICell test = it.next();
 
-            if (r.getId().equals(test.getId())) {
-                it.remove();
-                found = true;
-                break;
-            }
-        }
+			if (r.getId().equals(test.getId())) {
+				it.remove();
+				found = true;
+				break;
+			}
+		}
 
-        // only put the cell in if it was removed
-        if (found) {
-            addCell(r);
-        }
+		// only put the cell in if it was removed
+		if (found) {
+			addCell(r);
+		}
 
-    }
+	}
 
-    /**
-     * Remove the given cell from the collection. If the cell is null, has no
-     * effect. If the cell is not in the collection, has no effect.
-     * 
-     * @param c
-     *            the cell to remove
-     */
-    @Override
+	/**
+	 * Remove the given cell from the collection. If the cell is null, has no
+	 * effect. If the cell is not in the collection, has no effect.
+	 * 
+	 * @param c
+	 *            the cell to remove
+	 */
+	@Override
 	public void removeCell(@NonNull ICell c) {
-        cells.remove(c);
-    }
+		cells.remove(c);
+	}
 
-    @Override
+	@Override
 	public int size() {
-        return cells.size();
-    }
+		return cells.size();
+	}
 
-    /**
-     * Check if the collection contains cells
-     * 
-     * @return
-     */
-    @Override
+	/**
+	 * Check if the collection contains cells
+	 * 
+	 * @return
+	 */
+	@Override
 	public boolean hasCells() {
-        return !cells.isEmpty();
-    }
+		return !cells.isEmpty();
+	}
 
-    @Override
+	@Override
 	public boolean hasLockedCells() {
-        for (Nucleus n : this.getNuclei()) {
-            if (n.isLocked()) {
-                return true;
-            }
-        }
-        return false;
-    }
+		for (Nucleus n : this.getNuclei()) {
+			if (n.isLocked()) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    @Override
+	@Override
 	public void setCellsLocked(boolean b) {
-        for (Nucleus n : this.getNuclei()) {
-            n.setLocked(b);
-        }
-    }
+		for (Nucleus n : this.getNuclei()) {
+			n.setLocked(b);
+		}
+	}
 
-    /**
-     * Get the cell with the given UUID
-     * 
-     * @param id
-     * @return
-     */
-    @Override
+	/**
+	 * Get the cell with the given UUID
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Override
 	public ICell getCell(@NonNull UUID id) {
-    	return cells.parallelStream()
-    			.filter(c->c.getId().equals(id))
-    			.findFirst().orElse(null);
-    }
+		return cells.parallelStream()
+				.filter(c->c.getId().equals(id))
+				.findFirst().orElse(null);
+	}
 
-    @Override
+	@Override
 	public NucleusType getNucleusType() {
-        return this.nucleusType;
-    }
+		return this.nucleusType;
+	}
 
-    /*
-     * 
-     * METHODS IMPLEMENTING THE REFOLDABLE INTERFACE
-     * 
-     */
+	/*
+	 * 
+	 * METHODS IMPLEMENTING THE REFOLDABLE INTERFACE
+	 * 
+	 */
 
-    @Override
-    public boolean hasConsensus() {
-        return this.consensusNucleus != null;
-    }
+	@Override
+	public boolean hasConsensus() {
+		return consensusNucleus != null;
+	}
 
-    @Override
-    public void setConsensus(@Nullable Nucleus n) {
-        this.consensusNucleus = n;
-    }
+	@Override
+	public void setConsensus(@Nullable Nucleus n) {
+		consensusNucleus = n;
+	}
 
-    @Override
-    public Nucleus getConsensus() {
-        return this.consensusNucleus;
-    }
+	@Override
+	public Nucleus getConsensus() {
+		return consensusNucleus;
+	}
 
-    /**
-     * Get the profile collection of the given type
-     * 
-     * @param type
-     * @return
-     */
-    @Override
+	/**
+	 * Get the profile collection of the given type
+	 * 
+	 * @param type
+	 * @return
+	 */
+	@Override
 	public IProfileCollection getProfileCollection() {
-        return profileCollection;
-    }
+		return profileCollection;
+	}
 
-    @Override
+	@Override
 	public File getFolder() {
-        return this.folder;
-    }
+		return folder;
+	}
 
-    @Override
+	@Override
 	public String getOutputFolderName() {
-        return this.outputFolder;
-    }
+		return outputFolder;
+	}
 
-    /**
-     * Get the output folder (e.g. to save the dataset into). If an output
-     * folder name (such as a date) has been input, it will be included
-     * 
-     * @return the folder
-     */
-    @Override
+	/**
+	 * Get the output folder (e.g. to save the dataset into). If an output
+	 * folder name (such as a date) has been input, it will be included
+	 * 
+	 * @return the folder
+	 */
+	@Override
 	public File getOutputFolder() {
-        File result = null;
-        if (outputFolder == null) {
-            result = this.getFolder();
-        } else {
-            result = new File(this.getFolder(), outputFolder);
-        }
-        return result;
-    }
+		if (outputFolder == null)
+			return getFolder();
+		return new File(this.getFolder(), outputFolder);
+	}
 
-    @Override
-    public void setOutputFolder(@NonNull File folder) {
-        this.folder = folder;
-        this.outputFolder = null;
-    }
+	@Override
+	public void setOutputFolder(@NonNull File folder) {
+		this.folder = folder;
+		this.outputFolder = null;
+	}
 
-    /**
-     * Get the distinct source image file list for all nuclei in the collection
-     * 
-     * @return
-     */
-    @Override
-	public Set<File> getImageFiles() {
-        Set<File> result = new HashSet<File>(0);
-        for (Nucleus n : this.getNuclei()) {
-            result.add(n.getSourceFile());
-        }
-        return result;
-    }
+	@Override
+	public synchronized Set<File> getImageFiles() {
+		return getNuclei().stream().map(n->n.getSourceFile()).collect(Collectors.toSet());
+	}
 
-    /**
-     * Get the array lengths of the nuclei in this collection as an array
-     * 
-     * @return
-     */
-    private int[] getArrayLengths() {
+	/**
+	 * Get the array lengths of the nuclei in this collection as an array
+	 * 
+	 * @return
+	 */
+	private synchronized int[] getArrayLengths() {
+		return getNuclei().stream().mapToInt(n->n.getBorderLength()).toArray();
+	}
 
-        int[] result = new int[this.getNuclei().size()];
+	public synchronized double[] getMedianDistanceBetweenPoints() {
+		return getNuclei().stream().mapToDouble(n->n.getMedianDistanceBetweenPoints()).toArray();
+	}
 
-        int i = 0;
-        
-        
-        
-        for (ICell cell : cells) {
+	@Override
+	public int getNucleusCount() {
+		return this.getNuclei().size();
+	}
 
-            for (Nucleus n : cell.getNuclei()) {
-                // Nucleus n = cell.getNucleus();
-                result[i++] = n.getBorderLength();
-            }
-        }
-        return result;
-    }
-
-    public double[] getMedianDistanceBetweenPoints() {
-
-        int count = this.getNucleusCount();
-        double[] result = new double[count];
-
-        int i = 0;
-
-        for (Nucleus n : getNuclei()) {
-            result[i++] = n.getMedianDistanceBetweenPoints();
-        }
-
-        return result;
-    }
-
-    @Override
-    public int getNucleusCount() {
-        return this.getNuclei().size();
-    }
-
-    /**
-     * Get the cells in this collection
-     * 
-     * @return
-     */
-      @Override
+	@Override
 	public Set<ICell> getCells() {
-        return cells;
-    }
-      
-      /**
-       * Get the cells in this collection
-       * 
-       * @return
-       */
-      @Override
+		return cells;
+	}
+
+
+	@Override
 	public Stream<ICell> streamCells() {
-          return cells.stream();
-      }
+		return cells.stream();
+	}
 
-    /**
-     * Get the cells within the given image file
-     * 
-     * @return
-     */
-    @Override
-	public Set<ICell> getCells(@NonNull File imageFile) {
-        Set<ICell> result = new HashSet<ICell>(cells.size());
+	@Override
+	public synchronized Set<ICell> getCells(@NonNull File imageFile) {
+		return cells.stream().filter(c->c.getNucleus().getSourceFile().equals(imageFile))
+				.collect(Collectors.toSet());
+	}
 
-        for (ICell cell : cells) {
-            if (cell.getNuclei().get(0).getSourceFile().equals(imageFile)) {
-                result.add(cell);
-            }
-        }
-        return result;
-    }
+	@Override
+	public synchronized boolean hasCells(@NonNull File imageFile) {
+		return getCells(imageFile).size() > 0;
+	}
 
-    @Override
-    public boolean hasCells(@NonNull File imageFile) {
-        return getCells(imageFile).size() > 0;
-    }
+	@Override
+	public synchronized boolean hasNuclei(@NonNull File imageFile) {
+		return getNuclei(imageFile).size() > 0;
+	}
 
-    @Override
-    public boolean hasNuclei(@NonNull File imageFile) {
-        return getNuclei(imageFile).size() > 0;
-    }
+	@Override
+	public synchronized Set<Nucleus> getNuclei() {
+		return cells.stream().flatMap(c->c.getNuclei().stream())
+				.collect(Collectors.toSet());
+	}
 
-    /**
-     * Get the nuclei in this collection
-     * 
-     * @return
-     */
-    @Override
-	public Set<Nucleus> getNuclei() {
+	@Override
+	public synchronized Set<Nucleus> getNuclei(@NonNull File imageFile) {
+		return getNuclei().stream().filter(n->n.getSourceFile().equals(imageFile))
+				.collect(Collectors.toSet());
+	}
 
-        Set<Nucleus> result = new HashSet<Nucleus>(cells.size());
-        for (ICell c : cells) {
-            result.addAll(c.getNuclei());
-        }
-
-        return result;
-    }
-
-    /**
-     * Get the nuclei within the specified image
-     * 
-     * @param image
-     *            the file to search
-     * @return the list of nuclei
-     */
-    @Override
-	public Set<Nucleus> getNuclei(@NonNull File imageFile) {
-        Set<Nucleus> result = new HashSet<Nucleus>(cells.size());
-        for (Nucleus n : this.getNuclei()) {
-            if (n.getSourceFile().equals(imageFile)) {
-                result.add(n);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Create a SignalManager with responsibility for aggregate nuclear signal
-     * methods.
-     * 
-     * @return
-     */
-    @Override
+	@Override
 	public SignalManager getSignalManager() {
-        return signalManager;
-    }
+		return signalManager;
+	}
 
-    @Override
+	@Override
 	public ProfileManager getProfileManager() {
-        return profileManager;
-    }
+		return profileManager;
+	}
 
-    @Override
+	@Override
 	public int getMedianArrayLength() {
-        if (size() == 0) {
-            return 0;
-        }
+		if (size() == 0)
+			return 0;
+		int[] p = this.getArrayLengths();
+		return Stats.quartile(p, Stats.MEDIAN);
+	}
 
-        int[] p = this.getArrayLengths();
-        return Stats.quartile(p, Stats.MEDIAN);
-    }
-
-    @Override
+	@Override
 	public int getMaxProfileLength() {
+		return Arrays.stream(getArrayLengths()).max().orElse(0);
+	}
 
-        return Arrays.stream(this.getArrayLengths()).max().orElse(0); // Stats.max(values);
-    }
+	/*
+	 * -------------------- Profile methods --------------------
+	 */
 
-    /*
-     * -------------------- Profile methods --------------------
-     */
-
-    /**
-     * Create the profile collections to hold angles from nuclear profiles based
-     * on the current nucleus profiles. The ProfileAggregate for each
-     * ProfileType is recalculated. The resulting median profiles will have the
-     * same length after this update
-     * 
-     * @param keepLength
-     *            when recalculating the profile aggregate, should the previous
-     *            length be kept
-     * @return
-     * @throws ProfileException 
-     */
-    @Override
+	@Override
 	public void createProfileCollection() throws ProfileException {
+		createProfileCollection(getMedianArrayLength());
+	}
 
-        /*
-         * Build a set of profile aggregates Default is to make profile
-         * aggregate from reference point
-         * 
-         */
-        createProfileCollection(this.getMedianArrayLength());
-    }
+	public void createProfileCollection(int length) throws ProfileException {
 
-    public void createProfileCollection(int length) throws ProfileException {
+		/*
+		 * Build a set of profile aggregates Default is to make profile
+		 * aggregate from reference point
+		 * 
+		 */
+		profileCollection.createProfileAggregate(this, length);
+	}
 
-        /*
-         * Build a set of profile aggregates Default is to make profile
-         * aggregate from reference point
-         * 
-         */
-        profileCollection.createProfileAggregate(this, length);
-    }
+	/**
+	 * Get the differences to the median profile for each nucleus
+	 * 
+	 * @param pointType the point to fetch profiles from
+	 * @return an array of differences
+	 */
+	private double[] getDifferencesToMedianFromPoint(Tag pointType) {
 
-    /**
-     * Get a list of all the segments currently within the profile collection
-     * 
-     * @return
-     */
-    public List<String> getSegmentNames() throws Exception {
+		int count = this.getNucleusCount();
+		double[] result = new double[count];
+		int i = 0;
 
-        List<String> result = new ArrayList<String>(0);
-        IProfileCollection pc = this.getProfileCollection();
-        List<IBorderSegment> segs = pc.getSegments(Tag.ORIENTATION_POINT);
-        for (IBorderSegment segment : segs) {
-            result.add(segment.getName());
-        }
-        return result;
-    }
+		IProfile medianProfile;
+		try {
+			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+			fine("Error getting median profile for collection", e);
+			for (int j = 0; i < result.length; j++) {
+				result[j] = 0;
+			}
+			return result;
+		}
 
-    /**
-     * Get the differences to the median profile for each nucleus
-     * 
-     * @param pointType
-     *            the point to fetch profiles from
-     * @return an array of differences
-     */
-    private double[] getDifferencesToMedianFromPoint(Tag pointType) {
+		for (Nucleus n : this.getNuclei()) {
 
-        int count = this.getNucleusCount();
-        double[] result = new double[count];
-        int i = 0;
+			try {
+				IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
+				result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+			} catch (ProfileException | UnavailableProfileTypeException e) {
+				fine("Error getting nucleus profile", e);
+				result[i] = Double.MAX_VALUE;
+			} finally {
+				i++;
+			}
+		}
+		return result;
+	}
 
-        IProfile medianProfile;
-        try {
-            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            fine("Error getting median profile for collection", e);
-            for (int j = 0; i < result.length; j++) {
-                result[j] = 0;
-            }
-            return result;
-        }
+	/**
+	 * Get the differences to the median profile for each nucleus, normalised to
+	 * the perimeter of the nucleus. This is the sum-of-squares difference,
+	 * rooted and divided by the nuclear perimeter
+	 * 
+	 * @param pointType the point to fetch profiles from
+	 * @return an array of normalised differences
+	 */
+	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
+		IProfile medianProfile;
+		try {
+			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+			warn("Cannot get median profile for collection");
+			fine("Error getting median profile", e);
+			double[] result = new double[size()];
+			Arrays.fill(result, Double.MAX_VALUE);
+			return result;
+		}
 
-        for (Nucleus n : this.getNuclei()) {
+		return getNuclei().stream().mapToDouble(n->{
+			try {
 
-            try {
-                IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
-                result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-            } catch (ProfileException | UnavailableProfileTypeException e) {
-                fine("Error getting nucleus profile", e);
-                result[i] = Double.MAX_VALUE;
-            } finally {
-                i++;
-            }
-        }
-        return result;
-    }
+				IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
+				double diff = angleProfile.absoluteSquareDifference(medianProfile);
 
-    /**
-     * Get the differences to the median profile for each nucleus, normalised to
-     * the perimeter of the nucleus. This is the sum-of-squares difference,
-     * rooted and divided by the nuclear perimeter
-     * 
-     * @param pointType the point to fetch profiles from
-     * @return an array of normalised differences
-     */
-    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
-        IProfile medianProfile;
-        try {
-            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            warn("Cannot get median profile for collection");
-            fine("Error getting median profile", e);
-            double[] result = new double[size()];
-            Arrays.fill(result, Double.MAX_VALUE);
-            return result;
-        }
-        
-        return getNuclei().stream().mapToDouble(n->{
-            try {
+				// normalise to the number of points in the perimeter
+				diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
+				return Math.sqrt(diff); // differences in degrees, rather than square degrees
 
-                IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
-                double diff = angleProfile.absoluteSquareDifference(medianProfile);
-                
-                // normalise to the number of points in the perimeter
-                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
-                return Math.sqrt(diff); // differences in degrees, rather than square degrees
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				fine("Error getting nucleus profile", e);
+				return  Double.MAX_VALUE;
+			} 
+		}).toArray();
+	}
 
-            } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-                fine("Error getting nucleus profile", e);
-                return  Double.MAX_VALUE;
-            } 
-        }).toArray();
-    }
+	/**
+	 * Get the perimeter normalised veriabililty of a nucleus angle profile
+	 * compared to the median profile of the collection
+	 * 
+	 * @param pointType
+	 *            the tag to use as index 0
+	 * @param c
+	 *            the cell to test
+	 * @return the variabililty score of the nucleus
+	 * @throws Exception
+	 */
+	@Override
+	public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {
+		IProfile medianProfile;
+		try {
+			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+			fine("Error getting median profile for collection", e);
+			return 0;
+		}
+		IProfile angleProfile;
+		try {
+			angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
-    /**
-     * Get the perimeter normalised veriabililty of a nucleus angle profile
-     * compared to the median profile of the collection
-     * 
-     * @param pointType
-     *            the tag to use as index 0
-     * @param c
-     *            the cell to test
-     * @return the variabililty score of the nucleus
-     * @throws Exception
-     */
-    @Override
-    public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {
-        IProfile medianProfile;
-        try {
-            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            fine("Error getting median profile for collection", e);
-            return 0;
-        }
-        IProfile angleProfile;
-        try {
-            angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
+			double diff = angleProfile.absoluteSquareDifference(medianProfile);
+			diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise
+			// to
+			// the
+			// number
+			// of
+			// points
+			// in
+			// the
+			// perimeter
+			// (approximately
+			// 1
+			// point
+			// per
+			// pixel)
+			double rootDiff = Math.sqrt(diff); // use the differences in
+			// degrees, rather than square
+			// degrees
+			return rootDiff;
+		} catch (ProfileException | UnavailableComponentException e) {
+			fine("Error getting nucleus profile", e);
+			return 0;
+		}
+	}
 
-            double diff = angleProfile.absoluteSquareDifference(medianProfile);
-            diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise
-                                                                                           // to
-                                                                                           // the
-                                                                                           // number
-                                                                                           // of
-                                                                                           // points
-                                                                                           // in
-                                                                                           // the
-                                                                                           // perimeter
-                                                                                           // (approximately
-                                                                                           // 1
-                                                                                           // point
-                                                                                           // per
-                                                                                           // pixel)
-            double rootDiff = Math.sqrt(diff); // use the differences in
-                                               // degrees, rather than square
-                                               // degrees
-            return rootDiff;
-        } catch (ProfileException | UnavailableComponentException e) {
-            fine("Error getting nucleus profile", e);
-            return 0;
-        }
-    }
+	public double compareProfilesToMedian(BorderTagObject pointType) throws Exception {
+		double[] scores = this.getDifferencesToMedianFromPoint(pointType);
+		double result = 0;
+		for (double s : scores) {
+			result += s;
+		}
+		return result;
+	}
 
-    public double compareProfilesToMedian(BorderTagObject pointType) throws Exception {
-        double[] scores = this.getDifferencesToMedianFromPoint(pointType);
-        double result = 0;
-        for (double s : scores) {
-            result += s;
-        }
-        return result;
-    }
+	/**
+	 * Get the distances between two border tags for each nucleus
+	 * 
+	 * @param pointTypeA
+	 * @param pointTypeB
+	 * @return
+	 */
+	public double[] getPointToPointDistances(Tag pointTypeA, Tag pointTypeB) {
+		int count = this.getNucleusCount();
+		double[] result = new double[count];
+		int i = 0;
+		for (Nucleus n : this.getNuclei()) {
+			try {
+				result[i] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
+			} catch (UnavailableBorderTagException e) {
+				fine("Tag not present: " + pointTypeA + " or " + pointTypeB);
+				result[i] = 0;
+			} finally {
+				i++;
+			}
 
-    /**
-     * Get the distances between two border tags for each nucleus
-     * 
-     * @param pointTypeA
-     * @param pointTypeB
-     * @return
-     */
-    public double[] getPointToPointDistances(Tag pointTypeA, Tag pointTypeB) {
-        int count = this.getNucleusCount();
-        double[] result = new double[count];
-        int i = 0;
-        for (Nucleus n : this.getNuclei()) {
-            try {
-                result[i] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
-            } catch (UnavailableBorderTagException e) {
-                fine("Tag not present: " + pointTypeA + " or " + pointTypeB);
-                result[i] = 0;
-            } finally {
-                i++;
-            }
+		}
+		return result;
+	}
 
-        }
-        return result;
-    }
-
-    /**
-     * Get the nucleus with the lowest difference score to the median profile
-     * 
-     * @param pointType
-     *            the point to compare profiles from
-     * @return the best nucleus
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
-     */
-    @Override
+	/**
+	 * Get the nucleus with the lowest difference score to the median profile
+	 * 
+	 * @param pointType
+	 *            the point to compare profiles from
+	 * @return the best nucleus
+	 * @throws UnavailableBorderTagException
+	 * @throws UnavailableProfileTypeException
+	 */
+	@Override
 	public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
-            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
-        Set<Nucleus> list = this.getNuclei();
+			throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
+		Set<Nucleus> list = this.getNuclei();
 
-        // No need to check profiles if there is only one nucleus
-        if (list.size() == 1) {
-            for (Nucleus p : list) {
-                return p;
-            }
-        }
+		// No need to check profiles if there is only one nucleus
+		if (list.size() == 1) {
+			for (Nucleus p : list) {
+				return p;
+			}
+		}
 
-        IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
 
-        // the profile we compare the nucleus to
-        // Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
-        Nucleus n = null;
+		// the profile we compare the nucleus to
+		// Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
+		Nucleus n = null;
 
-        double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
-        for (Nucleus p : list) {
-            IProfile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
-            double nDifference = angleProfile.absoluteSquareDifference(medianProfile);
-            if (nDifference < difference) {
-                difference = nDifference;
-                n = p;
-            }
-        }
+		double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
+		for (Nucleus p : list) {
+			IProfile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
+			double nDifference = angleProfile.absoluteSquareDifference(medianProfile);
+			if (nDifference < difference) {
+				difference = nDifference;
+				n = p;
+			}
+		}
 
-        if (n == null) {
-            throw new ProfileException("Error finding nucleus similar to median");
-        }
+		if (n == null) {
+			throw new ProfileException("Error finding nucleus similar to median");
+		}
 
-        return n;
-    }
+		return n;
+	}
 
-    /*
-     * 
-     * METHODS IMPLEMENTING THE STATISTICAL COLLECTION INTERFACE
-     * 
-     */
-    
-    @Override
-    public void clear(PlottableStatistic stat, String component) {
-        statsCache.clear(stat, component, null);
-    }
+	/*
+	 * 
+	 * METHODS IMPLEMENTING THE STATISTICAL COLLECTION INTERFACE
+	 * 
+	 */
 
-    @Override
-    public void clear(PlottableStatistic stat, String component, UUID id) {
-        statsCache.clear(stat, component, id);
-    }
+	@Override
+	public void clear(PlottableStatistic stat, String component) {
+		statsCache.clear(stat, component, null);
+	}
 
-    @Override
-    public void clear(MeasurementScale scale) {
-        statsCache.clear(scale);
-    }
+	@Override
+	public void clear(PlottableStatistic stat, String component, UUID id) {
+		statsCache.clear(stat, component, id);
+	}
 
-    @Override
-    public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
-            throws Exception {
-        return getMedianStatistic(stat, component, scale, null);
-    }
+	@Override
+	public void clear(MeasurementScale scale) {
+		statsCache.clear(scale);
+	}
 
-    @Override
-    public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale,
-            UUID id) throws Exception {
+	@Override
+	public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
+			throws Exception {
+		return getMedianStatistic(stat, component, scale, null);
+	}
 
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
-            return getMedianStatistic(stat, component, scale, id);
-        }
+	@Override
+	public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale,
+			UUID id) throws Exception {
 
-        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
-            return getMedianStatistic(stat, component, scale, id);
-        }
-        return 0;
-    }
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
+			return getMedianStatistic(stat, component, scale, id);
+		}
 
-    @Override
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
+			return getMedianStatistic(stat, component, scale, id);
+		}
+		return 0;
+	}
+
+	@Override
 	public double[] getRawValues(PlottableStatistic stat, String component,
-            MeasurementScale scale) {
+			MeasurementScale scale) {
 
-        return getRawValues(stat, component, scale, null);
+		return getRawValues(stat, component, scale, null);
 
-    }
+	}
 
-    @Override
+	@Override
 	public double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
-            UUID id) {
-
-    	switch(component) {
-    		case CellularComponent.WHOLE_CELL: return getCellStatistics(stat, scale);
-    		case CellularComponent.NUCLEUS: return getNuclearStatistics(stat, scale);
-    		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return getSegmentStatistics(stat, scale, id);
-    		default: {
-    			warn("No component of type " + component + " can be handled");
-    			return null;
-    		}
-    	}
-    }
-
-    private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
-            UUID id) throws Exception {
-
-        if (statsCache.hasMedian(stat, component, scale, id)) {
-
-            return statsCache.getMedian(stat, component, scale, id);
-
-        } else {
-
-            double median = Statistical.ERROR_CALCULATING_STAT;
-
-            if (this.hasCells()) {
-            	
-            	double[] values = getRawValues(stat, component, scale, id);
-
-                DescriptiveStatistics  s = new DescriptiveStatistics ();
-                for(double v  : values){
-                	s.addValue(v);
-                }
-                median = s.getPercentile(Stats.MEDIAN);
-            }
-
-            statsCache.setMedian(stat, component, scale, id, median);
-            return median;
-        }
-    }
-
-    
-    @Override
-    public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale) {
-        return getMinStatistic(stat, component, scale, null);
-    }
-    
-    @Override
-    public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale,
-            UUID id){
-
-    	// Handle old segment andSignalStatistic enums
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
-            return getMinStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-        }
-
-        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
-            return getMinStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-        }
-        return getMinStatistic(stat, component, scale, id);
-    }
-    
-    private synchronized double getMinStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
-    		UUID id) {
-
-    	double[] values = getRawValues(stat, component, scale, id);
-    	return Arrays.stream(values).min().orElse(Statistical.ERROR_CALCULATING_STAT);
-    }
-    
-    @Override
-    public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale) {
-        return getMaxStatistic(stat, component, scale, null);
-    }
-    
-    @Override
-    public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale,
-            UUID id){
-
-    	// Handle old segment andSignalStatistic enums
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
-            return getMaxStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-        }
-
-        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
-            return getMaxStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-        }
-        return getMaxStatistic(stat, component, scale, id);
-    }
-    
-    private synchronized double getMaxStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
-    		UUID id) {
-
-    	double[] values = getRawValues(stat, component, scale, id);
-    	return Arrays.stream(values).max().orElse(Statistical.ERROR_CALCULATING_STAT);
-    }
-    
-    /**
-     * Get a list of the given statistic values for each nucleus in the
-     * collection
-     * 
-     * @param stat the statistic to use
-     * @param scale the measurement scale
-     * @return a list of values
-     * @throws Exception
-     */
-    private double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
-
-        double[] result = null;
-
-        if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null)) {
-            return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-        } else {
-            result = cells.parallelStream().mapToDouble(c -> c.getStatistic(stat, scale)).toArray();
-            Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
-        }
-        return result;
-
-    }
-
-    /**
-     * Get a list of the given statistic values for each nucleus in the
-     * collection
-     * 
-     * @param stat the statistic to use
-     * @param scale the measurement scale
-     * @return a list of values
-     * @throws Exception
-     */
-    private double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
-
-        double[] result = null;
-
-        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
-            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
-
-        } else {
-
-            if (PlottableStatistic.VARIABILITY.equals(stat)) {
-                result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
-            } else {
-
-                result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
-            }
-            Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
-        }
-
-        return result;
-    }
-
-    /**
-     * Calculate the length of the segment with the given name in each nucleus
-     * of the collection
-     * 
-     * @param segName the segment name
-     * @param scale the scale to use
-     * @return a list of segment lengths
-     * @throws Exception
-     */
-    private double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id){
-    	
-    	double[] result = null;
-    	if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
-    		return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-
-    	} else {
-    		AtomicInteger errorCount= new AtomicInteger(0);
-    		result = getNuclei().parallelStream().mapToDouble(n -> {
-    			IBorderSegment segment;
-    			try {
-    				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-    			} catch (ProfileException | UnavailableComponentException e) {
-    				errorCount.incrementAndGet();
-    				return 0;
-    			}
-    			double perimeterLength = 0;
-    			if (segment != null) {
-    				int indexLength = segment.length();
-    				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
-    				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
-    			}
-    			return perimeterLength;
-
-    		}).sorted().toArray();
-
-    		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
-    		if(errorCount.get()>0)
-              warn(String.format("Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment", id, errorCount.get()));
-
-    	}
-    	return result;
-    }
-
-    /*
-     * 
-     * METHODS IMPLEMENTING THE FILTERABLE INTERFACE
-     * 
-     */
-
-    @Override
-    public ICellCollection filter(Predicate<ICell> predicate) {
-
-        String name = "Filtered_" + predicate.toString();
-
-        ICellCollection subCollection = new DefaultCellCollection(this, name);
-
-        List<ICell> list = cells.parallelStream().filter(predicate).collect(Collectors.toList());
-
-        for (ICell cell : list) {
-            subCollection.addCell(new DefaultCell(cell));
-        }
-
-        if (subCollection.size() == 0) {
-            warn("No cells in collection");
-            return subCollection;
-        }
-
-        try {
-
-            // TODO - this fails on converted collections from (at least) 1.13.0
-            // with no profiles in aggregate
-            this.getProfileManager().copyCollectionOffsets(subCollection);
-            this.getSignalManager().copySignalGroups(subCollection);
-
-        } catch (ProfileException e) {
-            warn("Error copying collection offsets");
-            stack("Error in offsetting", e);
-        }
-
-        return subCollection;
-    }
-
-    @Override
-    public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
-            double upper) {
-        DecimalFormat df = new DecimalFormat("#.##");
-
-        Predicate<ICell> pred = new Predicate<ICell>() {
-            @Override
-            public boolean test(ICell t) {
-
-                for (Nucleus n : t.getNuclei()) {
-
-                    double value = stat.equals(PlottableStatistic.VARIABILITY)
-                            ? getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
-
-                    if (value < lower) {
-                        return false;
-                    }
-
-                    if (value > upper) {
-                        return false;
-                    }
-
-                }
-                return true;
-            }
-
-            @Override
-            public String toString() {
-                return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
-            }
-
-        };
-
-        return filter(pred);
-    }
-
-    @Override
-    public ICellCollection and(ICellCollection other) {
-
-        ICellCollection newCollection = chooseNewCollectionType(this, "AND operation");
-
-        other.streamCells()
-            .filter(c->contains(c))
-            .forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-        return newCollection;
-    }
-
-    @Override
-    public ICellCollection not(ICellCollection other) {
-
-        ICellCollection newCollection = chooseNewCollectionType(this, "NOT operation");
-        
-        streamCells()
-            .filter(c->!other.contains(c))
-            .forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-        return newCollection;
-    }
-
-    @Override
-    public ICellCollection xor(ICellCollection other) {
-
-        ICellCollection newCollection = chooseNewCollectionType(this, "XOR operation");
-        
-        streamCells()
-            .filter(c->!other.contains(c))
-            .forEach(c->newCollection.addCell(new DefaultCell(c)));
-        
-        other.streamCells()
-            .filter(c->!contains(c))
-            .forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-        return newCollection;
-    }
-
-    @Override
-    public ICellCollection or(ICellCollection other) {
-
-        ICellCollection newCollection = chooseNewCollectionType(this, "OR operation");
-        
-        getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
-        
-        other.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-        return newCollection;
-    }
-    
-    private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
-        
-        // Decide if the other collection is also a child of the root parent
-        IAnalysisDataset rootParent = getDatasetOfRealCollection(this);
-        IAnalysisDataset rootOther = other.isVirtual() ?
-            ((VirtualCellCollection) other).getRootParent() : getDatasetOfRealCollection(other);
-        return rootParent == rootOther 
-        		? new VirtualCellCollection(rootParent, name)
-        		: new DefaultCellCollection(this, name);
-    }
+			UUID id) {
+
+		switch(component) {
+		case CellularComponent.WHOLE_CELL: return getCellStatistics(stat, scale);
+		case CellularComponent.NUCLEUS: return getNuclearStatistics(stat, scale);
+		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return getSegmentStatistics(stat, scale, id);
+		default: {
+			warn("No component of type " + component + " can be handled");
+			return null;
+		}
+		}
+	}
+
+	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
+			UUID id) throws Exception {
+
+		if (statsCache.hasMedian(stat, component, scale, id))
+			return statsCache.getMedian(stat, component, scale, id);
+
+		double median = Statistical.ERROR_CALCULATING_STAT;
+
+		if (this.hasCells()) {
+			double[] values = getRawValues(stat, component, scale, id);
+			median = Stats.quartile(values, Stats.MEDIAN);
+		}
+		statsCache.setMedian(stat, component, scale, id, median);
+		return median;
+	}
+
+
+	@Override
+	public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale) {
+		return getMinStatistic(stat, component, scale, null);
+	}
+
+	@Override
+	public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale,
+			UUID id){
+
+		// Handle old segment and SignalStatistic enums
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
+			return getMinStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
+		}
+
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
+			return getMinStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
+		}
+		return getMinStatistic(stat, component, scale, id);
+	}
+
+	private synchronized double getMinStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
+			UUID id) {
+
+		double[] values = getRawValues(stat, component, scale, id);
+		return Arrays.stream(values).min().orElse(Statistical.ERROR_CALCULATING_STAT);
+	}
+
+	@Override
+	public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale) {
+		return getMaxStatistic(stat, component, scale, null);
+	}
+
+	@Override
+	public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale,
+			UUID id){
+
+		// Handle old segment andSignalStatistic enums
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class)
+			return getMaxStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class)
+			return getMaxStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
+		return getMaxStatistic(stat, component, scale, id);
+	}
+
+	private synchronized double getMaxStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
+			UUID id) {
+
+		double[] values = getRawValues(stat, component, scale, id);
+		return Arrays.stream(values).max().orElse(Statistical.ERROR_CALCULATING_STAT);
+	}
+
+	/**
+	 * Get a sorted list of the given statistic values for each nucleus in the
+	 * collection
+	 * 
+	 * @param stat the statistic to use
+	 * @param scale the measurement scale
+	 * @return a list of values
+	 * @throws Exception
+	 */
+	private double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
+
+		double[] result = null;
+
+		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
+			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
+		result = cells.stream().mapToDouble(c -> c.getStatistic(stat, scale)).sorted().toArray();
+		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
+		return result;
+
+	}
+
+	/**
+	 * Get a list of the given statistic values for each nucleus in the
+	 * collection
+	 * 
+	 * @param stat the statistic to use
+	 * @param scale the measurement scale
+	 * @return a list of values
+	 * @throws Exception
+	 */
+	private double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
+
+		double[] result = null;
+
+		if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
+			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
+
+		}
+		if (PlottableStatistic.VARIABILITY.equals(stat)) {
+			result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
+		} else {
+			result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
+		}
+		Arrays.sort(result);
+		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
+
+		return result;
+	}
+
+	/**
+	 * Calculate the length of the segment with the given name in each nucleus
+	 * of the collection
+	 * 
+	 * @param segName the segment name
+	 * @param scale the scale to use
+	 * @return a list of segment lengths
+	 * @throws Exception
+	 */
+	private double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id){
+
+		double[] result = null;
+		if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
+			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
+
+		}
+		AtomicInteger errorCount= new AtomicInteger(0);
+		result = getNuclei().stream().mapToDouble(n -> {
+			IBorderSegment segment;
+			try {
+				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+			} catch (ProfileException | UnavailableComponentException e) {
+				errorCount.incrementAndGet();
+				return 0;
+			}
+			double perimeterLength = 0;
+			if (segment != null) {
+				int indexLength = segment.length();
+				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
+				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+			}
+			return perimeterLength;
+
+		}).sorted().toArray();
+
+		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
+		if(errorCount.get()>0)
+			warn(String.format("Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment", id, errorCount.get()));
+		return result;
+	}
+
+	/*
+	 * 
+	 * METHODS IMPLEMENTING THE FILTERABLE INTERFACE
+	 * 
+	 */
+
+	@Override
+	public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
+
+		String name = "Filtered_" + predicate.toString();
+
+		ICellCollection subCollection = new DefaultCellCollection(this, name);
+
+		List<ICell> list = cells.parallelStream().filter(predicate).collect(Collectors.toList());
+
+		for (ICell cell : list) {
+			subCollection.addCell(new DefaultCell(cell));
+		}
+
+		if (subCollection.size() == 0) {
+			warn("No cells in collection");
+			return subCollection;
+		}
+
+		try {
+
+			// TODO - this fails on converted collections from (at least) 1.13.0
+			// with no profiles in aggregate
+			this.getProfileManager().copyCollectionOffsets(subCollection);
+			this.getSignalManager().copySignalGroups(subCollection);
+
+		} catch (ProfileException e) {
+			warn("Error copying collection offsets");
+			stack("Error in offsetting", e);
+		}
+
+		return subCollection;
+	}
+
+	@Override
+	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
+			double upper) {
+		DecimalFormat df = new DecimalFormat("#.##");
+
+		Predicate<ICell> pred = new Predicate<ICell>() {
+			@Override
+			public boolean test(ICell t) {
+
+				for (Nucleus n : t.getNuclei()) {
+
+					double value = stat.equals(PlottableStatistic.VARIABILITY)
+							? getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+
+							if (value < lower) {
+								return false;
+							}
+
+							if (value > upper) {
+								return false;
+							}
+
+				}
+				return true;
+			}
+
+			@Override
+			public String toString() {
+				return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
+			}
+
+		};
+
+		return filter(pred);
+	}
+
+	@Override
+	public ICellCollection and(ICellCollection other) {
+
+		ICellCollection newCollection = chooseNewCollectionType(this, "AND operation");
+
+		other.streamCells()
+		.filter(c->contains(c))
+		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+
+		return newCollection;
+	}
+
+	@Override
+	public ICellCollection not(ICellCollection other) {
+
+		ICellCollection newCollection = chooseNewCollectionType(this, "NOT operation");
+
+		streamCells()
+		.filter(c->!other.contains(c))
+		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+
+		return newCollection;
+	}
+
+	@Override
+	public ICellCollection xor(ICellCollection other) {
+
+		ICellCollection newCollection = chooseNewCollectionType(this, "XOR operation");
+
+		streamCells()
+		.filter(c->!other.contains(c))
+		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+
+		other.streamCells()
+		.filter(c->!contains(c))
+		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+
+		return newCollection;
+	}
+
+	@Override
+	public ICellCollection or(ICellCollection other) {
+
+		ICellCollection newCollection = chooseNewCollectionType(this, "OR operation");
+
+		getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
+
+		other.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
+
+		return newCollection;
+	}
+
+	private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
+
+		// Decide if the other collection is also a child of the root parent
+		IAnalysisDataset rootParent = getDatasetOfRealCollection(this);
+		IAnalysisDataset rootOther = other.isVirtual() ?
+				((VirtualCellCollection) other).getRootParent() : getDatasetOfRealCollection(other);
+				return rootParent == rootOther 
+						? new VirtualCellCollection(rootParent, name)
+								: new DefaultCellCollection(this, name);
+	}
 
 	private IAnalysisDataset getDatasetOfRealCollection(ICellCollection other){
 		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
@@ -1227,352 +1081,352 @@ public class DefaultCellCollection implements ICellCollection {
 		return null;
 	}
 
-    /**
-     * Invalidate the existing cached vertically rotated nuclei, and
-     * recalculate.
-     */
-    @Override
+	/**
+	 * Invalidate the existing cached vertically rotated nuclei, and
+	 * recalculate.
+	 */
+	@Override
 	public void updateVerticalNuclei() {
 
-        try {
-            getNuclei().parallelStream().forEach(n -> {
-                n.updateVerticallyRotatedNucleus();
-                n.updateDependentStats();
-            });
+		try {
+			getNuclei().parallelStream().forEach(n -> {
+				n.updateVerticallyRotatedNucleus();
+				n.updateDependentStats();
+			});
 
-            statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
-            statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
-        } catch (Exception e) {
-            warn("Cannot update all vertical nuclei");
-            stack("Error updating vertical nuclei", e);
-        }
+			statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
+			statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
+		} catch (Exception e) {
+			warn("Cannot update all vertical nuclei");
+			stack("Error updating vertical nuclei", e);
+		}
 
-    }
+	}
 
-    @Override
-    public void setSourceFolder(@NonNull File newFolder) {
-        File oldFile = getFolder();
-        if(!newFolder.exists())
-        	return;   
-        folder = newFolder;
-        getCells().stream()
-	        .flatMap(c->c.getNuclei().stream())
-	        .forEach(n->n.setSourceFolder(newFolder));
+	@Override
+	public void setSourceFolder(@NonNull File newFolder) {
+		File oldFile = getFolder();
+		if(!newFolder.exists())
+			return;   
+		folder = newFolder;
+		getCells().stream()
+		.flatMap(c->c.getNuclei().stream())
+		.forEach(n->n.setSourceFolder(newFolder));
 
-    }
+	}
 
-    /**
-     * Test if the collection contains a cell with the same id as the given cell
-     * 
-     * @param c
-     * @return
-     */
-    @Override
+	/**
+	 * Test if the collection contains a cell with the same id as the given cell
+	 * 
+	 * @param c
+	 * @return
+	 */
+	@Override
 	public boolean contains(ICell c) {
-        return contains(c.getId());
-    }
+		return contains(c.getId());
+	}
 
-    @Override
-    public boolean contains(UUID id) {
-        return cells.parallelStream().anyMatch(cell -> cell.getId().equals(id));
-    }
+	@Override
+	public boolean contains(UUID id) {
+		return cells.parallelStream().anyMatch(cell -> cell.getId().equals(id));
+	}
 
-    /**
-     * Test if the collection contains the given cell (this must be the same
-     * object, not just a cell with the same id)
-     * 
-     * @param c
-     * @return
-     */
-    @Override
+	/**
+	 * Test if the collection contains the given cell (this must be the same
+	 * object, not just a cell with the same id)
+	 * 
+	 * @param c
+	 * @return
+	 */
+	@Override
 	public boolean containsExact(@NonNull ICell c) {
-        return cells.parallelStream().anyMatch(cell -> cell == c);
-    }
+		return cells.parallelStream().anyMatch(cell -> cell == c);
+	}
 
-    /**
-     * Fetch the signal group ids in this collection
-     * 
-     * @param id
-     * @return
-     */
-    @Override
+	/**
+	 * Fetch the signal group ids in this collection
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Override
 	public Set<UUID> getSignalGroupIDs() {
 
-        Set<UUID> ids = new HashSet<UUID>(signalGroups.keySet());
-        ids.remove(IShellResult.RANDOM_SIGNAL_ID);
-        return ids;
-    }
+		Set<UUID> ids = new HashSet<UUID>(signalGroups.keySet());
+		ids.remove(IShellResult.RANDOM_SIGNAL_ID);
+		return ids;
+	}
 
-    /**
-     * Fetch the signal groups in this collection
-     * 
-     * @param id
-     * @return
-     */
-    @Override
+	/**
+	 * Fetch the signal groups in this collection
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Override
 	public Collection<ISignalGroup> getSignalGroups() {
-        return this.signalGroups.values();
-    }
+		return this.signalGroups.values();
+	}
 
-    /**
-     * Fetch the signal group with the given ID
-     * 
-     * @param id
-     * @return
-     */
-    @Override
+	/**
+	 * Fetch the signal group with the given ID
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Override
 	public Optional<ISignalGroup> getSignalGroup(@NonNull UUID id) {
-        return Optional.ofNullable(this.signalGroups.get(id));
-    }
+		return Optional.ofNullable(this.signalGroups.get(id));
+	}
 
-    @Override
+	@Override
 	public void addSignalGroup(@NonNull UUID id, @NonNull ISignalGroup group) {
-        this.signalGroups.put(id, group);
-    }
+		this.signalGroups.put(id, group);
+	}
 
-    @Override
+	@Override
 	public boolean hasSignalGroup(@NonNull UUID id) {
-        return this.signalGroups.containsKey(id);
-    }
+		return this.signalGroups.containsKey(id);
+	}
 
-    /**
-     * Remove the given group
-     * 
-     * @param id
-     */
-    @Override
+	/**
+	 * Remove the given group
+	 * 
+	 * @param id
+	 */
+	@Override
 	public void removeSignalGroup(@NonNull UUID id) {
-        this.signalGroups.remove(id);
-    }
+		this.signalGroups.remove(id);
+	}
 
-    /**
-     * Get the RuleSetCollection with the index finding rules for this nucleus
-     * type
-     * 
-     * @return
-     */
-    @Override
+	/**
+	 * Get the RuleSetCollection with the index finding rules for this nucleus
+	 * type
+	 * 
+	 * @return
+	 */
+	@Override
 	public RuleSetCollection getRuleSetCollection() {
-        return this.ruleSets;
-    }
+		return this.ruleSets;
+	}
 
-    /**
-     * Get the number of nuclei shared with the given dataset
-     * 
-     * @param d2
-     * @return
-     */
-    @Override
+	/**
+	 * Get the number of nuclei shared with the given dataset
+	 * 
+	 * @param d2
+	 * @return
+	 */
+	@Override
 	public synchronized int countShared(@NonNull IAnalysisDataset d2) {
-        return countShared(d2.getCollection());
-    }
+		return countShared(d2.getCollection());
+	}
 
-    /**
-     * Get the number of nuclei shared with the given dataset
-     * 
-     * @param d2
-     * @return
-     */
-    @Override
+	/**
+	 * Get the number of nuclei shared with the given dataset
+	 * 
+	 * @param d2
+	 * @return
+	 */
+	@Override
 	public synchronized int countShared(@NonNull ICellCollection d2) {
 
-        if (vennCache.hasCount(d2))
-            return vennCache.getCount(d2);
-        int shared = countSharedNuclei(d2);
-        d2.setSharedCount(this, shared);
-        vennCache.addCount(d2, shared);
+		if (vennCache.hasCount(d2))
+			return vennCache.getCount(d2);
+		int shared = countSharedNuclei(d2);
+		d2.setSharedCount(this, shared);
+		vennCache.addCount(d2, shared);
 
-        return shared;
+		return shared;
 
-    }
+	}
 
-    @Override
-    public void setSharedCount(@NonNull ICellCollection d2, int i) {
-        vennCache.addCount(d2, i);
-    }
+	@Override
+	public void setSharedCount(@NonNull ICellCollection d2, int i) {
+		vennCache.addCount(d2, i);
+	}
 
-    /**
-     * Count the number of nuclei from this dataset that are present in d2
-     * 
-     * @param d1
-     * @param d2
-     * @return
-     */
-    private synchronized int countSharedNuclei(ICellCollection d2) {
+	/**
+	 * Count the number of nuclei from this dataset that are present in d2
+	 * 
+	 * @param d1
+	 * @param d2
+	 * @return
+	 */
+	private synchronized int countSharedNuclei(ICellCollection d2) {
 
-        if (d2 == this)
-            return cells.size();
+		if (d2 == this)
+			return cells.size();
 
-        if (d2.getNucleusType() != nucleusType)
-            return 0;
-        
-        Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
-        toSearch.retainAll(getCellIDs());
-        return toSearch.size();
-    }
+		if (d2.getNucleusType() != nucleusType)
+			return 0;
 
-    public int countClockWiseRPNuclei() {
-        int count = 0;
-        for (Nucleus n : getNuclei()) {
-            if (n.isClockwiseRP()) {
-                count++;
-            }
-        }
-        return count;
-    }
-    
-    @Override
-    public void setScale(double scale){
-    	clear(MeasurementScale.MICRONS);
-        
-        for (ICell c : cells) {
-            c.setScale(scale);
-        }
+		Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
+		toSearch.retainAll(getCellIDs());
+		return toSearch.size();
+	}
 
-        if (hasConsensus())
-        	consensusNucleus.setScale(scale);
-    }
+	public int countClockWiseRPNuclei() {
+		int count = 0;
+		for (Nucleus n : getNuclei()) {
+			if (n.isClockwiseRP()) {
+				count++;
+			}
+		}
+		return count;
+	}
 
-    @Override
+	@Override
+	public void setScale(double scale){
+		clear(MeasurementScale.MICRONS);
+
+		for (ICell c : cells) {
+			c.setScale(scale);
+		}
+
+		if (hasConsensus())
+			consensusNucleus.setScale(scale);
+	}
+
+	@Override
 	public String toString() {
 
-        String newLine = System.getProperty("line.separator");
+		String newLine = System.getProperty("line.separator");
 
-        StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
-                .append("Collection:" + getName() + newLine).append("Nuclei: " + this.getNucleusCount() + newLine)
-                .append("Clockwise: " + this.countClockWiseRPNuclei() + newLine)
-                .append("Source folder: " + this.getFolder().getAbsolutePath() + newLine)
-                .append("Nucleus type: " + this.nucleusType + newLine).append("Profile collections:" + newLine);
+		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
+				.append("Collection:" + getName() + newLine).append("Nuclei: " + this.getNucleusCount() + newLine)
+				.append("Clockwise: " + this.countClockWiseRPNuclei() + newLine)
+				.append("Source folder: " + this.getFolder().getAbsolutePath() + newLine)
+				.append("Nucleus type: " + this.nucleusType + newLine).append("Profile collections:" + newLine);
 
-        IProfileCollection pc = this.getProfileCollection();
-        b.append(pc.toString() + newLine);
+		IProfileCollection pc = this.getProfileCollection();
+		b.append(pc.toString() + newLine);
 
-        b.append(this.ruleSets.toString() + newLine);
+		b.append(this.ruleSets.toString() + newLine);
 
-        b.append("Signal groups:" + newLine);
-        for (UUID signalGroupID : this.signalGroups.keySet()) {
-            ISignalGroup group = this.signalGroups.get(signalGroupID);
-            int count = this.getSignalManager().getSignalCount(signalGroupID);
-            b.append(signalGroupID.toString() + ": " + group.toString() + " | " + count + newLine);
-        }
-        
-        if(this.hasConsensus()){
-            b.append("Consensus:" + newLine);
-            b.append(getConsensus().toString()+newLine);
-        }
+		b.append("Signal groups:" + newLine);
+		for (UUID signalGroupID : this.signalGroups.keySet()) {
+			ISignalGroup group = this.signalGroups.get(signalGroupID);
+			int count = this.getSignalManager().getSignalCount(signalGroupID);
+			b.append(signalGroupID.toString() + ": " + group.toString() + " | " + count + newLine);
+		}
 
-        return b.toString();
-    }
+		if(this.hasConsensus()){
+			b.append("Consensus:" + newLine);
+			b.append(getConsensus().toString()+newLine);
+		}
 
-    private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
+		return b.toString();
+	}
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		out.defaultWriteObject();
+	}
 
-        in.defaultReadObject();
-        isRefolding = false;
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
-        if (ruleSets == null || ruleSets.isEmpty()) {
-            log("Creating default ruleset for collection");
-            ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
-        }
+		in.defaultReadObject();
+		isRefolding = false;
 
-        statsCache = new StatsCache();
-        vennCache = new VennCache();
+		if (ruleSets == null || ruleSets.isEmpty()) {
+			log("Creating default ruleset for collection");
+			ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
+		}
 
-        signalManager = new SignalManager(this);
-        profileManager = new ProfileManager(this);
+		statsCache = new StatsCache();
+		vennCache = new VennCache();
 
-        // Make sure any profile aggregates match the length of saved segments
-        try {
-        	this.profileCollection.createAndRestoreProfileAggregate(this);
-        }catch(ProfileException e) {
-        	warn("Unable to restore profile aggregate");
-        	stack(e);
-        }
+		signalManager = new SignalManager(this);
+		profileManager = new ProfileManager(this);
 
-    }
+		// Make sure any profile aggregates match the length of saved segments
+		try {
+			this.profileCollection.createAndRestoreProfileAggregate(this);
+		}catch(ProfileException e) {
+			warn("Unable to restore profile aggregate");
+			stack(e);
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
-        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-        result = prime * result + ((cells == null) ? 0 : cells.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((nucleusType == null) ? 0 : nucleusType.hashCode());
-        result = prime * result + ((outputFolder == null) ? 0 : outputFolder.hashCode());
-        result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
-        result = prime * result + ((ruleSets == null) ? 0 : ruleSets.hashCode());
-        result = prime * result + ((signalGroups == null) ? 0 : signalGroups.hashCode());
-        result = prime * result + ((statsCache == null) ? 0 : statsCache.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        return result;
-    }
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultCellCollection other = (DefaultCellCollection) obj;
-        if (consensusNucleus == null) {
-            if (other.consensusNucleus != null)
-                return false;
-        } else if (!consensusNucleus.equals(other.consensusNucleus))
-            return false;
-        if (folder == null) {
-            if (other.folder != null)
-                return false;
-        } else if (!folder.equals(other.folder))
-            return false;
-        if (cells == null) {
-            if (other.cells != null)
-                return false;
-        } else if (!cells.equals(other.cells))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (nucleusType != other.nucleusType)
-            return false;
-        if (outputFolder == null) {
-            if (other.outputFolder != null)
-                return false;
-        } else if (!outputFolder.equals(other.outputFolder))
-            return false;
-        if (profileCollection == null) {
-            if (other.profileCollection != null)
-                return false;
-        } else if (!profileCollection.equals(other.profileCollection))
-            return false;
-        if (ruleSets == null) {
-            if (other.ruleSets != null)
-                return false;
-        } else if (!ruleSets.equals(other.ruleSets))
-            return false;
-        if (signalGroups == null) {
-            if (other.signalGroups != null)
-                return false;
-        } else if (!signalGroups.equals(other.signalGroups))
-            return false;
-        if (statsCache == null) {
-            if (other.statsCache != null)
-                return false;
-        } else if (!statsCache.equals(other.statsCache))
-            return false;
-        if (uuid == null) {
-            if (other.uuid != null)
-                return false;
-        } else if (!uuid.equals(other.uuid))
-            return false;
-        return true;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
+		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+		result = prime * result + ((cells == null) ? 0 : cells.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((nucleusType == null) ? 0 : nucleusType.hashCode());
+		result = prime * result + ((outputFolder == null) ? 0 : outputFolder.hashCode());
+		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
+		result = prime * result + ((ruleSets == null) ? 0 : ruleSets.hashCode());
+		result = prime * result + ((signalGroups == null) ? 0 : signalGroups.hashCode());
+		result = prime * result + ((statsCache == null) ? 0 : statsCache.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultCellCollection other = (DefaultCellCollection) obj;
+		if (consensusNucleus == null) {
+			if (other.consensusNucleus != null)
+				return false;
+		} else if (!consensusNucleus.equals(other.consensusNucleus))
+			return false;
+		if (folder == null) {
+			if (other.folder != null)
+				return false;
+		} else if (!folder.equals(other.folder))
+			return false;
+		if (cells == null) {
+			if (other.cells != null)
+				return false;
+		} else if (!cells.equals(other.cells))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (nucleusType != other.nucleusType)
+			return false;
+		if (outputFolder == null) {
+			if (other.outputFolder != null)
+				return false;
+		} else if (!outputFolder.equals(other.outputFolder))
+			return false;
+		if (profileCollection == null) {
+			if (other.profileCollection != null)
+				return false;
+		} else if (!profileCollection.equals(other.profileCollection))
+			return false;
+		if (ruleSets == null) {
+			if (other.ruleSets != null)
+				return false;
+		} else if (!ruleSets.equals(other.ruleSets))
+			return false;
+		if (signalGroups == null) {
+			if (other.signalGroups != null)
+				return false;
+		} else if (!signalGroups.equals(other.signalGroups))
+			return false;
+		if (statsCache == null) {
+			if (other.statsCache != null)
+				return false;
+		} else if (!statsCache.equals(other.statsCache))
+			return false;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		return true;
+	}
 }

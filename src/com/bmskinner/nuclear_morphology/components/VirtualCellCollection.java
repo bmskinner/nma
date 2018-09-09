@@ -115,8 +115,8 @@ public class VirtualCellCollection implements ICellCollection {
      * @param parent
      * @param name
      */
-    public VirtualCellCollection(IAnalysisDataset parent, String name) {
-        this(parent, name, java.util.UUID.randomUUID());
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name) {
+        this(parent, name, UUID.randomUUID());
     }
 
     /**
@@ -126,27 +126,35 @@ public class VirtualCellCollection implements ICellCollection {
      * @param name
      * @param id
      */
-    public VirtualCellCollection(IAnalysisDataset parent, String name, UUID id) {
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name, @NonNull UUID id) {
         this.parent = parent;
         this.name = name == null ? "Undefined dataset name" : name;
         this.uuid = id;
 
+    }
+    
+    /**
+     * Create for a parent dataset, providing a collection of cells 
+     * to populate the new collection. The name and ID are copied from
+     * the cell collection.
+     * 
+     * @param parent the dataset to which this will belong
+     * @param cells the collection of cells to add to this collection
+     */
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull ICellCollection cells) {
+        this(parent, cells.getName(), cells.getID(), cells);
     }
 
     /**
      * Create from a parent dataset, spcifying the collection name and id, and
      * providing a collection of cells to populate the new collection.
      * 
-     * @param parent
-     *            the dataset to which this will belong
-     * @param name
-     *            the name of the collection
-     * @param id
-     *            the id of the collection
-     * @param cells
-     *            the collection of cells to add to this collection
+     * @param parent the dataset to which this will belong
+     * @param name the name of the collection
+     * @param id the id of the collection
+     * @param cells the collection of cells to add to this collection
      */
-    public VirtualCellCollection(IAnalysisDataset parent, String name, UUID id, ICellCollection cells) {
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name, @NonNull UUID id, @NonNull ICellCollection cells) {
         this(parent, name, id);
         for (ICell cell : cells.getCells()) {
             this.addCell(cell);
@@ -158,7 +166,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setName(String s) {
+    public void setName(@NonNull String s) {
         this.name = s;
 
     }
@@ -207,7 +215,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized Set<ICell> getCells(File f) {
+    public synchronized Set<ICell> getCells(@NonNull File f) {
         Set<ICell> result = new HashSet<ICell>(cellIDs.size());
 
         for (ICell cell : parent.getCollection().getCells()) {
@@ -221,12 +229,12 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public boolean hasCells(File imageFile) {
+    public boolean hasCells(@NonNull File imageFile) {
         return getCells(imageFile).size() > 0;
     }
 
     @Override
-    public boolean hasNuclei(File imageFile) {
+    public boolean hasNuclei(@NonNull File imageFile) {
         return getNuclei(imageFile).size() > 0;
     }
 
@@ -257,7 +265,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized Set<Nucleus> getNuclei(File imageFile) {
+    public synchronized Set<Nucleus> getNuclei(@NonNull File imageFile) {
 
         ICellCollection parentCollection = parent.getCollection();
         if (parentCollection == null) {
@@ -272,7 +280,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void addCell(ICell c) {
+    public void addCell(@NonNull ICell c) {
         if (!parent.getCollection().contains(c.getId())) {
             throw new IllegalArgumentException("Parent does not contain cell");
         }
@@ -281,12 +289,12 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void replaceCell(ICell c) {
+    public void replaceCell(@NonNull ICell c) {
         warn("Not implemented for virtual collections");
     }
 
     @Override
-    public ICell getCell(UUID id) {
+    public ICell getCell(@NonNull UUID id) {
         if (cellIDs.contains(id)) {
             return parent.getCollection().getCell(id);
         }
@@ -299,7 +307,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void removeCell(ICell c) {
+    public void removeCell(@NonNull ICell c) {
         cellIDs.remove(c.getId());
 
     }
@@ -340,7 +348,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public boolean containsExact(ICell cell) {
+    public boolean containsExact(@NonNull ICell cell) {
         return parent.getCollection().containsExact(cell);
     }
 
@@ -387,7 +395,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setOutputFolder(File folder) {
+    public void setOutputFolder(@NonNull File folder) {
         parent.getCollection().setOutputFolder(folder);
     }
 
@@ -408,12 +416,12 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void removeSignalGroup(UUID id) {
+    public void removeSignalGroup(@NonNull UUID id) {
         shellResults.remove(id);
     }
 
     @Override
-    public  Optional<ISignalGroup> getSignalGroup(UUID signalGroup) {
+    public  Optional<ISignalGroup> getSignalGroup(@NonNull UUID signalGroup) {
 
     	if(!parent.getCollection().hasSignalGroup(signalGroup))
     		return Optional.empty();
@@ -455,7 +463,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public boolean hasSignalGroup(UUID signalGroup) {
+    public boolean hasSignalGroup(@NonNull UUID signalGroup) {
         return parent.getCollection().hasSignalGroup(signalGroup);
     }
 
@@ -465,7 +473,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void addSignalGroup(UUID newID, ISignalGroup newGroup) {
+    public void addSignalGroup(@NonNull UUID newID, @NonNull ISignalGroup newGroup) {
         parent.getCollection().addSignalGroup(newID, newGroup);
     }
 
@@ -485,7 +493,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setSourceFolder(File expectedImageDirectory) {
+    public void setSourceFolder(@NonNull File expectedImageDirectory) {
         parent.getCollection().setSourceFolder(expectedImageDirectory);
     }
 
@@ -610,7 +618,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
     @Override
-    public ICellCollection and(ICellCollection other) {
+    public ICellCollection and(@NonNull ICellCollection other) {
 
         ICellCollection newCollection = chooseNewCollectionType(other, "AND operation");
 
@@ -625,7 +633,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection not(ICellCollection other) {
+    public ICellCollection not(@NonNull ICellCollection other) {
         ICellCollection newCollection = chooseNewCollectionType(other, "NOT operation");
 
         for (ICell c : getCells()) {
@@ -639,7 +647,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection xor(ICellCollection other) {
+    public ICellCollection xor(@NonNull ICellCollection other) {
         ICellCollection newCollection = chooseNewCollectionType(other, "XOR operation");
 
         for (ICell c : getCells()) {
@@ -660,7 +668,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection or(ICellCollection other) {
+    public ICellCollection or(@NonNull ICellCollection other) {
         ICellCollection newCollection = chooseNewCollectionType(other, "OR operation");
 
         for (ICell c : getCells()) {
@@ -678,7 +686,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection filter(Predicate<ICell> predicate) {
+    public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
 
         String name = "Filtered_" + predicate.toString();
 
@@ -709,7 +717,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
+    public ICellCollection filterCollection(@NonNull PlottableStatistic stat, MeasurementScale scale, double lower,
             double upper) {
         DecimalFormat df = new DecimalFormat("#.##");
 
@@ -745,13 +753,13 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public int countShared(IAnalysisDataset d2) {
+    public int countShared(@NonNull IAnalysisDataset d2) {
         return countShared(d2.getCollection());
 
     }
 
     @Override
-    public int countShared(ICellCollection d2) {
+    public int countShared(@NonNull ICellCollection d2) {
         if (this.vennCache.containsKey(d2.getID())) {
             return vennCache.get(d2.getID());
         }
@@ -762,7 +770,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setSharedCount(ICellCollection d2, int i) {
+    public void setSharedCount(@NonNull ICellCollection d2, int i) {
         vennCache.put(d2.getID(), i);
     }
 
@@ -990,16 +998,14 @@ public class VirtualCellCollection implements ICellCollection {
         if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
             return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
-        } else {
-
-            if (PlottableStatistic.VARIABILITY.equals(stat)) {
-                result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
-            } else {
-                result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
-            }
-            Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
         }
+		if (PlottableStatistic.VARIABILITY.equals(stat)) {
+		    result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
+		} else {
+		    result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
+		}
+		Arrays.sort(result);
+		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
         return result;
     }
 

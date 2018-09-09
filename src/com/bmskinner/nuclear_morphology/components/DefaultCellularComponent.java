@@ -639,9 +639,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         if (this.hasStatistic(PlottableStatistic.PERIMETER) && this.hasStatistic(PlottableStatistic.AREA)) {
             double perim2 = Math.pow(this.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
             return (4 * Math.PI) * (this.getStatistic(PlottableStatistic.AREA, MeasurementScale.PIXELS) / perim2);
-        } else {
-            return ERROR_CALCULATING_STAT;
         }
+		return ERROR_CALCULATING_STAT;
 
     }
 

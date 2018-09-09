@@ -66,7 +66,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     }
 
     @Override
-    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
+    public synchronized List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
         List<ICell> list = new ArrayList<>();
 
         try {
@@ -94,20 +94,17 @@ public class FluorescentNucleusFinder extends CellFinder {
 
             for (Nucleus n : nuclei) {
                 if (nuclOptions.isValid(n)) {
-                    list.add(CellFactory.buildInstance(n));
+                	ICell c = CellFactory.buildInstance(n);
+                	if(c!=null)
+                		list.add(c);
                 }
             }
         } catch (MissingOptionException e) {
         	warn("No options for nucleus creation in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
         } finally {
         	fireProgressEvent();
-        }
-//            warn("Error searching in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
-//        }
-
-        
+        }        
         return list;
-
     }
 
     private List<Nucleus> detectNucleus(@NonNull File imageFile)
@@ -188,7 +185,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
     }
 
-    private Nucleus makeNucleus(final Roi roi, final File f, final IDetectionOptions nuclOptions, int objectNumber,
+    private Nucleus makeNucleus(@NonNull final Roi roi, @NonNull final File f, @NonNull final IDetectionOptions nuclOptions, int objectNumber,
             final StatsMap values) throws ComponentCreationException {
         
         fine("Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));

@@ -143,10 +143,11 @@ public interface IShellResult extends Serializable, Loggable {
 
     /**
      * Get the pixel count data for a signal in the given nucleus in the given cell.
+     * The signal parameter can be left null to fetch pixels for the entire nucleus
      * @param type the type of pixel to fetch
      * @param cell the cell
      * @param nucleus the nucleus
-     * @param signal the signal
+     * @param signal the signal, or null to fetch all pixels in the nucleus
      * @return the pixel counts in that object per shell
      */
     public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);

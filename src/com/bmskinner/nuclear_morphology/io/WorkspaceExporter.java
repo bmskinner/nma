@@ -79,6 +79,8 @@ public abstract class WorkspaceExporter extends XMLWriter implements Exporter {
 		public void exportWorkspace(final @NonNull IWorkspace w) {
 
 	        File exportFile = w.getSaveFile();
+	        if(exportFile==null)
+	        	return;
 	        if (exportFile.exists())
 	            exportFile.delete();
 
@@ -108,6 +110,8 @@ public abstract class WorkspaceExporter extends XMLWriter implements Exporter {
 		public void exportWorkspace(@NonNull final IWorkspace w) {
 
 	        File exportFile = w.getSaveFile();
+	        if(exportFile==null)
+	        	return;
 	        if (exportFile.exists())
 	            exportFile.delete();
 	        

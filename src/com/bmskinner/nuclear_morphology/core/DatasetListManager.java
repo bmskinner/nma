@@ -128,7 +128,7 @@ public final class DatasetListManager implements Loggable {
      * Test if a single dataset is selected
      * @return
      */
-    public synchronized boolean isSingleDataset() {
+    public synchronized boolean isSingleSelectedDataset() {
         return (selected.size() == 1);
     }
 
@@ -137,7 +137,7 @@ public final class DatasetListManager implements Loggable {
      * 
      * @return
      */
-    public synchronized final boolean isMultipleDatasets() {
+    public synchronized final boolean isMultipleSelectedDatasets() {
         return (this.selected.size() > 1);
     }
 

@@ -103,22 +103,21 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
     
     private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
 
-    public DetailPanel(@NonNull InputSupplier context) {
+    public DetailPanel(@NonNull final InputSupplier context) {
         this(context, DEFAULT_TAB_TITLE);
     }
     
-    public DetailPanel(@NonNull TabPanel parent) {
+    public DetailPanel(@NonNull final TabPanel parent) {
     	this(parent.getInputSupplier(), parent, DEFAULT_TAB_TITLE);
     }
     
-    public DetailPanel(@NonNull InputSupplier context, String title) {
+    public DetailPanel(@NonNull final InputSupplier context, final String title) {
         this(context, null, title);        
     }
     
-    public DetailPanel(@NonNull InputSupplier context, @Nullable TabPanel parent, @NonNull String title) {
+    public DetailPanel(@NonNull final InputSupplier context, @Nullable final TabPanel parent, @NonNull final String title) {
     	inputSupplier = context;
         parentPanel = parent;
-//        this.addChartOptionsRenderedEventListener(this);
         panelTabTitleLbl = title;
     }
     
@@ -142,7 +141,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * @param panel the panel to add
      */
     @Override
-	public void addSubPanel(final TabPanel panel) {
+	public void addSubPanel(final @NonNull TabPanel panel) {
         subPanels.add(panel);
         panel.addSignalChangeListener(this);
         panel.addDatasetEventListener(this);

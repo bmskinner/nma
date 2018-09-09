@@ -30,6 +30,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -119,7 +121,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         return false;
     }
 
-    public abstract void deleteClusterGroup(IClusterGroup group);
+    public abstract void deleteClusterGroup(@NonNull IClusterGroup group);
 
     public void addClusterGroup(IClusterGroup group) {
         this.clusterGroups.add(group);

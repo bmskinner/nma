@@ -163,6 +163,8 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                 activeName = line.split(TAB)[1];
 
+                if(activeID==null)
+                	continue;
                 ICellCollection c = new VirtualCellCollection(dataset, activeName, activeID);
 
                 IAnalysisDataset d = new ChildAnalysisDataset(dataset, c);

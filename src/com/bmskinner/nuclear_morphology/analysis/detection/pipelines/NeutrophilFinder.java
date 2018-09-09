@@ -22,6 +22,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +114,7 @@ public class NeutrophilFinder extends CellFinder {
      */
 
     @Override
-    public List<ICell> findInImage(File imageFile) throws ImageImportException {
+    public Collection<ICell> findInImage(File imageFile) throws ImageImportException {
         List<ICell> list = new ArrayList<>();
 
         List<ICytoplasm> cyto = detectCytoplasm(imageFile);

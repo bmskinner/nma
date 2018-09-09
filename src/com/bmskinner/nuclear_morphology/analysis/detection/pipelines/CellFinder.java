@@ -20,7 +20,11 @@ package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -38,22 +42,22 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  * @since 1.13.5
  *
  */
-public abstract class CellFinder extends AbstractFinder<List<ICell>> {
+public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 
     /**
      * Construct the finder using an options
      * 
      * @param op
      */
-    public CellFinder(final IAnalysisOptions op) {
+    public CellFinder(@NonNull final IAnalysisOptions op) {
         super(op);
 
     }
 
     @Override
-    public List<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
+    public Collection<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
 
-        List<ICell> list = new ArrayList<>();
+        final Queue<ICell> list = new ConcurrentLinkedQueue<>();
         File[] arr = folder.listFiles();
         if (arr == null) {
             return null;
@@ -61,19 +65,16 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
         
         Stream.of(arr).parallel().forEach(f -> {
             
-            if(Thread.interrupted()){
+            if(Thread.interrupted())
                 return;
-            }
-            
-            if (!f.isDirectory()) {
-
-                if (ImageImporter.fileIsImportable(f)) {
-                    try {
-                        list.addAll(findInImage(f));
-                    } catch (ImageImportException e) {
-                        stack("Error searching image", e);
-                    }
-                }
+            if(f.isDirectory())
+            	return;
+            if (!ImageImporter.fileIsImportable(f))
+            	return;
+            try {
+            	list.addAll(findInImage(f));
+            } catch (ImageImportException e) {
+            	stack("Error searching image", e);
             }
         });
 
