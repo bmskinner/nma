@@ -94,7 +94,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         IPoint com = IPoint.makeNew(0, 0);
-
         NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
         Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
 
@@ -104,31 +103,22 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         n.setStatistic(PlottableStatistic.PERIMETER, perim);
         n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
+        // Build a consensus nucleus from the template points
         Nucleus cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
 
         for (Tag tag : BorderTagObject.values()) {
-
             if (Tag.INTERSECTION_POINT.equals(tag)) // not relevant here
                 continue;
-
             if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
                         Stats.MEDIAN);
                 int newIndex = cons.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
                 cons.setBorderTag(tag, newIndex);
             }
-
         }
-
-        // Check the profile generated
-
-        IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Stats.MEDIAN);
-        IProfile nucProfile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        double diff = median.absoluteSquareDifference(nucProfile);
-
-        // // Adjust segments to fit size
-
+        cons.alignVertically();
+        
+        // Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {
         	ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);

@@ -67,7 +67,7 @@ public interface IAnalysisMethod extends Callable<IAnalysisResult>, Loggable {
     /**
      * Call this method and specify a method to be run if a condition is met. 
      * If the condition is true, it returns the same method that is given.
-     * If  the condition is dalse, it returns this method.
+     * If  the condition is false, it returns this method.
      * @param nextMethod the next method to be run.
      * @return the next method to be run
      * @throws Exception if an error occurs in the called method

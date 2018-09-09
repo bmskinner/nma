@@ -6,8 +6,6 @@ import org.junit.Test;
 
 public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 
-
-
 	@Test
 	public void testRoundDataset() throws Exception {
 		

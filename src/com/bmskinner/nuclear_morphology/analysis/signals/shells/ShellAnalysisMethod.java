@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -66,34 +67,40 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	public static final double MINIMUM_CIRCULARITY = 0.1;
 	
 	private final IShellOptions options;
+	
+	private ICellCollection collection;
 
     private final Map<UUID, KeyedShellResult> counters = new HashMap<>();
 
-    public ShellAnalysisMethod(@NonNull IAnalysisDataset dataset, @NonNull IShellOptions o) {
+    public ShellAnalysisMethod(@NonNull final IAnalysisDataset dataset, @NonNull final IShellOptions o) {
         super(dataset);
         options = o;
     }
 
     @Override
     public IAnalysisResult call() throws Exception {
-
         // Set the progress total
         ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, dataset.getCollection().size() - 1);
         fireProgressEvent(e);
-        run();
-                
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
-        return r;
+        run();  
+        return new DefaultAnalysisResult(dataset);
     }
 
     protected void run() {
+       
+        
+    	// If all cells are not suitable for shell analysis, prefiltering may have created a child collection that
+    	// can be analysed. Check for this before running.
+//    	Optional<IAnalysisDataset> optionalSuitable = dataset.getChildDatasets().stream().filter(d->d.getName().equals("Suitable_for_shell_analysis")).findAny();
+//    	collection = optionalSuitable.isPresent() ? optionalSuitable.get().getCollection() : dataset.getCollection();
+    	collection = dataset.getCollection();
+    	if (!collection.getSignalManager().hasSignals()) 
+             return;
+    	 
+    	log("Created shell analysis for collection "+collection.getName());
 
-        ICellCollection collection = dataset.getCollection();
-
-        if (!collection.getSignalManager().hasSignals()) 
-            return;
-
-        log(String.format("Performing %s shell analysis with %s shells...", options.getErosionMethod(), options.getShellNumber()));
+        log(String.format("Performing %s shell analysis with %s shells on dataset %s...", 
+        		options.getErosionMethod(), options.getShellNumber(), collection.getName()));
 
         try {
 
@@ -150,7 +157,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         }
 
 
-        private void analyseNucleus(Nucleus n) {
+        private void analyseNucleus(@NonNull final Nucleus n) {
 
             try {
                 shellDetector = new ShellDetector(n,  options.getShellNumber(), options.getErosionMethod(), true);
@@ -178,8 +185,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
         }
 
-        private void analyseSignalGroup(Nucleus n, UUID signalGroup) throws ImageImportException {
-            ICellCollection collection = dataset.getCollection();
+        private void analyseSignalGroup(@NonNull final Nucleus n, @NonNull final UUID signalGroup) throws ImageImportException {
             if (!collection.getSignalManager().hasSignals(signalGroup))
                 return;
 
@@ -214,15 +220,13 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
     private void createResults() {
         // get stats and export
-        ICellCollection collection = dataset.getCollection();
-
         boolean addRandom = false;
 
         for (UUID group : counters.keySet()) {
             addRandom |= collection.getSignalManager().hasSignals(group);
             if (collection.getSignalManager().hasSignals(group)) {
                 KeyedShellResult channelCounter = counters.get(group);
-                dataset.getCollection().getSignalGroup(group).get().setShellResult(channelCounter);
+                collection.getSignalGroup(group).get().setShellResult(channelCounter);
             }
         }
 
@@ -232,8 +236,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
     private void addRandomSignal() {
 
-        ICellCollection collection = dataset.getCollection();
-
         // Create a random sample distribution
         if (collection.hasConsensus()) {
 
@@ -241,7 +243,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             random.setFolder(new File(""));
             random.setGroupColour(Color.LIGHT_GRAY);
 
-            dataset.getCollection().addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
+            collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
 
             // Calculate random positions of pixels
             RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
@@ -250,7 +252,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             
 			RandomShellResult randomResult = new RandomShellResult( options.getShellNumber(), options.getErosionMethod(), c);
 			
-			dataset.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
+			collection.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
 			        .setShellResult(randomResult);
         } else {
             warn("Cannot create simulated dataset, no consensus");

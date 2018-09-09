@@ -19,6 +19,8 @@
 
 package com.bmskinner.nuclear_morphology.analysis;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
@@ -29,11 +31,14 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public abstract class SingleDatasetAnalysisMethod extends AbstractAnalysisMethod {
     
-    protected IAnalysisDataset dataset;
+    protected final IAnalysisDataset dataset;
     
-    public SingleDatasetAnalysisMethod(IAnalysisDataset dataset) {
+    /**
+     * Create with a dataset for analysis
+     * @param dataset
+     */
+    public SingleDatasetAnalysisMethod(@NonNull final IAnalysisDataset dataset) {
         super();
         this.dataset = dataset;
     }
-
 }

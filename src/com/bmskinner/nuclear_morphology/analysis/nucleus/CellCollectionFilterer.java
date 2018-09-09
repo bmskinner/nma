@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * A filterer that filters cell collections to remove obvious outliers
+ * A filterer that filters cell collections on measured values
  * 
  * @author bms41
  * @since 1.13.5
@@ -58,56 +58,40 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
 
         // Make the predicate for the stats
         // Fails if outside the given range
-        Predicate<ICell> pred = new Predicate<ICell>() {
-            @Override
-            public boolean test(ICell t) {
+        Predicate<ICell> pred = (t) -> {
+        	for (Nucleus n : t.getNuclei()) {
+        		for (PlottableStatistic stat : stats) {
+        			double med;
+        			try {
+        				med = collection.getMedian(stat, CellularComponent.NUCLEUS,
+        						MeasurementScale.PIXELS);
+        			} catch (Exception e) {
+        				stack("Cannot get median stat", e);
+        				return false;
+        			}
+        			double max = med * delta;
+        			double min = med / delta;
 
-                for (Nucleus n : t.getNuclei()) {
+        			double value = n.getStatistic(stat);
 
-                    for (PlottableStatistic stat : stats) {
-                        double med;
-                        try {
-                            med = collection.getMedian(stat, CellularComponent.NUCLEUS,
-                                    MeasurementScale.PIXELS);
-                        } catch (Exception e) {
-                            stack("Cannot get median stat", e);
-                            return false;
-                        }
-
-                        double max = med * delta;
-                        double min = med / delta;
-
-                        double value = n.getStatistic(stat);
-
-                        if (value > max || value < min) {
-                            return false;
-                        }
-                    }
-
-                }
-                return true;
-            }
-
+        			if (value > max || value < min)
+        				return false;
+        		}
+        	}
+        	return true;
         };
 
         // Test each cell for the predicate
         Iterator<ICell> it = collection.getCells().iterator();
-
         while (it.hasNext()) {
             ICell c = it.next();
-
             if (!pred.test(c)) {
-
                 if (failCollection != null)
                     failCollection.addCell(new DefaultCell(c));
                 it.remove();
-
             }
-
         }
-
         fine("Remaining: " + collection.size() + " nuclei");
-
     }
 
 
@@ -143,8 +127,6 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
          
          ICellCollection filtered = collection.filter(pred);
 
-//        ICellCollection filtered = collection.filterCollection(stat, scale, lower, upper);
-//
         if (filtered == null)
             throw new CollectionFilteringException("No collection returned");
 

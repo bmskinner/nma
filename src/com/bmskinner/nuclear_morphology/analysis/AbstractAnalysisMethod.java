@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -34,6 +36,9 @@ import org.eclipse.jdt.annotation.NonNull;
  * in the task. Calling {@code fireProgressEvent(long l)} will tell the worker to update the progress
  * to the given value out of the total amount of 'work' in the task. 
  * 
+ * This base class does not take an input dataset; it serves as the starting point for all 
+ * pipelines
+ * 
  * @author ben
  *
  */
@@ -44,8 +49,7 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     protected IAnalysisResult  result    = null;
 
     public AbstractAnalysisMethod() {}
-    
-
+        
     @Override
     public void addProgressListener(ProgressListener l) {
         listeners.add(l);

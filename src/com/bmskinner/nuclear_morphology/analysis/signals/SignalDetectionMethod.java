@@ -168,7 +168,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
         List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
 
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
 
         for (ICellCollection collection : signalPopulations) {
             finer("Processing " + collection.getName());
@@ -185,7 +185,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
      * 
      * @param collection
      */
-    private void processSubPopulation(ICellCollection collection) {
+    private void processSubPopulation(@NonNull ICellCollection collection) {
 
         try {
             finer("Creating new analysis dataset for " + collection.getName());
@@ -204,15 +204,13 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
      * Create two child populations for the given dataset: one with signals in
      * the given group, and one without signals
      * 
-     * @param r
-     *            the collection to split
-     * @param signalGroup
-     *            the signal group to split on
+     * @param r the collection to split
+     * @param signalGroup the signal group to split on
      * @return a list of new collections
      */
-    private List<ICellCollection> dividePopulationBySignals(ICellCollection r, UUID signalGroup) {
+    private List<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
 
-        List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
+        List<ICellCollection> signalPopulations = new ArrayList<>();
         log("Dividing population by signals...");
 
         Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
@@ -235,7 +233,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		    signalPopulations.add(listCollection);
 
 		    // Only add a group of cells without signals if at least one
-		    // cell does havea signal
+		    // cell does have a signal
 
 		    Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 		    if (!notList.isEmpty()) {

@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public abstract class MultipleDatasetAnalysisMethod  extends AbstractAnalysisMethod {
     
-    final protected List<IAnalysisDataset> datasets;
+    final protected List<IAnalysisDataset> datasets = new ArrayList<>();
     
     /**
      * Construct with a list of datasets to be analysed
@@ -41,7 +41,7 @@ public abstract class MultipleDatasetAnalysisMethod  extends AbstractAnalysisMet
      */
     public MultipleDatasetAnalysisMethod(List<IAnalysisDataset> datasets) {
         super();
-        this.datasets = datasets;
+        this.datasets.addAll(datasets);
     }
     
     /**
@@ -50,7 +50,6 @@ public abstract class MultipleDatasetAnalysisMethod  extends AbstractAnalysisMet
      */
     public MultipleDatasetAnalysisMethod(IAnalysisDataset dataset) {
         super();
-        this.datasets = new ArrayList<>();
         datasets.add(dataset);
     }
 

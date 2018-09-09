@@ -59,9 +59,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-		fine("Profiling collection");
 		run();
-		fine("Finished profiling collection");
 		return new DefaultAnalysisResult(dataset);
 	}
 
@@ -84,12 +82,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param collection
 	 * @param pointType
-	 * @throws ProfileException 
-	 * @throws UnavailableProfileTypeException 
-	 * @throws UnavailableBorderTagException 
-	 * @throws NoDetectedIndexException 
 	 */
-	private void run() throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException, NoDetectedIndexException {
+	private void run() throws Exception {
 
 		ICellCollection collection = dataset.getCollection();
 

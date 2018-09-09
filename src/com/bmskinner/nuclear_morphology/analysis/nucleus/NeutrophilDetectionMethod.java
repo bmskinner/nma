@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,10 +29,10 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
-import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
@@ -53,19 +54,19 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  * @since 1.13.4
  *
  */
-public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
+public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
     private static final String spacerString = "---------";
 
     private final String outputFolder;
 
-    private Finder<List<ICell>> finder;
+    private Finder<Collection<ICell>> finder;
 
     private final File folder;
 
     private final IAnalysisOptions analysisOptions;
 
-    private Map<File, ICellCollection> collectionMap = new HashMap<File, ICellCollection>();
+    private Map<File, ICellCollection> collectionMap = new HashMap<>();
 
     List<IAnalysisDataset> datasets;
 
@@ -79,7 +80,7 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
      * @param options the options to detect with
      */
     public NeutrophilDetectionMethod(@NonNull String outputFolder, @NonNull File debugFile, @NonNull IAnalysisOptions options) {
-        super(null);
+        super();
 
         if (outputFolder == null || options == null)
             throw new IllegalArgumentException("Must have output folder name and input options");
@@ -352,17 +353,7 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
             makeFolder(folder);
 
             log("File:  " + file.getName());
-            List<ICell> cells = finder.findInImage(file);
-            // // Build a pipline for the image
-            // DetectionPipeline<ICell> pipe = new
-            // NeutrophilDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.CYTOPLASM),
-            // analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
-            // file,
-            // analysisOptions.getProfileWindowProportion());
-            //
-            // // Run each step of the pipeline without sampling intermediate
-            // results
-            // List<ICell> cells = pipe.findInImage();
+            Collection<ICell> cells = finder.findInImage(file);
 
             if (cells.isEmpty()) {
                 log("  No cells detected in image");

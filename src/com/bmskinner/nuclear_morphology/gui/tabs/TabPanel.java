@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
@@ -86,7 +88,7 @@ public interface TabPanel extends EventListener {
      * @param panel
      *            the panel to add
      */
-    void addSubPanel(TabPanel panel);
+    void addSubPanel(@NonNull TabPanel panel);
     
     TabPanel getParentPanel();
     

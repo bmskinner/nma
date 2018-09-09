@@ -83,7 +83,7 @@ public class ShellDetector extends Detector {
      * largest shell (index 0) and ends with the smallest shell. The larger
      * shells include the area contained within smaller shells.
      */
-    private List<Shell> shells = new ArrayList<Shell>(0);
+    private List<Shell> shells = new ArrayList<>();
 
 
     /**
@@ -92,7 +92,7 @@ public class ShellDetector extends Detector {
      * @param isScale should the component be scaled up for more precise shell creation
      * @throws ShellAnalysisException
      */
-    public ShellDetector(@NonNull CellularComponent component, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
+    public ShellDetector(@NonNull final CellularComponent component, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
         this(component, ShellDetector.DEFAULT_SHELL_COUNT, type, isScale);
     }
 
@@ -105,12 +105,10 @@ public class ShellDetector extends Detector {
      * @param isScale should the component be scaled up for more precise shell creation
      * @throws ShellAnalysisException
      */
-    public ShellDetector(@NonNull CellularComponent component, int shellCount, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
+    public ShellDetector(@NonNull final CellularComponent component, int shellCount, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
         nShells = shellCount;
         this.type = type;
         this.isScale = isScale;
-//        component.getBounds().getX();
-//        fine("Creating shell for component at "+ component.getBounds().getX()+" - "+ component.getBounds().getY() );
         createShells(component);
     }
 
@@ -263,12 +261,10 @@ public class ShellDetector extends Detector {
      * the component shape by 1 pixel, the areas created will not be perfectly
      * equal, but will be at the closest area above or below the target.
      * 
-     * @param c
-     *            the component to divide
-     * @param shellCount
-     *            the number of shells to create
+     * @param c the component to divide
+     * @param shellCount the number of shells to create
      */
-    private void createShells(@NonNull CellularComponent c) {
+    private void createShells(@NonNull final CellularComponent c) {
 
         // Position of the shells is with respect to the source image
         Roi objectRoi = new PolygonRoi(c.toOriginalPolygon(), Roi.POLYGON);
@@ -279,9 +275,6 @@ public class ShellDetector extends Detector {
 
         // start with the next shell in nucleus, and shrink shell by shell
         for (int i=0; i<nShells; i++) {
-            
-            // this approach makes shells of equal radius, not equal area. 
-            // Is that more or less useful?
             Roi shrinkingRoi = re.shrink(type, i);
 
             // Make the shell
@@ -289,10 +282,6 @@ public class ShellDetector extends Detector {
             ratios[i] = areas[i]/areas[0];
             shells.add(new Shell(shrinkingRoi, c));
         }
-//        fine("Shells at "+ objectRoi.getBounds().getX()+" - "+ objectRoi.getBounds().getY() );
-//        fine("Areas: "+Arrays.toString(areas));
-//        fine("Ratios: "+Arrays.toString(ratios));
-
     }
 
     public class Shell implements Imageable {
@@ -597,7 +586,7 @@ public class ShellDetector extends Detector {
     
     /**
      * This is a replacement for the default ImageJ RoiEnlarger.
-     * It is spcifically designed to erode the roi for shell analysis,
+     * It is specifically designed to erode the roi for shell analysis,
      * using the fixed number of shells to set threshold in the EDM
      * @author bms41
      * @since 1.13.8
@@ -619,7 +608,7 @@ public class ShellDetector extends Detector {
          * @param shell the shell to fetch
          * @return
          */
-        public Roi shrink(@NonNull ShrinkType type, int shell){
+        public Roi shrink(@NonNull final ShrinkType type, int shell){
             switch(type){
                 case RADIUS: return shrinkByRadius(shell);
                 case AREA:   return shrinkByArea(shell);
@@ -636,8 +625,7 @@ public class ShellDetector extends Detector {
             ImageProcessor ip = createFromRoi();
             boolean bb = Prefs.blackBackground;
             Prefs.blackBackground = true;
-            
-            
+
             final ImageProcessor ip1 = ip.duplicate();
             new EDM().toEDM(ip1); // zero at edge, 255 at centre
             int max = getMaxPixelValue(ip1); // the EDM may not use all 255 values 
@@ -659,12 +647,11 @@ public class ShellDetector extends Detector {
         
         
         private Roi shrinkByArea(int shell) {
-            
-            // scale the image such that the EDM can be calculated
 
             double ratio = (double) (nShells-shell)  / (double) nShells;
             
             ImageProcessor ip = createFromRoi();
+            // scale the image such that the EDM can be calculated
 //            if(isScale)
 //                ip = ip.resize(ip.getWidth()*DEFAULT_SCALE_FACTOR);
             boolean bb = Prefs.blackBackground;
@@ -685,14 +672,9 @@ public class ShellDetector extends Detector {
                 newIp.setThreshold(threshold, 255, ImageProcessor.NO_LUT_UPDATE);
                 roi2 = (new ThresholdToSelection()).convert(newIp);
                 scaledArea = Stats.area(roi2);
-//                showImage(""+threshold, newIp);
                 threshold++;
             }
-            
-            
-            
-            
-//            fine("Shell "+shell+" Ratio: "+ratio+" Thresh: "+threshold+" Des: "+desiredArea+" Act:"+scaledArea);
+
             Prefs.blackBackground = bb;
             
             Rectangle bounds2 = roi2.getBounds();

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.AbstractFinder;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
@@ -54,7 +56,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     final private INuclearSignalOptions signalOptions;
     final private ICellCollection       collection;
 
-    public SignalFinder(IAnalysisOptions op, INuclearSignalOptions signalOptions, ICellCollection collection) {
+    public SignalFinder(@NonNull IAnalysisOptions op, @NonNull INuclearSignalOptions signalOptions, @NonNull ICellCollection collection) {
         super(op);
         this.signalOptions = signalOptions;
         this.collection = collection;
@@ -67,7 +69,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     }
 
     @Override
-    public List<INuclearSignal> findInFolder(File folder) throws ImageImportException {
+    public List<INuclearSignal> findInFolder(@NonNull File folder) throws ImageImportException {
 
         if (folder == null) {
             throw new IllegalArgumentException("Folder cannot be null");
@@ -75,11 +77,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         List<INuclearSignal> list = new ArrayList<>();
 
-        if (folder.listFiles() == null) {
+        if (folder.listFiles() == null)
             return list;
-        }
 
-        Stream.of(folder.listFiles()).parallel().forEach(f -> {
+        Stream.of(folder.listFiles()).forEach(f -> {
             if (!f.isDirectory()) {
 
                 if (ImageImporter.fileIsImportable(f)) {
@@ -96,7 +97,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     }
 
     @Override
-    public List<INuclearSignal> findInImage(File imageFile) throws ImageImportException {
+    public List<INuclearSignal> findInImage(@NonNull File imageFile) throws ImageImportException {
 
         List<INuclearSignal> list = new ArrayList<>();
 
@@ -172,12 +173,17 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
             // annotate detected signals onto the imagefile
             fireDetectionEvent(ap.duplicate(), "Annotated objects");
         }
-
         return list;
-
     }
 
-    public List<INuclearSignal> findInImage(File imageFile, Nucleus n) throws ImageImportException {
+    /**
+     * Find nuclear signals within the given image, for the given nucleus
+     * @param imageFile the image to search
+     * @param n the nucleus the signals should belong to
+     * @return
+     * @throws ImageImportException
+     */
+    public List<INuclearSignal> findInImage(@NonNull File imageFile, @NonNull Nucleus n) throws ImageImportException {
 
         detector = new SignalDetector(signalOptions, signalOptions.getChannel());
 
@@ -187,50 +193,45 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         try {
             // The detector also creates the signals currently
             List<INuclearSignal> temp = detector.detectSignal(imageFile, stack, n);
-
-            for (INuclearSignal s : temp) {
-                if (checkSignal(s, n)) {
+            for (INuclearSignal s : temp)
+                if (checkSignal(s, n)) 
                     list.add(s);
-                }
-            }
-
         } catch (Exception e) {
             error("Error in detector", e);
         }
-
         return list;
-
     }
 
-    protected void drawSignals(Nucleus n, List<INuclearSignal> list, ImageAnnotator an, boolean annotate) {
+    /**
+     * Draw the signals for the given nucleus on an annotator
+     * @param n the nucleus to annotate
+     * @param list the  signals in the nucleus to be annotated
+     * @param an the annotator
+     * @param annotateStats should the stats be drawn on the image
+     */
+    protected void drawSignals(@NonNull Nucleus n, @NonNull List<INuclearSignal> list, @NonNull ImageAnnotator an, boolean annotateStats) {
 
         an.annotateBorder(n, Color.BLUE);
-
         for (INuclearSignal s : list) {
-
             Color color = checkSignal(s, n) ? Color.ORANGE : Color.RED;
             an.annotateBorder(s, color);
-
-            if (annotate) {
+            if (annotateStats) {
                 an.annotateSignalStats(n, s, Color.YELLOW, Color.BLUE);
             }
-
         }
-
     }
 
-    private boolean checkSignal(INuclearSignal s, Nucleus n) {
-
-        if (s.getStatistic(PlottableStatistic.AREA) < signalOptions.getMinSize()) {
-
+    /**
+     * Test if the given signal passes the options criteria
+     * @param s the signal
+     * @param n the nucleus the signal belongs to
+     * @return
+     */
+    private boolean checkSignal(@NonNull INuclearSignal s, @NonNull Nucleus n) {
+        if (s.getStatistic(PlottableStatistic.AREA) < signalOptions.getMinSize())
             return false;
-        }
-
-        if (s.getStatistic(
-                PlottableStatistic.AREA) > (signalOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA))) {
-
+        if (s.getStatistic( PlottableStatistic.AREA) > (signalOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA)))
             return false;
-        }
         return true;
     }
 

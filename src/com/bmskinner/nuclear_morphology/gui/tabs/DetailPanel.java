@@ -22,6 +22,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -64,7 +65,6 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener.CellUpdatedEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -78,7 +78,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, CellUpdatedEventListener {
 
-    private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
+    private final List<Object> listeners = new CopyOnWriteArrayList<Object>();
     
     private final InputSupplier inputSupplier;
 
@@ -185,8 +185,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * @return
      */
     public synchronized boolean isSingleDataset() {
-        // return(this.list.size()==1);
-        return DatasetListManager.getInstance().isSingleDataset();
+        return DatasetListManager.getInstance().isSingleSelectedDataset();
     }
 
     /**
@@ -195,7 +194,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * @return
      */
     public synchronized boolean isMultipleDatasets() {
-        return DatasetListManager.getInstance().isMultipleDatasets();
+        return DatasetListManager.getInstance().isMultipleSelectedDatasets();
     }
 
     public synchronized boolean hasDatasets() {
