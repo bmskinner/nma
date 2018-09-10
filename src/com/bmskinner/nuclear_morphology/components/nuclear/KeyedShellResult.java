@@ -20,7 +20,6 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +29,10 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
-import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -69,6 +66,23 @@ public class KeyedShellResult implements IShellResult {
         for(CountType t : CountType.values()) {
         	map.put(t, new ShellCount());
         }
+    }
+    
+    /**
+     * Create with the given number of shells
+     * @param nShells
+     */
+    private KeyedShellResult(KeyedShellResult r){
+    	this(r.getNumberOfShells(), r.getType());
+        
+        for(CountType t : CountType.values()) {
+        	map.put(t, r.map.get(t).duplicate());
+        }
+    }
+    
+    @Override
+    public IShellResult duplicate() {
+    	return new KeyedShellResult(this);
     }
     
     /**
@@ -151,69 +165,40 @@ public class KeyedShellResult implements IShellResult {
     }
     
     @Override
-    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-    	long[] observed   = getObserved(agg, norm);
-    	
-    	double[] other = expected.getProportions(agg, norm);
-    	double[] exp = getExpected(agg, norm, other);
-    	
-    	for(double d : exp){
-            if(d<=0) // we can't do a chi square test if one of the values is zero
-                return 1;
-        }
-
-    	ChiSquareTest test = new ChiSquareTest();
-    	return test.chiSquare(exp, observed);
-    }
-    
-    @Override
-    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-    	 long[] observed   = getObserved(agg, norm);
-//    	 System.out.println("Obs vals: "+Arrays.toString(observed));
-    	 
-    	 double[] other = expected.getProportions(agg, norm);
-//    	 System.out.println("Exp prop: "+Arrays.toString(other));
-    	 
-         double[] exp = getExpected(agg, norm, other);
-//         System.out.println("Exp vals: "+Arrays.toString(exp));
-         for(double d : exp){
-             if(d<=0) // we can't do a chi square test if one of the values is zero
-                 return 1;
-         }
-
-    	 ChiSquareTest test = new ChiSquareTest();
-    	 return test.chiSquareTest(exp, observed);
+   	public int getNumberOfSignals(@NonNull Aggregation agg) {
+    	return map.get(CountType.SIGNAL).size(agg);
     }
     
     /**
      * Get the observed values as a long array.
      * @return the observed shell values
      */
-    private long[] getObserved(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    @Override
+	public long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm) {
         long[] observed = new long[nShells];
-        int count = map.get(CountType.SIGNAL).size(agg);
+        int nCells = map.get(CountType.SIGNAL).size(agg);
         double[] means = getProportions(agg, norm);
         for (int i = 0; i < nShells; i++) {
-            double mean = means[i];
-            observed[i] = (long) (mean * count);
+            double meanSignalProportion = means[i]; 
+            observed[i] = (long) (meanSignalProportion * nCells); 
         }
         return observed;
     }
-    
-    /**
-     * Get the expected values for chi-sqare test, assuming an equal proportion
-     * of signal per shell
-     * 
-     * @return the expected values
-     */
-    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm, double[] other) {
-        double[] expected = new double[nShells];
-        int count = map.get(CountType.SIGNAL).size(agg);
-        for (int i=0; i<nShells; i++) {
-            expected[i] = other[i] * count;
-        }
-        return expected;
-    }
+//    
+//    /**
+//     * Get the expected values for chi-sqare test, assuming an equal proportion
+//     * of signal per shell
+//     * 
+//     * @return the expected values
+//     */
+//    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm, double[] other) {
+//        double[] expected = new double[nShells];
+//        int count = map.get(CountType.SIGNAL).size(agg);
+//        for (int i=0; i<nShells; i++) {
+//            expected[i] = other[i] * count;
+//        }
+//        return expected;
+//    }
     
 	@Override
 	public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -303,6 +288,14 @@ public class KeyedShellResult implements IShellResult {
         
         public ShellCount(){
             results = new HashMap<>();
+        }
+        
+        public ShellCount duplicate() {
+        	ShellCount result = new ShellCount();
+        	for(Key k: results.keySet()) {
+        		result.results.put(k.duplicate(), results.get(k));
+        	}
+        	return result;
         }
         
         void addValues(@NonNull Key k, long[] values){
@@ -439,6 +432,12 @@ public class KeyedShellResult implements IShellResult {
             this.cellId = cellId;
             this.componentId = componentId;
             this.signalId = signalId;
+        }
+        
+        public Key duplicate() {
+        	if(signalId==null)
+        		return new Key(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), null);
+        	return new Key(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), UUID.fromString(signalId.toString()));
         }
         
         /**

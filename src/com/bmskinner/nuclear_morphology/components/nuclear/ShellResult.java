@@ -192,15 +192,15 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
 		return stderrs.stream().mapToDouble(d->d.doubleValue()).toArray();			
 	}
 
-	@Override
-	public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-		return chisquare;
-	}
-
-	@Override
-	public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-		return pvalue;
-	}
+//	@Override
+//	public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
+//		return chisquare;
+//	}
+//
+//	@Override
+//	public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
+//		return pvalue;
+//	}
 
 	@Override
 	public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -214,4 +214,16 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
         Arrays.fill(result, 0);
         return result;
     }
+
+	@Override
+	public long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getNumberOfSignals(@NonNull Aggregation agg) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

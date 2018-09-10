@@ -67,13 +67,11 @@ public class SignalGroup implements ISignalGroup {
         if (!s.hasShellResult()) {
             shellResult = null;
         } else {
-            shellResult = new DefaultShellResult(s.getShellResult().get());
+            shellResult = s.getShellResult().get().duplicate();
         }
         groupName = s.getGroupName();
         isVisible = s.isVisible();
         groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
-//        channel = s.getChannel();
-//        folder = new File(s.getFolder().getAbsolutePath());
     }
     
 	@Override

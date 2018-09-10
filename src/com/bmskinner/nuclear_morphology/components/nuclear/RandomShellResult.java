@@ -26,6 +26,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
@@ -58,6 +61,12 @@ public class RandomShellResult implements IShellResult{
     @Override
     public ShrinkType getType() {
         return type;
+    }
+    
+    @Override
+    public IShellResult duplicate() {
+    	RandomShellResult r = new RandomShellResult(nShells, type, counts);
+    	return r;
     }
 
     @Override
@@ -98,15 +107,15 @@ public class RandomShellResult implements IShellResult{
         return result;
     }
 
-    @Override
-    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-        return 1;
-    }
-
-    @Override
-    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-        return 1;
-    }
+//    @Override
+//    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
+//        return 1;
+//    }
+//
+//    @Override
+//    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
+//        return 1;
+//    }
 
     @Override
     public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -117,6 +126,20 @@ public class RandomShellResult implements IShellResult{
     public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
             @Nullable INuclearSignal signal) {
         return counts;
+    }
+    
+    /**
+     * Get the observed values as a long array.
+     * @return the observed shell values
+     */
+    @Override
+	public long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    	return counts;
+    }
+    
+    @Override
+   	public int getNumberOfSignals(@NonNull Aggregation agg) {
+    	return 1;
     }
 
     @Override

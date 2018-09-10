@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -110,10 +111,11 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private static final String SHOW_RANDOM_TOOLTIP    = "Show a random distribution of signals in the consensus nucleus";
     private static final String SHOW_NUCLEI_TOOLTIP    = "Show nuclei in the dataset with shells annotated";
 
-    private static final int P_VALUE_COLUMN = 2;
+    private static final int P_VALUE_COLUMN = 3;
+    private static final int PAIRWISE_P_VALUE_COLUMN = 4;
     
     private ExportableChartPanel chartPanel;
-    private ExportableChartPanel consensusPanel;
+//    private ExportableChartPanel consensusPanel;
 
     private JRadioButton withinSignalsBtn = new JRadioButton(WITHIN_SIGNALS_LBL);
     private JRadioButton withinNucleiBtn  = new JRadioButton(WITHIN_NUCLEI_LBL);
@@ -127,7 +129,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private JCheckBox dapiNormalise      = new JCheckBox(DAPI_NORM_LBL, true);
     private JCheckBox showRandomCheckbox = new JCheckBox(SHOW_RANDOM_LBL, false);
 
-    protected ExportableTable table;
+    protected ExportableTable overallTable;
+    protected ExportableTable pairwiseTable;
 
     public SignalShellsPanel(@NonNull InputSupplier context) {
         super(context, PANEL_TITLE_LBL);
@@ -175,7 +178,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
                                                                // cells in
                                                                // height
         constraints.gridwidth = 3; // Take up 1 cell in width
-        constraints.weightx = 0.3;
+        constraints.weightx = 0.5;
         constraints.weighty = 1;
         constraints.anchor = GridBagConstraints.CENTER;
 
@@ -185,8 +188,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         constraints.gridx = 3; // Start after centre
         constraints.gridy = 0; // Start at top
         constraints.gridheight = GridBagConstraints.REMAINDER;
-        constraints.gridwidth = 7;
-        constraints.weightx = 0.7;
+        constraints.gridwidth = 4;
+        constraints.weightx = 0.5;
 
         panel.add(shellBarPanel, constraints);
 
@@ -201,12 +204,12 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private JPanel createWestPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        JScrollPane tablePanel = createTablePanel();
-
-        consensusPanel = createConsensusPanel();
+        JPanel tablePanel    = createOverallTablePanel();
+        JPanel pairwisePanel = createPairwiseTablePanel();
+//        consensusPanel = createConsensusPanel();
 
         panel.add(tablePanel, BorderLayout.NORTH);
-        panel.add(consensusPanel, BorderLayout.CENTER);
+        panel.add(pairwisePanel, BorderLayout.CENTER);
 
         return panel;
 
@@ -286,22 +289,50 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
      * 
      * @return
      */
-    private JScrollPane createTablePanel() {
+    private JPanel createOverallTablePanel() {
         JPanel tablePanel = new JPanel(new BorderLayout());
-
+        
+        JPanel header = new JPanel();
+        header.add(new JLabel("Comparisons to random distribution by chi-square"));
+        tablePanel.add(header, BorderLayout.NORTH);
         TableModel model = AnalysisDatasetTableCreator.createBlankTable();
-        table = new ExportableTable(model);
-        table.setEnabled(false);
-        tablePanel.add(table, BorderLayout.CENTER);
+        overallTable = new ExportableTable(model);
+        overallTable.setEnabled(false);
+        
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(overallTable);
+        scrollPane.setColumnHeaderView(overallTable.getTableHeader());
+        Dimension size = new Dimension(200, 150);
+        tablePanel.setMinimumSize(size);
+        tablePanel.setPreferredSize(size);
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        return tablePanel;
+    }
+    
+    /**
+     * Create the table panel
+     * 
+     * @return
+     */
+    private JPanel createPairwiseTablePanel() {
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        
+        JPanel header = new JPanel();
+        header.add(new JLabel("Pairwise comparisons of shell results by chi-square"));
+        tablePanel.add(header, BorderLayout.NORTH);
+        TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+        pairwiseTable = new ExportableTable(model);
+        pairwiseTable.setEnabled(false);
+        
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(tablePanel);
-        scrollPane.setColumnHeaderView(table.getTableHeader());
+        scrollPane.setViewportView(pairwiseTable);
+        scrollPane.setColumnHeaderView(pairwiseTable.getTableHeader());
         Dimension size = new Dimension(200, 150);
-        scrollPane.setMinimumSize(size);
-        scrollPane.setPreferredSize(size);
-
-        return scrollPane;
+        tablePanel.setMinimumSize(size);
+        tablePanel.setPreferredSize(size);
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        return tablePanel;
     }
 
     /**
@@ -336,24 +367,22 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
         setChart(barChartOptions);
 
-        ChartOptions consensusChartOptions = new ChartOptionsBuilder()
-        		.setDatasets(getDatasets())
-                .setTarget(consensusPanel)
-                .setShowAnnotations(showRandom) // proxy distribution
-                .setShowXAxis(false)
-                .setShowYAxis(false)
-                .setAggregation(agg)
-                .setNormalisation(norm).build();
-
-        setChart(consensusChartOptions);
-
         TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
         		.setAggregation(agg)
                 .setNormalisation(norm)
-                .setTarget(table)
-                .setRenderer(P_VALUE_COLUMN, new PValueTableCellRenderer()).build();
-
+                .setTarget(overallTable)
+//                .setRenderer(P_VALUE_COLUMN, new PValueTableCellRenderer())
+                .build();
         setTable(tableOptions);
+        
+        TableOptions pairwiseOptions = new TableOptionsBuilder().setDatasets(getDatasets())
+        		.setAggregation(agg)
+                .setNormalisation(norm)
+                .setTarget(pairwiseTable)
+//                .setRenderer(PAIRWISE_P_VALUE_COLUMN, new PValueTableCellRenderer())
+                .build();
+
+        setTable(pairwiseOptions);
 
     }
 
@@ -390,8 +419,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         chartPanel.setChart(AbstractChartFactory.createLoadingChart());
-        consensusPanel.setChart(AbstractChartFactory.createLoadingChart());
-        table.setModel(AbstractTableCreator.createLoadingTable());
+//        consensusPanel.setChart(AbstractChartFactory.createLoadingChart());
+        overallTable.setModel(AbstractTableCreator.createLoadingTable());
+        pairwiseTable.setModel(AbstractTableCreator.createLoadingTable());
 
     }
 
@@ -405,6 +435,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     @Override
     protected TableModel createPanelTableType(@NonNull TableOptions options) {
+    	if(options.getTarget()==pairwiseTable)
+    		return new NuclearSignalTableCreator(options).createPairwiseShellChiSquareTable();
         return new NuclearSignalTableCreator(options).createShellChiSquareTable();
     }
 

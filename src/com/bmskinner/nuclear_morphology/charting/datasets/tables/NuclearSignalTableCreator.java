@@ -22,8 +22,10 @@ import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -52,6 +54,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.stats.ShellDistributionTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class NuclearSignalTableCreator extends AbstractTableCreator {
@@ -511,8 +514,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				    
 				    double mean = r.get().getOverallShell(options.getAggregation(), options.getNormalisation());
 				    double pval = 1;
-				    if(random.isPresent())
-	                    pval = r.get().getPValue(options.getAggregation(), options.getNormalisation(), random.get());
+				    if(random.isPresent()) {
+				    	ShellDistributionTester tester = new ShellDistributionTester(r.get(), random.get());
+				    	pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
+				    }
 				    
 				    Object[] rowData = {
 				            d.getName(), 
@@ -522,6 +527,88 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				    model.addRow(rowData);
 				}
             }
+        }
+        return model;
+    }
+    
+    /**
+     * Create a table with columns for dataset, signal group, and the p value of
+     * a chi-square test for all selected pairwise dataset and signal group combinations
+     * 
+     * @param options
+     * @return
+     */
+    public TableModel createPairwiseShellChiSquareTable() {
+
+        if (!options.hasDatasets())
+            return createBlankTable();
+
+        DefaultTableModel model = new DefaultTableModel();
+
+        DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
+
+        Object[] columnNames = { Labels.DATASET, 
+        		Labels.Signals.SIGNAL_GROUP_LABEL, 
+        		Labels.DATASET, 
+        		Labels.Signals.SIGNAL_GROUP_LABEL,
+        		Labels.Stats.PROBABILITY };
+
+        model.setColumnIdentifiers(columnNames);
+        
+        Map<String, Object[]> valuesAdded = new HashMap<>();
+
+        for (IAnalysisDataset d1 : options.getDatasets()) {
+
+        	for (UUID signalGroup1 : d1.getCollection().getSignalManager().getSignalGroupIDs()) {
+
+        		ISignalGroup group1 = d1.getCollection().getSignalGroup(signalGroup1).get();
+        		Optional<IShellResult> r1 = group1.getShellResult();
+        		if (!r1.isPresent()) 
+        			continue;
+
+        		String groupName1 = group1.getGroupName();
+
+        		for (IAnalysisDataset d2 : options.getDatasets()) {
+
+        			for (UUID signalGroup2 : d2.getCollection().getSignalManager().getSignalGroupIDs()) {
+        				if(d1==d2 && signalGroup1==signalGroup2)
+        					continue;
+
+        				ISignalGroup group2 = d2.getCollection().getSignalGroup(signalGroup2).get();
+        				Optional<IShellResult> r2 = group2.getShellResult();
+        				if (!r2.isPresent()) 
+        					continue;
+
+        				String groupName2 = group2.getGroupName();
+
+        				ShellDistributionTester tester = new ShellDistributionTester(r1.get(), r2.get());
+        				double pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
+        				
+        				String k1 = d1.getId().toString()+signalGroup1.toString()+d2.getId().toString()+signalGroup2.toString();
+        				String k2 = d2.getId().toString()+signalGroup2.toString()+d1.getId().toString()+signalGroup1.toString();
+        				Object[] rowData = { 
+			        			d1.getName(), 
+			        			groupName1, 
+			        			d2.getName(), 
+			        			groupName2, 
+			        			pFormat.format(pval) };
+        				
+        				
+        				if(valuesAdded.containsKey(k2)) {
+        					String prevPValue = valuesAdded.get(k2)[4].toString();
+        					if(Double.valueOf(prevPValue)<pval)
+        						valuesAdded.put(k2, rowData); 
+        				} else {
+        					valuesAdded.put(k1, rowData); 
+        				}
+        			}
+        		}
+
+        	}
+        }
+        
+        for(String key : valuesAdded.keySet()) {
+        	model.addRow(valuesAdded.get(key));
         }
         return model;
     }

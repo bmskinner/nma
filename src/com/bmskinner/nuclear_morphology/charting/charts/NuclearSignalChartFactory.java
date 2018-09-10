@@ -91,9 +91,11 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
      */
     public JFreeChart createShellChart() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return createEmptyShellChart();
-        }
+        
+        if(options.isMultipleDatasets())
+        	return createEmptyShellChart();
 
         List<CategoryDataset> list;
         try {

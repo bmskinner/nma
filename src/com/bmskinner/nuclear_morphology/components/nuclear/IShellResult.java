@@ -53,7 +53,12 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum ShrinkType {
-        RADIUS, AREA;
+    	
+    	/** Shells have an equal radius, and different areas */
+        RADIUS, 
+        
+        /** Shells have an equal area, and different radii */
+        AREA;
     }
     
     
@@ -64,7 +69,12 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum CountType {
-        SIGNAL, COUNTERSTAIN;
+    	
+        /** Pixels in signal channels */
+        SIGNAL,
+        
+        /** Pixels in counterstain channel */
+        COUNTERSTAIN;
     }
     
     /**
@@ -74,7 +84,11 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum Normalisation {
-        NONE, DAPI;
+    	/** No normalisation is applied */
+        NONE, 
+        
+        /** Signal intensities are normalised by counterstain intensity */
+        DAPI;
     }
     
     /**
@@ -85,7 +99,14 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum Aggregation {
-        BY_SIGNAL, BY_NUCLEUS;
+    	/** Only pixels within defined signals are considered */
+        BY_SIGNAL,
+        
+        /** All pixels within the nucleus are considered */
+        BY_NUCLEUS,
+    	
+    	/** Only the position of a defined signal centre of mass is considered */
+        SIGNAL_COM;
     }
     
     /**
@@ -94,8 +115,11 @@ public interface IShellResult extends Serializable, Loggable {
      */
     ShrinkType getType();
     
+    IShellResult duplicate();
+    
     /**
-     * Get the pixel proportions in each shell
+     * Get the mean pixel proportion in each shell averaged
+     * across all cells
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
@@ -120,7 +144,7 @@ public interface IShellResult extends Serializable, Loggable {
      * @param expected a shell distribution to compare against
      * @return the result of a chi square test against the given distribution
      */
-    double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
+//    double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
     
     /**
      * Get the chi square p-value for the the pixels against a random distribution
@@ -130,7 +154,7 @@ public interface IShellResult extends Serializable, Loggable {
      * @param expected a shell distribution to compare against
      * @return the result of a chi square test against the given distribution
      */
-    double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
+//    double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
     
     /**
      * Get the overall shell position for the pixels 
@@ -140,6 +164,14 @@ public interface IShellResult extends Serializable, Loggable {
      * @return the overall shell position
      */
     double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm);
+    
+    
+    /**
+     * Get the observed aggregate values as a long array. This is the mean signal proportion per shell
+     * multipled by the number of cells
+     * @return the shell values
+     */
+    long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm);
 
     /**
      * Get the pixel count data for a signal in the given nucleus in the given cell.
@@ -150,7 +182,7 @@ public interface IShellResult extends Serializable, Loggable {
      * @param signal the signal, or null to fetch all pixels in the nucleus
      * @return the pixel counts in that object per shell
      */
-    public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
+    long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
     
     /**
      * Get the number of shells in the shell result
@@ -158,5 +190,11 @@ public interface IShellResult extends Serializable, Loggable {
      * @return the shell count
      */
     int getNumberOfShells();    
+    
+    /**
+     * Get the number of signals stored in this result under the given aggregation type
+     * @return
+     */
+    int getNumberOfSignals(@NonNull Aggregation agg);
 
 }
