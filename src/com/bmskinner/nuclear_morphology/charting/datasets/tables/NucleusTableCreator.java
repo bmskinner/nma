@@ -55,14 +55,12 @@ public class NucleusTableCreator extends AbstractTableCreator {
      * @return
      */
     public TableModel createLobeDetectionOptionsTable() {
-
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return AnalysisDatasetTableCreator.createBlankTable();
-        }
 
         DefaultTableModel model = new DefaultTableModel();
 
-        Vector<Object> rowNames = new Vector<Object>();
+        Vector<Object> rowNames = new Vector<>();
 
         // Make the row names for the options
         IDetectionSubOptions op = null;
@@ -70,8 +68,6 @@ public class NucleusTableCreator extends AbstractTableCreator {
 
         	Optional<? extends IAnalysisOptions> o = options.firstDataset().getAnalysisOptions();
         	if(o.isPresent()){
-                
-
                 IDetectionOptions ido = o.get().getDetectionOptions(CellularComponent.NUCLEUS).get();
 
                 if (ido.hasSubOptions(IDetectionSubOptions.HOUGH_OPTIONS)) {
@@ -79,9 +75,8 @@ public class NucleusTableCreator extends AbstractTableCreator {
                 }
             }
 
-            if (op == null) {
+            if (op == null)
                 return createBlankTable();
-            }
 
             rowNames.addAll(op.getKeys());
 

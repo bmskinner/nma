@@ -23,20 +23,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.SystemColor;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,12 +44,8 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.Document;
-import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -68,14 +55,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
@@ -85,79 +72,31 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  *
  */
 @SuppressWarnings("serial")
-public class LogPanel extends DetailPanel implements ActionListener, ProgressBarAcceptor {
+public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
     private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
-    private static final String NEXT_HISTORY_ACTION = "Next";
-    private static final String PREV_HISTORY_ACTION = "Prev";
-
-    private static final String CHECK_CMD = "check";
-    private static final String HELP_CMD  = "help";
-    private static final String CLEAR_CMD = "clear";
-    private static final String THROW_CMD = "throw";
-    private static final String LIST_CMD  = "list";
-    private static final String KILL_CMD  = "kill";
-    private static final String REPAIR_CMD  = "unfuck";
-    private static final String TASKS_CMD  = "tasks";
-
-    private static final Map<String, Runnable> LOCAL_CMDS = new HashMap<>();
+    
+    private final EventHandler eh;
 
     private JTextPane textArea = new JTextPane();
+    
+    private final Console console = new Console();
 
     private JPanel logPanel;      // messages and errors
     private JPanel progressPanel; // progress bars for analyses
-
-    private JTextField console = new JTextField();
-
     private SimpleAttributeSet attrs; // the styling attributes
 
-    private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
-
-    int          historyIndex = -1;
-    List<String> history      = new LinkedList<String>();
-
-    {
-        commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
-        commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
-        commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
-        commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
-        commandMap.put("info", InterfaceMethod.INFO);
-    }
-
-    private void listDatasets() {
-        int i = 0;
-        for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
-            String type = d.getCollection().isReal() ? "Real" : "Virtual";
-            log(i + "\t" + d.getName()+"\t"+type);
-            i++;
-        }
-    }
-
-    private void killAllTasks() {
-
-        log("Threads running in the JVM:");
-        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-        for (Thread t : threadSet) {
-            log("Thread " + t.getId() + ": " + t.getState());
-            t.interrupt();
-        }
-
-    }
-    
-    private void listTasks() {
-    	log(ThreadManager.getInstance().toString());
-    }
-    
-    @Override
-    public void setChartsAndTablesLoading() {
-    }
-
-    public LogPanel(@NonNull InputSupplier context) {
-        super(context);
-        this.setLayout(new BorderLayout());
-        this.logPanel = createLogPanel();
-        makeCommandList();
-        this.add(logPanel, BorderLayout.CENTER);
+    public LogPanel(@NonNull InputSupplier context, @NonNull EventHandler eh) {
+    	super(context);
+    	this.eh = eh;
+    	this.setLayout(new BorderLayout());
+    	this.logPanel = createLogPanel();
+    	
+    	addDatasetEventListener(eh);
+    	addInterfaceEventListener(eh);
+    	addSignalChangeListener(eh);
+    	textArea.setDropTarget(new MainDragAndDropTarget(eh));
+    	this.add(logPanel, BorderLayout.CENTER);
     }
     
     @Override
@@ -208,139 +147,39 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
 
         progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
         panel.add(progressPanel, BorderLayout.NORTH);
+        panel.add(console, BorderLayout.SOUTH);
 
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
-                SHOW_CONSOLE_ACTION); // grave accent new Character('\u0065')
+                SHOW_CONSOLE_ACTION);
         this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
-
-        console.setFont(font);
-        panel.add(console, BorderLayout.SOUTH);
-        console.setVisible(false);
-        console.addActionListener(this);
-
-        console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
-                PREV_HISTORY_ACTION);
-
-        console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
-
-        console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
-                NEXT_HISTORY_ACTION);
-        console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
-
-        // Need an extra drop target for file opening as well as in the main
-        // window
-        DropTarget dropTarget = makePanelDropTarget();
-        textArea.setDropTarget(dropTarget);
-
         return panel;
     }
-
-    /**
-     * Make the list of local commands to run
-     */
-    private void makeCommandList() {
-        LOCAL_CMDS.put(CHECK_CMD, () -> {
-            validateDatasets();
-        });
-        LOCAL_CMDS.put(HELP_CMD, () -> {
-            log("Available commands: ");
-            for (String key : commandMap.keySet()) {
-                InterfaceMethod im = commandMap.get(key);
-                log(" " + key + " - " + im.toString());
-            }
-            log(" build - show the version info ");
-            log(" check - validate the open root datasets");
-            log(" list  - list the open root datasets");
-        });
-        LOCAL_CMDS.put(CLEAR_CMD, () -> {
-            clear();
-        });
-        LOCAL_CMDS.put(THROW_CMD, () -> {
-            log("Throwing exception");
-            try {
-                throw new IllegalArgumentException("Throwing an exception");
-            } catch (Exception e) {
-                error("Caught expected exception", e);
-            }
-        });
-        LOCAL_CMDS.put(LIST_CMD, () -> {
-            listDatasets();
-        });
-        LOCAL_CMDS.put(KILL_CMD, () -> {
-            killAllTasks();
-        });
-        
-        LOCAL_CMDS.put(TASKS_CMD, () -> {
-        	listTasks();
-        });
-        
-        LOCAL_CMDS.put(REPAIR_CMD, () ->{
-        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets());
-        });
+    
+    private void listDatasets() {
+        int i = 0;
+        for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
+            String type = d.getCollection().isReal() ? "Real" : "Virtual";
+            log(i + "\t" + d.getName()+"\t"+type);
+            i++;
+        }
     }
 
-    private DropTarget makePanelDropTarget() {
-        DropTarget d = new DropTarget() {
+    private void killAllTasks() {
 
-            @Override
-            public synchronized void drop(DropTargetDropEvent dtde) {
+        log("Threads running in the JVM:");
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        for (Thread t : threadSet) {
+            log("Thread " + t.getId() + ": " + t.getState());
+            t.interrupt();
+        }
 
-                try {
-                    fine("Drop event heard");
-                    dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-                    Transferable t = dtde.getTransferable();
-
-                    Set<File> fileList = new HashSet<File>();
-
-                    // Check that what was provided is a list
-                    if (t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>) {
-
-                        // Check that what is in the list is files
-                        List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
-                        for (Object o : tempList) {
-                            fine("Checking dropped object");
-
-                            if (o instanceof File) {
-                                fine("Object is a file");
-                                fileList.add((File) o);
-                            }
-                        }
-
-                        // Open the files - we open *.nmd files and analyse
-                        // directories
-
-                        for (File f : fileList) {
-                            fine("Checking dropped file");
-                            if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
-                                    || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION)) {
-                                getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
-
-                            }
-                            
-                            if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
-                                getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX+f.getAbsolutePath());
-
-                            }
-
-                            if (f.isDirectory()) {
-                                getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.NEW_ANALYSIS_PREFIX+f.getAbsolutePath());
-
-                            }
-
-                        }
-                    }
-
-                } catch (UnsupportedFlavorException e) {
-                    error("Error in DnD", e);
-                } catch (IOException e) {
-                    error("IO error in DnD", e);
-                }
-
-            }
-
-        };
-        return d;
     }
+    
+    private void listTasks() {
+    	log(ThreadManager.getInstance().toString());
+    }
+
+   
 
     /**
      * Print the given string
@@ -368,15 +207,6 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
      */
     public void println(String s) {
     	print(s+System.getProperty("line.separator"));
-    }
-
-    /**
-     * Set the text of the console
-     * 
-     * @param s
-     */
-    private void setConsoleText(String s) {
-        console.setText(s);
     }
 
     /**
@@ -425,86 +255,11 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
 
         @Override
 		public void actionPerformed(ActionEvent e) {
-            finest("Button pressed: " + e.getActionCommand());
-            if (console.isVisible()) {
-                console.setVisible(false);
-            } else {
-                console.setText(null);
-                console.setVisible(true);
-                console.grabFocus();
-                console.requestFocus();
-                console.requestFocusInWindow();
-            }
-            revalidate();
-            repaint();
+            console.toggle();
         }
     }
 
-    private class PrevHistoryAction extends AbstractAction {
-
-        public PrevHistoryAction() {
-            super("Prev");
-        }
-
-        @Override
-		public void actionPerformed(ActionEvent e) {
-
-            if (history.isEmpty()) {
-                return;
-            }
-
-            if (historyIndex == history.size()) {
-                return;
-            }
-
-            historyIndex++;
-            console.setText(history.get(historyIndex));
-
-        }
-    }
-
-    private class NextHistoryAction extends AbstractAction {
-
-        public NextHistoryAction() {
-            super("Next");
-        }
-
-        @Override
-		public void actionPerformed(ActionEvent e) {
-            if (history.isEmpty()) {
-                return;
-            }
-            if (historyIndex < 0) {
-                return;
-            }
-            if (historyIndex == 0) {
-                console.setText("");
-                return;
-            }
-
-            historyIndex--;
-            console.setText(history.get(historyIndex));
-
-        }
-    }
-
-    /*
-     * Listener for the console
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        if (e.getSource().equals(console)) {
-
-            log(console.getText());
-            history.add(console.getText());
-            // historyIndex=0;
-            runCommand(console.getText());
-
-            console.setText("");
-        }
-
-    }
+    
 
     private void validateDatasets() {
 
@@ -523,161 +278,204 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
 
     }
 
-    /**
-     * Run the given command from the console
-     * 
-     * @param command
-     */
-    private void runCommand(String command) {
-    	if (commandMap.containsKey(command)) {
-            getInterfaceEventHandler().fire(InterfaceEvent.of(this, commandMap.get(command)));
-        } else {
-
-            if (LOCAL_CMDS.containsKey(command)) {
-                LOCAL_CMDS.get(command).run();
-            } else {
-                log("Command not recognised");
-            }
-
-        }
-    }
-
     @Override
     public void update(List<IAnalysisDataset> list) {
         // Does nothing, no datasets are displayed.
         // Using DetailPanel only for signalling access
 
     }
-
-    /*
-     * 
-     * Copied from
-     * https://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/ A
-     * class to control the maximum number of lines to be stored in a Document
+    
+    /**
+     * Allow typed commands for functions that are not ready to expose through the GUI 
+     * @author ben
      *
-     * Excess lines can be removed from the start or end of the Document
-     * depending on your requirement.
-     *
-     * a) if you append text to the Document, then you would want to remove
-     * lines from the start. b) if you insert text at the beginning of the
-     * Document, then you would want to remove lines from the end.
      */
-    public class LimitLinesDocumentListener implements DocumentListener {
-        private int     maximumLines;
-        private boolean isRemoveFromStart;
+    private class Console extends JPanel implements ActionListener {
+    	 private JTextField console = new JTextField();
+    	 private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
 
-        /*
-         * Specify the number of lines to be stored in the Document. Extra lines
-         * will be removed from the start of the Document.
-         */
-        public LimitLinesDocumentListener(int maximumLines) {
-            this(maximumLines, true);
-        }
+    	private int historyIndex = -1;
+    	private List<String> history = new LinkedList<>();
+    	
+        private static final String NEXT_HISTORY_ACTION = "Next";
+        private static final String PREV_HISTORY_ACTION = "Prev";
 
-        /*
-         * Specify the number of lines to be stored in the Document. Extra lines
-         * will be removed from the start or end of the Document, depending on
-         * the boolean value specified.
-         */
-        public LimitLinesDocumentListener(int maximumLines, boolean isRemoveFromStart) {
-            setLimitLines(maximumLines);
-            this.isRemoveFromStart = isRemoveFromStart;
-        }
+        private static final String HIST_CMD  = "history";
+        private static final String CHECK_CMD = "check";
+        private static final String HELP_CMD  = "help";
+        private static final String CLEAR_CMD = "clear";
+        private static final String THROW_CMD = "throw";
+        private static final String LIST_CMD  = "list";
+        private static final String KILL_CMD  = "kill";
+        private static final String REPAIR_CMD  = "unfuck";
+        private static final String TASKS_CMD  = "tasks";
 
-        /*
-         * Return the maximum number of lines to be stored in the Document
-         */
-        public int getLimitLines() {
-            return maximumLines;
-        }
+        private final Map<String, Runnable> runnableCommands = new HashMap<>();
 
-        /*
-         * Set the maximum number of lines to be stored in the Document
-         */
-        public void setLimitLines(int maximumLines) {
-            if (maximumLines < 1) {
-                String message = "Maximum lines must be greater than 0";
-                throw new IllegalArgumentException(message);
+    	{
+    		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
+    		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
+    		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
+    		commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
+    		commandMap.put("info", InterfaceMethod.INFO);
+    	}
+    	
+    	public Console() {
+    		setLayout(new BorderLayout());
+    		makeCommandList();
+    		Font font = new Font("Monospaced", Font.PLAIN, 13);
+    		console.setFont(font);
+            add(console, BorderLayout.CENTER);
+            setVisible(false);
+            console.addActionListener(this);
+
+            console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+                    PREV_HISTORY_ACTION);
+
+            console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
+
+            console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+                    NEXT_HISTORY_ACTION);
+            console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
+    	}
+    	
+    	/**
+    	 * Toggle the visibilty of the console
+    	 */
+    	public void toggle() {
+    		if (isVisible()) {
+                setVisible(false);
+            } else {
+            	setVisible(true);
+            	console.setText(null);
+                console.grabFocus();
+                console.requestFocus();
+                console.requestFocusInWindow();
             }
-
-            this.maximumLines = maximumLines;
-        }
-
-        // Handle insertion of new text into the Document
-
-        @Override
-		public void insertUpdate(final DocumentEvent e) {
-            // Changes to the Document can not be done within the listener
-            // so we need to add the processing to the end of the EDT
-
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-				public void run() {
-                    removeLines(e);
+            revalidate();
+            repaint();
+    	}
+    	
+    	 /**
+         * Make the list of local commands to run
+         */
+        private void makeCommandList() {
+        	runnableCommands.put(HIST_CMD, () -> {
+                log("History: ");
+                for (String s : history)
+                    log("\t"+s);
+            });
+        	
+            runnableCommands.put(CHECK_CMD, ()-> validateDatasets());
+            runnableCommands.put(HELP_CMD, () -> {
+                log("Available commands: ");
+                for (String key : commandMap.keySet()) {
+                    InterfaceMethod im = commandMap.get(key);
+                    log(" " + key + " - " + im.toString());
+                }
+                log(" check - validate the open root datasets");
+                log(" list  - list the open root datasets");
+            });
+            runnableCommands.put(CLEAR_CMD, () -> {
+                clear();
+            });
+            runnableCommands.put(THROW_CMD, () -> {
+                log("Throwing exception");
+                try {
+                    throw new IllegalArgumentException("Throwing an exception");
+                } catch (Exception e) {
+                    error("Caught expected exception", e);
                 }
             });
+            runnableCommands.put(LIST_CMD, () -> {
+                listDatasets();
+            });
+            runnableCommands.put(KILL_CMD, () -> {
+                killAllTasks();
+            });
+            
+            runnableCommands.put(TASKS_CMD, () -> {
+            	listTasks();
+            });
+            
+            runnableCommands.put(REPAIR_CMD, () ->{
+            	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets());
+            });
         }
-
-        @Override
-		public void removeUpdate(DocumentEvent e) {
-        }
-
-        @Override
-		public void changedUpdate(DocumentEvent e) {
-        }
-
-        /*
-         * Remove lines from the Document when necessary
+    	
+        /**
+         * Run the given command from the console
+         * 
+         * @param command
          */
-        private void removeLines(DocumentEvent e) {
-            // The root Element of the Document will tell us the total number
-            // of line in the Document.
+        private void runCommand(String command) {
+        	if (commandMap.containsKey(command)) {
+                getInterfaceEventHandler().fire(InterfaceEvent.of(this, commandMap.get(command)));
+            } else {
 
-            Document document = e.getDocument();
-            Element root = document.getDefaultRootElement();
-
-            while (root.getElementCount() > maximumLines) {
-                if (isRemoveFromStart) {
-                    removeFromStart(document, root);
+                if (runnableCommands.containsKey(command)) {
+                    runnableCommands.get(command).run();
                 } else {
-                    removeFromEnd(document, root);
+                    log("Command not recognised");
                 }
+
+            }
+        }
+    	
+    	/*
+         * Listener for the console
+         */
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            if (e.getSource().equals(console)) {
+                log(console.getText());
+                history.add(console.getText());
+                historyIndex=history.size();
+                runCommand(console.getText());
+                console.setText("");
+            }
+        }
+    	
+    	private class PrevHistoryAction extends AbstractAction {
+
+            public PrevHistoryAction() {
+                super("Prev");
+            }
+
+            @Override
+    		public void actionPerformed(ActionEvent e) {
+            	if (history.isEmpty())
+                    return;
+                if (historyIndex > -1) {
+                	historyIndex--;
+                }
+                if (historyIndex == -1) {
+                    console.setText("");
+                    return;
+                }
+                console.setText(history.get(historyIndex));
             }
         }
 
-        /*
-         * Remove lines from the start of the Document
-         */
-        private void removeFromStart(Document document, Element root) {
-            Element line = root.getElement(0);
-            int end = line.getEndOffset();
+        private class NextHistoryAction extends AbstractAction {
 
-            try {
-
-                document.remove(0, end);
-            } catch (BadLocationException ble) {
-
-                logToImageJ("Error removing lines", ble);
+            public NextHistoryAction() {
+                super("Next");
             }
-        }
 
-        /*
-         * Remove lines from the end of the Document
-         */
-        private void removeFromEnd(Document document, Element root) {
-            // We use start minus 1 to make sure we remove the newline
-            // character of the previous line
+            @Override
+    		public void actionPerformed(ActionEvent e) {
+            	if (history.isEmpty()) {
+            		historyIndex=0;
+                    return;
+            	}
+                if (historyIndex >= history.size()-1)
+                    return;
+                historyIndex++;
+                console.setText(history.get(historyIndex));
 
-            Element line = root.getElement(root.getElementCount() - 1);
-            int start = line.getStartOffset();
-            int end = line.getEndOffset();
-
-            try {
-                document.remove(start - 1, end - start);
-            } catch (BadLocationException ble) {
-                logToImageJ("Error removing lines", ble);
             }
         }
     }
-
 }

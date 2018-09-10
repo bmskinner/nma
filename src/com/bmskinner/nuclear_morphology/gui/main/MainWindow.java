@@ -123,7 +123,7 @@ public class MainWindow extends AbstractMainWindow {
             
             
             
-            logPanel = new LogPanel(eh.getInputSupplier());
+            logPanel = new LogPanel(eh.getInputSupplier(), eh);
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
@@ -253,10 +253,6 @@ public class MainWindow extends AbstractMainWindow {
      */
     @Override
 	protected void createEventHandling() {
-
-        logPanel.addDatasetEventListener(eh);
-        logPanel.addInterfaceEventListener(eh);
-        logPanel.addSignalChangeListener(eh);
         this.addDatasetUpdateEventListener(logPanel);
 
         populationsPanel.addSignalChangeListener(eh);

@@ -59,27 +59,20 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
         if (DatasetListManager.getInstance().hashCodeChanged()) {
             fine("Found changed hashcode");
-            Object[] options = { "Save datasets and workspaces", "Exit without saving", "Cancel exit" };
+            Object[] options = { "Save and exit", "Exit without saving", "Do not exit" };
             int save = JOptionPane.showOptionDialog(null, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-            if (save == 0) {
-                saveAndClose();
-
+            
+            switch(save) {
+            	case 0: saveAndClose();
+            	case 1: close();
+            	case 2: return;
+            	default: return;
             }
 
-            if (save == 1) {
-                fine("Exiting without save");
-                close();
-            }
-
-            if (save == 2) {
-                fine("Ignoring close");
-            }
-        } else {
-            fine("No change found");
-            close();
         }
+		fine("No change found");
+		close();
     }
 
     public void windowClosed(WindowEvent e) {
@@ -95,9 +88,8 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
         }
 
         mw.dispose();
-        if (mw.isStandalone()) {
+        if (mw.isStandalone())
             System.exit(0);
-        }
     }
 
     /**

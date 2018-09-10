@@ -111,7 +111,7 @@ public class DockableMainWindow extends AbstractMainWindow {
     		SingleDockFactory floatFactory = new SingleDockFactory();
     		dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks are not converted to tab docks
             
-            logPanel = new LogPanel(eh.getInputSupplier());
+            logPanel = new LogPanel(eh.getInputSupplier(), eh);
             
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
@@ -243,9 +243,7 @@ public class DockableMainWindow extends AbstractMainWindow {
      */
     @Override
 	protected void createEventHandling() {
-        logPanel.addDatasetEventListener(eh);
-        logPanel.addInterfaceEventListener(eh);
-        logPanel.addSignalChangeListener(eh);
+
         this.addDatasetUpdateEventListener(logPanel);
 
         populationsPanel.addSignalChangeListener(eh);
