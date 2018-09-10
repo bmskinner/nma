@@ -383,10 +383,14 @@ public class SignalManager implements Loggable {
 
         if (!this.hasSignals(signalGroupId))
             return new double[0];
-
-        Set<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);
-//        List<Double> a = new ArrayList<Double>(0);
         
+        if(PlottableStatistic.NUCLEUS_SIGNAL_COUNT.equals(stat)) {
+        	return collection.getCells().stream().flatMap(c->c.getNuclei().stream())
+                    .mapToDouble(n->n.getSignalCollection().numberOfSignals(signalGroupId))
+                    .toArray();
+        }
+
+        Set<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);        
         return cells.stream().flatMap(  c->c.getNuclei().stream()  )
             .flatMap(  n->n.getSignalCollection()
                     .getStatistics(stat, scale, signalGroupId)

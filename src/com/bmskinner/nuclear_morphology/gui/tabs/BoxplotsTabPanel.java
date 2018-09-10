@@ -55,7 +55,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 
     private static final String PANEL_TITLE_LBL = "Violin plots";
-    protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>(8);
+    protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
 
     protected JPanel mainPanel;   // hold the charts
     protected JPanel headerPanel; // hold buttons

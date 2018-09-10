@@ -20,6 +20,8 @@ import java.util.Optional;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
@@ -56,7 +58,7 @@ import ij.process.ImageProcessor;
  */
 public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 
-	public InteractiveBorderTagCellPanel(CellUpdatedEventListener parent){
+	public InteractiveBorderTagCellPanel(@NonNull CellUpdatedEventListener parent){
 		super(parent);
 	}
 
@@ -85,6 +87,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			ImageProcessor ip;
 			try{
 				ip = component.getImage();
+				
 			} catch(UnloadableImageException e){
 				ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
 			}

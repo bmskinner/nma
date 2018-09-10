@@ -93,9 +93,7 @@ public interface ISignalCollection extends Serializable, Loggable {
     List<List<INuclearSignal>> getSignals();
 
     /**
-     * Get the signals in the given group. Fetches the actual signals, not a
-     * copy
-     * 
+     * Get the signals in the given group.
      * @param signalGroup the signal group
      * @return a list of signals
      */

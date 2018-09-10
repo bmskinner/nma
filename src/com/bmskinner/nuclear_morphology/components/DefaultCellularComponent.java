@@ -444,33 +444,26 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public ImageProcessor getImage() throws UnloadableImageException {
-
         ImageProcessor ip = imageRef.get();
-        if (ip != null) {
+        if (ip != null)
             return ip;
-        }
+        if (!getSourceFile().exists())
+        	throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
+        
+        // Get the stack, make greyscale and invert
+        int stack = ImageImporter.rgbToStack(getChannel());
 
-        if (getSourceFile().exists()) {
+        try {
+        	ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
+        	ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
+        	ip.invert();
 
-            // Get the stack, make greyscale and invert
-            int stack = ImageImporter.rgbToStack(getChannel());
+        	imageRef = new SoftReference<>(ip);
+        	return ip;
 
-            try {
-                ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
-                ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
-                ip.invert();
-
-                imageRef = new SoftReference<ImageProcessor>(ip);
-
-                return ip;
-
-            } catch (ImageImportException e) {
-                stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
-                throw new UnloadableImageException("Source image is not available");
-            }
-
-        } else {
-            throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
+        } catch (ImageImportException e) {
+        	stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
+        	throw new UnloadableImageException("Source image is not available");
         }
     }
     
@@ -500,24 +493,22 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         if (ip != null) {
             return ip;
         }
+        if (!getSourceFile().exists())
+            throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
 
-        if (getSourceFile().exists()) {
 
-            try {
-                ip = new ImageImporter(getSourceFile()).importToColorProcessor();
+        try {
+        	ip = new ImageImporter(getSourceFile()).importToColorProcessor();
 
-                imageRef = new SoftReference<ImageProcessor>(ip);
+        	imageRef = new SoftReference<>(ip);
 
-                return ip;
+        	return ip;
 
-            } catch (ImageImportException e) {
-                stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
-                throw new UnloadableImageException("Source image is not available");
-            }
-
-        } else {
-            throw new UnloadableImageException("Source image is not available");
+        } catch (ImageImportException e) {
+        	stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
+        	throw new UnloadableImageException("Source image is not available");
         }
+
     }
 
     @Override
@@ -533,10 +524,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         int padding = CellularComponent.COMPONENT_BUFFER; // a border of pixels
                                                           // beyond the cell
                                                           // boundary
-        int wideW = (int) (positions[CellularComponent.WIDTH] + (padding * 2));
-        int wideH = (int) (positions[CellularComponent.HEIGHT] + (padding * 2));
-        int wideX = (int) (positions[CellularComponent.X_BASE] - padding);
-        int wideY = (int) (positions[CellularComponent.Y_BASE] - padding);
+        int wideW = positions[CellularComponent.WIDTH] + (padding * 2);
+        int wideH = positions[CellularComponent.HEIGHT] + (padding * 2);
+        int wideX = positions[CellularComponent.X_BASE] - padding;
+        int wideY = positions[CellularComponent.Y_BASE] - padding;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;

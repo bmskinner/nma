@@ -24,8 +24,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -34,20 +37,20 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 
 public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
 
-    public SignalViolinDatasetCreator(final ChartOptions options) {
+    public SignalViolinDatasetCreator(@NonNull final ChartOptions options) {
         super(options);
+    }
+    
+    public ViolinCategoryDataset createSignalCountViolinDataset() throws ChartDatasetCreationException {
+    	return new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_SIGNAL);
+    	
     }
 
     public ViolinCategoryDataset createSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
-
-        if (options.isSingleDataset()) {
+        if (options.isSingleDataset())
             return createSingleSignalColocalisationViolinDataset();
-        }
-
-        if (options.isMultipleDatasets()) {
+        if (options.isMultipleDatasets())
             return createMultipleSignalColocalisationViolinDataset();
-        }
-
         return new ViolinCategoryDataset();
 
     }

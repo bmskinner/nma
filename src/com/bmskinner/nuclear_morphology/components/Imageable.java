@@ -107,8 +107,8 @@ public interface Imageable {
      * Get the image from which the component was detected. Opens the image via
      * the {@link com.bmskinner.nuclear_morphology.io.ImageImporter}, fetches
      * the appropriate channel and inverts it. The complete image is returned;
-     * no cropping is performed. The returned image is a ColorProcessor, so annotations can
-     * be performed.
+     * no cropping is performed. The resulting image is returned as a ColorProcessor, 
+     * even if the image is greyscale, so colour annotations can be added.
      * 
      * @return a color image
      * @throws UnloadableImageException if the image can't be loaded

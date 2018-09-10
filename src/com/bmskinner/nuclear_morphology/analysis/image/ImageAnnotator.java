@@ -94,7 +94,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
                                                                     // width too
         
         scale = finalWidth / originalWidth;
-
         ImageProcessor result = ip.duplicate().resize((int) finalWidth);
         this.ip = result;
     }
@@ -163,7 +162,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
                 annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, 7);
             }
             annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);
-//            annotateSegments(n);
             annotateSignals(n);
 
         } catch (Exception e) {
@@ -708,7 +706,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      *            the nucleus
      * @return the annotator
      */
-    public ImageAnnotator annotateSignals(Nucleus n) {
+    public ImageAnnotator annotateSignals(@NonNull Nucleus n) {
 
         ISignalCollection signalCollection = n.getSignalCollection();
         int i = 0;
@@ -716,8 +714,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
         	        	            
             if(signalCollection.hasSignal(id)){
 
-            	Color colour = i == ImageImporter.FIRST_SIGNAL_CHANNEL ? Color.RED
-            			: i == ImageImporter.FIRST_SIGNAL_CHANNEL + 1 ? Color.GREEN : Color.WHITE;
+            	Color colour = ColourSelecter.getSignalColour(i);
 
             	List<INuclearSignal> signals = signalCollection.getSignals(id);
 

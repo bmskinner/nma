@@ -38,7 +38,6 @@ import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 @SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel {
 
-   
     private static final String PANEL_TITLE_LBL = "Nuclear signals";
     private JTabbedPane signalsTabPane;
 
@@ -46,7 +45,7 @@ public class SignalsDetailPanel extends DetailPanel {
      * Create the panel.
      */
     public SignalsDetailPanel(@NonNull InputSupplier context) {
-        super(context);
+        super(context, PANEL_TITLE_LBL);
         try {
 
             this.setLayout(new BorderLayout());
@@ -54,6 +53,7 @@ public class SignalsDetailPanel extends DetailPanel {
             signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
             DetailPanel overviewPanel = new SignalsOverviewPanel(context);
+            DetailPanel countsPanel  = new SignalCountsPanel(context);
             DetailPanel boxplotPanel = new SignalsBoxplotPanel(context);
 //            DetailPanel histogramPanel = new SignalsHistogramPanel(context);
             DetailPanel shellsPanel = new SignalShellsPanel(context);
@@ -62,16 +62,18 @@ public class SignalsDetailPanel extends DetailPanel {
             DetailPanel colocalistionPanel = new SignalsColocalisationPanel(context);
 
             signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
+            signalsTabPane.addTab(countsPanel.getPanelTitle(), countsPanel);
             signalsTabPane.addTab(analysisPanel.getPanelTitle(), analysisPanel);
             signalsTabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
-//            signalsTabPane.addTab(histogramPanel.getPanelTitle(), histogramPanel);
+
             signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
             signalsTabPane.addTab(shellsPanel.getPanelTitle(), shellsPanel);
             signalsTabPane.addTab(colocalistionPanel.getPanelTitle(), colocalistionPanel);
 
             this.addSubPanel(overviewPanel);
+            this.addSubPanel(countsPanel);
             this.addSubPanel(boxplotPanel);
-//            this.addSubPanel(histogramPanel);
+
             this.addSubPanel(shellsPanel);
             this.addSubPanel(analysisPanel);
             this.addSubPanel(signalScatterChartPanel);
@@ -82,11 +84,6 @@ public class SignalsDetailPanel extends DetailPanel {
         } catch (Exception e) {
             error("Error making signal panel", e);
         }
-    }
-
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
     
     @Override

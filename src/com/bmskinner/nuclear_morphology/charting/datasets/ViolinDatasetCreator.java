@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -66,8 +67,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * Get a violin dataset for the given statistic for each dataset in the
      * options
      * 
-     * @param stat
-     *            the statistic to chart
+     * @param stat the statistic to chart
      * @return a violin dataset
      * @throws ChartDatasetCreationException
      *             if any error occurs or the statistic was not recognised
@@ -75,34 +75,20 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     public ViolinCategoryDataset createPlottableStatisticViolinDataset(String component)
             throws ChartDatasetCreationException {
 
-        finest("Creating violin dataset for " + component);
-
-        if (CellularComponent.WHOLE_CELL.equals(component)) {
+        if (CellularComponent.WHOLE_CELL.equals(component))
             return createCellStatisticViolinDataset();
-        }
 
-        if (CellularComponent.NUCLEUS.equals(component)) {
+        if (CellularComponent.NUCLEUS.equals(component))
             return createNucleusStatisticViolinDataset();
-        }
 
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
             return createSignalStatisticViolinDataset();
-        }
 
-        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
             return createSegmentStatisticDataset();
-        }
-
         throw new ChartDatasetCreationException("Component not recognised: " + component);
 
     }
-
-    /*
-     * 
-     * PRIVATE METHODS
-     * 
-     * 
-     */
 
     /**
      * Get a boxplot dataset for the given statistic for each collection
@@ -167,23 +153,18 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             for (double d : stats) {
                 list.add(new Double(d));
             }
-
             ds.add(list, rowKey, colKey);
-
-//            addProbabilities(ds, list, rowKey, colKey);
         }
 
         return ds;
     }
 
     /**
-     * Create a boxplot dataset for signal statistics for a single analysis
+     * Create a violin dataset for signal statistics for a single analysis
      * dataset
      * 
-     * @param dataset
-     *            the AnalysisDataset to get signal info from
-     * @return a boxplot dataset
-     * @throws Exception
+     * @param dataset the analysis dataset to get signal info from
+     * @return a violin dataset
      */
     private ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
@@ -191,7 +172,6 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         PlottableStatistic stat = options.getStat();
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
-
         for (@NonNull IAnalysisDataset d : datasets) {
 
             ICellCollection collection = d.getCollection();
@@ -199,11 +179,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             for (@NonNull UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
                 if (collection.getSignalManager().hasSignals(signalGroup)) {
+                	
+                	ISignalGroup group = collection.getSignalGroup(signalGroup).get();
 
                     double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
 
-                    String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup;
-                    String colKey = collection.getName();
+                    String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_"+signalGroup+"_"+group.getGroupName();
+                    String colKey = collection.getName() + "_" +collection.getID();
                     /*
                      * For charting, use offset angles, otherwise the boxplots
                      * will fail on wrapped signals
@@ -215,8 +197,9 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     for (double value : values) {
                         list.add(new Double(value));
                     }
-                    if(list.size()>0)
+                    if(list.size()>0) {
                         ds.add(list, rowKey, colKey);
+                    }
                 }
             }
         }

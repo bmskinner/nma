@@ -190,93 +190,46 @@ public class DefaultSignalCollection implements ISignalCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#getSignals(java.util.UUID)
-     */
     @Override
     public List<INuclearSignal> getSignals(@NonNull UUID signalGroup) {
-        // checkSignalGroup(signalGroup);
-        if (this.hasSignal(signalGroup)) {
+        if (this.hasSignal(signalGroup)) 
             return this.collection.get(signalGroup);
-        } else {
-            return new ArrayList<INuclearSignal>(0);
-        }
+		return new ArrayList<>(0);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#getSourceFile(java.util.UUID)
-     */
     @Override
     public File getSourceFile(@NonNull UUID signalGroup) {
         if (collection.containsKey(signalGroup)) {
-
             List<INuclearSignal> list = collection.get(signalGroup);
-            if (list != null && !list.isEmpty()) {
+            if (list != null && !list.isEmpty())
                 return list.get(0).getSourceFile();
-            } else {
-                return null;
-            }
-        } else {
-            return null;
         }
+		return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#updateSourceFile(java.util.UUID,
-     * java.io.File)
-     */
     @Override
     public void updateSourceFile(@NonNull UUID signalGroup, @NonNull File f) {
-
         for (INuclearSignal s : collection.get(signalGroup)) {
             s.setSourceFile(f);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#getSourceChannel(java.util.UUID)
-     */
     @Override
     public int getSourceChannel(@NonNull UUID signalGroup) {
         if (collection.containsKey(signalGroup)) {
-
             List<INuclearSignal> list = collection.get(signalGroup);
-            if (list != null && !list.isEmpty()) {
+            if (list != null && !list.isEmpty())
                 return list.get(0).getChannel();
-            } else {
-                return -1;
-            }
-        } else {
-            return -1;
         }
-
+		return -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#numberOfSignalGroups()
-     */
     @Override
     public int size() {
         return collection.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#numberOfSignals()
-     */
+
     @Override
     public int numberOfSignals() {
         int count = 0;
@@ -286,11 +239,6 @@ public class DefaultSignalCollection implements ISignalCollection {
         return count;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#hasSignal(java.util.UUID)
-     */
     @Override
     public boolean hasSignal(@NonNull UUID signalGroup) {
         if (signalGroup == null) {
@@ -305,11 +253,7 @@ public class DefaultSignalCollection implements ISignalCollection {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#hasSignal()
-     */
+
     @Override
     public boolean hasSignal() {
         return !collection.isEmpty();
@@ -324,12 +268,9 @@ public class DefaultSignalCollection implements ISignalCollection {
     public int numberOfSignals(@NonNull UUID signalGroup) {
         if (signalGroup == null)
             return 0;
-
-        if (this.hasSignal(signalGroup)) {
+        if (this.hasSignal(signalGroup))
             return collection.get(signalGroup).size();
-        } else {
-            return 0;
-        }
+		return 0;
     }
 
     /*

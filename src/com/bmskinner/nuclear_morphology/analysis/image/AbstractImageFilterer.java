@@ -312,7 +312,7 @@ public abstract class AbstractImageFilterer implements Loggable {
                 // Since we are scaling from 255-0, this is 1- the actual
                 // fraction
 
-                float invF = ((float) pixel) / 255f;
+                float invF = (pixel) / 255f;
                 float f = 1f - invF;
 
                 // Set the saturation to the fractional intensity of the
@@ -351,15 +351,14 @@ public abstract class AbstractImageFilterer implements Loggable {
      */
     public void crop(@NonNull CellularComponent c) {
 
-        if (ip == null) {
+        if (ip == null)
             throw new IllegalArgumentException("Image processor is null");
-        }
         // Choose a clip for the image (an enlargement of the original nucleus ROI
         int[] positions = c.getPosition();
-        int wideW = (int) (positions[CellularComponent.WIDTH] + CellularComponent.COMPONENT_BUFFER*2);
-        int wideH = (int) (positions[CellularComponent.HEIGHT] + CellularComponent.COMPONENT_BUFFER*2);
-        int wideX = (int) (positions[CellularComponent.X_BASE] - CellularComponent.COMPONENT_BUFFER);
-        int wideY = (int) (positions[CellularComponent.Y_BASE] - CellularComponent.COMPONENT_BUFFER);
+        int wideW = positions[CellularComponent.WIDTH] + CellularComponent.COMPONENT_BUFFER*2;
+        int wideH = positions[CellularComponent.HEIGHT] + CellularComponent.COMPONENT_BUFFER*2;
+        int wideX = positions[CellularComponent.X_BASE] - CellularComponent.COMPONENT_BUFFER;
+        int wideY = positions[CellularComponent.Y_BASE] - CellularComponent.COMPONENT_BUFFER;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -435,9 +434,9 @@ public abstract class AbstractImageFilterer implements Loggable {
             int pixel = ip.get(i);
             int[] rgb = intToRgb(pixel);
             
-            double rProp = ((double) rgb[0] - rMin) / rRange;
-            double gProp = ((double) rgb[1] - gMin) / gRange;
-            double bProp = ((double) rgb[2] - bMin) / bRange;
+            double rProp = (rgb[0] - rMin) / rRange;
+            double gProp = (rgb[1] - gMin) / gRange;
+            double bProp = (rgb[2] - bMin) / bRange;
 
             
             int rNew = (int) (255 * rProp);
@@ -508,7 +507,7 @@ public abstract class AbstractImageFilterer implements Loggable {
         for (int i = 0; i < ip.getPixelCount(); i++) {
             int pixel = ip.get(i);
 
-            double proportion = ((double) pixel - minIntensity) / range;
+            double proportion = (pixel - minIntensity) / range;
 
             int newPixel = (int) (255 * proportion);
             result.set(i, newPixel);
@@ -614,7 +613,7 @@ public abstract class AbstractImageFilterer implements Loggable {
                 continue;
             }
 
-            float diff = (float) (r - b);
+            float diff = r - b;
             float scaled = Math.abs(diff) / 255f; // fraction of 8bit space
             float ranged = 0.17f * scaled;
 
@@ -627,7 +626,7 @@ public abstract class AbstractImageFilterer implements Loggable {
             // 128
             // float h = 300f + diff; // start at purple, variation of up to 128
 
-            float s = diff < 0 ? 1 - ((float) b / 255f) : 1 - ((float) r / 255f);
+            float s = diff < 0 ? 1 - (b / 255f) : 1 - (r / 255f);
 
             float v = 1f;
 
@@ -674,7 +673,7 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return a value from 0-1
      */
     protected static float getSaturationFromIntensity(int i) {
-        return (float) (255f - (255f - i)) / 255f;
+        return (255f - (255f - i)) / 255f;
     }
 
     /**
