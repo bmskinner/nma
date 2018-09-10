@@ -120,32 +120,32 @@ public interface ISignalGroup extends Serializable {
      */
     void setGroupColour(@NonNull Color groupColour);
 
-    /**
-     * Get the RGB channel this signal was detected in
-     * 
-     * @return
-     */
-    int getChannel();
+//    /**
+//     * Get the RGB channel this signal was detected in
+//     * 
+//     * @return
+//     */
+//    int getChannel();
+//
+//    /**
+//     * Set the RGB channel the signal was detected in
+//     * 
+//     * @param channel
+//     */
+//    void setChannel(int channel);
 
-    /**
-     * Set the RGB channel the signal was detected in
-     * 
-     * @param channel
-     */
-    void setChannel(int channel);
-
-    /**
-     * Get the folder the signals were found in
-     * 
-     * @return
-     */
-    File getFolder();
-
-    /**
-     * Set the folder of images the signals were found in
-     * 
-     * @param folder
-     */
-    void setFolder(@NonNull File folder);
+//    /**
+//     * Get the folder the signals were found in
+//     * 
+//     * @return
+//     */
+//    File getFolder();
+//
+//    /**
+//     * Set the folder of images the signals were found in
+//     * 
+//     * @param folder
+//     */
+//    void setFolder(@NonNull File folder);
 
 }

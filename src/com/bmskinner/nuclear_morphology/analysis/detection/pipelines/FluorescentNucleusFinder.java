@@ -107,7 +107,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         return list;
     }
 
-    private List<Nucleus> detectNucleus(@NonNull File imageFile)
+    private synchronized List<Nucleus> detectNucleus(@NonNull final File imageFile)
             throws ImageImportException, MissingOptionException {
 
         List<Nucleus> list = new ArrayList<>();
@@ -185,7 +185,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
     }
 
-    private Nucleus makeNucleus(@NonNull final Roi roi, @NonNull final File f, @NonNull final IDetectionOptions nuclOptions, int objectNumber,
+    private synchronized Nucleus makeNucleus(@NonNull final Roi roi, @NonNull final File f, @NonNull final IDetectionOptions nuclOptions, int objectNumber,
             final StatsMap values) throws ComponentCreationException {
         
         fine("Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));

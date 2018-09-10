@@ -182,6 +182,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
         // Replace signal groups
         mergeSignalGroups(newCollection);
+        
+        //TODO update nuclear signal options with new ids
 
         // create the dataset; has no analysis options at present
         IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
@@ -197,6 +199,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         // a merged dataset should not have analysis options
         // of its own; it lets each merge source display options
         // appropriately
+        //TODO need to keep the signal folder settings preserved. Copy the analysis options where
+        // possible
         newDataset.setAnalysisOptions(null);
 
         return newDataset;

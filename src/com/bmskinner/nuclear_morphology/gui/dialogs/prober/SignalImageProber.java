@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
 
@@ -134,15 +135,11 @@ public class SignalImageProber extends IntegratedImageProber {
         // get the group name
 
         ISignalGroup group = new SignalGroup(name);
-
-        group.setChannel(options.getChannel());
-        group.setFolder(options.getFolder());
-
         dataset.getCollection().addSignalGroup(id, group);
 
         // Set the default colour for the signal group
-        int totalGroups = dataset.getCollection().getSignalGroups().size();
-        Color colour = ColourSelecter.getColor(totalGroups);
+//        int totalGroups = dataset.getCollection().getSignalGroups().size();
+        Color colour = ColourSelecter.getSignalColour(options.getChannel());
         group.setGroupColour(colour);
 
         dataset.getAnalysisOptions().get().setDetectionOptions(id.toString(), options);
@@ -154,7 +151,11 @@ public class SignalImageProber extends IntegratedImageProber {
      * @return a valid name
      */
     private String getGroupName() {
-    	return JOptionPane.showInputDialog(NEW_NAME_LBL);
+		try {
+			return inputSupplier.requestString(NEW_NAME_LBL);
+		} catch (RequestCancelledException e) {
+			return getGroupName(); // no, you will provide a name
+		}
     }
 
 }

@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -367,15 +368,14 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         for (UUID signalGroup : d.getCollection().getSignalGroupIDs()) {
 
-            if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID)) {
+            if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                 continue;
-            }
 
             try {
-
                 Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
                 if(!g.isPresent())
                 	continue;
+                INuclearSignalOptions signalOptions = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup);
 
                 fieldNames.add("");
                 rowData.add("");
@@ -391,7 +391,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
 
                 fieldNames.add("Source channel");
-                rowData.add(g.get().getChannel());
+                rowData.add(signalOptions.getChannel());
 
                 fieldNames.add("Number of signals");
                 rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));

@@ -129,7 +129,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         
         File folder = op.get().getFolder();
         int totalImages = countSuitableImages(folder);
-        fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
+        fireUpdateProgressTotalLength(totalImages);
         log(String.format("Analysing %d images", totalImages));
         return totalImages;
     }
@@ -176,31 +176,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
             //
 
-        }
-        return result;
-    }
-
-    /**
-     * Count the number of images in the given folder that are suitable for
-     * analysis. Rcursive over subfolders.
-     * 
-     * @param folder the folder to count
-     * @return the number of analysable image files
-     */
-    private static int countSuitableImages(@NonNull final File folder) {
-        final File[] listOfFiles = folder.listFiles();
-        if (listOfFiles == null)
-            return 0;
-        int result = 0;
-
-        for (File file : listOfFiles) {
-            boolean ok = ImageImporter.fileIsImportable(file);
-            if (ok) {
-                result++;
-            } else {
-                if (file.isDirectory())// recurse over any sub folders
-                    result += countSuitableImages(file);
-            }
         }
         return result;
     }
@@ -266,10 +241,10 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     
     /**
      * Test if the given folder has any image files that can be analysed
-     * @param folder
+     * @param folder the folder to test
      * @return
      */
-    protected boolean containsImageFiles(File folder) {
+    protected boolean containsImageFiles(@NonNull final File folder) {
     	if(!folder.isDirectory())
     		return false;
     	File[] arr = folder.listFiles();
@@ -279,6 +254,31 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         	if(ImageImporter.fileIsImportable(f))
         		return true;
         return false;
+    }
+    
+    /**
+     * Count the number of images in the given folder that are suitable for
+     * analysis. Rcursive over subfolders.
+     * 
+     * @param folder the folder to count
+     * @return the number of analysable image files in this folder or subfolders
+     */
+    private static int countSuitableImages(@NonNull final File folder) {
+        final File[] listOfFiles = folder.listFiles();
+        if (listOfFiles == null)
+            return 0;
+        int result = 0;
+
+        for (File file : listOfFiles) {
+            boolean ok = ImageImporter.fileIsImportable(file);
+            if (ok) {
+                result++;
+            } else {
+                if (file.isDirectory())// recurse over any sub folders
+                    result += countSuitableImages(file);
+            }
+        }
+        return result;
     }
 
 }

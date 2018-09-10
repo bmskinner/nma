@@ -52,12 +52,9 @@ public class ProgressEvent extends EventObject {
      * for example - the total progress bar length to be altered based on a
      * computation in an IAnalysisMethod
      * 
-     * @param source
-     *            the source firing the event
-     * @param m
-     *            the messsage type
-     * @param v
-     *            the value in the message
+     * @param source the source firing the event
+     * @param m the messsage type
+     * @param v the value in the message
      */
     public ProgressEvent(Object source, int m, long v) {
         super(source);
@@ -65,10 +62,18 @@ public class ProgressEvent extends EventObject {
         value = v;
     }
 
+    /**
+     * Get the message in this event
+     * @return
+     */
     public int getMessage() {
         return message;
     }
 
+    /**
+     * Get the value in this event
+     * @return
+     */
     public long getValue() {
         return value;
     }

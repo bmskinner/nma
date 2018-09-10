@@ -112,7 +112,7 @@ public class DatasetShellsExporter extends StatsExporter implements Loggable {
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
             ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
             String groupName   = signalGroup.getGroupName();
-            String groupFolder = signalGroup.getFolder().getAbsolutePath();            
+            String groupFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).getFolder().getAbsolutePath();            
             Optional<IShellResult> oShellResult = signalGroup.getShellResult();
             if(!oShellResult.isPresent())
                 continue;

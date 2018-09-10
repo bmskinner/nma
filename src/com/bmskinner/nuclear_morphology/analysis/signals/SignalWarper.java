@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +42,9 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageExcep
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -197,7 +201,11 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                     	finest("Image for " + n.getNameAndNumber() + " is " + ip.getWidth() + "x" + ip.getHeight());
                     } else {
 //                    	 we need to get the file in which no signals were detected
-                    	ip = sourceDataset.getCollection().getSignalManager().getSignalSourceImage(signalGroup, cell);
+                    	// This is not stored in a nucleus, so combine the expected file name with the source folder
+                    	INuclearSignalOptions signalOptions = sourceDataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup);
+                    	File imageFolder = signalOptions.getFolder();
+                    	File imageFile   = new File(imageFolder, n.getSourceFileName());
+                    	ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
                     }
 
                     // Create NucleusMeshImage from nucleus.
@@ -225,7 +233,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                     // Make a blank image for the array
                     warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
 
-                } catch (UnloadableImageException e) {
+                } catch (UnloadableImageException | ImageImportException e) {
                     stack("Unable to load signal image for signal group " + signalGroup + " in nucleus "
                             + n.getNameAndNumber(), e);
                     warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);

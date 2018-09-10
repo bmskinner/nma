@@ -239,7 +239,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         if (collection.hasConsensus()) {
 
             ISignalGroup random = new SignalGroup("Random distribution");
-            random.setFolder(new File(""));
+//            random.setFolder(new File(""));
             random.setGroupColour(Color.LIGHT_GRAY);
 
             collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);

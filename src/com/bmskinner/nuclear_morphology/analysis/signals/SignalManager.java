@@ -156,50 +156,20 @@ public class SignalManager implements Loggable {
     	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
         return g.isPresent() ? g.get().getGroupName() : "";
     }
-
-    public int getSignalChannel(@NonNull final UUID signalGroupId) {
-    	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
-        return g.isPresent() ? g.get().getChannel() : -1;
-    }
-
-    /**
-     * Get the name of the folder containing the images for the given signal
-     * group
-     * 
-     * @param signalGroupId the signal group
-     * @return
-     * @throws UnavailableSignalGroupException
-     */
-    public String getSignalSourceFolder(@NonNull final UUID signalGroupId) {
-    	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
-        return g.isPresent() ? g.get().getFolder().getAbsolutePath() : "";
-    }
     
     /**
      * Get the source image for the given signal group and cell. This will return the appropriate
-     * image even if no signals were detected in the cell. This allows the method to be a more robust alternative
-     * to {@link com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection::getImage}
+     * image even if no signals were detected in the cell. 
      * @param signalGroupId the signal group id
      * @param cell the cell whose signal image to fetch
      * @return the image processor for the image
      * @throws UnloadableImageException if the image cannot be found or opened
      */
     public ImageProcessor getSignalSourceImage(@NonNull final UUID signalGroupId, @NonNull final ICell cell) throws UnloadableImageException {
-    	Nucleus n = cell.getNuclei().get(0);
+    	Nucleus n = cell.getNucleus();
     	if(n.getSignalCollection().hasSignal(signalGroupId))
     		return n.getSignalCollection().getImage(signalGroupId);
-    	File expectedFile = new File(getSignalSourceFolder(signalGroupId), n.getSourceFile().getName());
-    	if(!expectedFile.exists())
-    		throw new UnloadableImageException("File "+expectedFile+" does not exist");
-    	
-    	try {
-    		return new ImageImporter(expectedFile).importImage(getSignalChannel(signalGroupId));
-        } catch (ImageImportException e) {
-            stack("Error importing image source file " +expectedFile.getAbsolutePath(), e);
-            throw new UnloadableImageException("Unable to load signal image", e);
-        }
-    	
-    	
+    	throw new UnloadableImageException( String.format("No signal image file %s for nucleus %s", n.getSignalCollection().getSourceFile(signalGroupId), n.getNameAndNumber()));   	
     }
 
     /**
@@ -223,15 +193,10 @@ public class SignalManager implements Loggable {
                 n.getSignalCollection().updateSourceFile(signalGroupId, newFile);
             }
         });
-
-
-        collection.getSignalGroup(signalGroupId).get().setFolder(folder);
-
-
     }
 
     /**
-     * Update the signal group id
+     * Update a signal group id
      * 
      * @param oldID the id to replace
      * @param newID the new id
@@ -241,30 +206,21 @@ public class SignalManager implements Loggable {
         if (!collection.hasSignalGroup(oldID))
             return;
 
-        for (Nucleus n : collection.getNuclei()) {
+        for (Nucleus n : collection.getNuclei())
             n.getSignalCollection().updateSignalGroupId(oldID, newID);
-        }
 
         // the group the signals are currently in
 		ISignalGroup oldGroup = collection.getSignalGroup(oldID).get();
 
 		// Merge and rename signal groups
 
-		if (collection.hasSignalGroup(newID)) { // check if the group
-		                                        // already exists
+		if (collection.hasSignalGroup(newID)) { // check if the group already exists
 
 		    ISignalGroup existingGroup = collection.getSignalGroup(newID).get();
 
 		    if (!oldGroup.getGroupName().equals(existingGroup.getGroupName())) {
-		        existingGroup
-		                .setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
+		        existingGroup.setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
 		    }
-
-		    if (oldGroup.getChannel() != existingGroup.getChannel()) {
-		        existingGroup.setChannel(-1);
-		    }
-
-		    // Shells and colours?
 
 		} else { // the signal group does not exist, just copy the old group
 

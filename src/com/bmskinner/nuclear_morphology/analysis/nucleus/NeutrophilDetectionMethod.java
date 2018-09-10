@@ -79,7 +79,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
      * @param debugFile the dataset log file
      * @param options the options to detect with
      */
-    public NeutrophilDetectionMethod(@NonNull String outputFolder, @NonNull File debugFile, @NonNull IAnalysisOptions options) {
+    public NeutrophilDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
         super();
 
         if (outputFolder == null || options == null)

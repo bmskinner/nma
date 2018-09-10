@@ -24,12 +24,6 @@ public class XMLWriterTest {
 	}
 	
 	@Test
-	public void testExceptionThrownOnNonExistantDocument() throws IOException {
-		exception.expect(IllegalArgumentException.class);
-		XMLWriter.writeXML(null, new File(""));
-	}
-
-	@Test
 	public void testExceptionThrownOnNonExistantFile() throws IOException {
 		Element rootElement = new Element(XMLWriterTest.class.getSimpleName());
 		Document doc = new Document(rootElement);

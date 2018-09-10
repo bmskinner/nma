@@ -99,7 +99,7 @@ public class DatasetSignalsExporter extends StatsExporter {
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
             ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
             String groupName   = signalGroup.getGroupName();
-            String groupFolder = signalGroup.getFolder().getAbsolutePath();            
+            String groupFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).getFolder().getAbsolutePath();            
             
             for (ICell cell : d.getCollection().getCells()) {
                 

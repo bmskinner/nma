@@ -158,14 +158,13 @@ public class DatasetConverter implements Loggable, Importer {
                 for (UUID id : oldOptions.getNuclearSignalGroups()) {
                     INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
                     if(oldDataset.getCollection().hasSignalGroup(id)){
-                    	File folder = oldDataset.getCollection().getSignalGroup(id).get().getFolder();
-                    	int channel = oldDataset.getCollection().getSignalGroup(id).get().getChannel();
+                    	File folder = oldSignalOptions.getFolder();
+                    	int channel = oldSignalOptions.getChannel();
 
                     	INuclearSignalOptions newSignalOptions = OptionsFactory
                     			.makeNuclearSignalOptions(oldSignalOptions);
                     	newSignalOptions.setFolder(folder);
                     	newSignalOptions.setChannel(channel);
-
                     	newOptions.setDetectionOptions(id.toString(), newSignalOptions);
                     }
                 }

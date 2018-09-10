@@ -25,6 +25,8 @@ import java.util.List;
 import javax.swing.JDialog;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
@@ -46,6 +48,7 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
     
     protected final DatasetEventHandler dh = new DatasetEventHandler(this);
     protected final InterfaceEventHandler ih = new InterfaceEventHandler(this);
+    protected final InputSupplier inputSupplier = new DefaultInputSupplier();
 
     public MessagingDialog() {
         super();

@@ -116,14 +116,14 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
 
             // craete the analysis folder early. Did not before in case folder
             // had no images
-            File analysisFolder = new File(directory, outputFolderName);
-            if (!analysisFolder.exists()) {
-                analysisFolder.mkdir();
-            }
+//            File analysisFolder = new File(directory, outputFolderName);
+//            if (!analysisFolder.exists()) {
+//                analysisFolder.mkdir();
+//            }
             //
-            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
+//            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
 
-            IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, logFile, options);
+            IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, options);
 
             worker = new DefaultAnalysisWorker(m);
             worker.addPropertyChangeListener(this);

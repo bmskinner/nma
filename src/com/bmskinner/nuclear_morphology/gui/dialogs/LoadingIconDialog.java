@@ -55,13 +55,10 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
         super((Dialog) null); // provides a taskbar icon
 
         boolean ok = loadResources(RESOURCE_FOLDER);
-        if (!ok) {
+        if (!ok)
             ok = loadResources("");
-        }
-        if (!ok) {
+        if (!ok)
             fine("Resource loading failed (gif)");
-        }
-
         this.loadingLabel.setIcon(blankGif);
 
     }

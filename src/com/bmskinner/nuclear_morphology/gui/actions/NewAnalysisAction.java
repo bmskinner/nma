@@ -144,9 +144,9 @@ public class NewAnalysisAction extends VoidResultAction {
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
 
-            File analysisFolder = new File(directory, outputFolderName);
-            if (!analysisFolder.exists())
-                analysisFolder.mkdir();
+//            File analysisFolder = new File(directory, outputFolderName);
+//            if (!analysisFolder.exists())
+//                analysisFolder.mkdir();
 
             IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
             

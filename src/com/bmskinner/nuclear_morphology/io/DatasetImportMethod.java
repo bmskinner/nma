@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
@@ -484,8 +485,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         	Map<UUID, File> map = new HashMap<>();
         	for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
         		Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(id);
-        		if(group.isPresent() && group.get().getFolder().exists()) {
-        			map.put(id, group.get().getFolder());
+        		INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id);
+        		if(group.isPresent() && signalOptions.getFolder().exists()) {
+        			map.put(id, signalOptions.getFolder());
         		} else {
         			map.put(id, FileSelector.getSignalDirectory(dataset, id));
         		}        		
@@ -520,9 +522,11 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     		fine("Updating signal group to " + newsignalDir);
     		// Update the folder
     		dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
+    		dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalID).setFolder(newsignalDir);
 
     		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
     			child.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
+    			child.getAnalysisOptions().get().getNuclearSignalOptions(signalID).setFolder(newsignalDir);
     		}
     	}
     }

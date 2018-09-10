@@ -384,9 +384,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 
         // Will be null if no signals were reported for the cell with this
         // collection
-        if (f == null) {
+        if (f == null)
             throw new UnloadableImageException("File for signal group is null");
-        }
 
         int c = this.getSourceChannel(signalGroup);
 

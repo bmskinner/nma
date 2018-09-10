@@ -73,14 +73,31 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     		return nextMethod;
 		return this;
     }
+    
+    /**
+     * Update the total number of steps in the task, and alert progress
+     * listeners. For example, can set progress bar lengths 
+     * @param totalProgress
+     */
+    protected void fireUpdateProgressTotalLength(int totalProgress) {
+    	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalProgress));
+    }
 
+    /**
+     * Fire a progress event to listeners, indicating one step of the task has been completed
+     */
     protected void fireProgressEvent() {
         ProgressEvent e = new ProgressEvent(this);
         fireProgressEvent(e);
     }
     
-    protected void fireProgressEvent(long l) {
-        ProgressEvent e = new ProgressEvent(this, ProgressEvent.INCREASE_BY_VALUE, l);
+    /**
+     * Fire a progress event to listeners, indicating a total number of steps of the task 
+     * have been completed
+     * @param stepsNewlyCompleted the number of steps of the task completed
+     */
+    protected void fireProgressEvent(long stepsNewlyCompleted) {
+        ProgressEvent e = new ProgressEvent(this, ProgressEvent.INCREASE_BY_VALUE, stepsNewlyCompleted);
         fireProgressEvent(e);
     }
 
@@ -94,7 +111,6 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     @Override
     public void progressEventReceived(ProgressEvent event) {
         fireProgressEvent(); // pass upwards
-
     }
 
 }

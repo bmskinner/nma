@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
 
 /**
@@ -86,9 +85,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 
 		IAnalysisOptions options = readOptions();
 
-    	File outFolder = createOutputFolder(options);
-    	File saveFile = new File(outFolder, imageFolder.getName()+Io.SAVE_FILE_EXTENSION);
-
+    	String outFolder = createOutputFolderName(options);
     	if(options.hasDetectionOptions(IAnalysisOptions.NUCLEUS)) {
     		createNucleusDetectionMethod(options, outFolder);
     		createRefoldingMethod(options);
@@ -107,9 +104,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 		return options;
 	}
 	
-	private void createNucleusDetectionMethod(@NonNull IAnalysisOptions options, @NonNull File outFolder) throws Exception {
+	private void createNucleusDetectionMethod(@NonNull IAnalysisOptions options, @NonNull String outFolder) throws Exception {
 		options.getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(imageFolder);
-		datasets =  new NucleusDetectionMethod(outFolder.getName(), options).call().getDatasets();
+		datasets =  new NucleusDetectionMethod(outFolder, options).call().getDatasets();
 		for(IAnalysisDataset dataset : datasets)
 			methodsToRun.add(new DatasetProfilingMethod(dataset));
 		for(IAnalysisDataset dataset : datasets)
@@ -155,7 +152,6 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 				INuclearSignalOptions nop = options.getNuclearSignalOptions(signalGroupId);
 				nop.setFolder(dataset.getCollection().getFolder());
 				ISignalGroup group = new SignalGroup("Channel "+nop.getChannel());
-				group.setFolder(dataset.getCollection().getFolder());
 				group.setGroupColour(ColourSelecter.getSignalColour(nop.getChannel()));
 				dataset.getCollection().addSignalGroup(signalGroupId, group);
 				methodsToRun.add(new SignalDetectionMethod(dataset, nop, signalGroupId));
@@ -190,19 +186,19 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 		 }
 	}
 		
-	private File createOutputFolder(@NonNull IAnalysisOptions options) {
+	private String createOutputFolderName(@NonNull IAnalysisOptions options) {
 		Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
-    	File outFolder = new File(imageFolder, outputFolderName);
-    	outFolder.mkdirs();
-    	return outFolder;
+		return outputFolderName;
 	}
 		
 	private void run(@NonNull List<IAnalysisMethod> methods) throws Exception {
+		 fireUpdateProgressTotalLength(methods.size());
 		 for(IAnalysisMethod method : methods) {
 			 System.out.println("Running "+method.getClass().getSimpleName());
 			 method.call();
+			 fireProgressEvent();
 		 }
 	}
 }

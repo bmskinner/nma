@@ -40,7 +40,11 @@ public class SignalGroup implements ISignalGroup {
     private String            groupName        = "";
     private boolean           isVisible        = true;
     private Color             groupColour      = null;
+    
+    @Deprecated
     private int               channel          = 0;
+    
+    @Deprecated
     private File              folder           = null;
     
     // Space to store warped signals from this signal group against a template consensus
@@ -68,8 +72,8 @@ public class SignalGroup implements ISignalGroup {
         groupName = s.getGroupName();
         isVisible = s.isVisible();
         groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
-        channel = s.getChannel();
-        folder = new File(s.getFolder().getAbsolutePath());
+//        channel = s.getChannel();
+//        folder = new File(s.getFolder().getAbsolutePath());
     }
     
 	@Override
@@ -132,25 +136,25 @@ public class SignalGroup implements ISignalGroup {
         this.groupColour = groupColour;
     }
 
-    @Override
-    public int getChannel() {
-        return channel;
-    }
-
-    @Override
-    public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    @Override
-    public File getFolder() {
-        return folder;
-    }
-
-    @Override
-    public void setFolder(@NonNull File folder) {
-        this.folder = folder;
-    }
+//    @Override
+//    public int getChannel() {
+//        return channel;
+//    }
+//
+//    @Override
+//    public void setChannel(int channel) {
+//        this.channel = channel;
+//    }
+//
+//    @Override
+//    public File getFolder() {
+//        return folder;
+//    }
+//
+//    @Override
+//    public void setFolder(@NonNull File folder) {
+//        this.folder = folder;
+//    }
 
     @Override
     public String toString() {
@@ -167,8 +171,8 @@ public class SignalGroup implements ISignalGroup {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + channel;
-		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+//		result = prime * result + channel;
+//		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
 		result = prime * result + ((groupColour == null) ? 0 : groupColour.hashCode());
 		result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
 		result = prime * result + (isVisible ? 1231 : 1237);
@@ -186,13 +190,13 @@ public class SignalGroup implements ISignalGroup {
 		if (getClass() != obj.getClass())
 			return false;
 		SignalGroup other = (SignalGroup) obj;
-		if (channel != other.channel)
-			return false;
-		if (folder == null) {
-			if (other.folder != null)
-				return false;
-		} else if (!folder.equals(other.folder))
-			return false;
+//		if (channel != other.channel)
+//			return false;
+//		if (folder == null) {
+//			if (other.folder != null)
+//				return false;
+//		} else if (!folder.equals(other.folder))
+//			return false;
 		if (groupColour == null) {
 			if (other.groupColour != null)
 				return false;

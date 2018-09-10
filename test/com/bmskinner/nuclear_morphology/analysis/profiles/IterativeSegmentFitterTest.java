@@ -137,7 +137,7 @@ public class IterativeSegmentFitterTest {
 			assertEquals("Segments should match", targetSeg.toString(), resultSeg.toString());
 		}
 
-//		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
+		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
 	}
 	
 	

@@ -12,6 +12,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
@@ -36,7 +38,7 @@ import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
  * @since 1.14.0
  *
  */
-public class OptionsXMLReader {
+public class OptionsXMLReader implements Loggable {
 	
 	public static final File EMPTY_FILE = new File("empty");
 	
@@ -98,30 +100,32 @@ public class OptionsXMLReader {
 			document = saxBuilder.build(file);
 			Element rootElement = document.getRootElement();
 			Element clusters = rootElement.getChild(OptionsXMLWriter.CLUSTERS);
-			for(Element component : clusters.getChildren(OptionsXMLWriter.CLUSTER_GROUP)) {
-				IClusteringOptions o = buildClusteringOptions(component);
-				result.add(o);
+			if(clusters!=null) { // may not be present
+				for(Element component : clusters.getChildren(OptionsXMLWriter.CLUSTER_GROUP)) {
+					IClusteringOptions o = buildClusteringOptions(component);
+					result.add(o);
+				}
 			}
 		} catch (JDOMException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			fine("Unable to read clustering options", e);
+			return result;
 		}
 		return result;
 	}
 	
-	private IClusteringOptions buildClusteringOptions(Element e) {
+	private IClusteringOptions buildClusteringOptions(@NonNull Element e) {
 		IClusteringOptions o = new DefaultClusteringOptions();
 		addKeyedValues(e, o);
 		return o;
 	}
 	
-	private String replaceKeyModifications(String s) {
+	private String replaceKeyModifications(@NonNull String s) {
 		String r = s.replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ")
 				.replace(OptionsXMLWriter.UUID_PREFIX, "");
 		return r;
 	}
 	
-	private void addKeyedValues(Element e, HashOptions o) {
+	private void addKeyedValues(@NonNull Element e, @NonNull HashOptions o) {
 		// Primary keys
 		List<Element> boolContainer = e.getChildren(OptionsXMLWriter.BOOLEAN_KEY);
 		if(!boolContainer.isEmpty()) {
@@ -173,7 +177,7 @@ public class OptionsXMLReader {
 		}
 	}
 	
-	private void addComponent(Element e, IAnalysisOptions op) {
+	private void addComponent(@NonNull Element e, @NonNull IAnalysisOptions op) {
 		
 		String detectedObject = e.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue();
 		
