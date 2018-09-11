@@ -25,11 +25,16 @@ public class ShellReportMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 	
-	public void run() throws Exception {
+	public void run() {
 		
-		DemoReportGenerator generator = new DemoReportGenerator();
-		generator.generateShellReport(dataset);
-		fireProgressEvent();
+		try {
+			DemoReportGenerator generator = new DemoReportGenerator();
+			generator.generateShellReport(dataset);
+			fireProgressEvent();
+		} catch(Exception e) {
+			warn("Could not generate report for dataset "+dataset.getName()+": "+e.getMessage());
+			stack(e);
+		}
 		
 	}
 	
