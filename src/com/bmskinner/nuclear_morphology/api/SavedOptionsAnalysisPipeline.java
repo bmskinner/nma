@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -40,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
 
 /**
  * A class to replicate a saved xml options file
@@ -155,6 +157,10 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	}
 	
 	private void createSignalDetectionMethods(@NonNull IAnalysisOptions options) throws Exception {
+		
+		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
+		Map<UUID, String> signalNames = r.readSignalGroupNames();
+		
 		for(IAnalysisDataset dataset : datasets) {
 			// Add signals
 			boolean checkShell = true;
@@ -162,7 +168,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			for(UUID signalGroupId : options.getNuclearSignalGroups()) {
 				INuclearSignalOptions nop = options.getNuclearSignalOptions(signalGroupId);
 				nop.setFolder(dataset.getCollection().getFolder());
-				ISignalGroup group = new SignalGroup("Channel "+nop.getChannel());
+				ISignalGroup group = new SignalGroup(signalNames.get(signalGroupId));
 				group.setGroupColour(ColourSelecter.getSignalColour(nop.getChannel()));
 				dataset.getCollection().addSignalGroup(signalGroupId, group);
 				methodsToRun.add(new SignalDetectionMethod(dataset, nop, signalGroupId));
@@ -183,6 +189,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 				};
 				//			 methodsToRun.add(new CellCollectionFilteringMethod(dataset, p, "Suitable_for_shell_analysis"));
 				methodsToRun.add(new ShellAnalysisMethod(dataset, shellOptions));
+				methodsToRun.add(new ShellReportMethod(dataset));
 			}
 		} 
 	}

@@ -3,7 +3,9 @@ package com.bmskinner.nuclear_morphology.io;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -104,6 +106,32 @@ public class OptionsXMLReader implements Loggable {
 				for(Element component : clusters.getChildren(OptionsXMLWriter.CLUSTER_GROUP)) {
 					IClusteringOptions o = buildClusteringOptions(component);
 					result.add(o);
+				}
+			}
+		} catch (JDOMException | IOException e) {
+			fine("Unable to read clustering options", e);
+			return result;
+		}
+		return result;
+	}
+	
+	/**
+	 * Read the signal group names in the file, and map them to the
+	 * signal group ids
+	 * @return
+	 */
+	public Map<UUID, String> readSignalGroupNames(){
+		Map<UUID, String> result = new HashMap<>();
+		SAXBuilder saxBuilder = new SAXBuilder();
+		Document document;
+		try {
+			document = saxBuilder.build(file);
+			Element rootElement = document.getRootElement();
+			for(Element signal : rootElement.getChildren(OptionsXMLWriter.DETECTION_METHOD)) {
+				if(signal.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue().startsWith(IAnalysisOptions.SIGNAL_GROUP)) {
+					UUID signalGroup = UUID.fromString(signal.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue().replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
+					String name = signal.getAttribute(OptionsXMLWriter.SIGNAL_NAME).getValue();
+					result.put(signalGroup, name);
 				}
 			}
 		} catch (JDOMException | IOException e) {

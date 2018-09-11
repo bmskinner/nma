@@ -164,8 +164,6 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
     	
     	UUID redId =  UUID.fromString("00000000-0000-0000-0000-100000000001");
         ISignalGroup red = new SignalGroup("Test red");
-        red.setChannel(redOptions.getChannel());
-        red.setFolder(redOptions.getFolder());
         red.setGroupColour(Color.RED);
         obs.getCollection().addSignalGroup(redId, red);
         
@@ -174,8 +172,6 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
         greenOptions.setChannel(1);
         UUID greenId =  UUID.fromString("00000000-0000-0000-0000-100000000002");
         ISignalGroup green = new SignalGroup("Test green");
-        green.setChannel(greenOptions.getChannel());
-        green.setFolder(greenOptions.getFolder());
         green.setGroupColour(Color.GREEN);
         obs.getCollection().addSignalGroup(greenId, green);
         

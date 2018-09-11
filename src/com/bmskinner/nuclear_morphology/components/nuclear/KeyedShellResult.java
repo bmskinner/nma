@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,21 +121,35 @@ public class KeyedShellResult implements IShellResult {
         map.get(type).addValues(k, shellData);
     }
     
-    /**
-     * Get the pixel count data for a signal in the given nucleus in the given cell.
-     * @param type the type of pixel to fetch
-     * @param cell the cell
-     * @param nucleus the nucleus
-     * @param signal the signal
-     * @return the pixel counts in that object per shell
-     */
     @Override
 	public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
     	Key k = signal==null 
         		? new Key(cell.getId(), nucleus.getID()) 
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
     	return map.get(type).getPixelIntensities(k);
-    }   
+    }  
+    
+    @Override
+	public double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
+    	Key k = signal==null 
+        		? new Key(cell.getId(), nucleus.getID()) 
+        		: new Key(cell.getId(), nucleus.getID(), signal.getID());
+        		
+        long[] intensities = map.get(type).getPixelIntensities(k);
+        if(intensities==null)
+        	return makeEmptyArray();
+        long total = LongStream.of(intensities).sum();
+        if(total==0)
+        	return makeEmptyArray();
+
+        return LongStream.of(intensities).mapToDouble(l-> (double)l/(double)total).toArray();
+    } 
+    
+    private double[] makeEmptyArray() {
+    	double[] result = new double[nShells];
+    	Arrays.fill(result, 0);
+    	return result;
+    }
     
     @Override
     public double[] getProportions(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -184,22 +199,7 @@ public class KeyedShellResult implements IShellResult {
         }
         return observed;
     }
-//    
-//    /**
-//     * Get the expected values for chi-sqare test, assuming an equal proportion
-//     * of signal per shell
-//     * 
-//     * @return the expected values
-//     */
-//    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm, double[] other) {
-//        double[] expected = new double[nShells];
-//        int count = map.get(CountType.SIGNAL).size(agg);
-//        for (int i=0; i<nShells; i++) {
-//            expected[i] = other[i] * count;
-//        }
-//        return expected;
-//    }
-    
+
 	@Override
 	public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
 		double[] props = getProportions(agg, norm);

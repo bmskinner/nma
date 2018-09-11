@@ -25,6 +25,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -87,6 +88,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDia
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.reports.DemoReportGenerator;
 
 /**
  * Holds information on shell analysis results, and allows new shell analyses to
@@ -128,6 +130,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private JButton showNuclei  = new JButton(SHOW_SHELLS_LBL);
     
     private JButton filterBtn = new JButton(FILTER_LBL);
+    private JButton reportBtn = new JButton("Report");
 
     private JCheckBox dapiNormalise      = new JCheckBox(DAPI_NORM_LBL, true);
     private JCheckBox showRandomCheckbox = new JCheckBox(SHOW_RANDOM_LBL, false);
@@ -281,6 +284,15 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         	}
         });
         panel.add(filterBtn);
+        
+        reportBtn.addActionListener(e->{
+        	try {
+				new DemoReportGenerator().generateShellReport(activeDataset());
+			} catch (IOException e1) {
+				warn("Well, poo: "+e1.getMessage());
+			}
+        });
+        panel.add(reportBtn);
         
         setEnabled(false);
 

@@ -114,9 +114,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             }
 
             // make the shells and measure the values
-            for (ICell c : collection.getCells()) {
-                new CellAnalysis(c).analyse();
-            }
+            collection.getCells().parallelStream().forEach(c->new CellAnalysis(c).analyse());
+//            for (ICell c : collection.getCells()) {
+//                new CellAnalysis(c).analyse();
+//            }
 
             ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0);
             fireProgressEvent(e);
@@ -148,15 +149,14 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             this.c = c;
         }
         
-        public void analyse(){
+        public synchronized void analyse(){
             for(Nucleus n : c.getNuclei()){
                 analyseNucleus(n);
                 fireProgressEvent();
             }
         }
 
-
-        private void analyseNucleus(@NonNull final Nucleus n) {
+        private synchronized void analyseNucleus(@NonNull final Nucleus n) {
 
             try {
                 shellDetector = new ShellDetector(n,  options.getShellNumber(), options.getErosionMethod(), true);
@@ -184,7 +184,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
         }
 
-        private void analyseSignalGroup(@NonNull final Nucleus n, @NonNull final UUID signalGroup) throws ImageImportException {
+        private synchronized void analyseSignalGroup(@NonNull final Nucleus n, @NonNull final UUID signalGroup) throws ImageImportException {
             if (!collection.getSignalManager().hasSignals(signalGroup))
                 return;
 
@@ -217,7 +217,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         }
     }
 
-    private void createResults() {
+    private synchronized void createResults() {
         // get stats and export
         boolean addRandom = false;
 
@@ -233,7 +233,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             addRandomSignal();
     }
 
-    private void addRandomSignal() {
+    private synchronized void addRandomSignal() {
 
         // Create a random sample distribution
         if (collection.hasConsensus()) {

@@ -37,6 +37,7 @@ public interface Io {
     
     static final String TAB_FILE_EXTENSION = ".txt";
     static final String SVG_FILE_EXTENSION = ".svg";
+    static final String PNG_FILE_EXTENSION = ".png";
 
     static final String NEWLINE = System.getProperty("line.separator");
     

@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -45,6 +46,7 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	public static final String UUID_PREFIX = "UUID_";
 	
 	public static final String SIGNAL_GROUP_PREFIX = "SignalGroup_";
+	public static final String SIGNAL_NAME         = "SignalName";
 	public static final String CLUSTERS = "Clusters";
 	public static final String CLUSTER_GROUP = "ClusterGroup";
 	public static final String CLUSTER_NAME  = "ClusterGroupName";
@@ -61,7 +63,7 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	public static Document createDocument(@NonNull IAnalysisDataset dataset) {
 		Element rootElement = new Element(DETECTION_LBL);
 		if(dataset.hasAnalysisOptions())
-			appendElement(dataset.getAnalysisOptions().get(), rootElement);
+			appendElement(dataset, dataset.getAnalysisOptions().get(), rootElement);
 		
 		Element clusters = new Element(CLUSTERS);
 		for(IClusterGroup g : dataset.getClusterGroups()) {
@@ -76,25 +78,32 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		return new Document(rootElement);
 	}
 
-	public static Document createDocument(@NonNull IAnalysisOptions options) {
+	private static Document createDocument(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options) {
 		Element rootElement = new Element(DETECTION_LBL);
-		appendElement(options, rootElement);
+		appendElement(dataset, options, rootElement);
 		return new Document(rootElement);
 	}
 
-	public static Document createDocument(@NonNull HashOptions options) {
+	private static Document createDocument(@NonNull HashOptions options) {
 		Element rootElement = new Element(DETECTION_LBL);
 		appendElement(options, rootElement);
 		return new Document(rootElement);
 	}
 	
-	private static void appendElement(@NonNull IAnalysisOptions options, Element rootElement) {
+	private static void appendElement(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options, Element rootElement) {
 		for(String key : options.getDetectionOptionTypes()){
 			Element element = new Element(DETECTION_METHOD);
 			if(isUUID(key)){ // signal group without prefix
 				element.setAttribute(DETECTED_OBJECT, IAnalysisOptions.SIGNAL_GROUP+key);
 			} else {
 				element.setAttribute(DETECTED_OBJECT, key);
+			}
+			
+			// add signal group names
+			if(element.getAttribute(DETECTED_OBJECT).getValue().startsWith(IAnalysisOptions.SIGNAL_GROUP)) {
+				UUID signalGroup = UUID.fromString(element.getAttribute(DETECTED_OBJECT).getValue().replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
+				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
+				element.setAttribute(SIGNAL_NAME, groupName);
 			}
 			
 			appendElement(options.getDetectionOptions(key).get(), element);

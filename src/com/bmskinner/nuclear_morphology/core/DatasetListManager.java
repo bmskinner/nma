@@ -36,7 +36,9 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Track the open datasets in the program
+ * Track the open datasets in the program. Implemented as a singleton, since
+ * every component needs to have a consistent view of what is open or selected
+ * at any time.
  * 
  * @author bms41
  *

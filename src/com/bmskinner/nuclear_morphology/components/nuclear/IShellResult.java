@@ -185,6 +185,17 @@ public interface IShellResult extends Serializable, Loggable {
     long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
     
     /**
+     * Get the proportion of signal in each shell for a signal in the given nucleus in the given cell.
+     * The signal parameter can be left null to fetch pixels for the entire nucleus
+     * @param type the type of pixel to fetch
+     * @param cell the cell
+     * @param nucleus the nucleus
+     * @param signal the signal, or null to fetch all pixels in the nucleus
+     * @return the pixel counts in that object per shell
+     */
+    double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
+    
+    /**
      * Get the number of shells in the shell result
      * 
      * @return the shell count
