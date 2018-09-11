@@ -191,7 +191,7 @@ public class SignalCountsPanel extends DetailPanel {
             	ICellCollection filtered  = f.filter(dataset.getCollection(), options.getPredicate(dataset.getCollection()));
             	ICellCollection virt = new VirtualCellCollection(dataset, filtered.getName());
             	filtered.getCells().forEach(c->virt.addCell(c));
-            	virt.setName("Filtered_"+groupPanel.getSelectedGroup().getGroupName());
+            	virt.setName("Filtered_signal_count_"+groupPanel.getSelectedGroup().getGroupName());
 
             	dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
             	dataset.getCollection().getSignalManager().copySignalGroups(virt);

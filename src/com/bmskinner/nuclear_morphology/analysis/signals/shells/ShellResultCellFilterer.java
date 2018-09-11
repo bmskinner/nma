@@ -13,6 +13,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Allow cell collections to be filtered based on
@@ -65,35 +66,38 @@ public class ShellResultCellFilterer {
 			throw new IllegalArgumentException("No shell result in signal group");
 		
 		final IShellResult s = r.get();
-		
+//		log(String.format("Making nucleus filter for operation %s with shell %s and proportion %s", operation, shell, proportion));
 		Predicate<ICell> pred = (cell)->{
 			boolean cellPasses = true;
 			for(Nucleus n : cell.getNuclei()) {
 				try {
 					long[] pixels = s.getPixelValues(CountType.SIGNAL, cell, n, null);
-					if(pixels==null)
-						return false;
+					if(pixels==null) {
+						cellPasses &= false;
+						continue;
+					}
 					long total = LongStream.of(pixels).sum();
-					double[] props = LongStream.of(pixels).mapToDouble(l->l/total).toArray();
+					double[] props = LongStream.of(pixels).mapToDouble(l->(double)l/(double)total).toArray();
 					switch(operation) {
-					case SPECIFIC_SHELL_IS_MORE_THAN: cellPasses &= props[shell]>proportion;
-					case SPECIFIC_SHELL_IS_LESS_THAN: cellPasses &= props[shell]<proportion;
+					case SPECIFIC_SHELL_IS_MORE_THAN: cellPasses &= props[shell]>=proportion;
+					case SPECIFIC_SHELL_IS_LESS_THAN: cellPasses &= props[shell]<=proportion;
 					case SHELL_PLUS_SHELLS_INTERIOR_TO_MORE_THAN: {
 						double sum = 0;
 						for(int i=shell;i<s.getNumberOfShells(); i++) {
 							sum+=props[i];
 						}
-						cellPasses &= sum>proportion;
+						cellPasses &= sum>=proportion;
 					}
 					case SHELL_PLUS_SHELLS_PERIPHERAL_TO_MORE_THAN: {
 						double sum = 0;
 						for(int i=0; i<=shell; i++) {
 							sum+=props[i];
 						}
-						cellPasses &= sum>proportion;
+						cellPasses &= sum>=proportion;
 					}
 					}
 				} catch(Exception e) {
+					cellPasses &= false;
 					System.out.println(e.getMessage());
 					e.printStackTrace();
 				}

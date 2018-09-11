@@ -55,15 +55,14 @@ public class SignalsDetailPanel extends DetailPanel {
             DetailPanel overviewPanel = new SignalsOverviewPanel(context);
             DetailPanel countsPanel  = new SignalCountsPanel(context);
             DetailPanel boxplotPanel = new SignalsBoxplotPanel(context);
-//            DetailPanel histogramPanel = new SignalsHistogramPanel(context);
             DetailPanel shellsPanel = new SignalShellsPanel(context);
-            DetailPanel analysisPanel = new SignalsAnalysisPanel(context);
+            DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel(context);
             DetailPanel signalScatterChartPanel = new SignalScatterChartPanel(context);
             DetailPanel colocalistionPanel = new SignalsColocalisationPanel(context);
 
             signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
+            signalsTabPane.addTab(detectionSettingsPanel.getPanelTitle(), detectionSettingsPanel);
             signalsTabPane.addTab(countsPanel.getPanelTitle(), countsPanel);
-            signalsTabPane.addTab(analysisPanel.getPanelTitle(), analysisPanel);
             signalsTabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
 
             signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
@@ -75,7 +74,7 @@ public class SignalsDetailPanel extends DetailPanel {
             this.addSubPanel(boxplotPanel);
 
             this.addSubPanel(shellsPanel);
-            this.addSubPanel(analysisPanel);
+            this.addSubPanel(detectionSettingsPanel);
             this.addSubPanel(signalScatterChartPanel);
             this.addSubPanel(colocalistionPanel);
 

@@ -52,6 +52,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer.CollectionFilteringException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer;
@@ -78,6 +80,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDialog;
@@ -451,7 +454,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         private double proportion =0;
         private int shell = 0;
         private ShellResultFilterOperation op = ShellResultFilterOperation.SPECIFIC_SHELL_IS_LESS_THAN;
-        private UUID id;
+        private SignalGroupSelectionPanel groupPanel;
 
         protected JPanel headingPanel;
         protected JPanel optionsPanel;
@@ -482,18 +485,25 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         
         public void filter() {
         	log("Filtering");
-        	ICellCollection filtered = new ShellResultCellFilterer(id)
+        	ICellCollection filtered = new ShellResultCellFilterer(groupPanel.getSelectedID())
         			.setFilter(op, shell, proportion)
         			.filter(activeDataset().getCollection());
 			if(!filtered.hasCells()) {
 				log("No cells found");
 				return;
 			}
-			log("Found "+filtered.size()+" cells");
-			ICellCollection virt = new VirtualCellCollection(activeDataset(), "Filtered_on_shell");
-			filtered.getCells().forEach(c->virt.addCell(c));
-            activeDataset().addChildCollection(virt);
-            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+			
+			try {
+				log("Found "+filtered.size()+" cells");
+				ICellCollection virt = new VirtualCellCollection(activeDataset(), "Filtered_on_shell");
+				filtered.getCells().forEach(c->virt.addCell(c));
+				activeDataset().getCollection().getProfileManager().copyCollectionOffsets(virt);
+				activeDataset().getCollection().getSignalManager().copySignalGroups(virt);
+				activeDataset().addChildCollection(virt);		
+				getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+			} catch (ProfileException e1) {
+				stack("Unable to filter collection for " + activeDataset().getName(), e1);
+			}
         }
 
 
@@ -517,18 +527,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
             List<JLabel> labels = new ArrayList<>();
             List<Component> fields = new ArrayList<>();
             
-            Set<UUID> groupSet = activeDataset().getCollection().getSignalGroupIDs();
-			List<UUID> ids = groupSet.stream().collect(Collectors.toList());
-			
-			String[] names = ids.stream().map(id->activeDataset().getCollection().getSignalGroup(id).get().getGroupName())
-			.toArray(String[]::new);
-			JComboBox<String> idBox = new JComboBox<>(names);
-
-			idBox.addActionListener(e -> id= ids.get(idBox.getSelectedIndex()));
-			idBox.setSelectedIndex(0);
+            groupPanel = new SignalGroupSelectionPanel(activeDataset());
             
             labels.add(new JLabel("Signal group"));
-            fields.add(idBox);
+            fields.add(groupPanel);
             
             JComboBox<ShellResultFilterOperation> typeBox = new JComboBox<>(ShellResultFilterOperation.values());
             typeBox.setSelectedItem(ShellResultFilterOperation.SPECIFIC_SHELL_IS_LESS_THAN);
