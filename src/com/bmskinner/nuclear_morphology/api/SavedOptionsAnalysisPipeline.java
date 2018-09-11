@@ -47,10 +47,10 @@ import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
  * @since 1.14.0
  *
  */
-public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
+public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod implements AnalysisPipeline {
 	
-	private final File xmlFile;
-	private final File imageFolder;
+	private File xmlFile;
+	private File imageFolder;
 	private List<IAnalysisDataset> datasets;
 	private final List<IAnalysisMethod> methodsToRun = new ArrayList<>();
 	
@@ -62,7 +62,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 	 * @throws Exception
 	 */
 	public SavedOptionsAnalysisPipeline(@NonNull final File imageFolder, @NonNull final File xmlFile) {
-		this.xmlFile = xmlFile;
+		this.xmlFile     = xmlFile;
 		this.imageFolder = imageFolder;
 	}
 	
@@ -70,6 +70,17 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod {
 	public IAnalysisResult call() throws Exception {
 		run();
 		return new DefaultAnalysisResult(datasets);
+	}
+	
+	@Override
+	public void run(@NonNull final File imageFolder, @NonNull final File xmlFile) throws AnalysisPipelineException {
+		this.xmlFile     = xmlFile;
+		this.imageFolder = imageFolder;
+		try {
+			run();
+		} catch(Exception e) {
+			throw new AnalysisPipelineException(e);
+		}
 	}
 
 	/**
