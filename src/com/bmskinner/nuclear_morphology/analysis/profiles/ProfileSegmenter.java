@@ -19,16 +19,12 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -43,41 +39,28 @@ public class ProfileSegmenter implements Loggable {
      */
     public static final int MIN_SEGMENT_SIZE = 10;
 
-    /**
-     * Window size for smoothing profiles prior to minima and maxima testing
-     */
+    /** Window size for smoothing profiles prior to minima and maxima testing */
     private static final int SMOOTH_WINDOW   = 2;
     
-    
-    /**
-     * Window size for calculating minima and maxima
-     */
+    /**  Window size for calculating minima and maxima */
     private static final int MAXIMA_WINDOW   = 5;
-    
-    /**
-     * Window size for calculating deltas
-     */
-    private static final int DELTA_WINDOW    = 2;
-    
+        
     /**
      * Threshold for calling minima and maxima; a maximum must be above
      * this value, a minimum must be below it
      */
     private static final int ANGLE_THRESHOLD = 180;
-
-    /**
-     * The minimum rate of change required in the profile (first differential)
-     * as a proportion of the total differential within the profile.
-     */
-    private static final double MIN_RATE_OF_CHANGE = 0.01;
+    
+    /** The exclusion zone above and below the threshold, as a fraction
+     * of the threshold value. For an angle profile, with threshold 180, 
+     * this is 18 degrees, or a range of 162-198 within which min/maxima 
+     * will not be called */
+    private static final double THRESHOLD_FRACTION = 0.10;
 
     private final IProfile profile; // the profile to segment
     private final List<IBorderSegment> segments = new ArrayList<>();
 
     private BooleanProfile minOrMax = null;
-    private BooleanProfile secondDifferentialMinOrMax = null;
-
-    private double         minRateOfChange  = 1;
 
     /**
      * These are points at which a segment boundary must be called.
@@ -193,7 +176,6 @@ public class ProfileSegmenter implements Loggable {
                 // Check if the test is within MIN_SEGMENT_SIZE of tag
             	if (index2 - index1 < MIN_SEGMENT_SIZE) {
             		toRemove.add(index2);
-//            		fine("Removing " + index2 + ": too close to " + index1);
             	}
             }
         }
@@ -213,18 +195,8 @@ public class ProfileSegmenter implements Loggable {
     	
     	IProfile smoothed = profile.smooth(SMOOTH_WINDOW);
     	
-    	minOrMax = smoothed.getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD)
-        		.or(smoothed.getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD));
-
-        
-    	// Find first derivative rates of change
-        IProfile firstDiff  = smoothed.calculateDeltas(DELTA_WINDOW);
-        
-        // Find second derivative rates of change
-        IProfile secondDiff = firstDiff.calculateDeltas(DELTA_WINDOW);
-        secondDifferentialMinOrMax = secondDiff.getLocalMaxima(MAXIMA_WINDOW, 0)
-        		.or(secondDiff.getLocalMinima(MAXIMA_WINDOW, 0)); 
-
+    	minOrMax = smoothed.getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD+(ANGLE_THRESHOLD*THRESHOLD_FRACTION))
+        		.or(smoothed.getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD-(ANGLE_THRESHOLD*THRESHOLD_FRACTION)));
     }
 
     /**
@@ -275,14 +247,6 @@ public class ProfileSegmenter implements Loggable {
         // Must be a minima or maxima        
         if(!minOrMax.get(index))
         	return false;
-
-        
-        //the value must be distinct from its surroundings.
-        //TODO - this is impairing normal segmentation
-//        if(!secondDifferentialMinOrMax.get(index))
-//        	return false;
-//        if(deltaProfile.get(index) < minRateOfChange)
-//            return false;
         return true;
     }
 
