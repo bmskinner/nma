@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import java.util.function.Predicate;
+
 import com.bmskinner.nuclear_morphology.components.Filterable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -32,7 +34,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @param <E>
  *            the collection to be filtered
  */
-public abstract class Filterer<E extends Filterable> implements Loggable {
+public abstract class Filterer<E extends Filterable, K> implements Loggable {
 
     public static final int FAILURE_THRESHOLD = 1;
     public static final int FAILURE_FERET     = 2;
@@ -94,6 +96,15 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
      */
     public abstract E filter(E collection, String component, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException;
+    
+    /**
+     * Filter the collection with the given predicate
+     * @param collection
+     * @param pred
+     * @return
+     * @throws CollectionFilteringException 
+     */
+    public abstract E filter(E collection, Predicate<K> pred) throws CollectionFilteringException;
 
     /**
      * Thrown when a cell collection cannot be filtered

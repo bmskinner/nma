@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  * @since 1.13.5
  *
  */
-public class CellCollectionFilterer extends Filterer<ICellCollection> {
+public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
 	
 	private DecimalFormat df = new DecimalFormat("#.##");
 
@@ -94,6 +94,22 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
         fine("Remaining: " + collection.size() + " nuclei");
     }
 
+    @Override
+    public ICellCollection filter(ICellCollection collection, Predicate<ICell> pred) throws CollectionFilteringException {
+    	 ICellCollection filtered = collection.filter(pred);
+
+         if (filtered == null || !filtered.hasCells())
+             throw new CollectionFilteringException("No collection returned");
+         try {
+             collection.getProfileManager().copyCollectionOffsets(filtered);
+             collection.getSignalManager().copySignalGroups(filtered);
+
+         } catch (ProfileException e) {
+             warn("Error copying collection offsets");
+             stack("Error in offsetting", e);
+         }
+         return filtered;
+    }
 
     @Override
     public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
@@ -105,77 +121,62 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
     public ICellCollection filter(ICellCollection collection, String component, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException {
     	
-    	 Predicate<ICell> pred = new Predicate<ICell>() {
-    		 @Override
-    		 public boolean test(ICell t) {
-    			
-    			 
-    			 if(CellularComponent.NUCLEUS.equals(component))
-    				 return t.getNuclei().stream().anyMatch(createNucleusFilter(collection, stat, lower, upper, scale));
-    			 
-    			 if(CellularComponent.NUCLEAR_SIGNAL.equals(component))
-    				 return t.getNuclei().stream().anyMatch(createNuclearSignalFilter(stat, lower, upper, scale));
-    			 return false;
-    		 }
-
-             @Override
-             public String toString() {
-                 return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
-             }
-
-         };
-         
-         ICellCollection filtered = collection.filter(pred);
-
-        if (filtered == null)
-            throw new CollectionFilteringException("No collection returned");
-
-        if (!filtered.hasCells())
-            throw new CollectionFilteringException("No cells returned for " + stat);
-
-        try {
-
-            // TODO - this fails on converted collections from (at least) 1.13.0
-            // with no profiles in aggregate
-            collection.getProfileManager().copyCollectionOffsets(filtered);
-            collection.getSignalManager().copySignalGroups(filtered);
-
-        } catch (ProfileException e) {
-            warn("Error copying collection offsets");
-            stack("Error in offsetting", e);
-        }
-
-        return filtered;
-    }
-    
-    private Predicate<Nucleus> createNuclearSignalFilter(PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
-    	return (n) ->{
-    			return n.getSignalCollection().getAllSignals().stream().anyMatch(s->{
-    				 double value = s.getStatistic(stat, scale);
-					 if (value < lower)
-						 return false;
-					 if (value > upper)
-						 return false;
-					 return true;
-    			});
-    	};
-    }
-    
-    private Predicate<Nucleus> createNucleusFilter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
+    	FilteringOptions op = new DefaultFilteringOptions();
+    	op.addMinimumThreshold(stat, component, scale, lower);
+    	op.addMaximumThreshold(stat, component, scale, upper);
     	
-    	return (n) ->{
-    		try {
-				 double value = stat.equals(PlottableStatistic.VARIABILITY)
-						 ? collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
-						 if (value < lower)
-							 return false;
-						 if (value > upper)
-							 return false;
-			 } catch (UnavailableBorderTagException e) {
-				 return false;
-			 }
-			 return true;
-    	};
+    	Predicate<ICell> pred = op.getPredicate(collection);
+//    	 Predicate<ICell> pred = new Predicate<ICell>() {
+//    		 @Override
+//    		 public boolean test(ICell t) {
+//    			
+//    			 
+//    			 if(CellularComponent.NUCLEUS.equals(component))
+//    				 return t.getNuclei().stream().anyMatch(createNucleusFilter(collection, stat, lower, upper, scale));
+//    			 
+//    			 if(CellularComponent.NUCLEAR_SIGNAL.equals(component))
+//    				 return t.getNuclei().stream().anyMatch(createNuclearSignalFilter(stat, lower, upper, scale));
+//    			 return false;
+//    		 }
+//
+//             @Override
+//             public String toString() {
+//                 return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
+//             }
+//
+//         };
+         
+        return filter(collection, pred);
     }
+    
+//    private Predicate<Nucleus> createNuclearSignalFilter(PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
+//    	return (n) ->{
+//    			return n.getSignalCollection().getAllSignals().stream().anyMatch(s->{
+//    				 double value = s.getStatistic(stat, scale);
+//					 if (value < lower)
+//						 return false;
+//					 if (value > upper)
+//						 return false;
+//					 return true;
+//    			});
+//    	};
+//    }
+//    
+//    private Predicate<Nucleus> createNucleusFilter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
+//    	
+//    	return (n) ->{
+//    		try {
+//				 double value = stat.equals(PlottableStatistic.VARIABILITY)
+//						 ? collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+//						 if (value < lower)
+//							 return false;
+//						 if (value > upper)
+//							 return false;
+//			 } catch (UnavailableBorderTagException e) {
+//				 return false;
+//			 }
+//			 return true;
+//    	};
+//    }
 
 }

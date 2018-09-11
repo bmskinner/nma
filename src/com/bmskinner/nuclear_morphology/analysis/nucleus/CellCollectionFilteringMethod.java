@@ -22,18 +22,18 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
  */
 public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod {
 		
-	private final Predicate<ICell> predicate;
+	private final FilteringOptions options;
 	private final String newCollectionName;
 	
-	public CellCollectionFilteringMethod(@NonNull IAnalysisDataset dataset, @NonNull Predicate<ICell> pred, @NonNull String name) {
+	public CellCollectionFilteringMethod(@NonNull IAnalysisDataset dataset, @NonNull FilteringOptions op, @NonNull String name) {
 		super(dataset);
-		predicate = pred;
+		options = op;
 		newCollectionName = name;
 	}
 	
-	public CellCollectionFilteringMethod(@NonNull List<IAnalysisDataset> datasets, @NonNull Predicate<ICell> pred, @NonNull String name) {
+	public CellCollectionFilteringMethod(@NonNull List<IAnalysisDataset> datasets, @NonNull FilteringOptions op, @NonNull String name) {
 		super(datasets);
-		predicate = pred;
+		options = op;
 		newCollectionName = name;
 	}
 
@@ -42,7 +42,7 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 	public IAnalysisResult call() throws Exception {
 
 		for(IAnalysisDataset d : datasets) {
-			ICellCollection filtered = d.getCollection().filter(predicate);
+			ICellCollection filtered = d.getCollection().filter(options.getPredicate(d.getCollection()));
 			if(filtered==null)
 				continue;
 			if (!filtered.hasCells())

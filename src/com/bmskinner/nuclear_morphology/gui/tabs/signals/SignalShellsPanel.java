@@ -272,10 +272,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         
         filterBtn.addActionListener(e->{
         	ShellFilteringSetupDialog dialog = new ShellFilteringSetupDialog(activeDataset());
-        	if(dialog.isReadyToRun()) {
-        		dialog.filter();
-        	}
-        	
+        	if(dialog.isReadyToRun())
+        		dialog.filter();        	
         });
         panel.add(filterBtn);
         

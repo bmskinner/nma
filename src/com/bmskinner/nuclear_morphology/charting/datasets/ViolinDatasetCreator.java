@@ -185,7 +185,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
 
                     String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_"+signalGroup+"_"+group.getGroupName();
-                    String colKey = collection.getName() + "_" +collection.getID();
+                    String colKey = collection.getName();
                     /*
                      * For charting, use offset angles, otherwise the boxplots
                      * will fail on wrapped signals

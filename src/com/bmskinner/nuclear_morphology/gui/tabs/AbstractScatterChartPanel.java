@@ -35,8 +35,10 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultFilteringOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer.CollectionFilteringException;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 //import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer;
 //import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -51,6 +53,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -232,45 +235,78 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
         
-        Filterer<ICellCollection> f = new CellCollectionFilterer();
-
+        FilteringOptions options = new DefaultFilteringOptions(true);
+        Range domain = getDomainBounds();
+        Range range = getRangeBounds();
+        PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
+        PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
+        
+        options.addMinimumThreshold(statA, component, scale, domain.getLowerBound());
+        options.addMaximumThreshold(statA, component, scale, domain.getUpperBound());
+        
+        options.addMinimumThreshold(statB, component, scale, range.getLowerBound());
+        options.addMaximumThreshold(statB, component, scale, range.getUpperBound());
+        
+        Filterer<ICellCollection, ICell> f = new CellCollectionFilterer();
+        
+        
         for (IAnalysisDataset d : getDatasets()) {
-
-            Range domain = getDomainBounds();
-            Range range = getRangeBounds();
-
-            PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
-            PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
-
-            try {
-
-                ICellCollection stat1 = f.filter(d.getCollection(), component, statA, domain.getLowerBound(),
-                        domain.getUpperBound(), scale);
-
-                ICellCollection stat2 = f.filter(stat1, component, statB, range.getLowerBound(), range.getUpperBound(), scale);
-
-                ICellCollection virt = new VirtualCellCollection(d, stat2.getName());
-                
-                stat2.getCells().forEach(c->virt.addCell(c));
-
-                virt.setName("Filtered_" + statA + "_" + statB);
-
-                d.addChildCollection(virt);
-                try {
-
-                    d.getCollection().getProfileManager().copyCollectionOffsets(virt);
-                } catch (ProfileException e) {
-                    warn("Error copying collection offsets for " + d.getName());
-                    stack("Error in offsetting", e);
-                    continue;
-                }
-
-            } catch (CollectionFilteringException e1) {
-                stack("Unable to filter collection for " + d.getName(), e1);
-                continue;
-            }
-
+        	try {
+        		ICellCollection filtered  = f.filter(d.getCollection(), options.getPredicate(d.getCollection()));
+        		ICellCollection virt = new VirtualCellCollection(d, filtered.getName());
+        		filtered.getCells().forEach(c->virt.addCell(c));
+        		virt.setName("Filtered_" + statA + "_" + statB);
+        		
+        		d.getCollection().getProfileManager().copyCollectionOffsets(virt);
+        		d.getCollection().getSignalManager().copySignalGroups(virt);
+        		d.addChildCollection(virt);		
+        	} catch (CollectionFilteringException | ProfileException e1) {
+        		stack("Unable to filter collection for " + d.getName(), e1);
+        		continue;
+        	}
         }
+    
+        
+        
+//        Filterer<ICellCollection> f = new CellCollectionFilterer();
+//
+//        for (IAnalysisDataset d : getDatasets()) {
+//
+//            Range domain = getDomainBounds();
+//            Range range = getRangeBounds();
+//
+//            PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
+//            PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
+//
+//            try {
+//
+//                ICellCollection stat1 = f.filter(d.getCollection(), component, statA, domain.getLowerBound(),
+//                        domain.getUpperBound(), scale);
+//
+//                ICellCollection stat2 = f.filter(stat1, component, statB, range.getLowerBound(), range.getUpperBound(), scale);
+//
+//                ICellCollection virt = new VirtualCellCollection(d, stat2.getName());
+//                
+//                stat2.getCells().forEach(c->virt.addCell(c));
+//
+//                virt.setName("Filtered_" + statA + "_" + statB);
+//
+//                d.addChildCollection(virt);
+//                try {
+//
+//                    d.getCollection().getProfileManager().copyCollectionOffsets(virt);
+//                } catch (ProfileException e) {
+//                    warn("Error copying collection offsets for " + d.getName());
+//                    stack("Error in offsetting", e);
+//                    continue;
+//                }
+//
+//            } catch (CollectionFilteringException e1) {
+//                stack("Unable to filter collection for " + d.getName(), e1);
+//                continue;
+//            }
+//
+//        }
         log("Filtered datasets");
 
         finer("Firing population update request");

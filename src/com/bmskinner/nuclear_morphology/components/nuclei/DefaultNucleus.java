@@ -204,7 +204,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         // Note - variability will remain zero here
         // These stats are specific to nuclei
-        
+                
         if (PlottableStatistic.ASPECT.equals(stat))
             return getAspectRatio();
 
