@@ -85,7 +85,7 @@ public class DemoReportGenerator implements Loggable {
 
 			if(group.hasShellResult()) {
 				
-				File chartFile = new File(saveFolder, group.getGroupName()+Io.PNG_FILE_EXTENSION);
+				File chartFile = new File(saveFolder, dataset.getName()+"_"+group.getGroupName()+Io.PNG_FILE_EXTENSION);
 				
 				IDetectionOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId);
 				
@@ -152,33 +152,44 @@ public class DemoReportGenerator implements Loggable {
 
 		for(ICell cell : dataset.getCollection().getCells()) {
 
-			for(Nucleus n :cell.getNuclei()) {
+			nucleusLoop: for(Nucleus n :cell.getNuclei()) {
 
-				builder.append(String.format("x=%s y=%s"+NEWLINE, n.getCentreOfMass().getXAsInt(), n.getCentreOfMass().getYAsInt()));
+				String cellLine = String.format("x=%s y=%s"+NEWLINE, n.getCentreOfMass().getXAsInt(), n.getCentreOfMass().getYAsInt());
 
 				// Red
-				builder.append("Red");
+				String redLine = "Red";
 				ISignalGroup red = dataset.getCollection().getSignalGroup(channelMap.get(0)).get();
 				double[] reds = red.getShellResult().get().getProportions(CountType.SIGNAL, cell, n, null);	
 				for(int i=reds.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine
-					builder.append("\t"+formatter.format(reds[i]));					
-				builder.append(NEWLINE);
+					redLine+="\t"+formatter.format(reds[i]);	
+				redLine+=NEWLINE;
+				
 
 				// Green
-				builder.append("Green");
-				ISignalGroup green = dataset.getCollection().getSignalGroup(channelMap.get(0)).get();
+				String greenLine = "Green";
+				ISignalGroup green = dataset.getCollection().getSignalGroup(channelMap.get(1)).get();
 				double[] greens = green.getShellResult().get().getProportions(CountType.SIGNAL, cell, n, null);	
-				for(int i=greens.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine
-					builder.append("\t"+formatter.format(greens[i]));					
-				builder.append(NEWLINE);
+				for(int i=greens.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine		
+					greenLine+="\t"+formatter.format(greens[i]);	
+				greenLine+=NEWLINE;
 
 				// Blue
-				builder.append("Blue");
+				String blueLine = "Blue";
 				ISignalGroup blue = red.hasShellResult()?red:green;
 				double[] blues = blue.getShellResult().get().getProportions(CountType.COUNTERSTAIN, cell, n, null);	
 				for(int i=blues.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine
-					builder.append("\t"+formatter.format(blues[i]));					
-				builder.append(NEWLINE);	
+					blueLine+="\t"+formatter.format(blues[i]);					
+				blueLine+=NEWLINE;
+				
+				// Sanity check - can't export something with no counterstain signal
+				for(double d : blues)
+					if(d==0)
+						continue nucleusLoop;
+				
+				builder.append(cellLine);
+				builder.append(redLine);
+				builder.append(greenLine);
+				builder.append(blueLine);
 			}
 
 		}
