@@ -22,7 +22,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.14.0
  *
  */
-public class ShellResultCellFilterer {
+public class ShellResultCellFilterer implements Loggable {
 	
 	private UUID signalGroupId;
 	private double proportion;
@@ -53,7 +53,7 @@ public class ShellResultCellFilterer {
 		return this;
 	}
 	
-	public ICellCollection filter(ICellCollection c) {
+	public ICellCollection filter(@NonNull ICellCollection c) {
 		if(operation==null)
 			throw new IllegalArgumentException("Operation must be set before filtering");
 		
@@ -66,7 +66,7 @@ public class ShellResultCellFilterer {
 			throw new IllegalArgumentException("No shell result in signal group");
 		
 		final IShellResult s = r.get();
-//		log(String.format("Making nucleus filter for operation %s with shell %s and proportion %s", operation, shell, proportion));
+//		log(String.format("Making nucleus filter for operation %s with shell %s and proportion %s on signal group %s", operation, shell, proportion, signalGroupId));
 		Predicate<ICell> pred = (cell)->{
 			boolean cellPasses = true;
 			for(Nucleus n : cell.getNuclei()) {
@@ -74,27 +74,38 @@ public class ShellResultCellFilterer {
 					long[] pixels = s.getPixelValues(CountType.SIGNAL, cell, n, null);
 					if(pixels==null) {
 						cellPasses &= false;
+//						log(String.format("Cell: %s No pixels", operation));
 						continue;
 					}
 					long total = LongStream.of(pixels).sum();
 					double[] props = LongStream.of(pixels).mapToDouble(l->(double)l/(double)total).toArray();
 					switch(operation) {
-					case SPECIFIC_SHELL_IS_MORE_THAN: cellPasses &= props[shell]>=proportion;
-					case SPECIFIC_SHELL_IS_LESS_THAN: cellPasses &= props[shell]<=proportion;
-					case SHELL_PLUS_SHELLS_INTERIOR_TO_MORE_THAN: {
-						double sum = 0;
-						for(int i=shell;i<s.getNumberOfShells(); i++) {
-							sum+=props[i];
+						case SPECIFIC_SHELL_IS_MORE_THAN: cellPasses &= props[shell]>=proportion; 
+//						log(String.format("Cell: %s prop %s and needed %s: %s", operation, props[shell], proportion, cellPasses));
+						break;
+						case SPECIFIC_SHELL_IS_LESS_THAN: cellPasses &= props[shell]<=proportion; 
+//						log(String.format("Cell: %s prop %s and needed %s: %s", operation, props[shell], proportion, cellPasses));
+						break;
+						
+						case SHELL_PLUS_SHELLS_INTERIOR_TO_MORE_THAN: {
+							double sum = 0;
+							for(int i=shell;i<s.getNumberOfShells(); i++) {
+								sum+=props[i];
+							}
+//							log(String.format("Cell: %s sum %s and needed %s: %s", operation, sum, proportion, cellPasses));
+							cellPasses &= sum>=proportion;
+							 break;
 						}
-						cellPasses &= sum>=proportion;
-					}
-					case SHELL_PLUS_SHELLS_PERIPHERAL_TO_MORE_THAN: {
-						double sum = 0;
-						for(int i=0; i<=shell; i++) {
-							sum+=props[i];
+						case SHELL_PLUS_SHELLS_PERIPHERAL_TO_MORE_THAN: {
+							double sum = 0;
+							for(int i=0; i<=shell; i++) {
+								sum+=props[i];
+							}
+//							log(String.format("Cell: %s sum %s and needed %s: %s", operation, sum, proportion, cellPasses));
+							cellPasses &= sum>=proportion;
+							 break;
 						}
-						cellPasses &= sum>=proportion;
-					}
+//						default: log(String.format("Cell: %s needed %s. No valid operation provided", operation, proportion));
 					}
 				} catch(Exception e) {
 					cellPasses &= false;

@@ -64,11 +64,11 @@ public class SignalGroup implements ISignalGroup {
      * @param s
      */
     public SignalGroup(@NonNull ISignalGroup s) {
-        if (!s.hasShellResult()) {
+//        if (!s.hasShellResult()) {
             shellResult = null;
-        } else {
-            shellResult = s.getShellResult().get().duplicate();
-        }
+//        } else {
+//            shellResult = s.getShellResult().get().duplicate();
+//        }
         groupName = s.getGroupName();
         isVisible = s.isVisible();
         groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;

@@ -194,7 +194,6 @@ public class SignalCountsPanel extends DetailPanel {
             	virt.setName("Filtered_signal_count_"+groupPanel.getSelectedGroup().getGroupName());
 
             	dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
-            	dataset.getCollection().getSignalManager().copySignalGroups(virt);
             	dataset.addChildCollection(virt);		
             } catch (CollectionFilteringException | ProfileException e1) {
             	stack("Unable to filter collection for " + dataset.getName(), e1);

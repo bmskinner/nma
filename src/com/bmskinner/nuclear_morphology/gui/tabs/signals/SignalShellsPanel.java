@@ -274,9 +274,11 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         panel.add(showNuclei);
         
         filterBtn.addActionListener(e->{
-        	ShellFilteringSetupDialog dialog = new ShellFilteringSetupDialog(activeDataset());
-        	if(dialog.isReadyToRun())
-        		dialog.filter();        	
+        	if(activeDataset()!=null) {
+        		ShellFilteringSetupDialog dialog = new ShellFilteringSetupDialog(activeDataset());
+        		if(dialog.isReadyToRun())
+        			dialog.filter();   
+        	}
         });
         panel.add(filterBtn);
         
@@ -394,10 +396,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         setEnabled(false);
 
         if (activeDataset().getCollection().getSignalManager().hasSignals()) {
-            setEnabled(true);
-            if (!activeDataset().getCollection().hasConsensus()) {
-                showRandomCheckbox.setEnabled(false);
-            }
+        	newAnalysis.setEnabled(true);
+            if(activeDataset().getCollection().getSignalManager().hasShellResult())
+            	setEnabled(true);
+            showRandomCheckbox.setEnabled(activeDataset().getCollection().hasConsensus());
         }
 
     }
@@ -451,7 +453,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
         private static final String DIALOG_TITLE = "Shell filtering options";
         
-        private double proportion =0;
+        private final IAnalysisDataset dataset;
+        
+        private double proportion=0.5d;
         private int shell = 0;
         private ShellResultFilterOperation op = ShellResultFilterOperation.SPECIFIC_SHELL_IS_LESS_THAN;
         private SignalGroupSelectionPanel groupPanel;
@@ -460,7 +464,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         protected JPanel optionsPanel;
         protected JPanel footerPanel;
 
-        public ShellFilteringSetupDialog(final IAnalysisDataset dataset) {
+        public ShellFilteringSetupDialog(@NonNull final IAnalysisDataset dataset) {
             this(dataset, DIALOG_TITLE);
         }
 
@@ -470,8 +474,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
          * @param mw
          * @param title
          */
-        protected ShellFilteringSetupDialog(final IAnalysisDataset dataset, final String title) {
+        protected ShellFilteringSetupDialog(@NonNull final IAnalysisDataset dataset, @NonNull final String title) {
             super(true);
+            this.dataset = dataset;
             createUI();
             pack();
             setVisible(true);
@@ -484,10 +489,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         }
         
         public void filter() {
-        	log("Filtering");
+        	log("Filtering "+dataset.getName());
         	ICellCollection filtered = new ShellResultCellFilterer(groupPanel.getSelectedID())
         			.setFilter(op, shell, proportion)
-        			.filter(activeDataset().getCollection());
+        			.filter(dataset.getCollection());
 			if(!filtered.hasCells()) {
 				log("No cells found");
 				return;
@@ -495,14 +500,13 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 			
 			try {
 				log("Found "+filtered.size()+" cells");
-				ICellCollection virt = new VirtualCellCollection(activeDataset(), "Filtered_on_shell");
+				ICellCollection virt = new VirtualCellCollection(dataset, "Filtered_on_shell");
 				filtered.getCells().forEach(c->virt.addCell(c));
-				activeDataset().getCollection().getProfileManager().copyCollectionOffsets(virt);
-				activeDataset().getCollection().getSignalManager().copySignalGroups(virt);
-				activeDataset().addChildCollection(virt);		
+				dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
+				dataset.addChildCollection(virt);		
 				getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 			} catch (ProfileException e1) {
-				stack("Unable to filter collection for " + activeDataset().getName(), e1);
+				stack("Unable to filter collection for " + dataset.getName(), e1);
 			}
         }
 
@@ -518,7 +522,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
             footerPanel = createFooter();
             getContentPane().add(footerPanel, BorderLayout.SOUTH);
             
-            ICellCollection collection = activeDataset().getCollection();
+            ICellCollection collection = dataset.getCollection();
             
             optionsPanel = new JPanel();
             GridBagLayout layout = new GridBagLayout();
@@ -527,7 +531,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
             List<JLabel> labels = new ArrayList<>();
             List<Component> fields = new ArrayList<>();
             
-            groupPanel = new SignalGroupSelectionPanel(activeDataset());
+            groupPanel = new SignalGroupSelectionPanel(dataset);
             
             labels.add(new JLabel("Signal group"));
             fields.add(groupPanel);
@@ -539,7 +543,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
             labels.add(new JLabel("Filtering operation"));
             fields.add(typeBox);
             
-            SpinnerNumberModel sModel = new SpinnerNumberModel(0, 0, collection.getSignalManager().getShellCount(), 1);
+            SpinnerNumberModel sModel = new SpinnerNumberModel(0, 0, collection.getSignalManager().getShellCount()-1, 1);
             JSpinner spinner = new JSpinner(sModel);
             spinner.addChangeListener(e-> shell = (int) sModel.getValue());
             
