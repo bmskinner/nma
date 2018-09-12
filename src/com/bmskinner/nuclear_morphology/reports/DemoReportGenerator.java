@@ -110,7 +110,7 @@ public class DemoReportGenerator implements Loggable {
 				chart.getCategoryPlot().setRangeGridlinesVisible(true);
 				chart.getCategoryPlot().setRangeGridlinePaint(Color.LIGHT_GRAY);
 				chart.getCategoryPlot().getRangeAxis().setRange(0, 60);
-				chart.getCategoryPlot().addRangeMarker(new ValueMarker(20, Color.BLACK, new BasicStroke(2)));
+//				chart.getCategoryPlot().addRangeMarker(new ValueMarker(20, Color.BLACK, new BasicStroke(2)));
 //				BufferedImage buffImg = chart.createBufferedImage(300, 200);
 				OutputStream out = new FileOutputStream(chartFile);
 				ChartUtilities.writeChartAsPNG(out, chart, 800, 600);

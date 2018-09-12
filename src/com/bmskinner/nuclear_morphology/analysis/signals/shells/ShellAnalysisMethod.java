@@ -78,51 +78,26 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
     @Override
     public IAnalysisResult call() throws Exception {
-        // Set the progress total
-        ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, dataset.getCollection().size() - 1);
-        fireProgressEvent(e);
+    	fireUpdateProgressTotalLength(dataset.getCollection().getNucleusCount()-1);
         run();  
         return new DefaultAnalysisResult(dataset);
     }
 
     protected void run() {
-       
-        
-    	// If all cells are not suitable for shell analysis, prefiltering may have created a child collection that
-    	// can be analysed. Check for this before running.
-//    	Optional<IAnalysisDataset> optionalSuitable = dataset.getChildDatasets().stream().filter(d->d.getName().equals("Suitable_for_shell_analysis")).findAny();
-//    	collection = optionalSuitable.isPresent() ? optionalSuitable.get().getCollection() : dataset.getCollection();
     	collection = dataset.getCollection();
     	if (!collection.getSignalManager().hasSignals()) 
              return;
     	 
-    	log("Created shell analysis for collection "+collection.getName());
-
         log(String.format("Performing %s shell analysis with %s shells on dataset %s...", 
         		options.getErosionMethod(), options.getShellNumber(), collection.getName()));
 
         try {
-
-            for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
-
-                if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
-                    continue;
-                counters.put(signalGroup, new KeyedShellResult( options.getShellNumber(), options.getErosionMethod()));
-                
-                // Assign the options to each signal group
-                dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup).setShellOptions(options);
-            }
+        	createShellCounters();
 
             // make the shells and measure the values
             collection.getCells().parallelStream().forEach(c->new CellAnalysis(c).analyse());
-//            for (ICell c : collection.getCells()) {
-//                new CellAnalysis(c).analyse();
-//            }
-
-            ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0);
-            fireProgressEvent(e);
-
-            // get stats
+            
+            fireIndeterminateState();
             createResults();
 
             log("Shell analysis complete");
@@ -132,6 +107,60 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             return;
         }
         return;
+    }
+    
+    /**
+     * Create the shell results for each signal group
+     */
+    private void createShellCounters() {
+    	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
+            if (IShellResult.RANDOM_SIGNAL_ID.equals(signalGroupId))
+                continue;
+            counters.put(signalGroupId, new KeyedShellResult( options.getShellNumber(), options.getErosionMethod()));
+            
+            // Assign the options to each signal group
+            dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
+        }
+    }
+    
+    private synchronized void createResults() {
+        // get stats and export
+        boolean addRandom = false;
+
+        for (UUID group : counters.keySet()) {
+            addRandom |= collection.getSignalManager().hasSignals(group);
+            if (collection.getSignalManager().hasSignals(group)) {
+                KeyedShellResult channelCounter = counters.get(group);
+                collection.getSignalGroup(group).get().setShellResult(channelCounter);
+            }
+        }
+
+        if (addRandom)
+            addRandomSignal();
+    }
+
+    private synchronized void addRandomSignal() {
+
+        // Create a random sample distribution
+        if (collection.hasConsensus()) {
+            ISignalGroup random = new SignalGroup("Random distribution");
+            random.setGroupColour(Color.LIGHT_GRAY);
+
+            collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
+
+            // Calculate random positions of pixels
+            RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
+
+            long[] c = sr.getCounts();
+            
+			RandomShellResult randomResult = new RandomShellResult( options.getShellNumber(), options.getErosionMethod(), c);
+			
+			collection.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
+			        .setShellResult(randomResult);
+        } else {
+            warn("Cannot create simulated dataset, no consensus");
+        }
+
     }
 
     
@@ -145,7 +174,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         private ShellDetector shellDetector;
         final ICell c;
         
-        public CellAnalysis(ICell c){
+        public CellAnalysis(@NonNull ICell c){
             this.c = c;
         }
         
@@ -167,9 +196,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             }
 
             try {
-
-                ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importToStack();
-
                 for (UUID signalGroup : n.getSignalCollection().getSignalGroupIds()) {
 
                     if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
@@ -197,9 +223,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             if (sourceFile == null) 
                 return;
 
-            ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importToStack();
             ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
-
             KeyedShellResult counter = counters.get(signalGroup);
 
             int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
@@ -215,48 +239,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                 counter.addShellData(CountType.SIGNAL, c, n, s, countsInSignals); // the pixels within the signal
             }
         }
-    }
-
-    private synchronized void createResults() {
-        // get stats and export
-        boolean addRandom = false;
-
-        for (UUID group : counters.keySet()) {
-            addRandom |= collection.getSignalManager().hasSignals(group);
-            if (collection.getSignalManager().hasSignals(group)) {
-                KeyedShellResult channelCounter = counters.get(group);
-                collection.getSignalGroup(group).get().setShellResult(channelCounter);
-            }
-        }
-
-        if (addRandom)
-            addRandomSignal();
-    }
-
-    private synchronized void addRandomSignal() {
-
-        // Create a random sample distribution
-        if (collection.hasConsensus()) {
-
-            ISignalGroup random = new SignalGroup("Random distribution");
-//            random.setFolder(new File(""));
-            random.setGroupColour(Color.LIGHT_GRAY);
-
-            collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
-
-            // Calculate random positions of pixels
-            RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
-
-            long[] c = sr.getCounts();
-            
-			RandomShellResult randomResult = new RandomShellResult( options.getShellNumber(), options.getErosionMethod(), c);
-			
-			collection.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
-			        .setShellResult(randomResult);
-        } else {
-            warn("Cannot create simulated dataset, no consensus");
-        }
-
     }
     
     private class RandomDistribution {

@@ -82,6 +82,13 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     protected void fireUpdateProgressTotalLength(int totalProgress) {
     	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalProgress));
     }
+    
+    /**
+     * Alert progress listeners that the task length has become indeterminate
+     */
+    protected void fireIndeterminateState() {
+    	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0));
+    }
 
     /**
      * Fire a progress event to listeners, indicating one step of the task has been completed
