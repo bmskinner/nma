@@ -97,6 +97,20 @@ public class RandomShellResult implements IShellResult{
         }
 
     }
+    
+	@Override
+	public double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
+			@Nullable INuclearSignal signal) {
+		long total = LongStream.of(counts).sum();
+        if(total==0){
+            double[] result = new double[nShells];
+            for(int i=0; i<nShells; i++){
+                result[i] = 0;
+            }
+            return result;
+        }
+        return LongStream.of(counts).mapToDouble(l-> (double)l/(double)total).toArray();
+	}
 
     @Override
     public double[] getStdErrs(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -106,16 +120,6 @@ public class RandomShellResult implements IShellResult{
         }
         return result;
     }
-
-//    @Override
-//    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-//        return 1;
-//    }
-//
-//    @Override
-//    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-//        return 1;
-//    }
 
     @Override
     public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -156,5 +160,4 @@ public class RandomShellResult implements IShellResult{
            return b.toString();
         
     }
-
 }

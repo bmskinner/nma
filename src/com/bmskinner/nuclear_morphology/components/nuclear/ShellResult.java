@@ -226,4 +226,17 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	public IShellResult duplicate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
+			@Nullable INuclearSignal signal) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

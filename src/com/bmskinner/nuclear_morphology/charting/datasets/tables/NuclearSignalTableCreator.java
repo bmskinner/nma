@@ -488,7 +488,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         DefaultTableModel model = new DefaultTableModel();
 
-        DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
+        DecimalFormat lowFormat = new DecimalFormat("0.00E00");
+        DecimalFormat pFormat = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
         Object[] columnNames = { Labels.DATASET, 
         		Labels.Signals.SIGNAL_GROUP_LABEL, 
@@ -519,11 +520,14 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				    	pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
 				    }
 				    
+				    // Choose the most readable format
+				    String pString = pval<0.001 ? lowFormat.format(pval) : pFormat.format(pval);
+				    
 				    Object[] rowData = {
 				            d.getName(), 
 				            groupName, 
 				            pFormat.format(mean),
-				            pFormat.format(pval) };
+				            pString };
 				    model.addRow(rowData);
 				}
             }
@@ -545,6 +549,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         DefaultTableModel model = new DefaultTableModel();
 
+        DecimalFormat lowFormat = new DecimalFormat("0.00E00");
         DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
         Object[] columnNames = { Labels.DATASET, 
@@ -586,6 +591,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         				
         				String k1 = d1.getId().toString()+signalGroup1.toString()+d2.getId().toString()+signalGroup2.toString();
         				String k2 = d2.getId().toString()+signalGroup2.toString()+d1.getId().toString()+signalGroup1.toString();
+        				
+//        				String pString = pval<0.001 ? lowFormat.format(pval) : pFormat.format(pval);
         				Object[] rowData = { 
 			        			d1.getName(), 
 			        			groupName1, 

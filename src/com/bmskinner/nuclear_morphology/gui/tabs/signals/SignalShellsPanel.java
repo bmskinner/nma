@@ -442,10 +442,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     @Override
     protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-        if (options.getTarget() == chartPanel) {
+//        if (options.getTarget() == chartPanel) {
             return new NuclearSignalChartFactory(options).createShellChart();
-        }
-		return new NuclearSignalChartFactory(options).createShellConsensusChart();
+//        }
+//		return new NuclearSignalChartFactory(options).createShellConsensusChart();
     }
 
     @Override

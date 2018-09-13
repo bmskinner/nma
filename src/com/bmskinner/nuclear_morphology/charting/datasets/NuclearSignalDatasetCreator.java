@@ -214,7 +214,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      */
     public List<CategoryDataset> createShellBarChartDataset() throws ChartDatasetCreationException {
 
-        List<CategoryDataset> result = new ArrayList<CategoryDataset>();
+        List<CategoryDataset> result = new ArrayList<>();
 
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
@@ -242,8 +242,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * Create a consensus nucleus dataset overlaid with shells. Requires a
      * single dataset in the options.
      * 
-     * @param options
-     *            the options
+     * @param options the options
      * @return a chart dataset
      * @throws ChartDatasetCreationException
      *             if the IAnalysisDataset has no shell results or the dataset
@@ -328,6 +327,18 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 		if(!r.isPresent())
 			return;
 		
+		if(options.getNormalisation().equals(Normalisation.DAPI)) {
+
+			for (int shell=0; shell<r.get().getNumberOfShells(); shell++) {
+				double d = -100d/r.get().getNumberOfShells();
+
+				ds.add(signalGroup, d, 0,
+						"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
+			}
+			return;
+		}
+			
+		// otherwise use raw counts
 		double[] arr = r.get().getProportions(agg, norm);
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 			double d = arr[shell]* 100;

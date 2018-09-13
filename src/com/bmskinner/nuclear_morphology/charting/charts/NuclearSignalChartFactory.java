@@ -174,51 +174,39 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
      * 
      * @return the chart
      */
-    public JFreeChart createShellConsensusChart() {
-
-        if (!options.isSingleDataset()) {
-            return makeEmptyChart();
-        }
-
-        // Check for consensus nucleus
-        if (!options.firstDataset().getCollection().hasConsensus()) {
-            return makeEmptyChart();
-        }
-
-        int shellCount = options.firstDataset().getCollection().getSignalManager().getShellCount();
-
-        if (shellCount == 0) {
-            // No shells to display
-            return makeEmptyChart();
-        }
-
-        XYDataset shellDataset;
-
-        try {
-            shellDataset = new NuclearSignalDatasetCreator(options).createShellConsensusDataset();
-        } catch (ChartDatasetCreationException e) {
-            stack("Error making shell consensus dataset", e);
-            return makeErrorChart();
-        }
-
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
-        plot.setDataset(shellDataset);
-
-        int seriesCount = plot.getSeriesCount();
-        for (int i = 0; i < seriesCount; i++) {
-            plot.getRenderer().setSeriesVisibleInLegend(i, false);
-            plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-            plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-        }
-
-        // TODO: if there is only one shell result, add overlays showing signal
-        // distribution
-
-        applyAxisOptions(chart);
-        return chart;
-
-    }
+//    public JFreeChart createShellConsensusChart() {
+//
+//        if (!options.isSingleDataset())
+//            return makeEmptyChart();
+//
+//        int shellCount = options.firstDataset().getCollection().getSignalManager().getShellCount();
+//
+//        if (shellCount == 0)
+//            return makeEmptyChart();
+//
+//        XYDataset shellDataset;
+//
+//        try {
+//            shellDataset = new NuclearSignalDatasetCreator(options).createShellConsensusDataset();
+//        } catch (ChartDatasetCreationException e) {
+//            stack("Error making shell consensus dataset", e);
+//            return makeErrorChart();
+//        }
+//
+//        JFreeChart chart = createBaseXYChart();
+//        XYPlot plot = chart.getXYPlot();
+//        plot.setDataset(shellDataset);
+//
+//        int seriesCount = plot.getSeriesCount();
+//        for (int i = 0; i < seriesCount; i++) {
+//            plot.getRenderer().setSeriesVisibleInLegend(i, false);
+//            plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+//            plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+//        }
+//        applyAxisOptions(chart);
+//        return chart;
+//
+//    }
 
     /**
      * Create a nucleus outline chart with nuclear signals drawn as transparent

@@ -81,8 +81,8 @@ public class ShellDistributionTester {
 
 	private double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
 		long[] obs = observed.getAggregateCounts(agg, norm);
-		double[] other = expected.getProportions(agg, norm);
-		double[] exp = getExpected(agg, norm, other, observed.getNumberOfSignals(agg));
+		double[] other = expected.getProportions(agg, norm);	
+		double[] exp   = getExpected(agg, norm, other, observed.getNumberOfSignals(agg));
 
 		for(double d : exp){
 			if(d<=0) // we can't do a chi square test if one of the values is zero
@@ -93,14 +93,19 @@ public class ShellDistributionTester {
 		return test.chiSquareTest(exp, obs);
 	}
         
+
     /**
-     * Get the expected values for the chi-sqare test     * 
-     * @return the expected values
+     * Get the expected values for the chi-sqare test    
+     * @param agg the aggregation
+     * @param norm the normalisation
+     * @param other the other shell proportions
+     * @param nObjects the number of objects to be tested 
+     * @return
      */
-    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm, double[] other, int nCells) {
+    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm, double[] other, int nObjects) {
         double[] exp = new double[other.length];
         for (int i=0; i<other.length; i++) {
-        	exp[i] = other[i] * nCells;
+        	exp[i] = other[i] * nObjects;
         }
         return exp;
     }

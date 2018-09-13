@@ -129,7 +129,6 @@ public class ShellDetector extends Detector {
      * @return
      */
     public int findShell(@NonNull IPoint p) {
-
         int shell = -1;
         for (Shell r : shells) {
             if (r.contains(p.getXAsInt(), p.getYAsInt())) {
@@ -138,13 +137,6 @@ public class ShellDetector extends Detector {
         }
         return shell;
     }
-
-    /*
-     * 
-     * METHODS FOR COUNTING THE NUMBER OF PIXELS WITHIN A SHELL, REGARDLESS OF
-     * INTENSITY
-     * 
-     */
 
     /**
      * Find the number of pixels of the component within each shell
@@ -158,7 +150,7 @@ public class ShellDetector extends Detector {
             Shell shell = shells.get(i);
             counts[i] = shell.getPixelCount(component);
         }
-        return correctNestedIntensities(counts);
+        return correctNestedValues(counts);
     }
     
     /**
@@ -172,7 +164,7 @@ public class ShellDetector extends Detector {
             Shell shell = shells.get(i);
             result[i] = shell.getPixelCount();
         }
-        return correctNestedIntensities(result);
+        return correctNestedValues(result);
     }
     
     /**
@@ -193,8 +185,7 @@ public class ShellDetector extends Detector {
             fine("Error loading image", e);
             return makeZeroArray();
         }
-        result = correctNestedIntensities(result);
-//        System.out.println(Arrays.toString(result));
+        result = correctNestedValues(result);
         return result;
     }
 
@@ -212,7 +203,7 @@ public class ShellDetector extends Detector {
             Shell shell = shells.get(i);
             result[i] = shell.getPixelIntensity(st, channel);
         }
-        return correctNestedIntensities(result);
+        return correctNestedValues(result);
     }
     
     /*
@@ -226,7 +217,7 @@ public class ShellDetector extends Detector {
      * @param array
      * @return
      */
-    private long[] correctNestedIntensities(long[] array) {
+    private long[] correctNestedValues(long[] array) {
 
         if (array.length == 0)
             throw new IllegalArgumentException("Array length is zero");
@@ -449,22 +440,6 @@ public class ShellDetector extends Detector {
             return result;
         }
         
-        private void drawMasks(ImageProcessor ip, Shape mask){
-            ip.setValue(128);
-            Rectangle bounds = mask.getBounds();
-            ip.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-            ip.draw(shellRoi);
-
-        }
-                        
-        private void showImage(String title, ImageProcessor ip) throws InterruptedException {
-            ImagePlus img = new ImagePlus(title, ip);
-            img.show();
-            while(img.isVisible()) {
-                Thread.sleep(1000);
-            }
-        }
-
         /**
          * Get the position of the shell as described in the CellularComponent
          * interface

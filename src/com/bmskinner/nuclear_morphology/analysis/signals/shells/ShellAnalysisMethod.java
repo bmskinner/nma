@@ -121,6 +121,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             // Assign the options to each signal group
             dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
         }
+    	
+    	// Ensure a random distribution exists
+    	if(!collection.getSignalManager().getSignalGroupIDs().contains(IShellResult.RANDOM_SIGNAL_ID))
+    		counters.put(IShellResult.RANDOM_SIGNAL_ID, new KeyedShellResult(options.getShellNumber(), options.getErosionMethod()));
     }
     
     private synchronized void createResults() {
@@ -142,24 +146,24 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     private synchronized void addRandomSignal() {
 
         // Create a random sample distribution
-        if (collection.hasConsensus()) {
+//        if (collection.hasConsensus()) {
             ISignalGroup random = new SignalGroup("Random distribution");
             random.setGroupColour(Color.LIGHT_GRAY);
 
             collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
 
             // Calculate random positions of pixels
-            RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
+//            RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
 
-            long[] c = sr.getCounts();
+//            long[] c = sr.getCounts();
             
-			RandomShellResult randomResult = new RandomShellResult( options.getShellNumber(), options.getErosionMethod(), c);
+//			RandomShellResult randomResult = new RandomShellResult( options.getShellNumber(), options.getErosionMethod(), c);
 			
 			collection.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
-			        .setShellResult(randomResult);
-        } else {
-            warn("Cannot create simulated dataset, no consensus");
-        }
+			        .setShellResult(counters.get(IShellResult.RANDOM_SIGNAL_ID));
+//        } else {
+//            warn("Cannot create simulated dataset, no consensus");
+//        }
 
     }
 
@@ -179,10 +183,14 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         }
         
         public synchronized void analyse(){
+        	try {
             for(Nucleus n : c.getNuclei()){
                 analyseNucleus(n);
                 fireProgressEvent();
             }
+        	} catch(Exception e) {
+        		stack(e);
+        	}
         }
 
         private synchronized void analyseNucleus(@NonNull final Nucleus n) {
@@ -234,9 +242,14 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
             
+            long[] random = new RandomDistribution(n, shellDetector, RandomDistribution.DEFAULT_ITERATIONS).getCounts();
+            counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.SIGNAL, c, n, random); // random pixels in the nucleus
+            counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // counterstain for random signal
+            
             for (INuclearSignal s : signals) {
                 long[] countsInSignals = shellDetector.findPixelIntensities(s);
                 counter.addShellData(CountType.SIGNAL, c, n, s, countsInSignals); // the pixels within the signal
+                counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.SIGNAL, c, n, s, random); // same random pixels in the nucleus keyed to the signal
             }
         }
     }
@@ -244,38 +257,30 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     private class RandomDistribution {
         
         private long[] counts;
+        private ShellDetector shellDetector;
 
         public static final int DEFAULT_ITERATIONS = 10000;
 
-        public RandomDistribution(@NonNull CellularComponent template, int iterations) {
+        public RandomDistribution(@NonNull CellularComponent template, ShellDetector detector, int iterations) {
                         
             if(iterations<=0)
                 throw new IllegalArgumentException("Must have at least one iteration");
-            
+            shellDetector = detector;
             counts = new long[ options.getShellNumber()];
             for(int i=0; i< options.getShellNumber(); i++){
                 counts[i] = 0;
             }
 
-            List<IPoint> list = new ArrayList<IPoint>();
+            List<IPoint> list = new ArrayList<>();
             for (int i = 0; i < iterations; i++) {
                 list.add(createRandomPoint(template));
             }
-            
 
-            // Find the shell for these points in the template
-            try {
-                ShellDetector detector = new ShellDetector(template,  options.getShellNumber(), options.getErosionMethod(), true);
-                for (IPoint p : list) {
-                    int shell = detector.findShell(p);
-                    if(shell>=0) // -1 for point not found
-                        counts[shell]++;
-                }
-
-            } catch (ShellAnalysisException e) {
-                System.err.println(e.getMessage());
-                e.printStackTrace();
-            }
+			for (IPoint p : list) {
+			    int shell = shellDetector.findShell(p);
+			    if(shell>=0) // -1 for point not found
+			        counts[shell]++;
+			}
 
         }
 
