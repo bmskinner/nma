@@ -20,16 +20,9 @@
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.awt.Shape;
-import java.awt.geom.Path2D;
 import java.util.Arrays;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,23 +30,22 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
+import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
-import ij.IJ;
-import ij.gui.OvalRoi;
-import ij.gui.Roi;
-import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -63,69 +55,26 @@ import ij.process.ImageProcessor;
  */
 public class ShellDetectorTest {
     
-	private static final UUID signalGroup = UUID.fromString("00000000-0000-0000-0000-100000000001");
+	private static final long SEED = 1234;
+
     private ShellDetector sd;
     private Nucleus testNucleus;
     private INuclearSignal testSignal;
 
     @Before
     public void setUp() throws Exception {
-    	testNucleus = createMockNucleus(400);
-    	testSignal = createMockSignal(400, 60);
-    }
-    
-    private Nucleus createMockNucleus(int diameter) throws UnloadableImageException {
-    	Roi r = new OvalRoi(50, 50, diameter, diameter);
-    	ImageProcessor ip = createRoundImage(r, diameter+100);
-    	Nucleus n = mock(Nucleus.class);
-    	when(n.getID()).thenReturn(signalGroup);
-    	when(n.toRoi()).thenReturn(r);
-    	when(n.toPolygon()).thenReturn(r.getFloatPolygon());    
-    	when(n.toOriginalPolygon()).thenReturn(r.getFloatPolygon());    	
-    	when(n.toShape()).thenReturn(createShape(r));
-    	when(n.toOriginalShape()).thenReturn(createShape(r));
-    	when(n.getBounds()).thenReturn(r.getBounds());
-    	when(n.getImage()).thenReturn(ip);
-    	return n;
-    }
-        
-    /**
-     * Create a signal
-     * @param ndiameter the nucleus diameter
-     * @param sDiamater the signal diameter
-     * @return
-     * @throws UnloadableImageException
-     */
-    private INuclearSignal createMockSignal(int nDiameter, int sDiameter) throws UnloadableImageException {
     	
-    	INuclearSignal s = mock(INuclearSignal.class);
-    	Roi signalRoi = new OvalRoi(nDiameter/3-20, nDiameter/3, sDiameter, sDiameter);
-    	ImageProcessor ip = createRoundImage(signalRoi, nDiameter+100);
-    	when(s.getID()).thenReturn(signalGroup);
-    	when(s.toRoi()).thenReturn(signalRoi);
-    	when(s.toShape()).thenReturn(createShape(signalRoi));
-    	when(s.toOriginalShape()).thenReturn(createShape(signalRoi));
-    	when(s.getImage()).thenReturn(ip);
-    	return s;
-    }
-    
-    private Shape createShape(Roi r) {
-    	float[] xpoints = r.getFloatPolygon().xpoints;
-    	float[] ypoints = r.getFloatPolygon().ypoints;
-    	Path2D.Double path = new Path2D.Double();
-    	path.moveTo(xpoints[0], ypoints[0]);
-    	for(int i=0; i<r.getFloatPolygon().npoints; i++) {
-    		path.lineTo(xpoints[i], ypoints[i]);
-    	}
-    	path.closePath();
-    	return path;
-    }
-    
-    private ImageProcessor createRoundImage(Roi r, int diameter) {
-    	ImageProcessor ip = new ByteProcessor(diameter, diameter);
-    	ip.setColor(255);
-    	ip.fill(r);
-    	return ip;
+    	IAnalysisDataset d = new TestDatasetBuilder(SEED).cellCount(1)
+        		.xBase(50).yBase(50)
+        		.baseWidth(200).baseHeight(200)
+        		.ofType(NucleusType.ROUND)
+        		.withNucleusShape(TestComponentShape.SQUARE)
+        		.addSignalsInChannel(0)
+        		.build();
+
+    	testNucleus = d.getCollection().streamCells().findFirst().get().getNucleus();
+    	testSignal  = testNucleus.getSignalCollection().getSignals(TestDatasetBuilder.RED_SIGNAL_GROUP).get(0);
+    	
     }
     
     /**
@@ -137,61 +86,44 @@ public class ShellDetectorTest {
      */
     private ImageProcessor drawShells(Imageable template, ShellDetector sd) throws UnloadableImageException{
     	ImageProcessor ip = template.getImage();
-    	ip.setColor(128);
+    	
     	ip.setLineWidth(2);
-    	for(Shell s : sd.getShells()) {
+    	List<Shell> shells = sd.getShells();
+    	for(int i=0; i<shells.size(); i++) {
+    		Shell s = shells.get(i);
+    		ip.setColor(ColourSelecter.getColor(i));
     		ip.draw(s.toRoi());
     	}
     	return ip;
     }
-    
+        
     @Test
-    public void testGetShellsByRadius() throws ComponentCreationException, ShellAnalysisException, ImageImportException, UnloadableImageException, InterruptedException {
+    public void testGetShellsByRadius() throws Exception {
     	testGetShells(ShrinkType.RADIUS);
     }
     
     @Test
-    public void testGetShellsByArea() throws ComponentCreationException, ShellAnalysisException, ImageImportException, UnloadableImageException, InterruptedException {
+    public void testGetShellsByArea() throws Exception {
     	testGetShells(ShrinkType.AREA);
     }
     
-    private void testGetShells(ShrinkType type) throws ComponentCreationException, ShellAnalysisException, ImageImportException, UnloadableImageException, InterruptedException {
+    private void testGetShells(ShrinkType type) throws Exception {
     	sd = new ShellDetector(testNucleus, type, false);
     	ImageProcessor ip = drawShells(testNucleus, sd);
-//    	showImage(type.toString(), ip);
+        ImageViewer.showImage(ip, "Nucleus shells");
     }
     
     @Test
-    public void testGetShellsInDecreasingSizeByRadius() throws UnloadableImageException, ShellAnalysisException, InterruptedException {
-    	testGetShellsOfDecreasingSize(ShrinkType.RADIUS);
-    }
-    
-    @Test
-    public void testGetShellsInDecreasingSizeByArea() throws UnloadableImageException, ShellAnalysisException, InterruptedException {
-    	testGetShellsOfDecreasingSize(ShrinkType.AREA);
-    }
-    
-    public void testGetShellsOfDecreasingSize(ShrinkType type) throws UnloadableImageException, ShellAnalysisException, InterruptedException {
-    	for(int i=400; i>40; i-=10) {
-    		Nucleus n = createMockNucleus(i);
-    		sd = new ShellDetector(n, type, false);
-    		ImageProcessor ip = drawShells(n, sd);
-//        	showImage(i+": "+type.toString(), ip);
-    	}
-    	
-    }
-
-    @Test
-    public void testFindPixelCountPerShellCellularComponentByArea() throws ComponentCreationException, ShellAnalysisException {
+    public void testFindPixelCountPerShellCellularComponentByArea() throws Exception {
     	testFindPixelCountPerShellCellularComponent(ShrinkType.AREA);
     }
     
     @Test
-    public void testFindPixelCountPerShellCellularComponentByRadius() throws ComponentCreationException, ShellAnalysisException {
+    public void testFindPixelCountPerShellCellularComponentByRadius() throws Exception {
     	testFindPixelCountPerShellCellularComponent(ShrinkType.RADIUS);
     }
     
-    private void testFindPixelCountPerShellCellularComponent(ShrinkType type) throws ComponentCreationException, ShellAnalysisException {
+    private void testFindPixelCountPerShellCellularComponent(ShrinkType type) throws Exception {
     	sd = new ShellDetector(testNucleus, type, false);
         long[] obs = sd.findPixelCounts(testNucleus);
         long[] exp = sd.findPixelCounts();
@@ -199,7 +131,7 @@ public class ShellDetectorTest {
     }
     
     @Test
-    public void testFindPixelCountPerShellByArea() throws ComponentCreationException, ShellAnalysisException {
+    public void testFindPixelCountPerShellByArea() throws Exception {
 
         sd = new ShellDetector(testNucleus, ShrinkType.AREA, true);
         long[] obs = sd.findPixelCounts();
@@ -237,7 +169,7 @@ public class ShellDetectorTest {
     }
     
     @Test
-    public void testFindPixelIntensityPerShellCellularComponentWorksForSignals() throws ComponentCreationException, ShellAnalysisException, UnloadableImageException, InterruptedException {
+    public void testFindPixelIntensityPerShellCellularComponentWorksForSignals() throws Exception {
     	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
         long[] obs = sd.findPixelIntensities(testSignal);
         ImageProcessor ip = drawShells(testSignal, sd);
@@ -255,80 +187,7 @@ public class ShellDetectorTest {
         IAnalysisMethod s = new DatasetExportMethod(dataset, dataset.getSavePath());
         s.call();
     }
-        
-    private class ShellRangeValidator {
-        
-        public ShellRangeValidator(){
-            
-        }
-        
-        public void testValueRangesForRoundNucleusShellDetection(ShrinkType type) throws Exception {
-            int maxShells = 10;
-            int minShells = 2;
-            int maxDiam = 300;
-            int minDiam = 10;
-            ICell c = mock(ICell.class);
-            when(c.getId()).thenReturn(signalGroup);
-            
-            for(int shell=minShells; shell<=maxShells; shell++) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Shells\tDiam\tArea\tDiff\t");
-                String s = IntStream.range(0, shell).mapToObj(i-> "Shell_"+i).collect(Collectors.joining("\t"));
-                sb.append(s+System.getProperty("line.separator"));
-                for(int diam=minDiam; diam<=maxDiam; diam+=2) {  
-                    
-                    Nucleus n = createMockNucleus(diam);
-                    sd = new ShellDetector(n, shell, type, false);
-                    long[] counts = sd.findPixelCounts(n);
-                    long sum = LongStream.of(counts).sum();
-                    sb.append(shell+"\t"+diam+"\t"+sum+"\t"+formatArray(counts, sum)+System.getProperty("line.separator"));
-                    System.out.println(shell+"\t"+diam+"\t"+sum+"\t"+formatArray(counts, sum));
-                }
-                IJ.append(sb.toString(), "test/"+type+"_"+shell+"_shellReport.txt");
-            }
-            
-        }
-        
-        private String formatArray(long[] obs, long total) {
-            StringBuilder sb = new StringBuilder();
-            
-            double[] obsRatios = getRatios(obs, total);
-
-            double diff = getDifferencesInRatioFromIdeal(obsRatios);   
-
-            sb.append(diff+"\t"+LongStream.of(obs).mapToObj(l->String.valueOf(l)).collect(Collectors.joining("\t")));
-            return sb.toString();
-        }
-        
-        private double getDifferencesInRatioFromIdeal(double[] obs){
-            double sumDiffs = 0;
-            double[] diffs = new double[obs.length];
-            double fraction = 1d/obs.length;
-            for(int i=0; i<obs.length; i++) {
-                diffs[i] = Math.abs( (fraction*i)-obs[i]);
-                sumDiffs += diffs[i];
-            }
-            return sumDiffs;
-        }
-        
-        private double[] getRatios(long[] counts, long sum){
-            double[] ratios = new double[counts.length];
-            for(int i=0; i<counts.length; i++) {
-                ratios[i] = (double)counts[i]/sum;
-
-            }
-            return ratios;
-        }
-        
-        private double[] getExpected(int nShells, long sum){
-            double[] exp = new double[nShells];
-            double expVal = (double) (1d/nShells) *sum;
-            Arrays.fill(exp, expVal);
-            return exp;
-        }
-
-    }
-    
+          
     
     private boolean testEquals(long[] exp, long[ ]obs){
         assertEquals(exp.length, obs.length);

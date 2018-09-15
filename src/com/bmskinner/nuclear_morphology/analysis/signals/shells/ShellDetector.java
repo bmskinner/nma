@@ -39,6 +39,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
+import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -123,24 +124,25 @@ public class ShellDetector extends Detector {
 
     /**
      * Find the shell in the template object that the given point lies within,
-     * or -1 if the point is not found
+     * or -1 if the point is not within the object
      * 
-     * @param p
+     * @param p the point to test
      * @return
      */
     public int findShell(@NonNull IPoint p) {
-        int shell = -1;
-        for (Shell r : shells) {
+    	if(!shells.get(0).contains(p)) // outermost
+    		return -1;
+        int shell = 0;
+        for(int i=1; i<shells.size();i++) {
+        	Shell r = shells.get(i);
             if (r.contains(p))
-                shell++;
-            else
-            	log(p.toString()+" not in shell "+r.toString());
+                shell=i;
         }
         return shell;
     }
 
     /**
-     * Find the number of pixels of the component within each shell
+     * Find the number of pixels of the given component within each shell
      * 
      * @param signal
      * @return
@@ -169,7 +171,8 @@ public class ShellDetector extends Detector {
     }
     
     /**
-     * Find the total pixel intensity per shell contained within the component
+     * Find the total pixel intensity per shell contained within the component.
+     * Total intensity is the sum of individual pixel intensities (0-255).
      * 
      * @param signal the component to measure.
      * @return
@@ -263,12 +266,10 @@ public class ShellDetector extends Detector {
     }
 
     /**
-     * Divide the object into shells of equal area. Since this works by eroding
-     * the component shape by 1 pixel, the areas created will not be perfectly
-     * equal, but will be at the closest area above or below the target.
+     * Divide the object into shells using the erosion method defined
+     * in the constructor.
      * 
      * @param c the component to divide
-     * @param shellCount the number of shells to create
      */
     private void createShells(@NonNull final CellularComponent c) {
 
@@ -277,16 +278,24 @@ public class ShellDetector extends Detector {
         double[] areas = new double[nShells];
         double[] ratios = new double[nShells];
         
+        // The first shell in the object is the object itself
+        areas[0] = Stats.area(objectRoi);
+        ratios[0] = 1;
+        shells.add(new Shell((Roi)objectRoi.clone(), c));
+        
+        
+//        log("Starting roi: "+objectRoi.getFloatBounds().toString());
+        // Remaining shells are shrunk from this
         RoiShrinker re = new RoiShrinker((Roi)objectRoi.clone());
 
         // start with the next shell in nucleus, and shrink shell by shell
-        for (int i=0; i<nShells; i++) {
-            Roi shrinkingRoi = re.shrink(type, i);
+        for (int i=1; i<nShells; i++) {
+            Roi erodedRoi = re.shrink(type, i);
 
             // Make the shell
-            areas[i] = Stats.area(shrinkingRoi);
+            areas[i] = Stats.area(erodedRoi);
             ratios[i] = areas[i]/areas[0];
-            shells.add(new Shell(shrinkingRoi, c));
+            shells.add(new Shell(erodedRoi, c));
         }
     }
 
@@ -593,11 +602,14 @@ public class ShellDetector extends Detector {
     private class RoiShrinker {
         
         private final @NonNull Roi roi;
-        private final @NonNull Rectangle bounds;
+        private final int x, y, w, h;
         
         public RoiShrinker(@NonNull Roi r){
             roi = r;
-            bounds = roi.getBounds();
+            x = roi.getBounds().x;
+            y = roi.getBounds().y;
+            w = roi.getBounds().width;
+            h = roi.getBounds().height;
         }
 
         /**
@@ -638,58 +650,62 @@ public class ShellDetector extends Detector {
             Rectangle bounds2 = roi2.getBounds();
             if (bounds2.width<=0 && bounds2.height<=0)
                 return roi;
-            roi2.setLocation(bounds.x+bounds2.x-1, bounds.y+bounds2.y-1);           
+            roi2.setLocation(x+bounds2.x-1, y+bounds2.y-1);           
             
             return roi2;
         }
         
         
+        /**
+         * Erode the roi to a size corresponding to the desired shell
+         * by area
+         * @param shell the shell to erode to
+         * @return
+         */
         private Roi shrinkByArea(int shell) {
 
-            double ratio = (double) (nShells-shell)  / (double) nShells;
+            double desiredRatio = (double) (nShells-shell)  / (double) nShells;
+            
+            ThresholdToSelection converter = new ThresholdToSelection();
             
             ImageProcessor ip = createFromRoi();
-            // scale the image such that the EDM can be calculated
-//            if(isScale)
-//                ip = ip.resize(ip.getWidth()*DEFAULT_SCALE_FACTOR);
-            boolean bb = Prefs.blackBackground;
-            Prefs.blackBackground = true;
+            new EDM().toEDM(ip); // zero at edge, up to 255 at centre
 
-            final ImageProcessor ip1 = ip.duplicate();
+            ip.setThreshold(1, 255, ImageProcessor.NO_LUT_UPDATE);
+            Roi startingRoi = converter.convert(ip);
+            double scaledArea = Stats.area(startingRoi);
 
-            new EDM().toEDM(ip1); // zero at edge, up to 255 at centre
-            
             int threshold = 1;
-            @NonNull Roi roi2 = (Roi) roi.clone();
-            double area = Stats.area(roi);
-            double scaledArea = area;
-            double desiredArea = scaledArea*ratio;
+            @NonNull Roi shellRoi = (Roi) startingRoi.clone();
+
+            double desiredArea = scaledArea*desiredRatio;
 
             while(scaledArea>desiredArea || threshold==1) { // ensure we go through at least once
-                final ImageProcessor newIp = ip1.duplicate();
-                newIp.setThreshold(threshold, 255, ImageProcessor.NO_LUT_UPDATE);
-                roi2 = (new ThresholdToSelection()).convert(newIp);
-                scaledArea = Stats.area(roi2);
+                ip.setThreshold(threshold, 255, ImageProcessor.NO_LUT_UPDATE);
+                shellRoi = converter.convert(ip);
+                scaledArea = Stats.area(shellRoi);
+//                log("Shell "+shell+" Threshold "+threshold+": Area "+scaledArea+" Desired: "+desiredArea+"  Ratio: "+desiredRatio);
                 threshold++;
             }
 
-            Prefs.blackBackground = bb;
-            
-            Rectangle bounds2 = roi2.getBounds();
+            Rectangle bounds2 = shellRoi.getBounds();
             if (bounds2.width<=0 && bounds2.height<=0)
                 return roi;
-            roi2.setLocation(bounds.x+bounds2.x-1, bounds.y+bounds2.y-1);           
-            return roi2;
+            shellRoi.setLocation(x+bounds2.x, y+bounds2.y);   
+//            log("Next shell: "+shellRoi.getFloatBounds().toString());
+            return shellRoi;
         }
 
+        /**
+         * The EDM requires a new image with only the roi of interest visible
+         * @return
+         */
         private ImageProcessor createFromRoi() {
-            int width = bounds.width + 2;
-            int height = bounds.height + 2;
-            final ImageProcessor ip = new ByteProcessor(width, height);
+            final ImageProcessor ip = new ByteProcessor(w+2, h+2);
             roi.setLocation(1, 1);
             ip.setColor(255);
             ip.fill(roi);
-            roi.setLocation(bounds.x, bounds.y);
+            roi.setLocation(x, y);
             return ip;
         }
         

@@ -236,20 +236,16 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                 return;
             
             ImageProcessor signalProcessor = n.getSignalCollection().getImage(signalGroup);
-//            ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
             KeyedShellResult counter = counters.get(signalGroup);
 
-//            int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
-
             long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalProcessor);
-//            long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalStack, signalChannel);
             long[] totalCounterIntensity = shellDetector.findPixelIntensities(n);
 
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
             
             long[] random = new RandomDistribution(n, shellDetector, RandomDistribution.DEFAULT_ITERATIONS).getCounts();
-            log("Adding random counts "+Arrays.toString(random));
+
             counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.SIGNAL, c, n, random); // random pixels in the nucleus
             counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // counterstain for random signal
             
@@ -283,17 +279,22 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             List<IPoint> list = new ArrayList<>();
             for (int i = 0; i < iterations; i++) {
-                list.add(createRandomPoint(template));
+            	IPoint p = createRandomPoint(template);
+            	while(!template.containsOriginalPoint(p))
+            		p = createRandomPoint(template);            	 
+                list.add(p);
             }
 
+            int unMappedPoints = 0;
 			for (IPoint p : list) {
 			    int shell = shellDetector.findShell(p);
 			    if(shell>=0) // -1 for point not found
 			        counts[shell]++;
 			    else {
-			    	log("Point "+p.toString()+" is not in a shell of "+template.toString());
+			    	unMappedPoints++;
 			    }
 			}
+			finer("Random signal: "+unMappedPoints+" points were not in a shell");
 
         }
 
@@ -309,20 +310,19 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
          */
         private IPoint createRandomPoint(@NonNull CellularComponent template) {
 
-            Rectangle2D r = template.getBounds();
+            IPoint base = template.getOriginalBase();
+            double w = template.getBounds().getWidth();
+            double h = template.getBounds().getHeight();
 
             // Make a pseudo-random position in the rectangle
             double rx = rng.nextDouble();
             double ry = rng.nextDouble();
             
-            double xrange = r.getWidth()*rx;
-            double yrange = r.getHeight()*ry;
+            double xrange = w*rx;
+            double yrange = h*ry;
 
-            IPoint p = IPoint.makeNew(r.getX()+xrange, r.getY()+yrange);
-
-            if (template.containsPoint(p))
-                return p;
-			return createRandomPoint(template);
+            IPoint p = IPoint.makeNew(base.getX()+xrange, base.getY()+yrange);
+            return p;
         }
     }
     

@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.components;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.UUID;
 
@@ -27,6 +28,7 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -102,6 +104,11 @@ public class TestComponentFactory {
 					 return this.getSignals(signalGroup).get(0).getImage();
 				 }
 			};
+			
+			@Override
+			public ImageProcessor getGreyscaleImage() {
+				return getImage();
+			}
 
 			@Override
 			public ImageProcessor getImage() {
@@ -111,8 +118,8 @@ public class TestComponentFactory {
 				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
 				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
 				
-				ImageProcessor ip = new ByteProcessor(xmax, ymax);
-		    	ip.setColor(255);
+				ImageProcessor ip = new ColorProcessor(xmax, ymax);
+		    	ip.setColor(Color.WHITE);
 		    	ip.fill(finalRoi);
 		    	return ip;
 			}
@@ -166,6 +173,12 @@ public class TestComponentFactory {
 		File f = new File("empty file");
 		
 		INuclearSignal s = new DefaultNuclearSignal(roi, com, f, channel, position) {
+			
+			@Override
+			public ImageProcessor getGreyscaleImage() {
+				return getImage();
+			}
+			
 			@Override
 			public ImageProcessor getImage() {
 				Roi finalRoi = toOriginalRoi();
@@ -174,8 +187,8 @@ public class TestComponentFactory {
 				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
 				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
 				
-				ImageProcessor ip = new ByteProcessor(xmax, ymax);
-		    	ip.setColor(255);
+				ImageProcessor ip = new ColorProcessor(xmax, ymax);
+		    	ip.setColor(Color.WHITE);
 		    	ip.fill(finalRoi);
 		    	return ip;
 			}

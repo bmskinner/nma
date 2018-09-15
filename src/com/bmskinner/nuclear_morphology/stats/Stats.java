@@ -426,15 +426,14 @@ public class Stats implements Loggable {
         return count;
 
     }
-
+    
     private static double calculatePolygonArea(@NonNull Roi r) {
 
-        FloatPolygon f = r.getFloatPolygon();
+        FloatPolygon f = r.getInterpolatedPolygon();
         double sum = 0;
         for (int i = 0; i < f.npoints - 1; i++) {
             sum = sum + f.xpoints[i] * f.ypoints[i + 1] - f.ypoints[i] * f.xpoints[i + 1];
         }
-
         return Math.abs(sum / 2);
     }
 
