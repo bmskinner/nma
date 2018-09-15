@@ -411,7 +411,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         	newAnalysis.setEnabled(true);
             if(activeDataset().getCollection().getSignalManager().hasShellResult())
             	setEnabled(true);
-            showRandomCheckbox.setEnabled(activeDataset().getCollection().hasConsensus());
         }
 
     }
@@ -434,7 +433,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         chartPanel.setChart(AbstractChartFactory.createLoadingChart());
-//        consensusPanel.setChart(AbstractChartFactory.createLoadingChart());
         overallTable.setModel(AbstractTableCreator.createLoadingTable());
         pairwiseTable.setModel(AbstractTableCreator.createLoadingTable());
 

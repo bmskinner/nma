@@ -80,7 +80,7 @@ public class VirtualCellCollection implements ICellCollection {
 
     private final IAnalysisDataset parent;
 
-    private final Set<UUID> cellIDs = new HashSet<UUID>(0);
+    private final Set<UUID> cellIDs = new HashSet<>(0);
 
     private final UUID uuid; // the collection id
 
@@ -93,7 +93,7 @@ public class VirtualCellCollection implements ICellCollection {
 
     // We need to store signal groups separately to allow shell results etc to
     // be kept
-    private volatile Map<UUID, IShellResult> shellResults = new HashMap<UUID, IShellResult>(0);
+    private volatile Map<UUID, IShellResult> shellResults = new HashMap<>(0);
 
     /*
      * TRANSIENT FIELDS
@@ -101,7 +101,7 @@ public class VirtualCellCollection implements ICellCollection {
 
     private transient boolean isRefolding = false;
 
-    protected volatile transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
+    protected volatile transient Map<UUID, Integer> vennCache = new HashMap<>();
 
     private transient ProfileManager profileManager = new ProfileManager(this);
     private transient SignalManager  signalManager  = new SignalManager(this); // TODO:

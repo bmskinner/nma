@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
@@ -94,6 +95,19 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	 
         log(String.format("Performing %s shell analysis with %s shells on dataset %s...", 
         		options.getErosionMethod(), options.getShellNumber(), collection.getName()));
+        
+        
+        // If this is a child, and the parent already has the data, just copy it
+        if(collection instanceof VirtualCellCollection) {
+        	ICellCollection parent = ((VirtualCellCollection)collection).getParent().getCollection();
+        	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
+        		if(parent.getSignalGroup(signalGroupId).get().hasShellResult())
+					copyShellResults(signalGroupId, parent, collection);	
+        	}
+        	if(parent.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().hasShellResult())
+        		copyShellResults(IShellResult.RANDOM_SIGNAL_ID, parent, collection);	        	
+        	return;
+        }
 
         try {
         	createShellCounters();
@@ -110,7 +124,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             stack("Error in shell analysis", e);
             return;
         }
-        return;
     }
     
     /**
@@ -140,18 +153,73 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             if (collection.getSignalManager().hasSignals(group)) {
                 KeyedShellResult channelCounter = counters.get(group);
                 collection.getSignalGroup(group).get().setShellResult(channelCounter);
+                copyShellResultsToChildDatasets(group);
             }
         }
 
+
         if (addRandom)
             addRandomSignal();
+    }
+    
+    /**
+     * Copy shell values from the source to the destination collection. If is assumed
+     * that the destination is a child of the source
+     * @param group
+     * @param src
+     * @param dest
+     */
+    private void copyShellResults(@NonNull UUID group, @NonNull ICellCollection src, @NonNull ICellCollection dest) {
+    	IShellResult channelCounter = src.getSignalGroup(group).get().getShellResult().get();
+    	if (dest.getSignalManager().hasSignals(group) || IShellResult.RANDOM_SIGNAL_ID.equals(group)) {
+    		KeyedShellResult childCounter = new KeyedShellResult(options.getShellNumber(), options.getErosionMethod());
+    		for(ICell c : dest.getCells()) {
+    			for(Nucleus n : c.getNuclei()) {
+
+    				long[] counterstain = channelCounter.getPixelValues(CountType.COUNTERSTAIN, c, n, null);
+    				long[] signals      = channelCounter.getPixelValues(CountType.SIGNAL, c, n, null);
+
+    				childCounter.addShellData(CountType.COUNTERSTAIN, c, n, counterstain);
+    				childCounter.addShellData(CountType.SIGNAL, c, n, signals);
+
+    				for(INuclearSignal s : n.getSignalCollection().getSignals(group)) {
+    					long[] signalValue = channelCounter.getPixelValues(CountType.SIGNAL, c, n, s);
+    					childCounter.addShellData(CountType.SIGNAL, c, n, s, signalValue);
+    				}
+    				
+    				// We can't select signals by group in the random set
+    				if(IShellResult.RANDOM_SIGNAL_ID.equals(group)) {
+    					n.getSignalCollection().getSignals().stream().flatMap(l->l.stream()).forEach(s->{
+    						long[] signalValue = channelCounter.getPixelValues(CountType.SIGNAL, c, n, s);
+        					childCounter.addShellData(CountType.SIGNAL, c, n, s, signalValue);
+    					});
+    				}
+    			}
+    		}
+
+    		dest.getSignalGroup(group).get().setShellResult(childCounter);
+    	}
+    }
+    
+    
+    /**
+     * Duplicate cell values to new shell results for child collections 
+     * @param group
+     */
+    private void copyShellResultsToChildDatasets(UUID group) {
+        for(IAnalysisDataset childDataset : dataset.getAllChildDatasets()) {
+        	ICellCollection child = childDataset.getCollection();
+        	copyShellResults(group, collection, child);
+        }
     }
 
     private synchronized void addRandomSignal() {
     	ISignalGroup random = new SignalGroup("Random distribution");
     	random.setGroupColour(Color.LIGHT_GRAY);
-    	random.setShellResult(counters.get(IShellResult.RANDOM_SIGNAL_ID));
+    	KeyedShellResult channelCounter = counters.get(IShellResult.RANDOM_SIGNAL_ID);
+    	random.setShellResult(channelCounter);
     	collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
+    	copyShellResultsToChildDatasets(IShellResult.RANDOM_SIGNAL_ID);
     }
 
     
