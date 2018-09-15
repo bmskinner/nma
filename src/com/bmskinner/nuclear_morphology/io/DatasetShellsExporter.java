@@ -128,6 +128,38 @@ public class DatasetShellsExporter extends StatsExporter implements Loggable {
 
                     if(!n.getSignalCollection().hasSignal(signalGroupId))
                         continue;
+                    
+                    // Append random signal
+                    outLine.append(d.getName() + TAB)
+                    .append(cell.getId() + TAB)
+                    .append(n.getID() + TAB)
+                    .append(CellularComponent.NUCLEUS + TAB)
+                    .append(n.getSourceFolder() + TAB)
+                    .append(n.getSourceFileName() + TAB)
+                    .append(CellularComponent.NUCLEUS + TAB)
+                    .append(IShellResult.RANDOM_SIGNAL_ID.toString() + TAB)
+                    .append("Random" + TAB)
+                    .append("Null" + TAB)
+                    .append("Null" + TAB)
+                    .append("Null"+TAB)
+                    .append(Aggregation.BY_NUCLEUS + TAB);
+
+                    long[] randomByNucleus =  d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().getShellResult().get().getPixelValues(CountType.SIGNAL, cell, n, null);
+                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
+
+                    for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                        outLine.append(randomByNucleus[i]+TAB);
+                    }
+                    for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                        outLine.append(counterstain[i]+TAB);
+                    }
+
+                    if (outLine.length() > 0)
+                        outLine.setLength(outLine.length() - 1);
+                    outLine.append(NEWLINE);
+                    
+                    
+                    // Append real signals
 
                     outLine.append(d.getName() + TAB)
                     .append(cell.getId() + TAB)
@@ -144,7 +176,7 @@ public class DatasetShellsExporter extends StatsExporter implements Loggable {
                     .append(Aggregation.BY_NUCLEUS + TAB);
 
                     long[] signalByNucleus = shellResult.getPixelValues(CountType.SIGNAL, cell, n, null);
-                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
+//                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
 
                     for(int i=0; i<shellResult.getNumberOfShells(); i++){
                         outLine.append(signalByNucleus[i]+TAB);
