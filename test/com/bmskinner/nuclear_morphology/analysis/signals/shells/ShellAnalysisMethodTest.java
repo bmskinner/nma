@@ -19,29 +19,40 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
+import java.io.File;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder.TestComponentShape;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
-import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 
 public class ShellAnalysisMethodTest {
     
-    private ShellAnalysisMethod m;
+	private static final long SEED = 1234;
     private IAnalysisDataset d;
     
     @Before
     public void setUp() throws Exception{
-        d = SampleDatasetReader.openTestRodentDataset();  
+        d = new TestDatasetBuilder(SEED).cellCount(10)
+        		.withMaxSizeVariation(20)
+        		.maxRotation(90)
+        		.xBase(50).yBase(50)
+        		.baseWidth(50).baseHeight(50)
+        		.ofType(NucleusType.ROUND)
+        		.withNucleusShape(TestComponentShape.SQUARE)
+        		.addSignalsInChannel(0)
+        		.addSignalsInChannel(1)
+        		.build();
     }
 
     @Test
-    public void testAreaMethodOnRodentDatasetWithNoSignals() throws Exception {
-    	IShellOptions o = new DefaultShellOptions();
-        m = new ShellAnalysisMethod(d, o);
-        m.call();
+    public void test() throws Exception {
+    	new ShellAnalysisMethod(d, new DefaultShellOptions()).call();
     }
 
 }

@@ -4,8 +4,10 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.assertj.swing.util.Arrays;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -13,12 +15,19 @@ import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCre
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.DefaultSignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 /**
  * Construct test components for unit testing
@@ -30,26 +39,6 @@ public class TestComponentFactory {
 	
 	public static final int DEFAULT_X_BASE = 10;
 	public static final int DEFAULT_Y_BASE = 10;
-	
-	/**
-	 * Create a cell with a square nucleus based at 10, 10 with the given width
-	 * @param w
-	 * @return
-	 * @throws ComponentCreationException
-	 */
-	public static ICell squareCell(int w) throws ComponentCreationException {
-		return rectangularCell(w, w);
-	}
-	
-	/**
-	 * Create a cell with a rectangular nucleus based at 10, 10 with the given width and height
-	 * @param w
-	 * @return
-	 * @throws ComponentCreationException
-	 */
-	public static ICell rectangularCell(int w, int h) throws ComponentCreationException {
-		return new DefaultCell(rectangularNucleus(w, h));
-	}
 	
 	/**
 	 * Create a cell with a rectangular nucleus
@@ -65,21 +54,7 @@ public class TestComponentFactory {
 	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
 		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation, fixedStartOffset));
 	}
-	
-	/**
-	 * Create a square component based at 10, 10 with the given width
-	 * @param w
-	 * @return
-	 * @throws ComponentCreationException 
-	 */
-	public static Nucleus squareNucleus(int w) throws ComponentCreationException {
-		return rectangularNucleus(w, w);
-	}
-	
-	public static Nucleus rectangularNucleus(int w,int h) throws ComponentCreationException {
-		return rectangularNucleus(w, h, DEFAULT_X_BASE, DEFAULT_Y_BASE, 0, 0);
-	}
-	
+		
 	/**
 	 * Create a rectangular component based at 10, 10 with the given width 
 	 * and height. The border may be drawn from any starting position in the object
@@ -114,16 +89,100 @@ public class TestComponentFactory {
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
 		int[] position = {xBase, yBase, w, h};		
 		File f = new File("empty file");
-		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0);
+		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0) {
+			
+			private static final long serialVersionUID = 1L;
+			private ISignalCollection overrideCollection = new DefaultSignalCollection() {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				    public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
+					 if (this.getSignals(signalGroup).size() == 0)
+				            throw new UnloadableImageException("No signals in group");
+					 return this.getSignals(signalGroup).get(0).getImage();
+				 }
+			};
+
+			@Override
+			public ImageProcessor getImage() {
+				Roi finalRoi = toOriginalRoi();
+				
+				int[] position = getPosition(); 
+				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
+				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
+				
+				ImageProcessor ip = new ByteProcessor(xmax, ymax);
+		    	ip.setColor(255);
+		    	ip.fill(finalRoi);
+		    	return ip;
+			}
+			
+			@Override
+			public ISignalCollection getSignalCollection() {
+				return overrideCollection;
+			}
+			
+		};
 		
 		n.rotate(rotation);
 		
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		n.findPointsAroundBorder();
+		n.findPointsAroundBorder();		
 		return n;
 	}
 	
+	/**
+	 * Create a signal within the bounds of the given component, occupying at most
+	 * the maxPropotion of the component
+	 * @param c the component to create a signal within  
+	 * @param maxProportion the maximum proportion of the component area to fill, from 0-1
+	 * @param channel the signal channel
+	 * @return
+	 */
+	public static INuclearSignal createSignal(CellularComponent c, double maxProportion, int channel) {
+		Roi templateRoi = c.toOriginalRoi();
+		
+		int w = (int) (templateRoi.getFloatWidth()*maxProportion);
+		int h = (int) (templateRoi.getFloatHeight()*maxProportion);
+		
+		int[] xpoints = new int[(w+h)*2];
+		int[] ypoints = new int[(w+h)*2];
+		int xBase = (int) templateRoi.getXBase();
+		int yBase = (int) templateRoi.getYBase();
+		
+		for(int i=0; i<(w+h)*2; i++) {
+			
+			int x = i<=w ? i : i<=w+h ? w : i<=w+h+w ? w+h+w-i: 0;
+			xpoints[i] = x+xBase;
+			
+			int y = i<=w ? 0 : i<=w+h ? i-w : i<=w+h+w ? h : (w+h+w+h-i);
+			ypoints[i] = y+yBase;
+		}
+		
+		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
+		int[] position = {xBase, yBase, w, h};		
+		File f = new File("empty file");
+		
+		INuclearSignal s = new DefaultNuclearSignal(roi, com, f, channel, position) {
+			@Override
+			public ImageProcessor getImage() {
+				Roi finalRoi = toOriginalRoi();
+				
+				int[] position = getPosition(); 
+				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
+				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
+				
+				ImageProcessor ip = new ByteProcessor(xmax, ymax);
+		    	ip.setColor(255);
+		    	ip.fill(finalRoi);
+		    	return ip;
+			}
+		};
+		return s;
+	}
+		
 	/**
 	 * Offset the int array by the given amount with wrapping
 	 * @param array

@@ -1,14 +1,22 @@
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.Random;
+import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 
 /**
  * Simplify the creation of test datasets using a builder pattern
@@ -27,6 +35,9 @@ public class TestDatasetBuilder {
 	public static final int DEFAULT_BORDER_OFFSET = 0;
 	public static final boolean DEFAULT_IS_RANDOM_OFFSET = true;
 	
+	public static final boolean DEFAULT_RED_SIGNALS = false;
+	public static final boolean DEFAULT_GREEN_SIGNALS = false;
+	
 	private IAnalysisDataset d;
 	private NucleusType type = NucleusType.ROUND;
 	private int nCells = 1;
@@ -41,6 +52,12 @@ public class TestDatasetBuilder {
 	private boolean profile = false;
 	private boolean segment = false;
 	private boolean offset  = DEFAULT_IS_RANDOM_OFFSET;
+	
+	private boolean redSignals = DEFAULT_RED_SIGNALS;
+	private boolean greenSignals = DEFAULT_GREEN_SIGNALS;
+	
+	public static final UUID RED_SIGNAL_GROUP = UUID.fromString("99998888-7777-6666-5555-444433332222");
+	public static final UUID GREEN_SIGNAL_GROUP = UUID.fromString("88887777-6666-5555-4444-333322221111");
 	
 	private TestComponentShape nucleusShape = TestComponentShape.SQUARE;
 	
@@ -69,7 +86,7 @@ public class TestDatasetBuilder {
 				
 		switch(nucleusShape) {
 		case SQUARE: 
-		default: d = variableRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
+		default: d = createRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
 		}
 		d.setRoot(true);
 		if(segment || profile)
@@ -144,6 +161,14 @@ public class TestDatasetBuilder {
 		return this;
 	}	
 	
+	public TestDatasetBuilder addSignalsInChannel(int i) {
+		if(i==0)
+			redSignals = true;
+		if(i==1)
+			greenSignals = true;
+		return this;
+	}	
+	
 	/**
 	 * Create a dataset consisting of rectangular nuclei. Each nucleus has a random width and
 	 * size constrained by the variation factor
@@ -159,9 +184,29 @@ public class TestDatasetBuilder {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	private IAnalysisDataset variableRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
+	private IAnalysisDataset createRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
 		
-		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test", type);
+		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test "+type.toString(), type);
+		
+		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(collection.getFolder());
+		o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setMinSize( (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
+		o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setMaxSize( (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
+
+		if(redSignals) {
+			ISignalGroup g = new SignalGroup("Red");
+			g.setGroupColour(Color.red);
+			collection.addSignalGroup(RED_SIGNAL_GROUP, g);
+			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File("empty folder"));
+			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+RED_SIGNAL_GROUP, n);
+		}
+		
+		if(greenSignals) {
+			ISignalGroup g = new SignalGroup("Green");
+			g.setGroupColour(Color.GREEN);
+			collection.addSignalGroup(GREEN_SIGNAL_GROUP, g);
+			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File("empty folder"));
+			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+GREEN_SIGNAL_GROUP, n);
+		}
 
 		for(int i=0; i<nCells; i++) {
 			
@@ -175,12 +220,25 @@ public class TestDatasetBuilder {
 			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
 			
 			ICell cell = TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
-					borderOffset);
-			
-			Nucleus n = cell.getNucleus();
-			
+					borderOffset);			
 			collection.addCell(cell);
+			
+			
+			if(redSignals) {
+				INuclearSignal s = TestComponentFactory.createSignal(cell.getNucleus(), 0.2, 0);
+				cell.getNucleus().getSignalCollection().addSignal(s, RED_SIGNAL_GROUP);
+			}
+			
+			if(greenSignals) {
+				INuclearSignal s = TestComponentFactory.createSignal(cell.getNucleus(), 0.2, 1);
+				cell.getNucleus().getSignalCollection().addSignal(s, GREEN_SIGNAL_GROUP);
+			}
+			
 		}
-		return new DefaultAnalysisDataset(collection);
+		
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
+		d.setAnalysisOptions(o);
+
+		return d;
 	}
 }

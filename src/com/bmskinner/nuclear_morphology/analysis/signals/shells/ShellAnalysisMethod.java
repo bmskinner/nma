@@ -22,9 +22,11 @@ import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -50,8 +52,10 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 /**
  * Detect signal proportions within concentric shells of a nucleus
@@ -210,7 +214,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                         continue;
                     analyseSignalGroup(n, signalGroup);  
                 }
-            } catch (ImageImportException e) {
+            } catch (ImageImportException | UnloadableImageException e) {
 
                 warn("Cannot import image source file");
                 stack("Error importing file", e);
@@ -218,7 +222,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
         }
 
-        private synchronized void analyseSignalGroup(@NonNull final Nucleus n, @NonNull final UUID signalGroup) throws ImageImportException {
+        private synchronized void analyseSignalGroup(@NonNull final Nucleus n, @NonNull final UUID signalGroup) throws ImageImportException, UnloadableImageException {
             if (!collection.getSignalManager().hasSignals(signalGroup))
                 return;
 
@@ -230,19 +234,22 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             
             if (sourceFile == null) 
                 return;
-
-            ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
+            
+            ImageProcessor signalProcessor = n.getSignalCollection().getImage(signalGroup);
+//            ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
             KeyedShellResult counter = counters.get(signalGroup);
 
-            int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
+//            int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
 
-            long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalStack, signalChannel);
+            long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalProcessor);
+//            long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalStack, signalChannel);
             long[] totalCounterIntensity = shellDetector.findPixelIntensities(n);
 
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
             
             long[] random = new RandomDistribution(n, shellDetector, RandomDistribution.DEFAULT_ITERATIONS).getCounts();
+            log("Adding random counts "+Arrays.toString(random));
             counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.SIGNAL, c, n, random); // random pixels in the nucleus
             counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // counterstain for random signal
             
@@ -256,13 +263,16 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     
     private class RandomDistribution {
         
+    	private static final long DEFAULT_SEED = 1234;
+    	
         private long[] counts;
         private ShellDetector shellDetector;
-
+        private Random rng;
+        
         public static final int DEFAULT_ITERATIONS = 10000;
 
         public RandomDistribution(@NonNull CellularComponent template, ShellDetector detector, int iterations) {
-                        
+        	rng = new Random(DEFAULT_SEED);
             if(iterations<=0)
                 throw new IllegalArgumentException("Must have at least one iteration");
             shellDetector = detector;
@@ -280,6 +290,9 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 			    int shell = shellDetector.findShell(p);
 			    if(shell>=0) // -1 for point not found
 			        counts[shell]++;
+			    else {
+			    	log("Point "+p.toString()+" is not in a shell of "+template.toString());
+			    }
 			}
 
         }
@@ -298,13 +311,14 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             Rectangle2D r = template.getBounds();
 
-            // Make a random position in the rectangle
-            // nextDouble is exclusive of the top value,
-            // so add 1 to make it inclusive
-            double rx = ThreadLocalRandom.current().nextDouble(r.getX(), r.getWidth() + 1);
-            double ry = ThreadLocalRandom.current().nextDouble(r.getY(), r.getHeight() + 1);
+            // Make a pseudo-random position in the rectangle
+            double rx = rng.nextDouble();
+            double ry = rng.nextDouble();
+            
+            double xrange = r.getWidth()*rx;
+            double yrange = r.getHeight()*ry;
 
-            IPoint p = IPoint.makeNew(rx, ry);
+            IPoint p = IPoint.makeNew(r.getX()+xrange, r.getY()+yrange);
 
             if (template.containsPoint(p))
                 return p;

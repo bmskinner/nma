@@ -131,9 +131,10 @@ public class ShellDetector extends Detector {
     public int findShell(@NonNull IPoint p) {
         int shell = -1;
         for (Shell r : shells) {
-            if (r.contains(p.getXAsInt(), p.getYAsInt())) {
+            if (r.contains(p))
                 shell++;
-            }
+            else
+            	log(p.toString()+" not in shell "+r.toString());
         }
         return shell;
     }
@@ -189,6 +190,20 @@ public class ShellDetector extends Detector {
         return result;
     }
 
+    /**
+     * Count the total pixel intensity in each shell for the given image
+     * 
+     * @param ip the image to analyse
+     * @return
+     */
+    public long[] findPixelIntensities(@NonNull ImageProcessor ip) {
+        long[] result = makeZeroArray();
+        for (int i = 0; i < shells.size(); i++) {
+            Shell shell = shells.get(i);
+            result[i] = shell.getPixelIntensity(ip);
+        }
+        return correctNestedValues(result);
+    }
 
     /**
      * Count the total pixel intensity in each shell for the given image
@@ -248,7 +263,7 @@ public class ShellDetector extends Detector {
     }
 
     /**
-     * Divide the nucleus into shells of equal area. Since this works by eroding
+     * Divide the object into shells of equal area. Since this works by eroding
      * the component shape by 1 pixel, the areas created will not be perfectly
      * equal, but will be at the closest area above or below the target.
      * 
@@ -379,6 +394,20 @@ public class ShellDetector extends Detector {
 //                ip = ip.resize(ip.getWidth()*DEFAULT_SCALE_FACTOR);
             return getPixelIntensity(ip, this.toShape());
         }
+        
+        /**
+         * Find the sum of all pixel intensities within this shell from the
+         * given channel.
+         *
+         * @param st the stack to measure
+         * @param channel within the stack to measure
+         * @return the sum of intensities in the shell
+         */
+        private long getPixelIntensity(ImageProcessor ip) {
+//            if(isScale)
+//                ip = ip.resize(ip.getWidth()*DEFAULT_SCALE_FACTOR);
+            return getPixelIntensity(ip, this.toShape());
+        }
 
         /**
          * Find the sum of pixel intensities in the signal channel within this
@@ -430,13 +459,6 @@ public class ShellDetector extends Detector {
                     }
                 }
             }
-//            drawMasks(ip, mask);
-//            try {
-//                showImage("", ip);
-//            } catch (InterruptedException e) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
-//            }
             return result;
         }
         
@@ -481,7 +503,8 @@ public class ShellDetector extends Detector {
 
         @Override
 		public String toString() {
-            return this.getBounds().toString();
+        	return String.format("Bounds: x: %s-%s y: %s-%s", shellRoi.getBounds().getX(), shellRoi.getBounds().getX()+shellRoi.getBounds().getWidth(), 
+        			shellRoi.getBounds().getY(), shellRoi.getBounds().getY()+shellRoi.getBounds().getHeight());
         }
 
 		@Override

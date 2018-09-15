@@ -20,7 +20,6 @@
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,17 +46,21 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkTy
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.IJ;
-import ij.ImagePlus;
 import ij.gui.OvalRoi;
 import ij.gui.Roi;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
+/**
+ * Test the shell detector is functioning
+ * @author ben
+ *
+ */
 public class ShellDetectorTest {
     
 	private static final UUID signalGroup = UUID.fromString("00000000-0000-0000-0000-100000000001");
