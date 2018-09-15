@@ -127,19 +127,13 @@ public class DefaultSignalCollection implements ISignalCollection {
         collection.put(newID, list);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#addSignal(components.nuclear.
-     * NuclearSignal, java.util.UUID)
-     */
     @Override
     public void addSignal(@NonNull INuclearSignal n, @NonNull UUID signalGroup) {
         if (signalGroup == null)
             throw new IllegalArgumentException("Group is null");
 
         if (collection.get(signalGroup) == null) {
-            List<INuclearSignal> list = new ArrayList<INuclearSignal>();
+            List<INuclearSignal> list = new ArrayList<>();
             collection.put(signalGroup, list);
         }
         collection.get(signalGroup).add(n);

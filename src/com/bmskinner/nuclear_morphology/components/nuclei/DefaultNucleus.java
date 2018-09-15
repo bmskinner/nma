@@ -549,7 +549,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     @Override
 	public String toString() {
         String newLine = System.getProperty("line.separator");
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new StringBuilder(super.toString()+newLine);
 
         b.append(this.getNameAndNumber());
         b.append(newLine);

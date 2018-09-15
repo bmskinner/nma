@@ -69,7 +69,8 @@ public interface ISignalCollection extends Serializable, Loggable {
     void updateSignalGroupId(@NonNull UUID oldID, @NonNull UUID newID);
 
     /**
-     * Add a single signal to the given signal group
+     * Add a single signal to the given signal group. If the signal group does
+     * not yet exist in the collection, it is created.
      * 
      * @param n the signal
      * @param signalGroup the signal group

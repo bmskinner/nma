@@ -22,6 +22,7 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -223,15 +224,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             ICellCollection collection = dataset.getCollection();
 
             if (collection.hasSignalGroup(IShellResult.RANDOM_SIGNAL_ID)) {
-                if (options.isShowAnnotations()) {
-                    addRandomShellData(ds, collection, options);
-                }
+                if (options.isShowAnnotations())
+                    addRandomShellData(ds, collection);
             }
 
             for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
-            	if(collection.getSignalGroup(signalGroup).get().isVisible()){
-					addRealShellData(ds, collection, options, signalGroup);
-				}
+            	if(collection.getSignalGroup(signalGroup).get().isVisible())
+					addRealShellData(ds, collection, signalGroup);
             }
             result.add(ds);
         }
@@ -244,8 +243,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * 
      * @param options the options
      * @return a chart dataset
-     * @throws ChartDatasetCreationException
-     *             if the IAnalysisDataset has no shell results or the dataset
+     * @throws ChartDatasetCreationException if the IAnalysisDataset has no shell results or the dataset
      *             count is not 1
      */
     public XYDataset createShellConsensusDataset() throws ChartDatasetCreationException {
@@ -310,11 +308,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @param collection the cell collection to take random shell data from
      * @param options the chart options
      */
-    private void addRandomShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options) {
+    private void addRandomShellData(@NonNull final ShellResultDataset ds, @NonNull final ICellCollection collection) {
 
         UUID signalGroup = IShellResult.RANDOM_SIGNAL_ID;
 
-		// Choose between signal or nucleus level analysis
 		Aggregation agg = options.getAggregation();
 		Normalisation norm = options.getNormalisation();
 		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
@@ -340,16 +337,12 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			
 		// otherwise use raw counts
 		double[] arr = r.get().getProportions(agg, norm);
+//		log(String.format("Random proportions for %s %s: %s",agg, norm, Arrays.toString(arr)));
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
-			double d = arr[shell]* 100;
+			double d = -arr[shell]* 100;
 
-			ds.add(signalGroup, -d, 0,
+			ds.add(signalGroup, d, 0,
 					"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
-			// we need the string value for shell otherwise we get error
-			// "the method addValue(Number, Comparable, Comparable) is
-			// ambiguous for the type DefaultCategoryDataset"
-			// ditto the doublevalue for std
-
 		}
     }
 
@@ -360,10 +353,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @param collection the cell collection to take shell data from
      * @param options the chart options
      */
-    private void addRealShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options,
-            UUID signalGroup) {
+    private void addRealShellData(@NonNull final ShellResultDataset ds, @NonNull final ICellCollection collection, @NonNull final UUID signalGroup) {
 
-        // Choose between signal or nucleus level analysis
     	Aggregation agg = options.getAggregation();
 		Normalisation norm = options.getNormalisation();
 		
@@ -378,14 +369,12 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			return;
 
 		double[] arr = r.get().getProportions(agg, norm);
+//		log(String.format("Real proportions for %s %s: %s",agg, norm, Arrays.toString(arr)));
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 			double d = arr[shell]*100;
 
 			ds.add(signalGroup, d, 0,
 					"Group_" + g.get().getGroupName() + "_" + collection.getName(), String.valueOf(shell));
-			// we need the string value for shell otherwise we get error
-			// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
-			// ditto the doublevalue for std
 
 		}
     }

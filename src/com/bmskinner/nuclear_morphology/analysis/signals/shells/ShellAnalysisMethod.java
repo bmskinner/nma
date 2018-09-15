@@ -148,27 +148,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     }
 
     private synchronized void addRandomSignal() {
-
-        // Create a random sample distribution
-//        if (collection.hasConsensus()) {
-            ISignalGroup random = new SignalGroup("Random distribution");
-            random.setGroupColour(Color.LIGHT_GRAY);
-
-            collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
-
-            // Calculate random positions of pixels
-//            RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
-
-//            long[] c = sr.getCounts();
-            
-//			RandomShellResult randomResult = new RandomShellResult( options.getShellNumber(), options.getErosionMethod(), c);
-			
-			collection.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
-			        .setShellResult(counters.get(IShellResult.RANDOM_SIGNAL_ID));
-//        } else {
-//            warn("Cannot create simulated dataset, no consensus");
-//        }
-
+    	ISignalGroup random = new SignalGroup("Random distribution");
+    	random.setGroupColour(Color.LIGHT_GRAY);
+    	random.setShellResult(counters.get(IShellResult.RANDOM_SIGNAL_ID));
+    	collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
     }
 
     
@@ -235,10 +218,12 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             if (sourceFile == null) 
                 return;
             
-            ImageProcessor signalProcessor = n.getSignalCollection().getImage(signalGroup);
             KeyedShellResult counter = counters.get(signalGroup);
+            
+            ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
+            int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
 
-            long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalProcessor);
+            long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalStack, signalChannel);
             long[] totalCounterIntensity = shellDetector.findPixelIntensities(n);
 
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus

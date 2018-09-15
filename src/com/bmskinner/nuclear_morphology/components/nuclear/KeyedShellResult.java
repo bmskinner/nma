@@ -40,8 +40,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 /**
  * This shell result is designed to allow raw data to be
  * exported from shell analyses. Averages and normalisations are computed when data are requested,
- * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}. It also prompted
- * the refactoring of the {@link IShellResult} interface.
+ * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}.
  * @author bms41
  * @since 1.13.8
  *
@@ -92,8 +91,8 @@ public class KeyedShellResult implements IShellResult {
      * @param component the nucleus
      * @param shellData the pixel intensity counts per shell
      */
-    public void addShellData(@NonNull CountType type, @NonNull ICell c, @NonNull Nucleus n, long @NonNull [] shellData){
-        addShellData(type, c, n, null, shellData);
+    public void addShellData(@NonNull CountType countType, @NonNull ICell c, @NonNull Nucleus n, long @NonNull [] shellData){
+        addShellData(countType, c, n, null, shellData);
     }
     
     /**
@@ -103,7 +102,7 @@ public class KeyedShellResult implements IShellResult {
      * @param signal the signal
      * @param shellData the pixel intensity counts per shell
      */
-    public void addShellData(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal, long @NonNull [] shellData){
+    public void addShellData(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal, long @NonNull [] shellData){
         if (shellData.length != nShells) 
             throw new IllegalArgumentException("Shell count must be "+nShells);
         
@@ -118,24 +117,24 @@ public class KeyedShellResult implements IShellResult {
         		? new Key(cell.getId(), nucleus.getID()) 
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
 
-        map.get(type).addValues(k, shellData);
+        map.get(countType).putValues(k, shellData);
     }
     
     @Override
-	public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
+	public long[] getPixelValues(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
     	Key k = signal==null 
         		? new Key(cell.getId(), nucleus.getID()) 
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
-    	return map.get(type).getPixelIntensities(k);
+    	return map.get(countType).getPixelIntensities(k);
     }  
     
     @Override
-	public double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
+	public double[] getProportions(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
     	Key k = signal==null 
         		? new Key(cell.getId(), nucleus.getID()) 
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
         		
-        long[] intensities = map.get(type).getPixelIntensities(k);
+        long[] intensities = map.get(countType).getPixelIntensities(k);
         if(intensities==null)
         	return makeEmptyArray();
         long total = LongStream.of(intensities).sum();
@@ -238,7 +237,7 @@ public class KeyedShellResult implements IShellResult {
 	    			
 	    			double sig = sigs[shell];
 	    			double cnt = cnts[shell];
-	    			double nor = cnt==0d?0d:(double)sig/(double)cnt;
+	    			double nor = cnt==0d?0d:sig/cnt;
 	    			        			
 	    			double totalNor = 0;
 	    			for(int i=0; i<nShells; i++) {	
@@ -259,7 +258,6 @@ public class KeyedShellResult implements IShellResult {
      * @return the mean signal proportion (the mean of the values returned by {@link getProportions()}
      */
     private double getAverageProportion(Normalisation norm, Aggregation agg, int shell){
-//    	fine(norm+" - "+agg+" - shell "+shell+"\n"+Arrays.toString(getProportions(agg, norm, shell)));
         return DoubleStream.of(getProportions(agg, norm, shell)).average().orElse(-1);
     }
     
@@ -284,7 +282,7 @@ public class KeyedShellResult implements IShellResult {
     private class ShellCount implements Serializable {
 
 		private static final long serialVersionUID = 1L;
-        final Map<Key, long[]> results;
+		private final Map<Key, long[]> results;
         
         public ShellCount(){
             results = new HashMap<>();
@@ -298,25 +296,30 @@ public class KeyedShellResult implements IShellResult {
         	return result;
         }
         
-        void addValues(@NonNull Key k, long[] values){
+        /**
+         * Add the given values to the key. Existing values
+         * are overwitten. 
+         * @param k
+         * @param values
+         */
+        public void putValues(@NonNull Key k, long[] values){
             results.put(k, values);
         }
-        
-        void addValue(@NonNull Key k, int shell, long value){
-            if(!results.containsKey(k))
-                results.put(k, new long[nShells]);
-            results.get(k)[shell] = value;
-        }
-        
+                
         /**
          * Get the number of objects in the counter
          * @return
          */
-        int size(){
+        public int size(){
             return results.size();
         }
         
-        int size(Aggregation agg){
+        /**
+         * Get the number of keys in the counter with the given
+         * aggregation level
+         * @return
+         */
+        public int size(Aggregation agg){
             return keys(agg).size();
         }
         
@@ -325,7 +328,7 @@ public class KeyedShellResult implements IShellResult {
          * @param shell
          * @return
          */
-        long sum(int shell){
+        public long sum(int shell){
             if(shell<0||shell>=nShells)
                 throw new IllegalArgumentException("Shell is out of bounds");
             return results.values().stream().mapToLong(a->a[shell]).sum();
@@ -336,7 +339,7 @@ public class KeyedShellResult implements IShellResult {
          * @param k the key of the object
          * @return
          */
-        long sum(Key k){
+        public long sum(Key k){
             if(results.containsKey(k))
                 return LongStream.of(results.get(k)).sum();
             return 0;
@@ -346,7 +349,7 @@ public class KeyedShellResult implements IShellResult {
          * Fetch all the object keys
          * @return
          */
-        Set<Key> keys(){
+        public Set<Key> keys(){
             return results.keySet();
         }
         
@@ -357,39 +360,39 @@ public class KeyedShellResult implements IShellResult {
          * @param agg the aggregation level
          * @return the object keys matching the aggregation level
          */
-        Set<Key> keys(Aggregation agg){
+        public Set<Key> keys(Aggregation agg){
         	switch(agg){
         		case BY_NUCLEUS: return results.keySet().stream().filter(k->!k.hasSignal()).collect(Collectors.toSet());
         		case BY_SIGNAL:  return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
-        		default: return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
+        		default:         return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
         	}
         }
                 
-        long getPixelIntensity(Key k, int shell){
+        public long getPixelIntensity(Key k, int shell){
             if(results.containsKey(k))
                 return results.get(k)[shell];
             return 0;
         }
         
-        long[] getPixelIntensities(Key k){
+        public long[] getPixelIntensities(Key k){
             return results.get(k);
         }
         
-        List<long[]> getCellPixelIntensities(@NonNull UUID cellId){
+        public List<long[]> getCellPixelIntensities(@NonNull UUID cellId){
             return results.keySet().stream()
                     .filter(k->k.hasCell(cellId))
                     .map(k->results.get(k))
                     .collect(Collectors.toList());
         }
         
-        List<long[]> getComponentPixelIntensities(@NonNull UUID componentId){
+        public List<long[]> getComponentPixelIntensities(@NonNull UUID componentId){
             return results.keySet().stream()
                     .filter(k->k.hasComponent(componentId))
                     .map(k->results.get(k))
                     .collect(Collectors.toList());
         }
         
-        List<long[]> getSignalPixelIntensities(@NonNull UUID signalId){
+        public List<long[]> getSignalPixelIntensities(@NonNull UUID signalId){
             return results.keySet().stream()
                     .filter(k->k.hasSignal(signalId))
                     .map(k->results.get(k))
