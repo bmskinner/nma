@@ -46,7 +46,8 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	public static final String UUID_PREFIX = "UUID_";
 	
 	public static final String SIGNAL_GROUP_PREFIX = "SignalGroup_";
-	public static final String SIGNAL_NAME         = "SignalName";
+	public static final String SIGNAL_ID         = "SignalGroupId";
+	public static final String SIGNAL_NAME       = "SignalGroupName";
 	public static final String CLUSTERS = "Clusters";
 	public static final String CLUSTER_GROUP = "ClusterGroup";
 	public static final String CLUSTER_NAME  = "ClusterGroupName";
@@ -93,17 +94,24 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	private static void appendElement(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options, Element rootElement) {
 		for(String key : options.getDetectionOptionTypes()){
 			Element element = new Element(DETECTION_METHOD);
-			if(isUUID(key)){ // signal group without prefix
-				element.setAttribute(DETECTED_OBJECT, IAnalysisOptions.SIGNAL_GROUP+key);
+			if(isUUID(key) || key.startsWith(IAnalysisOptions.SIGNAL_GROUP)){ // signal group without prefix
+				element.setAttribute(DETECTED_OBJECT, IAnalysisOptions.NUCLEAR_SIGNAL);
 			} else {
 				element.setAttribute(DETECTED_OBJECT, key);
 			}
 			
 			// add signal group names
-			if(element.getAttribute(DETECTED_OBJECT).getValue().startsWith(IAnalysisOptions.SIGNAL_GROUP)) {
-				UUID signalGroup = UUID.fromString(element.getAttribute(DETECTED_OBJECT).getValue().replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
+			if(element.getAttribute(DETECTED_OBJECT).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
 				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
-				element.setAttribute(SIGNAL_NAME, groupName);
+				
+				Element signalId = new Element(OptionsXMLWriter.SIGNAL_ID);
+				signalId.setText(signalGroup.toString());
+				element.addContent(signalId);
+				
+				Element signalName = new Element(OptionsXMLWriter.SIGNAL_NAME);
+				signalName.setText(groupName);
+				element.addContent(signalName);
 			}
 			
 			appendElement(options.getDetectionOptions(key).get(), element);

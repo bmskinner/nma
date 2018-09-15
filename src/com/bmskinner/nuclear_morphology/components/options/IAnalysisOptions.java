@@ -39,10 +39,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public interface IAnalysisOptions extends Serializable, Loggable {
 
     // Standard detection keys
-    static final String NUCLEUS    = "Nucleus";
-    static final String CYTOPLASM  = "Cytoplasm";
-    static final String SPERM_TAIL = "SpermTail";
-    static final String SIGNAL_GROUP = "SignalGroup_";
+    static final String NUCLEUS        = "Nucleus";
+    static final String CYTOPLASM      = "Cytoplasm";
+    static final String SPERM_TAIL     = "SpermTail";
+    static final String SIGNAL_GROUP   = "SignalGroup_";
+    static final String NUCLEAR_SIGNAL = "NuclearSignal";
 
     static final boolean     DEFAULT_REFOLD            = true;
     static final boolean     DEFAULT_KEEP_FAILED       = false;

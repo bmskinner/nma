@@ -128,14 +128,17 @@ public class OptionsXMLReader implements Loggable {
 			document = saxBuilder.build(file);
 			Element rootElement = document.getRootElement();
 			for(Element signal : rootElement.getChildren(OptionsXMLWriter.DETECTION_METHOD)) {
-				if(signal.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue().startsWith(IAnalysisOptions.SIGNAL_GROUP)) {
-					UUID signalGroup = UUID.fromString(signal.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue().replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
-					String name = signal.getAttribute(OptionsXMLWriter.SIGNAL_NAME).getValue();
-					result.put(signalGroup, name);
+				if(signal.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+					Element idElement = signal.getChild(OptionsXMLWriter.SIGNAL_ID);
+					UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());		
+					
+					Element nameElement = signal.getChild(OptionsXMLWriter.SIGNAL_NAME);
+					String name = nameElement.getText();
+					result.put(id, name);
 				}
 			}
 		} catch (JDOMException | IOException e) {
-			fine("Unable to read clustering options", e);
+			fine("Unable to read signal names", e);
 			return result;
 		}
 		return result;
@@ -243,9 +246,11 @@ public class OptionsXMLReader implements Loggable {
 			op.setDetectionOptions(IAnalysisOptions.NUCLEUS, o);
 		}
 		
-		if(detectedObject.startsWith(IAnalysisOptions.SIGNAL_GROUP) || detectedObject.length()==36 ) { // probably signal group uuid
+		if(detectedObject.startsWith(IAnalysisOptions.NUCLEAR_SIGNAL) ) {
 			try {
-				UUID id = UUID.fromString(detectedObject.replace(IAnalysisOptions.SIGNAL_GROUP, ""));
+				
+				Element idElement = e.getChild(OptionsXMLWriter.SIGNAL_ID);
+				UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());				
 				INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
 				addKeyedValues(e, n);				
 				for(Element component : e.getChildren(OptionsXMLWriter.SUB_OPTION_KEY)) {
