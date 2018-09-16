@@ -41,6 +41,7 @@ public class Nuclear_Morphology_Analysis
 	 */
 	private static final Logger errorLogger = Logger.getLogger(Loggable.ERROR_LOGGER);
 	private static final Logger programLogger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+	private static final Logger consoleLogger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 
@@ -85,14 +86,13 @@ public class Nuclear_Morphology_Analysis
 			File dir =  Importer.getProgramDir();
 			
 			File errorFile = new File(dir, "error.log");
-//			System.out.println(errorFile.getAbsolutePath());
 
 			LogFileHandler errorHandler = new LogFileHandler(errorFile, new LogFileFormatter());
 			Logger.getLogger(ERROR_LOGGER).addHandler(errorHandler);
 			Logger.getLogger(ERROR_LOGGER).setLevel(Loggable.TRACE);
 			
-			Logger.getLogger(PROGRAM_LOGGER).addHandler(new ConsoleHandler(new LogPanelFormatter()));
-			Logger.getLogger(PROGRAM_LOGGER).setLevel(Level.INFO);
+			Logger.getLogger(CONSOLE_LOGGER).addHandler(new ConsoleHandler(new LogPanelFormatter()));
+			Logger.getLogger(CONSOLE_LOGGER).setLevel(Level.FINE);
 			
 		} catch (SecurityException e) {
 			logToImageJ("Error initialising", e);
@@ -132,11 +132,10 @@ public class Nuclear_Morphology_Analysis
 		URL urlToGif = cl.getResource(path);
 		if(urlToGif!=null){
 			return urlToGif;
-		} else {
-			path = "splash.gif";
-			urlToGif = cl.getResource(path);
-			return urlToGif;
 		}
+		path = "splash.gif";
+		urlToGif = cl.getResource(path);
+		return urlToGif;
 	}
 	
 	/**

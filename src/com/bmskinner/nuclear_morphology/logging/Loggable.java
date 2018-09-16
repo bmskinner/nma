@@ -34,6 +34,7 @@ public interface Loggable {
     public static final String ROOT_LOGGER    = "";
     public static final String PROGRAM_LOGGER = "ProgramLogger";
     public static final String ERROR_LOGGER   = "ErrorLogger";
+    public static final String CONSOLE_LOGGER = "ConsoleLogger";
 
     public static final Level TRACE = new ErrorLevel();
 
@@ -61,6 +62,7 @@ public interface Loggable {
      */
     default void log(Level level, String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(level, message);
+        Logger.getLogger(CONSOLE_LOGGER).log(level, message);
     }
 
     /**
@@ -73,6 +75,7 @@ public interface Loggable {
     default void error(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(Level.SEVERE, message, t);
+        Logger.getLogger(CONSOLE_LOGGER).log(Level.SEVERE, message, t);
     }
 
     /**
@@ -86,6 +89,7 @@ public interface Loggable {
     default void stack(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
+        Logger.getLogger(CONSOLE_LOGGER).log(Level.SEVERE, message, t);
     }
 
     /**
@@ -110,6 +114,7 @@ public interface Loggable {
      */
     default void fine(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
+        Logger.getLogger(CONSOLE_LOGGER).log(Level.FINE, message);
     }
 
     /**
@@ -121,6 +126,7 @@ public interface Loggable {
      */
     default void fine(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
+        Logger.getLogger(CONSOLE_LOGGER).log(TRACE, message, t);
     }
 
     /**
@@ -131,6 +137,7 @@ public interface Loggable {
      */
     default void finer(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINER, message);
+        Logger.getLogger(CONSOLE_LOGGER).log(Level.FINER, message);
     }
 
     /**
@@ -140,6 +147,7 @@ public interface Loggable {
      */
     default void finest(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
+        Logger.getLogger(CONSOLE_LOGGER).log(Level.FINEST, message);
     }
 
     /**
@@ -149,6 +157,7 @@ public interface Loggable {
      */
     default void warn(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.WARNING, message);
+        Logger.getLogger(CONSOLE_LOGGER).log(Level.WARNING, message);
     }
 
     /**
@@ -170,6 +179,7 @@ public interface Loggable {
      */
     default void log(Level level, String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(level, message, t);
+        Logger.getLogger(CONSOLE_LOGGER).log(level, message, t);
     }
 
     /**
