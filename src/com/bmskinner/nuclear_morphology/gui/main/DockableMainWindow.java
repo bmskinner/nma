@@ -276,7 +276,6 @@ public class DockableMainWindow extends AbstractMainWindow {
      */
     private synchronized void addDataset(final IAnalysisDataset dataset) {
     	DatasetListManager.getInstance().addDataset(dataset);
-    	fine("Adding dataset to populations panel: "+dataset.getName());
     	getPopulationsPanel().addDataset(dataset);
     	for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
     		getPopulationsPanel().addDataset(child);

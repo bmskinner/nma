@@ -489,7 +489,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         DefaultTableModel model = new DefaultTableModel();
 
         DecimalFormat lowFormat = new DecimalFormat("0.00E00");
-        DecimalFormat pFormat = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+        DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
         Object[] columnNames = { Labels.DATASET, 
         		Labels.Signals.SIGNAL_GROUP_LABEL, 
@@ -497,7 +497,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         		Labels.Stats.PROBABILITY };
 
         model.setColumnIdentifiers(columnNames);
-
+        int nComparisons = 0;
+        
+        Map<String, Object[]> valuesToAdd = new HashMap<>();
+        
         for (IAnalysisDataset d : options.getDatasets()) {
             
             Optional<ISignalGroup> randomGroup = d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
@@ -519,18 +522,26 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				    	ShellDistributionTester tester = new ShellDistributionTester(r.get(), random.get());
 				    	pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
 				    }
-				    
-				    // Choose the most readable format
-				    String pString = pval<0.001 ? lowFormat.format(pval) : pFormat.format(pval);
-				    
+
+				    String key = d.getId().toString()+groupName.toString();
 				    Object[] rowData = {
 				            d.getName(), 
 				            groupName, 
 				            pFormat.format(mean),
-				            pString };
-				    model.addRow(rowData);
+				            pval };
+				    valuesToAdd.put(key, rowData);
+				    nComparisons++;
 				}
             }
+        }
+        
+        for(String key : valuesToAdd.keySet()) {
+        	Object[] values = valuesToAdd.get(key);
+        	double d = (double) values[3];
+        	d*=nComparisons; //Bonferroni correction
+        	d=Math.min(d, 1);
+        	values[3]= d < 0.001 ? lowFormat.format(d) : pFormat.format(d);  // Choose the most readable format
+        	model.addRow(values);
         }
         return model;
     }
@@ -559,6 +570,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         		Labels.Stats.PROBABILITY };
 
         model.setColumnIdentifiers(columnNames);
+        
+        int nComparisons = 0;
         
         Map<String, Object[]> valuesAdded = new HashMap<>();
 
@@ -592,30 +605,35 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         				String k1 = d1.getId().toString()+signalGroup1.toString()+d2.getId().toString()+signalGroup2.toString();
         				String k2 = d2.getId().toString()+signalGroup2.toString()+d1.getId().toString()+signalGroup1.toString();
         				
-//        				String pString = pval<0.001 ? lowFormat.format(pval) : pFormat.format(pval);
         				Object[] rowData = { 
 			        			d1.getName(), 
 			        			groupName1, 
 			        			d2.getName(), 
 			        			groupName2, 
-			        			pFormat.format(pval) };
+			        			pval };
         				
         				
         				if(valuesAdded.containsKey(k2)) {
-        					String prevPValue = valuesAdded.get(k2)[4].toString();
-        					if(Double.valueOf(prevPValue)<pval)
+        					double prevPValue = (double) valuesAdded.get(k2)[4];
+        					if(prevPValue<pval)
         						valuesAdded.put(k2, rowData); 
         				} else {
         					valuesAdded.put(k1, rowData); 
+        					nComparisons++;
         				}
         			}
         		}
 
         	}
         }
-        
+
         for(String key : valuesAdded.keySet()) {
-        	model.addRow(valuesAdded.get(key));
+        	Object[] values = valuesAdded.get(key);
+        	double d = (double) values[4];
+        	d*=nComparisons; //Bonferroni correction
+        	d=Math.min(d, 1);
+        	values[4]= d < 0.001 ? lowFormat.format(d) : pFormat.format(d);
+        	model.addRow(values);
         }
         return model;
     }

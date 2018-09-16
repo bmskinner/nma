@@ -308,7 +308,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         JPanel tablePanel = new JPanel(new BorderLayout());
         
         JPanel header = new JPanel();
-        header.add(new JLabel("Comparisons to random distribution by chi-square"));
+        header.add(new JLabel("Comparisons to random distribution by chi-square with Bonferroni correction"));
         tablePanel.add(header, BorderLayout.NORTH);
         TableModel model = AnalysisDatasetTableCreator.createBlankTable();
         overallTable = new ExportableTable(model);
@@ -333,7 +333,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         JPanel tablePanel = new JPanel(new BorderLayout());
         
         JPanel header = new JPanel();
-        header.add(new JLabel("Pairwise comparisons of shell results by chi-square"));
+        header.add(new JLabel("Pairwise comparisons of shell results by chi-square with Bonferroni correction"));
         tablePanel.add(header, BorderLayout.NORTH);
         TableModel model = AnalysisDatasetTableCreator.createBlankTable();
         pairwiseTable = new ExportableTable(model);

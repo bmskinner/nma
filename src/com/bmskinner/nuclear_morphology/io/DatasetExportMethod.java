@@ -129,19 +129,10 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
                 fos.close();
             }
 
-            // This line is not always reached when saving multiple datasets
-            fine("Save complete");
-
-            if (!ok) {
+            if (!ok)
                 return false;
-            }
 
-            DatasetListManager.getInstance().updateHashCode(dataset); // track
-                                                                      // the
-                                                                      // state
-                                                                      // since
-                                                                      // last
-                                                                      // save
+            DatasetListManager.getInstance().updateHashCode(dataset);
 
         } catch (FileNotFoundException e) {
             warn("File not found when saving dataset");

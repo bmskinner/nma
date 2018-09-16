@@ -43,7 +43,7 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
      */
     public static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
     
-    public static final String DEFAULT_PROBABILITY_FORMAT = "#.####";
+    public static final String DEFAULT_PROBABILITY_FORMAT = "#0.0000";
 
     public AbstractDatasetCreator(@NonNull final E options) {
         this.options = options;
