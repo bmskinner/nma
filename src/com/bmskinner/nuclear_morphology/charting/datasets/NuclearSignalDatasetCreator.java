@@ -31,7 +31,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYZDataset;
 
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
@@ -233,6 +235,56 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 					addRealShellData(ds, collection, signalGroup);
             }
             result.add(ds);
+        }
+        return result;
+    }
+    
+    /**
+     * Show shell results as a heatmap of shell on the x versus dataset on the y
+     * @return
+     * @throws ChartDatasetCreationException
+     */
+    public XYZDataset createMultipleDatasetShellHeatMapDataset() throws ChartDatasetCreationException {
+
+    	DefaultXYZDataset  result = new DefaultXYZDataset();
+
+    	int yValue = 0;
+        for (IAnalysisDataset dataset : options.getDatasets()) {
+
+            ICellCollection collection = dataset.getCollection();
+
+            for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
+            	if(collection.getSignalGroup(signalGroup).get().isVisible()) {
+            		
+            		Aggregation agg = options.getAggregation();
+            		Normalisation norm = options.getNormalisation();
+            		
+            		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
+            		if(!g.isPresent())
+            			continue;
+            		Optional<IShellResult> r = g.get().getShellResult();
+            		if(!r.isPresent())
+            			continue;
+            		IShellResult shellResult = r.get();
+
+            		double[] zVals = shellResult.getProportions(agg, norm);
+            		double[] yVals = new double[zVals.length];
+            		Arrays.fill(yVals, yValue);
+            		double[] xVals = new double[zVals.length];
+            		for (int shell = 0; shell < shellResult.getNumberOfShells(); shell++) {
+            			xVals[shell] = shell;
+            		}
+            		
+            		double[][] data = { xVals, yVals, zVals};
+
+            		String series = "Group_" + g.get().getGroupName() + "_" + collection.getName();
+
+            		result.addSeries(series, data);
+            		yValue++;
+            	}
+					
+            }
+
         }
         return result;
     }

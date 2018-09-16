@@ -178,6 +178,13 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
     				long[] counterstain = channelCounter.getPixelValues(CountType.COUNTERSTAIN, c, n, null);
     				long[] signals      = channelCounter.getPixelValues(CountType.SIGNAL, c, n, null);
+    				
+    				if(counterstain==null) {
+    					fine("No counterstain for "+n.getNameAndNumber());
+    					continue;
+    				}
+    				if(signals==null)
+    					continue;
 
     				childCounter.addShellData(CountType.COUNTERSTAIN, c, n, counterstain);
     				childCounter.addShellData(CountType.SIGNAL, c, n, signals);

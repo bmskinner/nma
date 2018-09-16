@@ -248,7 +248,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	addSeparator();
     	
     	add(workspaceSubMenu);
-    	add(biosampleSubMenu);
+//    	add(biosampleSubMenu);
     	
     	addSeparator();
 

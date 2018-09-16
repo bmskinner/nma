@@ -69,6 +69,11 @@ public class Labels {
     	public static final String RE_REFOLD_LBL  = "Re-Refold";
     }
 
+    /**
+     * Labels from the populations panel and popup menus
+     * @author ben
+     *
+     */
     public static class Populations {
     	
     	public static final String MOVE_UP_LBL            = "Move up";
@@ -103,10 +108,10 @@ public class Labels {
         
         public static final String EXPORT                 = "Export...";
         public static final String EXPORT_STATS           = "Nuclear statistics";
-        public static final String EXPORT_SIGNALS         = "Nuclear signals";
-        public static final String EXPORT_SHELLS          = "Signal shell data";
-        public static final String EXPORT_CELL_LOCS       = "Cell locations";
-        public static final String EXPORT_OPTIONS         = "Analysis options";
+        public static final String EXPORT_SIGNALS         = "Nuclear signal statistics";
+        public static final String EXPORT_SHELLS          = "Nuclear signal shells";
+        public static final String EXPORT_CELL_LOCS       = "Cell locations within images";
+        public static final String EXPORT_OPTIONS         = "Dataset analysis options";
     }
     
     /**
