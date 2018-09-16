@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -181,11 +180,13 @@ public class VirtualCellCollection implements ICellCollection {
         return uuid;
     }
 
-    public boolean isReal() {
+    @Override
+	public boolean isReal() {
         return false;
     }
 
-    public boolean isVirtual() {
+    @Override
+	public boolean isVirtual() {
         return true;
     }
 
@@ -375,7 +376,8 @@ public class VirtualCellCollection implements ICellCollection {
      * @return
      * @throws ProfileException 
      */
-    public void createProfileCollection() throws ProfileException {
+    @Override
+	public void createProfileCollection() throws ProfileException {
         profileCollection.createProfileAggregate(this, parent.getCollection().getMedianArrayLength());
     }
 
@@ -573,17 +575,12 @@ public class VirtualCellCollection implements ICellCollection {
     public IAnalysisDataset getRootParent() {
         if (parent.isRoot()) {
             return parent;
-        } else {
-
-            if (parent.getCollection() instanceof VirtualCellCollection) {
-                VirtualCellCollection v = (VirtualCellCollection) parent.getCollection();
-
-                return v.getRootParent();
-            } else {
-                return null;
-            }
-
         }
+		if (parent.getCollection() instanceof VirtualCellCollection) {
+		    VirtualCellCollection v = (VirtualCellCollection) parent.getCollection();
+		    return v.getRootParent();
+		}
+		return null;
     }
 
     private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
@@ -958,27 +955,25 @@ public class VirtualCellCollection implements ICellCollection {
     	if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
     		return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 
-    	} else {
-
-    		result = getNuclei().parallelStream().mapToDouble(n -> {
-    			IBorderSegment segment;
-    			try {
-    				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-    			} catch (ProfileException | UnavailableComponentException e) {
-    				return 0;
-    			}
-    			double perimeterLength = 0;
-    			if (segment != null) {
-    				int indexLength = segment.length();
-    				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
-    				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
-    			}
-    			return perimeterLength;
-
-    		}).toArray();
-    		Arrays.sort(result);
-    		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
     	}
+		result = getNuclei().parallelStream().mapToDouble(n -> {
+			IBorderSegment segment;
+			try {
+				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+			} catch (ProfileException | UnavailableComponentException e) {
+				return 0;
+			}
+			double perimeterLength = 0;
+			if (segment != null) {
+				int indexLength = segment.length();
+				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
+				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+			}
+			return perimeterLength;
+
+		}).toArray();
+		Arrays.sort(result);
+		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
     	return result;
     }
 
@@ -1027,11 +1022,10 @@ public class VirtualCellCollection implements ICellCollection {
         if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
             return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
-        } else {
-            result = getCells().parallelStream().mapToDouble(n -> n.getStatistic(stat)).toArray();
-            Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
         }
+		result = getCells().parallelStream().mapToDouble(n -> n.getStatistic(stat)).toArray();
+		Arrays.sort(result);
+		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
 
         return result;
 
@@ -1081,24 +1075,22 @@ public class VirtualCellCollection implements ICellCollection {
         if (this.statsCache.hasMedian(stat, component, scale, id)) {
             return statsCache.getMedian(stat, component, scale,id);
 
-        } else {
-
-        	double median = Statistical.ERROR_CALCULATING_STAT;
-
-            if (this.hasCells()) {
-            	
-            	double[] values = getRawValues(stat, component, scale, id);
-
-                DescriptiveStatistics  s = new DescriptiveStatistics ();
-                for(double v  : values){
-                	s.addValue(v);
-                }
-                median = s.getPercentile(Stats.MEDIAN);
-            }
-
-            statsCache.setMedian(stat, component, scale, id, median);
-            return median;
         }
+		double median = Statistical.ERROR_CALCULATING_STAT;
+
+		if (this.hasCells()) {
+			
+			double[] values = getRawValues(stat, component, scale, id);
+
+		    DescriptiveStatistics  s = new DescriptiveStatistics ();
+		    for(double v  : values){
+		    	s.addValue(v);
+		    }
+		    median = s.getPercentile(Stats.MEDIAN);
+		}
+
+		statsCache.setMedian(stat, component, scale, id, median);
+		return median;
 
     }
     
@@ -1130,20 +1122,7 @@ public class VirtualCellCollection implements ICellCollection {
             angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
             double diff = angleProfile.absoluteSquareDifference(medianProfile);
-            diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise
-                                                                                           // to
-                                                                                           // the
-                                                                                           // number
-                                                                                           // of
-                                                                                           // points
-                                                                                           // in
-                                                                                           // the
-                                                                                           // perimeter
-                                                                                           // (approximately
-                                                                                           // 1
-                                                                                           // point
-                                                                                           // per
-                                                                                           // pixel)
+            diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
             double rootDiff = Math.sqrt(diff); // use the differences in
                                                // degrees, rather than square
                                                // degrees
@@ -1181,5 +1160,62 @@ public class VirtualCellCollection implements ICellCollection {
         // after reading has finished.
 
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cellIDs == null) ? 0 : cellIDs.hashCode());
+		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
+		result = prime * result + ((shellResults == null) ? 0 : shellResults.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		VirtualCellCollection other = (VirtualCellCollection) obj;
+		if (cellIDs == null) {
+			if (other.cellIDs != null)
+				return false;
+		} else if (!cellIDs.equals(other.cellIDs))
+			return false;
+		if (consensusNucleus == null) {
+			if (other.consensusNucleus != null)
+				return false;
+		} else if (!consensusNucleus.equals(other.consensusNucleus))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (profileCollection == null) {
+			if (other.profileCollection != null)
+				return false;
+		} else if (!profileCollection.equals(other.profileCollection))
+			return false;
+		if (shellResults == null) {
+			if (other.shellResults != null)
+				return false;
+		} else if (!shellResults.equals(other.shellResults))
+			return false;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		return true;
+	}
+    
+    
 
 }

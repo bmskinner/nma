@@ -533,8 +533,40 @@ public class DefaultProfileCollection implements IProfileCollection {
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
+    
+    
 
-    /**
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((indexes == null) ? 0 : indexes.hashCode());
+		result = prime * result + Arrays.hashCode(segments);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultProfileCollection other = (DefaultProfileCollection) obj;
+		if (indexes == null) {
+			if (other.indexes != null)
+				return false;
+		} else if (!indexes.equals(other.indexes))
+			return false;
+		if (!Arrays.equals(segments, other.segments))
+			return false;
+		return true;
+	}
+
+
+
+	/**
      * The cache for profiles
      * 
      * @author bms41

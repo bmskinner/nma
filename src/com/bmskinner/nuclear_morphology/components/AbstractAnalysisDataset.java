@@ -51,14 +51,14 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     protected final Version version;
 
     // direct child collections
-    protected Set<IAnalysisDataset> childDatasets = new HashSet<IAnalysisDataset>(1);
+    protected Set<IAnalysisDataset> childDatasets = new HashSet<>();
 
     protected ICellCollection cellCollection;
 
     protected Paint datasetColour = null;
 
     // groups of cluster results
-    protected List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0);
+    protected List<IClusterGroup> clusterGroups = new ArrayList<>();
 
     /**
      * Create a dataset from a cell collection
@@ -192,5 +192,56 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     	// passed upwards here for the import method to handle.
         in.defaultReadObject();
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cellCollection == null) ? 0 : cellCollection.hashCode());
+		result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
+		result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
+		result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractAnalysisDataset other = (AbstractAnalysisDataset) obj;
+		if (cellCollection == null) {
+			if (other.cellCollection != null)
+				return false;
+		} else if (!cellCollection.equals(other.cellCollection))
+			return false;
+		if (childDatasets == null) {
+			if (other.childDatasets != null)
+				return false;
+		} else if (!childDatasets.equals(other.childDatasets))
+			return false;
+		if (clusterGroups == null) {
+			if (other.clusterGroups != null)
+				return false;
+		} else if (!clusterGroups.equals(other.clusterGroups))
+			return false;
+		if (datasetColour == null) {
+			if (other.datasetColour != null)
+				return false;
+		} else if (!datasetColour.equals(other.datasetColour))
+			return false;
+		if (version == null) {
+			if (other.version != null)
+				return false;
+		} else if (!version.equals(other.version))
+			return false;
+		return true;
+	}
+    
+    
 
 }
