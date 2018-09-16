@@ -72,7 +72,7 @@ public class ImportWorkflowAction  extends VoidResultAction {
     			if(file==null)
     				file = eh.getInputSupplier().requestFile("Choose analysis options", null, Importer.XML_FILE_EXTENSION_NODOT, "Analysis options file");
 
-    			File folder = eh.getInputSupplier().requestFolder("Choose image folder");    
+    			File folder = eh.getInputSupplier().requestFolder("Choose image folder", file.getParentFile());    
 
     			IAnalysisMethod m = new SavedOptionsAnalysisPipeline(folder, file);
                 

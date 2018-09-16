@@ -104,6 +104,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
     		createRefoldingMethod(options);
     		createSignalDetectionMethods(options);
     		createClusteringMethods();
+    		
     		for(IAnalysisDataset dataset : datasets)
     			methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath())); 
     	}
@@ -187,7 +188,6 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 								&& n.getStatistic(PlottableStatistic.CIRCULARITY)>ShellAnalysisMethod.MINIMUM_CIRCULARITY);
 					});
 				};
-				//			 methodsToRun.add(new CellCollectionFilteringMethod(dataset, p, "Suitable_for_shell_analysis"));
 				methodsToRun.add(new ShellAnalysisMethod(dataset, shellOptions));
 				methodsToRun.add(new ShellReportMethod(dataset));
 			}

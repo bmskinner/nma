@@ -418,6 +418,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     @Override
     protected void updateMultiple() {
     	showRandomCheckbox.setEnabled(false);
+    	showNuclei.setEnabled(false);
+        filterBtn.setEnabled(false);
+        reportBtn.setEnabled(false);
         updateChartAndTable();
 
     }

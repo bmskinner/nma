@@ -246,7 +246,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      */
     public XYZDataset createMultipleDatasetShellHeatMapDataset() throws ChartDatasetCreationException {
 
-    	DefaultXYZDataset  result = new DefaultXYZDataset();
+    	DefaultXYZDataset result = new DefaultXYZDataset();
 
     	int yValue = 0;
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -277,7 +277,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             		
             		double[][] data = { xVals, yVals, zVals};
 
-            		String series = "Group_" + g.get().getGroupName() + "_" + collection.getName();
+            		String series = g.get().getGroupName() + " in " + collection.getName()+"_Series_"+yValue;
 
             		result.addSeries(series, data);
             		yValue++;

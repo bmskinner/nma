@@ -18,7 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -34,6 +33,7 @@ import java.util.List;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
@@ -45,6 +45,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYZDataset;
 
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
@@ -68,7 +69,7 @@ import ij.io.SaveDialog;
 @SuppressWarnings("serial")
 public class ExportableChartPanel extends ChartPanel implements Loggable, ChartSetEventListener {
 
-    protected final List<Object> listeners = new ArrayList<Object>();
+    protected final List<Object> listeners = new ArrayList<>();
 
     /**
      * Control if the axis scales should be set to maintain aspect ratio
@@ -93,17 +94,14 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
     public static final String NEWLINE = System.getProperty("line.separator");
 
-    public ExportableChartPanel(JFreeChart chart) {
+    public ExportableChartPanel(@NonNull JFreeChart chart) {
         super(chart, false);
-
-        // getChartRenderingInfo().setEntityCollection(null);
 
         JPopupMenu popup = this.getPopupMenu();
         popup.addSeparator();
 
         JMenuItem exportItem = new JMenuItem("Export data...");
-        exportItem.addActionListener(this);
-        exportItem.setActionCommand("Export");
+        exportItem.addActionListener(e->export());
         exportItem.setEnabled(true);
 
         popup.add(exportItem);
@@ -111,7 +109,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         this.setPopupMenu(popup);
 
         // Ensure that the chart text and images are redrawn to
-        // a proper aspect ratio when the panel is resized
+        // a proper aspect ratio when the panel is resized        
         this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -128,6 +126,13 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         setMinimumDrawHeight(this.getHeight());
     }
 
+    /**
+     * Set if the panel should be considered to have a fixed aspect ratio.
+     * If true, the tick units of the x and y axes will have the same size
+     * on screen, and the axis ranges will update to fit the dimensions of the
+     * chart panel.
+     * @param b
+     */
     public void setFixedAspectRatio(boolean b) {
         isFixedAspectRatio = b;
 
@@ -146,6 +151,10 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         }
     }
 
+    /**
+     * Test if the panel is set to use a fixed aspect ratio
+     * @return
+     */
     public boolean isFixedAspectRatio() {
         return isFixedAspectRatio;
     }
@@ -177,14 +186,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         return w / h;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jfree.chart.ChartPanel#setChart(org.jfree.chart.JFreeChart)
-     * 
-     * Allows a message to be sent to registered ChartSetEventListeners that a
-     * new chart has been set
-     */
+
     @Override
     public void setChart(JFreeChart chart) {
         super.setChart(chart);
@@ -192,7 +194,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             fireChartSetEvent();
         } catch (NullPointerException e) {
             // This occurs during init because setChart is called internally in
-            // ChartPanel
+            // ChartPanel constructor
             // Catch and ignore
         }
 
@@ -336,34 +338,23 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
     private String getData() {
 
-        String result = "";
-
         try {
 
             if (this.getChart().getPlot() instanceof CategoryPlot) {
-
-                if (this.getChart().getCategoryPlot().getDataset() instanceof ShellResultDataset) {
-
+            	
+                if (this.getChart().getCategoryPlot().getDataset() instanceof ShellResultDataset)
                     return getShellData();
-                }
 
-                if (this.getChart().getCategoryPlot().getDataset() instanceof BoxAndWhiskerCategoryDataset) {
-
+                if (this.getChart().getCategoryPlot().getDataset() instanceof BoxAndWhiskerCategoryDataset)
                     return getBoxplotData();
-                }
 
             } else {
-
-                if (this.getChart().getXYPlot().getDataset() instanceof DefaultXYDataset) {
-
+            	if (this.getChart().getXYPlot().getDataset() instanceof XYZDataset)
+                    return getHeatMapData();
+                if (this.getChart().getXYPlot().getDataset() instanceof DefaultXYDataset)
                     return getXYProfileData(); // single profiles
-
-                }
-
-                if (this.getChart().getXYPlot().getDataset() instanceof HistogramDataset) {
-
+                if (this.getChart().getXYPlot().getDataset() instanceof HistogramDataset)
                     return getHistogramData();
-                }
 
             }
 
@@ -377,7 +368,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             }
             return builder.toString();
         }
-        return result;
+        return "";
     }
 
     private void export() {
@@ -406,33 +397,64 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         }
 
     }
+    
+    private String getHeatMapData() throws ClassCastException {
+        XYPlot plot = this.getChart().getXYPlot();
+        StringBuilder builder = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#0.0000");
 
-    // Invoke when dealing with an XY chart
+        int datasetCount = plot.getDatasetCount();
+        // header
+        builder.append("Dataset");
+        int shells = plot.getDataset(0).getItemCount(0);
+        
+        for(int i=0; i<shells; i++) 
+        	builder.append("\tShell_"+i);
+        builder.append(NEWLINE);
+
+        for (int dataset = 0; dataset < datasetCount; dataset++) {
+            XYZDataset ds = (XYZDataset) plot.getDataset(dataset);
+
+            for (int series = 0; series<ds.getSeriesCount(); series++) {
+                String columnName = ds.getSeriesKey(series).toString();
+                builder.append(columnName);
+               
+                for (int item = 0; item < ds.getItemCount(series); item++) {
+                   double value = ds.getZValue(series, item);
+                    builder.append("\t"+df.format(value));
+                }
+                builder.append(NEWLINE);
+            }
+        }
+        return builder.toString();
+    }
+
     private String getShellData() throws ClassCastException {
         CategoryPlot plot = this.getChart().getCategoryPlot();
         StringBuilder builder = new StringBuilder();
-        DecimalFormat df = new DecimalFormat("#0.00");
-
+        DecimalFormat df = new DecimalFormat("#0.0000");
+        
         int datasetCount = plot.getDatasetCount();
+        // header
+        builder.append("Dataset");
+        int shells = plot.getDataset(0).getColumnCount();        
+        for(int i=0; i<shells; i++) 
+        	builder.append("\tShell_"+i);
+        builder.append(NEWLINE);
 
         for (int dataset = 0; dataset < datasetCount; dataset++) {
             ShellResultDataset ds = (ShellResultDataset) plot.getDataset(dataset);
-
-            for (int column = 0; column < ds.getColumnCount(); column++) {
-                String columnName = ds.getColumnKey(column).toString();
-                builder.append("Shell_" + columnName + ":" + NEWLINE);
-
-                for (int row = 0; row < ds.getRowCount(); row++) {
-                    String rowName = ds.getRowKey(row).toString();
-                    builder.append("\t" + rowName + ":" + NEWLINE);
-
-                    double value = ds.getValue(row, column).doubleValue();
-                    builder.append("\t\t" + df.format(value) + NEWLINE);
-                }
+            for (int row = 0; row < ds.getRowCount(); row++) {
+            	
+            	String datasetKey = ds.getRowKey(row).toString();
+            	builder.append(datasetKey);
+            	for (int column = 0; column < shells; column++) {
+            		double value = ds.getValue(row, column).doubleValue();
+            		builder.append("\t" + df.format(value));
+            	}
+            	builder.append(NEWLINE);
             }
         }
-
-        builder.append(NEWLINE);
         return builder.toString();
     }
 
@@ -447,15 +469,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
         for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
 
-            XYDataset ds;
-            try {
-                ds = (DefaultXYDataset) plot.getDataset(dataset);
-            } catch (ClassCastException e) {
-                ds = (XYSeriesCollection) plot.getDataset(dataset); // try
-                                                                    // getting a
-                                                                    // collection
-                                                                    // instead
-            }
+            XYDataset ds = plot.getDataset(dataset);
 
             for (int series = 0; series < ds.getSeriesCount(); series++) {
 
@@ -561,17 +575,6 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             }
         }
         return builder.toString();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        super.actionPerformed(arg0);
-
-        // Align two points to the vertical
-        if (arg0.getActionCommand().equals("Export")) {
-
-            export();
-        }
     }
 
     /**

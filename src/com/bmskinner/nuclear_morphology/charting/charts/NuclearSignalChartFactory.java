@@ -213,7 +213,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 	        
 	        String labels[] = new String[xyz.getSeriesCount()];
 	        for (int i = 0; i<xyz.getSeriesCount(); i++)
-	            labels[i] = xyz.getSeriesKey(i).toString();
+	            labels[i] = xyz.getSeriesKey(i).toString().replaceAll("_Series_\\d+$", ""); // Series added in case datasets have same name
 	        SymbolAxis yAxis = new SymbolAxis(null, labels);
 
 	        // finally a renderer and a plot
