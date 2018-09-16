@@ -30,13 +30,15 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class NucleusProfilesPanel extends DetailPanel {
+	
+	JTabbedPane tabPanel;
     
     private static final String PANEL_TITLE_LBL = "Nuclear profiles";
 
     public NucleusProfilesPanel(@NonNull InputSupplier context) {
         super(context, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
-        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+        tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
         for (ProfileType type : ProfileType.displayValues()) {
 
@@ -45,19 +47,10 @@ public class NucleusProfilesPanel extends DetailPanel {
             tabPanel.addTab(panel.getPanelTitle(), panel);
         }
 
-        /*
-         * Create the other profile panels
-         */
-
-//        DetailPanel modalityDisplayPanel = new ModalityDisplayPanel();
         DetailPanel variabilityChartPanel = new VariabilityDisplayPanel(context);
 
         this.addSubPanel(variabilityChartPanel);
-//        this.addSubPanel(modalityDisplayPanel);
-
         tabPanel.addTab(variabilityChartPanel.getPanelTitle(), variabilityChartPanel);
-//        tabPanel.addTab(modalityDisplayPanel.getPanelTitle(), modalityDisplayPanel);
-
         this.add(tabPanel, BorderLayout.CENTER);
 
     }

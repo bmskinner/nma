@@ -29,6 +29,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class ComparisonDetailPanel extends DetailPanel {
+	
+	JTabbedPane tabPanel;
     
     private static final String PANEL_TITLE_LBL = "Comparisons";
 
@@ -37,7 +39,7 @@ public class ComparisonDetailPanel extends DetailPanel {
 
         this.setLayout(new BorderLayout());
 
-        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+        tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
         DetailPanel vennPanel = new VennDetailPanel(context);
         DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel(context);

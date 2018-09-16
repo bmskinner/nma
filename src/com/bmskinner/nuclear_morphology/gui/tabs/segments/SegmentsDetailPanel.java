@@ -36,12 +36,14 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public class SegmentsDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Nuclear segments";
+    
+    private JTabbedPane tabPanel;
 
     public SegmentsDetailPanel(@NonNull InputSupplier context) {
         super(context);
         this.setLayout(new BorderLayout());
 
-        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+        tabPanel = new JTabbedPane(JTabbedPane.TOP);
         tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         DetailPanel segmentProfilePanel = new SegmentProfilePanel(context);

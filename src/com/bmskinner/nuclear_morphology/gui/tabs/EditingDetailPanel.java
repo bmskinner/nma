@@ -34,12 +34,14 @@ import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 public class EditingDetailPanel extends DetailPanel {
     
     private static final String PANEL_TITLE_LBL = "Editing";
+    
+    private JTabbedPane tabPane;
 
     public EditingDetailPanel(@NonNull InputSupplier context) {
         super(context);
 
         this.setLayout(new BorderLayout());
-        JTabbedPane tabPane = new JTabbedPane();
+        tabPane = new JTabbedPane();
         this.add(tabPane, BorderLayout.CENTER);
 
         DetailPanel cellDetailPanel = new IndividualCellDetailPanel(context);

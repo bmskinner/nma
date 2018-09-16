@@ -73,7 +73,6 @@ public class IndividualCellDetailPanel extends DetailPanel {
     public IndividualCellDetailPanel(@NonNull InputSupplier context) {
 
         super(context);
-
         try {
 
             createSubPanels(context);
@@ -107,7 +106,6 @@ public class IndividualCellDetailPanel extends DetailPanel {
             warn("Error creating cell detail panel");
             stack("Error creating cell detail panel", e);
         }
-
     }
     
     
