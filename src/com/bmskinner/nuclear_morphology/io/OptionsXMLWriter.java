@@ -30,6 +30,7 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	public static final String DETECTED_OBJECT  = "Detected_object";
 	public static final String NUCLEUS_TYPE     = "Nucleus_type";
 	public static final String PROFILE_WINDOW   = "Profile_window";
+	public static final String SOFTWARE_VERSION = "SoftwareVersion";
 	
 	public static final String BOOLEAN_KEY = "Booleans";
 	public static final String FLOAT_KEY   = "Floats";
@@ -92,6 +93,11 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	}
 	
 	private static void appendElement(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options, Element rootElement) {
+		
+		Element versionElement = new Element(SOFTWARE_VERSION);
+		versionElement.setText(dataset.getVersion().toString());
+		rootElement.addContent(versionElement);
+		
 		for(String key : options.getDetectionOptionTypes()){
 			Element element = new Element(DETECTION_METHOD);
 			if(isUUID(key) || key.startsWith(IAnalysisOptions.SIGNAL_GROUP)){ // signal group without prefix
