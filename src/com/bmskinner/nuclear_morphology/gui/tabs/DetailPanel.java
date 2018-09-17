@@ -78,12 +78,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, CellUpdatedEventListener {
 
-    private final List<Object> listeners = new CopyOnWriteArrayList<Object>();
+    private final List<Object> listeners = new CopyOnWriteArrayList<>();
     
     private final InputSupplier inputSupplier;
 
     private final TabPanel parentPanel;
-    private final List<TabPanel> subPanels = new ArrayList<TabPanel>();
+    private final List<TabPanel> subPanels = new ArrayList<>();
 
     // The chart cache holds rendered charts for all selected options, until a
     // change is made to a dataset

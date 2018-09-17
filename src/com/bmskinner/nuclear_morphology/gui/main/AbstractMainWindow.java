@@ -6,26 +6,25 @@ import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFrame;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener.PopulationListUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
@@ -37,9 +36,11 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
             + Version.currentVersion().toString();
 	
 	protected final List<EventListener> listeners   = new ArrayList<>();
-	protected List<EventListener> updateListeners = new ArrayList<>();
 	
-	// store panels for iterating messages
+	/** Listeners for datase update events */
+	protected final List<EventListener> updateListeners   = new ArrayList<>();
+	
+	/** Panels displaying dataset information */
 	protected final List<TabPanel> detailPanels = new ArrayList<>();
 
 	protected final EventHandler eh;
@@ -81,12 +82,9 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 
                 Runnable r = () -> {
                     try {
-                        // If the update is called immediately, then the chart
-                        // size has
-                        // not yet changed, and therefore will render at the
-                        // wrong aspect
+                        // If the update is called immediately, the chart  size has
+                        // not yet changed, and therefore will render at the wrong aspect
                         // ratio
-
                         Thread.sleep(100);
                     } catch (InterruptedException e1) {
                         return;
@@ -122,7 +120,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 	public boolean isStandalone() {
         return isStandalone;
     }
-    
+      
     /**
      * Get the event handler that dispatches messages and analyses
      * 
@@ -133,25 +131,16 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
         return eh;
     }
     
-    
-    /*
-     * Trigger a recache of all charts and datasets
-     */
-    protected synchronized void recacheCharts() {
-
-        Runnable task = () -> {
-            for (TabPanel panel : getTabPanels()) {
-                panel.refreshChartCache();
-                panel.refreshTableCache();
-                
-                // All caches have been cleared, now reload whatever was selected 
-                eventReceived(new DatasetUpdateEvent(this, DatasetListManager.getInstance().getSelectedDatasets()));
-                
-            }
-        };
-        ThreadManager.getInstance().execute(task);
+    @Override
+	public InputSupplier getInputSupplier() {
+        return eh.getInputSupplier();
     }
-
+    
+    
+    /**
+     * Remove all charts and tables from caches, 
+     * but do not redraw them 
+     */
     protected synchronized void clearChartCache() {
         for (TabPanel panel : getTabPanels()) {
             panel.clearChartCache();
@@ -159,6 +148,11 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
         }
     }
 
+    /**
+     * Remove charts and tables from caches which contain the
+     * given datasets 
+     * @param list
+     */
     protected synchronized void clearChartCache(final List<IAnalysisDataset> list) {
 
         if (list == null || list.isEmpty()) {
@@ -171,19 +165,36 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
             panel.clearTableCache(list);
         }
     }
-
-
-    protected synchronized void recacheCharts(final List<IAnalysisDataset> list) {
+    
+    /*
+     * Trigger a recache of all charts and tables
+     */
+    protected synchronized void recacheCharts() {
 
         Runnable task = () -> {
             for (TabPanel panel : getTabPanels()) {
-                panel.refreshChartCache(list);
-                panel.refreshTableCache(list);
+                panel.refreshChartCache();
+                panel.refreshTableCache();                
             }
-            ThreadManager.getInstance().execute(new PanelUpdater(list));
-//            eventReceived(new DatasetUpdateEvent(this, list));//DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
         };
         ThreadManager.getInstance().execute(task);
+    }
+
+    /*
+     * Trigger a recache of all charts and tables which contain the given datasets
+     */
+    protected synchronized void recacheCharts(final List<IAnalysisDataset> list) {
+
+    	Runnable task = () -> {
+    		for (TabPanel panel : getTabPanels()) {
+    			panel.refreshChartCache(list);
+    			panel.refreshTableCache(list);
+    		}
+    		// Trigger a panel update for the given datasets
+//    		ThreadManager.getInstance().execute(new PanelUpdater(list));
+
+    	};
+    	ThreadManager.getInstance().execute(task);
 
     }
     
@@ -263,22 +274,29 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 		}
 	}
     
+    /**
+     * Send panel update requests to all panels
+     * @author ben
+     *
+     */
     public class PanelUpdater implements CancellableRunnable {
         private final List<IAnalysisDataset> list;
         
         private final AtomicBoolean isCancelled = new AtomicBoolean(false);
 
-        public PanelUpdater(final List<IAnalysisDataset> list) {
+        public PanelUpdater(final @NonNull List<IAnalysisDataset> list) {
             this.list = list;
         }
 
         @Override
         public synchronized void run() {
 
+        	// Set the loading state
         	for (TabPanel p : getTabPanels()) {
         		p.setChartsAndTablesLoading();
         	}
 
+        	// Fire the update to each listener
             DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
             Iterator<EventListener> iterator = updateListeners.iterator();
             while (iterator.hasNext()) {

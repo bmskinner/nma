@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
@@ -59,23 +60,29 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
         if (DatasetListManager.getInstance().hashCodeChanged()) {
             fine("Found changed hashcode");
-            Object[] options = { "Save and exit", "Exit without saving", "Do not exit" };
-            int save = JOptionPane.showOptionDialog(null, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            String[] options = { "Save and exit", "Exit without saving", "Do not exit" };
             
-            switch(save) {
-            	case 0: saveAndClose();
+            
+			try {
+				int save = mw.getInputSupplier().requestOption(options, 0, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?");
+				
+				switch(save) {
+            	case 0: saveAndClose(); break;
             	case 1: close();
             	case 2: return;
             	default: return;
             }
-
+				
+			} catch (RequestCancelledException e1) {
+				return;
+			}
         }
 		fine("No change found");
 		close();
     }
 
-    public void windowClosed(WindowEvent e) {
+    @Override
+	public void windowClosed(WindowEvent e) {
         close();
     }
 
@@ -84,6 +91,9 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
         GlobalOptions.getInstance().setDefaults();
 
         for (Handler h : Logger.getLogger(Loggable.ERROR_LOGGER).getHandlers()) {
+            h.close();
+        }
+        for (Handler h : Logger.getLogger(Loggable.PROGRAM_LOGGER).getHandlers()) {
             h.close();
         }
 

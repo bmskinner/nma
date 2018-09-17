@@ -152,7 +152,12 @@ public class DefaultInputSupplier implements InputSupplier {
 
 	@Override
 	public int requestOption(String[] options, int defaultOption, String message) throws RequestCancelledException {
-        int result = JOptionPane.showOptionDialog(null, message, message,
+        return requestOption(options, defaultOption, message,message);
+	}
+	
+	@Override
+	public int requestOption(String[] options, int defaultOption, String message, String title) throws RequestCancelledException {
+        int result = JOptionPane.showOptionDialog(null, message, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[defaultOption]);
         if(result<0)
@@ -160,8 +165,6 @@ public class DefaultInputSupplier implements InputSupplier {
         return result;
         
 	}
-	
-	
 	
 	
 

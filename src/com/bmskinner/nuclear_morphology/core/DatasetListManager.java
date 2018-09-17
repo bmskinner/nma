@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -53,12 +54,10 @@ public final class DatasetListManager implements Loggable {
      * the list can be used to determine the order of root datasets within the
      * populations panel.
      */
-    private volatile List<IAnalysisDataset> list = new ArrayList<>();
+    private volatile List<IAnalysisDataset> list = new CopyOnWriteArrayList<>();
 
-    /**
-     * The datasets currently selected in the UI. Includes child datasets
-     */
-    private volatile List<IAnalysisDataset> selected = new ArrayList<>();
+    /**The datasets currently selected in the UI. Includes child datasets */
+    private volatile List<IAnalysisDataset> selected = new ArrayList<>();;
 
     /**
      * This map stores the UUID of a dataset as a key against the hashcode of
@@ -67,11 +66,12 @@ public final class DatasetListManager implements Loggable {
      */
     private final Map<UUID, Integer> datasetHashcodeMap = new HashMap<>();
     
-    private final List<IWorkspace> workspaces = new ArrayList<>();
+    private final List<IWorkspace> workspaces = new CopyOnWriteArrayList<>();
     
+    /** Hashcodes for workspaces */
     private final Map<UUID, Integer> workspaceHashcodeMap = new HashMap<>();
 
-    protected DatasetListManager() { }
+    private DatasetListManager() { }
 
     /**
      * Fetch an instance of the manager
@@ -155,7 +155,7 @@ public final class DatasetListManager implements Loggable {
      * Set the selected datasets to the contents of the list
      * @param list
      */
-    public synchronized final void setSelectedDatasets(@NonNull Collection<IAnalysisDataset> list) {
+    public synchronized final void setSelectedDatasets(@NonNull final Collection<IAnalysisDataset> list) {
         selected.clear();
         selected.addAll(list);
     }
@@ -164,7 +164,7 @@ public final class DatasetListManager implements Loggable {
      * Set the given dataset to be the only selected dataset
      * @param d
      */
-    public synchronized final void setSelectedDataset(@NonNull IAnalysisDataset d) {
+    public synchronized final void setSelectedDataset(@NonNull final IAnalysisDataset d) {
         selected.clear();
         selected.add(d);
     }

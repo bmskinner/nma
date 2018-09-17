@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.gui.main;
 import java.awt.event.WindowListener;
 
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 
 /**
@@ -17,7 +18,20 @@ public interface MainView {
 	
 	boolean isStandalone();
 	
+    /**
+     * Get the event handler that dispatches messages and analyses
+     * 
+     * @return
+     */
 	EventHandler getEventHandler();
+	
+	
+    /**
+     * Get the input supplier for requesting user input
+     * 
+     * @return
+     */
+	InputSupplier getInputSupplier();
 	
 	ProgressBarAcceptor getProgressAcceptor();
 
