@@ -60,11 +60,12 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
             boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 
             IAnalysisMethod m;
-
+            int progressLength = PROGRESS_BAR_LENGTH;
             // The averaging method does not work for nuclei that are round, or have extreme variability. 
             // In these cases, or if the program config file has been set to override, use the old profile method.
             if (override){
                 m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+                progressLength = CurveRefoldingMode.FAST.maxIterations();
             } else {
                 
                 NucleusType t = dataset.getCollection().getNucleusType();
@@ -72,6 +73,7 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
                     case ROUND:
                     case NEUTROPHIL: {
                         m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+                        progressLength = CurveRefoldingMode.FAST.maxIterations();
                         break;
                     }
                     
@@ -81,7 +83,8 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
                 }
             }
 
-            worker = new DefaultAnalysisWorker(m, PROGRESS_BAR_LENGTH);
+            
+            worker = new DefaultAnalysisWorker(m, progressLength);
             worker.addPropertyChangeListener(this);
 
             this.setProgressMessage(PROGRESS_LBL + ": " + dataset.getName());

@@ -66,18 +66,16 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
         fireIndeterminate();
 
         // do the analysis and wait for the result
-        IAnalysisResult r = method.call();
-
-        fireIndeterminate();
+        IAnalysisResult r=  method.call();
+//        fine("Method completed, returning");
         return r;
     }
 
     @Override
     public void progressEventReceived(ProgressEvent event) {
 
-        if(this.isCancelled()){
+        if(this.isCancelled())
             method.cancel();
-        }
         
         if (event.getMessage() == ProgressEvent.SET_TOTAL_PROGRESS) {
         	progressTotal = event.getValue();
@@ -89,17 +87,13 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
         	return;
         }
 
-        if(event.getMessage()==ProgressEvent.INCREASE_BY_VALUE){
+        if(event.getMessage()==ProgressEvent.INCREASE_BY_VALUE)
         	progressCount=event.getValue();
-        } else {
+        else
         	progressCount++;
-        }
 
-        if (progressTotal >= 0) {
+        if (progressTotal >= 0)
         	publish(progressCount);
-        }
-
-
     }
 
     @Override
@@ -112,14 +106,13 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     }
 
     private void fireIndeterminate() {
+//    	fine("Firing indeterminate");
         firePropertyChange(IAnalysisWorker.INDETERMINATE_MSG, getProgress(), IAnalysisWorker.INDETERMINATE);
     }
 
     @Override
     public void done() {
-
-//        fine("Worker completed task");
-
+//    	fine("Task is done");
         try {
 
             if (this.get() != null) {
@@ -127,7 +120,6 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
                 firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
 
             } else {
-//                fine("Firing trigger for failed task");
                 firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
             }
 

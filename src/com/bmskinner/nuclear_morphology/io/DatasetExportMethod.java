@@ -28,6 +28,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
@@ -43,52 +45,45 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 
     private File saveFile = null;
-    // private boolean useHDF5 = false;
 
     /**
      * Construct with a dataset to export and the file location
      * 
-     * @param dataset
-     *            the dataset to be exported
-     * @param saveFile
-     *            the file to export to
+     * @param dataset the dataset to be exported
+     * @param saveFile the file to export to
      */
-    public DatasetExportMethod(IAnalysisDataset dataset, File saveFile) {
+    public DatasetExportMethod(@NonNull IAnalysisDataset dataset, @NonNull File saveFile) {
         super(dataset);
         this.saveFile = saveFile;
     }
 
-    public IAnalysisResult call() {
+    @Override
+	public IAnalysisResult call() {
         run();
         IAnalysisResult r = new DefaultAnalysisResult(dataset);
+//        fine("Returning saved dataset");
         return r;
     }
 
     protected void run() {
 
-        try {
+    	try {
+    		if (saveAnalysisDataset(dataset, saveFile)) 
+    			fine("Save was sucessful");
+    		else
+    			warn("Save was unsucessful");
 
-            if (saveAnalysisDataset(dataset, saveFile)) {
-                finest("Save was sucessful");
-
-            } else {
-                warn("Save was unsucessful");
-            }
-
-        } catch (Exception e) {
-            warn("Save was unsucessful");
-            stack("Unable to save dataset", e);
-        }
-
+    	} catch (Exception e) {
+    		warn("Save was unsucessful");
+    		stack("Unable to save dataset", e);
+    	}
     }
 
     /**
      * Save the given dataset to the given file
      * 
-     * @param dataset
-     *            the dataset
-     * @param saveFile
-     *            the file to save as
+     * @param dataset the dataset
+     * @param saveFile the file to save as
      * @return
      */
     public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile) {

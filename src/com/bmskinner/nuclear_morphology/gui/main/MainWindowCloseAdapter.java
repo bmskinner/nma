@@ -61,16 +61,15 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
         if (DatasetListManager.getInstance().hashCodeChanged()) {
             fine("Found changed hashcode");
             String[] options = { "Save and exit", "Exit without saving", "Do not exit" };
-            
-            
+
 			try {
 				int save = mw.getInputSupplier().requestOption(options, 0, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?");
 				
 				switch(save) {
-            	case 0: saveAndClose(); break;
-            	case 1: close();
-            	case 2: return;
-            	default: return;
+	            	case 0: saveAndClose(); return;
+	            	case 1: close(); return;
+	            	case 2: return;
+	            	default: return;
             }
 				
 			} catch (RequestCancelledException e1) {
@@ -106,33 +105,45 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
      * Save the root datasets, then dispose the frame
      */
     private void saveAndClose() {
-        Runnable r = () -> {
-            for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
-                final CountDownLatch latch = new CountDownLatch(1);
+    	
+    	final CountDownLatch latch = new CountDownLatch(1);
+    	
+    	// Run saves
+    	Runnable r = () ->{
+    		
+    		for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
+    			final CountDownLatch cl = new CountDownLatch(1);
+    			Runnable task = new SaveDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), cl, false);
+    			new Thread(task).run();
+    			try {
+    				cl.await();
+    			} catch (InterruptedException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+    		}
+    		log("All root datasets saved");
 
-                Runnable task = new SaveDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), latch, false);
-                task.run();
+    		for (IWorkspace w : DatasetListManager.getInstance().getWorkspaces()) {
+    			Runnable wrkTask = new ExportWorkspaceAction(w, mw.getProgressAcceptor(), mw.getEventHandler());
+    			wrkTask.run();
+    		}
+    		log("All workspaces saved");
+    		latch.countDown();
+    	};
 
-                try {
-                    latch.await();
-                } catch (InterruptedException e) {
-                    error("Interruption to thread", e);
-                }
-            }
-            
-            log("All root datasets saved");
-            
-            for (IWorkspace w : DatasetListManager.getInstance().getWorkspaces()) {
-
-            	Runnable wrkTask = new ExportWorkspaceAction(w, mw.getProgressAcceptor(), mw.getEventHandler());
-            	wrkTask.run();
-            }
-            log("All workspaces saved");
-            
-            close();
-        };
-
-        ThreadManager.getInstance().execute(r);
+    	// Wait for saves to complete, then close the window
+    	Runnable s = () ->{
+    		try {
+    			latch.await();
+    		} catch (InterruptedException e) {
+    			stack(e);
+    		}
+    		close();
+    	};
+    	
+    	new Thread(r).start();
+    	new Thread(s).start();
     }
 
 }

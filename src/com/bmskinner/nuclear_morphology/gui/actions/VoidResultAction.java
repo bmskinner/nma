@@ -180,27 +180,22 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
             
         }
 
-        if (evt.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
+        if (evt.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG))
             finished();
-        }
 
-        if (evt.getPropertyName().equals(IAnalysisWorker.ERROR_MSG)) {
+        if (evt.getPropertyName().equals(IAnalysisWorker.ERROR_MSG))
             removeProgressBar();
-        }
 
-        if (evt.getPropertyName().equals(IAnalysisWorker.INDETERMINATE_MSG)) {
+        if (evt.getPropertyName().equals(IAnalysisWorker.INDETERMINATE_MSG))
             setProgressBarIndeterminate();
-        }
-
     }
 
     /**
      * The method run when the analysis has completed
      */
     public void finished() {
-        this.worker.removePropertyChangeListener(this);
+        worker.removePropertyChangeListener(this);
         cancel();
-
     }
 
     /**

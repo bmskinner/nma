@@ -67,7 +67,8 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
     public SaveDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal,
             boolean chooseSaveLocation) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
-        setLatch(doneSignal);
+        if(doneSignal!=null)
+        	setLatch(doneSignal);
 
         this.setProgressBarIndeterminate();
 
@@ -78,7 +79,7 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
             String fileName = saveDialog.getFileName();
             String folderName = saveDialog.getDirectory();
             if (fileName != null && folderName != null) {
-                saveFile = new File(folderName + File.separator + fileName);
+                saveFile = new File(folderName, fileName);
             } else {
                 this.finished();
             }
@@ -106,6 +107,7 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
 
     @Override
     public void finished() {
+//    	fine("Finished save");
         this.countdownLatch();
         super.finished();
     }

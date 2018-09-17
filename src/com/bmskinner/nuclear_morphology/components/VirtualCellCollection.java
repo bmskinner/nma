@@ -77,21 +77,25 @@ public class VirtualCellCollection implements ICellCollection {
 
     private static final long serialVersionUID = 1L;
 
+    /** the dataset this is a child of */
     private final IAnalysisDataset parent;
 
+    /** the cells that belong to this collection */
     private final Set<UUID> cellIDs = new HashSet<>(0);
 
-    private final UUID uuid; // the collection id
+    /** the collection id */
+    private final UUID uuid;
 
-    private String name; // the name of the collection
+    /** the name of the collection */
+    private String name;
 
-    // this holds the mapping of tail indexes etc in the median profile arrays
+    /** this holds the mapping of tail indexes etc in the median profile arrays */
     private volatile IProfileCollection profileCollection = new DefaultProfileCollection();
 
-    private volatile Nucleus consensusNucleus; // the refolded consensus nucleus
+    /** the refolded consensus nucleus */
+    private volatile Nucleus consensusNucleus;
 
-    // We need to store signal groups separately to allow shell results etc to
-    // be kept
+    /** Store signal groups separately to allow shell results to be kept */
     private volatile Map<UUID, IShellResult> shellResults = new HashMap<>(0);
 
     /*
@@ -103,9 +107,7 @@ public class VirtualCellCollection implements ICellCollection {
     protected volatile transient Map<UUID, Integer> vennCache = new HashMap<>();
 
     private transient ProfileManager profileManager = new ProfileManager(this);
-    private transient SignalManager  signalManager  = new SignalManager(this); // TODO:
-                                                                               // integrate
-
+    private transient SignalManager  signalManager  = new SignalManager(this);
     private volatile transient StatsCache statsCache = new StatsCache();
 
     /**
