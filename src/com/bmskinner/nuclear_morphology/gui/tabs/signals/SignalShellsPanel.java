@@ -289,10 +289,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         	try {
 				new DemoReportGenerator().generateShellReport(activeDataset());
 			} catch (IOException e1) {
-				warn("Well, poo: "+e1.getMessage());
+				
 			}
         });
-        panel.add(reportBtn);
+//        panel.add(reportBtn);
         
         setEnabled(false);
 

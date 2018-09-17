@@ -231,11 +231,11 @@ public final class DatasetListManager implements Loggable {
 
     /**
      * Get all the datasets in the manager. Recursively fetches child datasets.
-     * @return
+     * @return the datasets, or an empty set if no datasets are loaded
      */
-    public synchronized final Set<IAnalysisDataset> getAllDatasets() {
+    @NonNull public synchronized final Set<IAnalysisDataset> getAllDatasets() {
 
-        Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>();
+        Set<IAnalysisDataset> result = new HashSet<>();
         for (IAnalysisDataset d : list) {
             result.add(d);
             result.addAll(d.getAllChildDatasets());

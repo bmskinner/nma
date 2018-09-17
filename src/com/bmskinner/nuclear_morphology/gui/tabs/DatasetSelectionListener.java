@@ -1,8 +1,11 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EventObject;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
@@ -23,8 +26,14 @@ public interface DatasetSelectionListener {
 	 */
 	public class DatasetSelectionEvent extends EventObject {
 
-		List<IAnalysisDataset> datasets = new ArrayList<>();
-		public DatasetSelectionEvent(Object source, List<IAnalysisDataset> list) {
+		private final List<IAnalysisDataset> datasets = new ArrayList<>();
+		
+		/**
+		 * Create with datasets to display in the ui
+		 * @param source
+		 * @param list
+		 */
+		public DatasetSelectionEvent(Object source, @NonNull final Collection<IAnalysisDataset> list) {
 			super(source);
 			datasets.addAll(list);
 		}
