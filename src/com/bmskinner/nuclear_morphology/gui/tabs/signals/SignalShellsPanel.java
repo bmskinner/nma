@@ -366,7 +366,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         return panel;
     }
 
-    private void updateChartAndTable() {
+    private synchronized void updateChartAndTable() {
 
         Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
         Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
@@ -402,7 +402,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
 
         updateChartAndTable();
         setEnabled(false);
@@ -416,7 +416,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
     	showRandomCheckbox.setEnabled(false);
     	showNuclei.setEnabled(false);
         filterBtn.setEnabled(false);
@@ -426,7 +426,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         setEnabled(false);
         updateChartAndTable();
 
@@ -442,7 +442,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
 //        if (options.getTarget() == chartPanel) {
             return new NuclearSignalChartFactory(options).createShellChart();
 //        }
@@ -450,14 +450,14 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    protected TableModel createPanelTableType(@NonNull TableOptions options) {
+    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
     	if(options.getTarget()==pairwiseTable)
     		return new NuclearSignalTableCreator(options).createPairwiseShellChiSquareTable();
         return new NuclearSignalTableCreator(options).createShellChiSquareTable();
     }
 
     @Override
-    public void actionPerformed(ActionEvent arg0) {
+    public synchronized void actionPerformed(ActionEvent arg0) {
         updateChartAndTable();
     }
     

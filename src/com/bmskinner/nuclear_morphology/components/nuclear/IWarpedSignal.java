@@ -47,10 +47,8 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	 * Add a warped signal image for the given template
 	 * @param template the template object signals were warped on to 
 	 * @param image the warped image
-	 */
-//	void addWarpedImage(@NonNull CellularComponent template, @NonNull ImageProcessor image);
-	
-	void addWarpedImage(@NonNull CellularComponent template, @NonNull ByteProcessor image);
+	 */	
+	void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, @NonNull ByteProcessor image);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 
@@ -59,6 +57,9 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	 * @return
 	 */
 	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template);
+	
+	
+	String getTargetName(@NonNull CellularComponent template);
 	
 	/**
 	 * Detect a signal within the warped signal image, using the given detection options.

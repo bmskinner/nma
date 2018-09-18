@@ -151,12 +151,12 @@ public class SignalsColocalisationPanel extends DetailPanel {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
         return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
     }
 }

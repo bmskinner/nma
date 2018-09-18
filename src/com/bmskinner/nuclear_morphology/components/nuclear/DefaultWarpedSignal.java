@@ -30,6 +30,8 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	/** ImageProcessors are not serializable, so store the byte array and convert back as needed */
 	private final Map<CellularComponent, byte[][]> templates = new HashMap<>();
 	
+	private final Map<CellularComponent, String> targetNames = new HashMap<>();
+	
 	private final boolean isCellsWithSignals;
 	
 	/**
@@ -57,7 +59,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	}
 
 	@Override
-	public void addWarpedImage(@NonNull CellularComponent template, @NonNull ByteProcessor image) {
+	public void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, @NonNull ByteProcessor image) {
 
 		byte[][] arr = new byte[image.getWidth()][image.getHeight()];
 		
@@ -67,6 +69,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			}
 		}
 		templates.put(template, arr);
+		targetNames.put(template, name);
 	}
 
 	@Override
@@ -83,6 +86,11 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 		}
 		return Optional.of(image);
 	}
+	
+	@Override
+	public String getTargetName(@NonNull CellularComponent template) {
+		return targetNames.get(template);
+	}
 
 	@Override
 	public Optional<INuclearSignal> getWarpedSignal(@NonNull CellularComponent template, @NonNull INuclearSignalOptions options) {
@@ -97,6 +105,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + (isCellsWithSignals ? 1231 : 1237);
 		result = prime * result + ((templates == null) ? 0 : templates.hashCode());
+		result = prime * result + ((targetNames == null) ? 0 : targetNames.hashCode());
 		return result;
 	}
 
@@ -121,7 +130,14 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 				return false;
 		} else if (!templates.equals(other.templates))
 			return false;
+		if (targetNames == null) {
+			if (other.targetNames != null)
+				return false;
+		} else if (!targetNames.equals(other.targetNames))
+			return false;
 		return true;
 	}
+
+
 
 }

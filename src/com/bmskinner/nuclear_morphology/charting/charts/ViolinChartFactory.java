@@ -82,7 +82,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @param ds the dataset
      * @return
      */
-    public JFreeChart createSignalColocalisationViolinChart() {
+    public synchronized JFreeChart createSignalColocalisationViolinChart() {
 
         ViolinCategoryDataset ds = null;
         if (options.hasDatasets()) {
@@ -103,15 +103,12 @@ public class ViolinChartFactory extends AbstractChartFactory {
         ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
 
         for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
-
-            for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
+            for (int series=0; series<plot.getDataset(datasetIndex).getRowCount(); series++) {
 
                 renderer.setSeriesPaint(series, Color.LIGHT_GRAY);
                 renderer.setSeriesOutlinePaint(series, Color.BLACK);
             }
-
         }
-
         return chart;
     }
 

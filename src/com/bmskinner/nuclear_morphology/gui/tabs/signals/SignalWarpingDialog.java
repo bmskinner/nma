@@ -48,6 +48,7 @@ import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionListener;
@@ -84,7 +85,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalWarpingModel.ImageCache.Key;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalWarpingModel.ImageCache.WarpedImageKey;
 
 import ij.process.ImageProcessor;
 
@@ -105,6 +106,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private static final String RUN_LBL             = "Run";
     private static final String DIALOG_TITLE        = "Signal warping";
     private static final String COW_LBL             = "Co-warpalise";
+    
+    private static final int KEY_COLUMN_INDEX = 4;
 
     private List<IAnalysisDataset> datasets;
     private ExportableChartPanel   chartPanel;
@@ -145,7 +148,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     public SignalWarpingDialog(final List<IAnalysisDataset> datasets) {
         super();
         this.datasets = datasets;
-        model = new SignalWarpingModel(this);
+        model = new SignalWarpingModel();
         
         // Add saved warped images to the image cache 
         model.addSavedImages(datasets);
@@ -273,25 +276,27 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             runButton.setEnabled(false);
 
         
-        thresholdSlider = new JSlider(0, model.ALL_VISIBLE);
+        thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
         lowerPanel.add(thresholdSlider);
         thresholdSlider.setVisible(false);
-        thresholdSlider.addChangeListener( e-> {
-        	JSlider s = (JSlider) e.getSource();
-    		int value = 255 - s.getValue();
-        	model.setThreshold(value);
-        	chartPanel.setChart(model.getChart());
-        });
+        thresholdSlider.addChangeListener( makeThresholdChangeListener());
 
         lowerPanel.add(progressBar);
         progressBar.setVisible(false);
-
-        lowerPanel.add(this.getLoadingLabel());
 
         headerPanel.add(upperPanel);
         headerPanel.add(lowerPanel);
 
         return headerPanel;
+    }
+    
+    private ChangeListener makeThresholdChangeListener() {
+    	return (e)-> {
+        	JSlider s = (JSlider) e.getSource();
+    		int value = SignalWarpingModel.THRESHOLD_ALL_VISIBLE - s.getValue();
+        	model.setThresholdOfSelected(value);
+        	chartPanel.setChart(model.getChart());
+        };
     }
 
     /**
@@ -313,11 +318,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         cellSelectionModel.addListSelectionListener(e->{
         	model.clearSelection();
         	int[] selectedRow = signalSelectionTable.getSelectedRows();
+        	thresholdSlider.setVisible(selectedRow.length==1);
 
         	for (int i = 0; i < selectedRow.length; i++) {
-        		fine("Selecting "+i);
-        		Key selectedKey = (Key) signalSelectionTable.getValueAt(selectedRow[i], 3);
+        		WarpedImageKey selectedKey = (WarpedImageKey) signalSelectionTable.getValueAt(selectedRow[i], KEY_COLUMN_INDEX);
+        		fine("Selected: "+selectedKey);
         		model.addSelection(selectedKey);
+        		for(ChangeListener l : thresholdSlider.getChangeListeners())
+        			thresholdSlider.removeChangeListener(l);
+        		thresholdSlider.setValue(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedKey));
+        		thresholdSlider.addChangeListener( makeThresholdChangeListener());
         		updateChart();
         	}
         });
@@ -337,7 +347,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private void updateChart() {
 
         Runnable task = () -> {
-            fine("Updating chart");
             chartPanel.setChart(model.getChart());
             chartPanel.restoreAutoBounds();
         };
@@ -352,11 +361,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	Vector<IAnalysisDataset> templateDatasets = new Vector<>();
     	Vector<ISignalGroup>     templateSignals  = new Vector<>();
     	Vector<Boolean>          isSignalsOnly    = new Vector<>();
-    	Vector<CellularComponent> targetShape     = new Vector<>();
-    	Vector<Key> keys     = new Vector<>();
-
+    	Vector<String > targetShape     = new Vector<>();
+    	Vector<WarpedImageKey> keys     = new Vector<>();
+    	
         for (CellularComponent d : model.getTargets()) {
-            for (Key k : model.getKeys(d)) {
+            for (WarpedImageKey k : model.getKeys(d)) {
             	
             	templateDatasets.add(k.getTemplate());
             	
@@ -365,7 +374,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             	templateSignals.add(s);
             	
             	isSignalsOnly.add(k.isOnlyCellsWithSignals());
-            	targetShape.add(d);
+            	targetShape.add(k.getTargetName());
             	keys.add(k);
             }
         }
@@ -378,9 +387,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
         signalSelectionTable.setModel(tableModel);
         signalSelectionTable.getColumn("Keys").setMaxWidth(0);
-        
-        ListSelectionModel cellSelectionModel = signalSelectionTable.getSelectionModel();
-        cellSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     }
 
     /**
@@ -402,7 +408,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
         	finest("Signal group: " + signalBox.getSelectedGroup());
 
-            setStatusLoading();
             setEnabled(false);
 
             progressBar.setStringPainted(true);
@@ -441,8 +446,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         try {
 
             ImageProcessor image = warper.get();
-            
-            CellularComponent consensusTemplate = datasetBoxTwo.getSelectedDataset().getCollection().getConsensus();
+            IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
+            CellularComponent consensusTemplate = targetDataset.getCollection().getConsensus();
             IAnalysisDataset signalSource = datasetBoxOne.getSelectedDataset();
             UUID signalGroupId = signalBox.getSelectedID();
             
@@ -451,18 +456,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             ISignalGroup sg  = signalSource.getCollection().getSignalGroup(signalGroupId).get();
             IWarpedSignal ws = sg.getWarpedSignals().orElse(new DefaultWarpedSignal(signalGroupId, isCellsWithSignals));
             
-            ws.addWarpedImage(consensusTemplate, image.convertToByteProcessor());
+            ws.addWarpedImage(consensusTemplate, targetDataset.getName(), image.convertToByteProcessor());
             sg.setWarpedSignals(ws);
             
             model.clearSelection();
-            model.addImage(consensusTemplate, signalSource, signalGroupId, isCellsWithSignals, image);
+            model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, image);
 
             updateSignalSelectionTable();
             updateChart();
 
             setEnabled(true);
-
-            setStatusLoaded();
 
         } catch (Exception e) {
             error("Error getting warp results", e);

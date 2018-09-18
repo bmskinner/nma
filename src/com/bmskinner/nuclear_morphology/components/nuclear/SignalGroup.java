@@ -136,8 +136,7 @@ public class SignalGroup implements ISignalGroup {
 
     @Override
     public String toString() {
-        String colour = groupColour == null ? "No colour" : groupColour.toString();
-        return String.format("Name: %s | Visible: %s | Colour: %s", groupName, isVisible, colour);
+        return groupName;
     }
     
 	@Override
