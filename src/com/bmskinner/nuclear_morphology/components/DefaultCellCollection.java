@@ -1325,6 +1325,8 @@ public class DefaultCellCollection implements ICellCollection {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
 		in.defaultReadObject();
+		
+		
 		isRefolding = false;
 
 		if (ruleSets == null || ruleSets.isEmpty()) {

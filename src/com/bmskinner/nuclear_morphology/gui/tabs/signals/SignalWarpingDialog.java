@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
@@ -44,8 +45,14 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -66,9 +73,14 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
@@ -110,7 +122,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     private JProgressBar progressBar = new JProgressBar(0, 100);
 
-    private JTree tree;
+//    private JTree tree;
+    private JTable signalSelectionTable;
 
     private final SignalWarpingModel model;
 
@@ -289,42 +302,32 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private JPanel createWestPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
+        
+        signalSelectionTable = new ExportableTable();
+        signalSelectionTable.setCellSelectionEnabled(false);
+        signalSelectionTable.setRowSelectionAllowed(true);
+        signalSelectionTable.setColumnSelectionAllowed(false);
+        ListSelectionModel cellSelectionModel = signalSelectionTable.getSelectionModel();
+        cellSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        
+        cellSelectionModel.addListSelectionListener(e->{
+        	model.clearSelection();
+        	int[] selectedRow = signalSelectionTable.getSelectedRows();
 
-        tree = new JTree();
-        selectionListener = createTreeListener();
-        updateTree();
-        JScrollPane sp = new JScrollPane(tree);
+        	for (int i = 0; i < selectedRow.length; i++) {
+        		fine("Selecting "+i);
+        		Key selectedKey = (Key) signalSelectionTable.getValueAt(selectedRow[i], 3);
+        		model.addSelection(selectedKey);
+        		updateChart();
+        	}
+        });
+
+        updateSignalSelectionTable();
+        JScrollPane sp = new JScrollPane(signalSelectionTable);
         panel.add(sp, BorderLayout.CENTER);
         return panel;
     }
-    
-    private TreeSelectionListener createTreeListener() {
-    	return e-> {
-    		if (!isCtrlPressed()) {
-                model.clearSelection();
-            }
-
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
-
-            Object obj = node.getUserObject();
-            if (obj instanceof Key) {
-
-                Key k = (Key) obj;
-                
-                if (isCtrlPressed()) {
-                	model.toggleSelection(k);
-                } else {
-                	model.addSelection(k);
-                }
-
-                thresholdSlider.setValue(255-model.getThreshold());
-                updateChart();
-            }
-
-            thresholdSlider.setVisible(model.selectedSize() == 1);
-    	};
-    }
-    
+        
     /**
      * Update the chart to display the given image over the nucleus outline for
      * dataset two
@@ -342,30 +345,42 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     }
 
-    private void updateTree() {
-
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Targets");
+    private void updateSignalSelectionTable() {
+    	
+    	DefaultTableModel tableModel = new DefaultTableModel();
+    	
+    	Vector<IAnalysisDataset> templateDatasets = new Vector<>();
+    	Vector<ISignalGroup>     templateSignals  = new Vector<>();
+    	Vector<Boolean>          isSignalsOnly    = new Vector<>();
+    	Vector<CellularComponent> targetShape     = new Vector<>();
+    	Vector<Key> keys     = new Vector<>();
 
         for (CellularComponent d : model.getTargets()) {
-
-            DefaultMutableTreeNode m = new DefaultMutableTreeNode("idToCome");
-            root.add(m);
             for (Key k : model.getKeys(d)) {
-                m.add(new DefaultMutableTreeNode(k));
+            	
+            	templateDatasets.add(k.getTemplate());
+            	
+            	UUID signalGroupId = k.getSignalGroupId();
+            	ISignalGroup s = k.getTemplate().getCollection().getSignalGroup(signalGroupId).get();
+            	templateSignals.add(s);
+            	
+            	isSignalsOnly.add(k.isOnlyCellsWithSignals());
+            	targetShape.add(d);
+            	keys.add(k);
             }
-
         }
-
-        tree.removeTreeSelectionListener(selectionListener);
         
-        TreeModel model = new DefaultTreeModel(root);
-        
-        tree.setModel(model);
+        tableModel.addColumn("Source dataset", templateDatasets);
+        tableModel.addColumn("Source signals", templateSignals);
+        tableModel.addColumn("Only cells with signals?", isSignalsOnly);
+        tableModel.addColumn("Target shape", targetShape);
+        tableModel.addColumn("Keys", keys);
 
-        for (int i = 0; i < tree.getRowCount(); i++) {
-            tree.expandRow(i);
-        }
-        tree.addTreeSelectionListener(selectionListener);
+        signalSelectionTable.setModel(tableModel);
+        signalSelectionTable.getColumn("Keys").setMaxWidth(0);
+        
+        ListSelectionModel cellSelectionModel = signalSelectionTable.getSelectionModel();
+        cellSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     }
 
     /**
@@ -431,16 +446,18 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             IAnalysisDataset signalSource = datasetBoxOne.getSelectedDataset();
             UUID signalGroupId = signalBox.getSelectedID();
             
+            boolean isCellsWithSignals = cellsWithSignalsBox.isSelected();
+            
             ISignalGroup sg  = signalSource.getCollection().getSignalGroup(signalGroupId).get();
-            IWarpedSignal ws = sg.getWarpedSignals().orElse(new DefaultWarpedSignal(signalGroupId));
+            IWarpedSignal ws = sg.getWarpedSignals().orElse(new DefaultWarpedSignal(signalGroupId, isCellsWithSignals));
             
             ws.addWarpedImage(consensusTemplate, image.convertToByteProcessor());
             sg.setWarpedSignals(ws);
             
             model.clearSelection();
-            model.addImage(consensusTemplate, signalSource, signalGroupId, image);
+            model.addImage(consensusTemplate, signalSource, signalGroupId, isCellsWithSignals, image);
 
-            updateTree();
+            updateSignalSelectionTable();
             updateChart();
 
             setEnabled(true);

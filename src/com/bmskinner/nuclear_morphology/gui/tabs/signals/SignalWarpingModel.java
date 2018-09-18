@@ -88,7 +88,7 @@ public class SignalWarpingModel implements Loggable {
             		
             		Optional<ImageProcessor> im = ws.get().getWarpedImage(c);
             		if(im.isPresent()) {
-            			Key k = cache.new Key(c, d, signalGroupId);
+            			Key k = cache.new Key(c, d, signalGroupId,ws.get().isCellsWithSignals());
             			cache.add(k, im.get());
 
 
@@ -115,8 +115,8 @@ public class SignalWarpingModel implements Loggable {
 		this.threshold = threshold;
 	}
 	
-	public void addImage(CellularComponent consensusTemplate, IAnalysisDataset signalSource, UUID signalGroupId, ImageProcessor image) {
-		Key k = cache.new Key(consensusTemplate, signalSource, signalGroupId);
+	public void addImage(CellularComponent consensusTemplate, IAnalysisDataset signalSource, UUID signalGroupId, boolean isCellsWithSignals, ImageProcessor image) {
+		Key k = cache.new Key(consensusTemplate, signalSource, signalGroupId,isCellsWithSignals);
 
         cache.add(k, image);
 
@@ -256,8 +256,8 @@ public class SignalWarpingModel implements Loggable {
             displayImages.add(k);
         }
 
-        public void addDisplayImage(@NonNull CellularComponent target, @NonNull IAnalysisDataset template, @NonNull UUID signalGroupId) {
-            displayImages.add(new Key(target, template, signalGroupId));
+        public void addDisplayImage(@NonNull CellularComponent target, @NonNull IAnalysisDataset template, boolean isCellsWithSignals, @NonNull UUID signalGroupId) {
+            displayImages.add(new Key(target, template, signalGroupId, isCellsWithSignals));
         }
 
         public void removeDisplayImage(@NonNull Key k) {
@@ -313,8 +313,8 @@ public class SignalWarpingModel implements Loggable {
             map.put(k, ip);
         }
 
-        public void add(@NonNull CellularComponent target, @NonNull IAnalysisDataset template, @NonNull UUID signalGroupId, @NonNull ImageProcessor ip) {
-            map.put(new Key(target, template, signalGroupId), ip);
+        public void add(@NonNull CellularComponent target, @NonNull IAnalysisDataset template, @NonNull UUID signalGroupId, boolean isCellsWithSignals, @NonNull ImageProcessor ip) {
+            map.put(new Key(target, template, signalGroupId, isCellsWithSignals), ip);
         }
 
         public ImageProcessor get(@NonNull Key k) {
@@ -343,14 +343,32 @@ public class SignalWarpingModel implements Loggable {
             private final @NonNull CellularComponent target;
             private final @NonNull IAnalysisDataset  template;
             private final @NonNull UUID              signalGroupId;
+            private final boolean isOnlyCellsWithSignals;
 
-            public Key(@NonNull CellularComponent target, @NonNull IAnalysisDataset template, @NonNull UUID signalGroupId) {
+            public Key(@NonNull CellularComponent target, @NonNull IAnalysisDataset template, @NonNull UUID signalGroupId, boolean isCellsWithSignals) {
                 this.target   = target;
                 this.template = template;
                 this.signalGroupId = signalGroupId;
+                isOnlyCellsWithSignals = isCellsWithSignals;
             }
 
-            @Override
+            public CellularComponent getTarget() {
+				return target;
+			}
+
+            public IAnalysisDataset getTemplate() {
+				return template;
+			}
+
+			public UUID getSignalGroupId() {
+				return signalGroupId;
+			}
+
+			public boolean isOnlyCellsWithSignals() {
+				return isOnlyCellsWithSignals;
+			}
+
+			@Override
             public int hashCode() {
                 final int prime = 31;
                 int result = 1;

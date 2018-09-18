@@ -127,22 +127,70 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      */
     int getVertexCount();
 
+    /**
+     * The total number of internal vertices
+     * 
+     * @return
+     */
     int getInternalVertexCount();
 
+    /**
+     * The total number of peripheral vertices
+     * 
+     * @return
+     */
     int getPeripheralVertexCount();
 
+    /**
+     * The total number of edges
+     * 
+     * @return
+     */
     int getEdgeCount();
 
+    /**
+     * The total number of faces
+     * 
+     * @return
+     */
     int getFaceCount();
 
+    /**
+     * Get the peripheral vertices
+     * 
+     * @return
+     */
     List<MeshVertex> getPeripheralVertices();
 
+    /**
+     * Get the internal vertices
+     * 
+     * @return
+     */
     List<MeshVertex> getInternalVertices();
 
+    /**
+     * Get the edges
+     * 
+     * @return
+     */
     Set<MeshEdge> getEdges();
 
+    /**
+     * Get the faces
+     * 
+     * @return
+     */
     Set<MeshFace> getFaces();
 
+    /**
+     * Test if the given mesh can be compared to this mesh. That is,
+     * does the mesh have the same number of vertices and segmentation
+     * pattern?
+     * 
+     * @param mesh the mesh to test
+     * @return true if the mesh can be compared to this mesh, false otherwise
+     */
     boolean isComparableTo(@NonNull Mesh<E> mesh);
 
     /**

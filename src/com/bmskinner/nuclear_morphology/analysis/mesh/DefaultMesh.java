@@ -39,11 +39,10 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPoin
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * An implementation of the Mesh for Nuclei
+ * A default implementation of the mesh
  * 
  * @author bms41
  *
@@ -55,18 +54,19 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
     private int vertexSpacing = 10; // the default average number of border
                                     // points between vertices
 
-    // For each segment, list the proportions through the segment at which a vertex is found
+    /** For each segment, list the proportions through the segment at which a vertex is found */
     private Map<Integer, List<Double>> segmentVertexProportions = new HashMap<>();
 
-    // Store the vertices in the mesh. List, so we can index it.
+    /** Store the vertices in the mesh. List, so we can index it. */
     private List<MeshVertex> peripheralVertices = new ArrayList<>();
 
-    // Store the skeleton vertices in the mesh
+    /** Store the skeleton vertices in the mesh */
     private List<MeshVertex> internalVertices = new ArrayList<>();
 
+    /** Track the edges in the mesh */
     private Set<MeshEdge> edges = new LinkedHashSet<>();
 
-    // Track the faces of interest in the mesh
+    /** Track the faces in the mesh */
     private Set<MeshFace> faces = new LinkedHashSet<>();
 
     E component;
@@ -112,7 +112,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
      * @param template the mesh to use for proportions
      * @throws MeshCreationException
      */
-    public DefaultMesh(@NonNull E n, @NonNull Mesh<Nucleus> template) throws MeshCreationException {
+    public DefaultMesh(@NonNull E n, @NonNull Mesh<E> template) throws MeshCreationException {
         this.component = n;
         this.segmentVertexProportions = template.getVertexProportions();
         this.vertexSpacing = template.getVertexSpacing();
@@ -163,14 +163,9 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         return segmentVertexProportions;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getNucleusName()
-     */
     @Override
     public String getComponentName() {
-        return component.toString();
+        return component==null ? "" : component.toString();
     }
 
     /**
@@ -188,12 +183,11 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             String name = "P" + newIndex;
             peripheralVertices.add(new DefaultMeshVertex(p, name, peripheral));
             return newIndex;
-        } else {
-            int newIndex = internalVertices.size();
-            String name = "I" + newIndex;
-            internalVertices.add(new DefaultMeshVertex(p, name, peripheral));
-            return newIndex;
         }
+		int newIndex = internalVertices.size();
+		String name = "I" + newIndex;
+		internalVertices.add(new DefaultMeshVertex(p, name, peripheral));
+		return newIndex;
     }
 
     /**
@@ -214,9 +208,8 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             MeshEdge e = new DefaultMeshEdge(v1, v2, 1);
             edges.add(e);
             return e;
-        } else {
-            throw new IllegalArgumentException("Mesh does not contain vertices");
         }
+		throw new IllegalArgumentException("Mesh does not contain vertices");
     }
 
     /**
@@ -240,172 +233,85 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             faces.add(f);
             return f;
 
-        } else {
-            return null;
         }
+		return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#contains(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshVertex)
-     */
+
     @Override
-    public boolean contains(MeshVertex v) {
+    public boolean contains(@NonNull MeshVertex v) {
         return (v != null && (peripheralVertices.contains(v) || internalVertices.contains(v)));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#contains(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace)
-     */
     @Override
-    public boolean contains(MeshFace test) {
+    public boolean contains(@NonNull MeshFace test) {
         return test != null && faces.contains(test);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#contains(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace)
-     */
     @Override
-    public boolean contains(IPoint test) {
+    public boolean contains(@NonNull IPoint test) {
         return hasFaceContaining(test);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#contains(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)
-     */
     @Override
-    public boolean contains(MeshEdge e) {
+    public boolean contains(@NonNull MeshEdge e) {
         return e != null && edges.contains(e);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getSegmentCount()
-     */
     @Override
     public int getSegmentCount() {
         return segmentCount;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getVertexSpacing()
-     */
     @Override
     public int getVertexSpacing() {
         return this.vertexSpacing;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getVertexCount()
-     */
     @Override
     public int getVertexCount() {
         return peripheralVertices.size() + internalVertices.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#
-     * getInternalVertexCount()
-     */
     @Override
     public int getInternalVertexCount() {
         return internalVertices.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#
-     * getPeripheralVertexCount()
-     */
     @Override
     public int getPeripheralVertexCount() {
         return peripheralVertices.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getEdgeCount()
-     */
     @Override
     public int getEdgeCount() {
         return edges.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getFaceCount()
-     */
     @Override
     public int getFaceCount() {
         return faces.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getPeripheralVertices
-     * ()
-     */
     @Override
     public List<MeshVertex> getPeripheralVertices() {
         return peripheralVertices;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getInternalVertices()
-     */
     @Override
     public List<MeshVertex> getInternalVertices() {
         return internalVertices;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getEdges()
-     */
     @Override
     public Set<MeshEdge> getEdges() {
         return edges;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getFaces()
-     */
     @Override
     public Set<MeshFace> getFaces() {
         return this.faces;
     }
-
 
     @Override
     public boolean isComparableTo(@NonNull Mesh<E> mesh) { 	
@@ -422,7 +328,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
     
     @Override
     public Mesh<E> comparison(@NonNull E target) throws MeshCreationException {
-    	return comparison(new DefaultMesh(target, this));
+    	return comparison(new DefaultMesh<E>(target, this));
     }
     
 
@@ -435,7 +341,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         finer("Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
         finer("Mesh has " + mesh.getFaceCount() + " faces");
 
-        DefaultMesh result = new DefaultMesh(this);
+        DefaultMesh<E> result = new DefaultMesh<E>(this);
 
         List<MeshEdge> ourEdges = new ArrayList<MeshEdge>(edges);
         List<MeshEdge> theirEdges = new ArrayList<MeshEdge>(mesh.getEdges());
@@ -450,9 +356,9 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             result.getEdge(our).setValue(ratio);
         }
 
-        List<MeshFace> ourFaces = new ArrayList<MeshFace>(faces);
-        List<MeshFace> theirFaces = new ArrayList<MeshFace>(mesh.getFaces());
-        List<MeshFace> resultFaces = new ArrayList<MeshFace>(result.faces);
+        List<MeshFace> ourFaces    = new ArrayList<>(faces);
+        List<MeshFace> theirFaces  = new ArrayList<>(mesh.getFaces());
+        List<MeshFace> resultFaces = new ArrayList<>(result.faces);
 
         for (int i = 0; i < ourFaces.size(); i++) {
             MeshFace our = ourFaces.get(i);
@@ -551,11 +457,6 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 //        return result;
 //    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#toPath()
-     */
     @Override
     public Path2D toPath() {
         Path2D path = new Path2D.Double();
@@ -574,15 +475,8 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         return path;
     }
 
-    /**
-     * Get the face in this mesh with the same vertices as the given face, or
-     * null if not present
-     * 
-     * @param f
-     * @return
-     */
     @Override
-    public MeshFace getFace(MeshFace test) {
+    public MeshFace getFace(@NonNull MeshFace test) {
 
         for (MeshFace f : faces) {
             if (f.equals(test)) {
@@ -593,15 +487,8 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         return null;
     }
 
-    /**
-     * Get the edge in this mesh with the same vertices as the given edge, or
-     * null if not present
-     * 
-     * @param f
-     * @return
-     */
     @Override
-    public MeshEdge getEdge(MeshEdge test) {
+    public MeshEdge getEdge(@NonNull MeshEdge test) {
         for (MeshEdge e : edges) {
             if (e.equals(test)) {
                 return e;
@@ -713,7 +600,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
      * @return
      */
     @Override
-    public MeshFace getFace(IPoint p) {
+    public MeshFace getFace(@NonNull IPoint p) {
         if (component.containsOriginalPoint(p)) {
             for (MeshFace f : faces) {
                 if (f.contains(p)) {

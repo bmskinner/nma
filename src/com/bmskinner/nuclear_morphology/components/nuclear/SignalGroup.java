@@ -134,42 +134,16 @@ public class SignalGroup implements ISignalGroup {
         this.groupColour = groupColour;
     }
 
-//    @Override
-//    public int getChannel() {
-//        return channel;
-//    }
-//
-//    @Override
-//    public void setChannel(int channel) {
-//        this.channel = channel;
-//    }
-//
-//    @Override
-//    public File getFolder() {
-//        return folder;
-//    }
-//
-//    @Override
-//    public void setFolder(@NonNull File folder) {
-//        this.folder = folder;
-//    }
-
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder();
-
-        String colour = this.groupColour == null ? "No colour" : this.groupColour.toString();
-
-        b.append(groupName + " | " + this.isVisible + " | " + colour);
-        return b.toString();
+        String colour = groupColour == null ? "No colour" : groupColour.toString();
+        return String.format("Name: %s | Visible: %s | Colour: %s", groupName, isVisible, colour);
     }
-
+    
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-//		result = prime * result + channel;
-//		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
 		result = prime * result + ((groupColour == null) ? 0 : groupColour.hashCode());
 		result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
 		result = prime * result + (isVisible ? 1231 : 1237);
@@ -187,13 +161,6 @@ public class SignalGroup implements ISignalGroup {
 		if (getClass() != obj.getClass())
 			return false;
 		SignalGroup other = (SignalGroup) obj;
-//		if (channel != other.channel)
-//			return false;
-//		if (folder == null) {
-//			if (other.folder != null)
-//				return false;
-//		} else if (!folder.equals(other.folder))
-//			return false;
 		if (groupColour == null) {
 			if (other.groupColour != null)
 				return false;

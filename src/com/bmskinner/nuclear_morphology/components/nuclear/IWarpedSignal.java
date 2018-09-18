@@ -25,6 +25,12 @@ import ij.process.ImageProcessor;
 public interface IWarpedSignal extends Serializable, Loggable {
 	
 	/**
+	 * Were the warped images derived from all cells, or just those with defined signals?
+	 * @return
+	 */
+	boolean isCellsWithSignals();
+	
+	/**
 	 * Defines the signal group which was warped 
 	 * @return
 	 */

@@ -110,7 +110,7 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         
         openBtn.addActionListener(e ->{
         	File folder = options.getFolder();
-        	File f = FileSelector.chooseOptionsImportFile();
+        	File f = FileSelector.chooseOptionsImportFile(folder);
         	if(f==null)
         		return;
         	IAnalysisOptions o = new OptionsXMLReader(f).readAnalysisOptions(); //read

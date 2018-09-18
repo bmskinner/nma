@@ -122,13 +122,13 @@ public class FileSelector {
     }
     
     /**
-     * Choose the folder to export dataset stats.
+     * Choose the folder to import detection options.
      * @param datasets the datasets to be exported
      * @return the file to export to
      */
-    public static @Nullable File chooseOptionsImportFile() {
+    public static @Nullable File chooseOptionsImportFile(@Nullable File defaultFolder) {
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
-        return chooseFile(null, filter, "Choose options file");
+        return chooseFile(defaultFolder, filter, "Choose options file");
     }
     
     /**

@@ -167,10 +167,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             return;
         }
 
-//        if (straighten) {
-//            meshConsensus = meshConsensus.straighten();
-//        }
-
         Rectangle r = meshConsensus.toPath().getBounds();
 
         // The new image size
@@ -189,10 +185,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                 Mesh<Nucleus> cellMesh;
                 try {
                     cellMesh = new DefaultMesh(n, meshConsensus);
-
-//                    if (straighten) {
-//                        cellMesh = cellMesh.straighten();
-//                    }
 
                     // Get the image with the signal
                     ImageProcessor ip;
@@ -226,10 +218,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                     warpedImages[cellNumber] = warped;
 
                 } catch (IllegalArgumentException e) {
-
+                	warn(e.getMessage());
                     stack(e.getMessage(), e);
-                    warn(e.getMessage());
-
                     // Make a blank image for the array
                     warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
 

@@ -1,8 +1,8 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InvalidClassException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -16,19 +16,34 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
+/**
+ * Default implementation of a warped signal
+ * @author ben
+ * @since 1.14.0
+ *
+ */
 public class DefaultWarpedSignal implements IWarpedSignal {
-	
+
+	private static final long serialVersionUID = 1L;
 	private final UUID id;
-	
-	// ImageProcessors are not serializable, so store the byte array and convert back as needed
+
+	/** ImageProcessors are not serializable, so store the byte array and convert back as needed */
 	private final Map<CellularComponent, byte[][]> templates = new HashMap<>();
+	
+	private final boolean isCellsWithSignals;
 	
 	/**
 	 * Construct with the signal group id
 	 * @param signalGroupId
 	 */
-	public DefaultWarpedSignal(@NonNull UUID signalGroupId) {
+	public DefaultWarpedSignal(@NonNull UUID signalGroupId, boolean isCellsWithSignals) {
 		id = signalGroupId;
+		this.isCellsWithSignals = isCellsWithSignals;
+	}
+	
+	@Override
+	public boolean isCellsWithSignals() {
+		return isCellsWithSignals;
 	}
 
 	@Override
@@ -80,6 +95,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + (isCellsWithSignals ? 1231 : 1237);
 		result = prime * result + ((templates == null) ? 0 : templates.hashCode());
 		return result;
 	}
@@ -98,6 +114,8 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
+		if (isCellsWithSignals != other.isCellsWithSignals)
+			return false;
 		if (templates == null) {
 			if (other.templates != null)
 				return false;
@@ -105,7 +123,5 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			return false;
 		return true;
 	}
-	
-	
 
 }
