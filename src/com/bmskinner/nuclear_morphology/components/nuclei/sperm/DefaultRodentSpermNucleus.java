@@ -466,7 +466,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     public Nucleus getVerticallyRotatedNucleus() {
         super.getVerticallyRotatedNucleus();
         if (verticalNucleus == null) {
-            warn("Unknown error creating vertical nucleus");
+            fine("Unknown error creating vertical nucleus");
             return null;
         }
 
@@ -477,7 +477,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         try {
             vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
         } catch (UnavailableBorderTagException e) {
-            stack("Cannot get RP from vertical nucleus. Not checking horizontal orientation", e);
+            stack("Cannot get RP from vertical nucleus; returning default orientation", e);
             return verticalNucleus;
         }
         /*
@@ -495,10 +495,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         return verticalNucleus;
     }
 
-    /*
-     * ----------------------- Methods for detecting the tail
-     * -----------------------
-     */
 
     /*
      * Detect the tail based on a list of local minima in an NucleusBorderPoint

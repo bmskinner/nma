@@ -373,20 +373,20 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
      */
     private void runWarping() {
 
-        finest("Running warping");
-
-        thresholdSlider.setVisible(false);
-        progressBar.setValue(0);
-
-        IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
-        IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
-
-        boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
-
-        Nucleus target = targetDataset.getCollection().getConsensus();
-
-        finest("Signal group: " + signalBox.getSelectedGroup());
+        fine("Running warping");
         try {
+        	thresholdSlider.setVisible(false);
+        	progressBar.setValue(0);
+
+        	IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
+        	IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
+
+        	boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
+
+        	Nucleus target = targetDataset.getCollection().getConsensus();
+
+        	finest("Signal group: " + signalBox.getSelectedGroup());
+
             setStatusLoading();
             setEnabled(false);
 
@@ -396,14 +396,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             warper = new SignalWarper(sourceDataset, target, signalBox.getSelectedID(), cellsWithSignals, SignalWarper.REGULAR_MESH);
             warper.addPropertyChangeListener(this);
+            
+            fine("Executing warper");
             ThreadManager.getInstance().execute(warper);
-//            warper.execute();
 
         } catch (Exception e) {
-            error("Error running warping", e);
-
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(targetDataset).build();
-            JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
+        	warn("Error running warping");
+            fine("Error running warping", e);
+            JFreeChart chart = ConsensusNucleusChartFactory.makeErrorChart();
             chartPanel.setChart(chart);
             setEnabled(true);
         }

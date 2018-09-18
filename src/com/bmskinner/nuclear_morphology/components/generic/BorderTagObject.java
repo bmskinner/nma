@@ -89,7 +89,10 @@ public class BorderTagObject implements Tag {
     }
 
     public static BorderTagObject[] values() {
-        BorderTagObject[] result = { REFERENCE_POINT, ORIENTATION_POINT, TOP_VERTICAL, BOTTOM_VERTICAL,
+        BorderTagObject[] result = { REFERENCE_POINT, 
+        		ORIENTATION_POINT, 
+        		TOP_VERTICAL, 
+        		BOTTOM_VERTICAL,
                 INTERSECTION_POINT };
         return result;
     }

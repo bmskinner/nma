@@ -281,48 +281,42 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public void setBorderTag(@NonNull Tag tag, int i) {
-        if (segsLocked) {
+        if (segsLocked)
             return;
-        }
-
-        if (i < 0 || i >= this.getBorderLength()) {
-            throw new IllegalArgumentException(
-                    "Index " + i + " is out of bounds : border length is " + this.getBorderLength());
-        }
+        
+        if (i < 0 || i >= this.getBorderLength())
+            throw new IllegalArgumentException(String.format("Index %s is out of bounds for border length %s", i, getBorderLength()));
 
         try {
 
+        	borderTags.put(tag, i);
+        	
             // When moving the RP, move all segments to match
-            if (tag.equals(Tag.REFERENCE_POINT)) {
+            if (Tag.REFERENCE_POINT.equals(tag)) {
                 ISegmentedProfile p = getProfile(ProfileType.ANGLE);
                 int oldRP = getBorderIndex(tag);
                 int diff = i - oldRP;
                 try {
                     p.nudgeSegments(diff);
                 } catch (ProfileException e) {
-                    warn("Cannot offset profile to " + tag);
-                    fine("Error moving segments", e);
+                    stack("Error nudging segments when assigning RP", e);
                     return;
                 }
-                finest("Old RP at " + oldRP);
-                finest("New RP at " + i);
-                finest("Moving segments by" + diff);
-
                 setProfile(ProfileType.ANGLE, p);
 
             }
 
-            this.borderTags.put(tag, i);
-
             // The intersection point should always be opposite the orientation point
-            if (tag.equals(Tag.ORIENTATION_POINT)) {
+            if (Tag.ORIENTATION_POINT.equals(tag)) {
                 int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(i)));
                 this.setBorderTag(Tag.INTERSECTION_POINT, intersectionIndex);
             }
 
 
-        } catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
-            stack("Error getting angle profile ", e);
+        } catch (UnavailableProfileTypeException e) {
+        	stack(String.format("Unable to find angle profile in object"), e);
+        } catch(UnavailableBorderTagException e) {
+        	stack(String.format("Error getting border tag %s for object", tag), e);
         }
     }
 

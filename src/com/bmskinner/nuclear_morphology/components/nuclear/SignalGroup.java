@@ -160,8 +160,7 @@ public class SignalGroup implements ISignalGroup {
 
         String colour = this.groupColour == null ? "No colour" : this.groupColour.toString();
 
-        b.append(groupName + " | " + this.channel + " | " + this.isVisible + " | " + colour + " | "
-                + this.folder.getAbsolutePath());
+        b.append(groupName + " | " + this.isVisible + " | " + colour);
         return b.toString();
     }
 
