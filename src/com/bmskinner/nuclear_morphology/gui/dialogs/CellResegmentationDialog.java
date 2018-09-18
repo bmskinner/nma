@@ -211,7 +211,12 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             table.setModel(createTableModel("Not set"));
             table.getColumnModel().getColumn(COLUMN_STATE).setCellRenderer(new SegmentStateRenderer());
             segCount = 0;
-            segStart = obj.getBorderIndex(Tag.REFERENCE_POINT);
+            try {
+				segStart = obj.getBorderIndex(Tag.REFERENCE_POINT);
+			} catch (UnavailableBorderTagException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
             log("Select endpoint for segment 0");
             drawCurrentSegments(obj); // clear the segment chart
             setEnabled(false);
@@ -298,26 +303,28 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
     private void resegmentationComplete() {
 
-        isRunning = false;
-        setEnabled(true);
-        table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
+    	isRunning = false;
+    	setEnabled(true);
+    	table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
 
-        Nucleus n = workingCell.getNucleus();
-        UUID id;
-        try {
-            id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            warn("Cannot get segmented profile");
-            fine("Error getting profile", e);
-            return;
-        }
+    	Nucleus n = workingCell.getNucleus();
+    	UUID id;
+    	try {
+    		id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
 
-        IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
-                n.getBorderLength(), id);
-        newSegments.add(last);
-        finer("Added " + last.toString());
 
-        log("Resegmenting complete");
+    		IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
+    				n.getBorderLength(), id);
+    		newSegments.add(last);
+    		finer("Added " + last.toString());
+
+    		log("Resegmenting complete");
+
+    	} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+    		warn("Cannot get segmented profile");
+    		fine("Error getting profile", e);
+    		return;
+    	}
     }
 
     private void moveRPComplete() {

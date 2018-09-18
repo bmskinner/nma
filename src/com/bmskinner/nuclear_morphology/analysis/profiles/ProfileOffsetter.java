@@ -86,26 +86,14 @@ public class ProfileOffsetter implements Loggable {
          * Get the proportion of the index through the segment
          */
         double proportion = segFromRef.getIndexProportion(index);
-//        finest("Found " + tag + " at " + proportion + " through median segment " + segFromRef.getID());
 
-        /*
-         * Go through each nucleus and apply the position
-         */
-//        finer("Updating tag location in nuclei");
+        /* Go through each nucleus and apply the position  */
         for (Nucleus nucleus : collection.getNuclei()) {
+        	try {
+        		
+//        		int oldNIndex = nucleus.getBorderIndex(tag);
 
-            int oldNIndex = nucleus.getBorderIndex(tag);
-            if (oldNIndex == -1) {
-                finer("Border tag does not exist and will be created");
-            }
-
-            try {
                 IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE).getSegment(segID);
-
-                if (nucleusSegment == null) {
-                    warn("Error updating nucleus, segment " + segID + " not found");
-                    throw new UnavailableComponentException("Segment " + segID + " not found");
-                }
 
                 // find the index in the segment closest to the proportion 
                 int newIndex = nucleusSegment.getProportionalIndex(proportion);

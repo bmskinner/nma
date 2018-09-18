@@ -139,7 +139,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable {
                     p = getPointFromProfileIndex(xValue);
                     xCrosshairOutline.setValue(p.getX());
                     yCrosshairOutline.setValue(p.getY());
-                } catch (UnavailableBorderPointException e1) {
+                } catch (UnavailableBorderPointException | UnavailableBorderTagException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
@@ -162,7 +162,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable {
                     try {
                         p = getPointFromProfileIndex(xValue);
                         fireBorderPointEvent(p);
-                    } catch (UnavailableBorderPointException e1) {
+                    } catch (UnavailableBorderPointException | UnavailableBorderTagException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
@@ -181,15 +181,14 @@ public class CoupledProfileOutlineChartPanel implements Loggable {
         return xValue;
     }
 
-    private IBorderPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException{
+    private IBorderPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException, UnavailableBorderTagException{
         // Find the index of the border point with the current profile chart x
         // value
-//        Nucleus n = cell.getNucleus();
         int rpIndex = obj.getBorderIndex(Tag.REFERENCE_POINT);
         int xIndex = obj.wrapIndex(index + rpIndex);
 
         // Get that border point
-        IBorderPoint p = obj.getOriginalBorderPoint(xIndex);//.getBorderPoint(xIndex);
+        IBorderPoint p = obj.getOriginalBorderPoint(xIndex);
         return p;
     }
 

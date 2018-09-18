@@ -588,23 +588,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 //        				fine(p.toString());
         			}
         			fine(i+": "+seg.length());
-
-        			// go through each index in the segment.
-        			//        			for (int j = 0; j <= seg.length(); j++) {
-        			//        				// get the corresponding border index.
-        			//        				int borderIndex = n.wrapIndex(seg.getStartIndex() + j + pointIndex);
-        			//
-        			//        				IBorderPoint p = n.getBorderPoint(borderIndex);
-        			//
-        			//        				xpoints[j] = (float) p.getX();
-        			//        				ypoints[j] = (float) p.getY();
-        			//        			}
-
         			float[][] data = { xpoints, ypoints };
         			ds.addSeries(seg.getName(), data, 0);
-        			
-//        			fine(Arrays.toString(xpoints));
-//        			fine(Arrays.toString(ypoints));
         		}
         	}
 
@@ -621,14 +606,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Add the IQR for a segment to the given dataset
      * 
-     * @param segment
-     *            the segment to add
-     * @param ds
-     *            the dataset to add it to
-     * @param n
-     *            the consensus nucleus
-     * @param scaledRange
-     *            the IQR scale profile
+     * @param segment the segment to add
+     * @param ds the dataset to add it to
+     * @param n the consensus nucleus
+     * @param scaledRange the IQR scale profile
      */
     private void addSegmentIQRToConsensus(@NonNull IBorderSegment segment, @NonNull FloatXYDataset ds, @NonNull Nucleus n, @NonNull IProfile scaledRange,
             @NonNull Tag pointType) throws ChartDatasetCreationException {
@@ -650,20 +631,16 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         // Hence a segment start index of zero is at the pointType
 
         for (int i = 0; i <= segment.length(); i++) {
+        	try {
+        		// get the index of this point of the segment in the nucleus border list.
+        		// The nucleus border list has an arbitrary zero location, and the
+        		// pointType index is given within this
+        		// We need to add the index of the pointType to the values within the segment
+        		int segmentIndex = segment.getStartIndex() + i;
+        		int index = CellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 
-            // get the index of this point of the segment in the nucleus border
-            // list.
-            // The nucleus border list has an arbitrary zero location, and the
-            // pointType index is given within this
-            // We need to add the index of the pointType to the values within
-            // the segment
-            int segmentIndex = segment.getStartIndex() + i;
-            int index = CellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
-
-            // get the border point at this index
-            IBorderPoint p;
-            try {
-                p = n.getBorderPoint(index);
+        		// get the border point at this index
+        		IBorderPoint p = n.getBorderPoint(index);
 
                 // Find points three indexes ahead and behind to make a triangle
                 // from
@@ -674,12 +651,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 // make a line between points 3 ahead and behind.
                 // get the orthogonal line, running through the XYPoint
                 LineEquation eq = new DoubleEquation(n.getBorderPoint(prevIndex), n.getBorderPoint(nextIndex));
-                // move the line to the index point, and find the orthogonal
-                // line
+                // move the line to the index point, and find the orthogonal line
                 LineEquation perp = eq.translate(p).getPerpendicular(p);
 
-                // Select the index from the scaledRange corresponding to the
-                // position in the segment
+                // Select the index from the scaledRange corresponding to the position in the segment
                 // The scaledRange is aligned to the segment already
                 IPoint aPoint = perp.getPointOnLine(p,
                         (0 - scaledRange.get(CellularComponent.wrapIndex(segmentIndex, scaledRange.size()))));
@@ -703,7 +678,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 throw new ChartDatasetCreationException("Unable to get border point", e);
             } catch(IllegalArgumentException e){
                 throw new ChartDatasetCreationException("Problem with line equation", e);
-            }
+            } catch (UnavailableBorderTagException e) {
+            	throw new ChartDatasetCreationException("Border tag is not present: "+pointType, e);
+			}
 
         }
 
@@ -720,16 +697,15 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param seg
      * @return
      */
-    public int getSegmentPosition(@NonNull Nucleus n, @NonNull IBorderSegment seg) {
-        int result = 0;
-        if (seg.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT)) {
-            return result;
-        } else {
-            result++;
-            result += getSegmentPosition(n, seg.prevSegment());
-        }
-        return result;
-    }
+//    public int getSegmentPosition(@NonNull Nucleus n, @NonNull IBorderSegment seg) {
+//        int result = 0;
+//        if (seg.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT)) {
+//            return result;
+//        }
+//		result++;
+//		result += getSegmentPosition(n, seg.prevSegment());
+//        return result;
+//    }
 
     /**
      * Create a dataset with lines from each of the BorderTags within the
@@ -754,7 +730,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 float[][] data = { xpoints, ypoints };
                 ds.addSeries("Tag_" + tag, data, 0);
             }
-        } catch (UnavailableBorderPointException e) {
+        } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
             throw new ChartDatasetCreationException("Unable to get border point", e);
         }
 

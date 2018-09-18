@@ -403,38 +403,37 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     @Override
     public void alignVertically() {
 
-        boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
-        int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
-        int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
+    	boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
 
-        // check if the point was set but not found
-        useTVandBV &= topPoint!=BORDER_INDEX_NOT_FOUND;
-        useTVandBV &= bottomPoint!=BORDER_INDEX_NOT_FOUND;
-        useTVandBV &= topPoint != bottomPoint; // Situation when something went very wrong
-        
-        if (useTVandBV) {
+    	if (useTVandBV) {
+    		try {
+    			int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
+    			int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
+    			if(topPoint == bottomPoint) {
+    				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    				return;
+    			}
 
-            try {
-            	IBorderPoint[] points = getBorderPointsForVerticalAlignment();
-                alignPointsOnVertical(points[0], points[1]);
+    			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
+    			alignPointsOnVertical(points[0], points[1]);
 
-            } catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
-                stack("Cannot get border tag or profile", e);
-                try {
-                    rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
-                } catch (UnavailableBorderTagException e1) {
-                    stack("Cannot get border tag", e1);
-                }
-            }
-        } else {
+    		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
+    			stack("Cannot get border tag or profile", e);
+    			try {
+    				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    			} catch (UnavailableBorderTagException e1) {
+    				stack("Cannot get border tag", e1);
+    			}
+    		}
+    	} else {
 
-            // Default if top and bottom vertical points have not been specified
-            try {
-                rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
-            } catch (UnavailableBorderTagException e) {
-                stack("Cannot get border tag", e);
-            }
-        }
+    		// Default if top and bottom vertical points have not been specified
+    		try {
+    			rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    		} catch (UnavailableBorderTagException e) {
+    			stack("Cannot get border tag", e);
+    		}
+    	}
 
     }
 

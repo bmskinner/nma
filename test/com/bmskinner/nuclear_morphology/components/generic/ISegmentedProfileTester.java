@@ -402,6 +402,13 @@ public class ISegmentedProfileTester {
 	}
 	
 	@Test
+	public void testClearSegments() throws ProfileException {   
+	    profile.clearSegments();
+	    // A profile always has a default segment
+	    assertEquals(1, profile.getSegmentCount());
+	}
+	
+	@Test
 	public void testGetDisplacement() {
 	    IBorderSegment s1 = profile.getSegmentAt(1);
 	    double d = profile.getDisplacement(s1);
@@ -526,27 +533,27 @@ public class ISegmentedProfileTester {
 		assertEquals("Old end "+oldEnd+" + "+offset, expEnd, newEnd);
 	}
 	
-	@Test
-	public void testOffsetOnStatelessProfiles() throws Exception {
-
-		// Test that offsetting the profile offsets each individual segment properly
-		for(int i=-profile.size()-1; i<profile.size()*2; i++) {
-//			System.out.println(String.format("Testing offset of %s", i));
-			ISegmentedProfile testProfile = profile.copy().offset(i);
-
-			 List<IBorderSegment> testSegments = testProfile.getSegments();
-
-			 List<IBorderSegment> expectedSegments = makeTestSegments();
-			 
-			 for(IBorderSegment testSeg : testSegments){
-				 UUID segId = testSeg.getID();
-				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
-				 expSeg.offset(-i);
-				 
-				 assertEquals(expSeg.toString(), testSeg.toString());
-			 }
-		}
-	}
+//	@Test
+//	public void testOffsetOnStatelessProfiles() throws Exception {
+//
+//		// Test that offsetting the profile offsets each individual segment properly
+//		for(int i=-profile.size()-1; i<profile.size()*2; i++) {
+////			System.out.println(String.format("Testing offset of %s", i));
+//			ISegmentedProfile testProfile = profile.copy().offset(i);
+//
+//			 List<IBorderSegment> testSegments = testProfile.getSegments();
+//
+//			 List<IBorderSegment> expectedSegments = makeTestSegments();
+//			 
+//			 for(IBorderSegment testSeg : testSegments){
+//				 UUID segId = testSeg.getID();
+//				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
+//				 expSeg.offset(-i);
+//				 
+//				 assertEquals(expSeg.toString(), testSeg.toString());
+//			 }
+//		}
+//	}
 	
 	@Test
 	public void testOffsetOnStatefulProfiles() throws Exception {
@@ -901,5 +908,32 @@ public class ISegmentedProfileTester {
 	    exception.expect(IllegalArgumentException.class);
         profile.interpolate(-1);
     }
+	
+	@Test
+    public void testInterpolateInSegmentWithNoMergeSources() throws ProfileException {
+		profile.clearSegments();
+		assertEquals(1, profile.getSegmentCount());
+		ISegmentedProfile result = profile.interpolate(profile.size()*2);
+		assertEquals(profile.getSegmentCount(), result.getSegmentCount());
+	    for (int i=0; i<profile.getSegmentCount(); i++) {
+	        assertEquals("New start index",profile.getSegmentAt(i).getStartIndex()*2, result.getSegmentAt(i).getStartIndex());
+	    }
+	}
+	
+	@Test
+    public void testUpdate() throws SegmentUpdateException, UnavailableComponentException {
+		IBorderSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
+		
+		int oldStart = seg0.getStartIndex();
+		int newStart = oldStart+10;
+		
+		int oldEnd = seg0.getEndIndex();
+		int newEnd = oldEnd+10;
+
+		assertTrue(profile.update(seg0, newStart, newEnd));
+		assertEquals(newStart, profile.getSegment(UUID.fromString(SEG_0)).getStartIndex());
+		assertEquals(newEnd, profile.getSegment(UUID.fromString(SEG_0)).getEndIndex());
+	}
+    
 	
 }

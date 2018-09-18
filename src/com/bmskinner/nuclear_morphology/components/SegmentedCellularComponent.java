@@ -1188,9 +1188,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public IBorderSegment getSegmentAt(int position) {
-
-			if(position < 0 || position > segments.nChildren()-1)
+			if(position < 0 || (segments.nChildren()>0 && position > segments.nChildren()-1))
 				throw new IllegalArgumentException("Segment position is out of bounds");
+			if(segments.nChildren()==0 && position==0)
+				return segments;
 			return segments.getMergeSources().get(position);
 		}
 
@@ -1334,39 +1335,32 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			// interpolate the IProfile
 			IProfile newProfile = super.interpolate(length);
-			
 			List<IBorderSegment> newSegs = new ArrayList<>();
-			
-			// Interpolate the segments
 			
 			// single segment
 			if(!segments.hasMergeSources()) {
-				newSegs.add(new OpenBorderSegment(0, length-1, length, segments.getID()));
+				newSegs.add(new OpenBorderSegment(0, 0, length, segments.getID()));
 				return new SegmentedFloatProfile(newProfile, newSegs);
 			}
 			
-			// multiple child segments
-			
-			// Need to ensure the start and end indexes match for consecutive segments
-			// after the interpolation
+			/* Multiple child segments
+			Need to ensure the start and end indexes match for consecutive segments
+			after the interpolation */
 			
 			List<Integer> putativeStartPoints = new ArrayList<>();
 			
 			for (BorderSegmentTree s : segments.leaves) {
 				double prop = this.getFractionOfIndex(s.getStartIndex());
 				int newStart  = (int) Math.round((prop * length));
-				
 				putativeStartPoints.add(newStart);
 			}
 			
 			
 			// With the new start points, create the segments
-			
 			for(int i=0; i<putativeStartPoints.size(); i++) {
 
-				int newStart = putativeStartPoints.get(i);
-				int newEnd   = i==putativeStartPoints.size()-1 ? putativeStartPoints.get(0) : putativeStartPoints.get(i+1);
-				
+				int newStart  = putativeStartPoints.get(i);
+				int newEnd    = i==putativeStartPoints.size()-1 ? putativeStartPoints.get(0) : putativeStartPoints.get(i+1);
 				int newLength = newStart<newEnd ? newEnd-newStart : newEnd + length-newStart;
 				
 				if(newLength<IBorderSegment.INTERPOLATION_MINIMUM_LENGTH)
@@ -1375,7 +1369,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 
 			// assign new segments
-//			finer("Creating new SegmentedFloatProfile to pass interpolated profile out of component");
 			return new SegmentedFloatProfile(newProfile, newSegs);
 		}
 
@@ -1794,6 +1787,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return id;
 			}
 			
+			/**
+			 * Get the number of children of this segment
+			 * @return
+			 */
 			public int nChildren() {
 				return leaves.size();
 			}

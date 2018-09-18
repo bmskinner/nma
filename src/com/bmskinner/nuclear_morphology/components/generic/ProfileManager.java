@@ -95,25 +95,16 @@ public class ProfileManager implements Loggable {
 
         collection.getNuclei().stream().forEach(n -> {
             if (!n.isLocked()) {
-
-            	int oldIndex = n.getBorderIndex(tag);
-            	
-                // returns the positive offset index of this profile which best
-                // matches the median profile
-                int newIndex;
-                try {
-                    newIndex = n.getProfile(type).findBestFitOffset(median);
+            	try {
+            		// returns the positive offset index of this profile which best
+            		// matches the median profile
+            		int newIndex = n.getProfile(type).findBestFitOffset(median);
+            		
+            		n.setBorderTag(tag, newIndex);
 
                 } catch (ProfileException | UnavailableProfileTypeException e1) {
-                    warn("Error getting offset from nucleus " + n.getNameAndNumber());
+                    warn("Error updating tag by offset in nucleus " + n.getNameAndNumber());
                     stack(e1.getMessage(), e1);
-                    return;
-                }
-                try {
-                    n.setBorderTag(tag, newIndex);
-                } catch (IndexOutOfBoundsException e) {
-                    warn("Error updating nucleus tag " + tag+": "+ n.getNameAndNumber());
-                    stack(e.getMessage(), e);
                     return;
                 }
 
@@ -121,8 +112,6 @@ public class ProfileManager implements Loggable {
                     n.updateVerticallyRotatedNucleus();
                     n.updateDependentStats();
                 }
-
-                finer("Updated "+tag+" from "+oldIndex+" to new index "+newIndex);
             }
         });
 
@@ -269,7 +258,7 @@ public class ProfileManager implements Loggable {
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
      */
-    private void updateExtendedBorderTagIndex(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
+    private void updateExtendedBorderTagIndex(@NonNull Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
     	int rpIndex  = collection.getProfileCollection().getIndex(Tag.REFERENCE_POINT);
@@ -282,21 +271,29 @@ public class ProfileManager implements Loggable {
         
         List<Tag> tags = collection.getProfileCollection().getBorderTags();
         for(Tag existingTag : tags) {
-        	if(existingTag.equals(tags))
+        	if(existingTag.equals(tag))
         		continue;
         	int existingTagIndex = collection.getProfileCollection().getIndex(existingTag);
         	if(index==existingTagIndex) {
         		updateProfileCollectionOffsets(tag, index);
         		// update nuclei
         		collection.getNuclei().stream().forEach(n -> {
-        			if (!n.isLocked()) {
-        				int existingIndex = n.getBorderIndex(existingTag);
-        				n.setBorderTag(tag, existingIndex);
-        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-        					n.updateVerticallyRotatedNucleus();
-        					n.updateDependentStats();
-        				}
+        			if(n.isLocked())
+        				return;
+        			
+        			int existingIndex;
+        			try {
+        				existingIndex = n.getBorderIndex(existingTag);
+        			} catch (UnavailableBorderTagException e) {
+        				stack(e);
+        				return;
         			}
+        			n.setBorderTag(tag, existingIndex);
+        			if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
+        				n.updateVerticallyRotatedNucleus();
+        				n.updateDependentStats();
+        			}
+        			
         		});
         		
         		//Update consensus

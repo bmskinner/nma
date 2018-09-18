@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -44,12 +46,8 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
     private final CellularComponent component;
 
-    public OutlineDatasetCreator(final ChartOptions options, final CellularComponent c) {
+    public OutlineDatasetCreator(@NonNull final ChartOptions options, @NonNull final CellularComponent c) {
         super(options);
-        if (c == null) {
-            throw new IllegalArgumentException("Component cannot be null");
-        }
-
         component = c;
     }
 
@@ -71,33 +69,24 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Add the outline of the current object to the given dataset.
      * 
-     * @param segmented
-     *            should the outline be segmented (where segments are available)
-     * @return an XYDataset with the outline. Segments will be as separate
-     *         series if segmented is true.
-     * @throws ChartDatasetCreationException
+     * @param ds the dataset to add an outline to
+     * @param segmented should the outline be segmented (where segments are available)
      */
     public void addOutline(ComponentOutlineDataset<CellularComponent> ds, boolean segmented)
             throws ChartDatasetCreationException {
 
         String seriesKey = chooseSeriesKey();
-        if (segmented) {
+        if (segmented)
             addSegmentedOutline(ds);
-        } else {
+        else
             addNonSegmentedOutline(ds, seriesKey);
-        }
-
     }
 
     /**
      * Create a dataset with the outline of the current object.
      * 
-     * @param ds
-     *            the dataset the data should be added to
-     * @param segmented
-     *            should the outline be segmented (where segments are available)
-     * @return an XYDataset with the outline. Segments will be as separate
-     *         series if segmented is true.
+     * @param ds the dataset the data should be added to
+     * @param segmented should the outline be segmented (where segments are available)
      * @throws ChartDatasetCreationException
      */
     public void addOutline(ComponentOutlineDataset<CellularComponent> ds, Comparable seriesKey, boolean segmented)
@@ -170,25 +159,22 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 int segmentPosition = seg.getPosition();
 
                 for (int j = 0; j <= seg.length(); j++) {
+                	try {
+                		int index = seg.getStartIndex() + j;
+                		int offsetIndex = t.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
 
-                    int index = seg.getStartIndex() + j;
-                    int offsetIndex = t.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
-
-                    IBorderPoint p;
-                    try {
-                        /*
-                         * Note that the original border point is used here to
-                         * avoid mismatches with the border tags drawn in other
-                         * methods.
-                         */
-                        // p = t.getBorderPoint(offsetIndex);
-                        p = t.getOriginalBorderPoint(offsetIndex);
-                    } catch (UnavailableBorderPointException e) {
-                        throw new ChartDatasetCreationException("Cannot get border point at index " + offsetIndex, e);
-                    } // get the border points in the segment
-
-                    xpoints[j] = p.getX() - 0.5;
-                    ypoints[j] = p.getY() - 0.5;
+                		/*
+                		 * Note that the original border point is used here to
+                		 * avoid mismatches with the border tags drawn in other
+                		 * methods.
+                		 */
+                		// p = t.getBorderPoint(offsetIndex);
+                		IBorderPoint p = t.getOriginalBorderPoint(offsetIndex);
+                		xpoints[j] = p.getX() - 0.5;
+                		ypoints[j] = p.getY() - 0.5;
+                	} catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
+                		throw new ChartDatasetCreationException("Cannot get border point", e);
+                	}
                 }
 
                 double[][] data = { xpoints, ypoints };

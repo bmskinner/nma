@@ -93,29 +93,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     public SegmentedFloatProfile(@NonNull final IProfile profile) {
         super(profile);
-
-//        int midpoint = profile.size() / 2;
-//        IBorderSegment segment1 = IBorderSegment.newSegment(0, midpoint, profile.size());
-//
-//        segment1.setPosition(0);
-//        IBorderSegment segment2 = IBorderSegment.newSegment(midpoint, 0, profile.size());
-//
-//        segment2.setPosition(1);
-//        List<IBorderSegment> segments = new ArrayList<>();
-//        segments.add(segment1);
-//        segments.add(segment2);
-
-//        try {
-//            IBorderSegment.linkSegments(segments);
-//        } catch (ProfileException e) {
-//            warn("Error linking segments");
-//        }
-
         segments = new IBorderSegment[1];
         segments[0] = IBorderSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
-//        for (int i = 0; i < segments.size(); i++) {
-//            this.segments[i] = segments.get(i);
-//        }
     }
 
     /**
@@ -152,11 +131,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegment(java.util.UUID)
-     */
     @Override
     public @NonNull IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException {
         for (IBorderSegment seg : this.segments) {
@@ -168,11 +142,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#hasSegment(java.util.UUID)
-     */
     @Override
     public boolean hasSegment(@NonNull UUID id) {
         for (IBorderSegment seg : this.segments) {
@@ -183,11 +152,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentsFrom(java.util.UUID)
-     */
     @Override
     public List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws UnavailableComponentException, ProfileException {
         return getSegmentsFrom(getSegment(id));
@@ -216,21 +180,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         	nextSeg = nextSeg.nextSegment();
         }
         return IBorderSegment.copy(result);
-        
-//        List<IBorderSegment> result = new ArrayList<IBorderSegment>();
-//        int i = segments.length - 1; // the number of segments
-//        result.add(firstSeg);
-//        while (i > 0) {
-//
-//            if (firstSeg.hasNextSegment()) {
-//                firstSeg = firstSeg.nextSegment();
-//                result.add(firstSeg);
-//                i--;
-//            } else {
-//                throw new UnavailableComponentException(i + ": No next segment in " + firstSeg.toString());
-//            }
-//        }
-//        return IBorderSegment.copy(result);
     }
 
     @Override
@@ -298,11 +247,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentContaining(int)
-     */
     @Override
     public IBorderSegment getSegmentContaining(int index) {
 
@@ -346,8 +290,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     @Override
     public void clearSegments() {
-        segments = new IBorderSegment[0];
-
+        segments = new IBorderSegment[1];
+        segments[0] = IBorderSegment.newSegment(0, 0, size(), IProfileCollection.DEFAULT_SEGMENT_ID);
     }
 
     @Override
@@ -361,7 +305,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     @Override
     public List<UUID> getSegmentIDs() {
-        List<UUID> result = new ArrayList<UUID>();
+        List<UUID> result = new ArrayList<>();
         for (IBorderSegment seg : this.segments) {
             result.add(seg.getID());
         }
@@ -496,8 +440,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         IProfile newProfile = super.interpolate(length);
         List<IBorderSegment> newSegs = new ArrayList<>();
         
-        // No segments in profile
-        if(segments.length==0) {
+        // No segments in profile or single default segment
+        if(segments.length<=1) {
         	newSegs.add(new DefaultBorderSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID));
         	return new SegmentedFloatProfile(newProfile, newSegs);
         }

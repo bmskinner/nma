@@ -201,23 +201,28 @@ public class CellCollection implements ICellCollection {
      * -----------------------
      */
 
-    public boolean isReal() {
+    @Override
+	public boolean isReal() {
         return true;
     }
 
-    public boolean isVirtual() {
+    @Override
+	public boolean isVirtual() {
         return false;
     }
 
-    public void setName(String s) {
+    @Override
+	public void setName(String s) {
         this.name = s;
     }
 
-    public String getName() {
+    @Override
+	public String getName() {
         return this.name;
     }
 
-    public UUID getID() {
+    @Override
+	public UUID getID() {
         return this.uuid;
     }
 
@@ -226,11 +231,13 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public Set<UUID> getCellIDs() {
+    @Override
+	public Set<UUID> getCellIDs() {
         return new HashSet<UUID>(mappedCollection.keySet());
     }
 
-    public void addCell(ICell r) {
+    @Override
+	public void addCell(ICell r) {
         if (r == null) {
             throw new IllegalArgumentException("Cell is null");
         }
@@ -252,7 +259,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @param r
      */
-    public void replaceCell(ICell r) {
+    @Override
+	public void replaceCell(ICell r) {
         if (r == null) {
             throw new IllegalArgumentException("Cell is null");
         }
@@ -275,7 +283,8 @@ public class CellCollection implements ICellCollection {
      * @param c
      *            the cell to remove
      */
-    public void removeCell(ICell c) {
+    @Override
+	public void removeCell(ICell c) {
 
         if (c == null) {
             return;
@@ -283,11 +292,13 @@ public class CellCollection implements ICellCollection {
         this.mappedCollection.remove(c.getId());
     }
 
-    public int size() {
+    @Override
+	public int size() {
         return mappedCollection.size();
     }
 
-    public boolean hasConsensus() {
+    @Override
+	public boolean hasConsensus() {
         if (this.consensusNucleus == null) {
             return false;
         } else {
@@ -300,7 +311,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public boolean hasCells() {
+    @Override
+	public boolean hasCells() {
         if (this.mappedCollection.isEmpty()) {
             return false;
         } else {
@@ -318,7 +330,8 @@ public class CellCollection implements ICellCollection {
         return getNuclei(imageFile).size() > 0;
     }
 
-    public boolean hasLockedCells() {
+    @Override
+	public boolean hasLockedCells() {
         for (Nucleus n : this.getNuclei()) {
             if (n.isLocked()) {
                 return true;
@@ -327,13 +340,15 @@ public class CellCollection implements ICellCollection {
         return false;
     }
 
-    public void setCellsLocked(boolean b) {
+    @Override
+	public void setCellsLocked(boolean b) {
         for (Nucleus n : this.getNuclei()) {
             n.setLocked(b);
         }
     }
 
-    public void setConsensus(@Nullable Nucleus n) {
+    @Override
+	public void setConsensus(@Nullable Nucleus n) {
         this.consensusNucleus = n;
     }
 
@@ -343,11 +358,13 @@ public class CellCollection implements ICellCollection {
      * @param id
      * @return
      */
-    public ICell getCell(UUID id) {
+    @Override
+	public ICell getCell(UUID id) {
         return this.mappedCollection.get(id);
     }
 
-    public NucleusType getNucleusType() {
+    @Override
+	public NucleusType getNucleusType() {
         return this.nucleusType;
     }
 
@@ -370,7 +387,8 @@ public class CellCollection implements ICellCollection {
         return null;
     }
 
-    public Nucleus getConsensus() {
+    @Override
+	public Nucleus getConsensus() {
         return this.consensusNucleus;
     }
 
@@ -383,16 +401,16 @@ public class CellCollection implements ICellCollection {
     public IProfileCollection getProfileCollection(ProfileType type) {
         if (this.profileCollections.containsKey(type)) {
             return this.profileCollections.get(type);
-        } else {
-            throw new IllegalArgumentException("ProfileCollection key " + type.toString() + " not present");
         }
+		throw new IllegalArgumentException("ProfileCollection key " + type.toString() + " not present");
     }
 
     public void setProfileCollection(ProfileType type, IProfileCollection p) {
         this.profileCollections.put(type, (ProfileCollection) p);
     }
 
-    public void createProfileCollection() throws ProfileException {
+    @Override
+	public void createProfileCollection() throws ProfileException {
         /*
          * Build a first set of profile aggregates Default is to make profile
          * aggregate from reference point Do not build an aggregate for the
@@ -434,11 +452,13 @@ public class CellCollection implements ICellCollection {
         this.profileCollections.remove(type);
     }
 
-    public File getFolder() {
+    @Override
+	public File getFolder() {
         return this.folder;
     }
 
-    public String getOutputFolderName() {
+    @Override
+	public String getOutputFolderName() {
         return this.outputFolder;
     }
 
@@ -448,7 +468,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return the folder
      */
-    public File getOutputFolder() {
+    @Override
+	public File getOutputFolder() {
         File result = null;
         if (this.getOutputFolderName() == null) {
             result = this.getFolder();
@@ -469,7 +490,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public Set<File> getImageFiles() {
+    @Override
+	public Set<File> getImageFiles() {
         Set<File> result = new HashSet<File>(0);
         for (Nucleus n : this.getNuclei()) {
             result.add(n.getSourceFile());
@@ -565,7 +587,8 @@ public class CellCollection implements ICellCollection {
     // return s;
     // }
 
-    public int getNucleusCount() {
+    @Override
+	public int getNucleusCount() {
         return this.size();
     }
 
@@ -578,7 +601,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public Set<ICell> getCells() {
+    @Override
+	public Set<ICell> getCells() {
         Set<ICell> result = new HashSet<ICell>(mappedCollection.size());
         for (ICell cell : mappedCollection.values()) {
             result.add(cell);
@@ -591,7 +615,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public Set<ICell> getCells(File imageFile) {
+    @Override
+	public Set<ICell> getCells(File imageFile) {
         Set<ICell> result = new HashSet<ICell>(mappedCollection.size());
         for (ICell cell : this.getCells()) {
             if (cell.getNucleus().getSourceFile().equals(imageFile)) {
@@ -606,7 +631,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public Stream<ICell> streamCells() {
+    @Override
+	public Stream<ICell> streamCells() {
         return getCells().stream();
     }
 
@@ -634,7 +660,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public Set<Nucleus> getNuclei() {
+    @Override
+	public Set<Nucleus> getNuclei() {
         Set<Nucleus> result = new HashSet<Nucleus>(mappedCollection.size());
         for (ICell c : this.getCells()) {
             result.add(c.getNucleus());
@@ -650,7 +677,8 @@ public class CellCollection implements ICellCollection {
      *            the file to search
      * @return the list of nuclei
      */
-    public Set<Nucleus> getNuclei(File imageFile) {
+    @Override
+	public Set<Nucleus> getNuclei(File imageFile) {
         Set<Nucleus> result = new HashSet<Nucleus>(mappedCollection.size());
         for (Nucleus n : this.getNuclei()) {
             if (n.getSourceFile().equals(imageFile)) {
@@ -666,11 +694,13 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public SignalManager getSignalManager() {
+    @Override
+	public SignalManager getSignalManager() {
         return new SignalManager(this);
     }
 
-    public ProfileManager getProfileManager() {
+    @Override
+	public ProfileManager getProfileManager() {
         return new ProfileManager(this);
     }
 
@@ -685,7 +715,8 @@ public class CellCollection implements ICellCollection {
     // return median;
     // }
 
-    public int getMedianArrayLength() {
+    @Override
+	public int getMedianArrayLength() {
         if (size() == 0) {
             return 0;
         }
@@ -694,7 +725,8 @@ public class CellCollection implements ICellCollection {
         return Stats.quartile(p, Stats.MEDIAN);
     }
 
-    public int getMaxProfileLength() {
+    @Override
+	public int getMaxProfileLength() {
 
         return Arrays.stream(this.getArrayLengths()).max().orElse(0);
     }
@@ -858,17 +890,17 @@ public class CellCollection implements ICellCollection {
         return result;
     }
 
-    public int[] getPointIndexes(Tag pointType) {
-
-        int count = this.getNucleusCount();
-        int[] result = new int[count];
-        int i = 0;
-
-        for (Nucleus n : this.getNuclei()) {
-            result[i++] = n.getBorderIndex(pointType);
-        }
-        return result;
-    }
+//    public int[] getPointIndexes(Tag pointType) {
+//
+//        int count = this.getNucleusCount();
+//        int[] result = new int[count];
+//        int i = 0;
+//
+//        for (Nucleus n : this.getNuclei()) {
+//            result[i++] = n.getBorderIndex(pointType);
+//        }
+//        return result;
+//    }
 
     /**
      * Get the distances between two border tags for each nucleus
@@ -901,7 +933,8 @@ public class CellCollection implements ICellCollection {
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
      */
-    public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
+    @Override
+	public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
             throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 
         if (this.size() == 1) {
@@ -940,11 +973,11 @@ public class CellCollection implements ICellCollection {
             throws Exception {
 
         if (stat.getClass() == NucleusStatistic.class) {
-            return getMedianNucleusStatistic((NucleusStatistic) stat, scale);
+            return getMedianNucleusStatistic(stat, scale);
         }
 
         if (stat.getClass() == SignalStatistic.class) {
-            return getSignalManager().getMedianSignalStatistic((SignalStatistic) stat, scale, signalGroup);
+            return getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
 
             // return getMedianSignalStatistic((SignalStatistic) stat, scale,
             // signalGroup);
@@ -1054,7 +1087,7 @@ public class CellCollection implements ICellCollection {
 
         try {
             if (stat instanceof NucleusStatistic) {
-                return getNuclearStatistics((NucleusStatistic) stat, scale);
+                return getNuclearStatistics(stat, scale);
             }
 
             if (stat instanceof SegmentStatistic) {
@@ -1372,7 +1405,8 @@ public class CellCollection implements ICellCollection {
      * @return
      * @throws Exception
      */
-    public ICellCollection and(ICellCollection other) {
+    @Override
+	public ICellCollection and(ICellCollection other) {
 
         CellCollection newCollection = new CellCollection(this, "AND operation");
 
@@ -1394,7 +1428,8 @@ public class CellCollection implements ICellCollection {
      * @return
      * @throws Exception
      */
-    public ICellCollection not(ICellCollection other) {
+    @Override
+	public ICellCollection not(ICellCollection other) {
 
         CellCollection newCollection = new CellCollection(this, "NOT operation");
 
@@ -1417,7 +1452,8 @@ public class CellCollection implements ICellCollection {
      * @return
      * @throws Exception
      */
-    public ICellCollection xor(ICellCollection other) {
+    @Override
+	public ICellCollection xor(ICellCollection other) {
 
         CellCollection newCollection = new CellCollection(this, "XOR operation");
 
@@ -1446,7 +1482,8 @@ public class CellCollection implements ICellCollection {
      * @return
      * @throws Exception
      */
-    public ICellCollection or(ICellCollection other) {
+    @Override
+	public ICellCollection or(ICellCollection other) {
 
         CellCollection newCollection = new CellCollection(this, "OR operation");
 
@@ -1470,7 +1507,8 @@ public class CellCollection implements ICellCollection {
      * Invalidate the existing cached vertically rotated nuclei, and
      * recalculate.
      */
-    public void updateVerticalNuclei() {
+    @Override
+	public void updateVerticalNuclei() {
 
         getNuclei().parallelStream().forEach(n -> {
             n.updateVerticallyRotatedNucleus();
@@ -1478,7 +1516,8 @@ public class CellCollection implements ICellCollection {
 
     }
 
-    public void setSourceFolder(File newFolder) {
+    @Override
+	public void setSourceFolder(File newFolder) {
         File oldFile = this.getFolder();
 
         if (newFolder.exists()) {
@@ -1517,7 +1556,8 @@ public class CellCollection implements ICellCollection {
      * @param c
      * @return
      */
-    public boolean contains(ICell c) {
+    @Override
+	public boolean contains(ICell c) {
         for (ICell cell : this.getCells()) {
             if (cell.equals(c)) {
                 return true;
@@ -1533,7 +1573,8 @@ public class CellCollection implements ICellCollection {
      * @param c
      * @return
      */
-    public boolean containsExact(ICell c) {
+    @Override
+	public boolean containsExact(ICell c) {
         for (ICell cell : this.getCells()) {
             if (cell == c) {
                 return true;
@@ -1548,7 +1589,8 @@ public class CellCollection implements ICellCollection {
      * @param id
      * @return
      */
-    public Set<UUID> getSignalGroupIDs() {
+    @Override
+	public Set<UUID> getSignalGroupIDs() {
         return this.signalGroups.keySet();
     }
 
@@ -1558,7 +1600,8 @@ public class CellCollection implements ICellCollection {
      * @param id
      * @return
      */
-    public Collection<ISignalGroup> getSignalGroups() {
+    @Override
+	public Collection<ISignalGroup> getSignalGroups() {
 
         Collection<ISignalGroup> result = new ArrayList<ISignalGroup>(signalGroups.size());
 
@@ -1576,11 +1619,13 @@ public class CellCollection implements ICellCollection {
      * @param id
      * @return
      */
-    public Optional<ISignalGroup> getSignalGroup(UUID id) {
+    @Override
+	public Optional<ISignalGroup> getSignalGroup(UUID id) {
         return Optional.ofNullable(this.signalGroups.get(id));
     }
 
-    public void addSignalGroup(UUID id, ISignalGroup group) {
+    @Override
+	public void addSignalGroup(UUID id, ISignalGroup group) {
 
         if (!(group instanceof SignalGroup)) {
             throw new IllegalArgumentException("Cannot cast to signal group");
@@ -1588,7 +1633,8 @@ public class CellCollection implements ICellCollection {
         this.signalGroups.put(id, (SignalGroup) group);
     }
 
-    public boolean hasSignalGroup(UUID id) {
+    @Override
+	public boolean hasSignalGroup(UUID id) {
         return this.signalGroups.containsKey(id);
     }
 
@@ -1597,7 +1643,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @param id
      */
-    public void removeSignalGroup(UUID id) {
+    @Override
+	public void removeSignalGroup(UUID id) {
         this.signalGroups.remove(id);
     }
 
@@ -1607,7 +1654,8 @@ public class CellCollection implements ICellCollection {
      * 
      * @return
      */
-    public RuleSetCollection getRuleSetCollection() {
+    @Override
+	public RuleSetCollection getRuleSetCollection() {
         return this.ruleSets;
     }
 
@@ -1617,7 +1665,8 @@ public class CellCollection implements ICellCollection {
      * @param d2
      * @return
      */
-    public int countShared(IAnalysisDataset d2) {
+    @Override
+	public int countShared(IAnalysisDataset d2) {
 
         return countShared(d2.getCollection());
 
@@ -1629,7 +1678,8 @@ public class CellCollection implements ICellCollection {
      * @param d2
      * @return
      */
-    public int countShared(ICellCollection d2) {
+    @Override
+	public int countShared(ICellCollection d2) {
 
         if (this.vennCache.containsKey(d2.getID())) {
             return vennCache.get(d2.getID());
@@ -1708,7 +1758,8 @@ public class CellCollection implements ICellCollection {
 
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
 
         String newLine = System.getProperty("line.separator");
         StringBuilder b = new StringBuilder();

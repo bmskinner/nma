@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -442,17 +443,24 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param n
 	 * @param plot
 	 */
-	private void addBorderTagMarkers(Nucleus n, XYPlot plot) {
+	private void addBorderTagMarkers(@NonNull Taggable n, @NonNull XYPlot plot) {
 		for (Tag tag : n.getBorderTags().keySet()) {
-			// get the index of the tag
-			int index = n.getBorderIndex(tag);
 
-			// Correct to start from RP
-			int offset = n.getBorderIndex(options.getTag());
-
-			// adjust the index to the offset
-			index = n.wrapIndex(index - offset);
-			addMarkerToXYPlot(plot, tag, (double) index);
+			try {
+				int index = n.getOffsetBorderIndex(options.getTag(), n.getBorderIndex(tag));
+				addMarkerToXYPlot(plot, tag, (double) index);
+			} catch (UnavailableBorderTagException e) {
+				stack("Border tag not available", e);
+			}
+//			// get the index of the tag
+//			int index = n.getBorderIndex(tag);
+//
+//			// Correct to start from RP
+//			int offset = n.getBorderIndex(options.getTag());
+//
+//			// adjust the index to the offset
+//			index = n.wrapIndex(index - offset);
+//			addMarkerToXYPlot(plot, tag, (double) index);
 		}
 	}
 

@@ -23,6 +23,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.javadocking.dock.TabDock;
 
 import ij.IJ;
@@ -193,7 +194,7 @@ public class Screenshotter {
 	
 	private void takeScreenShot(File folder, String title) throws IOException {
 		BufferedImage img = robot.createScreenCapture(makeCroppedBounds(mw));
-		File outputfile = new File(folder, title+".png");
+		File outputfile = new File(folder, title+Io.PNG_FILE_EXTENSION);
 		ImageIO.write(img, "png", outputfile);
 	}
 

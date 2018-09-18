@@ -559,7 +559,7 @@ public class VirtualCellCollection implements ICellCollection {
             try {
                 IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
                 result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-            } catch (ProfileException | UnavailableProfileTypeException e) {
+            } catch (ProfileException | UnavailableProfileTypeException | UnavailableBorderTagException e) {
                 fine("Error getting nucleus profile", e);
                 result[i] = Double.MAX_VALUE;
             } finally {
