@@ -745,41 +745,43 @@ public class ProfileManager implements Loggable {
         int rawOldIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, startPos);
 
         try {
-        if (profile.update(seg, newStart, newEnd)) {
-        	fine("Updating profile is possible");
-            n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-            finest("Updated nucleus profile with new segment boundaries");
+        	fine(profile.toString());
+        	if (profile.update(seg, newStart, newEnd)) {
+        		fine(String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
+        		fine("Profile now: "+profile.toString());
+        		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        		finest("Updated nucleus profile with new segment boundaries");
 
-            /*
-             * Check the border tags - if they overlap the old index replace
-             * them.
-             */
-            int rawIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
+        		/*
+        		 * Check the border tags - if they overlap the old index replace
+        		 * them.
+        		 */
+        		int rawIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
 
-            finest("Updating to index " + index + " from reference point");
-            finest("Raw old border point is index " + rawOldIndex);
-            finest("Raw new border point is index " + rawIndex);
+        		finest("Updating to index " + index + " from reference point");
+        		finest("Raw old border point is index " + rawOldIndex);
+        		finest("Raw new border point is index " + rawIndex);
 
-            if (n.hasBorderTag(rawOldIndex)) {
-                Tag tagToUpdate = n.getBorderTag(rawOldIndex);
-                fine("Updating tag " + tagToUpdate);
-                n.setBorderTag(tagToUpdate, rawIndex);
+        		if (n.hasBorderTag(rawOldIndex)) {
+        			Tag tagToUpdate = n.getBorderTag(rawOldIndex);
+        			fine("Updating tag " + tagToUpdate);
+        			n.setBorderTag(tagToUpdate, rawIndex);
 
-                // Update intersection point if needed
-                if (tagToUpdate.equals(Tag.ORIENTATION_POINT)) {
-                    n.setBorderTag(Tag.INTERSECTION_POINT,
-                            n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(Tag.ORIENTATION_POINT))));
-                }
-            }
+        			// Update intersection point if needed
+        			if (tagToUpdate.equals(Tag.ORIENTATION_POINT)) {
+        				n.setBorderTag(Tag.INTERSECTION_POINT,
+        						n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(Tag.ORIENTATION_POINT))));
+        			}
+        		}
 
-            n.updateVerticallyRotatedNucleus();
-            n.updateDependentStats();
+        		n.updateVerticallyRotatedNucleus();
+        		n.updateDependentStats();
 
-        } else {
-            log("Updating " + seg.getStartIndex() + " to index " + index + " failed");
-        }
+        	} else {
+        		warn(String.format("Updating %s start index from %s to %s failed", seg.getName(), seg.getStartIndex(), index ));
+        	}
         } catch(SegmentUpdateException e) {
-        	log("Updating " + seg.getStartIndex() + " to index " + index + " failed");
+        	warn(String.format("Updating %s start index from %s to %s failed", seg.getName(), seg.getStartIndex(), index ));
         }
     }
 

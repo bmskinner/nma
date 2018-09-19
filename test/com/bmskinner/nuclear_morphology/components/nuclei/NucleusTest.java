@@ -19,57 +19,109 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import static org.junit.Assert.assertEquals;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
+import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 
-import java.io.File;
-
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyRodentSpermNucleus;
 
+/**
+ * Tests for implementations of the Nucleus interface
+ * @author ben
+ *
+ */
+@RunWith(Parameterized.class)
 public class NucleusTest {
+	
+	private Nucleus nucleus;
+	
+	@Parameter(0)
+	public Class<? extends Nucleus> source;
+	
+	@Before
+    public void setUp() throws Exception {
+		nucleus = createInstance(source);
+    }
+	
+	/**
+	 * Create an instance of the class under test
+	 * @param source the class to create
+	 * @return
+	 * @throws Exception 
+	 */
+	public static Nucleus createInstance(Class<? extends Nucleus> source) throws Exception {
+
+		if(source==DefaultNucleus.class){
+			return TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20);
+		}
+
+		throw new Exception("Unable to create instance of "+source);
+	}
+	
+	@SuppressWarnings("unchecked")
+    @Parameters
+    public static Iterable<Class<? extends Nucleus>> arguments() {
+
+		// Since the objects created here persist throughout all tests,
+		// we're making class references. The actual objects under test
+		// are created fresh from the appropriate class.
+		return Arrays.asList(DefaultNucleus.class);
+	}
 
 	@Test
 	public void testMinDiameter() throws Exception {
-		Nucleus n = new DummyRodentSpermNucleus();
-		double expected = 53.14;
-		double epsilon = 0; // the amount of difference permitted
-		
-		assertEquals("Values should be identical", expected, n.getStatistic(PlottableStatistic.MIN_DIAMETER), epsilon);
-	}
-	
-	@Test
-	public void testFeret() throws Exception {
-	    Nucleus n = new DummyRodentSpermNucleus();
-		double expected = 134.27;
+		double expected = 100;
 		double epsilon = 0.01; // the amount of difference permitted
-		assertEquals("Values should be identical", expected, n.getStatistic(PlottableStatistic.MAX_FERET), epsilon);
+		assertEquals(expected, nucleus.getStatistic(PlottableStatistic.MIN_DIAMETER), epsilon);
 	}
-	
+		
 	@Test
 	public void testCentreOfMass() throws ComponentCreationException {
-	    Nucleus n = new DummyRodentSpermNucleus();
-		int expectedX = 74;
-		int expectedY = 46;
-		
-		double expectedXD = 74.0;
-		double expectedYD = 46.0;
-		double epsilon = 0.01; // the amount of difference permitted
-				
-		assertEquals("X int values should be identical", expectedX, n.getCentreOfMass().getXAsInt());
-		assertEquals("Y int values should be identical", expectedY, n.getCentreOfMass().getYAsInt());
-		
-		assertEquals("X double values should be identical", expectedXD, n.getCentreOfMass().getX(), epsilon);
-		assertEquals("Y double values should be identical", expectedYD, n.getCentreOfMass().getY(), epsilon);
+		int expectedX = 70;
+		int expectedY = 70;				
+		assertEquals("X int values", expectedX, nucleus.getCentreOfMass().getXAsInt());
+		assertEquals("Y int values", expectedY, nucleus.getCentreOfMass().getYAsInt());
+	}
+	
+	@Test
+	public void testGetProfileType() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		ISegmentedProfile profile = nucleus.getProfile(ProfileType.ANGLE);
+		System.out.println(profile.toString());
+		System.out.println(profile.valueString());
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testGetProfileTypeTag() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		ISegmentedProfile rawProfile = nucleus.getProfile(ProfileType.ANGLE);
+		ISegmentedProfile tagProfile = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+//		System.out.println(profile.toString());
+//		System.out.println(profile.valueString());
+		assertEquals(rawProfile.toString(), tagProfile.toString());
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testGetBorderIndex() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		int index = nucleus.getBorderIndex(Tag.REFERENCE_POINT);
+		System.out.println(index);
+		fail("Not yet implemented");
 	}
 
 }

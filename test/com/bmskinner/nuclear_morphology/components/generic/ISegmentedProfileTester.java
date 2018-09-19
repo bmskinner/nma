@@ -921,7 +921,7 @@ public class ISegmentedProfileTester {
 	}
 	
 	@Test
-    public void testUpdate() throws SegmentUpdateException, UnavailableComponentException {
+    public void testUpdateStartAndEnd() throws SegmentUpdateException, UnavailableComponentException {
 		IBorderSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 		
 		int oldStart = seg0.getStartIndex();
@@ -929,11 +929,119 @@ public class ISegmentedProfileTester {
 		
 		int oldEnd = seg0.getEndIndex();
 		int newEnd = oldEnd+10;
-
+		System.out.println(profile);
 		assertTrue(profile.update(seg0, newStart, newEnd));
-		assertEquals(newStart, profile.getSegment(UUID.fromString(SEG_0)).getStartIndex());
-		assertEquals(newEnd, profile.getSegment(UUID.fromString(SEG_0)).getEndIndex());
+		
+		IBorderSegment updated = profile.getSegment(UUID.fromString(SEG_0));
+		assertEquals(newStart, updated.getStartIndex());
+		assertEquals(newEnd, updated.getEndIndex());
+		
+		System.out.println(profile);
+		
+		IBorderSegment prev = updated.prevSegment();
+		IBorderSegment next = updated.nextSegment();
+		
+		assertEquals("Previous segmented updated", newStart, prev.getEndIndex());
+		assertEquals("Next segmented updated", newEnd, next.getStartIndex());
+		
 	}
-    
 	
+	@Test
+    public void testUpdateStartOnly() throws SegmentUpdateException, UnavailableComponentException {
+		IBorderSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
+		
+		int oldStart = seg0.getStartIndex();
+		int newStart = oldStart+10;
+		
+		int oldEnd = seg0.getEndIndex();
+
+		assertTrue(profile.update(seg0, newStart, oldEnd));
+		
+		IBorderSegment updated = profile.getSegment(UUID.fromString(SEG_0));
+		assertEquals(newStart, updated.getStartIndex());
+		assertEquals(oldEnd, updated.getEndIndex());
+		
+		IBorderSegment prev = updated.prevSegment();
+		IBorderSegment next = updated.nextSegment();
+		
+		assertEquals("Previous segmented updated", newStart, prev.getEndIndex());
+		assertEquals("Next segmented updated", oldEnd, next.getStartIndex());
+	}
+	
+	@Test
+    public void testUpdateEndOnly() throws SegmentUpdateException, UnavailableComponentException {
+		IBorderSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
+		
+		int oldStart = seg0.getStartIndex();
+		
+		int oldEnd = seg0.getEndIndex();
+		int newEnd = oldEnd+10;
+		assertTrue(profile.update(seg0, oldStart, newEnd));
+		
+		IBorderSegment updated = profile.getSegment(UUID.fromString(SEG_0));
+		assertEquals(oldStart, updated.getStartIndex());
+		assertEquals(newEnd, updated.getEndIndex());
+		
+		IBorderSegment prev = updated.prevSegment();
+		IBorderSegment next = updated.nextSegment();
+		
+		assertEquals("Previous segmented updated", oldStart, prev.getEndIndex());
+		assertEquals("Next segmented updated", newEnd, next.getStartIndex());
+	}
+
+	@Test
+    public void testUpdateFailsOnOutOfBoundsStart() throws SegmentUpdateException, UnavailableComponentException {
+		IBorderSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
+		
+		int oldStart = seg0.getStartIndex();
+		int oldEnd = seg0.getEndIndex();
+		
+		// Too close to prev start for update to succeed
+		try {
+			int newStart = CellularComponent.wrapIndex(seg0.prevSegment().getStartIndex()+1, profile.size());
+			profile.update(seg0, newStart, oldEnd);
+			fail("Invalid segment update did not except");
+		} catch(SegmentUpdateException e) {
+//			System.out.println("Expected exception caught: "+e.getMessage());
+		}
+		
+		// Confirm nothing happened
+		IBorderSegment updated = profile.getSegment(UUID.fromString(SEG_0));
+		assertEquals(oldStart, updated.getStartIndex());
+		assertEquals(oldEnd, updated.getEndIndex());
+		
+		IBorderSegment prev = updated.prevSegment();
+		IBorderSegment next = updated.nextSegment();
+		
+		assertEquals("Previous segmented updated", oldStart, prev.getEndIndex());
+		assertEquals("Next segmented updated", oldEnd, next.getStartIndex());
+	}	
+	
+	@Test
+    public void testUpdateExceptsOnOutOfBoundsEnd() throws SegmentUpdateException, UnavailableComponentException {
+		IBorderSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
+		
+		int oldStart = seg0.getStartIndex();
+		int oldEnd = seg0.getEndIndex();
+		
+		// Too close to next end for update to succeed
+		try {
+			int newEnd = CellularComponent.wrapIndex(seg0.nextSegment().getEndIndex()-1, profile.size());
+			profile.update(seg0, oldStart, newEnd);
+			fail("Invalid segment update did not except");
+		} catch(SegmentUpdateException e) {
+//			System.out.println("Expected exception caught: "+e.getMessage());
+		}
+		
+		// Confirm nothing happened
+		IBorderSegment updated = profile.getSegment(UUID.fromString(SEG_0));
+		assertEquals(oldStart, updated.getStartIndex());
+		assertEquals(oldEnd, updated.getEndIndex());
+		
+		IBorderSegment prev = updated.prevSegment();
+		IBorderSegment next = updated.nextSegment();
+		
+		assertEquals("Previous segmented updated", oldStart, prev.getEndIndex());
+		assertEquals("Next segmented updated", oldEnd, next.getStartIndex());
+	}
 }

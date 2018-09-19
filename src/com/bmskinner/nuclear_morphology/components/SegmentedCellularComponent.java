@@ -138,7 +138,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
             throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) for %s", profile.size(), getBorderLength(), type));
         
         try {
-//        	finest("Setting profile of type "+type);
     		assignProfile(type, new DefaultSegmentedProfile(profile));
 		} catch (IndexOutOfBoundsException | ProfileException e) {
 			stack("Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
@@ -152,22 +151,23 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
             return;
 
         if (!this.hasBorderTag(tag))
-            throw new UnavailableBorderTagException("Tag " + tag + " is not present");
+            throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
 
         // fetch the index of the pointType (the zero of the input profile)
         int pointIndex = this.borderTags.get(tag);
 
-        // remove the offset from the profile, by setting the profile to start from the pointIndex
+        // Keep a copy of the old profile
         ISegmentedProfile oldProfile = getProfile(type);
         
         try {
-            
-            setProfile(type, (p).offset(-pointIndex));
+        	// remove the offset from the profile, by setting the profile to start from the pointIndex
+        	ISegmentedProfile offsetNewProfile =  p.offset(-pointIndex);
+        	fine("Setting profile: "+offsetNewProfile.toString());
+            setProfile(type, offsetNewProfile);
         } catch (ProfileException e) { // restore the old profile
-            stack("Error setting profile " + type + " at " + tag, e);
+            stack(String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
             setProfile(type, oldProfile);
         }
-
     }
 
 	/**
@@ -2070,18 +2070,32 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new SegmentUpdateException(String.format("Segment will become too short (%d)", newLength));
 				
 				// All checks passed
+				int segIndex = segments.leaves.indexOf(this);
+				if(segIndex==-1) {
+					fine("The segment was not found in the leaves!");
+					fine("Behold the leaves!");
+					for(BorderSegmentTree s : segments.leaves)
+						fine(s.getDetail());
+				}
 				
-//				finest(String.format("Updating segment from %d-%d to %d-%d", this.startIndex, getEndIndex(), startIndex, endIndex));
 				this.startIndex = startIndex;
 				this.endIndex   = endIndex;
 				
 				// Pass on the updated positions to the surrounding segments
-				int segIndex = segments.leaves.indexOf(this);
+
+				fine("This is segment index "+segIndex);
 				
-				BorderSegmentTree nextSeg = segments.leaves.get(wrapSegmentIndex(segIndex+1));
+				int nextSegIndex = wrapSegmentIndex(segIndex+1);
+				
+				BorderSegmentTree nextSeg = segments.leaves.get(nextSegIndex);
+				fine("Updating next segment "+nextSegIndex+": "+nextSeg);
 				nextSeg.startIndex = endIndex;
+				fine("Next segment "+nextSegIndex+" now: "+nextSeg);
 				
-				BorderSegmentTree prevSeg = segments.leaves.get(wrapSegmentIndex(segIndex-1));
+				int prevSegIndex = wrapSegmentIndex(segIndex-1);
+				fine("Updating prev segment "+prevSegIndex);
+				BorderSegmentTree prevSeg = segments.leaves.get(prevSegIndex);
+				fine("Prev segment "+prevSegIndex+" now: "+prevSeg);
 				prevSeg.endIndex = startIndex;
 				
 				return true;
@@ -2167,7 +2181,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			@Override
 			public String toString() {
-				return String.format("%d - %d of %d", startIndex, endIndex, size());
+				StringBuilder b = new StringBuilder(String.format("%d - %d of %d", startIndex, endIndex, size()));
+				for(IBorderSegment s : this.getMergeSources())
+					b.append("\n\t"+s.toString());
+				
+				return b.toString();
 			}
 		}
 

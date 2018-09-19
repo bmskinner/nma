@@ -186,8 +186,8 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 						});
 						popupMenu.add(nextItem);
 						
-					} catch (UnavailableProfileTypeException e) {
-						e.printStackTrace();
+					} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
+						stack("Cannot get border tag index", e);
 					}
 					return popupMenu;
 				}
@@ -207,7 +207,6 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 							.findFirst();
 
 					if(point.isPresent()) {
-						System.out.println(String.format("Border point overlaps at %s ", point.get().toString()));
 						JPopupMenu popup = createPopup(point.get());
 						popup.show(imageLabel, e.getX(), e.getY());
 					}
