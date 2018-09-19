@@ -56,8 +56,6 @@ import com.bmskinner.nuclear_morphology.io.SVGWriter;
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
 
-    private static final String REFOLD_BTN_LBL = "Refold";
-    
     private ConsensusNucleusChartPanel consensusChartPanel;
     private JButton                    runRefoldingButton;
 
@@ -77,7 +75,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
         consensusChartPanel.addSignalChangeListener(this);
 
-        runRefoldingButton = new JButton(REFOLD_BTN_LBL);
+        runRefoldingButton = new JButton(Labels.Consensus.REFOLD_BTN_LBL);
 
         runRefoldingButton.addActionListener(e -> {
             this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, getDatasets());

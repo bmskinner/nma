@@ -94,7 +94,7 @@ public class Screenshotter {
 		InputSupplier is = new DefaultInputSupplier();
 		EventHandler eh = new EventHandler(is);
 		mw = new DockableMainWindow(true,eh);
-		mw.setExtendedState( mw.getExtendedState()|JFrame.MAXIMIZED_BOTH);
+//		mw.setExtendedState( mw.getExtendedState()|JFrame.MAXIMIZED_BOTH);
 		mw.setVisible(true);
 
 		Thread.sleep(LOAD_TIME_MILLIS);

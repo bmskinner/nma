@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.RandomSamplingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 
@@ -71,8 +72,11 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
          */
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-        labelPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
-        labelPanel.add(new JLabel("Row median value as a proportion of column median value"));
+        
+        String infoString = "Pairwise magnitude comparisons between populations\n"
+        		+"Row median value as a proportion of column median value";
+        
+        labelPanel.add(new WrappedLabel(infoString));
 
         /*
          * Control buttons

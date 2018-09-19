@@ -66,7 +66,8 @@ public class Labels {
     	public static final String INCREASE_ROTATION_TOOLTIP = "Rotate anti-clockwise 1 degree";
     	public static final String DECREASE_ROTATION_TOOLTIP = "Rotate clockwise 1 degree";
     	
-    	public static final String RE_REFOLD_LBL  = "Re-Refold";
+    	public static final String REFOLD_BTN_LBL = "Make consensus";
+    	public static final String RE_REFOLD_LBL  = "Remake consensus";
     }
 
     /**

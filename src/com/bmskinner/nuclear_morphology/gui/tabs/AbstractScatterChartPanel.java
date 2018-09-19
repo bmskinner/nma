@@ -28,6 +28,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -62,6 +64,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 /**
@@ -81,7 +84,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
     private static final String X_AXIS_LBL = "X axis";
     private static final String Y_AXIS_LBL = "Y axis";
     
-    private static final String SPEARMAN_LBL = "Spearman's rank correlation coefficients are shown in the table";
+    private static final String SPEARMAN_LBL = "Spearman's rank correlation coefficients";
     
     
     protected ExportableChartPanel chartPanel;  // hold the charts
@@ -105,32 +108,40 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
         this.add(headerPanel, BorderLayout.NORTH);
 
-        JPanel tablePanel = new JPanel(new BorderLayout());
-
-        TableModel model = AnalysisDatasetTableCreator.createBlankTable();
-        rhoTable = new ExportableTable(model);
-        rhoTable.setEnabled(false);
-        tablePanel.add(rhoTable, BorderLayout.CENTER);
-
         JFreeChart chart = ScatterChartFactory.makeEmptyChart();
 
         chartPanel = new ExportableChartPanel(chart);
         chartPanel.getChartRenderingInfo().setEntityCollection(null);
-        this.add(chartPanel, BorderLayout.CENTER);
-
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(tablePanel);
-        scrollPane.setColumnHeaderView(rhoTable.getTableHeader());
-        Dimension size = new Dimension(300, 200);
-        scrollPane.setMinimumSize(size);
-        scrollPane.setPreferredSize(size);
-
-        this.add(scrollPane, BorderLayout.WEST);
+        
+        add(chartPanel, BorderLayout.CENTER);
+        add(createWestPanel(), BorderLayout.WEST);
     }
 
     @Override
     public String getPanelTitle(){
         return PANEL_TITLE_LBL;
+    }
+    
+    private JPanel createWestPanel() {
+    	JTextArea textArea = new WrappedLabel(SPEARMAN_LBL);
+
+        JPanel panel = new JPanel(new BorderLayout());
+
+        TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+        rhoTable = new ExportableTable(model);
+        rhoTable.setEnabled(false);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(rhoTable);
+        scrollPane.setColumnHeaderView(rhoTable.getTableHeader());
+        Dimension size = new Dimension(300, 200);
+        scrollPane.setMinimumSize(size);
+        scrollPane.setPreferredSize(size);
+        
+        panel.add(textArea, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        
+        return panel;
     }
     
     private JPanel createHeader() {
@@ -155,8 +166,6 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         panel.add(statBBox);
 
         panel.add(gateButton);
-        panel.add(new JLabel(SPEARMAN_LBL));
-
         return panel;
     }
 

@@ -179,9 +179,9 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 			chart.getCategoryPlot().getRangeAxis().setRange(range);
 
 			String percentLabel = options.getNormalisation().equals(Normalisation.DAPI) ? "Normalised percent" : "Percent";
-			String locationLabel = options.getAggregation().equals(Aggregation.BY_NUCLEUS) ? Labels.NUCLEI : "flurochrome border";
+			String locationLabel = options.getAggregation().equals(Aggregation.BY_NUCLEUS) ? Labels.NUCLEI : "signal borders";
 
-			chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel + " of signal within " + locationLabel);
+			chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel + " pixel intensity within " + locationLabel);
 
 			return chart;
 		} catch (ChartDatasetCreationException e) {

@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -45,7 +46,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableModel;
 
@@ -82,6 +85,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDialog;
@@ -180,9 +184,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0; // Start at left
         constraints.gridy = 0; // Start at top
-        constraints.gridheight = GridBagConstraints.REMAINDER; // Take up 2
-                                                               // cells in
-                                                               // height
+        constraints.gridheight = GridBagConstraints.REMAINDER;
         constraints.gridwidth = 3; // Take up 1 cell in width
         constraints.weightx = 0.5;
         constraints.weighty = 1;
@@ -212,7 +214,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
         JPanel tablePanel    = createOverallTablePanel();
         JPanel pairwisePanel = createPairwiseTablePanel();
-//        consensusPanel = createConsensusPanel();
 
         panel.add(tablePanel, BorderLayout.NORTH);
         panel.add(pairwisePanel, BorderLayout.CENTER);
@@ -306,10 +307,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
      */
     private JPanel createOverallTablePanel() {
         JPanel tablePanel = new JPanel(new BorderLayout());
+                
+        JTextArea textArea = new WrappedLabel("Comparisons to random distribution by chi-square with Bonferroni correction");
         
-        JPanel header = new JPanel();
-        header.add(new JLabel("Comparisons to random distribution by chi-square with Bonferroni correction"));
-        tablePanel.add(header, BorderLayout.NORTH);
+        tablePanel.add(textArea, BorderLayout.NORTH);
         TableModel model = AnalysisDatasetTableCreator.createBlankTable();
         overallTable = new ExportableTable(model);
         overallTable.setEnabled(false);
@@ -331,10 +332,11 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
      */
     private JPanel createPairwiseTablePanel() {
         JPanel tablePanel = new JPanel(new BorderLayout());
+        Dimension size = new Dimension(200, 150);
+  
+        JTextArea textArea = new WrappedLabel("Pairwise comparisons of shell results by chi-square with Bonferroni correction");
         
-        JPanel header = new JPanel();
-        header.add(new JLabel("Pairwise comparisons of shell results by chi-square with Bonferroni correction"));
-        tablePanel.add(header, BorderLayout.NORTH);
+        tablePanel.add(textArea, BorderLayout.NORTH);
         TableModel model = AnalysisDatasetTableCreator.createBlankTable();
         pairwiseTable = new ExportableTable(model);
         pairwiseTable.setEnabled(false);
@@ -343,7 +345,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(pairwiseTable);
         scrollPane.setColumnHeaderView(pairwiseTable.getTableHeader());
-        Dimension size = new Dimension(200, 150);
+        
         tablePanel.setMinimumSize(size);
         tablePanel.setPreferredSize(size);
         tablePanel.add(scrollPane, BorderLayout.CENTER);
@@ -443,10 +445,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     @Override
     protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-//        if (options.getTarget() == chartPanel) {
-            return new NuclearSignalChartFactory(options).createShellChart();
-//        }
-//		return new NuclearSignalChartFactory(options).createShellConsensusChart();
+    	return new NuclearSignalChartFactory(options).createShellChart();
+
     }
 
     @Override
