@@ -1,7 +1,5 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import java.io.IOException;
-import java.io.InvalidClassException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +9,6 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
@@ -28,24 +25,16 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	private final UUID id;
 
 	/** ImageProcessors are not serializable, so store the byte array and convert back as needed */
-	private final Map<CellularComponent, byte[][]> templates = new HashMap<>();
+	private final Map<WarpedSignalKey, byte[][]> images = new HashMap<>();
 	
-	private final Map<CellularComponent, String> targetNames = new HashMap<>();
-	
-	private final boolean isCellsWithSignals;
+	private final Map<WarpedSignalKey, String> targetNames = new HashMap<>();
 	
 	/**
 	 * Construct with the signal group id
 	 * @param signalGroupId
 	 */
-	public DefaultWarpedSignal(@NonNull UUID signalGroupId, boolean isCellsWithSignals) {
+	public DefaultWarpedSignal(@NonNull UUID signalGroupId) {
 		id = signalGroupId;
-		this.isCellsWithSignals = isCellsWithSignals;
-	}
-	
-	@Override
-	public boolean isCellsWithSignals() {
-		return isCellsWithSignals;
 	}
 
 	@Override
@@ -54,12 +43,12 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	}
 
 	@Override
-	public @NonNull Set<CellularComponent> getTemplates() {
-		return templates.keySet();
+	public @NonNull Set<WarpedSignalKey> getWarpedSignalKeys() {
+		return images.keySet();
 	}
 
 	@Override
-	public void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, @NonNull ByteProcessor image) {
+	public void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, boolean isCellWithSignalsOnly, @NonNull ByteProcessor image) {
 
 		byte[][] arr = new byte[image.getWidth()][image.getHeight()];
 		
@@ -68,16 +57,19 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 				arr[w][h] = (byte) image.get(w, h);
 			}
 		}
-		templates.put(template, arr);
-		targetNames.put(template, name);
+		
+		WarpedSignalKey k = new WarpedSignalKey(template, isCellWithSignalsOnly);
+		
+		images.put(k, arr);
+		targetNames.put(k, name);
 	}
-
+	
 	@Override
-	public Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template) {
-		if(!templates.containsKey(template))
+	public Optional<ImageProcessor> getWarpedImage(@NonNull WarpedSignalKey k){
+		if(!images.containsKey(k))
 			return Optional.empty();
 		
-		byte[][] arr = templates.get(template);
+		byte[][] arr = images.get(k);
 		ByteProcessor image = new ByteProcessor(arr.length, arr[0].length);
 		for(int w=0; w<image.getWidth(); w++) {
 			for(int h=0; h<image.getHeight(); h++) {
@@ -86,16 +78,18 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 		}
 		return Optional.of(image);
 	}
-	
-	@Override
-	public String getTargetName(@NonNull CellularComponent template) {
-		return targetNames.get(template);
-	}
 
 	@Override
-	public Optional<INuclearSignal> getWarpedSignal(@NonNull CellularComponent template, @NonNull INuclearSignalOptions options) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+	public Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template, boolean isCellWithSignalsOnly) {
+		WarpedSignalKey k = new WarpedSignalKey(template, isCellWithSignalsOnly);
+		return getWarpedImage(k);
+	}
+	
+	@Override
+	public String getTargetName(@NonNull WarpedSignalKey key) {
+		if(targetNames.containsKey(key))
+			return targetNames.get(key);
+		return targetNames.get(new WarpedSignalKey(key.getTargetShape(), !key.isCellWithSignalsOnly()));
 	}
 
 	@Override
@@ -103,8 +97,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + (isCellsWithSignals ? 1231 : 1237);
-		result = prime * result + ((templates == null) ? 0 : templates.hashCode());
+		result = prime * result + ((images == null) ? 0 : images.hashCode());
 		result = prime * result + ((targetNames == null) ? 0 : targetNames.hashCode());
 		return result;
 	}
@@ -123,12 +116,10 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (isCellsWithSignals != other.isCellsWithSignals)
-			return false;
-		if (templates == null) {
-			if (other.templates != null)
+		if (images == null) {
+			if (other.images != null)
 				return false;
-		} else if (!templates.equals(other.templates))
+		} else if (!images.equals(other.images))
 			return false;
 		if (targetNames == null) {
 			if (other.targetNames != null)
@@ -137,7 +128,5 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			return false;
 		return true;
 	}
-
-
 
 }

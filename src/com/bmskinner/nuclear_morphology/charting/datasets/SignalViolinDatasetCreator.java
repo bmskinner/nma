@@ -41,12 +41,12 @@ public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
         super(options);
     }
     
-    public ViolinCategoryDataset createSignalCountViolinDataset() throws ChartDatasetCreationException {
+    public synchronized ViolinCategoryDataset createSignalCountViolinDataset() throws ChartDatasetCreationException {
     	return new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_SIGNAL);
     	
     }
 
-    public ViolinCategoryDataset createSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
+    public synchronized ViolinCategoryDataset createSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
         if (options.isSingleDataset())
             return createSingleSignalColocalisationViolinDataset();
         if (options.isMultipleDatasets())
@@ -62,7 +62,7 @@ public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
      * @return
      * @throws ChartDatasetCreationException
      */
-    private ViolinCategoryDataset createSingleSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
+    private synchronized ViolinCategoryDataset createSingleSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
 
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
@@ -122,7 +122,7 @@ public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
      * @return
      * @throws ChartDatasetCreationException
      */
-    private ViolinCategoryDataset createMultipleSignalColocalisationViolinDataset()
+    private synchronized ViolinCategoryDataset createMultipleSignalColocalisationViolinDataset()
             throws ChartDatasetCreationException {
 
         ViolinCategoryDataset ds = new ViolinCategoryDataset();

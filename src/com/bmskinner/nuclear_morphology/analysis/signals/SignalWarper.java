@@ -20,7 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.awt.Rectangle;
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,12 +32,12 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -70,10 +70,10 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
     private boolean          cellsWithSignals; // Only warp the cell images with
                                                // detected signals
     private boolean          straighten;       // Straighten the meshes
-    ImageProcessor[]         warpedImages;
+    private final List<ImageProcessor>     warpedImages = new ArrayList<>();
     private int totalCells;
 
-    ImageProcessor mergedImage = null;
+    private ImageProcessor mergedImage = null;
 
     /**
      * Constructor
@@ -102,9 +102,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         SignalManager m = sourceDataset.getCollection().getSignalManager();
         Set<ICell> cells = cellsWithSignals ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
         totalCells = cells.size();
-
-        warpedImages = new ImageProcessor[totalCells];
-
         fine(String.format("Created signal warper for %s signal group %s with %s cells",
         		sourceDataset.getName(), signalGroup, totalCells));
     }
@@ -136,7 +133,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 
     @Override
     public void done() {
-        finest("Worker completed task");
         try {
             if (this.get() != null) {
                 finest("Firing trigger for sucessful task");
@@ -161,18 +157,13 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 
         Mesh<Nucleus> meshConsensus;
         try {
-            meshConsensus = new DefaultMesh(target);
+            meshConsensus = new DefaultMesh<Nucleus>(target);
         } catch (MeshCreationException e2) {
             stack("Error creating mesh", e2);
             return;
         }
 
         Rectangle r = meshConsensus.toPath().getBounds();
-
-        // The new image size
-        int w = r.width;
-        int h = r.height;
-
         Set<ICell> cells = getCells(cellsWithSignals);
 
         int cellNumber = 0;
@@ -182,66 +173,55 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             for (Nucleus n : cell.getNuclei()) {
                 fine("Drawing signals for " + n.getNameAndNumber());
 
-                Mesh<Nucleus> cellMesh;
-                try {
-                    cellMesh = new DefaultMesh(n, meshConsensus);
-
-                    // Get the image with the signal
-                    ImageProcessor ip;
-                    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will be null
-                    	ip = n.getSignalCollection().getImage(signalGroup);
-                    	finest("Image for " + n.getNameAndNumber() + " is " + ip.getWidth() + "x" + ip.getHeight());
-                    } else {
-//                    	 we need to get the file in which no signals were detected
-                    	// This is not stored in a nucleus, so combine the expected file name with the source folder
-                    	INuclearSignalOptions signalOptions = sourceDataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup);
-                    	File imageFolder = signalOptions.getFolder();
-                    	File imageFile   = new File(imageFolder, n.getSourceFileName());
-                    	ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
-                    }
-
-                    // Create NucleusMeshImage from nucleus.
-                    finer("Making nucleus mesh image");
-                    ImageProcessor warped;
-                    try {
-                        MeshImage<Nucleus> im = new DefaultMeshImage(cellMesh, ip);
-
-                        // Draw NucleusMeshImage onto consensus mesh.
-                        finer("Warping image onto consensus mesh");
-                        warped = im.drawImage(meshConsensus);
-
-                    } catch (UncomparableMeshImageException | MeshImageCreationException e) {
-                        stack("Cannot make mesh for " + n.getNameAndNumber(), e);
-                        warped = null;
-                    }
-
-                    warpedImages[cellNumber] = warped;
-
-                } catch (IllegalArgumentException e) {
-                	warn(e.getMessage());
-                    stack(e.getMessage(), e);
-                    // Make a blank image for the array
-                    warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
-
-                } catch (UnloadableImageException | ImageImportException e) {
-                    stack("Unable to load signal image for signal group " + signalGroup + " in nucleus "
-                            + n.getNameAndNumber(), e);
-                    warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
-                } catch (MeshCreationException e1) {
-                    stack("Error creating mesh", e1);
-                    warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
-                } finally {
-
-                    List<ImageProcessor> list = Arrays.asList(warpedImages);
-                    mergedImage = ImageFilterer.averageByteImages(list);
-                    mergedImage = ImageFilterer.rescaleImageIntensity(mergedImage);
-                    publish(cellNumber++);
-                }
+                generateNucleusImage(meshConsensus, r.width, r.height, n);
+    		    publish(cellNumber++);
             }
-
         }
-
     }
+
+	private void generateNucleusImage(@NonNull Mesh<Nucleus> meshConsensus, int w, int h, @NonNull Nucleus n) {
+
+		try {
+			Mesh<Nucleus> cellMesh = new DefaultMesh<Nucleus>(n, meshConsensus);
+
+		    // Get the image with the signal
+		    ImageProcessor ip;
+		    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will throw exception
+		    	ip = n.getSignalCollection().getImage(signalGroup);
+		    } else {
+		    	// We need to get the file in which no signals were detected
+		    	// This is not stored in a nucleus, so combine the expected file name with the source folder
+		    	INuclearSignalOptions signalOptions = sourceDataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup);
+		    	File imageFolder = signalOptions.getFolder();
+		    	File imageFile   = new File(imageFolder, n.getSourceFileName());
+		    	ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
+		    }
+
+		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
+
+		    // Draw NucleusMeshImage onto consensus mesh.
+		    finer("Warping image onto consensus mesh");
+		    warpedImages.add(meshImage.drawImage(meshConsensus));
+
+		} catch (IllegalArgumentException e) {
+		    stack(e.getMessage(), e);
+		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
+		} catch (UnloadableImageException | ImageImportException e) {
+		    stack("Unable to load signal image for signal group " + signalGroup + " in nucleus "
+		            + n.getNameAndNumber(), e);
+		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
+		} catch (MeshCreationException e1) {
+		    stack("Error creating mesh", e1);
+		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
+		} catch (UncomparableMeshImageException | MeshImageCreationException e) {
+			 stack("Cannot make mesh for " + n.getNameAndNumber(), e);
+			 warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
+		} finally {
+		    mergedImage = ImageFilterer.averageByteImages(warpedImages);
+		    mergedImage = ImageFilterer.rescaleImageIntensity(mergedImage);
+		}
+	}
+
 
     /**
      * Get the cells to be used for the warping

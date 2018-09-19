@@ -661,14 +661,12 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     /**
      * Given a list of ordered segments, fetch the segment with the given name
      * 
-     * @param list
-     *            the linked order list
-     * @param segName
-     *            the segment name to find ('Seg_n')
+     * @param list the linked order list
+     * @param segName the segment name to find ('Seg_n')
      * @return the segment or null
      * @throws Exception
      */
-    static IBorderSegment getSegment(@NonNull List<IBorderSegment> list, String segName) {
+    static IBorderSegment getSegment(@NonNull final List<IBorderSegment> list, String segName) {
 
         for (IBorderSegment segment : list) {
 
@@ -686,7 +684,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param list
      * @return
      */
-    static boolean segmentCountsMatch(@NonNull List<IAnalysisDataset> list) {
+    static boolean segmentCountsMatch(@NonNull final List<IAnalysisDataset> list) {
 
         int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         for (IAnalysisDataset d : list) {

@@ -22,12 +22,14 @@ import ij.process.ImageProcessor;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 /**
  * A mesh image converts the pixels within an image to coordinates within each
  * face of a Mesh. It provides the mechanisms to convert a mesh back into an
- * image
+ * image given a template Mesh
  * 
  * @author bms41
  * @since 1.13.3
@@ -42,7 +44,7 @@ public interface MeshImage<E extends CellularComponent> {
      * @return an image processor with the image drawn according to the mesh
      * @throws UncomparableMeshImageException if the mesh does not match this MeshImage
      */
-    ImageProcessor drawImage(Mesh<E> mesh) throws UncomparableMeshImageException;
+    ImageProcessor drawImage(@NonNull Mesh<E> mesh) throws UncomparableMeshImageException;
 
     /**
      * Get the pixels for the given face in the mesh
@@ -50,6 +52,6 @@ public interface MeshImage<E extends CellularComponent> {
      * @param f the face
      * @return the pixels within the face
      */
-    List<MeshPixel> getMeshPixels(MeshFace f);
+    List<MeshPixel> getMeshPixels(@NonNull MeshFace f);
 
 }

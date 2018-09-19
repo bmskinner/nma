@@ -453,15 +453,13 @@ public abstract class AbstractImageFilterer implements Loggable {
      * Adjust the intensity of the given image so that the brightest pixel is at
      * 255 and the dimmest pixel is at 0
      * 
-     * @param ip
-     *            the image to adjust
+     * @param ip the image to adjust
      * @return a new ByteProcessor with rescaled values
      */
-    public static ImageProcessor rescaleImageIntensity(final ImageProcessor ip) {
+    public static ImageProcessor rescaleImageIntensity(@NonNull final ImageProcessor ip) {
 
-        if (ip == null) {
+        if (ip == null)
             throw new IllegalArgumentException("Image cannot be null");
-        }
 
         double maxIntensity = 0;
         double minIntensity = 255;
@@ -684,9 +682,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      */
     public static ImageProcessor averageRGBImages(List<ImageProcessor> list) {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException("List null or empty");
-        }
 
         // Check images are same dimensions
         int w = list.get(0).getWidth();
@@ -694,13 +691,11 @@ public abstract class AbstractImageFilterer implements Loggable {
 
         for (ImageProcessor ip : list) {
 
-            if (ip == null) {
+            if (ip == null)
                 throw new IllegalArgumentException("Null image in list");
-            }
 
-            if (w != ip.getWidth() || h != ip.getHeight()) {
+            if (w != ip.getWidth() || h != ip.getHeight())
                 throw new IllegalArgumentException("Dimensions do not match");
-            }
         }
 
         ImageProcessor cp = new ColorProcessor(w, h);

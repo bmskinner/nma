@@ -57,7 +57,7 @@ public final class DatasetListManager implements Loggable {
     private volatile List<IAnalysisDataset> list = new CopyOnWriteArrayList<>();
 
     /**The datasets currently selected in the UI. Includes child datasets */
-    private volatile List<IAnalysisDataset> selected = new ArrayList<>();;
+    private volatile List<IAnalysisDataset> selected = new CopyOnWriteArrayList<>(); // low efficiency if this is written frequently
 
     /**
      * This map stores the UUID of a dataset as a key against the hashcode of

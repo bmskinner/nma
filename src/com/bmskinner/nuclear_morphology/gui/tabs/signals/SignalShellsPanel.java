@@ -403,15 +403,15 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     @Override
     protected synchronized void updateSingle() {
-
-        updateChartAndTable();
-        setEnabled(false);
-
-        if (activeDataset().getCollection().getSignalManager().hasSignals()) {
-        	newAnalysis.setEnabled(true);
-            if(activeDataset().getCollection().getSignalManager().hasShellResult())
-            	setEnabled(true);
-        }
+    	updateChartAndTable();
+    	setEnabled(false);
+    	if(activeDataset()==null)
+    		return;
+    	if (activeDataset().getCollection().getSignalManager().hasSignals()) {
+    		newAnalysis.setEnabled(true);
+    		if(activeDataset().getCollection().getSignalManager().hasShellResult())
+    			setEnabled(true);
+    	}
 
     }
 

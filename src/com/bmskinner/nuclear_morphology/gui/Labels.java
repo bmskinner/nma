@@ -167,6 +167,20 @@ public class Labels {
 
         public static final String MINIMUM_SIGNAL_AREA     = "The smallest number of pixels a signal can contain";
         public static final String MAXIMUM_SIGNAL_FRACTION = "The largest size of a signal, as a fraction of the nuclear area (0-1)";
+        
+        /**
+         * Labels for the signal warping dialog
+         * @author ben
+         *
+         */
+        public class Warper {
+        	public static final String TABLE_HEADER_SOURCE_DATASET = "Source dataset";
+        	public static final String TABLE_HEADER_SOURCE_SIGNALS = "Source signals";
+        	public static final String TABLE_HEADER_SIGNALS_ONLY   = "Only cells with signals?";
+        	public static final String TABLE_HEADER_TARGET_SHAPE   = "Target shape";
+        	public static final String TABLE_HEADER_KEY_COLUMN     = "Keys";
+        	
+        }
 
     }
     

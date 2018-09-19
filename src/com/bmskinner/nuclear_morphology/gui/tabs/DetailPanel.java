@@ -343,33 +343,28 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * This method sets which of the overriden handling methods are run by
      * extending classes.
      */
-    private synchronized void updateDetail(List<IAnalysisDataset> list) {
-//        List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
-
+    private synchronized void updateDetail(@NonNull final List<IAnalysisDataset> list) {
         try {
-            if (list.isEmpty()) {
+            if (list==null || list.isEmpty()) {
                 updateNull();
                 return;
             }
 
-            if (list.size() > 1) {
+            if (list.size()>1) {
                 updateMultiple();
                 return;
             }
-
             updateSingle();
 
         } catch (Exception e) {
-            warn("Error updating panel " + this.getClass().getName());
-            e.printStackTrace();
-            fine("Error updating panel", e); // save detail for fine logging
+            fine("Error updating panel " + this.getClass().getName());
+            stack("Error updating panel", e); // save detail for fine logging
 
             try {
                 updateNull();
             } catch (Exception e1) {
-                warn(this.getClass().getName() + ": Error recovering from error updating panel");
-                fine("Error recovering from error updating panel", e1);
-                setUpdating(false);
+            	fine(this.getClass().getName() + ": Error recovering from error updating panel");
+            	stack("Error recovering from error updating panel", e1);
             }
         } finally {
             setUpdating(false);

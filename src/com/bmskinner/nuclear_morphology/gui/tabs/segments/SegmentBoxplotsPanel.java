@@ -76,13 +76,13 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateMultiple();
 
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
@@ -132,7 +132,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 

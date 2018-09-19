@@ -1,7 +1,6 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -23,13 +22,7 @@ import ij.process.ImageProcessor;
  *
  */
 public interface IWarpedSignal extends Serializable, Loggable {
-	
-	/**
-	 * Were the warped images derived from all cells, or just those with defined signals?
-	 * @return
-	 */
-	boolean isCellsWithSignals();
-	
+		
 	/**
 	 * Defines the signal group which was warped 
 	 * @return
@@ -37,36 +30,44 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	@NonNull UUID getSignalGroupId();
 	
 	/**
-	 * Get the templates onto which signals have been warped
+	 * Get the target shapes onto which signals have been warped
 	 * @return
 	 */
-	@NonNull Set<CellularComponent> getTemplates();
+	@NonNull Set<WarpedSignalKey> getWarpedSignalKeys();
 	
 	
 	/**
 	 * Add a warped signal image for the given template
 	 * @param template the template object signals were warped on to 
+	 * @param name the name of the template object
+	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset
 	 * @param image the warped image
 	 */	
-	void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, @NonNull ByteProcessor image);
+	void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, boolean isCellWithSignalsOnly, @NonNull ByteProcessor image);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 
-	 * the given template
+	 * the given target shape
+	 * @param template
+	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset, or just those with defined signals
+	 * @return
+	 */
+	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template, boolean isCellWithSignalsOnly);
+	
+	/**
+	 * Get the warped signal image corresponding to the signals warped onto 
+	 * the given target shape
+	 * @param key the signal key
+	 * @return
+	 */
+	Optional<ImageProcessor> getWarpedImage(@NonNull WarpedSignalKey key);
+	
+	
+	/**
+	 * Get the name of the target shape
 	 * @param template
 	 * @return
 	 */
-	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template);
-	
-	
-	String getTargetName(@NonNull CellularComponent template);
-	
-	/**
-	 * Detect a signal within the warped signal image, using the given detection options.
-	 * @param template the template onto which signals were warped
-	 * @param options the detection options for retrieving the signal
-	 * @return the signal that is detected by the given options
-	 */
-	Optional<INuclearSignal> getWarpedSignal(@NonNull CellularComponent template, @NonNull INuclearSignalOptions options);
-	
+	String getTargetName(@NonNull WarpedSignalKey key);
+		
 }

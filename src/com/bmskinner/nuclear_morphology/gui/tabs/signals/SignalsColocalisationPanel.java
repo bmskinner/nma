@@ -50,9 +50,6 @@ public class SignalsColocalisationPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Colocalisation";
     private static final String HEADER_LBL    = "Pairwise distances between the closest signal pairs";
-//    private static final String TABLE_TOOLTIP = "Median distance between closest signal pairs";
-
-    // private ExportableTable table; // table for analysis parameters
 
     private ExportableChartPanel violinChart;
 
@@ -93,15 +90,6 @@ public class SignalsColocalisationPanel extends DetailPanel {
      */
     private JPanel createMainPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-
-        // table = new
-        // ExportableTable(AbstractDatasetCreator.createBlankTable());
-        // table.setToolTipText(TABLE_TOOLTIP);
-        //
-        // table.setEnabled(false);
-        // JScrollPane scrollPane = new JScrollPane(table);
-        // panel.add(scrollPane, BorderLayout.WEST);
-
         violinChart = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
         panel.add(violinChart, BorderLayout.CENTER);
 
@@ -109,16 +97,7 @@ public class SignalsColocalisationPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
-
-        // TableOptions options = new TableOptionsBuilder()
-        // .setDatasets(getDatasets())
-        // .setScale(GlobalOptions.getInstance().getScale())
-        // .setTarget(table)
-        // .build();
-        //
-        // setTable(options);
-
+    protected synchronized void updateSingle() {
         ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
                 .setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
 
@@ -127,9 +106,7 @@ public class SignalsColocalisationPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateMultiple() {
-        // table.setModel(AbstractDatasetCreator.createBlankTable());
-
+    protected synchronized void updateMultiple() {
         ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
                 .setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
 
@@ -137,26 +114,24 @@ public class SignalsColocalisationPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateNull() {
-        // table.setModel(AbstractDatasetCreator.createBlankTable());
+    protected synchronized void updateNull() {
         violinChart.setChart(AbstractChartFactory.createEmptyChart());
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
-        // table.setModel(AbstractDatasetCreator.createLoadingTable());
         violinChart.setChart(AbstractChartFactory.createLoadingChart());
 
     }
 
     @Override
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
     }
 
     @Override
-    protected TableModel createPanelTableType(@NonNull TableOptions options) {
+    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
         return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
     }
 }

@@ -18,19 +18,20 @@
 
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
-
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 /**
  * This is an image based on NucleusMeshFace coordinates.
@@ -46,14 +47,14 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     final private Mesh<E> template;
 
     /**
-     * Create based on a template mesh and image. Each pixel within the nucleus
+     * Create based on a template mesh and image. Each pixel within the template
      * is converted to a mesh face coordinate.
      * 
      * @param mesh
      * @param ip the image to fetch pixels from
      * @throws MeshImageCreationException
      */
-    public DefaultMeshImage(final Mesh<E> mesh, final ImageProcessor ip) throws MeshImageCreationException {
+    public DefaultMeshImage(@NonNull final Mesh<E> mesh, @NonNull final ImageProcessor ip) throws MeshImageCreationException {
         template = mesh;
 
         // Create MeshPixels from the image processor for the region described
@@ -62,14 +63,11 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     }
 
     @Override
-    public List<MeshPixel> getMeshPixels(MeshFace f) {
-        if (!template.contains(f)) {
+    public List<MeshPixel> getMeshPixels(@NonNull MeshFace f) {
+        if (!template.contains(f))
             throw new IllegalArgumentException("Face is not present within template mesh");
-        }
 
-        MeshFace target = template.getFace(f); // ensure we have the exact face
-                                               // in the template
-
+        MeshFace target = template.getFace(f); // ensure we have the exact face in the template
         return map.get(target);
     }
 
@@ -81,11 +79,11 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
      * bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
      */
     @Override
-    public ImageProcessor drawImage(Mesh mesh) throws UncomparableMeshImageException {
+    public ImageProcessor drawImage(@NonNull Mesh<E> mesh) throws UncomparableMeshImageException {
 
-        if (!mesh.isComparableTo(template)) {
+        if (!mesh.isComparableTo(template))
             throw new UncomparableMeshImageException("Meshes do not match");
-        }
+        
         finer("Drawing image onto mesh");
 
         Rectangle r = mesh.toPath().getBounds();
@@ -105,10 +103,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         // Adjust from absolute position in original target image
         // Note that the consensus will have a position from its template
         // nucleus
-
-        // finest("Target nucleus original x,y base in image is "+xBase+",
-        // "+yBase);
-        // finest("The pixels should be moved by: -"+xBase+", -"+yBase);
         int missingPixels = 0;
         int missingFaces = 0;
         for (MeshFace templateFace : map.keySet()) {
@@ -178,44 +172,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         }
         return missingPixels;
     }
-
-    // /**
-    // * Get the size of the resulting image for the given mesh
-    // * @param mesh
-    // * @return
-    // */
-    // private int[] findImageDimensions(Mesh<Nucleus> mesh){
-    //
-    // int maxX = 0;
-    // int minX = Integer.MAX_VALUE;
-    //
-    // int maxY = 0;
-    // int minY = Integer.MAX_VALUE;
-    //
-    // for(MeshFace f : map.keySet()){
-    //
-    // List<MeshPixel> faceMap = map.get(f);
-    //
-    // for(MeshPixel c : faceMap ){
-    //
-    // IPoint p = c.getCoordinate().getCartesianCoordinate(mesh.getFace(f));
-    //
-    //
-    // maxX = p.getXAsInt() > maxX ? p.getXAsInt() : maxX;
-    // minX = p.getXAsInt() < minX ? p.getXAsInt() : minX;
-    //
-    // maxY = p.getYAsInt() > maxY ? p.getYAsInt() : maxY;
-    // minY = p.getYAsInt() < minY ? p.getYAsInt() : minY;
-    //
-    // }
-    //
-    // }
-    //
-    // int xRange = maxX - minX;
-    // int yRange = maxY - minY;
-    // int[] result = {xRange, yRange};
-    // return result;
-    // }
 
     /**
      * Make a ByteProcessor of the given dimensions with all pixels at 255
@@ -324,7 +280,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         return white;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("Nucleus mesh image \n");
         b.append("Image has " + map.keySet().size() + " faces\n");
@@ -361,7 +318,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         // Add an empty list of MeshPixels to each face
         for (MeshFace face : template.getFaces()) {
-            map.put(face, new ArrayList<MeshPixel>());
+            map.put(face, new ArrayList<>());
         }
 
         Rectangle bounds = template.getComponent().toOriginalShape().getBounds();
@@ -399,8 +356,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
                 if (face == null) {
                     missedCount++;
-                    // finer("\tTemplate mesh does not contain a face with pixel
-                    // "+pixel);
                     continue;
                 }
 
@@ -415,15 +370,11 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
                 int value = ip.get(x, y);
 
-                if (value < 0) {
-
-                    // log(ip.getClass().getName());
+                if (value < 0)
                     value = value & 0xff;
-                }
 
-                if (value < 0) {
+                if (value < 0)
                     throw new MeshImageCreationException("Pixel value is negative at " + x + ", " + y + ": " + value);
-                }
 
                 List<MeshPixel> pixels = map.get(face);
 
@@ -438,8 +389,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
                 } catch (PixelOutOfBoundsException e) {
                     missedCount++;
-                    // finer("Cannot get coordinate within face:
-                    // "+e.getMessage());
                 }
 
             }
@@ -447,7 +396,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         if (missedCount > 0) {
             fine("Faces could not be found for " + missedCount + " points");
-
         }
     }
 

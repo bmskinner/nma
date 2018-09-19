@@ -283,7 +283,7 @@ public class SignalManager implements Loggable {
      * 
      * @return
      */
-    public boolean hasSignals() {
+    public synchronized boolean hasSignals() {
         for (UUID i : getSignalGroupIDs()) {
             if (this.hasSignals(i)) {
                 return true;
@@ -306,7 +306,7 @@ public class SignalManager implements Loggable {
      * 
      * @return
      */
-    public boolean hasShellResult() {
+    public synchronized boolean hasShellResult() {
         for (UUID id : collection.getSignalGroupIDs()) {
             if (collection.getSignalGroup(id).get().hasShellResult()) {
 			    return true;

@@ -51,7 +51,7 @@ public abstract class AbstractChartFactory implements Loggable {
 
     protected final ChartOptions options;
 
-    public AbstractChartFactory(@NonNull ChartOptions o) {
+    public AbstractChartFactory(@NonNull final ChartOptions o) {
         if (o == null)
             throw new IllegalArgumentException("Options cannot be null");
         options = o;
