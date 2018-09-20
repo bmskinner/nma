@@ -676,12 +676,13 @@ public class IProfileTester {
         int stop  = 2;
         IProfile p = profile.getSubregion(start, stop);
         
-        assertEquals(5, p.size());
+        System.out.println(p.toString());
         
         for(int i=0; i<p.size(); i++){
         	int original = i<2 ? start+i : i-2;
         	 assertEquals(data[original], p.get(i), 0);
         }
+        assertEquals(5, p.size());
     }
 	
 	@Test

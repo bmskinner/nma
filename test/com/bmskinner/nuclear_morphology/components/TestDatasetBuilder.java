@@ -33,6 +33,8 @@ public class TestDatasetBuilder {
 	public static final int DEFAULT_Y_BASE      = 100;
 	public static final int DEFAULT_ROTATION    = 0;
 	public static final int DEFAULT_BORDER_OFFSET = 0;
+	
+	/** Should the start index of the border list be randomly offset? */
 	public static final boolean DEFAULT_IS_RANDOM_OFFSET = true;
 	
 	public static final boolean DEFAULT_RED_SIGNALS = false;
@@ -77,11 +79,17 @@ public class TestDatasetBuilder {
 	/**
 	 * Construct with a given seed for the random number
 	 * generator
+	 * @param seed the seed value
 	 */
 	public TestDatasetBuilder(long seed) {
 		rng = new Random(seed);
 	}
 		
+	/**
+	 * Construct a new dataset based on the parameters in this builder.
+	 * @return a new dataset
+	 * @throws Exception
+	 */
 	public IAnalysisDataset build() throws Exception {
 				
 		switch(nucleusShape) {
@@ -96,11 +104,23 @@ public class TestDatasetBuilder {
 		return d;
 	}
 	
+	/**
+	 * The new dataset should have a profiling method applied.
+	 * @return this builder
+	 * @throws Exception
+	 */
 	public TestDatasetBuilder profiled() throws Exception {
 		profile = true;
 		return this;
 	}
 	
+	/**
+	 * The new dataset should have a segmentation method applied. This
+	 * option sets profiling automatically; i.e. {@code builder.segmented()} is
+	 * equivalent to {@code builder.profiled().segmented()}.
+	 * @return this builder
+	 * @throws Exception
+	 */
 	public TestDatasetBuilder segmented() throws Exception {
 		segment = true;
 		return this;
@@ -146,21 +166,49 @@ public class TestDatasetBuilder {
 		return this;
 	}
 	
+	/**
+	 * The maximum random rotation to be applied to a cell after creation.
+	 * This simulates the random orientation of cells in an image. Each cell
+	 * will be rotated by a random value between zero and the given value. If this
+	 * is set to zero, no rotations will be applied. The default value is {@link #DEFAULT_ROTATION}.
+	 * @param i the maximum angle of rotation in degrees. 
+	 * @return this builder
+	 */
 	public TestDatasetBuilder maxRotation(int i) {
 		maxRotation = i;
 		return this;
 	}	
 	
+	/**
+	 * Should the start index of the border list be randomly offset?
+	 * This simulates detected objects, which may not have their borders
+	 * starting in a neat position for segmentation or profiling. The
+	 * default value is {@link #DEFAULT_IS_RANDOM_OFFSET}.
+	 * @param b should a random offset be applied
+	 * @return this builder
+	 */
 	public TestDatasetBuilder randomOffsetProfiles(boolean b) {
 		offset = b;
 		return this;
 	}	
 	
+	/**
+	 * Set a fixed offset value for the start index of the border list
+	 * in each cell. The default value is {@link #DEFAULT_BORDER_OFFSET}.
+	 * @param i
+	 * @see #randomOffsetProfiles(boolean)
+	 * @return this builder
+	 */
 	public TestDatasetBuilder fixedProfileOffset(int i) {
 		fixedOffset = i;
 		return this;
 	}	
 	
+	/**
+	 * Create nuclear signals in the given red or green channel.
+	 * @param i the RGB channel to add signals - 0 or 1
+	 * @return this builder
+	 */
 	public TestDatasetBuilder addSignalsInChannel(int i) {
 		if(i==0)
 			redSignals = true;

@@ -98,30 +98,4 @@ public class NucleusTest {
 		assertEquals("X int values", expectedX, nucleus.getCentreOfMass().getXAsInt());
 		assertEquals("Y int values", expectedY, nucleus.getCentreOfMass().getYAsInt());
 	}
-	
-	@Test
-	public void testGetProfileType() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-		ISegmentedProfile profile = nucleus.getProfile(ProfileType.ANGLE);
-		System.out.println(profile.toString());
-		System.out.println(profile.valueString());
-		fail("Not yet implemented");
-	}
-	
-	@Test
-	public void testGetProfileTypeTag() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-		ISegmentedProfile rawProfile = nucleus.getProfile(ProfileType.ANGLE);
-		ISegmentedProfile tagProfile = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-//		System.out.println(profile.toString());
-//		System.out.println(profile.valueString());
-		assertEquals(rawProfile.toString(), tagProfile.toString());
-		fail("Not yet implemented");
-	}
-	
-	@Test
-	public void testGetBorderIndex() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-		int index = nucleus.getBorderIndex(Tag.REFERENCE_POINT);
-		System.out.println(index);
-		fail("Not yet implemented");
-	}
-
 }

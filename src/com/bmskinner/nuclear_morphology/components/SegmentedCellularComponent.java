@@ -123,7 +123,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         			p = p.interpolate(getBorderLength());
         		assignProfile(type, new DefaultSegmentedProfile(p));
         	}
-        	return profileMap.get(type);
+        	return profileMap.get(type).copy();
         } catch (IndexOutOfBoundsException | ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
         }
@@ -758,7 +758,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			} 
 			// case when array wraps
 
-			float[] resultA = Arrays.copyOfRange(array, indexStart, array.length+1);
+			float[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
 			float[] resultB = Arrays.copyOfRange(array, 0, indexEnd+1);
 			float[] result = new float[resultA.length + resultB.length];
 			int index = 0;
@@ -1042,7 +1042,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			segments = new BorderSegmentTree(IProfileCollection.DEFAULT_SEGMENT_ID);
 			for(IBorderSegment s : list){
 				if(!s.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID))
-					segments.addMergeSource(s);
+					segments.addMergeSource(s.copy());
 			}
 		}
 
@@ -1058,8 +1058,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 		/**
-		 * Construct using a basic profile. Two segments are created that span the
-		 * entire profile, half each
+		 * Construct using a basic profile.
 		 * 
 		 * @param profile
 		 */
@@ -2042,9 +2041,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 								
 				// Check the incoming data
 		        if (startIndex < 0 || startIndex > size()-1)
-		            throw new SegmentUpdateException("Start index is outside the profile range: " + startIndex);
+		            throw new SegmentUpdateException(String.format("Start index %s is outside the profile range", startIndex));
 		        if (endIndex < 0 || endIndex > size()-1)
-		            throw new SegmentUpdateException("End index is outside the profile range: " + endIndex);
+		            throw new SegmentUpdateException(String.format("End index %s is outside the profile range", endIndex));
 
 				// Ensure next and prev segments cannot be 'jumped over'
 		        if( !contains(startIndex) && !prevSegment().contains(startIndex))
@@ -2070,11 +2069,16 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new SegmentUpdateException(String.format("Segment will become too short (%d)", newLength));
 				
 				// All checks passed
-				int segIndex = segments.leaves.indexOf(this);
+				
+				fine("Segment update checks passed");
+				fine("Perform update  of "+this.toString()+" to "+startIndex+"-"+endIndex);
+				
+
+				int segIndex = parent.leaves.indexOf(this);
 				if(segIndex==-1) {
 					fine("The segment was not found in the leaves!");
 					fine("Behold the leaves!");
-					for(BorderSegmentTree s : segments.leaves)
+					for(BorderSegmentTree s : parent.leaves)
 						fine(s.getDetail());
 				}
 				
@@ -2087,14 +2091,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				int nextSegIndex = wrapSegmentIndex(segIndex+1);
 				
-				BorderSegmentTree nextSeg = segments.leaves.get(nextSegIndex);
+				BorderSegmentTree nextSeg = parent.leaves.get(nextSegIndex);
 				fine("Updating next segment "+nextSegIndex+": "+nextSeg);
 				nextSeg.startIndex = endIndex;
 				fine("Next segment "+nextSegIndex+" now: "+nextSeg);
 				
 				int prevSegIndex = wrapSegmentIndex(segIndex-1);
 				fine("Updating prev segment "+prevSegIndex);
-				BorderSegmentTree prevSeg = segments.leaves.get(prevSegIndex);
+				BorderSegmentTree prevSeg = parent.leaves.get(prevSegIndex);
 				fine("Prev segment "+prevSegIndex+" now: "+prevSeg);
 				prevSeg.endIndex = startIndex;
 				

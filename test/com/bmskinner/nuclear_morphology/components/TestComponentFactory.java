@@ -63,7 +63,7 @@ public class TestComponentFactory {
 	 * @param w
 	 * @param h
 	 * @param fixedStartOffset an offset to apply to the border array
-	 * @return
+	 * @return a Nucleus
 	 * @throws ComponentCreationException 
 	 */
 	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
