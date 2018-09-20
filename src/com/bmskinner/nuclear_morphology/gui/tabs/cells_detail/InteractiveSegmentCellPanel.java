@@ -164,8 +164,8 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 						IBorderSegment prev = seg.prevSegment();
 						IBorderSegment next = seg.nextSegment();
 						
-						JMenuItem segThis = new JMenuItem("This: "+seg.getName());
-						segThis.setForeground(ColourSelecter.getColor(seg.getPosition()));
+//						JMenuItem segThis = new JMenuItem("This: "+seg.getName());
+//						segThis.setForeground(ColourSelecter.getColor(seg.getPosition()));
 
 						JMenuItem prevItem = new JMenuItem("Prev: "+prev.getName());
 						prevItem.setForeground(ColourSelecter.getColor(prev.getPosition()));
@@ -175,14 +175,14 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 							createImage();
 						});
 						popupMenu.add(prevItem);
-						popupMenu.add(segThis);
+//						popupMenu.add(segThis);
 
 						JMenuItem nextItem = new JMenuItem("Next: "+next.getName());
 						nextItem.setForeground(ColourSelecter.getColor(next.getPosition()));
 						nextItem.addActionListener(e->{
-//							fireSegmentEvent(next.getID(), index, SegmentEvent.MOVE_START_INDEX);
-//							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
-//							createImage();
+							fireSegmentEvent(next.getID(), index, SegmentEvent.MOVE_START_INDEX);
+							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+							createImage();
 						});
 						popupMenu.add(nextItem);
 						

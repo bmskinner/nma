@@ -213,15 +213,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                 // Correct for normalisation
                 if (isChartNormalised) {
 
-                    if (xValue < 0) {
-                        xValue += 100; // Wrap values below 0
-                    }
+                    if (xValue < 0)
+                        xValue += ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH; // Wrap values below
 
-                    if (xValue >= 100) { // Wrap values above 100
-                        xValue -= 100;
-                    }
+                    if (xValue >= ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH) // Wrap values above
+                        xValue -= ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
 
-                    xValue = profile.size() * (xValue / 100);
+                    xValue = profile.size() * (xValue / ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
 
                     fine("Profile position of domain value is " + xValue);
                 }

@@ -213,12 +213,7 @@ public class SegmentationHandler implements Loggable {
                     .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
 
             // Update the median profile
-            dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel
-                                                                                                          // always
-                                                                                                          // uses
-                                                                                                          // seg
-                                                                                                          // start
-                                                                                                          // index
+            dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index);
 
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
