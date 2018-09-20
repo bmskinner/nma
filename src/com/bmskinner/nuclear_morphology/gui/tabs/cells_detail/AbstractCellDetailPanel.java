@@ -36,18 +36,21 @@ public abstract class AbstractCellDetailPanel extends AbstractEditingPanel imple
     /**
      * Update the charts and tables for the current cell and component
      */
-    public abstract void update();
+    @Override
+	public abstract void update();
 
     /**
      * Get the current cell view
      * 
      * @return
      */
-    public synchronized CellViewModel getCellModel() {
+    @Override
+	public synchronized CellViewModel getCellModel() {
         return model;
     }
 
-    public synchronized void setCellModel(CellViewModel model) {
+    @Override
+	public synchronized void setCellModel(CellViewModel model) {
         this.model = model;
     }
 
@@ -55,7 +58,8 @@ public abstract class AbstractCellDetailPanel extends AbstractEditingPanel imple
      * Remove any charts that contain the current active cell, causing them to
      * redraw on the next refresh
      */
-    public synchronized void clearCellCharts() {
+    @Override
+	public synchronized void clearCellCharts() {
         this.getChartCache().clear(model.getCell());
     }
 

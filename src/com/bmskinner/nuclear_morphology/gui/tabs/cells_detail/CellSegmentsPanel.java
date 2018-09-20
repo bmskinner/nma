@@ -108,14 +108,14 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         panel.add(profileOptions);
         profileOptions.addActionListener(e -> update());
 
-//        resegmentButton = new JButton("Resegment");
-//        panel.add(resegmentButton);
-//        resegmentButton.setEnabled(false);
-//
-//        resegmentButton.addActionListener(e -> {
-//            CellResegmentationDialog d = new CellResegmentationDialog(getCellModel());
-//            d.load(getCellModel().getCell(), activeDataset());
-//        });
+        resegmentButton = new JButton("Resegment");
+        panel.add(resegmentButton);
+        resegmentButton.setEnabled(false);
+
+        resegmentButton.addActionListener(e -> {
+            CellResegmentationDialog d = new CellResegmentationDialog(getCellModel());
+            d.load(getCellModel().getCell(), activeDataset());
+        });
 
         return panel;
 
@@ -125,7 +125,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
 	public void setEnabled(boolean b) {
         super.setEnabled(b);
         profileOptions.setEnabled(b);
-//        resegmentButton.setEnabled(b);
+        resegmentButton.setEnabled(b);
     }
 
     @Override
@@ -140,9 +140,6 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
 
         } catch (Exception e) {
             error("Error updating cell panel", e);
-//            JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
-//            JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
-////            dualPanel.setCharts(chart1, chart2);
             setEnabled(false);
         }
 
@@ -151,23 +148,10 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     @Override
     public void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
-//        JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
-//        JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
-//
-////        dualPanel.setCharts(chart1, chart2);
     }
 
     @Override
     public void chartSetEventReceived(ChartSetEvent e) {
-//        ISegmentedProfile profile;
-//        try {
-//            profile = this.getCellModel().getCell().getNucleus().getProfile(profileOptions.getSelected(),
-//                    Tag.REFERENCE_POINT);
-//            dualPanel.setProfile(profile, false);
-//        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
-//            fine("Error getting profile", e1);
-//        }
-
     }
 
     @Override

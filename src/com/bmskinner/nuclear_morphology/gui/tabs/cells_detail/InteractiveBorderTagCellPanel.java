@@ -254,7 +254,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 	private void createMeshImage() {
 		ThreadManager.getInstance().submit(() ->{
 			try {
-				
+				output= null;
 				ImageProcessor ip;
 				try{
 					ip = component.getImage();
@@ -276,6 +276,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 					MeshAnnotator an3 = new MeshAnnotator( an.toProcessor(), getWidth(), getHeight(), compMesh);
 					an3.annotateNucleusMeshEdges();
 					imageLabel.setIcon(an3.toImageIcon());
+					input = an3.toProcessor().getBufferedImage();
 				}
 			} catch (MeshCreationException | IllegalArgumentException e) {
 				stack("Error making mesh or loading image", e);
@@ -287,7 +288,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 	private void createWarpImage() {
 		ThreadManager.getInstance().submit(() ->{
 			try {
-				
+				output= null;
 				ImageProcessor ip;
 				try{
 					ip = component.getImage();
@@ -310,6 +311,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
         			drawn.flipVertical();
         			an = new ImageAnnotator(drawn, getWidth(), getHeight());
         		}
+        		input = an.toProcessor().getBufferedImage();
         		imageLabel.setIcon(an.toImageIcon());
 			} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
 				stack("Error making mesh or loading image", e);
