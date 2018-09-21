@@ -87,9 +87,8 @@ public class Version implements Serializable {
         String[] parts = s.split("\\" + SEPARATOR);
         if (parts.length == 3) {
             return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), Integer.valueOf(parts[2]));
-        } else {
-            throw new IllegalArgumentException("Input string is not a version format");
         }
+		throw new IllegalArgumentException("Input string is not a version format");
     }
 
     /**

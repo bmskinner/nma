@@ -135,11 +135,7 @@ public abstract class AbstractOptions implements DisplayOptions {
      * @return
      */
     public boolean hasDatasets() {
-        if (list == null || list.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
+        return (list != null && !list.isEmpty());
     }
 
     @Override

@@ -67,7 +67,8 @@ public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
      * 
      * @param next
      */
-    public void setNextPoint(IBorderPoint next) {
+    @Override
+	public void setNextPoint(IBorderPoint next) {
         this.nextPoint = next;
     }
 
@@ -76,11 +77,13 @@ public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
      * 
      * @param prev
      */
-    public void setPrevPoint(IBorderPoint prev) {
+    @Override
+	public void setPrevPoint(IBorderPoint prev) {
         this.prevPoint = prev;
     }
 
-    public IBorderPoint nextPoint() {
+    @Override
+	public IBorderPoint nextPoint() {
         return this.nextPoint;
     }
 
@@ -90,15 +93,15 @@ public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
      * @param points
      * @return
      */
-    public IBorderPoint nextPoint(int points) {
+    @Override
+	public IBorderPoint nextPoint(int points) {
         if (points == 1)
             return this.nextPoint;
-        else {
-            return nextPoint.nextPoint(--points);
-        }
+		return nextPoint.nextPoint(--points);
     }
 
-    public IBorderPoint prevPoint() {
+    @Override
+	public IBorderPoint prevPoint() {
         return this.prevPoint;
     }
 
@@ -108,19 +111,20 @@ public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
      * @param points
      * @return
      */
-    public IBorderPoint prevPoint(int points) {
+    @Override
+	public IBorderPoint prevPoint(int points) {
         if (points == 1)
             return this.prevPoint;
-        else {
-            return prevPoint.prevPoint(--points);
-        }
+		return prevPoint.prevPoint(--points);
     }
 
-    public boolean hasNextPoint() {
+    @Override
+	public boolean hasNextPoint() {
         return nextPoint != null;
     }
 
-    public boolean hasPrevPoint() {
+    @Override
+	public boolean hasPrevPoint() {
         return prevPoint != null;
     }
 }

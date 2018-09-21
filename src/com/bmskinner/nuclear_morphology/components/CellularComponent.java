@@ -142,7 +142,7 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @param p
      * @return
      */
-    int getBorderIndex(IBorderPoint p);
+    int getBorderIndex(@NonNull IBorderPoint p);
 
     // public double getDistance(int index);
 
@@ -158,12 +158,10 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     /**
      * Update the border point at the given index to the given x y coordinates
      * 
-     * @param i
-     *            the index
-     * @param p
-     *            the new postion
+     * @param i  the index
+     * @param p the new postion
      */
-    void updateBorderPoint(int i, IPoint p);
+    void updateBorderPoint(int i, @NonNull IPoint p);
 
     /**
      * Get the length of the angle profile in index units
@@ -250,10 +248,9 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     /**
      * Flip the nucleus on the x-axis (horizontally) about the given point
      * 
-     * @param p
-     *            the point with the x coordinate to flip on
+     * @param p the point with the x coordinate to flip on
      */
-    void flipXAroundPoint(IPoint p);
+    void flipXAroundPoint(@NonNull IPoint p);
 
     /**
      * Get the median distance between each pair of border points
@@ -266,19 +263,16 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Translate the XY coordinates of each border point so that the nuclear
      * centre of mass is at the given point
      * 
-     * @param point
-     *            the new centre of mass
+     * @param point the new centre of mass
      */
-    void moveCentreOfMass(IPoint point);
+    void moveCentreOfMass(@NonNull IPoint point);
 
     /**
      * Translate the XY coordinates of each border point and the centre of mass
      * by the given amount in the x and y axes
      * 
-     * @param xOffset
-     *            the amount to move the border in the x-dimension
-     * @param yOffset
-     *            the amount to move the border in the y-dimension
+     * @param xOffset the amount to move the border in the x-dimension
+     * @param yOffset the amount to move the border in the y-dimension
      */
     void offset(double xOffset, double yOffset);
 
@@ -331,8 +325,7 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Create a shape (in this case a Path2D encompassing the border points of
      * the component) at the given scale
      * 
-     * @param scale
-     *            the measurement scale for the component
+     * @param scale the measurement scale for the component
      * @return
      */
     Shape toShape(MeasurementScale scale);
@@ -365,10 +358,8 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * outside the component, for an image centred on the nuclear centre of
      * mass, of the given size
      * 
-     * @param height
-     *            the height of the mask
-     * @param width
-     *            the width of the mask
+     * @param height the height of the mask
+     * @param width the width of the mask
      * @return a mask of size width * height
      */
     Mask getBooleanMask(int height, int width);
@@ -382,11 +373,11 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     Mask getSourceBooleanMask();
 
     /*
-     * For two NucleusBorderPoints in a Nucleus, find the point that lies
-     * halfway between them Used for obtaining a consensus between potential
+     * For two points in the object border, find the point that lies
+     * halfway between them. Used for obtaining a consensus between potential
      * tail positions
      */
-    int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB);
+    int getPositionBetween(@NonNull IBorderPoint pointA, @NonNull IBorderPoint pointB);
 
     /**
      * For a position in the roi, draw a line through the CoM and get the
@@ -396,17 +387,16 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return
      * @throws UnavailableBorderPointException
      */
-    IBorderPoint findOppositeBorder(IBorderPoint p) throws UnavailableBorderPointException;
+    IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) throws UnavailableBorderPointException;
 
     /**
-     * @param a
-     *            the point to draw to the centre of mass
+     * @param a the point to draw to the centre of mass
      * @return the orthogonal border point or input point if no other point was
      *         found
      * @throws UnavailableBorderPointException
      *             if the input point is not found in the component border
      */
-    IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) throws UnavailableBorderPointException;
+    IBorderPoint findOrthogonalBorderPoint(@NonNull IBorderPoint a) throws UnavailableBorderPointException;
 
     /**
      * Find the border point in this object that is closest to the given XYPoint
@@ -414,7 +404,7 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @param p
      * @return
      */
-    IBorderPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException;
+    IBorderPoint findClosestBorderPoint(@NonNull IPoint p) throws UnavailableBorderPointException;
 
     /**
      * Reverse the border outline of this object, including the roi points used
@@ -427,10 +417,8 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Wrap arrays. If an index falls of the end, it is returned to the start
      * and vice versa
      * 
-     * @param i
-     *            the index
-     * @param length
-     *            the array length
+     * @param i  the index
+     * @param length the array length
      * @return the index within the array
      */
     static int wrapIndex(int i, int length) {
@@ -452,10 +440,8 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Wrap arrays for doubles. This is used in interpolation. If an index falls
      * of the end, it is returned to the start and vice versa
      * 
-     * @param i
-     *            the index
-     * @param length
-     *            the array length
+     * @param i the index
+     * @param length the array length
      * @return the index within the array
      */
     static double wrapIndex(double i, int length) {

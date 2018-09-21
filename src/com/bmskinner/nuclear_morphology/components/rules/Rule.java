@@ -74,11 +74,7 @@ public class Rule implements Serializable {
     }
 
     public boolean getBooleanValue(int index) {
-        if (values.get(index) == 1d) {
-            return true;
-        } else {
-            return false;
-        }
+        return(values.get(index) == 1d);
     }
 
     public RuleType getType() {

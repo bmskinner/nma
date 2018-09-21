@@ -441,9 +441,8 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 
             return max - min;
 
-        } else {
-            return 0;
         }
+		return 0;
     }
 
     /*

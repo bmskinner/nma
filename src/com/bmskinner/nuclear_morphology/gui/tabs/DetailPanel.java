@@ -174,7 +174,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * @return
      */
     @Override
-	@Nullable public synchronized IAnalysisDataset activeDataset() {
+	public synchronized IAnalysisDataset activeDataset() {
         return DatasetListManager.getInstance().getActiveDataset();
     }
 

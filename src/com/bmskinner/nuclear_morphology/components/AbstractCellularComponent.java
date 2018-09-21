@@ -336,10 +336,9 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
                 return null;
             }
 
-        } else {
-            throw new UnloadableImageException("Source image is not available");
-            // return null;
         }
+		throw new UnloadableImageException("Source image is not available");
+		// return null;
     }
     
     @Override
@@ -427,14 +426,13 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             double result = statistics.get(stat);
             result = stat.convert(result, this.getScale(), scale);
             return result;
-        } else {
-            // finest("Calculating stat "+stat);
-            double result = calculateStatistic(stat);
-            // finest("Setting stat "+stat+": "+result);
-            setStatistic(stat, result);
-            // finest("Set stat "+stat+"; returning");
-            return result;
         }
+		// finest("Calculating stat "+stat);
+		double result = calculateStatistic(stat);
+		// finest("Setting stat "+stat+": "+result);
+		setStatistic(stat, result);
+		// finest("Set stat "+stat+"; returning");
+		return result;
     }
 
     // For subclasses to override
@@ -661,9 +659,8 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         // Check detailed position
         if (this.toPolygon().contains((float) p.getX(), (float) p.getY())) {
             return true;
-        } else {
-            return false;
         }
+		return false;
 
     }
 

@@ -95,7 +95,6 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
                     if (rowName.equals("")) {
                         String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
                         if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-
                             SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, 1);
                             ch.changeSignalColour(activeDataset(), cell.getID());
                         }

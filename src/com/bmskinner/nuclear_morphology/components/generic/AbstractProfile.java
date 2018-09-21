@@ -76,26 +76,21 @@ public abstract class AbstractProfile implements IProfile {
      * Check the lengths of the two profiles. Return the first profile
      * interpolated to the length of the longer.
      * 
-     * @param profile1
-     *            the profile to return interpolated
-     * @param profile2
-     *            the profile to compare
+     * @param profile1 the profile to be interpolated
+     * @param profile2 the second profile
      * @return a new profile with the length of the longest input profile
      * @throws ProfileException
      *             if the interpolation fails
      */
     protected IProfile equaliseLengths(IProfile profile1, IProfile profile2) throws ProfileException {
-        if (profile1 == null || profile2 == null) {
+        if (profile1 == null || profile2 == null)
             throw new IllegalArgumentException("Input profile is null when equilising lengths");
-        }
-        // profile 2 is smaller
-        // return profile 1 unchanged
-        if (profile2.size() < profile1.size()) {
+
+        if (profile2.size() < profile1.size())
             return profile1;
-        } else {
-            // profile 1 is smaller; interpolate to profile 2 length
-            profile1 = profile1.interpolate(profile2.size());
-        }
+        
+		// profile 1 is smaller; interpolate to profile 2 length
+		profile1 = profile1.interpolate(profile2.size());
 
         return profile1;
     }

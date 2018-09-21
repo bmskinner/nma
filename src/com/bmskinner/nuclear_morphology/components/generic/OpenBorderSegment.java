@@ -221,21 +221,11 @@ public class OpenBorderSegment implements IBorderSegment {
         return this.startIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getEndIndex()
-     */
     @Override
     public int getEndIndex() {
         return this.endIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getProportionalIndex(double)
-     */
     @Override
     public int getProportionalIndex(double d) {
     	if (d < 0 || d > 1)
@@ -244,11 +234,6 @@ public class OpenBorderSegment implements IBorderSegment {
 		return (int) Math.round(CellularComponent.wrapIndex(startIndex+targetLength, getProfileLength()));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getIndexProportion(int)
-     */
     @Override
     public double getIndexProportion(int index) {
         if (!this.contains(index)) {
@@ -261,7 +246,7 @@ public class OpenBorderSegment implements IBorderSegment {
             int test = it.next();
 
             if (index == test) {
-                return (double) ((double) counter / (double) this.length());
+                return (double) counter / (double) this.length();
             }
             counter++;
         }
@@ -269,22 +254,11 @@ public class OpenBorderSegment implements IBorderSegment {
         throw new IllegalArgumentException("Cannot get proportion for " + index);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getName()
-     */
     @Override
     public String getName() {
         return "Seg_" + this.positionInProfile;
     }
 
-    // when using this, use wrapIndex()!
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getMidpointIndex()
-     */
     @Override
     public int getMidpointIndex() {
         if (this.wraps()) {
@@ -292,20 +266,13 @@ public class OpenBorderSegment implements IBorderSegment {
             int midLength = this.length() >> 1;
             if (midLength + startIndex < totalLength) {
                 return midLength + startIndex;
-            } else {
-                return endIndex - midLength;
             }
+			return endIndex - midLength;
 
-        } else {
-            return ((endIndex - startIndex) / 2) + startIndex;
         }
+		return ((endIndex - startIndex) / 2) + startIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getDistanceToStart(int)
-     */
     @Override
     public int getShortestDistanceToStart(int index) {
         if (index < 0 || index >= totalLength) {
@@ -320,11 +287,7 @@ public class OpenBorderSegment implements IBorderSegment {
         return Math.min(abs, alt);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getDistanceToEnd(int)
-     */
+
     @Override
     public int getShortestDistanceToEnd(int index) {
         if (index < 0 || index >= totalLength) {
@@ -381,11 +344,6 @@ public class OpenBorderSegment implements IBorderSegment {
         return testLength(this.getStartIndex(), this.getEndIndex());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -427,12 +385,6 @@ public class OpenBorderSegment implements IBorderSegment {
     	}
     }
 
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#testLength(int, int)
-     */
     @Override
     public int testLength(int start, int end) {
     	if(wraps(start, end))
@@ -440,11 +392,6 @@ public class OpenBorderSegment implements IBorderSegment {
 		return end-start+1; // add one for segment end
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#wraps(int, int)
-     */
     @Override
     public boolean wraps(int start, int end) {
         if ((start < 0 || start > totalLength) || (end < 0 || end > totalLength)) {
@@ -453,44 +400,16 @@ public class OpenBorderSegment implements IBorderSegment {
         return (end <= start);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#wraps()
-     */
     @Override
     public boolean wraps() {
         return wraps(this.getStartIndex(), this.getEndIndex());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#contains(int)
-     */
     @Override
     public boolean contains(int index) {
         return IBorderSegment.contains(startIndex, endIndex, index, totalLength);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#testContains(int, int, int)
-     */
-//    @Override
-//    public boolean testContains(int start, int end, int index) {
-//        if (index < 0 || index > totalLength) {
-//            return false;
-//        }
-//
-//        if (wraps(start, end)) { // wrapped
-//            return (index <= end || index >= start);
-//        } else { // regular
-//            return (index >= start && index <= end);
-//        }
-//
-//    }
 
     /**
      * Test if a proposed update affects this segment
@@ -598,11 +517,6 @@ public class OpenBorderSegment implements IBorderSegment {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#update(int, int)
-     */
     @Override
     public boolean update(int startIndex, int endIndex) throws SegmentUpdateException {
         // Check the incoming data
@@ -642,12 +556,6 @@ public class OpenBorderSegment implements IBorderSegment {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setNextSegment(components.nuclear.
-     * NucleusBorderSegment)
-     */
     @Override
     public void setNextSegment(IBorderSegment s) {
         if (s == null) {
@@ -665,12 +573,6 @@ public class OpenBorderSegment implements IBorderSegment {
         this.nextSegment = s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setPrevSegment(components.nuclear.
-     * IBorderSegment)
-     */
     @Override
     public void setPrevSegment(IBorderSegment s) {
 
@@ -689,43 +591,20 @@ public class OpenBorderSegment implements IBorderSegment {
         this.prevSegment = s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasNextSegment()
-     */
     @Override
     public boolean hasNextSegment() {
-        if (this.nextSegment() != null) {
+        if (this.nextSegment() != null)
             return true;
-        } else {
-            return false;
-        }
+		return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasPrevSegment()
-     */
     @Override
     public boolean hasPrevSegment() {
-        if (this.prevSegment() != null) {
+        if (this.prevSegment() != null)
             return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
-    // public void setName(String s){
-    // this.name = s;
-    // }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setPosition(int)
-     */
     @Override
     public void setPosition(int i) {
         if (i < 0) {
@@ -734,28 +613,18 @@ public class OpenBorderSegment implements IBorderSegment {
         this.positionInProfile = (short) i;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getPosition()
-     */
     @Override
     public int getPosition() {
         return this.positionInProfile;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#toString()
-     */
     @Override
     public String toString() {
-
         return this.getName();
     }
 
-    public String getDetail() {
+    @Override
+	public String getDetail() {
 
         StringBuilder builder = new StringBuilder();
 

@@ -59,6 +59,8 @@ public abstract class AbstractEditingPanel extends DetailPanel
      */
     @Override
 	public void checkCellLock() {
+    	if(activeDataset()==null)
+    		return;
         ICellCollection collection = activeDataset().getCollection();
 
         if (collection.isVirtual())
@@ -86,7 +88,8 @@ public abstract class AbstractEditingPanel extends DetailPanel
      */
     @Override
 	public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
-
+    	if(activeDataset()==null)
+    		return;
         if (activeDataset().getCollection().isVirtual()) {
             warn("Cannot update core border tag for a child dataset");
             return;

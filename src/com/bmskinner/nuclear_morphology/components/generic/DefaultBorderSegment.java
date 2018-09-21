@@ -274,13 +274,11 @@ public class DefaultBorderSegment implements IBorderSegment {
             int midLength = this.length() >> 1;
             if (midLength + startIndex < totalLength) {
                 return midLength + startIndex;
-            } else {
-                return endIndex - midLength;
             }
+			return endIndex - midLength;
 
-        } else {
-            return ((endIndex - startIndex) / 2) + startIndex;
         }
+		return ((endIndex - startIndex) / 2) + startIndex;
     }
 
     @Override
