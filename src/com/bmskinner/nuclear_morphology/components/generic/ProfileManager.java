@@ -69,7 +69,9 @@ public class ProfileManager implements Loggable {
      * 
      * @param type
      * @return
+     * @deprecated since 1.14.0; no need for this any more
      */
+    @Deprecated
     public int getProfileWindowSize(ProfileType type) {
 
         int total = 0;
@@ -850,41 +852,33 @@ public class ProfileManager implements Loggable {
     }
 
     /**
-     * Check that the given segment pair does not cross a core border tag
+     * Check that the given segment pair can be merged given the 
+     * positions of core border tags
      * 
-     * @param seg1
-     * @param seg2
-     * @return
+     * @param seg1 the first in the pair to merge
+     * @param seg2 the second in the pair to merge
+     * @return true if the merge is possible, false otherwise
      * @throws UnavailableBorderTagException
-     * @throws Exception
      */
     public boolean testSegmentsMergeable(IBorderSegment seg1, IBorderSegment seg2)
             throws UnavailableBorderTagException {
 
-        // check the boundaries of the segment - we do not want to merge across
-        // the BorderTags
-        boolean ok = true;
-
+    	if(!seg1.nextSegment().getID().equals(seg2.getID()))
+    		return false;
+    	
+        // check the boundaries of the segment - we do not want to merge across the RP
+        int rpIndex = collection.getProfileCollection().getIndex(Tag.REFERENCE_POINT);
         for (Tag tag : BorderTagObject.values(BorderTagType.CORE)) {
 
-            /*
-             * Find the position of the border tag in the median profile
-             * 
-             */
-            int offsetForOp = collection.getProfileCollection().getIndex(Tag.REFERENCE_POINT);
+             // Find the position of the border tag in the median profile
+            int tagIndex = collection.getProfileCollection().getIndex(tag);
 
-            int offset = collection.getProfileCollection().getIndex(tag);
-
-            // this should be zero for the orientation point and
-            // totalLength+difference for the reference point
-            int difference = offset - offsetForOp;
-
-            if (seg2.getStartIndex() == seg2.getProfileLength() + difference || seg2.getStartIndex() == difference) {
-                ok = false;
-            }
-
+            int difference = tagIndex - rpIndex;
+            
+            if(seg1.getEndIndex()==tagIndex || seg2.getStartIndex() == tagIndex)
+            	return false;
         }
-        return ok;
+        return true;
     }
     
     /**
@@ -909,12 +903,14 @@ public class ProfileManager implements Loggable {
     }
 
     /**
-     * Merge the given segments from the median profile
+     * Merge the given segments from the median profile, and update each 
+     * nucleus in the collection.
      * 
-     * @param seg1
-     * @param seg2
-     * @throws UnsegmentedProfileException
-     * @throws ProfileException
+     * @param seg1 the first segment in the pair to merge
+     * @param seg2  the second segment in the pair to merge
+     * @param newID the id for the merged segment
+     * @throws UnsegmentedProfileException if the median profile is not segmented
+     * @throws ProfileException if the update fails
      * @throws UnavailableComponentException
      */
     public void mergeSegments(IBorderSegment seg1, IBorderSegment seg2, UUID newID)

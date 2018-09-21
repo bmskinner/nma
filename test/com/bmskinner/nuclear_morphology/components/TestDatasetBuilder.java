@@ -146,21 +146,45 @@ public class TestDatasetBuilder {
 		return this;
 	}
 	
+	/**
+	 * Set the minimum x coordinate for nuclei
+	 * Default value {@link #DEFAULT_X_BASE}.
+	 * @param i the base x
+	 * @return this builder
+	 */
 	public TestDatasetBuilder xBase(int i) {
 		xBase = i;
 		return this;
 	}
 	
+	/**
+	 * Set the minimum y coordinate for nuclei
+	 * Default value {@link #DEFAULT_Y_BASE}.
+	 * @param i the base x
+	 * @return this builder
+	 */
 	public TestDatasetBuilder yBase(int i) {
 		yBase = i;
 		return this;
 	}
 	
+	/**
+	 * Set the starting width for nuclei before any variations are added.
+	 * Default value {@link #DEFAULT_BASE_WIDTH}.
+	 * @param i the base width
+	 * @return this builder
+	 */
 	public TestDatasetBuilder baseWidth(int i) {
 		w = i;
 		return this;
 	}
 	
+	/**
+	 * Set the starting height for nuclei before any variations are added.
+	 * Default value {@link #DEFAULT_BASE_HEIGHT}.
+	 * @param i the base height
+	 * @return this builder
+	 */
 	public TestDatasetBuilder baseHeight(int i) {
 		h = i;
 		return this;

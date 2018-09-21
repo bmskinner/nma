@@ -46,7 +46,7 @@ public interface IProfileCollection extends Serializable, Loggable {
     /**
      * Get the index of the tag in the profile, zeroed on the reference point
      * 
-     * @param pointType the tag to find
+     * @param tag the tag to find
      * @return the index of the tag
      * @throws UnavailableBorderTagException if the tag is not present
      */
@@ -132,7 +132,8 @@ public interface IProfileCollection extends Serializable, Loggable {
     List<IBorderSegment> getSegments(@NonNull Tag tag) throws UnavailableBorderTagException, ProfileException;
 
     /**
-     * Get the ids of the segments in this collection
+     * Get the IDs of the segments in this collection. The IDs are ordered by position within
+     * the profile collection.
      * 
      * @return
      */
