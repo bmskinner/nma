@@ -79,7 +79,7 @@ public class FishRemappingFinder extends VoidFinder {
         String imageName = imageFile.getName();
 
         finest("Converting image");
-        ImageProcessor openProcessor = new ImageConverter(stack).convertToGreyscale().invert().toProcessor();
+        ImageProcessor openProcessor = new ImageConverter(stack).convertToRGBGreyscale().invert().toProcessor();
 
         fireDetectionEvent(openProcessor.duplicate(), "Original image");
 

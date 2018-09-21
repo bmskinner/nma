@@ -19,10 +19,14 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -33,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
@@ -47,15 +52,29 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     
     private InteractiveBorderTagCellPanel imagePanel;
 
-    private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
-    private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
+    private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus mesh");
+    private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
+    
+    private final CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
     
     public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
         super(context, model, PANEL_TITLE_LBL);
         // make the chart for each nucleus
         this.setLayout(new BorderLayout());
 
-        JPanel settingsPanel = new JPanel(new FlowLayout());
+        
+        JPanel header = makeHeader();
+        add(header, BorderLayout.NORTH);
+
+        imagePanel = new InteractiveBorderTagCellPanel(this);
+
+        add(imagePanel, BorderLayout.CENTER);
+        
+        cellBorderAdjustmentDialog = new CellBorderAdjustmentDialog(model);
+    }
+    
+    private JPanel makeHeader() {
+    	JPanel panel = new JPanel(new FlowLayout());
 
         rotationPanel = new RotationSelectionSettingsPanel();
         rotationPanel.setEnabled(false);
@@ -66,16 +85,20 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         warpMeshPanel.addActionListener(this);
         warpMeshPanel.setEnabled(false);
-
-        settingsPanel.add(makeMeshPanel);
-        settingsPanel.add(warpMeshPanel);
-        settingsPanel.add(new JLabel("Click a border point to reassign tags"));
         
-        add(settingsPanel, BorderLayout.NORTH);
+        WrappedLabel lbl1 = new WrappedLabel("Click a border point to reassign tags");
+        
+        JButton adjustBtn = new JButton("Adjust border");
+        adjustBtn.addActionListener(e-> cellBorderAdjustmentDialog.load(getCellModel().getCell(), activeDataset()));
 
-        imagePanel = new InteractiveBorderTagCellPanel(this);
 
-        add(imagePanel, BorderLayout.CENTER);
+        panel.add(makeMeshPanel);
+        panel.add(warpMeshPanel);
+        panel.add(Box.createHorizontalGlue());
+        panel.add(lbl1);
+//        panel.add(adjustBtn);
+        
+        return panel;
     }
     
     private synchronized void updateSettingsPanels() {

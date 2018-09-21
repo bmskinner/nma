@@ -26,6 +26,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -474,28 +475,23 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         }
     }
 
-    private void splitAction(ISegmentedProfile medianProfile) throws Exception {
+    private void splitAction(ISegmentedProfile medianProfile) {
 
-        IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
+    	IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
 
-        // show a list of segments that can be unmerged, and merge the selected
-        // option
+    	String[] options = Arrays.stream(nameArray).map(s->s.getName()).toArray(String[]::new);
 
-        IBorderSegment option = (IBorderSegment) JOptionPane.showInputDialog(null, "Choose segment to split",
-                "Split segment", JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
+    	try {
+    		int option = getInputSupplier().requestOption(options, 0, "Choose segment to split", "Split segment");
 
-        if (option != null) {
-
-            this.setAnalysing(true);
-
-            SegmentationHandler sh = new SegmentationHandler(activeDataset());
-            sh.splitSegment(option.getID());
-
-            refreshEditingPanelCharts();
-
-            this.setAnalysing(false);
-        }
-
+    		setAnalysing(true);
+    		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+    		sh.splitSegment(nameArray[option].getID());
+    		refreshEditingPanelCharts();
+    		setAnalysing(false);
+    	} catch (RequestCancelledException e) {
+    		return;
+    	}
     }
 
     /**
@@ -506,7 +502,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
      */
     private void unmergeAction(ISegmentedProfile medianProfile) throws Exception {
 
-        List<IBorderSegment> names = new ArrayList<IBorderSegment>();
+        List<IBorderSegment> names = new ArrayList<>();
 
         // Put the names of the mergable segments into a list
         for (IBorderSegment seg : medianProfile.getSegments()) {
@@ -514,28 +510,20 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
                 names.add(seg);
             }
         }
-
         IBorderSegment[] nameArray = names.toArray(new IBorderSegment[0]);
+        String[] options = Arrays.stream(nameArray).map(s->s.getName()).toArray(String[]::new);
+        
+        try {
+    		int option = getInputSupplier().requestOption(options, 0, "Choose merged segment to unmerge", "Unmerge segment");
 
-        // show a list of segments that can be unmerged, and merge the selected
-        // option
-
-        IBorderSegment mergeOption = (IBorderSegment) JOptionPane.showInputDialog(null, "Choose segments to unmerge",
-                "Unmerge", JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
-
-        if (mergeOption != null) {
-
-            // a choice was made
-            this.setAnalysing(true);
-
-            SegmentationHandler sh = new SegmentationHandler(activeDataset());
-            sh.unmergeSegments(mergeOption.getID());
-            //
-            this.setAnalysing(false);
-
-            refreshEditingPanelCharts();
-
-        }
+    		setAnalysing(true);
+    		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+    		sh.unmergeSegments(nameArray[option].getID());
+    		refreshEditingPanelCharts();
+    		setAnalysing(false);
+    	} catch (RequestCancelledException e) {
+    		return;
+    	}
     }
 
     @Override

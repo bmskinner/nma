@@ -109,13 +109,12 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         profileOptions.addActionListener(e -> update());
 
         resegmentButton = new JButton("Resegment");
-        panel.add(resegmentButton);
         resegmentButton.setEnabled(false);
-
         resegmentButton.addActionListener(e -> {
             CellResegmentationDialog d = new CellResegmentationDialog(getCellModel());
             d.load(getCellModel().getCell(), activeDataset());
         });
+//        panel.add(resegmentButton);
 
         return panel;
 
@@ -170,7 +169,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     @Override
     public void refreshChartCache() {
         clearChartCache();
-        finest("Updating chart after clear");
+        imagePanel.createImage();
         this.update();
     }
 

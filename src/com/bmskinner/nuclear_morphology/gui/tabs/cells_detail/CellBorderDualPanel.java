@@ -29,7 +29,7 @@ public class CellBorderDualPanel extends DualChartPanel {
     public static final int DEFAULT_OVERLAY_PERCENT = 25;
 
     public CellBorderDualPanel() {
-        super();
+        super(true);
 
         chartPanel.setFixedAspectRatio(true);
 

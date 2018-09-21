@@ -17,8 +17,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
@@ -155,30 +159,37 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 					JPopupMenu popupMenu = new JPopupMenu("Popup");
 					try {
 						
-						int raw = cell.getNucleus().getBorderIndex(point);
-						int index = cell.getNucleus().getOffsetBorderIndex(Tag.REFERENCE_POINT, raw);
+						int rawIndex = cell.getNucleus().getBorderIndex(point);
+						
+						int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
+						
+						// Get the index of the clicked point in the RP-indexed profile
+						int index = cell.getNucleus().wrapIndex(rawIndex-rpIndex);
+
 						IBorderSegment seg = cell.getNucleus().getProfile(ProfileType.ANGLE)
-								.getSegmentContaining(raw);
+								.getSegmentContaining(rawIndex);
 
 						
 						IBorderSegment prev = seg.prevSegment();
 						IBorderSegment next = seg.nextSegment();
 						
-//						JMenuItem segThis = new JMenuItem("This: "+seg.getName());
-//						segThis.setForeground(ColourSelecter.getColor(seg.getPosition()));
+						JMenuItem prevItem = new JMenuItem("Extend "+prev.getName()+" to here");
+						prevItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
+						prevItem.setBorderPainted(true);
 
-						JMenuItem prevItem = new JMenuItem("Prev: "+prev.getName());
-						prevItem.setForeground(ColourSelecter.getColor(prev.getPosition()));
 						prevItem.addActionListener(e->{
 							fireSegmentEvent(seg.getID(), index, SegmentEvent.MOVE_START_INDEX);
 							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 							createImage();
 						});
 						popupMenu.add(prevItem);
-//						popupMenu.add(segThis);
 
-						JMenuItem nextItem = new JMenuItem("Next: "+next.getName());
-						nextItem.setForeground(ColourSelecter.getColor(next.getPosition()));
+						popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
+						
+						JMenuItem nextItem = new JMenuItem("Extend "+next.getName()+" to here");
+						nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 3));
+						nextItem.setBorderPainted(true);
+						
 						nextItem.addActionListener(e->{
 							fireSegmentEvent(next.getID(), index, SegmentEvent.MOVE_START_INDEX);
 							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
@@ -234,6 +245,8 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		
 		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
 
+		
+		// Find the point that was clicked
 		Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
 				.stream().filter(p->{
 					return clickedPoint.getX()>=p.getX()-0.4 && 

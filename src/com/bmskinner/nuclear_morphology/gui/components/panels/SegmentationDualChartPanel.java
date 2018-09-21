@@ -40,7 +40,7 @@ public class SegmentationDualChartPanel extends DualChartPanel {
 	protected List<Object> listeners = new ArrayList<>();
 
     public SegmentationDualChartPanel() {
-        super();
+        super(false);
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();

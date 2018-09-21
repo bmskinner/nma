@@ -122,7 +122,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 
         // Convert to an RGB processor for annotation
-        ImageProcessor ip = new ImageConverter(greyProcessor).convertToGreyscale().invert().toProcessor();
+        ImageProcessor ip = new ImageConverter(greyProcessor).convertToRGBGreyscale().invert().toProcessor();
 
         ImageProcessor ap = ip.duplicate();
 

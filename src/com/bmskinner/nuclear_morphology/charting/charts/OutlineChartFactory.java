@@ -48,6 +48,7 @@ import org.jfree.ui.Layer;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanAligner;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
@@ -308,9 +309,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         try {
 
-            if (!options.isShowAnnotations()) {
+            if (!options.isShowAnnotations())
                 return makeBareCellOutlineChart();
-            }
 
             if (options.isShowMesh()) {
                 if (options.firstDataset().getCollection().hasConsensus()) {
@@ -462,15 +462,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
      */
     private JFreeChart makeStandardCellOutlineChart() throws ChartCreationException {
 
-        if (!options.hasCell()) {
-            finest("No cell to draw");
+        if (!options.hasCell())
             return ConsensusNucleusChartFactory.makeEmptyChart();
-        }
 
-        if (!options.hasDatasets()) {
-            finest("No dataset to draw");
+        if (!options.hasDatasets())
             return ConsensusNucleusChartFactory.makeEmptyChart();
-        }
 
         ICell cell = options.getCell();
         IAnalysisDataset dataset = options.firstDataset();
@@ -576,8 +572,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
         }
 
         // set the rendering options for each dataset type
-        finest("Rendering chart");
-
         int i = 0;
         for (String key : cellDataset.getKeys()) {
 
@@ -817,15 +811,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * @param imageFile
      * @param channel
      */
-    private static void drawImageAsAnnotation(XYPlot plot, ICell cell, CellularComponent component, boolean isRGB) {
+    private static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell, @NonNull CellularComponent component, boolean isRGB) {
 
-        if (component == null || cell == null || plot == null) {
+        if (component == null || cell == null || plot == null)
             return;
-        }
 
         ImageProcessor openProcessor;
         try {
-            openProcessor = isRGB ? component.getRGBImage() : component.getImage();
+//        	ImageProcessor ip = isRGB ? component.getRGBImage() : component.getImage();
+        	ImageConverter ic = new ImageConverter(component.getGreyscaleImage()).invert();
+        	openProcessor = ic.convertToRGBGreyscale().toProcessor();
+//            openProcessor = isRGB ? component.getRGBImage() : component.getGreyscaleImage();
         } catch (UnloadableImageException e) {
             return;
         }

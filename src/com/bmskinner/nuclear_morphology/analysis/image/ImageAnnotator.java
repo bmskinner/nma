@@ -191,16 +191,18 @@ public class ImageAnnotator extends AbstractImageFilterer {
             	for(IBorderSegment seg : profile.getOrderedSegments()) {
             		Paint color = ColourSelecter.getColor(seg.getPosition());
             		Iterator<Integer> it = seg.iterator();
+            		int lastIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getEndIndex());
             		while(it.hasNext()) {
             			int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, it.next());
             			IPoint p = n.getBorderPoint(index).plus(Imageable.COMPONENT_BUFFER);
-            			annotatePoint(p, (Color) color, 3);
+            			// since segments overlap, draw the last index larger so the next segment can overlay
+            			annotatePoint(p, (Color) color, lastIndex==index ? 5 : 3);
             		}
-//            		int start = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getStartIndex());
-//            		IPoint p = n.getBorderPoint(start).plus(Imageable.COMPONENT_BUFFER);
-//            		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
-//                            p,  (Color) color, 3);
             	}
+            	
+            	// Draw the RP again because it will be drawn over by the final segment
+            	IPoint rp = n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER);
+            	annotatePoint(rp, ColourSelecter.getColor(0), 3);
             }
             annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);
         } catch (Exception e) {

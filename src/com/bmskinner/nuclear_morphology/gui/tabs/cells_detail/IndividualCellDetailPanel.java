@@ -49,7 +49,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
                                                          // CellProfilePanel();
                                                          // // the nucleus angle
                                                          // profile
-    protected CellBorderTagPanel   cellBorderTagPanel;   // = new
+//    protected CellBorderTagPanel   cellBorderTagPanel;   // = new
                                                          // CellBorderTagPanel();
     protected CellOutlinePanel     outlinePanel;         // = new
                                                          // CellOutlinePanel();
@@ -81,7 +81,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
             JPanel westPanel = createCellandSignalListPanels(context);
             this.addSubPanel(cellStatsPanel);
             this.addSubPanel(segmentProfilePanel);
-            this.addSubPanel(cellBorderTagPanel);
+//            this.addSubPanel(cellBorderTagPanel);
             this.addSubPanel(outlinePanel);
             this.addSubPanel(cellsListPanel);
             this.addSubPanel(signalListPanel);
@@ -91,7 +91,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
             tabPane = new JTabbedPane(JTabbedPane.LEFT);
             tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
             tabPane.add(segmentProfilePanel.getPanelTitle(), segmentProfilePanel);
-            tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
+//            tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
             tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
             tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
             tabPane.setSelectedComponent(outlinePanel);
@@ -117,7 +117,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
     private void createSubPanels(@NonNull InputSupplier context) {
         segmentProfilePanel = new CellSegmentsPanel(context, model); // the nucleus angle
                                                            // profile
-        cellBorderTagPanel = new CellBorderTagPanel(context, model);
+//        cellBorderTagPanel = new CellBorderTagPanel(context, model);
         outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
                                                     // and detected objects
         cellStatsPanel = new CellStatsPanel(context, model); // the stats table
@@ -125,7 +125,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
         // cellSegTablePanel = new CellSegTablePanel(model);
 
         model.addView(segmentProfilePanel);
-        model.addView(cellBorderTagPanel);
+//        model.addView(cellBorderTagPanel);
         model.addView(outlinePanel);
         model.addView(cellStatsPanel);
         model.addView(cellsignalStatsPanel);

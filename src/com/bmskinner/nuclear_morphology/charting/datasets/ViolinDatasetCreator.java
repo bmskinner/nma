@@ -207,19 +207,10 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     }
 
     /**
-     * Create a box and whisker dataset for the desired segment statistic
+     * Create a violin dataset for the desired segment statistic
      * 
-     * @param collections
-     *            the datasets to include
-     * @param segName
-     *            the segment to calculate for
-     * @param scale
-     *            the scale
-     * @param stat
-     *            the segment statistic to use
      * @return
      * @throws ChartDatasetCreationException
-     * @throws Exception
      */
     private ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
 
@@ -228,7 +219,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         PlottableStatistic stat = options.getStat();
 
         if (stat.equals(PlottableStatistic.LENGTH)) {
-            return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
+            return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition());
         }
 
         if (stat.equals(PlottableStatistic.DISPLACEMENT)) {
@@ -242,54 +233,53 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     /**
      * Get the lengths of the given segment in the collections
      * 
-     * @param collections
-     * @param segName
+     * @param datasets
+     * @param segPosition
      * @return
      * @throws ChartDatasetCreationException
      * @throws Exception
      */
-    private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition,
-            MeasurementScale scale) throws ChartDatasetCreationException {
+    private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> datasets, int segPosition) throws ChartDatasetCreationException {
 
         ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
-        for (int i = 0; i < collections.size(); i++) {
+        for (int i = 0; i < datasets.size(); i++) {
 
-            ICellCollection collection = collections.get(i).getCollection();
+            ICellCollection collection = datasets.get(i).getCollection();
             try {
                 IBorderSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
                         segPosition);
 
-                List<Number> list = new ArrayList<Number>(0);
+                List<Number> list = new ArrayList<>();
 
                 for (Nucleus n : collection.getNuclei()) {
 
-                    IBorderSegment seg;
-
-                    seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
+                    IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
 
                     double length = 0;
                     if (seg != null) {
                         int indexLength = seg.length();
                         double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                        length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
+                        length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 
                     }
                     list.add(length);
-                    // finest("Added length "+length+" to segment dataset
-                    // "+seg.getName() );
                 }
 
                 String rowKey = IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i;
                 String colKey = IBorderSegment.SEGMENT_PREFIX + segPosition;
                 dataset.add(list, rowKey, colKey);
 
-//                addProbabilities(dataset, list, rowKey, colKey);
-
-            } catch (ProfileException | UnavailableComponentException e) {
-                fine("Error getting segmented profile", e);
-                throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+            } catch (ProfileException e) {
+                fine("Error fetching median profile");
+                stack(e);
+                throw new ChartDatasetCreationException("Error fetching median profile", e);
+            } catch (UnavailableComponentException e) {
+                fine("Error fetching segment", e);
+                stack(e);
+                throw new ChartDatasetCreationException("Error fetching segment", e);
             }
+            
         }
 
         return dataset;

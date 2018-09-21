@@ -137,11 +137,8 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         // ensure the progress bar gets hidden even if it is not removed
         setProgressBarVisible(false);
         
-        finer("Firing clear cache event");
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, dataset);
 
-        // The analysis takes place in a new thread to accomodate refolding.
-        // See specific comment below
         Thread thr = new Thread() {
 
             public void run() {
@@ -174,7 +171,6 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                     } catch (InterruptedException e) {
                         error("Interruption to thread", e);
                     }
-                    finest("Resuming thread after refolding datast");
                 }
 
                 /*

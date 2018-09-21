@@ -29,6 +29,7 @@ import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -75,7 +76,7 @@ public class ImageConverter extends AbstractImageFilterer {
     }
 
     /**
-     * Convert an ImageStack to RGB images suitable for export or display
+     * Convert to RGB images suitable for export or display
      * 
      * @return an ImageConverter containing the converted image
      */
@@ -84,7 +85,7 @@ public class ImageConverter extends AbstractImageFilterer {
         // Handle stacks first
         if (st != null) {
             if (st.getSize() == 1)
-                return makeGreyScaleIamge();
+                return makeGreyScaleImage();
             if (st.getSize() > 1)
                 return mergeStack();
         }
@@ -99,17 +100,22 @@ public class ImageConverter extends AbstractImageFilterer {
      * 
      * @return
      */
-    public ImageConverter convertToGreyscale() {
+    public ImageConverter convertToRGBGreyscale() {
         // Handle stacks first
         if (st != null) {
             if (st.getSize() == 1)
-                return makeGreyScaleIamge();
+                return makeGreyScaleImage();
             if (st.getSize() > 1) 
                 return makeGreyRGBImage(ImageImporter.COUNTERSTAIN); 
         }
 
-        if (ip != null)
+        if (ip != null) {
+        	
+        	if(ip instanceof ColorProcessor)
+        		return new ImageConverter(ip.convertToByteProcessor());
+        	
             return convertToRGBGreyscale(ip);
+        }
         return this;
     }
 
@@ -257,7 +263,7 @@ public class ImageConverter extends AbstractImageFilterer {
      * @param stack
      * @return the image
      */
-    private ImageConverter makeGreyScaleIamge() {
+    private ImageConverter makeGreyScaleImage() {
         return makeGreyRGBImage(ImageImporter.COUNTERSTAIN);
     }
 

@@ -51,6 +51,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.axis.ValueAxis;
@@ -301,21 +302,23 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
     protected void updateCharts(ICell cell) {
 
         finer("Making outline chart options");
-        ChartOptions outlineOptions = new ChartOptionsBuilder().setDatasets(dataset).setCell(cell)
-                .setRotationMode(RotationMode.ACTUAL).setShowAnnotations(false).setInvertYAxis(true) // only
-                                                                                                     // invert
-                                                                                                     // for
-                                                                                                     // actual
-                .setShowXAxis(false).setShowYAxis(false).setShowPoints(true).setCellularComponent(cell.getNucleus())
+        ChartOptions outlineOptions = new ChartOptionsBuilder()
+        		.setDatasets(dataset).setCell(cell)
+                .setRotationMode(RotationMode.ACTUAL)
+                .setShowAnnotations(false)
+                .setInvertYAxis(true)
+                .setShowXAxis(false)
+                .setShowYAxis(false)
+                .setShowPoints(true)
+                .setCellularComponent(cell.getNucleus())
                 .build();
 
         OutlineChartFactory ocf = new OutlineChartFactory(outlineOptions);
 
         JFreeChart outlineChart = ocf.makeCellOutlineChart();
         JFreeChart outlineChart2 = ocf.makeCellOutlineChart();
-        // finer("Updating chart");
+
         dualPanel.setCharts(outlineChart, outlineChart2);
-        // dualPanel.restoreAutoBounds();
 
     }
 
@@ -325,7 +328,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
     }
 
-    private void selectClickedPoint(IPoint clickedPoint) {
+    private void selectClickedPoint(@NonNull IPoint clickedPoint) {
         for (IBorderPoint point : workingCell.getNucleus().getBorderList()) {
 
             if (point.overlapsPerfectly(clickedPoint)) {
@@ -535,36 +538,6 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             finalMovePointY = xy.getRangeAxis().java2DToValue(p.getY(), dataArea, xy.getRangeAxisEdge());
 
             finalMovePointX = xy.getDomainAxis().java2DToValue(p.getX(), dataArea, xy.getDomainAxisEdge());
-
-            // log("Moving to "+finalMovePointX+" , "+finalMovePointY);
-            //
-            // double differenceY = finalMovePointY - initialMovePointY;
-            // double differenceX = finalMovePointX - initialMovePointX;
-            //
-            //// XYSeries series =
-            //
-            // xy.getDataset().
-            //
-            // if (series.getY(itemIndex).doubleValue()
-            // + difference > xy.getRangeAxis().getRange().getLength()
-            // || series.getY(itemIndex).doubleValue()
-            // + difference < 0.0D) {
-            // initialMovePointY = finalMovePointY;
-            // }
-            // // retrict movement for upper and lower limit (upper limit
-            // // should be as per application needs)
-            // double targetPoint =
-            // xy.getDataset().getX(xyItemEntity.getSeriesIndex(),
-            // itemIndex).series.getY(itemIndex).doubleValue() + difference;
-            // if (targetPoint > 15 || targetPoint < 0) {
-            // return;
-            // } else {
-            // series.update(Integer.valueOf(itemIndex),
-            // Double.valueOf(targetPoint));
-            // }
-            // panel.getChart().fireChartChanged();
-            // panel.updateUI();
-            // initialMovePointY = finalMovePointY;
         }
     }
 

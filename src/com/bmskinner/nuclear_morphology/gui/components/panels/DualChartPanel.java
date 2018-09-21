@@ -56,13 +56,14 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
 
     protected List<Object> listeners = new ArrayList<Object>();
 
-    public DualChartPanel() {
+    public DualChartPanel(boolean isFixedAspect) {
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();
 
         JFreeChart profileChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         chartPanel = new ExportableChartPanel(profileChart);
+        chartPanel.setFixedAspectRatio(isFixedAspect);
 
         chartPanel.setMinimumDrawWidth(0);
         chartPanel.setMinimumDrawHeight(0);
@@ -77,6 +78,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
          */
         JFreeChart rangeChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         rangePanel = new PositionSelectionChartPanel(rangeChart);
+        rangePanel.setFixedAspectRatio(isFixedAspect);
         rangePanel.addSignalChangeListener(this);
         rangePanel.addChartSetEventListener(this);
         rangePanel.setDomainZoomable(false); // zoom is controlled only by the

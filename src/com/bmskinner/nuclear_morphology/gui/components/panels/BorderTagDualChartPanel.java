@@ -49,7 +49,7 @@ public class BorderTagDualChartPanel extends DualChartPanel {
     private JPopupMenu popupMenu = new JPopupMenu("Popup");
 
     public BorderTagDualChartPanel() {
-        super();
+        super(false);
 
         chartPanel.addChartMouseListener(new ChartMouseListener() {
 

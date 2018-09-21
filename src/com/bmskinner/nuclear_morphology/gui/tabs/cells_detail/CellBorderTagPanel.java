@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
@@ -207,7 +208,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
         this.getCellModel().getCell().getNucleus().setLocked(false);
         try {
             this.getCellModel().getCell().getNucleus().setBorderTag(Tag.REFERENCE_POINT, tag, newTagIndex);
-        } catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException | UnavailableBorderTagException e) {
             warn("Cannot update border point");
             fine("Index not in profile", e);
             this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
