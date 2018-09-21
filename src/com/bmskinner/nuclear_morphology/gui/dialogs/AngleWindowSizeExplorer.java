@@ -36,6 +36,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -43,7 +44,9 @@ import org.jfree.data.xy.DefaultXYDataset;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -74,7 +77,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
     private JButton runButton;
 
-    public AngleWindowSizeExplorer(final IAnalysisDataset dataset) {
+    public AngleWindowSizeExplorer(@NonNull final IAnalysisDataset dataset) {
         super();
         this.dataset = dataset;
         try {
@@ -88,12 +91,12 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
     }
 
     private void createUI() {
-        this.setTitle("Angle window size explorer: " + dataset.getName());
+        this.setTitle("Angle window proportion explorer: " + dataset.getName());
         this.setLayout(new BorderLayout());
 
         this.add(createSettingsPanel(), BorderLayout.NORTH);
 
-        chartPanel = new ExportableChartPanel(MorphologyChartFactory.createEmptyChart());
+        chartPanel = new ExportableChartPanel(ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
         this.add(chartPanel, BorderLayout.CENTER);
 
     }
@@ -146,24 +149,6 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         	ThreadManager.getInstance().submit(r);
         	
         });
-//        runButton.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent arg0) {
-//
-//                Thread thr = new Thread() {
-//                    public void run() {
-//
-//                        try {
-//                            runAnalysis();
-//                        } catch (Exception e) {
-//                            log(Level.SEVERE, "Error testing", e);
-//                        }
-//                    }
-//                };
-//                thr.start();
-//
-//            }
-//        });
         panel.add(runButton);
 
         return panel;
@@ -219,13 +204,13 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         setAnalysing(true);
 
         // Clear the old chart
-        chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
+        chartPanel.setChart(ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
 
         log("Testing " + windowSizeMin + " - " + windowSizeMax);
 
         try {
         	for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {
-
+        		fine("Calculating " + i+"...");
         	    final double j = i;
         		// make a duplicate collection
         		final ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
@@ -238,15 +223,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
                     }
                     duplicateCollection.addCell(newCell);
         		});
-        		
-//        		for (ICell c : dataset.getCollection().getCells()) {
-//
-//        			ICell newCell = new DefaultCell(c);
-//        			for(Nucleus n : newCell.getNuclei()){
-//        				n.setWindowProportion(ProfileType.ANGLE, i);
-//        			}
-//        			duplicateCollection.addCell(newCell);
-//        		}
+
 
         		// recalc the aggregate
         		IProfileCollection pc = duplicateCollection.getProfileCollection();
@@ -271,14 +248,13 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         log("Profiling complete");
     }
 
-    private void updateChart(IProfile profile, double windowSize) {
+    private void updateChart(@NonNull IProfile profile, double windowSize) {
 
         XYPlot plot = chartPanel.getChart().getXYPlot();
         int datasetCount = plot.getDatasetCount();
-
         DefaultXYDataset ds = new DefaultXYDataset();
 
-        IProfile xpoints = createXPositions(profile, 100);
+        IProfile xpoints = createXPositions(profile, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
         double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 
         DecimalFormat df = new DecimalFormat("#0.000");

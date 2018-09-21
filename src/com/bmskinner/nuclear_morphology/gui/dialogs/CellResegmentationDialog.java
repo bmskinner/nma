@@ -122,6 +122,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
         taggableList.revalidate();
         taggableList.repaint();
         updateCharts(cell);
+        pack();
         setVisible(true);
     }
 
