@@ -184,11 +184,17 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         ISegmentedProfile profile = null;
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-                .setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
-                .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+        		.setNormalised(true)
+                .setAlignment(ProfileAlignment.LEFT)
+                .setShowIQR(false).setTag(Tag.REFERENCE_POINT)
+                .setShowMarkers(false)
+                .setProfileType(ProfileType.ANGLE)
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowProfiles(false)
-                .setShowPoints(true).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getMainPanel())
+                .setShowPoints(true)
+                .setShowXAxis(false).setShowYAxis(false)
+                .setTarget(dualPanel.getMainPanel())
                 .build();
 
         // Set the button configuration
@@ -246,7 +252,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
     	return new ProfileChartFactory(options).createProfileChart();
     }
 
