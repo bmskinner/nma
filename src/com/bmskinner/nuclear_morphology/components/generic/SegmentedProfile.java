@@ -838,13 +838,15 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         this.setSegments(newSegs);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#unmergeSegment(components.nuclear.
-     * NucleusBorderSegment)
-     */
+    @Override
+	public void unmergeSegment(@NonNull UUID segId) throws ProfileException {
+		try {
+			unmergeSegment(getSegment(segId));
+		} catch(UnavailableComponentException e) {
+			throw new ProfileException(e);
+		}
+	}
+    
     @Override
     public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
         // Check the segments belong to the profile

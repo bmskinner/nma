@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +19,9 @@ import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -28,12 +33,18 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ProfileManagerTest {
 	
+	private Logger logger;
 	private static final long RNG_SEED = 1234;
 	private ProfileManager manager;
 	private ICellCollection collection;
 
 	@Before
 	public void setUp() throws Exception {
+		
+		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+		logger.setLevel(Level.FINE);
+		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+		
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
 				.ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(true)
@@ -154,12 +165,30 @@ public class ProfileManagerTest {
 		IBorderSegment seg2 = profile.getSegmentAt(2);
 				
 		manager.mergeSegments(seg1, seg2, newId);
-		
+		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 		assertEquals(segIds.size()-1, newIds.size());
 		assertTrue(newIds.contains(newId));
 		assertFalse(newIds.contains(segId1));
 		assertFalse(newIds.contains(segId2));
+		IBorderSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
+		assertTrue(mergedSegment.hasMergeSources());
+		assertTrue(mergedSegment.hasMergeSource(segId1));
+		assertTrue(mergedSegment.hasMergeSource(segId2));
+		
+
+		for(Nucleus n : collection.getNuclei()) {
+			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
+			assertEquals(newIds.size(), nucleusIds.size());
+			assertTrue(newIds.contains(newId));
+			assertFalse(newIds.contains(segId1));
+			assertFalse(newIds.contains(segId2));
+			IBorderSegment mergedSeg = nucleusProfile.getSegment(newId);
+			assertTrue(mergedSeg.hasMergeSources());
+			assertTrue(mergedSeg.hasMergeSource(segId1));
+			assertTrue(mergedSeg.hasMergeSource(segId2));
+		}
 	}
 
 	@Test
@@ -173,8 +202,37 @@ public class ProfileManagerTest {
 	}
 
 	@Test
-	public void testUnmergeSegments() {
-		fail("Not yet implemented");
+	public void testUnmergeSegments() throws Exception {
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		List<UUID> segIds = profile.getSegmentIDs();
+		UUID newId = UUID.randomUUID();
+		UUID segId1 = profile.getSegmentAt(1).getID();
+		UUID segId2 = profile.getSegmentAt(2).getID();
+		IBorderSegment seg1 = profile.getSegmentAt(1);
+		IBorderSegment seg2 = profile.getSegmentAt(2);
+
+		manager.mergeSegments(seg1, seg2, newId);
+		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
+		
+		manager.unmergeSegments(newId);
+		
+		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
+		assertEquals(segIds.size(), newIds.size());
+		assertFalse(newIds.contains(newId));
+		assertTrue(newIds.contains(segId1));
+		assertTrue(newIds.contains(segId2));
+		
+		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
+		
+		for(Nucleus n : collection.getNuclei()) {
+			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
+			assertEquals(segIds.size(), nucleusIds.size());
+			assertFalse(newIds.contains(newId));
+			assertTrue(newIds.contains(segId1));
+			assertTrue(newIds.contains(segId2));
+		}
+		
 	}
 
 }

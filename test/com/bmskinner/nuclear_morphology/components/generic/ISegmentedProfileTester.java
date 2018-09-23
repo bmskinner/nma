@@ -725,8 +725,19 @@ public class ISegmentedProfileTester {
 	    IBorderSegment s2 = profile.getSegmentAt(2);
 	    
 	    profile.mergeSegments(s1, s2, mergedId);
+	    
+        List<UUID> segIds = profile.getSegmentIDs();
+        
+        assertFalse(segIds.contains(s1.getID()));
+        assertFalse(segIds.contains(s2.getID()));
+        assertTrue(segIds.contains(mergedId));
+        
+        IBorderSegment m = profile.getSegment(mergedId);
+        assertTrue(m.hasMergeSources());
+        assertTrue(m.hasMergeSource(s1.getID()));
+        assertTrue(m.hasMergeSource(s2.getID()));
 
-	    IBorderSegment m = profile.getSegment(mergedId);
+	    
 	    assertEquals("Merged segment start", s1.getStartIndex(), m.getStartIndex());
 	    assertEquals("Merged segment end", s2.getEndIndex(), m.getEndIndex());
 	    assertEquals("Number of segments", expCount, profile.getSegmentCount());
@@ -764,13 +775,24 @@ public class ISegmentedProfileTester {
         int expCount = profile.getSegmentCount();
         
         profile.mergeSegments(s1, s2, mergedId);
-        IBorderSegment m = profile.getSegment(mergedId);
-		profile.unmergeSegment(m);
+        
+        assertEquals(expCount-1, profile.getSegmentCount());
+                        
+		profile.unmergeSegment(mergedId);
 		
 		assertEquals(expCount, profile.getSegmentCount());
 		
+		List<UUID> newIds = profile.getSegmentIDs();
+		assertTrue(newIds.contains(s1.getID()));
+		assertTrue(newIds.contains(s2.getID()));
+		assertFalse(newIds.contains(mergedId));
+		
 		assertEquals(s1.toString(), profile.getSegmentAt(1).toString());
 		assertEquals(s2.toString(), profile.getSegmentAt(2).toString());
+		
+		assertEquals("Original segment start", s1.getStartIndex(), profile.getSegmentAt(1).getStartIndex());
+	    assertEquals("Original segment end", s2.getEndIndex(), profile.getSegmentAt(2).getEndIndex());
+	    assertEquals("Number of segments", expCount, profile.getSegmentCount());
 	}
 
 	@Test

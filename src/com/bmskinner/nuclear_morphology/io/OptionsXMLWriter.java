@@ -86,7 +86,7 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 		return new Document(rootElement);
 	}
 
-	private static Document createDocument(@NonNull HashOptions options) {
+	static Document createDocument(@NonNull HashOptions options) {
 		Element rootElement = new Element(DETECTION_LBL);
 		appendElement(options, rootElement);
 		return new Document(rootElement);

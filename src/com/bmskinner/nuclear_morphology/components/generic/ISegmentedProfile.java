@@ -64,7 +64,8 @@ public interface ISegmentedProfile extends IProfile {
     @NonNull IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException;
 
     /**
-     * Test if a segment with the given id is present
+     * Test if a segment with the given id is present within the profile, or
+     * as a merge source of one of the segments in the profile
      * @param id the id
      * @return true if a segment is present with the id, false otherwise
      * @throws IllegalArgumentException if the id is null
@@ -278,6 +279,13 @@ public interface ISegmentedProfile extends IProfile {
      * @param segment
      */
     void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException;
+    
+    /**
+     * Reverse a merge operation on a segment
+     * 
+     * @param segment
+     */
+    void unmergeSegment(@NonNull UUID segId) throws ProfileException;
 
     /**
      * Split the segment containing at the given index into two new segments.

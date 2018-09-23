@@ -154,7 +154,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
     	return new ProfileChartFactory(options).createProfileChart();
     }
 

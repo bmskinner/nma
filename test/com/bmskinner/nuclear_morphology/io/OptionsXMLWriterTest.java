@@ -42,12 +42,12 @@ public class OptionsXMLWriterTest {
 		OptionsXMLWriter.writeXML(doc, new File("C:/Users/ben/Documents/test.xml"));
 	}
 	
-	@Test
-	public void testAnalysisOptions() throws IOException {
-		File folder = new File("C:/Users/ben/Documents/test.xml");
-		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(folder);
-		Document doc = OptionsXMLWriter.createDocument(op);
-		OptionsXMLWriter.writeXML(doc, new File("C:/Users/ben/Documents/test.xml"));
-	}
+//	@Test
+//	public void testAnalysisOptions() throws IOException {
+//		File folder = new File("C:/Users/ben/Documents/test.xml");
+//		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(folder);
+//		Document doc = OptionsXMLWriter.createDocument(op);
+//		OptionsXMLWriter.writeXML(doc, new File("C:/Users/ben/Documents/test.xml"));
+//	}
 
 }

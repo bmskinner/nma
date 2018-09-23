@@ -702,6 +702,14 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		mergeSegments(segment1.getID(), segment2.getID(), id);
 	}
 
+    @Override
+	public void unmergeSegment(@NonNull UUID segId) throws ProfileException {
+		try {
+			unmergeSegment(getSegment(segId));
+		} catch(UnavailableComponentException e) {
+			throw new ProfileException(e);
+		}
+	}
 
     @Override
     public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
@@ -710,10 +718,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             throw new IllegalArgumentException("Input segment is not part of this profile");
         }
 
-        if (!segment.hasMergeSources()) {
+        if (!segment.hasMergeSources())
             return;
-//            throw new IllegalArgumentException("Segment does not have merge sources");
-        }
 
         // Replace the two segments in this profile
         List<IBorderSegment> oldSegs = this.getSegments();
@@ -823,25 +829,16 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#toString()
-     */
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder("Profile");
         for (IBorderSegment seg : this.segments) {
-            builder.append(seg.toString() + System.getProperty("line.separator"));
+            builder.append(" | "+seg.toString());
         }
         return builder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#valueString()
-     */
+
     @Override
     public String valueString() {
         return super.toString();
@@ -852,11 +849,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     	return new SegmentedFloatProfile(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#hashCode()
-     */
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -865,11 +858,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

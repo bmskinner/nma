@@ -36,18 +36,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 
 /**
- * This class is extended for making a panel with multiple stats histograms
- * arranged vertically
- * 
+ * Base class for multiple violin plots arranged horizontally
+ *
  * @author bms41
  *
  */

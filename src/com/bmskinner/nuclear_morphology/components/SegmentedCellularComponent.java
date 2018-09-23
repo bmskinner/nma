@@ -1522,23 +1522,28 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			mergedSegment.addMergeSource(firstSegment);
 			mergedSegment.addMergeSource(secondSegment);
+//			fine("Added merge source "+mergedSegment.hasMergeSources());
 			
 			// Clear the old segments
 			List<BorderSegmentTree> newSegs = new ArrayList<>();
 			// Replace the two segments in this profile
 			for (BorderSegmentTree oldSegment : segments.leaves) {
-
-				if (oldSegment.equals(firstSegment)) {
+//				fine("Checking profile segment "+oldSegment.getID());
+				if (oldSegment.getID().equals(firstSegment.getID())) {
+//					fine("\tPutting merged segment "+mergedSegment.getID());
+//					fine("\tIgnoring old segment "+oldSegment.getID());
 					newSegs.add(mergedSegment);
-				} else if (oldSegment.equals(secondSegment)) {
-					// do nothing
+				} else if (oldSegment.getID().equals(secondSegment.getID())) {
+//					fine("\tIgnoring old segment "+oldSegment.getID());
 				} else {
 					// add the original segments
+//					fine("\tPutting old segment "+oldSegment.getID());
 					newSegs.add(oldSegment);
 				}
 			}
 			segments.clearMergeSources();
 			for (BorderSegmentTree seg : newSegs) {
+//				fine("Adding profile segment "+seg.getID());
 				segments.addMergeSource(seg);
 			}
 		}
@@ -1549,23 +1554,30 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 		
 		@Override
+		public void unmergeSegment(@NonNull UUID segId) throws ProfileException {
+			try {
+				unmergeSegment(getSegment(segId));
+			} catch(UnavailableComponentException e) {
+				throw new ProfileException(e);
+			}
+		}
+		
+		@Override
 		public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
 			// Check the segments belong to the profile
 			if (!this.contains(segment))
 				throw new IllegalArgumentException("Input segment is not part of this profile");
-
+//			fine("Checking segment "+segment.getID()+" has merge sources");
 			if (!segment.hasMergeSources())
 				return;
 
 			List<BorderSegmentTree> newSegs = new ArrayList<>();
 			
 			for (BorderSegmentTree oldSegment : segments.leaves) {
-
-				if (oldSegment.equals(segment)) { // segment to unmerge
-
-					for (BorderSegmentTree mergedSegment : oldSegment.leaves) {
+//				fine("Checking segment "+oldSegment.getID());
+				if (oldSegment.getID().equals(segment.getID())) { // segment to unmerge
+					for (BorderSegmentTree mergedSegment : oldSegment.leaves) 
 						newSegs.add(mergedSegment);
-					}
 
 				} else { // all other segments
 					newSegs.add(oldSegment);
@@ -1574,6 +1586,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			segments.clearMergeSources();
 			for (BorderSegmentTree seg : newSegs) {
+//				fine("Adding merge source "+seg.getID());
 				segments.addMergeSource(seg);
 			}
 
@@ -1774,6 +1787,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 */
 			protected BorderSegmentTree(@NonNull IBorderSegment seg, @Nullable BorderSegmentTree parent) {
 				this(seg.getID(), seg.getStartIndex(), seg.getEndIndex(), parent);
+				// Add merge sources of template segment
+				if(seg.hasMergeSources()) {
+					for(IBorderSegment mge : seg.getMergeSources())
+						addMergeSource(mge.copy());
+				}
 			}	
 			
 			@Override
@@ -2187,7 +2205,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			public String toString() {
 				StringBuilder b = new StringBuilder(String.format("%d - %d of %d", startIndex, endIndex, size()));
 				for(IBorderSegment s : this.getMergeSources())
-					b.append("\n\t"+s.toString());
+					b.append(" | Source: "+s.toString());
 				
 				return b.toString();
 			}

@@ -231,6 +231,22 @@ public class IBorderSegmentTester {
 	}
 	
 	@Test
+	public void testMergeSourcesPreservedWhenSegmentIsDuplicated() {
+		DefaultBorderSegment s1 = new DefaultBorderSegment(startIndex, startIndex+20, profileLength);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(startIndex+20, endIndex, profileLength);
+		
+		segment.addMergeSource(s1);
+		segment.addMergeSource(s2);
+		
+		IBorderSegment duplicated = segment.copy();
+		assertTrue(duplicated.hasMergeSources());
+		for(IBorderSegment mge : segment.getMergeSources()) {
+			assertTrue(duplicated.hasMergeSource(mge.getID()));
+		}
+		
+	}
+	
+	@Test
 	public void testGetStartIndex() throws SegmentUpdateException {
 		assertEquals(startIndex, segment.getStartIndex());
 	}

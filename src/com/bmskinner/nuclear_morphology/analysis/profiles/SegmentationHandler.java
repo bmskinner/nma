@@ -53,11 +53,11 @@ public class SegmentationHandler implements Loggable {
     }
 
     /**
-     * Unmerge segments with the given ID in this collection and its children,
+     * Merge segments with the given IDs in this collection and its children,
      * as long as the collection is real.
      * 
-     * @param segID
-     *            the segment ID to be unmerged
+     * @param segID1 the segment ID to be merged
+     * @param segID2 the segment ID to be merged
      */
     public void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) {
 
@@ -68,11 +68,12 @@ public class SegmentationHandler implements Loggable {
             return;
 
         // Give the new merged segment a new ID
-        UUID newID = java.util.UUID.randomUUID();
+        final UUID newID = UUID.randomUUID();
+        
         ISegmentedProfile medianProfile = null;
         try {
 
-            medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+        	medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                     Tag.REFERENCE_POINT, Stats.MEDIAN);
 
             IBorderSegment seg1 = medianProfile.getSegment(segID1);
@@ -135,7 +136,7 @@ public class SegmentationHandler implements Loggable {
             }
 
             // Unmerge in the dataset
-            dataset.getCollection().getProfileManager().unmergeSegments(seg);
+            dataset.getCollection().getProfileManager().unmergeSegments(segID);
 
             // Unmerge children
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
@@ -143,9 +144,9 @@ public class SegmentationHandler implements Loggable {
                 ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-                IBorderSegment childSeg = childProfile.getSegment(segID);
+//                IBorderSegment childSeg = childProfile.getSegment(segID);
 
-                child.getCollection().getProfileManager().unmergeSegments(childSeg);
+                child.getCollection().getProfileManager().unmergeSegments(segID);
             }
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
             stack("Error unmerging segments", e);

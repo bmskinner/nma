@@ -913,18 +913,12 @@ public class ProfileManager implements Loggable {
      * @throws ProfileException if the update fails
      * @throws UnavailableComponentException
      */
-    public void mergeSegments(IBorderSegment seg1, IBorderSegment seg2, UUID newID)
+    public void mergeSegments(@NonNull IBorderSegment seg1, @NonNull IBorderSegment seg2, @NonNull UUID newID)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
 
-        if (seg1 == null)
-            throw new IllegalArgumentException("Segment 1 cannot be null");
-
-        if (seg2 == null)
-            throw new IllegalArgumentException("Segment 2 cannot be null");
-
-        if (newID == null)
-            throw new IllegalArgumentException("New segment UUID cannot be null");
-
+        if (seg1 == null || seg2 == null || newID == null)
+            throw new IllegalArgumentException("Segment ids cannot be null");
+        
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Tag.REFERENCE_POINT, Stats.MEDIAN);
 
@@ -990,10 +984,9 @@ public class ProfileManager implements Loggable {
      * @param t
      * @return true if the segment ids match
      * @throws ProfileException 
-     * @throws UnavailableProfileTypeException 
-     * @throws UnavailableBorderTagException 
+     * @throws UnavailableComponentException 
      */
-    private boolean hasSegmentsMatchingMedian(Taggable t, ISegmentedProfile median) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+    private boolean hasSegmentsMatchingMedian(@NonNull Taggable t, @NonNull ISegmentedProfile median) throws ProfileException, UnavailableComponentException{
         ISegmentedProfile test = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         
         if(test.getSegmentCount() != median.getSegmentCount())
@@ -1002,6 +995,19 @@ public class ProfileManager implements Loggable {
         for(UUID id : median.getSegmentIDs()){
             if(!test.hasSegment(id))
                 return false;
+            
+            IBorderSegment medianSeg = median.getSegment(id);
+            IBorderSegment objectSeg = test.getSegment(id);
+            if(medianSeg.hasMergeSources()!=objectSeg.hasMergeSources())
+            	return false;
+            for(IBorderSegment mge : medianSeg.getMergeSources()) {
+            	if(!objectSeg.hasMergeSource(mge.getID()))
+            		return false;
+            }
+            for(IBorderSegment obj : objectSeg.getMergeSources()) {
+            	if(!medianSeg.hasMergeSource(obj.getID()))
+            		return false;
+            }
         }
         return true;
     }
@@ -1010,24 +1016,18 @@ public class ProfileManager implements Loggable {
      * Merge the segments with the given IDs into a new segment with the given
      * new ID
      * 
-     * @param p
-     *            the object with a segmented profile to merge
-     * @param seg1
-     *            the first segment to be merged
-     * @param seg2
-     *            the second segment to be merged
-     * @param newID
-     *            the new ID for the merged segment
+     * @param p the object with a segmented profile to merge
+     * @param seg1 the first segment to be merged
+     * @param seg2 the second segment to be merged
+     * @param newID the new ID for the merged segment
      * @throws ProfileException
      * @throws UnavailableComponentException
      */
-    private void mergeSegments(Taggable p, IBorderSegment seg1, IBorderSegment seg2, UUID newID)
+    private void mergeSegments(@NonNull Taggable p, @NonNull IBorderSegment seg1, @NonNull IBorderSegment seg2, @NonNull UUID newID)
             throws ProfileException, UnavailableComponentException {
 
         ISegmentedProfile profile = p.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        IBorderSegment nSeg1 = profile.getSegment(seg1.getID());
-        IBorderSegment nSeg2 = profile.getSegment(seg2.getID());
-        profile.mergeSegments(nSeg1, nSeg2, newID);
+        profile.mergeSegments(seg1.getID(), seg2.getID(), newID);
         p.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
     }
 
@@ -1191,24 +1191,23 @@ public class ProfileManager implements Loggable {
     /**
      * Unmerge the given segment into two segments
      * 
-     * @param seg
-     *            the segment to unmerge
+     * @param seg the segment to unmerge
      * @return
      * @throws UnsegmentedProfileException
      * @throws ProfileException
      * @throws UnavailableComponentException
      */
-    public void unmergeSegments(@NonNull IBorderSegment seg)
+    public void unmergeSegments(@NonNull UUID segId)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
                 
-        if(seg==null)
+        if(segId==null)
             throw new IllegalArgumentException("Segment to unmerge cannot be null");
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Tag.REFERENCE_POINT, Stats.MEDIAN);
 
         // Get the segments to merge
-        IBorderSegment test = medianProfile.getSegment(seg.getID());
+        IBorderSegment test = medianProfile.getSegment(segId);
         if (!test.hasMergeSources()) {
             fine("Segment has no merge sources - cannot unmerge");
             return;
@@ -1229,10 +1228,12 @@ public class ProfileManager implements Loggable {
                 return;
             }
         }
+        
+//        fine("Unmerging segment "+segId);
 
         // unmerge the two segments in the median - this is only a copy of the
         // profile collection
-        medianProfile.unmergeSegment(seg);
+        medianProfile.unmergeSegment(segId);
 
         // put the new segment pattern back with the appropriate offset
         collection.getProfileCollection().addSegments(Tag.REFERENCE_POINT, medianProfile.getSegments());
@@ -1243,10 +1244,11 @@ public class ProfileManager implements Loggable {
          */
         
         if(collection.isReal()){
+//        	fine("Unmerging individual nuclei for "+segId);
             for (Nucleus n : collection.getNuclei()) {
                 boolean wasLocked = n.isLocked();
                 n.setLocked(false);
-                unmergeSegments(n, seg.getID());
+                unmergeSegments(n, segId);
                 n.setLocked(wasLocked);
             }
         }
@@ -1257,17 +1259,16 @@ public class ProfileManager implements Loggable {
          */
         if (collection.hasConsensus()) {
             Nucleus n = collection.getConsensus();
-            unmergeSegments(n, seg.getID());
+            unmergeSegments(n, segId);
         }
 
         // Ensure the vertical nuclei have the same segment pattern
         collection.updateVerticalNuclei();
     }
 
-    private void unmergeSegments(Taggable t, UUID id) throws ProfileException, UnavailableComponentException {
+    private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
         ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        IBorderSegment nSeg = profile.getSegment(id);
-        profile.unmergeSegment(nSeg);
+        profile.unmergeSegment(id);
         t.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
     }
 
