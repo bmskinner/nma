@@ -90,7 +90,7 @@ public class TestComponentFactory {
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
 		int[] position = {xBase, yBase, w, h};		
-		File f = new File("empty file");
+		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0) {
 			
 			private static final long serialVersionUID = 1L;

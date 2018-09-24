@@ -26,6 +26,10 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
  */
 public class TestDatasetBuilder {
 	
+	public static final String TEST_DATASET_NAME = "Test";
+	public static final String TEST_DATASET_IMAGE_FOLDER = "Image folder";
+	public static final UUID   TEST_DATASET_UUID = UUID.fromString("99998888-0000-6666-1111-444433332222");
+	
 	public static final int DEFAULT_VARIATION   = 0;
 	public static final int DEFAULT_BASE_WIDTH  = 40;
 	public static final int DEFAULT_BASE_HEIGHT = 50;
@@ -258,7 +262,7 @@ public class TestDatasetBuilder {
 	 */
 	private IAnalysisDataset createRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
 		
-		ICellCollection collection = new DefaultCellCollection(new File("empty folder"), "Test", "Test "+type.toString(), type);
+		ICellCollection collection = new DefaultCellCollection(new File(TEST_DATASET_IMAGE_FOLDER), TEST_DATASET_NAME, TEST_DATASET_NAME+type.toString(), type, TEST_DATASET_UUID);
 		
 		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(collection.getFolder());
 		o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setMinSize( (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
@@ -268,7 +272,7 @@ public class TestDatasetBuilder {
 			ISignalGroup g = new SignalGroup("Red");
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(RED_SIGNAL_GROUP, g);
-			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File("empty folder"));
+			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+RED_SIGNAL_GROUP, n);
 		}
 		
@@ -276,7 +280,7 @@ public class TestDatasetBuilder {
 			ISignalGroup g = new SignalGroup("Green");
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(GREEN_SIGNAL_GROUP, g);
-			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File("empty folder"));
+			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+GREEN_SIGNAL_GROUP, n);
 		}
 
