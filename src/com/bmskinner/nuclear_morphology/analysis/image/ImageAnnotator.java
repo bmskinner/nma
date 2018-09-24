@@ -546,10 +546,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
     /**
      * Draw the size and shape values over the CoM of the component
      * 
-     * @param n
-     *            the component to draw
-     * @param c
-     *            the color of the text
+     * @param n the component to draw
+     * @param c the color of the text
      * @return
      */
     public ImageAnnotator annotateSignalStats(CellularComponent parent, CellularComponent signal, Color text,
@@ -704,19 +702,18 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * Draw the signals within a nucleus on the current image. This assumes that the current image
      * is a nucleus component image.
      * 
-     * @param n
-     *            the nucleus
+     * @param n the nucleus
      * @return the annotator
      */
     public ImageAnnotator annotateSignals(@NonNull Nucleus n) {
 
         ISignalCollection signalCollection = n.getSignalCollection();
-        int i = 0;
+ 
         for (UUID id : signalCollection.getSignalGroupIds()) {
         	        	            
             if(signalCollection.hasSignal(id)){
 
-            	Color colour = ColourSelecter.getSignalColour(i);
+            	Color colour = ColourSelecter.getSignalColour(signalCollection.getSourceChannel(id));
 
             	List<INuclearSignal> signals = signalCollection.getSignals(id);
 
@@ -743,7 +740,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     annotatePolygon(roi, colour);
                 }
             }
-            i++;
         }
         return this;
     }
