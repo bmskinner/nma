@@ -121,15 +121,16 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
         if (profile != null) {
             try {
-
                 overlay = new CrosshairOverlay();
-                int i = 0;
-                for (IBorderSegment seg : profile.getOrderedSegments()) {
+                List<IBorderSegment> segments = profile.getOrderedSegments();
+                for(int i=0; i<profile.getSegmentCount(); i++) {
+                	// don't draw the first segment marker (the RP)
+                	if(i==0)
+                		continue;
+                	
+                	IBorderSegment seg = segments.get(i);
 
-                    Paint colour = ColourSelecter.getColor(i++);
-                    if (seg.isLocked()) {
-                        colour = Color.DARK_GRAY;
-                    }
+                    Paint colour = seg.isLocked()? Color.DARK_GRAY : ColourSelecter.getColor(i);
 
                     SegmentCrosshair xCrosshair = new SegmentCrosshair(Double.NaN, colour,
                             ChartComponents.MARKER_STROKE, seg);
@@ -140,9 +141,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
                     xCrosshair.setValue(value);
                     crosses.add(xCrosshair);
-
                     ((CrosshairOverlay) overlay).addDomainCrosshair(xCrosshair);
-
                 }
 
                 this.addOverlay(overlay);
@@ -184,7 +183,6 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         if (e.getButton() == MouseEvent.BUTTON1) {
 
             if (xCrosshair != null && !((SegmentCrosshair) xCrosshair).getSegment().isLocked()) {
-                // IJ.log("Mouse down : Running :"+checkRunning());
                 mouseIsDown = true;
                 initThread();
             }
@@ -196,8 +194,6 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
         if (e.getButton() == MouseEvent.BUTTON1) {
             mouseIsDown = false;
-            // IJ.log("Mouse up : Running :"+checkRunning());
-            // isRunning = false;
             /*
              * Get the location on the chart, and send a signal to update the
              * profile
@@ -284,24 +280,16 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
     protected void initThread() {
         if (checkAndMark()) {
-            new Thread() {
-                public void run() {
-                    // IJ.log("Thread start : Running :"+checkRunning());
-                    do {
-
-                        /*
-                         * Make the overlay under the mouse follow the mouse
-                         */
-
-                        int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
-                        int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
-                        updateActiveCrosshairLocation(x, y);
-
-                    } while (mouseIsDown);
-                    isRunning = false;
-
-                }
-            }.start();
+        	Runnable r = () ->{
+        		do {
+                     // Make the overlay under the mouse follow the mouse
+                    int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
+                    int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
+                    updateActiveCrosshairLocation(x, y);
+                } while (mouseIsDown);
+                isRunning = false;
+        	};
+            new Thread(r).start();
         }
     }
 

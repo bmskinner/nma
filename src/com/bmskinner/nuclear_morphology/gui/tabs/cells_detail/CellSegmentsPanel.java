@@ -105,8 +105,8 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
             }
         };
 
-        panel.add(profileOptions);
-        profileOptions.addActionListener(e -> update());
+//        panel.add(profileOptions);
+//        profileOptions.addActionListener(e -> update());
 
         resegmentButton = new JButton("Resegment");
         resegmentButton.setEnabled(false);
