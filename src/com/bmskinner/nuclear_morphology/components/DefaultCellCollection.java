@@ -111,10 +111,10 @@ public class DefaultCellCollection implements ICellCollection {
 
 	private Nucleus consensusNucleus; // the refolded consensus nucleus
 
-	private Set<ICell> cells = new HashSet<ICell>(100); // store all the cells
+	private Set<ICell> cells = new HashSet<>(100); // store all the cells
 	// analysed
 
-	private Map<UUID, ISignalGroup> signalGroups = new HashMap<UUID, ISignalGroup>(0);
+	private Map<UUID, ISignalGroup> signalGroups = new HashMap<>(0);
 
 	private RuleSetCollection ruleSets = new RuleSetCollection();
 
@@ -254,11 +254,6 @@ public class DefaultCellCollection implements ICellCollection {
 		cells.add(r);
 	}
 
-	/**
-	 * Replace the cell with the same ID as the given cell with the new copy
-	 * 
-	 * @param r
-	 */
 	@Override
 	public void replaceCell(@NonNull ICell r) {
 		if (r == null)
@@ -277,22 +272,31 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		// only put the cell in if it was removed
-		if (found) {
+		if (found)
 			addCell(r);
-		}
-
 	}
 
-	/**
-	 * Remove the given cell from the collection. If the cell is null, has no
-	 * effect. If the cell is not in the collection, has no effect.
-	 * 
-	 * @param c
-	 *            the cell to remove
-	 */
 	@Override
-	public void removeCell(@NonNull ICell c) {
+	public synchronized void removeCell(@NonNull ICell c) {
+		if(c==null)
+			return;
+		// TODO: There is a dodgy hashCode or equals somewhere preventing removal
+//		log("Now "+cells.size()+" cells");
+//		log("Test: "+c.hashCode());
 		cells.remove(c);
+//		if(!cells.remove(c)) {
+//			log("Unable to remove element");
+//			Iterator<ICell> it = cells.iterator();
+//			while(it.hasNext()) {
+//				ICell test = it.next();
+//				if(test.getId().equals(c.getId())) {
+//					log("Real: "+test.hashCode());
+//					log("Equals: "+test.equals(c));
+//					it.remove();
+//					log("Tried removing");
+//					log("Now "+cells.size()+" cells");
+//				}
+//			}
 	}
 
 	@Override
@@ -300,11 +304,6 @@ public class DefaultCellCollection implements ICellCollection {
 		return cells.size();
 	}
 
-	/**
-	 * Check if the collection contains cells
-	 * 
-	 * @return
-	 */
 	@Override
 	public boolean hasCells() {
 		return !cells.isEmpty();
@@ -1109,18 +1108,12 @@ public class DefaultCellCollection implements ICellCollection {
 		if(!newFolder.exists())
 			return;   
 		folder = newFolder;
-		getCells().stream()
+		cells.stream()
 		.flatMap(c->c.getNuclei().stream())
 		.forEach(n->n.setSourceFolder(newFolder));
 
 	}
 
-	/**
-	 * Test if the collection contains a cell with the same id as the given cell
-	 * 
-	 * @param c
-	 * @return
-	 */
 	@Override
 	public boolean contains(ICell c) {
 		return contains(c.getId());
@@ -1131,38 +1124,19 @@ public class DefaultCellCollection implements ICellCollection {
 		return cells.parallelStream().anyMatch(cell -> cell.getId().equals(id));
 	}
 
-	/**
-	 * Test if the collection contains the given cell (this must be the same
-	 * object, not just a cell with the same id)
-	 * 
-	 * @param c
-	 * @return
-	 */
 	@Override
 	public boolean containsExact(@NonNull ICell c) {
 		return cells.parallelStream().anyMatch(cell -> cell == c);
 	}
 
-	/**
-	 * Fetch the signal group ids in this collection
-	 * 
-	 * @param id
-	 * @return
-	 */
 	@Override
 	public Set<UUID> getSignalGroupIDs() {
 
-		Set<UUID> ids = new HashSet<UUID>(signalGroups.keySet());
+		Set<UUID> ids = new HashSet<>(signalGroups.keySet());
 		ids.remove(IShellResult.RANDOM_SIGNAL_ID);
 		return ids;
 	}
 
-	/**
-	 * Fetch the signal groups in this collection
-	 * 
-	 * @param id
-	 * @return
-	 */
 	@Override
 	public Collection<ISignalGroup> getSignalGroups() {
 		return this.signalGroups.values();

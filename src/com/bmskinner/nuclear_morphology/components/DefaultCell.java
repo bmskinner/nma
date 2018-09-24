@@ -401,20 +401,51 @@ public class DefaultCell implements ICell {
     }
         
     @Override
-    public boolean equals(Object o) {
-
-        if (this == o) 
-            return true;
-        if (o == null) 
-            return false;
-        if (getClass() != o.getClass())
-            return false;
-        ICell other = (ICell) o;
-        if (!other.getId().equals(this.getId()))
-            return false;
-
-        return true;
-    }
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultCell other = (DefaultCell) obj;
+		if (acrosomes == null) {
+			if (other.acrosomes != null)
+				return false;
+		} else if (!acrosomes.equals(other.acrosomes))
+			return false;
+		if (cytoplasm == null) {
+			if (other.cytoplasm != null)
+				return false;
+		} else if (!cytoplasm.equals(other.cytoplasm))
+			return false;
+		if (mitochondria == null) {
+			if (other.mitochondria != null)
+				return false;
+		} else if (!mitochondria.equals(other.mitochondria))
+			return false;
+		if (nuclei == null) {
+			if (other.nuclei != null)
+				return false;
+		} else if (!nuclei.equals(other.nuclei))
+			return false;
+		if (statistics == null) {
+			if (other.statistics != null)
+				return false;
+		} else if (!statistics.equals(other.statistics))
+			return false;
+		if (tails == null) {
+			if (other.tails != null)
+				return false;
+		} else if (!tails.equals(other.tails))
+			return false;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		return true;
+	}
 
     /*
      * (non-Javadoc)
@@ -446,17 +477,20 @@ public class DefaultCell implements ICell {
     }
     
     @Override
-    public int hashCode() {
-    	final int prime = 31;
-    	int hashCode = 1;
-        hashCode = prime * hashCode + ((acrosomes == null) ? 0 : acrosomes.hashCode());
-        hashCode = prime * hashCode + ((mitochondria == null) ? 0 : mitochondria.hashCode());
-        hashCode = prime * hashCode + ((nucleus == null) ? 0 : nucleus.hashCode());
-        hashCode = prime * hashCode + ((tails == null) ? 0 : tails.hashCode());
-        hashCode = prime * hashCode + ((uuid == null) ? 0 : uuid.hashCode());
-        hashCode = prime * hashCode + ((nuclei == null) ? 0 : nuclei.hashCode());
-        return hashCode;
-    }
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((acrosomes == null) ? 0 : acrosomes.hashCode());
+		result = prime * result + ((cytoplasm == null) ? 0 : cytoplasm.hashCode());
+		result = prime * result + ((mitochondria == null) ? 0 : mitochondria.hashCode());
+		result = prime * result + ((nuclei == null) ? 0 : nuclei.hashCode());
+		result = prime * result + ((statistics == null) ? 0 : statistics.hashCode());
+		result = prime * result + ((tails == null) ? 0 : tails.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+    
+    
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();

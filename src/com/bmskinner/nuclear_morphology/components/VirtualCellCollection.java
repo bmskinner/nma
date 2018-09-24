@@ -284,23 +284,20 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public void addCell(@NonNull ICell c) {
-        if (!parent.getCollection().contains(c.getId())) {
-            throw new IllegalArgumentException("Parent does not contain cell");
-        }
+        if (!parent.getCollection().contains(c.getId()))
+            throw new IllegalArgumentException("Cannot add a cell to a virtual collection that is not in the parent");
         cellIDs.add(c.getId());
-
     }
 
     @Override
     public void replaceCell(@NonNull ICell c) {
-        warn("Not implemented for virtual collections");
+        parent.getCollection().replaceCell(c);
     }
 
     @Override
     public ICell getCell(@NonNull UUID id) {
-        if (cellIDs.contains(id)) {
+        if (cellIDs.contains(id))
             return parent.getCollection().getCell(id);
-        }
         return null;
     }
 
@@ -362,6 +359,8 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public void setCellsLocked(boolean b) {
+    	for (Nucleus n : this.getNuclei())
+			n.setLocked(b);
     }
 
     @Override
@@ -421,7 +420,7 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public void removeSignalGroup(@NonNull UUID id) {
-        shellResults.remove(id);
+    	parent.getCollection().removeSignalGroup(id);
     }
 
     @Override

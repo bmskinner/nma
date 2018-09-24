@@ -158,10 +158,10 @@ public interface ICellCollection
     void addCell(@NonNull ICell c);
 
     /**
-     * Replace the cell with the same ID as the given cell with the new copy
+     * Replace the cell with the same ID as the given cell with the new copy.
+     * If no cell with the given ID is present, no action is taken.
      * 
-     * @param c
-     *            the replacement cell
+     * @param c the replacement cell
      */
     void replaceCell(@NonNull ICell c);
 

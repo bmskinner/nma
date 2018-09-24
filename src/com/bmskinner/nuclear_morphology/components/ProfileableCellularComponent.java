@@ -82,7 +82,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     /**
      * The indexes of tags in the profiles and border list
      */
-    protected Map<Tag, Integer> borderTags = new HashMap<>(4);
+    protected Map<Tag, Integer> borderTags = new HashMap<>();
 
     protected boolean segsLocked = false; // allow locking of segments and tags if
                                         // manually assigned

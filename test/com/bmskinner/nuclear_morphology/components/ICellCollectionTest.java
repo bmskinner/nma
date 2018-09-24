@@ -1,6 +1,11 @@
 package com.bmskinner.nuclear_morphology.components;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.Arrays;
@@ -10,14 +15,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
@@ -39,6 +48,9 @@ public class ICellCollectionTest {
 	private Logger logger;
 
 	private ICellCollection collection;
+	
+	@Rule
+    public final ExpectedException exception = ExpectedException.none();
 
 	@Parameter(0)
 	public Class<? extends ICellCollection> source;
@@ -58,22 +70,17 @@ public class ICellCollectionTest {
 	 * @throws Exception 
 	 */
 	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
-
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+				.ofType(NucleusType.ROUND)
+				.randomOffsetProfiles(true)
+				.addSignalsInChannel(0)
+				.segmented().build();
 		if(source==DefaultCellCollection.class){
-			IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
-					.ofType(NucleusType.ROUND)
-					.randomOffsetProfiles(true)
-					.segmented().build();
 			return d.getCollection();
 		}
 		
 		if(source==VirtualCellCollection.class){
-			IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-					.ofType(NucleusType.ROUND)
-					.randomOffsetProfiles(true)
-					.segmented().build();
-			d.getCollection().filter((c)->true);
-			ICellCollection v = new VirtualCellCollection(d, "Test", TestDatasetBuilder.TEST_DATASET_UUID);
+			ICellCollection v = new VirtualCellCollection(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID);
 			for(ICell c : d.getCollection().getCells()) {
 				v.addCell(c);
 			}
@@ -113,12 +120,8 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetCells() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testStreamCells() {
-		fail("Not yet implemented");
+		Set<ICell> cells = collection.getCells();
+		assertEquals(N_CELLS, cells.size());
 	}
 
 	@Test
@@ -134,17 +137,20 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetCellIDs() {
-		fail("Not yet implemented");
+		Set<UUID> ids = collection.getCellIDs();
+		assertTrue(collection.streamCells().allMatch(c->ids.contains(c.getId())));
 	}
 
 	@Test
 	public void testGetNuclei() {
-		fail("Not yet implemented");
+		Set<Nucleus> cells = collection.getNuclei();
+		assertEquals(N_CELLS, cells.size());
 	}
 
 	@Test
 	public void testGetNucleiFile() {
-		fail("Not yet implemented");
+		Set<ICell> cells = collection.getCells( new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		assertEquals(N_CELLS, cells.size());
 	}
 
 	@Test
@@ -154,17 +160,19 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testAddCell() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testReplaceCell() {
-		fail("Not yet implemented");
+		ICell cell = mock(ICell.class);
+		UUID id = UUID.fromString("00000000-0000-0000-0000-000000000001");
+		when(cell.getId()).thenReturn(id);
+		if(collection.isVirtual())
+			exception.expect(IllegalArgumentException.class);
+		collection.addCell(cell);
+		assertTrue(collection.contains(id));
 	}
 
 	@Test
 	public void testGetCell() {
-		
+		for(UUID id : collection.getCellIDs())
+			assertEquals(id, collection.getCell(id).getId());
 	}
 
 	@Test
@@ -175,9 +183,17 @@ public class ICellCollectionTest {
 	@Test
 	public void testRemoveCell() {
 		ICell c = collection.streamCells().findFirst().get();
-		UUID id = c.getNucleus().getID();
+		assertTrue(collection.contains(c));
 		collection.removeCell(c);
+		
+		Set<ICell> cells = collection.getCells();
+		cells.remove(c);
+		assertEquals(N_CELLS-1, cells.size());
+				
+		assertEquals(N_CELLS-1, collection.size());
 		assertFalse(collection.contains(c));
+		
+		
 	}
 
 	@Test
@@ -200,18 +216,41 @@ public class ICellCollectionTest {
 	public void testContainsICell() {
 		ICell c = collection.streamCells().findFirst().get();
 		assertTrue(collection.contains(c));
+		assertFalse(collection.contains((ICell)null));
+	}
+	
+	@Test
+	public void testContainsICellReturnsFalseOnNullInput() {
+		assertFalse(collection.contains((ICell)null));
 	}
 
 	@Test
 	public void testContainsUUID() {
 		ICell c = collection.streamCells().findFirst().get();
-		UUID id = c.getNucleus().getID();
+		UUID id = c.getId();
 		assertTrue(collection.contains(id));
 	}
 
 	@Test
+	public void testContainsUUIDReturnsFalseOnNullInput() {
+		assertFalse(collection.contains((UUID)null));
+	}
+	
+	@Test
+	public void testContainsUUIDReturnsFalseOnUUIDNotPresent() {
+		assertFalse(collection.contains(TestDatasetBuilder.RED_SIGNAL_GROUP));
+	}
+	
+	@Test
 	public void testContainsExact() {
-		fail("Not yet implemented");
+		ICell c = collection.streamCells().findFirst().get();
+		UUID id = c.getNucleus().getID();
+		ICell cell = mock(ICell.class);
+		when(cell.getId()).thenReturn(id);
+		when(cell.hasNucleus()).thenReturn(false);
+		when(cell.getNucleus()).thenReturn(null);
+		assertFalse(collection.containsExact(cell));
+		assertTrue(collection.containsExact(c));
 	}
 
 	@Test
@@ -230,117 +269,52 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetProfileCollection() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCreateProfileCollection() {
-		fail("Not yet implemented");
+		assertTrue(collection.getProfileCollection()!=null);
 	}
 
 	@Test
 	public void testGetFolder() {
-		fail("Not yet implemented");
+		assertTrue(collection.getFolder().equals(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER)));
 	}
 
 	@Test
 	public void testGetOutputFolderName() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetOutputFolder() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetOutputFolder() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetImageFiles() {
-		fail("Not yet implemented");
+		assertTrue(collection.getOutputFolderName().equals(TestDatasetBuilder.TEST_DATASET_NAME));
 	}
 
 	@Test
 	public void testGetSignalGroupIDs() {
-		fail("Not yet implemented");
+		assertTrue(collection.getSignalGroupIDs().size()==1);
+		assertTrue(collection.hasSignalGroup(TestDatasetBuilder.RED_SIGNAL_GROUP));
 	}
 
 	@Test
 	public void testRemoveSignalGroup() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetSignalGroup() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testHasSignalGroup() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetSignalGroups() {
-		fail("Not yet implemented");
+		assertTrue(collection.hasSignalGroup(TestDatasetBuilder.RED_SIGNAL_GROUP));
+		collection.removeSignalGroup(TestDatasetBuilder.RED_SIGNAL_GROUP);
+		assertFalse(collection.hasSignalGroup(TestDatasetBuilder.RED_SIGNAL_GROUP));
 	}
 
 	@Test
 	public void testAddSignalGroup() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetSignalManager() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetRuleSetCollection() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testUpdateVerticalNuclei() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetSourceFolder() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetNucleusMostSimilarToMedian() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCountSharedIAnalysisDataset() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCountSharedICellCollection() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetSharedCount() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetMedianArrayLength() {
-		fail("Not yet implemented");
+		ISignalGroup group = mock(ISignalGroup.class);
+		when( group.getGroupName()).thenReturn("A test group");
+		
+		assertFalse(collection.hasSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP));
+		collection.addSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP, group);
+		assertTrue(collection.hasSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP));
 	}
 
 	@Test
 	public void testGetMaxProfileLength() {
-		fail("Not yet implemented");
+		int exp = collection.streamCells().mapToInt(c->{
+			try {
+				return c.getNucleus().getProfile(ProfileType.ANGLE).size();
+			} catch (UnavailableProfileTypeException e) {
+				return Integer.MAX_VALUE;
+			}
+		}).max().orElse(Integer.MAX_VALUE);
+		assertEquals(exp, collection.getMaxProfileLength());
 	}
 
 	@Test
@@ -350,9 +324,5 @@ public class ICellCollectionTest {
 		assertTrue(collection.streamCells().allMatch(c->c.getNucleus().getScale()==scale));
 	}
 
-	@Test
-	public void testGetNormalisedDifferenceToMedian() {
-		fail("Not yet implemented");
-	}
 
 }
