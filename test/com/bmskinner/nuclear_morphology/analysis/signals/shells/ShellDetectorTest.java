@@ -30,7 +30,6 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
@@ -56,7 +55,6 @@ import ij.process.ImageProcessor;
 public class ShellDetectorTest {
     
 	private static final long SEED = 1234;
-
     private ShellDetector sd;
     private Nucleus testNucleus;
     private INuclearSignal testSignal;

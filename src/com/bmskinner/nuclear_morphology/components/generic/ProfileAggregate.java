@@ -67,6 +67,13 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
             x += profileIncrement;
         }
     }
+    
+    @Override
+	public IProfileAggregate duplicate() {
+    	ProfileAggregate result = new ProfileAggregate(length);
+    	//TODO
+		return result;
+	}
 
     /*
      * We need to calculate the median angle profile. This requires binning the

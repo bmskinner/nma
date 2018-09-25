@@ -28,33 +28,26 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
-import java.awt.geom.PathIterator;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.plugin.RoiScaler;
 import ij.plugin.filter.EDM;
 import ij.plugin.filter.ThresholdToSelection;
 import ij.process.ByteProcessor;
