@@ -46,9 +46,9 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.BooleanAligner;
-import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
@@ -56,8 +56,6 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
@@ -73,11 +71,8 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
@@ -868,129 +863,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * Create a chart with the outlines of all the nuclei within a dataset. The
      * options should only contain a single dataset
      * 
-     * @param options
      * @return
-     * @throws Exception
      */
     public JFreeChart createVerticalNucleiChart() {
 
-        if (!options.hasDatasets()) {
-            finest("No datasets - returning empty chart");
+        if (!options.hasDatasets())
             return makeEmptyChart();
-        }
-
-        if (options.isMultipleDatasets()) {
-            finest("Multiple datasets - creating vertical nuclei chart");
+        if (options.isMultipleDatasets())
             return createMultipleDatasetVerticalNucleiChart();
-        }
-
-        finest("Single dataset - creating vertical nuclei chart");
-        return createSingleDatasetVerticalNucleiChart();
-
-    }
-
-    /**
-     * Create the chart with the outlines of all the nuclei within a single
-     * dataset.
-     * 
-     * @param options
-     * @return
-     * @throws Exception
-     */
-    private JFreeChart createSingleDatasetVerticalNucleiChart() {
-
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
-
-        plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
-        plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
-
-        XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
-        r.setBaseSeriesVisibleInLegend(false);
-        r.setBaseStroke(ChartComponents.PROFILE_STROKE);
-        r.setSeriesPaint(0, Color.LIGHT_GRAY);
-        r.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
-
-        boolean hasConsensus = options.firstDataset().getCollection().hasConsensus();
-        Mask reference = null;
-        BooleanAligner aligner = null;
-        
-        int i = 0;
-        
-        if (options.isNormalised()) {
-            if (hasConsensus) {
-
-                reference = options.firstDataset().getCollection().getConsensus().getBooleanMask(200, 200);
-                aligner = new BooleanAligner(reference);
-            }
-
-            if (hasConsensus) {
-
-                finest("Creating consensus nucleus dataset");
-
-                Nucleus consensus = options.firstDataset().getCollection().getConsensus();
-
-                OutlineDatasetCreator dc = new OutlineDatasetCreator(options, consensus);
-
-                try {
-
-                    XYDataset consensusDataset = dc.createOutline(false);
-                    XYLineAndShapeRenderer c = new XYLineAndShapeRenderer(true, false);
-                    c.setBaseSeriesVisibleInLegend(false);
-                    c.setBaseStroke(ChartComponents.PROFILE_STROKE);
-                    c.setSeriesPaint(0, Color.BLACK);
-
-                    plot.setDataset(i, consensusDataset);
-                    plot.setRenderer(i, c);
-
-                } catch (ChartDatasetCreationException e) {
-                    warn("Cannot create data for dataset " + options.firstDataset().getName());
-                    fine("Error getting chart data", e);
-                }
-
-            }
-            i++;
-        }
-
-        finest("Creating charting datasets for vertically rotated nuclei");
-
-        for (Nucleus n : options.firstDataset().getCollection().getNuclei()) {
-
-            Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
-
-            /*
-             * Find the best offset for the CoM to fit the consensus nucleus if
-             * present
-             */
-            if (options.isNormalised() && aligner!=null){
-                if (hasConsensus) {
-                    Mask test = verticalNucleus.getBooleanMask(200, 200);
-                    int[] offsets = aligner.align(test);
-                    verticalNucleus.moveCentreOfMass(IPoint.makeNew(offsets[1], offsets[0]));
-                }
-            } else {
-                verticalNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
-            }
-
-            OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
-
-            try {
-
-                XYDataset nucleusDataset = dc.createOutline(false);
-                plot.setDataset(i, nucleusDataset);
-                plot.setRenderer(i, r);
-
-            } catch (ChartDatasetCreationException e) {
-                warn("Cannot create data for dataset " + options.firstDataset().getName());
-                stack("Error getting chart data", e);
-            } finally {
-                i++;
-            }
-
-        }
-        finest("Created vertical nuclei chart");
-        applyAxisOptions(chart);
-        return chart;
+        return makeEmptyChart();
     }
 
     /**
