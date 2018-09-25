@@ -143,6 +143,11 @@ public class AnalysisOptions implements IAnalysisOptions {
             e.printStackTrace();
         }
     }
+    
+    @Override
+	public IAnalysisOptions duplicate() {
+		return new AnalysisOptions(this);
+	}
 
     /*
      * ----------------------- Getters -----------------------

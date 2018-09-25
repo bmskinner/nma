@@ -194,7 +194,7 @@ public class OptionsFactory {
 
     /**
      * Create an instance of the default clustering options using
-     * {@link IClusteringOptions.DEFAULT_CLUSTER_METHOD}
+     * {@link IClusteringOptions#DEFAULT_CLUSTER_METHOD}
      * @return
      */
     public static IClusteringOptions makeClusteringOptions() {

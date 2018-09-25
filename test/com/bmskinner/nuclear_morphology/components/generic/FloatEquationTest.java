@@ -53,8 +53,8 @@ public class FloatEquationTest {
         FloatEquation d = new FloatEquation(p1, p2);
         
         LineEquation eq = d.getPerpendicular(IPoint.makeNew(p1));
-        assertEquals(eq.getM(), 0, 0.0000001);
-        assertEquals(eq.getC(), 0, 0.0000001);
+        assertEquals(eq.getM(), 0, 0);
+        assertEquals(eq.getC(), 0, 0);
         
     }
 
@@ -64,80 +64,15 @@ public class FloatEquationTest {
     	IPoint p0 = IPoint.makeNew(0d, 0d);
     	
     	for(int degree=0; degree<360; degree++) {
-    		double x = Math.cos(Math.toRadians(degree));
-    		double y = Math.sin(Math.toRadians(degree));
+    		double x = Math.abs(Math.cos(Math.toRadians(degree)));
+    		double y = Math.abs(Math.sin(Math.toRadians(degree)));
     		IPoint p1 = IPoint.makeNew(x, y);
     		
-    		LineEquation l = new FloatEquation(p0, p1);    		
-    		assertEquals(p1, l.getPointOnLine(p0, 1));
+    		LineEquation l = new FloatEquation(p0, p1);
+    		IPoint other = l.getPointOnLine(p0, 1);
+    		assertEquals("X at angle "+degree, (float)x, other.getX(), 0.00001);
+    		assertEquals("Y at angle "+degree, (float)y, other.getY(), 0.00001);
     	}
-    	
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetX() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetY() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetM() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetC() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testIsOnLine() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetPointOnLine() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetPerpendicular() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testTranslate() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetIntercept() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testIntersects() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetProportionalDistance() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetClosestDistanceToPoint() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testCalculateBestFitLine() {
-        fail("Not yet implemented");
     }
 
 }

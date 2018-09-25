@@ -37,6 +37,12 @@ import org.eclipse.jdt.annotation.NonNull;
 public interface ISignalGroup extends Serializable {
 	
 	/**
+	 * Create a copy of this signal group
+	 * @return
+	 */
+	ISignalGroup duplicate();
+	
+	/**
      * Get the warped signals for the group, if present
      * 
      * @return
@@ -119,33 +125,5 @@ public interface ISignalGroup extends Serializable {
      * @param groupColour
      */
     void setGroupColour(@NonNull Color groupColour);
-
-//    /**
-//     * Get the RGB channel this signal was detected in
-//     * 
-//     * @return
-//     */
-//    int getChannel();
-//
-//    /**
-//     * Set the RGB channel the signal was detected in
-//     * 
-//     * @param channel
-//     */
-//    void setChannel(int channel);
-
-//    /**
-//     * Get the folder the signals were found in
-//     * 
-//     * @return
-//     */
-//    File getFolder();
-//
-//    /**
-//     * Set the folder of images the signals were found in
-//     * 
-//     * @param folder
-//     */
-//    void setFolder(@NonNull File folder);
 
 }

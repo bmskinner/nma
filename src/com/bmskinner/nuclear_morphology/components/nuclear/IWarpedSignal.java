@@ -22,7 +22,13 @@ import ij.process.ImageProcessor;
  *
  */
 public interface IWarpedSignal extends Serializable, Loggable {
-		
+	
+	/**
+	 * Create a copy of this signal
+	 * @return
+	 */
+	IWarpedSignal duplicate();
+	
 	/**
 	 * Defines the signal group which was warped 
 	 * @return

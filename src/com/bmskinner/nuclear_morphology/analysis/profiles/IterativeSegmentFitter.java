@@ -83,6 +83,8 @@ public class IterativeSegmentFitter implements Loggable {
         for(IBorderSegment templateSegment : templateProfile.getOrderedSegments())
         	newSegments = bestFitSegment(profile, newSegments, templateSegment.getID());
 
+        for(IBorderSegment s : newSegments) // unlock after fitting
+        	s.setLocked(false);
         return new SegmentedFloatProfile(profile, newSegments);
     }
 

@@ -137,7 +137,7 @@ public class SegmentedFloatProfileTest {
 	public void testSegmentedFloatProfileIProfile() {
 	    IProfile profile = new FloatProfile(10, 100);
 	    ISegmentedProfile p = new SegmentedFloatProfile(profile);
-	    assertEquals(2, p.getSegmentCount());
+	    assertEquals(1, p.getSegmentCount());
 	}
 	
 	@Test
@@ -149,7 +149,7 @@ public class SegmentedFloatProfileTest {
         ISegmentedProfile p = new SegmentedFloatProfile(array);
         
         for (int i = 0; i < array.length; i++) {
-            assertEquals(array[i], p.get(i), 0.000001);
+            assertEquals(array[i], p.get(i), 0);
         }  
 	}
 	
@@ -163,37 +163,35 @@ public class SegmentedFloatProfileTest {
     public void testGetSegmentIDsReturnsEmptyListWhenNoSegments() throws ProfileException {
 		sp.clearSegments();
         List<UUID> result = sp.getSegmentIDs();
-        assertTrue(result.isEmpty());
+        assertEquals(1, result.size());
     }
 	
 	@Test
-    public void testGetSegmentsReturnsEmptyListAfterClearing() throws ProfileException {
+    public void testGetSegmentsReturnsSingleItemListAfterClearing() throws ProfileException {
 		sp.clearSegments();
         List<IBorderSegment> result = sp.getSegments();
-        assertTrue(result.isEmpty());
+        assertEquals(1, result.size());
     }
 	
 	@Test
 	public void testClearSegments() {
 	    assertTrue(sp.hasSegments());
 	    sp.clearSegments();
-        assertFalse(sp.hasSegments());
+	    assertEquals(1,sp.getSegmentCount());
 	}
 
 	@Test
 	public void testHasSegments() {
 		assertTrue(sp.hasSegments());
 		sp.clearSegments();
-		assertFalse(sp.hasSegments());
+		assertEquals(1, sp.getSegmentCount());
 	}
-	
 
-	
 	@Test
     public void testToString() {
-	    StringBuilder builder = new StringBuilder();
+	    StringBuilder builder = new StringBuilder("Profile");
         for (IBorderSegment seg : sp.getSegments()) {
-            builder.append(seg.toString() + System.getProperty("line.separator"));
+            builder.append(" | "+seg.toString());
         }
 
        assertEquals(builder.toString(), sp.toString());

@@ -228,8 +228,8 @@ public class DefaultBorderSegmentTest {
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
 		DefaultBorderSegment s2 = new DefaultBorderSegment(90, 30, 100);
 		
-		assertEquals(20, s1.length());
-		assertEquals(40, s2.length());
+		assertEquals(21, s1.length());
+		assertEquals(41, s2.length());
 	}
 
 	/**
@@ -238,10 +238,10 @@ public class DefaultBorderSegmentTest {
 	@Test
 	public void testTestLength() {
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-		assertEquals(20, s1.length());
+		assertEquals(21, s1.length());
 		
 		DefaultBorderSegment s2 = new DefaultBorderSegment(90,  20, 100);
-		assertEquals(30, s2.length());
+		assertEquals(31, s2.length());
 	}
 
 	/**
@@ -417,19 +417,25 @@ public class DefaultBorderSegmentTest {
 		assertTrue(s1.hasNextSegment());
 
 
-		// Out of range of s2; should fail
-		assertFalse(s1.update(0, 42)); // s2 is 25-40; this should fail
-		assertEquals(0, s1.getStartIndex());
-		assertEquals(26, s1.getEndIndex());
-		assertEquals(26, s2.getStartIndex());
-		assertEquals(40, s2.getEndIndex());
-
-		// Out of range of s2; should fail
-		assertFalse(s2.update(90, 42));
-		assertEquals(0, s1.getStartIndex());
-		assertEquals(26, s1.getEndIndex());
-		assertEquals(26, s2.getStartIndex());
-		assertEquals(40, s2.getEndIndex());
+		try {
+			s1.update(0, 42); // s2 is 25-40; this should fail
+			fail("The segment should have thrown an exception for invalid update");
+		} catch(SegmentUpdateException e) {
+			assertEquals(0, s1.getStartIndex());
+			assertEquals(25, s1.getEndIndex());
+			assertEquals(25, s2.getStartIndex());
+			assertEquals(40, s2.getEndIndex());
+		}
+		
+		try {
+			s2.update(90, 42); // Out of range of s2; should fail
+			fail("The segment should have thrown an exception for invalid update");
+		} catch(SegmentUpdateException e) {
+			assertEquals(0, s1.getStartIndex());
+			assertEquals(25, s1.getEndIndex());
+			assertEquals(25, s2.getStartIndex());
+			assertEquals(40, s2.getEndIndex());
+		}		
 	}
 
 	/**

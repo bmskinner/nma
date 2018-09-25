@@ -196,10 +196,11 @@ public class CellCollection implements ICellCollection {
         this(template.getFolder(), template.getOutputFolderName(), name, template.getNucleusType());
     }
 
-    /*
-     * ----------------------- Define adders for all types of nucleus eligable
-     * -----------------------
-     */
+    @Override
+	public ICellCollection duplicate() {
+    	return null;
+    }
+    
 
     @Override
 	public boolean isReal() {
@@ -225,6 +226,69 @@ public class CellCollection implements ICellCollection {
 	public UUID getID() {
         return this.uuid;
     }
+    
+    
+    
+    @Override
+	public boolean add(ICell e) {
+		return false;
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends ICell> c) {
+		return false;
+	}
+
+	@Override
+	public void clear() {
+		mappedCollection.clear();
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		return false;
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		return false;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return mappedCollection.isEmpty();
+	}
+
+	@Override
+	public Iterator<ICell> iterator() {
+		return null;
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		return false;
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		return false;
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		return false;
+	}
+
+	@Override
+	public Object[] toArray() {
+		return mappedCollection.values().toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] a) {
+		return mappedCollection.values().toArray(a);
+	}
+    
 
     /**
      * Get the UUIDs of all the cells in the collection

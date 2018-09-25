@@ -51,8 +51,15 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public interface ICellCollection
-        extends Serializable, Loggable, Filterable, StatisticalCollection, Refoldable<Nucleus> {
+        extends Serializable, Loggable, Filterable, StatisticalCollection, Refoldable<Nucleus>, Collection<ICell> {
 
+	
+	 /**
+     * Create a copy of the collection
+     * 
+     */
+	ICellCollection duplicate();
+	
     /**
      * Set the name of the collection
      * 

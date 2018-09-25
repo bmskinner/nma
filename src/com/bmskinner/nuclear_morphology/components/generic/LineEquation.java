@@ -23,8 +23,7 @@ public interface LineEquation {
     /**
      * Returns the x value for a given y value
      *
-     * @param y
-     *            the y value on the line
+     * @param y  the y value on the line
      * @return The x value at the given y value
      */
     double getX(double y);
@@ -32,8 +31,7 @@ public interface LineEquation {
     /**
      * Returns the y value for a given x value
      *
-     * @param x
-     *            the x value on the line
+     * @param x the x value on the line
      * @return The y value at the given x value
      */
     double getY(double x);
@@ -52,13 +50,13 @@ public interface LineEquation {
 
     /**
      * Returns a point a given distance away from a given point on the line
-     * specified by this Equation.
+     * specified by this equation. The returned point is in the positive x direction
+     * of the line, unless the line is vertical, in which case the direction is
+     * the positive y direction.
      *
-     * @param p
-     *            the reference point to measure from
-     * @param distance
-     *            the distance along the line from the point p
-     * @return The position <i>distance</i> away from <i>p</i>
+     * @param p  the reference point to measure from
+     * @param distance the distance along the line from the point
+     * @return The position <i>distance</i> away from <i>p</i> in the +x direction
      */
     IPoint getPointOnLine(IPoint p, double distance);
 

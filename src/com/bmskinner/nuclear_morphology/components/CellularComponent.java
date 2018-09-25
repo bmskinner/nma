@@ -532,4 +532,20 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
 		}
 		return difference;
 	}
+	
+	/**
+	 * Calculate the absolute square difference between two arrays of equal
+	 * length. Note - array lengths are not checked.
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 */
+	static double squareDifference(double[] arr1, double[] arr2) {
+		double difference = 0;
+		for (int j = 0; j < arr1.length; j++) {
+			difference += Math.pow(arr1[j] - arr2[j], 2);
+		}
+		return difference;
+	}
 }

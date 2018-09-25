@@ -130,7 +130,7 @@ public interface Profileable extends CellularComponent {
     void setLocked(boolean b);
 
     /**
-     * Set the lock on this segment of all the profile types
+     * Set the lock on this segment for all profile types
      * 
      * @param lock
      * @param segID

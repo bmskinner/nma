@@ -49,14 +49,12 @@ public class FloatProfile implements IProfile {
     /**
      * Constructor for a new Profile, based on an array of values.
      * 
-     * @param values
-     *            the array to use
+     * @param values the array to use
      */
     public FloatProfile(final float[] values) {
 
-        if (values==null || values.length == 0) {
+        if (values==null || values.length == 0)
             throw new IllegalArgumentException("Input array has zero length in profile constructor");
-        }
         this.array = values;
     }
 
@@ -64,55 +62,37 @@ public class FloatProfile implements IProfile {
      * Constructor based on an existing Profile. Makes a copy of the existing
      * Profile
      * 
-     * @param p
-     *            the profile to copy
+     * @param p the profile to copy
      */
     public FloatProfile(@NonNull final IProfile p) {
-        if (p==null) {
+        if (p==null)
             throw new IllegalArgumentException("Profile is null");
-        }
         this.array = new float[p.size()];
-
-        for (int i = 0; i < p.size(); i++) {
+        for (int i = 0; i < p.size(); i++)
             array[i] = (float) p.get(i);
-        }
     }
 
     /**
      * Constructor based on an fixed value and the profile length
      * 
-     * @param value
-     *            the value for the profile to hold at each index
-     * @param length
-     *            the length of the profile
+     * @param value the value for the profile to hold at each index
+     * @param length the length of the profile
      */
     public FloatProfile(final float value, final int length) {
 
-        if (length < 1) {
+        if (length < 1)
             throw new IllegalArgumentException("Profile length cannot be less than 1");
-        }
 
         this.array = new float[length];
-        for (int i = 0; i < this.array.length; i++) {
+        for (int i = 0; i < this.array.length; i++)
             array[i] = value;
-        }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#size()
-     */
     @Override
     public int size() {
         return array.length;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -121,11 +101,6 @@ public class FloatProfile implements IProfile {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -140,11 +115,6 @@ public class FloatProfile implements IProfile {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#get(int)
-     */
     @Override
     public double get(int index) throws IndexOutOfBoundsException {
 
@@ -164,11 +134,6 @@ public class FloatProfile implements IProfile {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getMax()
-     */
     @Override
     public double getMax() {
         double max = 0;
@@ -180,12 +145,6 @@ public class FloatProfile implements IProfile {
         return max;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexOfMax(components.generic.
-     * BooleanProfile)
-     */
     @Override
     public int getIndexOfMax(@NonNull BooleanProfile limits) throws ProfileException {
         
@@ -210,21 +169,11 @@ public class FloatProfile implements IProfile {
         return maxIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexOfMax()
-     */
     @Override
     public int getIndexOfMax() throws ProfileException {
         return getIndexOfMax( new BooleanProfile(this, true) );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getProportionalIndex(double)
-     */
     @Override
     public int getIndexOfFraction(double d) {
         if (d < 0 || d > 1)
@@ -237,11 +186,6 @@ public class FloatProfile implements IProfile {
         return target;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexProportion(int)
-     */
     @Override
     public double getFractionOfIndex(int index) {
         if (index < 0 || index >= array.length) {
@@ -251,11 +195,6 @@ public class FloatProfile implements IProfile {
         return (double) index / (double) array.length;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getMin()
-     */
     @Override
     public double getMin() {
         
@@ -268,12 +207,6 @@ public class FloatProfile implements IProfile {
         return min;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexOfMin(components.generic.
-     * BooleanProfile)
-     */
     @Override
     public int getIndexOfMin(@NonNull BooleanProfile limits) throws ProfileException {
         
@@ -323,63 +256,32 @@ public class FloatProfile implements IProfile {
     @Override
     public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
 
-        float[] arr2 = testProfile.toFloatArray();
+        double[] arr2 = testProfile.toDoubleArray();
         if (array.length == arr2.length) 
-            return squareDifference(array, arr2);
+            return CellularComponent.squareDifference(this.toDoubleArray(), arr2);
 
         // Lengthen the shorter profile
         if (array.length > arr2.length) {
-            arr2 = interpolate(arr2, array.length);
-            return squareDifference(array, arr2);
+            arr2 = IProfile.interpolate(arr2, array.length);
+            return CellularComponent.squareDifference(this.toDoubleArray(), arr2);
         } else {
-            float[] arr1 = interpolate(array, arr2.length);
-            return squareDifference(arr1, arr2);
+        	double[] arr1 = IProfile.interpolate(this.toDoubleArray(), arr2.length);
+            return CellularComponent.squareDifference(arr1, arr2);
         }
     }
     
     @Override
   	public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException {
-  		float[] arr1 = interpolate(array, interpolationLength);
-  		float[] arr2 = interpolate(testProfile.toFloatArray(), interpolationLength);
+  		float[] arr1 = IProfile.interpolate(array, interpolationLength);
+  		float[] arr2 = IProfile.interpolate(testProfile.toFloatArray(), interpolationLength);
   		return CellularComponent.squareDifference(arr1, arr2);
   	}
 
-    /**
-     * Calculate the absolute square difference between two arrays of equal
-     * length. Note - array lengths are not checked. TODO: Normalise to the
-     * length of the profiles
-     * 
-     * @param arr1
-     * @param arr2
-     * @return
-     */
-    private static double squareDifference(float[] arr1, float[] arr2) {
-        double difference = 0;
-
-        for (int j = 0; j < arr1.length; j++) { // for each point round the
-
-            difference += Math.pow(arr1[j] - arr2[j], 2); // square difference -
-                                                          // highlights extremes
-        }
-
-        return difference;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#copy()
-     */
     @Override
     public IProfile copy() throws ProfileException {
         return new FloatProfile(this.array);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#offset(int)
-     */
     @Override
     public IProfile offset(int j) throws ProfileException {
         float[] newArray = new float[array.length];
@@ -404,11 +306,6 @@ public class FloatProfile implements IProfile {
         return newArray;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#smooth(int)
-     */
     @Override
     public IProfile smooth(int windowSize) {
         
@@ -505,70 +402,10 @@ public class FloatProfile implements IProfile {
 	public IProfile interpolate(int newLength) throws ProfileException {
 		if(newLength<MINIMUM_PROFILE_LENGTH)
 			throw new IllegalArgumentException(String.format("New length %d below minimum %d",newLength,MINIMUM_PROFILE_LENGTH));
-		return new FloatProfile(interpolate(array, newLength));
+		return new FloatProfile(IProfile.interpolate(array, newLength));
 	}
 
-	/**
-	 * Interpolate the array to the given length, and return as a new array
-	 * 
-	 * @param arr the array to interpolate
-	 * @param length the new length
-	 * @return
-	 */
-	private float[] interpolate(float[] arr, int length) {
-
-		float[] result = new float[length];
-
-		// where in the old curve index is the new curve index?
-		for (int i=0; i<length-1; i++) {
-			// we have a point in the new array.
-			// we want to know which points it lies between in the old profile
-			float fraction = ((float) i / (float) length);
-
-			// get the value in the old profile at the given position
-			result[i] = getInterpolatedValue(arr, fraction);
-		}
-		result[length-1] = getInterpolatedValue(arr, 1.0f);
-		return result;
-
-	}
-
-    /**
-     * Get the interpolated value at the given fraction along the given array
-     * 
-     * @param array the array
-     * @param fraction the fraction of the position through the profile, from 0-1
-     * @return
-     */
-    private static float getInterpolatedValue(float[] array, float fraction) {
-        // Get the equivalent index of the fraction in the array
-        double index = fraction * array.length;
-        double indexFloor = Math.floor(index);
-
-        // Get the integer portion and find the bounding indices
-        int indexLower = (int) indexFloor;
-        
-     // only wrap possible if fraction is range 0-1
-        if (indexLower == array.length) {
-            indexLower = 0;
-        }
-
-     // only wrap possible if fraction is range 0-1
-        int indexHigher = indexLower + 1;
-        if (indexHigher == array.length) { 
-            indexHigher = 0;
-        }
-
-        // Find the fraction between the indices
-        double diffFraction = index - indexFloor;
-
-        // Calculate the linear interpolation
-        double interpolate = array[indexLower] + ((array[indexHigher] - array[indexLower]) * diffFraction);
-
-        return (float) interpolate;
-
-    }
-
+  
 	@Override
 	public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
 		return findBestFitOffset(testProfile, 0, array.length);
@@ -578,7 +415,7 @@ public class FloatProfile implements IProfile {
 	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
 		float[] test = testProfile.toFloatArray();  
 		if (array.length != test.length) 
-			test = interpolate(test, array.length);
+			test = IProfile.interpolate(test, array.length);
 		return CellularComponent.getBestFitOffset(array, test, minOffset, maxOffset);
 	}
 	
@@ -592,12 +429,8 @@ public class FloatProfile implements IProfile {
      */
     private int getBestFitOffset(float[] arr1, float[] arr2) {
 
-        double lowestScore = squareDifference(arr1, arr2);
+        double lowestScore = CellularComponent.squareDifference(arr1, arr2);
         int index = 0;
-
-        // Duplicate array 1
-        // float[] tmp = new float[arr1.length];
-        // System.arraycopy(arr1, 0, tmp, 0, arr1.length);
 
         // Position by position
         for (int i = 0; i < arr1.length; i++) {
@@ -605,7 +438,7 @@ public class FloatProfile implements IProfile {
             float[] tmp = offset(arr1, i);
 
             // // Compare to array 2
-            double score = squareDifference(tmp, arr2);
+            double score = CellularComponent.squareDifference(tmp, arr2);
             if (score < lowestScore) {
                 lowestScore = score;
                 index = i;
@@ -626,11 +459,6 @@ public class FloatProfile implements IProfile {
      * points <minimaLookupDistance> ahead and behind are checked. Each should
      * be greater than the value before. One exception is allowed, to account
      * for noisy data. Returns the indexes of minima
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getLocalMinima(int)
      */
     @Override
     public BooleanProfile getLocalMinima(int windowSize) {
@@ -708,11 +536,6 @@ public class FloatProfile implements IProfile {
         return minimaProfile;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getLocalMinima(int, double)
-     */
     @Override
     public BooleanProfile getLocalMinima(int windowSize, double threshold) {
         BooleanProfile minima = getLocalMinima(windowSize);
@@ -725,11 +548,6 @@ public class FloatProfile implements IProfile {
         return new BooleanProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getLocalMaxima(int)
-     */
     @Override
     public BooleanProfile getLocalMaxima(int windowSize) {
         
@@ -768,11 +586,6 @@ public class FloatProfile implements IProfile {
         return new BooleanProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getLocalMaxima(int, double)
-     */
     @Override
     public BooleanProfile getLocalMaxima(int windowSize, double threshold) {
         BooleanProfile maxima = getLocalMaxima(windowSize);
@@ -790,11 +603,6 @@ public class FloatProfile implements IProfile {
         return new BooleanProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getWindow(int, int)
-     */
     @Override
     public IProfile getWindow(int index, int windowSize) {
 
@@ -848,12 +656,6 @@ public class FloatProfile implements IProfile {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getSubregion(components.nuclear.
-     * NucleusBorderSegment)
-     */
     @Override
     public IProfile getSubregion(@NonNull IBorderSegment segment) throws ProfileException {
 
@@ -917,11 +719,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#cumulativeSum()
-     */
     @Override
     public IProfile cumulativeSum() {
         float[] values = new float[this.size()];
@@ -934,11 +731,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#multiply(double)
-     */
     @Override
     public IProfile multiply(double multiplier) {
 
@@ -954,11 +746,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#multiply(components.generic.IProfile)
-     */
     @Override
     public IProfile multiply(IProfile multiplier) {
         if (this.size() != multiplier.size()) {
@@ -972,11 +759,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#divide(double)
-     */
     @Override
     public IProfile divide(double divider) {
 
@@ -992,11 +774,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#divide(components.generic.IProfile)
-     */
     @Override
     public IProfile divide(IProfile divider) {
         if (this.size() != divider.size()) {
@@ -1010,11 +787,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#add(components.generic.IProfile)
-     */
     @Override
     public IProfile add(IProfile adder) {
         if (this.size() != adder.size()) {
@@ -1028,11 +800,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#add(double)
-     */
     @Override
     public IProfile add(double value) {
         if (Double.isNaN(value) || Double.isInfinite(value))

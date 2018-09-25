@@ -69,7 +69,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         this.cellCollection = collection;
         this.version = Version.currentVersion();
     }
-
+    
     public Version getVersion() {
         return this.version;
     }

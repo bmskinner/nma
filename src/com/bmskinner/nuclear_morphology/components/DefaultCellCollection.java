@@ -158,17 +158,12 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Constructor with non-random id. Use only when copying an old collection.
 	 * Can cause ID conflicts!
 	 * 
-	 * @param folder
-	 *            the folder of images
-	 * @param outputFolder
-	 *            a name for the outputs (usually the analysis date). Can be
+	 * @param folder the folder of images
+	 * @param outputFolder a name for the outputs (usually the analysis date). Can be
 	 *            null
-	 * @param name
-	 *            the name of the collection
-	 * @param nucleusClass
-	 *            the class of nucleus to be held
-	 * @param id
-	 *            specify an id for the collection, rather than generating
+	 * @param name the name of the collection
+	 * @param nucleusClass the class of nucleus to be held
+	 * @param id specify an id for the collection, rather than generating
 	 *            randomly.
 	 */
 	public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType, UUID id) {
@@ -181,12 +176,8 @@ public class DefaultCellCollection implements ICellCollection {
 		// folder name
 		this.nucleusType = nucleusType;
 
-		// for(ProfileType type : ProfileType.values()){
-		// profileCollections.put(type, new DefaultProfileCollection());
-		// }
-
 		ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
-
+		
 	}
 
 	/**
@@ -210,6 +201,24 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	public DefaultCellCollection(ICellCollection template, String name) {
 		this(template.getFolder(), template.getOutputFolderName(), name, template.getNucleusType());
+	}
+	
+
+	@Override
+	public ICellCollection duplicate() {
+		DefaultCellCollection result = new DefaultCellCollection(folder, outputFolder, name, nucleusType, uuid);
+		result.ruleSets = ruleSets;
+		
+		for(ICell c : this)
+			result.addCell(new DefaultCell(c));
+		
+		result.consensusNucleus = consensusNucleus==null? null : consensusNucleus.duplicate();
+		result.profileCollection = profileCollection.duplicate();
+		
+		// copy the signals
+        for(UUID id : getSignalGroupIDs())
+        	result.addSignalGroup(id, getSignalGroup(id).get().duplicate());
+		return result;
 	}
 
 	@Override
@@ -235,6 +244,66 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public boolean isVirtual() {
 		return false;
+	}
+	
+	@Override
+	public boolean add(ICell e) {
+		return cells.add(e);
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends ICell> c) {
+		return cells.addAll(c);
+	}
+
+	@Override
+	public void clear() {
+		cells.clear();
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		return cells.contains(o);
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		return cells.containsAll(c);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return cells.isEmpty();
+	}
+
+	@Override
+	public Iterator<ICell> iterator() {
+		return cells.iterator();
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		return cells.remove(o);
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		return cells.removeAll(c);
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		return cells.retainAll(c);
+	}
+
+	@Override
+	public Object[] toArray() {
+		return cells.toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] a) {
+		return cells.toArray(a);
 	}
 
 	/**

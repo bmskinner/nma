@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Random;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -15,6 +16,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 
@@ -37,6 +39,7 @@ public class TestDatasetBuilder {
 	public static final int DEFAULT_Y_BASE      = 100;
 	public static final int DEFAULT_ROTATION    = 0;
 	public static final int DEFAULT_BORDER_OFFSET = 0;
+	public static final int DEFAULT_CHILD_CLUSTERS = 0;
 	
 	/** Should the start index of the border list be randomly offset? */
 	public static final boolean DEFAULT_IS_RANDOM_OFFSET = true;
@@ -61,6 +64,8 @@ public class TestDatasetBuilder {
 	
 	private boolean redSignals = DEFAULT_RED_SIGNALS;
 	private boolean greenSignals = DEFAULT_GREEN_SIGNALS;
+	
+	private int nClusters = DEFAULT_CHILD_CLUSTERS;
 	
 	public static final UUID RED_SIGNAL_GROUP = UUID.fromString("99998888-7777-6666-5555-444433332222");
 	public static final UUID GREEN_SIGNAL_GROUP = UUID.fromString("88887777-6666-5555-4444-333322221111");
@@ -105,6 +110,13 @@ public class TestDatasetBuilder {
 			new DatasetProfilingMethod(d).call();
 		if(segment)
 			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
+		
+		if(nClusters>0) {
+			IClusteringOptions o = OptionsFactory.makeClusteringOptions();
+			o.setClusterNumber(nClusters);
+			new NucleusClusteringMethod(d, o).call();
+		}
+		
 		return d;
 	}
 	
@@ -142,6 +154,18 @@ public class TestDatasetBuilder {
 	
 	public TestDatasetBuilder cellCount(int i) {
 		nCells = i;
+		return this;
+	}
+	
+	/**
+	 * Set the number of child datasets to create
+	 * by clustering
+	 * Default value {@link #DEFAULT_CHILD_CLUSTERS}.
+	 * @param i the number of clusters
+	 * @return this builder
+	 */
+	public TestDatasetBuilder numberOfClusters(int i) {
+		nClusters = i;
 		return this;
 	}
 	

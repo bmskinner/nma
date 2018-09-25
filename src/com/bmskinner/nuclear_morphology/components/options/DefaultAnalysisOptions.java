@@ -72,6 +72,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         set(template);
         analysisTime = System.currentTimeMillis();
     }
+    
+    @Override
+	public IAnalysisOptions duplicate() {
+		return new DefaultAnalysisOptions(this);
+	}
 
     @Override
     public Optional<IDetectionOptions> getDetectionOptions(String key){
@@ -279,9 +284,8 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         b.append(IDetectionOptions.NEWLINE+type);
         return b.toString();
     }
+
+	
     
-//    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//        in.defaultReadObject();
-//    }
 
 }

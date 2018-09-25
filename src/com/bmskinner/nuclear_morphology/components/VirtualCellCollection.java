@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -161,6 +162,16 @@ public class VirtualCellCollection implements ICellCollection {
             this.addCell(cell);
         }
     }
+    
+	@Override
+	public ICellCollection duplicate() {
+		VirtualCellCollection result = new VirtualCellCollection(parent, this);
+		
+		result.consensusNucleus = consensusNucleus.duplicate();
+		result.profileCollection = profileCollection.duplicate();
+		
+		return result;
+	}
 
     public IAnalysisDataset getParent() {
         return parent;
@@ -191,6 +202,66 @@ public class VirtualCellCollection implements ICellCollection {
 	public boolean isVirtual() {
         return true;
     }
+    
+    @Override
+	public boolean add(ICell e) {
+		return cellIDs.add(e.getId());
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends ICell> c) {
+		return cellIDs.addAll(c.stream().map(cell->cell.getId()).collect(Collectors.toSet()));
+	}
+
+	@Override
+	public void clear() {
+		cellIDs.clear();
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		return getCells().contains(o);
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		return getCells().containsAll(c);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return getCells().isEmpty();
+	}
+
+	@Override
+	public Iterator<ICell> iterator() {
+		return getCells().iterator();
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		return getCells().remove(o);
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		return getCells().removeAll(c);
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		return getCells().retainAll(c);
+	}
+
+	@Override
+	public Object[] toArray() {
+		return getCells().toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] a) {
+		return getCells().toArray(a);
+	}
 
     @Override
     public synchronized Set<ICell> getCells() {

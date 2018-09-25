@@ -296,7 +296,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     @Override
     public List<String> getSegmentNames() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (IBorderSegment seg : segments) {
             result.add(seg.getName());
         }

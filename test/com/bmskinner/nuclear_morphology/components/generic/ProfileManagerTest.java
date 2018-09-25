@@ -13,7 +13,9 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -60,58 +62,57 @@ public class ProfileManagerTest {
 	}
 
 	@Test
-	public void testUpdateTagToMedianBestFit() {
-		fail("Not yet implemented");
+	public void testSetLockOnAllNucleusSegmentsExcept() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		UUID segId1 = profile.getSegmentAt(1).getID();
+		
+		manager.setLockOnAllNucleusSegments(false);
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IBorderSegment s : p.getSegments()) {
+					assertFalse(s.isLocked());
+				}
+			}
+		}
+		
+		manager.setLockOnAllNucleusSegmentsExcept(segId1, true);
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IBorderSegment s : p.getSegments()) {
+					if(s.getID().equals(segId1))
+						assertFalse(s.isLocked());
+					else
+						assertTrue(s.isLocked());
+				}
+			}
+		}
+		
 	}
 
 	@Test
-	public void testUpdateProfileCollectionOffsets() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCalculateTopAndBottomVerticals() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testUpdateBorderTag() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetSegmentCount() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testRecalculateProfileAggregates() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCopyCollectionOffsets() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetLockOnAllNucleusSegmentsExcept() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetLockOnAllNucleusSegments() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testUpdateCellSegmentStartIndex() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testUpdateMedianProfileSegmentIndex() {
-		fail("Not yet implemented");
+	public void testSetLockOnAllNucleusSegments() throws Exception {
+		manager.setLockOnAllNucleusSegments(false);
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IBorderSegment s : p.getSegments()) {
+					assertFalse(s.isLocked());
+				}
+			}
+		}
+		
+		manager.setLockOnAllNucleusSegments(true);
+		
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IBorderSegment s : p.getSegments()) {
+					assertTrue(s.isLocked());
+				}
+			}
+		}
 	}
 
 	@Test
@@ -191,15 +192,6 @@ public class ProfileManagerTest {
 		}
 	}
 
-	@Test
-	public void testSplitSegmentIBorderSegment() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSplitSegmentIBorderSegmentUUIDUUID() {
-		fail("Not yet implemented");
-	}
 
 	@Test
 	public void testUnmergeSegments() throws Exception {

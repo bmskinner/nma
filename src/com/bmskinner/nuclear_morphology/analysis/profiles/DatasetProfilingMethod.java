@@ -174,33 +174,33 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		}
 	}
 
-//	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException {
-//
-//		ProfileIndexFinder finder = new ProfileIndexFinder();
-//
-//		// check the RP index in the median
-//		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-//		fine("RP in median is located at index " + rpIndex);
-//
-//		// If RP is not at zero, update
-//		if (rpIndex != 0) {
-//
-//			fine("RP in median is not yet at zero");
-//
-//			// Update the offsets in the profile collection to the new RP
-//			collection.getProfileManager().updateRP(rpIndex);
-//
-//			// Find the effects of the offsets on the RP
-//			// It should be found at zero
-//			finer("Checking RP index again");
-//			rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-//			fine("RP in median is now located at index " + rpIndex);
-//
-//			fine("Current state of profile collection:");
-//			fine(collection.getProfileCollection().tagString());
-//
-//		}
-//
-//		return rpIndex;
-//	}
+	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+
+		// check the RP index in the median
+		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+		fine("RP in median is located at index " + rpIndex);
+
+		// If RP is not at zero, update
+		if (rpIndex != 0) {
+
+			fine("RP in median is not yet at zero");
+			IProfile median = collection.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			// Update the offsets in the profile collection to the new RP
+			collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
+			collection.getProfileManager().recalculateProfileAggregates();
+
+			// Find the effects of the offsets on the RP
+			// It should be found at zero
+			finer("Checking RP index again");
+			rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+			fine("RP in median is now located at index " + rpIndex);
+
+			fine("Current state of profile collection:");
+			fine(collection.getProfileCollection().tagString());
+
+		}
+
+		return rpIndex;
+	}
 }

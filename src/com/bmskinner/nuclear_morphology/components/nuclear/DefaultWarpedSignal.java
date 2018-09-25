@@ -36,6 +36,16 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	public DefaultWarpedSignal(@NonNull UUID signalGroupId) {
 		id = signalGroupId;
 	}
+	
+	@Override
+	public IWarpedSignal duplicate() {
+		DefaultWarpedSignal w = new DefaultWarpedSignal(id);
+		for(WarpedSignalKey k : images.keySet()) {
+			w.images.put(k, images.get(k));
+			w.targetNames.put(k, targetNames.get(k));
+		}
+		return w;
+	}
 
 	@Override
 	public @NonNull UUID getSignalGroupId() {
@@ -128,5 +138,4 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			return false;
 		return true;
 	}
-
 }

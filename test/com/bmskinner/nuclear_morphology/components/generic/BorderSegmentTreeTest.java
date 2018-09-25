@@ -34,7 +34,7 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		singleSegment = singleSegmentProfile.getSegment(comp.getID());
+		singleSegment = singleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 	}
 
 
@@ -95,8 +95,17 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 
 	@Test
-	public void testTestLength() {
-		fail("Not yet implemented");
+	public void testTestLength() throws UnavailableComponentException {
+		IBorderSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		
+		int start = seg_0.getStartIndex();
+		int end  =  seg_0.getEndIndex();
+		
+		for(int i=start; i<end; i++) {
+			int length = seg_0.testLength(i, end);
+			assertEquals(end-i+1, length);			
+		}
+
 	}
 
 	@Test
@@ -150,14 +159,14 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	}
 
 	@Test
-	public void testOverlaps() throws UnavailableComponentException, ProfileException {
-		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1)));
-		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0)));
+	public void testOverlapsBeyondEndpoints() throws UnavailableComponentException, ProfileException {
+		assertFalse(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1)));
+		assertFalse(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0)));
 		
 		doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegmentContaining(1), 25, DOUBLE_SEG_ID_2, DOUBLE_SEG_ID_3);
 		
 		assertFalse(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlapsBeyondEndpoints(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_2)));
-		fail("Not yet implemented");
+
 	}
 
 }

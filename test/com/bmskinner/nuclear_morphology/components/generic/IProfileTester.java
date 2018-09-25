@@ -355,10 +355,10 @@ public class IProfileTester {
 
 	    IProfile interpolated = template.interpolate(newLength);
 	    
-	    float[] arr = interpolated.toFloatArray();
+	    double[] arr = interpolated.toDoubleArray();
 	    arr[0] = arr[0]+diff;
 	            
-	    IProfile p = new FloatProfile(arr);       
+	    IProfile p = new DoubleProfile(arr);       
         double expDiff = diff*diff;
         assertEquals(expDiff, template.absoluteSquareDifference(p), 0.001);
         assertEquals(expDiff, p.absoluteSquareDifference(template), 0.001);
@@ -556,23 +556,7 @@ public class IProfileTester {
 			assertEquals(profile, recovered);
 		}
 	}
-	
-	@Test
-	public void testFindBestFitOffsetHasNoEffectWithZeroOffsetWithLongerInterpolatedProfile() throws ProfileException {
-		int exp = 0;
-		IProfile test = profile.interpolate(profile.size()*2).offset(exp);
-		int offset = profile.findBestFitOffset(test);
-		assertEquals(exp, offset);
-	}
-	
-	@Test
-	public void testFindBestFitOffsetHasNoEffectWithZeroOffsetWithShorterInterpolatedProfile() throws ProfileException {
-		int exp = 0;
-		IProfile test = profile.interpolate(profile.size()/2).offset(exp);
-		int offset = profile.findBestFitOffset(test);
-		assertEquals(exp, offset);
-	}
-				
+		
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getLocalMinima(int)}.
 	 * @throws ProfileException 

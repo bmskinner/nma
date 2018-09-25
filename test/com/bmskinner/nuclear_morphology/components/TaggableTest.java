@@ -83,29 +83,12 @@ public class TaggableTest {
 	}
 
 	@Test
-	public void testGetProfileType() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE);
-		System.out.println(profile.toString());
-		System.out.println(profile.valueString());
-		fail("Not yet implemented");
-	}
-
-	@Test
 	public void testGetProfileTypeTag() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		ISegmentedProfile rawProfile = taggable.getProfile(ProfileType.ANGLE);
 		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		//			System.out.println(profile.toString());
-		//			System.out.println(profile.valueString());
-		assertEquals(rawProfile.toString(), tagProfile.toString());
-		fail("Not yet implemented");
+		assertEquals(rawProfile.offset(taggable.getBorderIndex(Tag.REFERENCE_POINT)).toString(), tagProfile.toString());
 	}
 
-	@Test
-	public void testGetBorderIndex() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-		int index = taggable.getBorderIndex(Tag.REFERENCE_POINT);
-		System.out.println(index);
-		fail("Not yet implemented");
-	}
 	
 	@Test
 	public void testUpdatingSegmentsInProfile() throws Exception {
@@ -129,19 +112,6 @@ public class TaggableTest {
 		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		
 		assertEquals(oldProfile.toString(), newProfile.toString());
-
-//		IBorderSegment updated = newProfile.getSegment(segId);
-//		assertEquals(newStart, updated.getStartIndex());
-//		assertEquals(newEnd, updated.getEndIndex());
-//		
-//		
-//		
-//		IBorderSegment prev = updated.prevSegment();
-//		IBorderSegment next = updated.nextSegment();
-//		
-//		assertEquals("Previous segmented updated", newStart, prev.getEndIndex());
-//		assertEquals("Next segmented updated", newEnd, next.getStartIndex());
-		
 	}
 	
 	

@@ -399,19 +399,19 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return CellularComponent.squareDifference(array, arr2);
 
 			if (array.length > arr2.length) {
-				arr2 = interpolate(arr2, array.length);
+				arr2 = IProfile.interpolate(arr2, array.length);
 				return CellularComponent.squareDifference(array, arr2);
 			} 
 
 			float[] arr1 = this.toFloatArray();
-			arr1 = interpolate(arr1, arr2.length);
+			arr1 = IProfile.interpolate(arr1, arr2.length);
 			return CellularComponent.squareDifference(arr1, arr2);
 		}
 		
 		@Override
 		public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException {
-			float[] arr1 = interpolate(array, interpolationLength);
-			float[] arr2 = interpolate(testProfile.toFloatArray(), interpolationLength);
+			float[] arr1 = IProfile.interpolate(array, interpolationLength);
+			float[] arr2 = IProfile.interpolate(testProfile.toFloatArray(), interpolationLength);
 			return CellularComponent.squareDifference(arr1, arr2);
 		}
 
@@ -477,98 +477,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public IProfile interpolate(int newLength) throws ProfileException {
 			if(newLength<MINIMUM_PROFILE_LENGTH)
 				throw new IllegalArgumentException(String.format("New length %d below minimum %d",newLength,MINIMUM_PROFILE_LENGTH));
-			return new FloatProfile(interpolate(array, newLength));
+			return new FloatProfile(IProfile.interpolate(array, newLength));
 		}
 
-		/**
-		 * Interpolate the array to the given length, and return as a new array
-		 * 
-		 * @param arr the array to interpolate
-		 * @param length the new length
-		 * @return
-		 */
-		private float[] interpolate(float[] arr, int length) {
 
-			float[] result = new float[length];
-
-			// where in the old curve index is the new curve index?
-			for (int i=0; i<length-1; i++) {
-				// we have a point in the new array.
-				// we want to know which points it lies between in the old profile
-				float fraction = ((float) i / (float) length);
-
-				// get the value in the old profile at the given position
-				result[i] = getInterpolatedValue(arr, fraction);
-			}
-			result[length-1] = getInterpolatedValue(arr, 1.0f);
-			return result;
-
-		}
-
-		/**
-		 * Get the interpolated value at the given fraction along the given array
-		 * 
-		 * @param arr
-		 * @param fraction the fraction, from 0-1
-		 * @return
-		 */
-		private float getInterpolatedValue(float[] arr, float fraction) {
-			// Get the equivalent index of the fraction in the array
-			double index = fraction * arr.length;
-			double indexFloor = Math.floor(index);
-
-			// Get the integer portion and find the bounding indices
-			int indexLower = (int) indexFloor;
-			if (indexLower == arr.length) { // only wrap possible if fraction is
-				// range 0-1
-				indexLower = 0;
-			}
-
-			int indexHigher = indexLower + 1;
-			if (indexHigher == arr.length) { // only wrap possible if fraction is
-				// range 0-1
-				indexHigher = 0;
-			}
-
-			// Find the fraction between the indices
-			double diffFraction = index - indexFloor;
-
-			// Calculate the linear interpolation
-			double interpolate = arr[indexLower] + ((arr[indexHigher] - arr[indexLower]) * diffFraction);
-
-			return (float) interpolate;
-
-		}
-
-		/**
-		 * Find a value in the profile via linear interpolation.
-		 * For example interpolateValue(12.4) will return the value 40%
-		 * between the values at indexes 12 and 13.
-		 * 
-		 * @param normIndex the fractional index position to find within this profile.
-		 * @return an interpolated value
-		 */
-		private float interpolateValue(float normIndex) {
-
-			// Find the indexes to interpolate between
-			int indexLower = wrapIndex( (int) Math.floor(normIndex));
-			int indexUpper = wrapIndex( (int) Math.ceil(normIndex));
-
-			// get the values at these indexes
-			float valueLower = array[indexLower];
-			float valueUpper = array[indexUpper];
-
-			// calculate the difference between values; this can be negative
-			float valueDifference = valueUpper - valueLower;
-
-			// calculate the fractional distance
-			float offset = normIndex - indexLower;
-
-			// calculate the value to be added to the lower index value
-			float newValue = valueDifference * offset;
-
-			return valueLower+ newValue;
-		}
 
 
 		@Override
@@ -580,7 +492,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
 			float[] test = testProfile.toFloatArray();  
 			if (array.length != test.length) 
-				test = interpolate(test, array.length);
+				test = IProfile.interpolate(test, array.length);
 			return CellularComponent.getBestFitOffset(array, test, minOffset, maxOffset);
 		}
 
@@ -1231,6 +1143,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public List<String> getSegmentNames() {
+			if(!segments.hasMergeSources()) {
+				List<String> l = new ArrayList<>();
+				l.add("Seg_"+0);
+				return l;
+			}
 			return IntStream.range(0, segments.nChildren())
 					.mapToObj(i->"Seg_"+i).collect(Collectors.toList());
 		}
@@ -1788,10 +1705,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			protected BorderSegmentTree(@NonNull IBorderSegment seg, @Nullable BorderSegmentTree parent) {
 				this(seg.getID(), seg.getStartIndex(), seg.getEndIndex(), parent);
 				// Add merge sources of template segment
+				
 				if(seg.hasMergeSources()) {
 					for(IBorderSegment mge : seg.getMergeSources())
 						addMergeSource(mge.copy());
 				}
+				setLocked(seg.isLocked());
 			}	
 			
 			@Override

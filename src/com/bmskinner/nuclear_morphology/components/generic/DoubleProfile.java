@@ -257,117 +257,35 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
     @Override
     public double absoluteSquareDifference(IProfile testProfile) throws ProfileException {
 
-        if (testProfile == null) {
-            throw new IllegalArgumentException("Test profile is null");
-        }
-        // the test profile needs to be matched to this profile
-        // whichever is smaller must be interpolated
-        IProfile profile1 = equaliseLengths(this.copy(), testProfile);
-        IProfile profile2 = equaliseLengths(testProfile, this.copy());
+        
+    	double[] arr2 = testProfile.toDoubleArray();
 
-        double difference = 0;
 
-        for (int j = 0; j < profile1.size(); j++) { // for each point round the
-                                                    // array
+		if (array.length == arr2.length)
+			return CellularComponent.squareDifference(array, arr2);
 
-            double thisValue = profile1.get(j);
-            double testValue = profile2.get(j);
-            difference += Math.pow(thisValue - testValue, 2); // square
-                                                              // difference -
-                                                              // highlights
-                                                              // extremes
-        }
-        return difference;
+		if (array.length > arr2.length) {
+			arr2 = IProfile.interpolate(testProfile.toDoubleArray(), array.length);
+			return CellularComponent.squareDifference(array, arr2);
+		} 
+
+		
+		double[] arr1 = IProfile.interpolate(array, arr2.length);
+		return CellularComponent.squareDifference(arr1, arr2);
     }
     
     @Override
   	public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException {
-  		float[] arr1 = interpolate(array, interpolationLength);
-  		float[] arr2 = interpolate(testProfile.toDoubleArray(), interpolationLength);
+  		float[] arr1 = IProfile.interpolate(this.toFloatArray(), interpolationLength);
+  		float[] arr2 = IProfile.interpolate(testProfile.toFloatArray(), interpolationLength);
   		return CellularComponent.squareDifference(arr1, arr2);
   	}
-    
-	/**
-	 * Interpolate the array to the given length, and return as a new array
-	 * 
-	 * @param array2 the array to interpolate
-	 * @param length the new length
-	 * @return
-	 */
-	private float[] interpolate(double[] array2, int length) {
 
-		float[] result = new float[length];
-
-		// where in the old curve index is the new curve index?
-		for (int i = 0; i < length; i++) {
-			// we have a point in the new array.
-			// we want to know which points it lies between in the old profile
-			float fraction = ((float) i / (float) length); // get the fractional
-			// index position
-			// needed
-
-			// get the value in the old profile at the given fractional index
-			// position
-			result[i] = getInterpolatedValue(array2, fraction);
-		}
-		return result;
-
-	}
-	
-	/**
-	 * Get the interpolated value at the given fraction along the given array
-	 * 
-	 * @param array2
-	 * @param fraction the fraction, from 0-1
-	 * @return
-	 */
-	private float getInterpolatedValue(double[] array2, float fraction) {
-		// Get the equivalent index of the fraction in the array
-		double index = fraction * array2.length;
-		double indexFloor = Math.floor(index);
-
-		// Get the integer portion and find the bounding indices
-		int indexLower = (int) indexFloor;
-		if (indexLower == array2.length) { // only wrap possible if fraction is
-			// range 0-1
-			indexLower = 0;
-		}
-
-		int indexHigher = indexLower + 1;
-		if (indexHigher == array2.length) { // only wrap possible if fraction is
-			// range 0-1
-			indexHigher = 0;
-		}
-
-		// Find the fraction between the indices
-		double diffFraction = index - indexFloor;
-
-		// Calculate the linear interpolation
-		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
-
-		return (float) interpolate;
-
-	}
-    
-    /*
-     * -------------------- Profile manipulation --------------------
-     */
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#copy()
-     */
     @Override
     public IProfile copy() {
         return new DoubleProfile(this.array);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#offset(int)
-     */
     @Override
     public IProfile offset(int j) throws ProfileException {
         double[] newArray = new double[this.size()];

@@ -50,6 +50,8 @@ public interface IAnalysisOptions extends Serializable, Loggable {
     static final double      DEFAULT_WINDOW_PROPORTION = 0.05;
     static final NucleusType DEFAULT_TYPE              = GlobalOptions.getInstance().getDefaultType();
 
+    IAnalysisOptions duplicate();
+    
     /**
      * Get the detection options for the given component
      * 

@@ -42,7 +42,14 @@ public interface IProfileCollection extends Serializable, Loggable {
     static IProfileCollection makeNew() {
         return new DefaultProfileCollection();
     }
-
+    
+    
+    /**
+     * Craete a copy of the collection
+     * @return
+     */
+    IProfileCollection duplicate();
+    
     /**
      * Get the index of the tag in the profile, zeroed on the reference point
      * 

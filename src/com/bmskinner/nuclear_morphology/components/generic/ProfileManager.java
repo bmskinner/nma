@@ -234,11 +234,11 @@ public class ProfileManager implements Loggable {
 
         finer("Updating border tag " + tag);
 
-        if (tag.equals(Tag.REFERENCE_POINT)) {
-//            updateRP(index);
-        	warn("Disabled RP updates in ProfileManager:245 for now");
-            return;
-        }
+//        if (tag.equals(Tag.REFERENCE_POINT)) {
+////            updateRP(index);
+//        	warn("Disabled RP updates in ProfileManager:245 for now");
+//            return;
+//        }
 
         if (tag.type().equals(BorderTagType.CORE)) {
             finer("Updating core border tag");
@@ -318,47 +318,7 @@ public class ProfileManager implements Loggable {
             	return;
         	}
         }
-        
-        
-//        if(index==rpIndex) {
-//        	finer("Setting " + tag + " to the RP index");
-//        	updateProfileCollectionOffsets(tag, index);
-//        	
-//        	// update nuclei
-//        	 collection.getNuclei().stream().forEach(n -> {
-//                 if (!n.isLocked()) {
-//                	 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
-//                	 n.setBorderTag(tag, rp);
-//                	 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-//                         n.updateVerticallyRotatedNucleus();
-//                         n.updateDependentStats();
-//                     }
-//                 }
-//        	 });
-//        	
-//        	//Update consensus
-//        	 if (collection.hasConsensus()) {
-//                 Nucleus n = collection.getConsensus();
-//                 int rp = n.getBorderIndex(Tag.REFERENCE_POINT);
-//                 n.setBorderTag(tag, rp);
-//                 
-//                 if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-//                     n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
-//                     if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
-//                         n.flipXAroundPoint(n.getCentreOfMass());
-//                 } else {
-//                     n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
-//                 }
-//             }
-//        	 
-//        	// Update signals as needed
-//             collection.getSignalManager().recalculateSignalAngles();
-//        	
-//        	return;
-//        }
-
-        // The index was not the RP; find best fits
-        
+                
         /*
          * Set the border tag in the median profile
          */
@@ -404,7 +364,7 @@ public class ProfileManager implements Loggable {
     }
 
     /**
-     * If a core border tag is moved, the profile needs to be resegmented.
+     * If a core border tag is moved, segment boundaries must be moved
      * 
      * @param tag
      * @param index
@@ -418,7 +378,7 @@ public class ProfileManager implements Loggable {
         /*
          * Updating core border tags:
          * 
-         * 1) Identify the new OP or RP index in the median - save out the
+         * 1) Identify the RP index in the median - save out the
          * offsets for the old border tags against the old RP
          * 
          * 2) Update the RP / OP location in nuclei using frankenprofiling - RP
@@ -705,16 +665,13 @@ public class ProfileManager implements Loggable {
      * Set the lock on the start index of all segments of all profile types in
      * all nuclei of the collection
      * 
-     * @param id
-     *            the segmnet to leave unlocked, or to unlock if locked
-     * @throws Exception
+     * @param b the segment lock state for all segments
      */
-    public void setLockOnAllNucleusSegments(boolean b) throws Exception {
+    public void setLockOnAllNucleusSegments(boolean b) {
 
         List<UUID> ids = collection.getProfileCollection().getSegmentIDs();
 
         collection.getNuclei().forEach(n -> {
-
             ids.forEach(segID -> n.setSegmentStartLock(b, segID));
         });
 

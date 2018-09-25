@@ -64,15 +64,18 @@ public class SignalGroup implements ISignalGroup {
      * @param s
      */
     public SignalGroup(@NonNull ISignalGroup s) {
-//        if (!s.hasShellResult()) {
-            shellResult = null;
-//        } else {
-//            shellResult = s.getShellResult().get().duplicate();
-//        }
+
+    	shellResult = null;
         groupName = s.getGroupName();
         isVisible = s.isVisible();
         groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
+        warpedSignals = s.getWarpedSignals().orElse(null);
     }
+    
+	@Override
+	public ISignalGroup duplicate() {
+		return new SignalGroup(this);
+	}
     
 	@Override
 	public Optional<IWarpedSignal> getWarpedSignals() {
@@ -183,7 +186,6 @@ public class SignalGroup implements ISignalGroup {
 		} else if (!warpedSignals.equals(other.warpedSignals))
 			return false;
 		return true;
-	}
-    
+	}   
     
 }

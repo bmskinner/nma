@@ -59,19 +59,32 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
     @Override
     public IAnalysisDataset duplicate() throws Exception {
-        throw new Exception("Not yet implemented");
-    }
+    	ChildAnalysisDataset cd = new ChildAnalysisDataset(parent, new VirtualCellCollection(parent, parent.getCollection()));
+    	for(ICell c: this.getCollection())
+    		cd.getCollection().addCell(c);
+    	
+        // copy the signals
+        for(UUID id : cellCollection.getSignalGroupIDs())
+        	cd.getCollection().addSignalGroup(id, cellCollection.getSignalGroup(id).get().duplicate());
 
-//    @Override
-//    public Handler getLogHandler() throws Exception {
-//        return parent.getLogHandler();
-//    }
+
+        // copy child datasets
+        for(IAnalysisDataset child : this.getAllChildDatasets())
+        	cd.addChildDataset(child.duplicate());
+        
+        // copy merge sources
+        for(IAnalysisDataset mge : this.getMergeSources())
+        	cd.addMergeSource(mge.duplicate());
+        
+        cd.setDatasetColour(datasetColour);
+
+    	return cd;
+    }
 
     @Override
     public void addChildCollection(@NonNull ICellCollection collection) {
         IAnalysisDataset childDataset = new ChildAnalysisDataset(this, collection);
         childDatasets.add(childDataset);
-
     }
 
     @Override

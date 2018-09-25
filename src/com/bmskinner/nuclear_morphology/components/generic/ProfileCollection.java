@@ -71,6 +71,22 @@ public class ProfileCollection implements IProfileCollection {
         indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
     }
     
+	@Override
+	public IProfileCollection duplicate() {
+//		DefaultProfileCollection pc = new DefaultProfileCollection();
+//		
+//		pc.length = length;
+//		for(Tag t : indexes.keySet())
+//			pc.indexes.put(t, indexes.get(t));
+//		
+//		pc.segments = new IBorderSegment[segments.length];
+//		for(int i=0; i<segments.length; i++)
+//			pc.segments[i] = segments[i].copy();
+//		
+//		return pc;
+		return null;
+	}
+    
     @Override
     public int segmentCount() {
     	return segments.size();

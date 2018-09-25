@@ -483,10 +483,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     static void linkSegments(@NonNull IBorderSegment[] list) throws ProfileException {
         if (list == null)
             throw new IllegalArgumentException("List of segments is null");
-
-//        if (list.length < 2)
-//            throw new IllegalArgumentException(String.format("Must have at least two segments (have %d)",list.length));
-
         for (int i = 0; i < list.length; i++) {
             IBorderSegment s = list[i];
             // Wrap indices
@@ -494,7 +490,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
             int n = i == list.length - 1 ? 0 : i + 1;
 
             if (i == 0) {
-
                 boolean lockState = s.isLocked();
                 s.setLocked(false);
                 try {
@@ -510,7 +505,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
             s.setPrevSegment(list[p]);
             s.setNextSegment(list[n]);
             s.setPosition(i);
-
         }
     }
 
@@ -522,7 +516,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @throws ProfileException
      */
     static void linkSegments(@NonNull List<IBorderSegment> list) throws ProfileException {
-//    	Logger.getLogger(PROGRAM_LOGGER).fine("Linking list of "+list.size()+" segments");
+
         for (int i = 0; i < list.size(); i++) {
             IBorderSegment s = list.get(i);
             // Wrap indices

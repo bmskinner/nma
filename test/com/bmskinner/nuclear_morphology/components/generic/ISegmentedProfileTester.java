@@ -382,7 +382,7 @@ public class ISegmentedProfileTester {
 	public void testGetSegmentNamesReturnsEmptyListWhenNoSegments() {
 		profile.clearSegments();
 	    List<String> result = profile.getSegmentNames();
-	    assertTrue(result.isEmpty());
+	    assertTrue(result.size()==1); // A profile always has a default segment
 	}
 
 	@Test
@@ -404,7 +404,7 @@ public class ISegmentedProfileTester {
 	@Test
 	public void testClearSegments() throws ProfileException {   
 	    profile.clearSegments();
-	    // A profile always has a default segment
+	 // A profile always has a default segment
 	    assertEquals(1, profile.getSegmentCount());
 	}
 	

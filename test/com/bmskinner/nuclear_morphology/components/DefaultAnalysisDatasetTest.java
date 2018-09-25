@@ -26,9 +26,11 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,6 +39,7 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -48,8 +51,16 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  *
  */
 public class DefaultAnalysisDatasetTest {
-    
-    private static IAnalysisDataset d;
+	
+	private static final long RNG_SEED = 1234;
+	
+	private static final int N_CELLS = 10;
+	
+	private static final int N_CHILD_DATASETS = 2;
+
+	private Logger logger;
+	
+    private IAnalysisDataset d;
     private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
     private static final UUID CHILD_ID_NULL = UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -60,33 +71,12 @@ public class DefaultAnalysisDatasetTest {
     
     @Before
     public void loadDataset() throws Exception {
-        d = SampleDatasetReader.openTestRodentDataset();
-        IAnalysisDataset child1 = mock(IAnalysisDataset.class);
-		when(child1.getId()).thenReturn(CHILD_ID_1);
-		IAnalysisDataset child2 = mock(IAnalysisDataset.class);
-		when(child2.getId()).thenReturn(CHILD_ID_2);
-		d.addChildDataset(child1);
-		d.addChildDataset(child2);
-    }
-
-    @Test
-    public void testGetChildUUIDs() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDeleteClusterGroup() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDefaultAnalysisDatasetICellCollection() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDefaultAnalysisDatasetICellCollectionFile() {
-        fail("Not yet implemented");
+    	d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+				.ofType(NucleusType.ROUND)
+				.withMaxSizeVariation(0)
+				.randomOffsetProfiles(true)
+				.numberOfClusters(N_CHILD_DATASETS)
+				.segmented().build();
     }
 
     @Test
@@ -95,95 +85,38 @@ public class DefaultAnalysisDatasetTest {
     	assertEquals(d, dup);
     }
 
-    @Test
-    public void testGetLogHandler() {
-        fail("Not yet implemented");
-    }
-
+  
     @Test
     public void testAddChildCollection() {
 
-        // Values that take ~half the dataset
-        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, 4850, 6000);
+    	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
+    	
+        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         UUID id = c.getID();
         
         d.addChildCollection(c);        
-        assertEquals(1, d.getChildCount());
+        assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
         assertEquals(c, d.getChildDataset(id).getCollection());
     }
 
     @Test
     public void testAddChildDataset() {
-     // Values that take ~half the dataset
-        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, 4850, 6000);
+    	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
+        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         IAnalysisDataset ch = new DefaultAnalysisDataset(c);
         UUID id = ch.getId();
         
         d.addChildDataset(ch);
-        assertEquals(1, d.getChildCount());
+        assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
         assertEquals(ch, d.getChildDataset(id));
     }
 
-    @Test
-    public void testGetSavePath() {
-        fail("Not yet implemented");
-    }
-
+  
     @Test
     public void testSetSavePath() {
         File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+"Test.nmd");
         d.setSavePath(f);
         assertEquals(f, d.getSavePath());
-    }
-
-    @Test
-    public void testGetAllChildUUIDs() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetChildDataset() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetMergeSource() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetAllMergeSources() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testAddMergeSource() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetMergeSources() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetMergeSourceIDs() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetAllMergeSourceIDs() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testHasMergeSourceUUID() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testHasMergeSourceIAnalysisDataset() {
-        fail("Not yet implemented");
     }
 
     @Test
@@ -193,102 +126,24 @@ public class DefaultAnalysisDatasetTest {
 
     @Test
     public void testGetChildCount() {
-        assertFalse(d.hasChildren());
-        assertEquals(0, d.getChildCount());
-        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, 4850, 6000);
+        assertEquals(N_CHILD_DATASETS, d.getChildCount());
+        int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
+        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         d.addChildCollection(c);  
-        assertTrue(d.hasChildren());
-        assertEquals(1, d.getChildCount());
+        assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
     }
 
-    @Test
-    public void testGetChildDatasets() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetAllChildDatasets() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetCollection() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetAnalysisOptions() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testHasAnalysisOptions() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testSetAnalysisOptions() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testRefreshClusterGroups() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testIsRoot() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testSetRoot() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDeleteChild() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDeleteMergeSource() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testToString() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testUpdateSourceImageDirectory() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testEqualsObject() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testAbstractAnalysisDataset() {
-        fail("Not yet implemented");
-    }
-
+  
     @Test
     public void testGetVersion() {
-        assertEquals(Version.v_1_13_8, d.getVersion());
+        assertEquals(Version.currentVersion(), d.getVersion());
     }
 
-    @Test
-    public void testGetUUID() {
-        fail("Not yet implemented");
-    }
+    
 
     @Test
     public void testGetName() {
-        assertEquals("Testing", d.getName());
+        assertEquals(TestDatasetBuilder.TEST_DATASET_NAME, d.getName());
     }
 
     @Test
@@ -300,9 +155,8 @@ public class DefaultAnalysisDatasetTest {
 
     @Test
     public void testSetDatasetColour() {
-        Paint c = ColourSelecter.getColor(0);
-        d.setDatasetColour(c);
-        assertEquals(c, d.getDatasetColour());
+        d.setDatasetColour(Color.RED);
+        assertEquals(Color.RED, d.getDatasetColour().get());
     }
 
     @Test
@@ -321,61 +175,11 @@ public class DefaultAnalysisDatasetTest {
     @Test
     public void testHasChildIAnalysisDataset() {
         
-        IAnalysisDataset child1 = mock(IAnalysisDataset.class);
-		when(child1.getId()).thenReturn(CHILD_ID_1);
-		
-		IAnalysisDataset childNull = mock(IAnalysisDataset.class);
-		when(childNull.getId()).thenReturn(CHILD_ID_NULL);
-		
-		assertTrue(d.hasChild(child1));
-		assertFalse(d.hasChild(childNull));
     }
 
     @Test
     public void testHasChildUUID() {
-    	assertTrue(d.hasChild(CHILD_ID_1));
-    	assertTrue(d.hasChild(CHILD_ID_2));
-    	assertFalse(d.hasChild(CHILD_ID_NULL));
-    }
-
-    @Test
-    public void testHasRecursiveChild() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testAddClusterGroup() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetMaxClusterGroupNumber() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testHasCluster() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetClusterGroups() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetClusterIDs() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testHasClusters() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testHasClusterGroup() {
-        fail("Not yet implemented");
+    	
     }
 
 }

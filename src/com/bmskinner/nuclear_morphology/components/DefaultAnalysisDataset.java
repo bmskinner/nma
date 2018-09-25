@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
@@ -92,19 +93,23 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public IAnalysisDataset duplicate() throws Exception {
-        IAnalysisDataset result = new DefaultAnalysisDataset(cellCollection);
-
-        List<ICell> l = new ArrayList<>();
-        for (final ICell c : cellCollection.getCells()) {
-            ICell n = new DefaultCell(c);
-            l.add(n);
-        }
+    	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection);
         
-        ICellCollection col = result.getCollection();
-        for (final ICell c : l)
-            col.addCell(c);
+        result.setAnalysisOptions(analysisOptions);
 
-        // TODO: Add child collections, clusters etc
+        result.cellCollection = cellCollection.duplicate();
+        
+        // copy child datasets
+        for(IAnalysisDataset child : this.getAllChildDatasets())
+        	result.addChildDataset(child.duplicate());
+        
+        // copy merge sources
+        for(IAnalysisDataset mge : this.getMergeSources())
+        	result.addMergeSource(mge.duplicate());
+        
+        result.setDatasetColour(datasetColour);
+        result.setRoot(isRoot);
+        
         return result;
     }
 
