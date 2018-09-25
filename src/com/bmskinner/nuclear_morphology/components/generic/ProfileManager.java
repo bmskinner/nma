@@ -89,9 +89,9 @@ public class ProfileManager implements Loggable {
      * Update the given tag in each nucleus of the collection to the index with
      * a best fit of the profile to the given median profile
      * 
-     * @param tag
-     * @param type
-     * @param median
+     * @param tag the tag to fit
+     * @param type the profile type to fit against
+     * @param median the template profile to offset against
      */
     public void updateTagToMedianBestFit(@NonNull Tag tag, @NonNull ProfileType type, @NonNull IProfile median) {
 

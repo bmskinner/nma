@@ -100,30 +100,29 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
 		finer("RP in default median is located at index " + rpIndex);
 
+		IProfile templateProfile = median.offset(rpIndex);
 		// Update the position of the RP in the nuclei to best fit the median
-		collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
+		collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 
 		// Regenerate the profile aggregates based on the new RP positions
 		collection.getProfileManager().recalculateProfileAggregates();
 		
+		// Test if the recalculated profile aggregate naturally puts the RP at zero
 		rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-		if(rpIndex != 0) 
-			warn("Could not assign RP cleanly");
 
-//		int coercionCounter = 0;
-//		while (rpIndex != 0) {
-//
-//			// Rebuild the median and offset the nuclei until the RP settles
-//			// at zero
-//			fine("Coercing RP to zero, round " + coercionCounter);
-//			coercionCounter++;
-//			rpIndex = coerceRPToZero(collection);
-//
-//			if (coercionCounter > 50) {
-//				warn("Unable to cleanly assign RP");
-//				break;
-//			}
-//		}
+		int coercionCounter = 0;
+		while (rpIndex != 0) {
+			// Rebuild the median and offset the nuclei until the RP settles
+			// at zero
+			fine("Coercing RP to zero, round " + coercionCounter);
+			coercionCounter++;
+			rpIndex = coerceRPToZero(collection);
+
+			if (coercionCounter > 50) {
+				warn("Unable to cleanly assign RP");
+				break;
+			}
+		}
 		identifyNonCoreTags(collection);
 	}
 
@@ -182,12 +181,13 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// If RP is not at zero, update
 		if (rpIndex != 0) {
-
+			
 			fine("RP in median is not yet at zero");
 			IProfile median = collection.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			IProfile templateProfile = median.offset(rpIndex);
 			// Update the offsets in the profile collection to the new RP
-			collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
+			collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 			collection.getProfileManager().recalculateProfileAggregates();
 
 			// Find the effects of the offsets on the RP
