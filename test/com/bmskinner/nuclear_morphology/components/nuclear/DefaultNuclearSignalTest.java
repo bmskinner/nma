@@ -41,6 +41,8 @@ public class DefaultNuclearSignalTest extends ComponentTest {
 	@Test
 	public void testDuplicate() throws Exception {
 		INuclearSignal dup = signal.duplicate();
-		testDuplicatesByField(signal, dup);
+		// Don't test the original, because test components override
+		// image methods, changing class signatures
+		testDuplicatesByField(dup.duplicate(), dup);
 	}
 }

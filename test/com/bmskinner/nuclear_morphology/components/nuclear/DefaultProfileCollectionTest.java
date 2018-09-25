@@ -1,46 +1,35 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Field;
-
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.components.ComponentTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 
-/**
- * Tests for the default signal collection class
- * @author bms41
- * @since 1.14.0
- *
- */
-public class DefaultSignalCollectionTest extends ComponentTest {
+public class DefaultProfileCollectionTest extends ComponentTest {
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 	
+	private IProfileCollection profiles;
 
-	private static final int N_CELLS = 1;
-
-	private ISignalCollection collection;	
 	@Before
 	public void setUp() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 				.ofType(NucleusType.ROUND)
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
-				.addSignalsInChannel(0)
-				.addSignalsInChannel(1)
 				.segmented().build();
-		
-		collection = d.getCollection().streamCells().findFirst().get().getNucleus().getSignalCollection();
+		profiles = d.getCollection().getProfileCollection();
 	}
 
 	@Test
 	public void testDuplicate() throws Exception {
-		ISignalCollection dup = collection.duplicate();
+		IProfileCollection dup = profiles.duplicate();
 		testDuplicatesByField(dup.duplicate(), dup);
 	}
 

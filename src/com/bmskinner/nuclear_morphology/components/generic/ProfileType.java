@@ -33,8 +33,7 @@ public enum ProfileType {
     DIAMETER("Diameter profile", "Distance across CoM", StatisticDimension.LENGTH), 
     RADIUS("Radius profile", "Distance from CoM", StatisticDimension.LENGTH),
     ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", StatisticDimension.DIMENSIONLESS),
-//    P2P("P2P", "Path length", StatisticDimension.LENGTH), // compatability with old version only
-    ZAHN_ROSKIE("Zahn-Roskies legacy profile", "Angle delta", StatisticDimension.DIMENSIONLESS); // type, only kept for 1.13.5 compat. 
+    ZAHN_ROSKIE("Zahn-Roskies legacy profile", "Angle delta", StatisticDimension.DIMENSIONLESS); // typo, only kept for 1.13.5 compat. 
 
     private String             name;
     private String             label;
@@ -45,8 +44,7 @@ public enum ProfileType {
      * 
      * @param name the name of the profile for display
      * @param label the label to use on chart axes with this profile
-     * @param dimension
-     *            the statistical dimension the profile covers
+     * @param dimension the statistical dimension the profile covers
      */
     ProfileType(String name, String label, StatisticDimension dimension) {
         this.name = name;
@@ -92,7 +90,7 @@ public enum ProfileType {
      * @return
      */
     public static ProfileType[] displayValues() {
-        ProfileType[] array = { ANGLE, DIAMETER, RADIUS, ZAHN_ROSKIES };
+        ProfileType[] array = { ANGLE, DIAMETER, RADIUS };
         return array;
     }
 }

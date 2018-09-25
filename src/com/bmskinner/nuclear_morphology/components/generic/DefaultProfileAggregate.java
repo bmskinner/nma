@@ -18,8 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -37,15 +36,17 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
-    private final float[][] aggregate;   // the values samples per profile
-    private final int       length;      // the length of the aggregate (the
-                                         // median array length of a population
-                                         // usually)
-    private final int       profileCount;
+	/** the values samples per profile */
+    private final float[][] aggregate;  
+    
+    /** the length of the aggregate */
+    private final int length; 
+    
+    /** the number of profiles in the aggregate */
+    private final int profileCount;
 
-    private int counter = 0; // track the number of profiles added to the
-                             // aggregate
-
+    /** track the number of profiles added to the aggregate */
+    private int counter = 0;
 
     /**
      * Create specifying the length of the profile, and the number of profiles expected
@@ -59,8 +60,18 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
         this.profileCount = profileCount;
 
         aggregate = new float[length][profileCount];
-
     }
+    
+	@Override
+	public IProfileAggregate duplicate() {
+		DefaultProfileAggregate result = new DefaultProfileAggregate(length,profileCount);
+		for(int i=0; i<aggregate.length; i++)
+			for(int j=0; j<aggregate[0].length; j++)
+				result.aggregate[i][j] = aggregate[i][j];
+		return result;
+	}
+    
+    
 
     @Override
 	public void addValues(@NonNull final IProfile profile) throws ProfileException {
@@ -208,4 +219,38 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
     public IProfile getQuartile(double quartile) throws ProfileException {
         return getQuartile((float) quartile);
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.deepHashCode(aggregate);
+		result = prime * result + counter;
+		result = prime * result + length;
+		result = prime * result + profileCount;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultProfileAggregate other = (DefaultProfileAggregate) obj;
+		if (!Arrays.deepEquals(aggregate, other.aggregate))
+			return false;
+		if (counter != other.counter)
+			return false;
+		if (length != other.length)
+			return false;
+		if (profileCount != other.profileCount)
+			return false;
+		return true;
+	}
+    
+    
+
 }

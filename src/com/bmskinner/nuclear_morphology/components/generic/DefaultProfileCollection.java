@@ -73,7 +73,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 	public IProfileCollection duplicate() {
 		DefaultProfileCollection pc = new DefaultProfileCollection();
 		
-		pc.length = length;
 		for(Tag t : indexes.keySet())
 			pc.indexes.put(t, indexes.get(t));
 		
@@ -81,6 +80,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 		for(int i=0; i<segments.length; i++)
 			pc.segments[i] = segments[i].copy();
 		
+		pc.length = length;
+		for(ProfileType t : map.keySet())
+			pc.map.put(t, map.get(t).duplicate());
+		
+		pc.cache = cache.duplicate();
 		return pc;
 	}
     
@@ -541,7 +545,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        map = new HashMap<ProfileType, IProfileAggregate>();
+        map = new HashMap<>();
         cache = new ProfileCache();
     }
 
@@ -659,9 +663,23 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         }
 
-        private Map<ProfileKey, IProfile> map = new HashMap<ProfileKey, IProfile>();
+        private Map<ProfileKey, IProfile> map = new HashMap<>();
 
         public ProfileCache() {
+        }
+        
+        public ProfileCache duplicate() {
+        	ProfileCache result = new ProfileCache();
+        	try {
+        		for(ProfileKey k : map.keySet()) {
+        			IProfile p = map.get(k);
+        			if(p!=null)
+        				result.map.put(k, p.copy());
+        		}
+        	} catch(ProfileException e) {
+
+        	}
+        	return result;
         }
 
         /**

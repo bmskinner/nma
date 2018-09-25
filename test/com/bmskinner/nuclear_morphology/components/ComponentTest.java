@@ -1,14 +1,15 @@
 package com.bmskinner.nuclear_morphology.components;
 
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
-
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 
 /**
  * Base class for the component tests
@@ -19,6 +20,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 public abstract class ComponentTest {
 	
 	protected static final long RNG_SEED = 1234;
+	protected static final int N_CELLS = 10;
 	protected Logger logger;
 	
 	/**
@@ -26,7 +28,7 @@ public abstract class ComponentTest {
 	 * @param type
 	 * @return
 	 */
-	protected List<Field> getInheritedPrivateFields(Class<?> type) {
+	private List<Field> getInheritedPrivateFields(Class<?> type) {
 	    List<Field> result = new ArrayList<>();
 
 	    Class<?> i = type;
@@ -46,11 +48,24 @@ public abstract class ComponentTest {
 	 */
 	protected void testDuplicatesByField(Object original, Object dup) throws Exception {
 		for(Field f : getInheritedPrivateFields(dup.getClass())) {
-			f.setAccessible(true);			 
-			assertEquals(f.getName(), f.get(original), f.get(dup));
+			f.setAccessible(true);	
+
+			if(f.getType().equals(SoftReference.class))
+				continue;
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.DefaultCellularComponent$ShapeCache")))
+				continue;
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection$ProfileCache")))
+				continue;	
+			Object oValue = f.get(original);
+			Object dValue  = f.get(dup);
+			
+			int oHash = oValue==null?-1:oValue.hashCode();
+			int dHash = dValue==null?-1:dValue.hashCode();
+			
+			assertThat(f.getName()+": hashcodes: original "+oHash+" | dup "+dHash, oValue, equalTo(dValue));
 		}
 
-		assertEquals(original, dup);
+		assertEquals("Equals method", original, dup);
 	}
 
 }

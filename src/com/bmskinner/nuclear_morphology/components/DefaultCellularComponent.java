@@ -309,21 +309,19 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
             DefaultCellularComponent comp = (DefaultCellularComponent) a;
 
-            this.xpoints = Arrays.copyOf(comp.xpoints, comp.xpoints.length);
+            this.xpoints = Arrays.copyOfRange(comp.xpoints, 0, comp.xpoints.length);
             this.ypoints = Arrays.copyOf(comp.ypoints, comp.ypoints.length);
             makeBorderList();
 
         } else {
             duplicateBorderList(a);
         }
-        finest("Created border list");
-
     }
 
     private void duplicateBorderList(CellularComponent c) {
         // Duplicate the border points
     	finest("Duplicating border list from template component");
-        this.borderList = new ArrayList<IBorderPoint>(c.getBorderLength());
+        this.borderList = new ArrayList<>(c.getBorderLength());
 
         for (IBorderPoint p : c.getBorderList()) {
             borderList.add(IBorderPoint.makeNew(p));

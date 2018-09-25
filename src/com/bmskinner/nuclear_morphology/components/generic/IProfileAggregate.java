@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -30,6 +28,12 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
  *
  */
 public interface IProfileAggregate {
+	
+	/**
+	 * Create a copy of this aggregate
+	 * @return
+	 */
+	IProfileAggregate duplicate();
 
     /**
      * Add the values from the given profile to the aggregate via interpolation

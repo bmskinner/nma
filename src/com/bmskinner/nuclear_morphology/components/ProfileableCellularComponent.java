@@ -77,7 +77,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
     protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
-    protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<>(5);
+    protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<>();
 
     /**
      * The indexes of tags in the profiles and border list
@@ -130,18 +130,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
                 try {
                     ISegmentedProfile oldProfile = comp.getProfile(type);
-                    ISegmentedProfile newProfile = oldProfile.copy();
-                    
-                    List<UUID> oldIds = oldProfile.getSegmentIDs();
-                    List<UUID> newIds = newProfile.getSegmentIDs();
-                    
-                    
-                    for(int i=0; i<oldIds.size(); i++){
-                        if(!oldIds.get(i).equals(newIds.get(i)))
-                            throw new UnprofilableObjectException("Segment ID lists did not copy correctly for "+type);
-                    }
-
-                    this.profileMap.put(type, newProfile);
+                    this.profileMap.put(type, oldProfile.copy());
 
                 } catch (UnavailableProfileTypeException e) {
                     stack("Cannot get profile type " + type + " from template", e);
@@ -150,9 +139,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                     stack("Cannot make new profile type " + type + " from template", e);
                     warn("Error copying profile");
                 }
-
             }
-
             this.setBorderTags(comp.getBorderTags());
 
             this.segsLocked = comp.isLocked();
@@ -161,6 +148,32 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
         
     }
+    
+    /**
+     * Used when duplicating components
+     * @param c
+     * @throws UnprofilableObjectException
+     */
+    protected ProfileableCellularComponent(@NonNull final ProfileableCellularComponent c) throws UnprofilableObjectException {
+    	 super(c);
+
+    	 this.angleWindowProportion = c.angleWindowProportion;
+         this.angleProfileWindowSize = c.angleProfileWindowSize;
+         for(Tag t : c.borderTags.keySet())
+        	 borderTags.put(t, c.borderTags.get(t));
+         this.segsLocked = c.segsLocked;
+         
+         for (ProfileType type : c.profileMap.keySet()) {
+             try {
+                 this.profileMap.put(type, c.profileMap.get(type).copy());
+
+             } catch (ProfileException e) {
+                 stack("Cannot make new profile type " + type + " from template", e);
+                 warn("Error copying profile");
+             }
+         }
+    }
+    
 
     /*
      * Finds the key points of interest around the border of the Nucleus. Can

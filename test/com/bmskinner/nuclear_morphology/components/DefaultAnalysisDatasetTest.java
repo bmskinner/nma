@@ -78,7 +78,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTest {
     @Test
     public void testDuplicate() throws Exception {
     	IAnalysisDataset dup = d.duplicate();
-    	testDuplicatesByField(d, dup);
+    	testDuplicatesByField(dup.duplicate(), dup);
     }
 
   

@@ -174,7 +174,8 @@ public class TestComponentFactory {
 		File f = new File("empty file");
 		
 		INuclearSignal s = new DefaultNuclearSignal(roi, com, f, channel, position) {
-			
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public ImageProcessor getGreyscaleImage() {
 				return getImage();

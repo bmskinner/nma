@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  *
  */
 public class DefaultCellCollectionTest extends ComponentTest {
-	private static final long RNG_SEED = 1234;
+
 	private static final int N_CELLS = 10;
 	private static final int N_CHILD_DATASETS = 2;
 
@@ -60,14 +60,7 @@ public class DefaultCellCollectionTest extends ComponentTest {
     @Test
     public void testDuplicate() throws Exception {
     	ICellCollection dup = c.duplicate();
-    	testDuplicatesByField(c, dup);
-//
-//    	assertEquals("Id", c.getID(), dup.getID());
-//    	assertEquals("Signal group ids", c.getSignalGroupIDs(), dup.getSignalGroupIDs());
-//    	assertEquals("Signal groups", c.getSignalGroups(), dup.getSignalGroups());
-//    	assertEquals("Folder", c.getFolder(), dup.getFolder());
-//    	assertEquals("Output folder", c.getOutputFolder(), dup.getOutputFolder());
-//    	assertEquals("Output folder name", c.getOutputFolderName(), dup.getOutputFolderName());
+    	testDuplicatesByField(dup.duplicate(), dup);
     }
         
     @Test
