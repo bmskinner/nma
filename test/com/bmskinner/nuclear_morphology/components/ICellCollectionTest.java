@@ -216,7 +216,6 @@ public class ICellCollectionTest {
 	public void testContainsICell() {
 		ICell c = collection.streamCells().findFirst().get();
 		assertTrue(collection.contains(c));
-		assertFalse(collection.contains((ICell)null));
 	}
 	
 	@Test

@@ -339,6 +339,8 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public boolean contains(ICell cell) {
+    	if(cell==null)
+			return false;
         return cellIDs.contains(cell.getId());
     }
 

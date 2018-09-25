@@ -280,23 +280,16 @@ public class DefaultCellCollection implements ICellCollection {
 	public synchronized void removeCell(@NonNull ICell c) {
 		if(c==null)
 			return;
-		// TODO: There is a dodgy hashCode or equals somewhere preventing removal
-//		log("Now "+cells.size()+" cells");
-//		log("Test: "+c.hashCode());
-		cells.remove(c);
-//		if(!cells.remove(c)) {
-//			log("Unable to remove element");
-//			Iterator<ICell> it = cells.iterator();
-//			while(it.hasNext()) {
-//				ICell test = it.next();
-//				if(test.getId().equals(c.getId())) {
-//					log("Real: "+test.hashCode());
-//					log("Equals: "+test.equals(c));
-//					it.remove();
-//					log("Tried removing");
-//					log("Now "+cells.size()+" cells");
-//				}
-//			}
+
+		// Since cell hashcodes change during profiling and segmentation,
+		// we can't just use cells.remove(c).
+
+		Set<ICell> newCells = new HashSet<>();
+		for(ICell cell : cells)
+			if(!cell.getId().equals(c.getId()))
+				newCells.add(cell);
+		
+		cells = newCells;
 	}
 
 	@Override
@@ -1116,6 +1109,8 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean contains(ICell c) {
+		if(c==null)
+			return false;
 		return contains(c.getId());
 	}
 
