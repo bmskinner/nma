@@ -37,6 +37,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface ICell extends Serializable, Loggable, Statistical, Comparable<ICell> {
 
+	/**
+	 * Create a copy of this cell
+	 * @return
+	 */
+	ICell duplicate();
+	
     /**
      * Get the ID of the cell
      * 

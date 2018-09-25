@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -50,16 +51,11 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  * @since 1.13.8
  *
  */
-public class DefaultAnalysisDatasetTest {
-	
-	private static final long RNG_SEED = 1234;
-	
+public class DefaultAnalysisDatasetTest extends ComponentTest {
+		
 	private static final int N_CELLS = 10;
 	
 	private static final int N_CHILD_DATASETS = 2;
-
-	private Logger logger;
-	
     private IAnalysisDataset d;
     private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -73,7 +69,7 @@ public class DefaultAnalysisDatasetTest {
     public void loadDataset() throws Exception {
     	d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 				.ofType(NucleusType.ROUND)
-				.withMaxSizeVariation(0)
+				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)
 				.segmented().build();
@@ -82,7 +78,7 @@ public class DefaultAnalysisDatasetTest {
     @Test
     public void testDuplicate() throws Exception {
     	IAnalysisDataset dup = d.duplicate();
-    	assertEquals(d, dup);
+    	testDuplicatesByField(d, dup);
     }
 
   

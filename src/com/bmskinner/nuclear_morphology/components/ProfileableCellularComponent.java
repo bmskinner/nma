@@ -175,7 +175,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public void initialise(double proportion) throws ComponentCreationException {
         if (proportion <= 0 || proportion >= 1)
             throw new ComponentCreationException("Must have a value between 0-1");
-
+        
         angleWindowProportion = proportion;
         double perimeter = getStatistic(PlottableStatistic.PERIMETER);
 

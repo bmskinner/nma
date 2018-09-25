@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.components;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Field;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,43 +36,40 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  * @since 1.13.8
  *
  */
-public class DefaultCellCollectionTest {
-	
+public class DefaultCellCollectionTest extends ComponentTest {
 	private static final long RNG_SEED = 1234;
+	private static final int N_CELLS = 10;
+	private static final int N_CHILD_DATASETS = 2;
+
     private ICellCollection c;
     
     @Rule
     public final ExpectedException exception = ExpectedException.none();
     
     @Before
-    public void loadDataset() throws Exception {
-    	IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
+    public void setUp() throws Exception {
+    	IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 				.ofType(NucleusType.ROUND)
+				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
+				.numberOfClusters(N_CHILD_DATASETS)
 				.segmented().build();
-        c = d.getCollection();
+    	c = d.getCollection();
     }
     
     @Test
-    public void testDefaultCellCollectionFileStringStringNucleusType() {
-        fail("Not yet implemented");
+    public void testDuplicate() throws Exception {
+    	ICellCollection dup = c.duplicate();
+    	testDuplicatesByField(c, dup);
+//
+//    	assertEquals("Id", c.getID(), dup.getID());
+//    	assertEquals("Signal group ids", c.getSignalGroupIDs(), dup.getSignalGroupIDs());
+//    	assertEquals("Signal groups", c.getSignalGroups(), dup.getSignalGroups());
+//    	assertEquals("Folder", c.getFolder(), dup.getFolder());
+//    	assertEquals("Output folder", c.getOutputFolder(), dup.getOutputFolder());
+//    	assertEquals("Output folder name", c.getOutputFolderName(), dup.getOutputFolderName());
     }
-
-    @Test
-    public void testDefaultCellCollectionFileStringStringNucleusTypeUUID() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDefaultCellCollectionIAnalysisDatasetString() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDefaultCellCollectionICellCollectionString() {
-        fail("Not yet implemented");
-    }
-    
+        
     @Test
 	public void testIsVirtual() {
 		assertFalse(c.isVirtual());

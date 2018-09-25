@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.junit.Before;
@@ -83,7 +84,7 @@ public class NucleusTest {
 		// are created fresh from the appropriate class.
 		return Arrays.asList(DefaultNucleus.class);
 	}
-
+	
 	@Test
 	public void testMinDiameter() throws Exception {
 		double expected = 100;

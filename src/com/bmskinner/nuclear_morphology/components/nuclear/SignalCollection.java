@@ -90,13 +90,13 @@ public class SignalCollection implements ISignalCollection {
         }
 
     }
+    
+    @Override
+	public ISignalCollection duplicate() {
+		return new SignalCollection(this);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#addSignalGroup(java.util.List,
-     * java.util.UUID, java.io.File, int)
-     */
+
     @Override
     public void addSignalGroup(List<INuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel) {
         if (list == null || Integer.valueOf(sourceChannel) == null || sourceFile == null || groupID == null) {

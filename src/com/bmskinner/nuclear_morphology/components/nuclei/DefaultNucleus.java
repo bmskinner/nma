@@ -137,14 +137,18 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
             setBorderTag(Tag.REFERENCE_POINT, rpIndex);
             setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
+            
+//            int prevBorderLength = getBorderLength();
 
             if (!this.isProfileOrientationOK() && canReverse) {
                 reverse();
-
+//                if(getBorderLength()!=prevBorderLength)
+//                	System.out.println(String.format("Border length changed from %s to %s", prevBorderLength, getBorderLength()));
                 // the number of border points can change when reversing
                 // due to float interpolation from different starting positions
-                // so do the whole thing again
-                initialise(this.getWindowProportion(ProfileType.ANGLE));
+                // so initialise from scratch
+                profileMap.clear();
+                initialise(angleWindowProportion);
                 canReverse = false;
                 findPointsAroundBorder();
             }

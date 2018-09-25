@@ -210,7 +210,7 @@ public class DefaultCellCollection implements ICellCollection {
 		result.ruleSets = ruleSets;
 		
 		for(ICell c : this)
-			result.addCell(new DefaultCell(c));
+			result.addCell(c.duplicate());
 		
 		result.consensusNucleus = consensusNucleus==null? null : consensusNucleus.duplicate();
 		result.profileCollection = profileCollection.duplicate();

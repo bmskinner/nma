@@ -84,6 +84,11 @@ public class Cell implements ICell {
             // acrosomes.add(new Acrosome(a));
         }
     }
+    
+    @Override
+    public ICell duplicate() {
+    	return new Cell(this);
+    }
 
     /*
      * (non-Javadoc)

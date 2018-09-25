@@ -54,6 +54,11 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
         super(n);
         this.closestNuclearBorderPoint = n.getClosestBorderPoint();
     }
+    
+    @Override
+    public INuclearSignal duplicate() {
+    	return new DefaultNuclearSignal(this);
+    }
 
     @Override
     public int getClosestBorderPoint() {
@@ -66,12 +71,31 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
     }
 
     @Override
-    public INuclearSignal duplicate() {
-        return new DefaultNuclearSignal(this);
-    }
-
-    @Override
     public void alignVertically() {
         // TODO Auto-generated method stub
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + closestNuclearBorderPoint;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultNuclearSignal other = (DefaultNuclearSignal) obj;
+		if (closestNuclearBorderPoint != other.closestNuclearBorderPoint)
+			return false;
+		return true;
+	}
+    
+    
 }

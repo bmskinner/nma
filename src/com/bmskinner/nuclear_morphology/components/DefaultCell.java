@@ -54,11 +54,8 @@ public class DefaultCell implements ICell {
     protected volatile ICytoplasm           cytoplasm = null;
     protected volatile List<Nucleus>        nuclei;
 
-    private volatile Map<PlottableStatistic, Double> statistics; // The
-                                                                 // statistical
-                                                                 // values
-                                                                 // stored for
-                                                                 // this object
+    /** The statistical values stored for this object */
+    private volatile Map<PlottableStatistic, Double> statistics;
 
     /**
      * Create a new cell with a random ID
@@ -84,8 +81,7 @@ public class DefaultCell implements ICell {
     /**
      * Create a new cell based on the given nucleus. The nucleus is NOT copied.
      * 
-     * @param n
-     *            the template nucleus for the cell
+     * @param n the template nucleus for the cell
      */
     public DefaultCell(Nucleus n) {
         this();
@@ -113,22 +109,22 @@ public class DefaultCell implements ICell {
 
         this.uuid = c.getId();
 
-        nuclei = new ArrayList<Nucleus>(0);
+        nuclei = new ArrayList<>(0);
         for (Nucleus m : c.getNuclei()) {
             nuclei.add(m.duplicate());
         }
 
-        mitochondria = new ArrayList<IMitochondrion>(0);
+        mitochondria = new ArrayList<>(0);
         for (IMitochondrion m : c.getMitochondria()) {
             mitochondria.add(m.duplicate());
         }
 
-        tails = new ArrayList<Flagellum>(0);
+        tails = new ArrayList<>(0);
         for (Flagellum f : c.getFlagella()) {
             tails.add(f.duplicate());
         }
 
-        acrosomes = new ArrayList<IAcrosome>(0);
+        acrosomes = new ArrayList<>(0);
         for (IAcrosome a : c.getAcrosomes()) {
             acrosomes.add(a.duplicate());
         }
@@ -136,24 +132,21 @@ public class DefaultCell implements ICell {
         if (c.hasCytoplasm())
             this.cytoplasm = c.getCytoplasm().duplicate();
 
-        statistics = new HashMap<PlottableStatistic, Double>();
+        statistics = new HashMap<>();
+        for(PlottableStatistic stat : c.getStatistics())
+        	statistics.put(stat, c.getStatistic(stat));
+    }
+    
+    @Override
+    public ICell duplicate() {
+    	return new DefaultCell(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#getId()
-     */
     @Override
     public @NonNull UUID getId() {
         return uuid;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#getNucleus()
-     */
     @Override
     public Nucleus getNucleus() {
         return nuclei.get(0);

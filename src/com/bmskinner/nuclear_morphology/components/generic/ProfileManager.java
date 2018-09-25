@@ -234,11 +234,11 @@ public class ProfileManager implements Loggable {
 
         finer("Updating border tag " + tag);
 
-//        if (tag.equals(Tag.REFERENCE_POINT)) {
-////            updateRP(index);
-//        	warn("Disabled RP updates in ProfileManager:245 for now");
-//            return;
-//        }
+        if (tag.equals(Tag.REFERENCE_POINT)) {
+//            updateRP(index);
+        	warn("Disabled RP updates in ProfileManager:239 for now");
+            return;
+        }
 
         if (tag.type().equals(BorderTagType.CORE)) {
             finer("Updating core border tag");

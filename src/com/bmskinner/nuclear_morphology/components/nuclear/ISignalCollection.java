@@ -43,6 +43,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public interface ISignalCollection extends Serializable, Loggable {
+	
+	/**
+	 * Create a copy of this collection
+	 * @return
+	 */
+	ISignalCollection duplicate();
 
     /**
      * Add a list of nuclear signals to the collection

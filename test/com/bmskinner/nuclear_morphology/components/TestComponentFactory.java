@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.components;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.awt.Color;
 import java.io.File;
@@ -230,7 +231,7 @@ public class TestComponentFactory {
 	}
 	
 	@Test
-	public void testOffsettingWitArrayLengthOffset() {
+	public void testOffsettingWithArrayLengthOffset() {
 		int[] arr = { 1, 2, 3, 4, 5 };
 		int offset = arr.length;
 		int[] exp = { 1, 2, 3, 4, 5 };
@@ -238,5 +239,55 @@ public class TestComponentFactory {
 		int[] res = offsetArray(arr, offset);
 		assertArrayEquals(exp, res);
 	}
+	
+	@Test
+	public void testCellCreatedWithDefaultVariables() throws ComponentCreationException {
+		ICell c = new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
+				TestDatasetBuilder.DEFAULT_BASE_HEIGHT, TestDatasetBuilder.DEFAULT_X_BASE, 
+				TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION, 
+				TestDatasetBuilder.DEFAULT_BORDER_OFFSET));
+	}
+	
+	@Test
+	public void testCellCreatedWithVariableBorderOffset() throws ComponentCreationException {
+		int max = (TestDatasetBuilder.DEFAULT_BASE_WIDTH+TestDatasetBuilder.DEFAULT_BASE_HEIGHT)*2;
+
+		for(int offset=0; offset<max; offset++) {
+			try {
+			ICell c = new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
+					TestDatasetBuilder.DEFAULT_BASE_HEIGHT, TestDatasetBuilder.DEFAULT_X_BASE, 
+					TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION, offset));
+			} catch(ComponentCreationException e) {
+				e.printStackTrace();
+				fail("Component creation failure for offset "+offset);
+			}
+		}
+		
+	}
+	
+//	@Test
+//	public void testCellCreatedWithChangingVariables() throws ComponentCreationException {
+//		int variation = 10;
+//		for(int w=TestDatasetBuilder.DEFAULT_BASE_WIDTH-variation; w<TestDatasetBuilder.DEFAULT_BASE_WIDTH+variation; w++) {
+//
+//			for(int h=TestDatasetBuilder.DEFAULT_BASE_HEIGHT-variation; h<TestDatasetBuilder.DEFAULT_BASE_HEIGHT+variation; h++) {
+//
+//				for(int x=TestDatasetBuilder.DEFAULT_X_BASE-variation; x<TestDatasetBuilder.DEFAULT_X_BASE+variation; x++) {
+//
+//					for(int y=TestDatasetBuilder.DEFAULT_Y_BASE-variation; y<TestDatasetBuilder.DEFAULT_Y_BASE+variation; y++) {
+//
+//						for(int offset=0; offset<TestDatasetBuilder.DEFAULT_BORDER_OFFSET+variation; offset++) {
+//							System.out.println(String.format("W %s H %s X %s Y %s Offset %s", w, h, x, y, offset));
+//							ICell c = new DefaultCell(rectangularNucleus(w, h, x, y, 
+//									TestDatasetBuilder.DEFAULT_ROTATION, offset));
+//						}
+//					}
+//
+//				}
+//
+//			}
+//
+//		}
+//	}
 
 }

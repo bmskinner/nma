@@ -50,10 +50,8 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 public class DefaultSignalCollection implements ISignalCollection {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Holds the signals
-     */
-    private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
+    /** Holds the signals */
+    private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<>();
 
     /**
      * Create an empty signal collection
@@ -72,23 +70,20 @@ public class DefaultSignalCollection implements ISignalCollection {
 
         for (UUID group : s.getSignalGroupIds()) {
 
-            List<INuclearSignal> list = new ArrayList<INuclearSignal>();
-
-            for (INuclearSignal signal : s.getSignals(group)) {
+            List<INuclearSignal> list = new ArrayList<>();
+            for (INuclearSignal signal : s.getSignals(group))
                 list.add(signal.duplicate());
-            }
 
             collection.put(group, list);
         }
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#addSignalGroup(java.util.List,
-     * java.util.UUID, java.io.File, int)
-     */
+	@Override
+	public ISignalCollection duplicate() {
+		return new DefaultSignalCollection(this);
+	}
+    
     @Override
     public void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID, @NonNull File sourceFile, int sourceChannel) {
         if (list == null || Integer.valueOf(sourceChannel) == null || sourceFile == null || groupID == null) {
@@ -98,23 +93,11 @@ public class DefaultSignalCollection implements ISignalCollection {
         collection.put(groupID, list);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#getSignalGroupIDs()
-     */
     @Override
     public Set<UUID> getSignalGroupIds() {
         return collection.keySet();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#updateSignalGroupID(java.util.UUID,
-     * java.util.UUID)
-     */
     @Override
     public void updateSignalGroupId(@NonNull UUID oldID, @NonNull UUID newID) {
 
@@ -445,10 +428,8 @@ public class DefaultSignalCollection implements ISignalCollection {
      * groups. Each signal is considered only once. Hence a group with 4 signals
      * compared to a group with 3 signals will produce a list of 3 values.
      * 
-     * @param id1
-     *            the first signal group
-     * @param id2
-     *            the second signal group
+     * @param id1 the first signal group
+     * @param id2  the second signal group
      * @return a list of the pixel distances between paired signals
      */
     public List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2) {
@@ -469,12 +450,9 @@ public class DefaultSignalCollection implements ISignalCollection {
     /**
      * Recursively find signal pairs with the shortest distance between them.
      * 
-     * @param d1
-     *            the nuclear signals in group 1
-     * @param d2
-     *            the nuclear signals in group 2
-     * @param scale
-     *            the measurement scale
+     * @param d1  the nuclear signals in group 1
+     * @param d2 the nuclear signals in group 2
+     * @param scale  the measurement scale
      * @return a list of best colocalising signals
      */
     private List<Colocalisation<INuclearSignal>> findColocalisingSignals(@NonNull Set<INuclearSignal> d1,
@@ -528,11 +506,6 @@ public class DefaultSignalCollection implements ISignalCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#toString()
-     */
     @Override
     public String toString() {
 
@@ -559,4 +532,33 @@ public class DefaultSignalCollection implements ISignalCollection {
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((collection == null) ? 0 : collection.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultSignalCollection other = (DefaultSignalCollection) obj;
+		if (collection == null) {
+			if (other.collection != null)
+				return false;
+		} else if (!collection.equals(other.collection))
+			return false;
+		return true;
+	}
+    
+    
+
+
 }
