@@ -95,5 +95,13 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_7));
     }
+    
+    @Override
+    @Test
+	public void test_1_13_8_ConvertsToCurrent() throws Exception {
+		 File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_8, ROUND_FILE);
+	        IAnalysisDataset d = testConvertsToCurrent(f);
+	        assertTrue(d.getVersion().equals(Version.v_1_13_8));
+	}
 
 }

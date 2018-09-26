@@ -88,20 +88,6 @@ public class RunProfilingAction extends SingleDatasetResultAction {
         // The analysis takes place in a new thread to accomodate refolding.
         // See specific comment in RunSegmentationAction
         Runnable task = () -> {
-
-            // public void run(){
-
-//            if ((downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS) {
-//
-//                final CountDownLatch latch = new CountDownLatch(1);
-//                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, progressAcceptors.get(0), eh, latch);
-//                r.run();
-//                try {
-//                    latch.await();
-//                } catch (InterruptedException e) {
-//                    error("Interruption in segmentation thread", e);
-//                }
-//            }
             
             getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
 
@@ -131,6 +117,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
                 p.run();
 
             }
+            countdownLatch();
         };
 
         ThreadManager.getInstance().execute(task);

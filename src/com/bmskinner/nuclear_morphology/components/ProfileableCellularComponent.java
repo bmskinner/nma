@@ -72,29 +72,22 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * The proportion of the perimeter to use for profiling
-     */
+    /** The proportion of the perimeter to use for profiling */
     protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
+    /** The profiles for this object */
     protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<>();
 
-    /**
-     * The indexes of tags in the profiles and border list
-     */
+    /** The indexes of tags in the profiles and border list */
     protected Map<Tag, Integer> borderTags = new HashMap<>();
 
-    protected boolean segsLocked = false; // allow locking of segments and tags if
-                                        // manually assigned
+    /** allow locking of segments and tags */
+    protected boolean segsLocked = false;
 
-    /*
-     * TRANSIENT FIELDS
-     */
+    /*  TRANSIENT FIELDS  */
 
-    protected transient int angleProfileWindowSize; // the chosen window size
-                                                    // for the nucleus based on
-                                                    // proportion
-
+    /** The chosen window size based on the window proportion */
+    protected transient int angleProfileWindowSize;
 
     /**
      * Construct with an ROI, a source image and channel, and the original

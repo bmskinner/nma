@@ -39,15 +39,15 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  */
 public abstract class OldFormatConverterTest {
     
-    protected static final String DIR_1_13_0 = "1.13.0/";
-    protected static final String DIR_1_13_1 = "1.13.1/";
-    protected static final String DIR_1_13_2 = "1.13.2/";
-    protected static final String DIR_1_13_3 = "1.13.3/";
-    protected static final String DIR_1_13_4 = "1.13.4/";
-    protected static final String DIR_1_13_5 = "1.13.5/";
-    protected static final String DIR_1_13_6 = "1.13.6/";
-    protected static final String DIR_1_13_7 = "1.13.7/";
-    
+	public static final String DIR_1_13_0 = "1.13.0/";
+	public static final String DIR_1_13_1 = "1.13.1/";
+	public static final String DIR_1_13_2 = "1.13.2/";
+	public static final String DIR_1_13_3 = "1.13.3/";
+	public static final String DIR_1_13_4 = "1.13.4/";
+	public static final String DIR_1_13_5 = "1.13.5/";
+	public static final String DIR_1_13_6 = "1.13.6/";
+	public static final String DIR_1_13_7 = "1.13.7/";
+	public static final String DIR_1_13_8 = "1.13.8/";
     
     /**
      * Try to open the dataset in the given file and test if it is valid after any conversions
@@ -56,6 +56,8 @@ public abstract class OldFormatConverterTest {
      * @throws Exception
      */
     protected IAnalysisDataset testConvertsToCurrent(File f) throws Exception {
+    	if(!f.exists())
+    		fail("Test file does not exist: "+f.getAbsolutePath());
         IAnalysisDataset d = SampleDatasetReader.openDataset(f);
         DatasetValidator v = new DatasetValidator();
         assertTrue(v.validate(d));
@@ -85,5 +87,8 @@ public abstract class OldFormatConverterTest {
     
     @Test
     public abstract void test_1_13_7_ConvertsToCurrent() throws Exception;
+    
+    @Test
+    public abstract void test_1_13_8_ConvertsToCurrent() throws Exception;
 
 }

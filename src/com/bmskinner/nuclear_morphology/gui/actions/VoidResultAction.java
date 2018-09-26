@@ -109,6 +109,9 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
         this.latch = Optional.of(latch);
     }
 
+    /**
+     * If the latch is present, count down by one
+     */
     protected void countdownLatch() {
         if (latch.isPresent())
             latch.get().countDown();

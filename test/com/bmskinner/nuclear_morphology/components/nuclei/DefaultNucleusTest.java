@@ -3,7 +3,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.ComponentTest;
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 
 /**
@@ -12,7 +12,7 @@ import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
  * @since 1.14.0
  *
  */
-public class DefaultNucleusTest extends ComponentTest {
+public class DefaultNucleusTest extends ComponentTester {
 
 	private Nucleus nucleus;	
 	@Before

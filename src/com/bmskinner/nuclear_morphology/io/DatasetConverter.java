@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
@@ -200,7 +202,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private void makeMergeSources(IAnalysisDataset template, IAnalysisDataset dest) throws DatasetConversionException {
+    private void makeMergeSources(@NonNull IAnalysisDataset template, @NonNull IAnalysisDataset dest) throws DatasetConversionException {
 
         if (template.hasMergeSources()) {
 
@@ -221,7 +223,7 @@ public class DatasetConverter implements Loggable, Importer {
      * @param template
      * @param dest
      */
-    private void makeVirtualCollections(IAnalysisDataset template, IAnalysisDataset dest)
+    private void makeVirtualCollections(@NonNull IAnalysisDataset template, @NonNull IAnalysisDataset dest)
             throws DatasetConversionException {
 
         for (IAnalysisDataset child : template.getChildDatasets()) {
@@ -287,7 +289,6 @@ public class DatasetConverter implements Loggable, Importer {
             // Copy segmentation patterns over
             oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
 
-            // copyCollectionOffsets(oldCollection, newCollection);
         } catch (ProfileException e) {
             stack("Error updating profiles across datasets", e);
             throw new DatasetConversionException("Profiling error in root dataset");
@@ -301,122 +302,26 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    // /**
-    // * Copy profile offsets from the this collection, to the
-    // * destination and build the median profiles for all profile types.
-    // * Also copy the segments from the regular angle profile onto
-    // * all other profile types
-    // * @param destination the collection to update
-    // * @throws Exception
-    // */
-    // public void copyCollectionOffsets(final ICellCollection source, final
-    // ICellCollection destination) throws ProfileException {
-    //
-    // if(source instanceof CellCollection){
-    //
-    // CellCollection sourceCollection = (CellCollection) source;
-    //
-    // /*
-    // * Get the corresponding profile collection from the tempalte
-    // */
-    // ProfileCollection sourcePC = (ProfileCollection)
-    // sourceCollection.getProfileCollection(type);
-    //
-    // List<IBorderSegment> segments;
-    //
-    // segments = sourcePC.getSegments(Tag.REFERENCE_POINT);
-    //
-    // fine("Got existing list of "+segments.size()+" segments");
-    //
-    // // use the same array length as the source collection to avoid segment
-    // slippage
-    // int profileLength = sourcePC.length();
-    //
-    //
-    // /*
-    // * Get the empty profile collection from the new ICellCollection
-    // * This has a ProfileCollection containing a map of aggregates for each
-    // profile type
-    // */
-    // IProfileCollection destPC = destination.getProfileCollection();
-    //
-    //
-    //
-    // /*
-    // * Create an aggregate from the nuclei in the collection.
-    // * This will have the length of the source collection.
-    // */
-    // destPC.createProfileAggregate(destination, profileLength);
-    // fine("Created new profile aggregates with length "+profileLength);
-    //
-    // /*
-    // * Copy the offset keys from the source collection
-    // */
-    // try {
-    // for(Tag key : sourcePC.getBorderTags()){
-    //
-    // destPC.addIndex(key, sourcePC.getIndex(key));
-    //
-    // }
-    //
-    // destPC.addSegments(Tag.REFERENCE_POINT, segments);
-    //
-    // } catch (UnavailableBorderTagException | IllegalArgumentException e) {
-    // warn("Cannot add segments to RP: "+e.getMessage());
-    // fine("Cannot add segments to RP", e);
-    // }
-    // fine("Copied tags to new collection");
-    //
-    //
-    // } else {
-    // source.getProfileManager().copyCollectionOffsets(destination);
-    // }
-    //
-    //
-    //
-    // }
-
-    private ICell createNewCell(ICell oldCell) throws DatasetConversionException {
+    private ICell createNewCell(@NonNull ICell oldCell) throws DatasetConversionException {
         ICell newCell = new DefaultCell(oldCell.getId());
-
-        // make a new nucleus
         Nucleus newNucleus = createNewNucleus(oldCell.getNucleus());
-
         newCell.setNucleus(newNucleus);
-
         return newCell;
-
     }
 
-    private Nucleus createNewNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus createNewNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         NucleusType type = oldDataset.getCollection().getNucleusType();
 
-        fine("\tCreating nucleus: " + n.getNameAndNumber() + "\t" + type);
-
-        Nucleus newNucleus;
-
         switch (type) {
-        case PIG_SPERM:
-            newNucleus = makePigNucleus(n);
-            break;
-        case RODENT_SPERM:
-            newNucleus = makeRodentNucleus(n);
-            break;
-        case ROUND:
-            newNucleus = makeRoundNucleus(n);
-            break;
-        default:
-            newNucleus = makeRoundNucleus(n);
-            break;
-
+	        case PIG_SPERM:    return makePigNucleus(n);
+	        case RODENT_SPERM: return makeRodentNucleus(n);
+	        case ROUND:        return makeRoundNucleus(n);
+	        default:           return makeRoundNucleus(n);
         }
-
-        return newNucleus;
-
     }
 
-    private Nucleus makeRoundNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus makeRoundNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         // Easy stuff
         File f = n.getSourceFile(); // the source file
@@ -451,7 +356,7 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    private Nucleus makeRodentNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus makeRodentNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         // Easy stuff
         File f = n.getSourceFile(); // the source file
@@ -497,7 +402,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private Nucleus makePigNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus makePigNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         // Easy stuff
         File f = n.getSourceFile(); // the source file
@@ -533,7 +438,7 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    private Nucleus copyGenericData(Nucleus template, Nucleus newNucleus) throws DatasetConversionException {
+    private Nucleus copyGenericData(@NonNull Nucleus template, @NonNull Nucleus newNucleus) throws DatasetConversionException {
 
         // The nucleus ID is created with the nucleus and is not accessible
         // Use reflection to get access and set the new id to the same as the
@@ -639,7 +544,7 @@ public class DatasetConverter implements Loggable, Importer {
      * @param newNucleus
      * @param template
      */
-    private void convertPlottableStatistics(Nucleus newNucleus, Nucleus template) {
+    private void convertPlottableStatistics(@NonNull Nucleus newNucleus, @NonNull Nucleus template) {
 
         for (PlottableStatistic stat : template.getStatistics()) {
             try {
@@ -665,7 +570,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private void convertNuclearSegments(Nucleus template, Nucleus newNucleus) throws DatasetConversionException {
+    private void convertNuclearSegments(@NonNull Nucleus template, @NonNull Nucleus newNucleus) throws DatasetConversionException {
         // Copy segments from RP
         for (ProfileType type : ProfileType.values()) {
 
@@ -703,7 +608,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private void convertNuclearSignals(Nucleus template, Nucleus newNucleus) {
+    private void convertNuclearSignals(@NonNull Nucleus template, @NonNull Nucleus newNucleus) {
 
         // Copy signals
 
@@ -726,7 +631,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private INuclearSignal convertSignal(INuclearSignal oldSignal) throws UnavailableBorderPointException {
+    private INuclearSignal convertSignal(@NonNull INuclearSignal oldSignal) throws UnavailableBorderPointException {
         // Get the roi for the old signal
         float[] xpoints = new float[oldSignal.getBorderLength()], ypoints = new float[oldSignal.getBorderLength()];
 

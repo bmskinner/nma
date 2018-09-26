@@ -264,9 +264,11 @@ public interface ICellCollection
     IProfileCollection getProfileCollection();
 
     /**
-     * Generate the profile and aggregates based on the profile
-     * length of the population.
-     * @throws ProfileException 
+     * Generate the profile aggregates from all cells in the 
+     * population based on the currently set reference point in each
+     * cell nucleus. The aggregate length will be set to the median
+     * nucleus border length of the population.
+     * @throws ProfileException if creation fails
      */
     void createProfileCollection() throws ProfileException;
 

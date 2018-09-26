@@ -127,6 +127,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             try {
                 // Deserialise whatever is in the file
                 dataset = readDataset(file);
+                fireIndeterminateState();
             } catch (UnsupportedVersionException e) {
             	warn("Version "+e.getMessage()+" not supported");
             	if(e.getDetectedVersion().isNewerThan(Version.currentVersion()))
@@ -405,8 +406,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                         "Cannot load '" + file.getAbsolutePath() + "' due to " + e.getClass().getSimpleName(), e);
             }
         }
-
-        fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0));
         return dataset;
     }
 

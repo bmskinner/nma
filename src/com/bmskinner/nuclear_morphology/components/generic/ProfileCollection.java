@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -947,4 +949,30 @@ public class ProfileCollection implements IProfileCollection {
 
         return result;
     }
+    
+	@Override
+	public double getProportionOfIndex(int index) {
+		if (index < 0 || index >= aggregate.length())
+            throw new IllegalArgumentException("Index out of bounds: " + index);
+        return (double) index / (double) aggregate.length();
+	}
+
+	@Override
+	public double getProportionOfIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
+		return getProportionOfIndex(getIndex(tag));
+	}
+
+	@Override
+	public int getIndexOfProportion(double proportion) {
+		if (proportion < 0 || proportion > 1)
+			throw new IllegalArgumentException("Proportion must be between 0-1: " + proportion);
+		if(proportion==0)
+			return 0;
+		if(proportion==1)
+			return aggregate.length()-1;
+		
+		double desiredDistanceFromStart = (double) aggregate.length() * proportion;
+		int target = (int) desiredDistanceFromStart;
+		return target;
+	}
 }

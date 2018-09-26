@@ -36,9 +36,11 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Checks the state of a dataset to report on abnormalities in, for example,
@@ -82,6 +84,12 @@ public class DatasetValidator implements Loggable {
 
 		int errors = 0;
 
+		
+		if (!checkChildMedianProfilesHaveBestAlignmentToRoot(d)) {
+			errorList.add("Error in profiling between datasets");
+			errors++;
+		}
+		
 		if (!checkSegmentsAreConsistentInProfileCollections(d)) {
 			errorList.add("Error in segmentation between datasets");
 			errors++;
@@ -99,6 +107,33 @@ public class DatasetValidator implements Loggable {
 		errorList.add(String.format("Dataset failed validation: %s out of %s cells have errors", errorCells.size(), d.getCollection().getCells().size()));
 		return false;
 
+	}
+	
+	
+	private boolean checkChildMedianProfilesHaveBestAlignmentToRoot(@NonNull IAnalysisDataset d) {
+		List<IAnalysisDataset> children = d.getAllChildDatasets();
+		boolean isOk = true;
+		try {
+			ISegmentedProfile rootMedian = d.getCollection().getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			
+			for (IAnalysisDataset child : children) {
+				ISegmentedProfile childMedian = child.getCollection().getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				
+				if(rootMedian.findBestFitOffset(childMedian)!=0) {
+					errorList.add(String.format("Child dataset %s has median offset to root", child.getName()));
+					isOk = false;
+				}
+				
+			}
+			
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
+				| UnsegmentedProfileException e) {
+			errorList.add(String.format("Root or child dataset profile cannot be found"));
+			isOk = false;
+		}
+		return isOk;	
 	}
 
 	/**

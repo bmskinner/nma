@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.ComponentTest;
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 
@@ -20,7 +20,7 @@ import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
  * @since 1.14.0
  *
  */
-public class DefaultNuclearSignalTest extends ComponentTest {
+public class DefaultNuclearSignalTest extends ComponentTester {
 
 	private static final int N_CELLS = 1;
 

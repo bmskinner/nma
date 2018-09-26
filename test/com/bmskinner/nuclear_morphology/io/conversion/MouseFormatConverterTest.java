@@ -38,87 +38,79 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  */
 public class MouseFormatConverterTest extends OldFormatConverterTest {
     
-    private static final String MOUSE_FILE = "Mouse.bak";
+	public static final String MOUSE_BACKUP_FILE = "Mouse.bak";
     
     @Override
     @Test
     public void test_1_13_0_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_0, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_0, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.currentVersion()));
+        assertEquals(Version.currentVersion(), d.getVersion());
     }
 
     @Override
     @Test
     public void test_1_13_1_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_1, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_1, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.currentVersion()));
+        assertEquals(Version.currentVersion(), d.getVersion());
     }
 
+    @Override
     @Test
     public void test_1_13_2_ConvertsToCurrent() throws Exception {
 
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_2, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_2, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.currentVersion()));
+        assertEquals(Version.currentVersion(), d.getVersion());
     }
 
+    @Override
     @Test
     public void test_1_13_3_ConvertsToCurrent() throws Exception {
 
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_3, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_3, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_3));
+        assertEquals(Version.v_1_13_3, d.getVersion());
     }
 
     @Override
     @Test
     public void test_1_13_4_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_4, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_4, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_4));
+        assertEquals(Version.v_1_13_4, d.getVersion());
     }
     
-//    @Test
-//    public void test_1_13_4_Merge_ConvertsToCurrent() throws Exception {
-//        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_4, "Mouse_merge.bak");
-//        IAnalysisDataset d = testConvertsToCurrent(f);
-//        assertTrue(d.getVersion().equals(Version.v_1_13_4));
-//    }
-
     @Override
     @Test
     public void test_1_13_5_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_5, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_5, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_5));
+        assertEquals(Version.v_1_13_5, d.getVersion());
     }
 
     @Override
     @Test
     public void test_1_13_6_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_6, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_6, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_6));
+        assertEquals(Version.v_1_13_6, d.getVersion());
     }
 
     @Override
     @Test
     public void test_1_13_7_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_7, MOUSE_FILE);
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_7, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_7));
+        assertEquals(Version.v_1_13_7, d.getVersion());
     }
-    
-    //TODO reenable when signal folder can be input. Currently opens UI
-//  @Test
-//  public void test_1_13_2_withSignalsConvertsToCurrent() throws Exception {
-//
-//      File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_2, "Testing_signals_A.bak");
-//      IAnalysisDataset d = testConvertsToCurrent(f);
-//      assertTrue(d.getVersion().equals(Version.currentVersion()));
-//  }
 
-
+    @Override
+    @Test
+    public void test_1_13_8_ConvertsToCurrent() throws Exception {
+    	File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_8, MOUSE_BACKUP_FILE);
+    	IAnalysisDataset d = testConvertsToCurrent(f);
+    	assertEquals(Version.v_1_13_8, d.getVersion());
+    }
 }

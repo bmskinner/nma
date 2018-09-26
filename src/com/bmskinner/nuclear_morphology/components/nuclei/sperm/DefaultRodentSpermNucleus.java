@@ -201,30 +201,12 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         }
         
         /*
-         * Find the distance from the vertical X position to the min and max
-         * points of the bounding box. VertX must lie between these points.
-         * 
-         */
-
-//        double distanceLower = vertX - minBoundingX;
-//        double distanceHigher = maxBoundingX - vertX;
-
-        /*
          * To determine if the point is hook or hump, take the X position of the
          * tip. This must lie on the hook side of the vertX
          */
 
         double dHook = 0;
         double dBody = 0;
-//        double referenceX;
-//        try {
-//            referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
-//        } catch (UnavailableBorderTagException e) {
-//            stack("Cannot get border tag", e);
-//            setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-//            setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
-//            return;
-//        }
 
         if(testNucleus.isClockwiseRP()){
         	dBody = vertX - minBoundingX;
@@ -237,11 +219,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
         setStatistic(PlottableStatistic.HOOK_LENGTH, dHook);
         setStatistic(PlottableStatistic.BODY_WIDTH, dBody);
-
-//        fine("Hook length is " + dHook);
-//        fine("Body width is " + dBody);
-//
-//        finest("Hook length and body width calculated");
     }
 
     /**

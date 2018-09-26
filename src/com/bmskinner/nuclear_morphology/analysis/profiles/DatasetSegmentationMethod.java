@@ -34,8 +34,11 @@ import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -183,13 +186,16 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			return new DefaultAnalysisResult(dataset);
 		}
 		
+		// Make a new collection and aggregate to invalidate previous cached data, possibly
+		// with different profile lengths
+		dataset.getCollection().createProfileCollection();
+		
 		dataset.getCollection().getProfileCollection().addSegments(median.getSegments());
 		
 		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei 
 		
 		// The best segmentation pattern has been found
-		// Copy segmentation to child datasets and invalidate 
-		// any consensus nuclei
+		// Copy segmentation to child datasets and invalidate  any consensus nuclei
 		if(dataset.hasChildren()){
 			for(IAnalysisDataset child: dataset.getAllChildDatasets()){
 				child.getCollection().setConsensus(null);
@@ -207,7 +213,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		}
 		return new DefaultAnalysisResult(dataset);
 	}
-
+	
 	private IAnalysisResult runCopyAnalysis() throws Exception {
 		if (sourceCollection == null) {
 			warn("Cannot copy: source collection is null");

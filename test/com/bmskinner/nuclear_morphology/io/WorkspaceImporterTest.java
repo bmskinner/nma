@@ -19,8 +19,8 @@ public class WorkspaceImporterTest {
 		File f = new File(SAMPLE_DATASET_PATH+FILE_NAME_1_14_0);
 		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
 
-		assertEquals("Testing", w.getName());
-		assertEquals(1, w.getBioSamples().size());
+		assertEquals("Example", w.getName());
+		assertEquals(0, w.getBioSamples().size());
 	}
 	
 	@Test

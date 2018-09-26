@@ -58,7 +58,32 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @throws UnavailableBorderTagException if the tag is not present
      */
     int getIndex(@NonNull Tag tag) throws UnavailableBorderTagException;
-
+    
+    /**
+     * Get the proportion of the index along the profile, zeroed on the reference point
+     * 
+     * @param index the index to find
+     * @return the proportion of the index along the profile, from 0-1
+     */
+    double getProportionOfIndex(int index);
+    
+    /**
+     * Get the proportion of the tag along the profile, zeroed on the reference point
+     * 
+     * @param tag the tag to find
+     * @return the proportion of the tag along the profile, from 0-1
+     * @throws UnavailableBorderTagException if the tag is not present
+     */
+    double getProportionOfIndex(@NonNull Tag tag) throws UnavailableBorderTagException;
+    
+    
+    /**
+     * Get the index closest to the given proportion along the profile
+     * @param proportion the proportion along the profile from 0-1
+     * @return the closest index
+     */
+    int getIndexOfProportion(double proportion);
+    
     /**
      * Get all the offset keys attached to this profile collection
      * 

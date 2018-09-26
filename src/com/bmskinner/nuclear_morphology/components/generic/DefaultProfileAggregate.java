@@ -188,13 +188,22 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      * @return
      */
     private float[] getValuesAtIndex(int i) {
-
         float[] values = new float[profileCount];
-
-        for (int n = 0; n < profileCount; n++) {
+        for (int n = 0; n < profileCount; n++)
             values[n] = aggregate[i][n];
-        }
-
+        return values;
+    }
+    
+    /**
+     * Get the values for the given nucleus in the aggregate
+     * 
+     * @param n
+     * @return
+     */
+    private float[] getValuesForNucleus(int n) {
+        float[] values = new float[profileCount];
+        for (int i = 0; i < profileCount; i++)
+            values[i] = aggregate[i][n];
         return values;
     }
 
@@ -249,6 +258,12 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 		if (profileCount != other.profileCount)
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "DefaultProfileAggregate [aggregate=" + Arrays.toString(aggregate) + ", length=" + length
+				+ ", profileCount=" + profileCount + ", counter=" + counter + "]";
 	}
     
     

@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * @since 1.14.0
  *
  */
-public abstract class ComponentTest {
+public abstract class ComponentTester extends FloatArrayTester {
 	
 	protected static final long RNG_SEED = 1234;
 	protected static final int N_CELLS = 10;
@@ -38,6 +38,22 @@ public abstract class ComponentTest {
 	    }
 
 	    return result;
+	}
+	
+	/**
+	 * Get the inherited field for the given class
+	 * @param type the class to fetch
+	 * @param name the inherited field name
+	 * @return
+	 */
+	protected Field getInheritedField(Class<?> type, String name) {
+		List<Field> fields = getInheritedPrivateFields(type);
+		for(Field f : fields)
+			if(f.getName().equals(name)) {
+				f.setAccessible(true);
+				return f;
+			}
+		return null;
 	}
 	
 	/**

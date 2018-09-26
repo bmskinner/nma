@@ -22,7 +22,7 @@ public class CountedInputStream extends FilterInputStream {
 	 * Construct with an input stream
 	 * @param in
 	 */
-	protected CountedInputStream(InputStream in) {
+	public CountedInputStream(InputStream in) {
 		super(in);
 	}
 	

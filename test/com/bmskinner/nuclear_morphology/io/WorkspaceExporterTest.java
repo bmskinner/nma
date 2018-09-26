@@ -11,7 +11,7 @@ import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 
 public class WorkspaceExporterTest {
 	
-	public static final String SAMPLE_DATASET_PATH = "test/com/bmskinner/nuclear_morphology/samples/datasets/";
+	public static final String SAMPLE_DATASET_PATH = "test/samples/datasets/";
 	public static final String FILE_NAME_1_14_0 = "1.14.0/Example.wrk";
 	public static final String FILE_NAME_1_13_8 = "1.13.8/Example.wrk";
 

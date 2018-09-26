@@ -94,7 +94,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /**
      * The statistical values stored for this object
      */
-    private Map<PlottableStatistic, Double> statistics = new HashMap<PlottableStatistic, Double>();
+    private Map<PlottableStatistic, Double> statistics = new HashMap<>();
 
     /**
      * The source file the component was detected in. This is detected on
@@ -125,7 +125,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * The complete border list, offset to an appropriate position for the
      * object
      */
-    private transient List<IBorderPoint> borderList = new ArrayList<IBorderPoint>(0);
+    private transient List<IBorderPoint> borderList = new ArrayList<>();
 
     /** Cache images while memory is available. */
     private transient SoftReference<ImageProcessor> imageRef = new SoftReference<>(null);
@@ -230,12 +230,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         IPoint oldCoM = IPoint.makeNew(centreOfMass);
         centreOfMass = IPoint.makeNew(originalCentreOfMass);
 
-        borderList = new ArrayList<>(0);
+        borderList = new ArrayList<>();
 
         // convert the roi positions to a list of border points
         // Each object decides whether it should be smoothed.
         boolean isSmooth = isSmoothByDefault();
         roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
+
         FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
 
         finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
@@ -1187,25 +1188,89 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return false;
 		return true;
 	}
+	
+	/**
+     * Create the border list from the stored int[] points. Mimics makeBorderList
+     * but adds a check that the created border list does not affect tags
+     * 
+     * @param roi
+     */
+    private void deserialiseBorderList() {
+
+    	finest("Creating border list from "+xpoints.length+" integer points");
+    	
+        // Make a copy of the int[] points otherwise creating a polygon roi
+        // will reset them to 0,0 coordinates
+        int[] xcopy = Arrays.copyOf(xpoints, xpoints.length);
+        int[] ycopy = Arrays.copyOf(ypoints, ypoints.length);
+        PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xpoints.length, Roi.TRACED_ROI);
+
+        // Creating the border list will set everything to the original image
+        // position.
+        // Move the border list back over the CoM if needed.
+        IPoint oldCoM = IPoint.makeNew(centreOfMass);
+        centreOfMass = IPoint.makeNew(originalCentreOfMass);
+
+        borderList = new ArrayList<>();
+
+        // convert the roi positions to a list of border points
+        // Each object decides whether it should be smoothed.
+        boolean isSmooth = isSmoothByDefault();
+        roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
+        
+        // TODO - what happens when a saved set of tag indexes no longer matches the border
+        // due to spline fitting?
+        // For example, the border lengths on the testing dataset change by about 6, which puts
+        // the RPs out of alignment.
+        // We need to check if the fitting makes a difference, and if so correct the indexes to 
+        // best proportional positions
+        // But how would we know that they were created without a spline fit?
+        // This is something that may need to be handled at the DatasetConverter level, since
+        // we know the spline fitting was added after 1.13.8 was released.
+        
+        FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
+
+        finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
+        for (int i = 0; i < smoothed.npoints; i++) {
+            IBorderPoint point = IBorderPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
+
+            if (i > 0) {
+                point.setPrevPoint(borderList.get(i - 1));
+                point.prevPoint().setNextPoint(point);
+            }
+            borderList.add(point);
+        }
+        // link endpoints
+        borderList.get(borderList.size() - 1).setNextPoint(borderList.get(0));
+        borderList.get(0).setPrevPoint(borderList.get(borderList.size() - 1));
+
+        moveCentreOfMass(oldCoM);
+        calculateBounds();
+        finest("Component has "+getBorderLength()+" border points");
+
+    }
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
 
         // Fill the transient fields
-        imageRef = new SoftReference<ImageProcessor>(null);
+        imageRef = new SoftReference<>(null);
         shapeCache = new ShapeCache();
 
         // needs to be traced to allow interpolation into the border list
-        makeBorderList(); // This will update the border to the original CoM
-                          // saved
+        makeBorderList();
+        
+        // TODO - what happens when a saved set of tag indexes no longer matches the border
+        // due to spline fitting?
+        // We need to check if the fitting makes a difference, and if so correct the indexes to 
+        // best proportional positions
 
-        Set<PlottableStatistic> set = new HashSet<PlottableStatistic>(statistics.keySet());
+        Set<PlottableStatistic> set = new HashSet<>(statistics.keySet());
         Iterator<PlottableStatistic> it = set.iterator();
 
         // Update any old stats to generic plottable statistics
-        // TODO - this should be removed for 1.14.0, as it was added in 1.13.4
-        // for compatibility
+        // TODO - this should be removed one compatibility is not needed for 1.13.4 or earlier
         while (it.hasNext()) {
             PlottableStatistic stat = it.next();
             double value = statistics.get(stat);

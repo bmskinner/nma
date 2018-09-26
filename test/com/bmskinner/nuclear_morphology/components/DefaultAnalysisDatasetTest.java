@@ -38,6 +38,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -51,7 +52,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  * @since 1.13.8
  *
  */
-public class DefaultAnalysisDatasetTest extends ComponentTest {
+public class DefaultAnalysisDatasetTest extends ComponentTester {
 		
 	private static final int N_CELLS = 10;
 	

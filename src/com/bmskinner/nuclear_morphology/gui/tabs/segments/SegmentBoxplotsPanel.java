@@ -105,7 +105,6 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
             // Get each segment as a boxplot
             for (IBorderSegment seg : segments) {
-            	fine("Creating segment chart for segment "+seg.getName()+" at "+seg.getPosition()+": "+seg.getID());
                 JFreeChart chart = AbstractChartFactory.createLoadingChart();
                 ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
                 chartPanel.addChartSetEventListener(this);

@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -137,7 +138,10 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         // ensure the progress bar gets hidden even if it is not removed
         setProgressBarVisible(false);
         
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, dataset);
+        List<IAnalysisDataset> datasetsToUpdate = new ArrayList<>();
+        datasetsToUpdate.add(dataset);
+        datasetsToUpdate.addAll( dataset.getAllChildDatasets());
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasetsToUpdate);
 
         Thread thr = new Thread() {
 

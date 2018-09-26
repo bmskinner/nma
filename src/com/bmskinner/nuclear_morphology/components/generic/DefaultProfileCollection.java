@@ -206,7 +206,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         List<IBorderSegment> result = new ArrayList<>();        
         
         for(IBorderSegment s : segments) {
-        	
         	IBorderSegment sc = s.copy(); 
         	sc.offset(offset);
         	result.add(sc);
@@ -215,19 +214,11 @@ public class DefaultProfileCollection implements IProfileCollection {
         try {
         	IBorderSegment.linkSegments(result);
         	return result;
-
-//        try {
-//        	IBorderSegment[] result = IBorderSegment.copy(segments);
-//        	for(IBorderSegment s : result) {
-//        		s.offset(offset);
-//        	}
-//        	return Arrays.asList(result);
         } catch (ProfileException e) {
         	error("Could not get segments from "+tag, e);
         	e.printStackTrace();
         	 return new ArrayList<>();     
         }
-     
     }
 
 
@@ -247,7 +238,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         IBorderSegment result = null;
         // get the name of the segment with the tag at the start
         for (IBorderSegment seg : segments) {
-
             if (seg.getStartIndex() == ZERO_INDEX) {
                 result = seg;
             }
@@ -340,7 +330,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         if (this.length() != n.get(0).getProfileLength())
         	throw new IllegalArgumentException(String.format("Segment profile length (%d) does not fit aggregate length (%d)", n.get(0).getProfileLength(), length()));
 
-
         /*
          * The segments coming in are zeroed to the given pointType pointIndex
          * This means the indexes must be moved forwards appropriately. Hence,
@@ -348,14 +337,13 @@ public class DefaultProfileCollection implements IProfileCollection {
          */
         int offset = getIndex(tag);
 
-
     	for(IBorderSegment s : n) {
     		s.offset(offset);
     	}
     	this.segments = new IBorderSegment[n.size()];
 
         for (int i = 0; i < segments.length; i++) {
-            segments[i] = n.get(i);
+            segments[i] = n.get(i).copy();
         }
     }
 
@@ -365,7 +353,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         double[] result = map.get(type).getValuesAtPosition(position);
 
         if (result == null) {
-
             result = new double[length()];
             for (int i = 0; i < result.length; i++) {
                 result[i] = 0;
@@ -381,11 +368,15 @@ public class DefaultProfileCollection implements IProfileCollection {
             throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
         if (collection.size() == 0)
             throw new IllegalArgumentException("Cell collection is empty");
-
-        this.length = length;
-        if (segments != null && length != segments[0].getProfileLength()) 
-            throw new ProfileException("Creating profile aggregate will invalidate segments");
         
+        this.length = length;
+        cache.clear();
+        
+        if (segments != null && segments.length>1 && length != segments[0].getProfileLength()) {
+        	createProfileAggregateOfDifferentLength(collection, length);
+        	return;
+        }
+
         if(segments==null) {
         	segments = new IBorderSegment[1];
         	segments[0] = new DefaultBorderSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID);
@@ -409,7 +400,37 @@ public class DefaultProfileCollection implements IProfileCollection {
                 stack("Error making aggregate", e);
             }
         }
-        cache.clear();
+        
+    }
+    
+    /**
+     * Allow a profile aggregate to be created and segments copied when median profile lengths have
+     * changed.
+     * @param collection
+     * @param length
+     */
+    private void createProfileAggregateOfDifferentLength(@NonNull ICellCollection collection, int length) throws ProfileException {
+    	indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
+    	try {
+    		// Copy the existing segments, adjusting the lengths using profile interpolation
+    		ISegmentedProfile sourceMedian = getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+    		ISegmentedProfile interpolatedMedian = sourceMedian.interpolate(length);
+    		
+    		for (ProfileType type : ProfileType.values()) {
+
+                IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
+                try {
+                    for (Nucleus n : collection.getNuclei())
+                         agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT));
+                } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+                    stack("Error making aggregate", e);
+                }
+                map.put(type, agg);
+            } 		
+    		addSegments(Tag.REFERENCE_POINT, interpolatedMedian.getSegments());
+    	} catch(Exception e) {
+    		throw new ProfileException(e);
+    	}
     }
 
 
@@ -733,4 +754,34 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         }
     }
+
+	@Override
+	public double getProportionOfIndex(int index) {
+		if (index < 0 || index >= length)
+            throw new IllegalArgumentException("Index out of bounds: " + index);
+		if(index==0)
+			return 0;
+		if(index==length-1)
+			return 1;
+        return (double) index / (double) (length-1);
+	}
+
+	@Override
+	public double getProportionOfIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
+		return getProportionOfIndex(getIndex(tag));
+	}
+
+	@Override
+	public int getIndexOfProportion(double proportion) {
+		if (proportion < 0 || proportion > 1)
+			throw new IllegalArgumentException("Proportion must be between 0-1: " + proportion);
+		if(proportion==0)
+			return 0;
+		if(proportion==1)
+			return length-1;
+		
+		double desiredDistanceFromStart = (double) length * proportion;
+		int target = (int) desiredDistanceFromStart;
+		return target;
+	}
 }

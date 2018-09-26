@@ -391,7 +391,6 @@ public class EventHandler implements Loggable, EventListener {
             final List<IAnalysisDataset> selectedDatasets = event.getDatasets();
 
             if (event.method().equals(DatasetEvent.PROFILING_ACTION)) {
-
                 int flag = 0; // set the downstream analyses to run
                 flag |= SingleDatasetResultAction.ADD_POPULATION;
                 flag |= SingleDatasetResultAction.STATS_EXPORT;
@@ -417,9 +416,31 @@ public class EventHandler implements Loggable, EventListener {
                 return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, acceptor, EventHandler.this);
             }
             
+            // Run a completely new analysis on the dataset
             if (event.method().equals(DatasetEvent.REFPAIR_SEGMENTATION)) {
-                final int flag = 0;
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, acceptor, EventHandler.this);
+
+            	// begin a new morphology analysis
+            	return () ->{
+            		
+            		final CountDownLatch l = new CountDownLatch(1);
+            		new Thread( ()->{
+            			int flag = 0; 
+            			new RunProfilingAction(selectedDatasets, flag, acceptor, EventHandler.this, l).run();
+            			
+            		}).start();
+
+            		new Thread( ()-> {
+            			
+            			try {
+            				l.await();
+            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, 0, acceptor, EventHandler.this).run();
+            			} catch(InterruptedException e) {
+            				return;
+            			}
+            			
+            		}).start();
+
+            	};
             }
 
             if (event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)) {

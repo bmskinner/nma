@@ -24,9 +24,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
-public class DefaultCellTest extends ComponentTest {
+public class DefaultCellTest extends ComponentTester {
 
 	private static final int N_CELLS = 10;
 	private static final int N_CHILD_DATASETS = 2;

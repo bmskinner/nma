@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.ComponentTest;
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  * @since 1.14.0
  *
  */
-public class DefaultSignalCollectionTest extends ComponentTest {
+public class DefaultSignalCollectionTest extends ComponentTester {
 	
 
 	private static final int N_CELLS = 1;

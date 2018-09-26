@@ -13,8 +13,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
-import com.bmskinner.nuclear_morphology.analysis.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.charting.OutlineChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;

@@ -28,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
@@ -36,7 +37,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  * @since 1.13.8
  *
  */
-public class DefaultCellCollectionTest extends ComponentTest {
+public class DefaultCellCollectionTest extends ComponentTester {
 
 	private static final int N_CELLS = 10;
 	private static final int N_CHILD_DATASETS = 2;

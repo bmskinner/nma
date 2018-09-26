@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,6 +9,8 @@ import static org.junit.Assert.assertEquals;
  *
  */
 public abstract class FloatArrayTester {
+	
+	public static final float DEFAULT_EPSILON = 0;
 	
 	/**
 	 * Test float array equality. Not in junit.
@@ -26,6 +28,15 @@ public abstract class FloatArrayTester {
             assertEquals("Index "+i, exp[i], obs[i], epsilon);
         }
         return equal;
+	}
+	
+	/**
+	 * Test float array equality with the default epsilon {@link #DEFAULT_EPSILON}
+	 * @param exp the expected array
+	 * @param obs the observed array
+	 */
+	public static boolean equals(float[] exp, float[] obs){
+	    return equals(exp, obs, DEFAULT_EPSILON);
 	}
 
 }

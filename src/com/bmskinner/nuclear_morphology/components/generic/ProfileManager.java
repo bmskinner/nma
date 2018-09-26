@@ -143,31 +143,7 @@ public class ProfileManager implements Loggable {
         }
 
     }
-
-    /**
-     * Change the RP to the given index in the current median from the profile
-     * collection.
-     * 
-     * @param index
-     */
-//    public void updateRP(int index) {
-//
-//        // Get the existing median, and offset it to the new index
-//        IProfile median;
-//        try {
-//            median = collection.getProfileCollection()
-//                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).offset(index);
-//            
-//            
-//            updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
-//
-//            collection.createProfileCollection();
-//        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-//            fine("Error updating the RP", e);
-//            return;
-//        }
-//    }
-
+    
     /**
      * Use the collection's ruleset to calculate the positions of the top and
      * bottom verticals in the median profile, and assign these to the nuclei
@@ -545,28 +521,22 @@ public class ProfileManager implements Loggable {
      * @throws Exception
      */
     public void recalculateProfileAggregates() throws ProfileException {
-
-        // use the same array length as the source collection to avoid segment
-        // slippage
+        // use the same array length as the source collection to avoid segment slippage
         IProfileCollection pc = collection.getProfileCollection();
-
         pc.createProfileAggregate(collection, pc.length());
-
     }
 
     /**
-     * Copy profile offsets from the this collection, to the destination and
+     * Copy profile offsets from this collection to the destination and
      * build the median profiles for all profile types. Also copy the segments
      * from the regular angle profile onto all other profile types
      * 
      * @param destination the collection to update
-     * @throws Exception
+     * @throws ProfileException if the copy fails
      */
-    public void copyCollectionOffsets(final ICellCollection destination) throws ProfileException {
+    public void copyCollectionOffsets(@NonNull final ICellCollection destination) throws ProfileException {
 
-        /*
-         * Get the corresponding profile collection from the tempalte
-         */
+        // Get the corresponding profile collection from the template
         IProfileCollection sourcePC = collection.getProfileCollection();
 
         List<IBorderSegment> segments;
@@ -579,38 +549,33 @@ public class ProfileManager implements Loggable {
         }
         fine("Got existing list of " + segments.size() + " segments");
 
-        // use the same array length as the source collection to avoid segment
-        // slippage
+        // use the same array length as the source collection to avoid segment slippage
         int profileLength = sourcePC.length();
 
-        /*
-         * Get the empty profile collection from the new CellCollection
-         */
+        
+        // Create a new profile collection for the destination, so profiles are refreshed
         IProfileCollection destPC = destination.getProfileCollection();
-
-        /*
-         * Create an aggregate from the nuclei in the collection. This will have
-         * the length of the source collection.
-         */
-        destPC.createProfileAggregate(destination, profileLength);
-        fine("Created new profile aggregates with length " + profileLength);
-        
-        
-        /*
-         * Copy the offset keys from the source collection
-         */
+        destPC.createProfileAggregate(destination, destination.getMedianArrayLength());
+        fine("Created new profile aggregate with length " + destination.getMedianArrayLength());
+                
+        // Copy the tags from the source collection
+        // Use proportional indexes to allow for a changed aggregate length
+        // Note: only the RP must be at a segment boundary. Some mismatches may occur
         try {
             for (Tag key : sourcePC.getBorderTags()) {
-
-                destPC.addIndex(key, sourcePC.getIndex(key));
-
+            	double prop = sourcePC.getProportionOfIndex(key);
+            	int adj = destPC.getIndexOfProportion(prop);
+                destPC.addIndex(key, adj);
             }
+            
+           // Copy the segments, also adjusting the lengths using profile interpolation
+            ISegmentedProfile sourceMedian = sourcePC.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+            ISegmentedProfile interpolatedMedian = sourceMedian.interpolate(destination.getMedianArrayLength());
+            
+            destPC.addSegments(Tag.REFERENCE_POINT, interpolatedMedian.getSegments());
 
-            destPC.addSegments(Tag.REFERENCE_POINT, segments);
-
-        } catch (UnavailableBorderTagException | IllegalArgumentException e) {
-            warn("Cannot add segments to RP: " + e.getMessage());
-            fine("Cannot add segments to RP", e);
+        } catch (UnavailableBorderTagException | IllegalArgumentException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
+            stack("Cannot add segments to RP", e);
         }
         fine("Copied tags to new collection");
         
