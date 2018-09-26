@@ -113,16 +113,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
         try {
         	ISegmentedProfile p = profileMap.get(type);
-        	
-        	if(! (p instanceof DefaultSegmentedProfile)) {
-        		finer("Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
-        		// When reading old datasets, sometimes the profile length does not match the border list length.
-        		// If this happens, the conversion will fail due to the new length constraints.
-        		// As a stopgap, interpolate profiles as needed.
-        		if(p.size()!=getBorderLength())
-        			p = p.interpolate(getBorderLength());
-        		assignProfile(type, new DefaultSegmentedProfile(p));
-        	}
+        	finer("Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
+        	// When reading old datasets, sometimes the profile length does not match the border list length.
+        	// This issue is resolved for datasets created in 1.14.0 onwards.
+        	// If this happens, the conversion will fail due to the new length constraints in the profile constructor.
+        	// As a stopgap, interpolate profiles as needed.
+        	if(p.size()!=getBorderLength())
+        		p = p.interpolate(getBorderLength());
+        	assignProfile(type, new DefaultSegmentedProfile(p));
         	return profileMap.get(type).copy();
         } catch (IndexOutOfBoundsException | ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);

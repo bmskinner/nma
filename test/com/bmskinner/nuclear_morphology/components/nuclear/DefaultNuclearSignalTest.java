@@ -1,12 +1,5 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 

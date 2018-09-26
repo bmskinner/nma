@@ -23,6 +23,8 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +33,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -84,6 +87,7 @@ import ij.gui.Roi;
 public class DatasetConverter implements Loggable, Importer {
 
     private IAnalysisDataset oldDataset;
+    private boolean wasConverted = false;
 
     /**
      * Migration table for stats classes
@@ -121,85 +125,186 @@ public class DatasetConverter implements Loggable, Importer {
     /**
      * Construct using the old dataset version
      * 
-     * @param old
-     *            the old format dataset
+     * @param old the old format dataset
      */
     public DatasetConverter(IAnalysisDataset old) {
         this.oldDataset = old;
     }
+    
+    public boolean shouldSave() {
+    	return wasConverted;
+    }
 
     /**
-     * Run the converter and make a new DefaultAnalysisDataset from the root,
-     * and ChildAnalysisDatasets from children.
+     * Run the converter
      * 
      * @return
      */
     public IAnalysisDataset convert() throws DatasetConversionException {
+    	IAnalysisDataset result = oldDataset;
+    	
+    	// The oldest format did not implement a version field 
+    	if(result instanceof AnalysisDataset)
+    		result = convert1_13_0ToCurrent(result);
+    	
+    	// Now the result will in a format with a checkable version
+    	if(result.getVersion().isOlderThan(Version.v_1_13_2))
+    		result = convert1_13_1To1_13_2(result);
+    	if(result.getVersion().isOlderThan(Version.v_1_14_0))
+    		result = convert1_13_8To1_14_0(result);
+    	return result;
+    }
+    
+    private IAnalysisDataset convert1_13_1To1_13_2(IAnalysisDataset template) throws DatasetConversionException {
+    	// Correct signal border locations from older versions for all
+    	// imported datasets
+        fine("Updating signal locations for pre-1.13.2 dataset");
+        updateSignalPositions(template);
+        for (IAnalysisDataset child : template.getAllChildDatasets()) {
+        	updateSignalPositions(child);
+        }
 
-        try {
-            log("Old dataset version : " + oldDataset.getVersion());
-            log("Shiny target version: " + Version.currentVersion());
+        if (template.hasMergeSources()) {
+        	for (IAnalysisDataset source : template.getAllMergeSources()) {
+        		updateSignalPositions(source);
+        	}
+        }
+        return template;
+    
+    }
+    
+    /**
+     * In older versions of the program, signal border positions were stored
+     * differently to the CoM. This needs correcting, as it causes errors in
+     * rotating signals. The CoM is relative to the nucleus, but the border list
+     * is relative to the image. Adjust the border to bring it back in line with
+     * the CoM.
+     * 
+     * @param dataset
+     */
+    private void updateSignalPositions(IAnalysisDataset dataset) {
+        dataset.getCollection().getNuclei().parallelStream().forEach(n -> {
 
-            backupOldDataset();
+            if (n.getSignalCollection().hasSignal()) {
 
-            log("Beginning conversion...");
+                for (UUID id : n.getSignalCollection().getSignalGroupIds()) {
 
-            ICellCollection newCollection = makeNewRootCollection();
+                    n.getSignalCollection().getSignals(id).parallelStream().forEach(s -> {
 
-            IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, oldDataset.getSavePath());
+                        if (!s.containsPoint(s.getCentreOfMass())) {
 
-            if (oldDataset.getAnalysisOptions().isPresent()) {
-            	IAnalysisOptions oldOptions = oldDataset.getAnalysisOptions().get();
-            	IAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
+                            for (int i = 0; i < s.getBorderLength(); i++) {
+                                try {
+                                    s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
+                                } catch (UnavailableBorderPointException e) {
+                                    stack("Could not offset border point", e);
+                                }
+                            }
+                        }
 
-                IDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
-
-                IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
-                newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-
-                for (UUID id : oldOptions.getNuclearSignalGroups()) {
-                    INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
-                    if(oldDataset.getCollection().hasSignalGroup(id)){
-                    	File folder = oldSignalOptions.getFolder();
-                    	int channel = oldSignalOptions.getChannel();
-
-                    	INuclearSignalOptions newSignalOptions = OptionsFactory
-                    			.makeNuclearSignalOptions(oldSignalOptions);
-                    	newSignalOptions.setFolder(folder);
-                    	newSignalOptions.setChannel(channel);
-                    	newOptions.setDetectionOptions(id.toString(), newSignalOptions);
-                    }
+                    });
                 }
 
-                newDataset.setAnalysisOptions(newOptions);
-            } else {
-                newDataset.setAnalysisOptions(null);
             }
 
-            newDataset.setDatasetColour(oldDataset.getDatasetColour().orElse(null));
+        });
+    }
+    
+    
+    /**
+     * Create a new dataset based on the values in the old dataset. The old
+     * classes cannot be used any more, so the resulting dataset will have
+     * the current version.
+     * @param template
+     * @return
+     * @throws DatasetConversionException
+     */
+    private IAnalysisDataset convert1_13_0ToCurrent(IAnalysisDataset template) throws DatasetConversionException {
+    	
+    	 try {
+             log("Old dataset version : " + template.getVersion());
+             log("Shiny target version: " + Version.currentVersion());
 
-            // arrange root cluster groups
-            for (IClusterGroup oldGroup : oldDataset.getClusterGroups()) {
+             backupOldDataset();
 
-                IClusterGroup newGroup = new ClusterGroup(oldGroup);
+             log("Beginning conversion...");
 
-                newDataset.addClusterGroup(newGroup);
+             ICellCollection newCollection = makeNewRootCollection();
 
-            }
+             IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, template.getSavePath());
 
-            // add the child datasets
-            makeVirtualCollections(oldDataset, newDataset);
+             if (oldDataset.getAnalysisOptions().isPresent()) {
+             	IAnalysisOptions oldOptions = template.getAnalysisOptions().get();
+             	IAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
 
-            // Add merge sources
-            makeMergeSources(oldDataset, newDataset);
+                 IDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
 
-            oldDataset = null;
-            return newDataset;
+                 IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
+                 newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 
-        } catch (Exception e) {
-            stack("Error converting dataset", e);
+                 for (UUID id : oldOptions.getNuclearSignalGroups()) {
+                     INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
+                     if(template.getCollection().hasSignalGroup(id)){
+                     	File folder = oldSignalOptions.getFolder();
+                     	int channel = oldSignalOptions.getChannel();
+
+                     	INuclearSignalOptions newSignalOptions = OptionsFactory
+                     			.makeNuclearSignalOptions(oldSignalOptions);
+                     	newSignalOptions.setFolder(folder);
+                     	newSignalOptions.setChannel(channel);
+                     	newOptions.setDetectionOptions(id.toString(), newSignalOptions);
+                     }
+                 }
+
+                 newDataset.setAnalysisOptions(newOptions);
+             } else {
+                 newDataset.setAnalysisOptions(null);
+             }
+
+             newDataset.setDatasetColour(template.getDatasetColour().orElse(null));
+
+             // arrange root cluster groups
+             for (IClusterGroup oldGroup : template.getClusterGroups()) {
+
+                 IClusterGroup newGroup = new ClusterGroup(oldGroup);
+
+                 newDataset.addClusterGroup(newGroup);
+
+             }
+
+             // add the child datasets
+             makeVirtualCollections(template, newDataset);
+
+             // Add merge sources
+             makeMergeSources(template, newDataset);
+             wasConverted = true;
+             return newDataset;
+
+         } catch (Exception e) {
+             stack("Error converting dataset", e);
+             throw new DatasetConversionException(e.getCause());
+         }
+    	
+    }
+    
+    private IAnalysisDataset convert1_13_8To1_14_0(IAnalysisDataset template)  throws DatasetConversionException {
+    	try {
+    		for(Nucleus n : template.getCollection().getNuclei()) {
+    			n.refreshBorderList(false);
+        		n.calculateProfiles();
+    		}
+
+    		ICellCollection c = template.getCollection();
+    		Method m = c.getProfileCollection().getClass().getDeclaredMethod("createAndRestoreProfileAggregate", ICellCollection.class);
+    		m.setAccessible(true);
+    		m.invoke(c.getProfileCollection(), c);
+    	} catch (ProfileException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+    		stack("Error converting dataset", e);
             throw new DatasetConversionException(e.getCause());
-        }
+    	}
+
+    	return template;
+
     }
 
     private void makeMergeSources(@NonNull IAnalysisDataset template, @NonNull IAnalysisDataset dest) throws DatasetConversionException {

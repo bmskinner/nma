@@ -1195,7 +1195,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * 
      * @param roi
      */
-    private void deserialiseBorderList() {
+    @Override
+	public void refreshBorderList(boolean useSplineFitting) {
 
     	finest("Creating border list from "+xpoints.length+" integer points");
     	
@@ -1216,18 +1217,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // convert the roi positions to a list of border points
         // Each object decides whether it should be smoothed.
         boolean isSmooth = isSmoothByDefault();
-        roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
         
-        // TODO - what happens when a saved set of tag indexes no longer matches the border
-        // due to spline fitting?
-        // For example, the border lengths on the testing dataset change by about 6, which puts
-        // the RPs out of alignment.
-        // We need to check if the fitting makes a difference, and if so correct the indexes to 
-        // best proportional positions
-        // But how would we know that they were created without a spline fit?
-        // This is something that may need to be handled at the DatasetConverter level, since
-        // we know the spline fitting was added after 1.13.8 was released.
-        
+        if(useSplineFitting)
+        	roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
+                
         FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
 
         finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
@@ -1261,11 +1254,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // needs to be traced to allow interpolation into the border list
         makeBorderList();
         
-        // TODO - what happens when a saved set of tag indexes no longer matches the border
-        // due to spline fitting?
-        // We need to check if the fitting makes a difference, and if so correct the indexes to 
-        // best proportional positions
-
         Set<PlottableStatistic> set = new HashSet<>(statistics.keySet());
         Iterator<PlottableStatistic> it = set.iterator();
 

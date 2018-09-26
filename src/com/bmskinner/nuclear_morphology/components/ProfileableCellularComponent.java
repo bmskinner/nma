@@ -706,8 +706,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-
-        // set transient fields
+        restoreFieldsAfterDeserialisation();
+       
+    }
+    
+    protected void restoreFieldsAfterDeserialisation() {
+    	 // set transient fields
         double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
         if(perimeter==Statistical.ERROR_CALCULATING_STAT)
             perimeter = this.calculateStatistic(PlottableStatistic.PERIMETER);
@@ -729,7 +733,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 stack(e);
             }
         }
-
     }
     
     @Override

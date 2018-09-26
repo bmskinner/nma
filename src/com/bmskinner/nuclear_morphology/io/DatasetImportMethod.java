@@ -145,6 +145,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 return; // Exception will be thrown in call() method
             
             updateDataset();
+            
+            validateDataset();
 
         } catch (IllegalArgumentException e) {
             warn("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
@@ -164,11 +166,18 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             updateSavePath(file, dataset);
         }
 
+        DatasetConverter conv = new DatasetConverter(dataset);
+
         // convert old files if needed
-        if (GlobalOptions.getInstance().isConvertDatasets()) {
-            if (dataset instanceof AnalysisDataset) {
-                dataset = upgradeDatasetVersion(dataset);
-            }
+        if (GlobalOptions.getInstance().isConvertDatasets()) {        	
+             try {
+            	 dataset = conv.convert();
+            	 wasConverted = conv.shouldSave();
+             } catch (DatasetConversionException e) {
+                 warn("Unable to convert to new format.");
+                 warn("Displaying as old format.");
+                 stack("Error in converter", e);
+             }
         }
 
         Version v = dataset.getVersion();
@@ -185,12 +194,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 fine("Updated output folder to " + exportFolder);
             }
 
-            File logFile = null;
-            if(file.getName().endsWith(SAVE_FILE_EXTENSION))
-                logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
+//            File logFile = null;
+//            if(file.getName().endsWith(SAVE_FILE_EXTENSION))
+//                logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
             
             if(file.getName().endsWith(BACKUP_FILE_EXTENSION)){
-                logFile = Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, LOG_FILE_EXTENSION);
+//                logFile = Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, LOG_FILE_EXTENSION);
                 dataset.setSavePath(Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, SAVE_FILE_EXTENSION));
             }
 
@@ -207,13 +216,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 }
             }
 
-            // Correct signal border locations from older versions for all
-            // imported datasets
-            if (v.isOlderThan(Version.v_1_13_2)) {
-                fine("Updating signal locations for pre-1.13.2 dataset");
-                updateSignals();
-            }
-
             // Generate vertically rotated nuclei for all imported datasets
             try {
                 dataset.getCollection().updateVerticalNuclei();
@@ -226,22 +228,27 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 stack("Error updating vertical nuclei", e);
             }
 
-            // Check the validity of the loaded dataset
-            DatasetValidator dv = new DatasetValidator();
-            if (!dv.validate(dataset)) {
-                for (String s : dv.getErrors()) {
-                    warn(s);
-                }
-                warn("Dataset is corrupted");
-                warn("Saving child dataset info");
-                new CellFileExporter().exportCellLocations(dataset);
-
-                warn("Curated cells saved");
-                warn("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
-            }
-
         } else {
             warn("Unable to open dataset version: " + dataset.getVersion());
+        }
+    }
+    
+    /**
+     * Check the dataset has valid segments and profiles
+     */
+    private void validateDataset() {
+    	 // Check the validity of the loaded dataset
+        DatasetValidator dv = new DatasetValidator();
+        if (!dv.validate(dataset)) {
+            for (String s : dv.getErrors()) {
+                warn(s);
+            }
+            warn("Dataset is corrupted");
+            warn("Saving child dataset info");
+            new CellFileExporter().exportCellLocations(dataset);
+
+            warn("Curated cells saved");
+            warn("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
         }
     }
 
@@ -268,57 +275,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         for (File lockFile : files){
             lockFile.delete();
         }
-    }
-
-    private void updateSignals() {
-        log("Updating signal positions for old dataset");
-        updateSignalPositions(dataset);
-        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-            updateSignalPositions(child);
-        }
-
-        if (dataset.hasMergeSources()) {
-            for (IAnalysisDataset source : dataset.getAllMergeSources()) {
-                updateSignalPositions(source);
-            }
-        }
-    }
-
-    /**
-     * In older versions of the program, signal border positions were stored
-     * differently to the CoM. This needs correcting, as it causes errors in
-     * rotating signals. The CoM is relative to the nucleus, but the border list
-     * is relative to the image. Adjust the border to bring it back in line with
-     * the CoM.
-     * 
-     * @param dataset
-     */
-    private void updateSignalPositions(IAnalysisDataset dataset) {
-        dataset.getCollection().getNuclei().parallelStream().forEach(n -> {
-
-            if (n.getSignalCollection().hasSignal()) {
-
-                for (UUID id : n.getSignalCollection().getSignalGroupIds()) {
-
-                    n.getSignalCollection().getSignals(id).parallelStream().forEach(s -> {
-
-                        if (!s.containsPoint(s.getCentreOfMass())) {
-
-                            for (int i = 0; i < s.getBorderLength(); i++) {
-                                try {
-                                    s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
-                                } catch (UnavailableBorderPointException e) {
-                                    stack("Could not offset border point", e);
-                                }
-                            }
-                        }
-
-                    });
-                }
-
-            }
-
-        });
     }
 
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
@@ -409,26 +365,26 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         return dataset;
     }
 
-    private IAnalysisDataset upgradeDatasetVersion(IAnalysisDataset dataset) {
-        log("Old format detected");
-
-        try {
-
-            DatasetConverter conv = new DatasetConverter(dataset);
-
-            IAnalysisDataset converted = conv.convert();
-
-            dataset = converted;
-
-            log("Conversion successful");
-            wasConverted = true;
-        } catch (DatasetConversionException e) {
-            warn("Unable to convert to new format.");
-            warn("Displaying as old format.");
-            stack("Error in converter", e);
-        }
-        return dataset;
-    }
+//    private IAnalysisDataset upgradeDatasetVersion(IAnalysisDataset dataset) {
+//        log("Old format detected");
+//
+//        try {
+//
+//            DatasetConverter conv = new DatasetConverter(dataset);
+//
+//            IAnalysisDataset converted = conv.convert();
+//
+//            dataset = converted;
+//
+//            log("Conversion successful");
+//            wasConverted = true;
+//        } catch (DatasetConversionException e) {
+//            warn("Unable to convert to new format.");
+//            warn("Displaying as old format.");
+//            stack("Error in converter", e);
+//        }
+//        return dataset;
+//    }
 
     /**
      * Check if the image folders are present in the correct relative
