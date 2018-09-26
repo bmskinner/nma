@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 public class DatasetEvent extends EventObject {
 
     public static final String PROFILING_ACTION = "Profiling action";
-    public static final String NEW_MORPHOLOGY   = "New morphology";
+    public static final String SEGMENTATION_ACTION   = "Segment dataset";
 
     /**
      * Signal that segments should be copied from the secondary dataset in the

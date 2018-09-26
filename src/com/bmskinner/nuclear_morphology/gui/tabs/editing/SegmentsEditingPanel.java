@@ -151,7 +151,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         
         segmentButton = new JButton(STR_SEGMENT_PROFILE);
         segmentButton.addActionListener(e->{
-        	 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, getDatasets());
+        	 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
         });
         panel.add(segmentButton);
 

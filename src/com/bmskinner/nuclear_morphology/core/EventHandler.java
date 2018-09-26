@@ -405,10 +405,8 @@ public class EventHandler implements Loggable, EventListener {
                 return new RunProfilingAction(selectedDatasets, flag, acceptor, EventHandler.this);
             }
 
-            if (event.method().equals(DatasetEvent.NEW_MORPHOLOGY)) {
-                log("Running new morphology analysis");
-                final int flag = SingleDatasetResultAction.ADD_POPULATION;
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, acceptor, EventHandler.this);
+            if (event.method().equals(DatasetEvent.SEGMENTATION_ACTION)) {
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)) {

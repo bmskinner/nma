@@ -39,8 +39,6 @@ public class IterativeSegmentFitter implements Loggable {
 	public IterativeSegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
         if (template == null)
             throw new IllegalArgumentException("Template profile is null");
-        if(template.getSegmentCount()<=1)
-        	throw new IllegalArgumentException("Template profile does not have segments");
         templateProfile = template.copy();
     }
 
@@ -57,6 +55,9 @@ public class IterativeSegmentFitter implements Loggable {
     	
         if (target==null)
             throw new IllegalArgumentException("Target profile is null");
+        
+        if(templateProfile.getSegmentCount()<=1)
+        	return new SegmentedFloatProfile(target);
 
 		try {
 			return remapSegmentEndpoints(target);

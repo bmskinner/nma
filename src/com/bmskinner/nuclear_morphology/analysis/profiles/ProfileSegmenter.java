@@ -52,9 +52,9 @@ public class ProfileSegmenter implements Loggable {
     private static final int ANGLE_THRESHOLD = 180;
     
     /** The exclusion zone above and below the threshold, as a fraction
-     * of the threshold value. For an angle profile, with threshold 180, 
-     * this is 18 degrees, or a range of 162-198 within which min/maxima 
-     * will not be called */
+     * of the threshold value. If this were 0.10, for an angle profile, 
+     * with threshold 180, this is 18 degrees, or a range of 162-198 within
+     *  which min/maxima  will not be called */
     private static final double THRESHOLD_FRACTION = 0.10;
 
     private final IProfile profile; // the profile to segment
