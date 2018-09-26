@@ -322,6 +322,11 @@ public class ICellCollectionTest {
 		collection.setScale(scale);
 		assertTrue(collection.streamCells().allMatch(c->c.getNucleus().getScale()==scale));
 	}
+	
+	@Test
+	public void testGetMedianArrayLength() {
+		assertEquals(178, collection.getMedianArrayLength());
+	}
 
 
 }

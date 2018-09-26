@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,17 +9,23 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
+import com.bmskinner.nuclear_morphology.charting.OutlineChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
@@ -32,21 +39,11 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.14.0
  *
  */
-public class RepresentativeMedianFinderTest extends FloatArrayTester {
-	
-	private Logger logger;
-	
-	@Before
-	public void setUp(){
-		logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
-		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-
-	}
-	
+public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
+		
 	@Test
 	public void testSingleNucleusDatasetReturnsIdenticalProfile() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
@@ -66,17 +63,19 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 		names.add("Overall median");
 		names.add("Representative median");
 		
-		if(!template.equals(result))
-			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
+//		if(!template.equals(result))
+//			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
 		
 		equals(template.toFloatArray(), result.toFloatArray(), 0);
 	}
 	
 	@Test
 	public void testTwoIdenticalNucleusDataset() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(2).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(2)
+				.ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(false)
-				.baseHeight(40).baseWidth(40).segmented().build();
+				.baseHeight(40).baseWidth(40)
+				.segmented().build();
 		
 		ISegmentedProfile template = d.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
@@ -91,7 +90,7 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 	
 	@Test
 	public void testThreeVariableNucleiDataset() throws Exception {
-		IAnalysisDataset dataset = new TestDatasetBuilder(1234).cellCount(3)
+		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(3)
 				.withMaxSizeVariation(16)
 				.baseHeight(40).baseWidth(40)
 				.randomOffsetProfiles(false)
@@ -114,7 +113,7 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 		names.add("Representative median");
 		
 //		if(!template.equals(result))
-			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
+//			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
 		
 //		equals(template.toFloatArray(), result.toFloatArray(), 0);
 	}
@@ -153,16 +152,33 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 		
 		
 //		if(!template.equals(result))
-			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");
+//			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");
+	}
+	
+	@Test
+	public void testMultipleIdenticalCells() throws Exception {
+
+			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(50)
+					.withMaxSizeVariation(0)
+					.baseHeight(40).baseWidth(40)
+					.randomOffsetProfiles(false)
+					.profiled().build();
+			ISegmentedProfile template = dataset.getCollection()
+					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+
+			RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());
+			
+			IProfile result = finder.findMedian();
+			
+			assertTrue(result!=null);		
 	}
 	
 	@Test
 	public void testMedianFindingIsRobustToIncreasingVariation() throws Exception {
-		long seed = 1234;
 		int maxCells = 50;		
 		for(int var=0; var<=20; var++) {
-			System.out.println(String.format("Testing variability %s on %s cells", var, maxCells));
-			IAnalysisDataset dataset = new TestDatasetBuilder(seed).cellCount(maxCells)
+			logger.log(Level.INFO, String.format("Testing variability %s on %s cells", var, maxCells));
+			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(maxCells)
 					.withMaxSizeVariation(var)
 					.baseHeight(40).baseWidth(40)
 					.randomOffsetProfiles(false)
@@ -175,16 +191,16 @@ public class RepresentativeMedianFinderTest extends FloatArrayTester {
 			
 			IProfile result = finder.findMedian();
 			
-			List<IProfile> profiles = new ArrayList<>();
-			profiles.add(template);
-			profiles.add(result);
+			assertTrue(result!=null);
+//			assertEquals(dataset)
 			
-			List<String> names = new ArrayList<>();
-			names.add("Overall median");
-			names.add("Representative median");
-			
-//			if(!template.equals(result))
-				ChartFactoryTest.showProfiles(profiles, names, "50 cells with variability "+var);
+//			List<IProfile> profiles = new ArrayList<>();
+//			profiles.add(template);
+//			profiles.add(result);
+//			
+//			List<String> names = new ArrayList<>();
+//			names.add("Overall median");
+//			names.add("Representative median");
 		}
 		
 	}

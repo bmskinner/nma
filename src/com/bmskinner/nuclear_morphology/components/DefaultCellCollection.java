@@ -473,7 +473,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	/**
-	 * Get the array lengths of the nuclei in this collection as an array
+	 * Get the border lengths of the nuclei in this collection as an array
 	 * 
 	 * @return
 	 */
@@ -560,14 +560,13 @@ public class DefaultCellCollection implements ICellCollection {
 	public void createProfileCollection() throws ProfileException {
 		createProfileCollection(getMedianArrayLength());
 	}
-
+	
+	/*
+	 * Build a set of profile aggregates Default is to make profile
+	 * aggregate from reference point
+	 * 
+	 */
 	public void createProfileCollection(int length) throws ProfileException {
-
-		/*
-		 * Build a set of profile aggregates Default is to make profile
-		 * aggregate from reference point
-		 * 
-		 */
 		profileCollection.createProfileAggregate(this, length);
 	}
 

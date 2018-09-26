@@ -47,6 +47,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 	public static final int RECALCULATE_MEDIAN = 0;
 	
+	public static final int MAX_COERCION_ATTEMPTS = 50;
+	
 	private final ProfileIndexFinder finder = new ProfileIndexFinder();
 
 	/**
@@ -84,11 +86,12 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @param pointType
 	 */
 	private void run() throws Exception {
-
+		fine("-----------------------------");
+    	fine("Beginning profiling method");
+    	fine("-----------------------------");
 		ICellCollection collection = dataset.getCollection();
 
 		collection.createProfileCollection();
-
 		// Create a median from the current reference points in the nuclei
 		IProfile median = collection.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
@@ -96,7 +99,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// RP index *should be* zero in the median profile at this point
 		// Check this before updating nuclei
-		
 		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
 		finer("RP in default median is located at index " + rpIndex);
 
@@ -111,18 +113,11 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
 
 		int coercionCounter = 0;
-		while (rpIndex != 0) {
-			// Rebuild the median and offset the nuclei until the RP settles
-			// at zero
+		while (rpIndex != 0 && coercionCounter++<MAX_COERCION_ATTEMPTS) {
 			fine("Coercing RP to zero, round " + coercionCounter);
-			coercionCounter++;
 			rpIndex = coerceRPToZero(collection);
-
-			if (coercionCounter > 50) {
-				warn("Unable to cleanly assign RP");
-				break;
-			}
 		}
+		
 		identifyNonCoreTags(collection);
 	}
 
@@ -173,6 +168,15 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		}
 	}
 
+	/**
+	 * Rebuild the median and offset the nuclei to set the RP at zero
+	 * @param collection
+	 * @return
+	 * @throws NoDetectedIndexException
+	 * @throws UnavailableBorderTagException
+	 * @throws UnavailableProfileTypeException
+	 * @throws ProfileException
+	 */
 	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 
 		// check the RP index in the median
@@ -189,16 +193,12 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			// Update the offsets in the profile collection to the new RP
 			collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 			collection.getProfileManager().recalculateProfileAggregates();
-
+//			collection.createProfileCollection();
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
 			finer("Checking RP index again");
 			rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
 			fine("RP in median is now located at index " + rpIndex);
-
-			fine("Current state of profile collection:");
-			fine(collection.getProfileCollection().tagString());
-
 		}
 
 		return rpIndex;

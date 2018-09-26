@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -51,7 +52,7 @@ public class RepresentativeMedianFinder implements Loggable {
 	public IProfile findMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		fine("-------------------------");
     	fine("Beginning median finding");
-    	fine("-------------------------");
+        fine("-------------------------");
 		float[][] differences  = buildDifferenceMatrix();
 		float[][] similarities = buildSimilarityMatrix(differences);
         
@@ -64,6 +65,7 @@ public class RepresentativeMedianFinder implements Loggable {
         // Get this best profile
         ISegmentedProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         List<IProfile> profiles = findBestProfiles(bestProfile);
+
         return buildMedianFromProfiles(profiles, collection.getMedianArrayLength());
 	}
 	
@@ -95,6 +97,9 @@ public class RepresentativeMedianFinder implements Loggable {
 			IProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);		
 			
 			List<IProfile> profiles = findBestProfiles(bestProfile);
+			
+			// We can't build a median out of zero profiles
+			
 			// Subset the collection to nuclei with a difference lower than the lower quartile of the variability 			
 			// Return the median profile of this subset
 			return buildMedianFromProfiles(profiles, collection.getMedianArrayLength());
@@ -113,20 +118,17 @@ public class RepresentativeMedianFinder implements Loggable {
 	 * @throws UnavailableProfileTypeException
 	 * @throws ProfileException
 	 */
-	public List<IProfile> findBestProfiles(IProfile target) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+	public List<IProfile> findBestProfiles(@NonNull IProfile target) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
 		float[] differences = calculateDistancesToTemplate(target);
 		float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
 		List<IProfile> result = new ArrayList<>();
-		
-		
-		if(nuclei.size()<=2) {
-			for(Nucleus n : nuclei)
+
+		if(nuclei.size()<=2 || medianDiff==0) { // too few profiles or all identical
+			for(Nucleus n : nuclei)  
 				result.add(n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
 			return result;
 		}
 
-		
-		
 		for(int i=0; i<differences.length; i++) {
 			if(differences[i]<medianDiff)
 				result.add(nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
@@ -134,12 +136,12 @@ public class RepresentativeMedianFinder implements Loggable {
 		return result;
 	}
 	
-	private IProfile buildMedianFromProfiles(List<IProfile> profiles, int length) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		fine("Group size for new median is "+profiles.size());
+		fine("Building aggregate of length "+length);
 		DefaultProfileAggregate agg = new DefaultProfileAggregate(length, profiles.size());
-		for(IProfile p : profiles) {
+		for(IProfile p : profiles)
 				agg.addValues(p);
-		}
 		return agg.getMedian();
 		
 	}

@@ -164,7 +164,8 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     void updateBorderPoint(int i, @NonNull IPoint p);
 
     /**
-     * Get the length of the angle profile in index units
+     * Get the length of the object border - equivalent to the length
+     * of the angle profile - in index units
      * 
      * @return
      */

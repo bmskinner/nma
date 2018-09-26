@@ -175,7 +175,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	private IAnalysisResult runNewAnalysis() throws Exception {
 
 		dataset.getCollection().setConsensus(null); // clear if present
-
+		fine("Before segmentation median length: "+collection.getMedianArrayLength());
 		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
 		
 		if(median.getSegmentCount()<=1) {
@@ -185,16 +185,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		
 		dataset.getCollection().getProfileCollection().addSegments(median.getSegments());
 		
-		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei by best-fit
-		
-		
-		
-		// 5 - Generate frankenprofiles for each nucleus against the median
-		// 6 - Profile the frankencollection
-		// 7 - Create a new frankenmedian
-		// 8 - Fit the frankensegments to the nuclei
-		// 9 - Measure the sum of profile differences between the nuclei and the frankenmedian
-//		iterateFrankenprofiles();
+		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei 
 		
 		// The best segmentation pattern has been found
 		// Copy segmentation to child datasets and invalidate 
@@ -282,9 +273,14 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	private ISegmentedProfile createSegmentsInMedian() throws Exception {
 		
 		// choose the best subset of nuclei and make a median profile from them
+		fine("Collection median length "+collection.getMedianArrayLength());
+		fine("Profile collection length "+collection.getProfileCollection().length());
+		
+		
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
 		
 		IProfile median = finder.findMedian();
+		fine("Representative median length "+median.size());
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		List<IBorderSegment> segments = segmenter.segment();
