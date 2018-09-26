@@ -141,7 +141,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
         double xmin = ob.getXMinValue();
         double xmax = ob.getXMaxValue();
 
-        if (xmin < xmax) { // must have a positive range
+        if (xmin < xmax && chartPanel!=null && chartPanel.getChart().getXYPlot()!=null) { // must have a positive range
             chartPanel.getChart().getXYPlot().getDomainAxis().setRange(xmin, xmax);
         }
 
