@@ -305,15 +305,14 @@ public class Stats implements Loggable {
 
         if (values.length == 1)
             return values[0];
-
-        if (values.length == 2)
-            return quartile < MEDIAN ? values[0] : values[1];
-
+        
         // Rank order the values
         float[] v = new float[values.length];
         System.arraycopy(values, 0, v, 0, values.length);
         Arrays.sort(v);
 
+        if (values.length == 2)
+        	return quartile < MEDIAN ? v[0] : v[1];
         int n = Math.round(((float) v.length * quartile) / ONE_HUNDRED_PERCENT);
         return v[n];
     }
@@ -349,10 +348,8 @@ public class Stats implements Loggable {
     /**
      * Get the quartile for a double array
      * 
-     * @param values
-     *            the values
-     * @param quartile
-     *            the quartile to find
+     * @param values the values
+     * @param quartile the quartile to find
      * @return the quartile value
      */
     public static double quartile(double[] values, int quartile) {
@@ -363,14 +360,13 @@ public class Stats implements Loggable {
         if (values.length == 1)
             return values[0];
 
-        if (values.length == 2)
-            return quartile < MEDIAN ? values[0] : values[1];
-
         // Rank order the values
         double[] v = new double[values.length];
         System.arraycopy(values, 0, v, 0, values.length);
         Arrays.sort(v);
-
+        
+        if (values.length == 2)
+            return quartile < MEDIAN ? v[0] : v[1];
         int n = Math.round(((float) v.length * quartile) / 100);
 
         return v[n];

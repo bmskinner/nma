@@ -31,7 +31,7 @@ public class TestDatasetBuilder {
 	public static final String TEST_DATASET_NAME = "Test";
 	public static final String TEST_DATASET_IMAGE_FOLDER = "Image folder";
 	public static final UUID   TEST_DATASET_UUID = UUID.fromString("99998888-0000-6666-1111-444433332222");
-	
+
 	public static final int DEFAULT_VARIATION   = 0;
 	public static final int DEFAULT_BASE_WIDTH  = 40;
 	public static final int DEFAULT_BASE_HEIGHT = 50;
@@ -69,6 +69,10 @@ public class TestDatasetBuilder {
 	
 	public static final UUID RED_SIGNAL_GROUP = UUID.fromString("99998888-7777-6666-5555-444433332222");
 	public static final UUID GREEN_SIGNAL_GROUP = UUID.fromString("88887777-6666-5555-4444-333322221111");
+	
+	public static final String RED_SIGNAL_GROUP_NAME = "Red";
+	public static final String GREEN_SIGNAL_GROUP_NAME = "Green";
+	
 	
 	private TestComponentShape nucleusShape = TestComponentShape.SQUARE;
 	
@@ -293,7 +297,7 @@ public class TestDatasetBuilder {
 		o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setMaxSize( (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
 		if(redSignals) {
-			ISignalGroup g = new SignalGroup("Red");
+			ISignalGroup g = new SignalGroup(RED_SIGNAL_GROUP_NAME);
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(RED_SIGNAL_GROUP, g);
 			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
@@ -301,7 +305,7 @@ public class TestDatasetBuilder {
 		}
 		
 		if(greenSignals) {
-			ISignalGroup g = new SignalGroup("Green");
+			ISignalGroup g = new SignalGroup(GREEN_SIGNAL_GROUP_NAME);
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(GREEN_SIGNAL_GROUP, g);
 			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));

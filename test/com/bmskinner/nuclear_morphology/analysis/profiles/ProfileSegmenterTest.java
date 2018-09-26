@@ -62,7 +62,7 @@ public class ProfileSegmenterTest {
 				.profiled().build();
 
 		segmentMedianProfile(d);
-		ChartFactoryTest.showMedianProfile(d, "Single cell dataset segmented");
+//		ChartFactoryTest.showMedianProfile(d, "Single cell dataset segmented");
 	}
 	
 	@Test
@@ -74,7 +74,7 @@ public class ProfileSegmenterTest {
 				.profiled().build();
 
 		segmentMedianProfile(d);
-		ChartFactoryTest.showMedianProfile(d, "Multiple identical cells");
+//		ChartFactoryTest.showMedianProfile(d, "Multiple identical cells");
 	}
 	
 	@Test
@@ -98,7 +98,7 @@ public class ProfileSegmenterTest {
 				.baseHeight(40).baseWidth(40).profiled().build();
 
 		segmentMedianProfile(d);
-		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells with offsets");
+//		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells with offsets");
 	}
 	
 	@Test
@@ -111,7 +111,7 @@ public class ProfileSegmenterTest {
 				.baseHeight(40).baseWidth(40).profiled().build();
 
 		segmentMedianProfile(d);
-		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells with offsets and rotation");
+//		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells with offsets and rotation");
 	}
 	
 	@Test

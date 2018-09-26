@@ -54,8 +54,6 @@ public class Kuwahara_Filter implements PlugInFilter {
         if (imp == null)
             return DONE;
         isRGB = imp.getBitDepth() == 24;
-        // if (!showDialog())
-        // return DONE;
         return IJ.setupDialog(imp, DOES_ALL - DOES_32 + SUPPORTS_MASKING);
     }
 

@@ -38,7 +38,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 	public void testSingleCellDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
 				.baseHeight(40).baseWidth(40).profiled().build();
-		testProfilingIsConsistent(d);
+		testProfilingIsConsistentBetweenMedianAndCells(d);
 	}
 	
 	@Test
@@ -46,14 +46,16 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
 				.ofType(NucleusType.ROUND).profiled().build();
-		testProfilingIsConsistent(d);
+		testProfilesAreIdenticalForAllCells(d);
+		testProfilingIsConsistentBetweenMedianAndCells(d);
 	}
 	
 	@Test
 	public void testMultiCellIdenticalRectangularDatasetIsNotAffectedByFixedBorderOffset() throws Exception {
 		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
 				.withMaxSizeVariation(0).profiled().build();
-		testProfilingIsConsistent(dataset);
+		testProfilesAreIdenticalForAllCells(dataset);
+		testProfilingIsConsistentBetweenMedianAndCells(dataset);
 	}
 	
 	@Test
@@ -61,7 +63,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 //		TODO - this test makes no sense, the profiles will not be identical in variable cells
 		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
 				.withMaxSizeVariation(20).profiled().build();
-		testProfilingIsConsistent(dataset);
+		testProfilingIsConsistentBetweenMedianAndCells(dataset);
 	}
 	
 	@Test
@@ -78,10 +80,12 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				System.out.println("xBase "+xBase+"; yBase "+yBase);
 				
 				IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-						.xBase(xBase).yBase(yBase).baseWidth(40).baseHeight(50)
-						.maxRotation(0).randomOffsetProfiles(false).fixedProfileOffset(20)
+						.xBase(xBase).yBase(yBase)
+						.randomOffsetProfiles(false).fixedProfileOffset(20)
 						.profiled()
 						.build();
+				
+				testProfilesAreIdenticalForAllCells(dataset);
 				
 				Nucleus loopCell = null;
 				
@@ -93,10 +97,8 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 						loopCell=cell.getNucleus();
 					
 					Nucleus n = cell.getNucleus();
-					assertEquals(loopCell.getBase().getX(), n.getBase().getX(), 0);
-					assertEquals(loopCell.getBase().getY(), n.getBase().getY(), 0);
-					assertEquals(globalCell.getBounds().getWidth(), n.getBounds().getWidth(), 0.001);
-					assertEquals(globalCell.getBounds().getHeight(), n.getBounds().getHeight(), 0.001);
+					testNucleiHaveIdenticalPositions(n, loopCell);
+					testNucleiHaveIdenticalSizes(n, globalCell);
 				}
 							
 				
@@ -114,6 +116,16 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 
 			}
 		}
+	}
+	
+	private void testNucleiHaveIdenticalPositions(Nucleus obs, Nucleus exp) {
+		assertEquals(exp.getBase().getX(), obs.getBase().getX(), 0);
+		assertEquals(exp.getBase().getY(), obs.getBase().getY(), 0);
+	}
+	
+	private void testNucleiHaveIdenticalSizes(Nucleus obs, Nucleus exp) {
+		assertEquals(exp.getBounds().getWidth(), obs.getBounds().getWidth(), 0.001);
+		assertEquals(exp.getBounds().getHeight(), obs.getBounds().getHeight(), 0.001);
 	}
 	
 	@Test
@@ -135,8 +147,6 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 					.profiled()
 					.build();
 
-
-			
 			// Check the collection
 			IProfile median = dataset.getCollection()
 					.getProfileCollection()

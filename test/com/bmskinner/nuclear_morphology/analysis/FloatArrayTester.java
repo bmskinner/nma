@@ -19,7 +19,7 @@ public abstract class FloatArrayTester {
 	public static boolean equals(float[] exp, float[] obs, float epsilon){
 	    boolean equal = true;
 	    equal &= obs.length==exp.length;
-	    assertEquals(exp.length, obs.length);
+	    assertEquals("Array length", exp.length, obs.length);
         
         for(int i=0; i<exp.length; i++){
             equal &= (Float.isNaN(exp[i]) && Float.isNaN(obs[i])) || Math.abs(exp[i] - obs[i])<=epsilon;

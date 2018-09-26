@@ -120,15 +120,15 @@ public class IterativeSegmentFitterTest {
 		
 		ISegmentedProfile result = fitter.fit(target.copy());
 		
-		List<IProfile> profiles = new ArrayList<>();
-		profiles.add(template);
-		profiles.add(target);
-		profiles.add(result);
-		
-		List<String> names = new ArrayList<>();
-		names.add("Template");
-		names.add("Target");
-		names.add("Result");
+//		List<IProfile> profiles = new ArrayList<>();
+//		profiles.add(template);
+//		profiles.add(target);
+//		profiles.add(result);
+//		
+//		List<String> names = new ArrayList<>();
+//		names.add("Template");
+//		names.add("Target");
+//		names.add("Result");
 		
 		
 		for(int i=0; i<target.getSegmentCount(); i++) {
@@ -137,7 +137,7 @@ public class IterativeSegmentFitterTest {
 			assertEquals("Segments should match", targetSeg.toString(), resultSeg.toString());
 		}
 
-		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
+//		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
 	}
 	
 	

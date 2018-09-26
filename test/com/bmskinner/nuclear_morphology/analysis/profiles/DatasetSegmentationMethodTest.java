@@ -186,8 +186,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 						.randomOffsetProfiles(false)
 						.segmented().build();
 				testSegmentationIsConsistent(dataset);
-//				if(inCells==maxCells)
-//					ChartFactoryTest.showProfiles(dataset.getCollection().getCells(), dataset);
 			}
 		}
 	}
@@ -203,16 +201,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		
 		ISegmentedProfile result = dataset.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
-				
-		List<IProfile> profiles = new ArrayList<>();
-		profiles.add(template);
-		profiles.add(result);
-		
-		List<String> names = new ArrayList<>();
-		names.add("Overall median");
-		names.add("Final median");
-		
-//		if(!template.equals(result))
-//			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");
+
 	}
 }

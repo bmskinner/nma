@@ -38,30 +38,19 @@ import java.awt.image.IndexColorModel;
  */
 public class ColourThresholder {
     private static final int HSB = 0, RGB = 1, LAB = 2, YUV = 3;
-    // private static final String[] colorSpaces = {"HSB", "RGB", "Lab", "YUV"};
+
     private boolean flag       = false;
     private int     colorSpace = HSB;
-    // private Thread thread;
-    // private static Frame instance;
-
-    // private int previousImageID = -1;
-    // private int previousSlice = -1;
 
     private boolean useH = true, useS = true, useB = true;
 
     private int minHue = 0, minSat = 0, minBri = 0;
     private int maxHue = 255, maxSat = 255, maxBri = 255;
 
-    // private boolean done;
     private byte[] hSource, sSource, bSource;
-    // private boolean applyingStack;
 
-    // private static final int DEFAULT = 0;
-    // private static String[] methodNames = AutoThresholder.getMethods();
-    // private static String method = methodNames[DEFAULT];
-    // private static AutoThresholder thresholder = new AutoThresholder();
     private static final int RED = 0, WHITE = 1, BLACK = 2, BLACK_AND_WHITE = 3;
-    // private static final String[] modes = {"Red", "White", "Black", "B&W"};
+
     private static int mode = BLACK_AND_WHITE;
 
     private int        numSlices;
@@ -75,17 +64,12 @@ public class ColourThresholder {
     }
 
     private void checkArgs(int min, int max) {
-        if (min >= max) {
+        if (min >= max)
             throw new IllegalArgumentException("Min is greater than max");
-        }
-
-        if (min < 0 || min > 255) {
+        if (min < 0 || min > 255)
             throw new IllegalArgumentException("Min must be in range 0-255");
-        }
-
-        if (max < 0 || max > 255) {
+        if (max < 0 || max > 255)
             throw new IllegalArgumentException("Max must be in range 0-255");
-        }
     }
 
     public void setHue(int min, int max) {
@@ -116,16 +100,13 @@ public class ColourThresholder {
      */
     public ImageProcessor threshold(ImageProcessor ip) {
 
-        if (!(ip instanceof ColorProcessor)) {
+        if (!(ip instanceof ColorProcessor))
             throw new IllegalArgumentException("Must be a colour processor");
-        }
 
         ImagePlus imp = new ImagePlus("", ip.duplicate());
 
         setup(imp);
-
         apply(imp);
-
         return imp.getProcessor();
     }
 
@@ -149,7 +130,7 @@ public class ColourThresholder {
 
         // Get hsb or rgb from image.
         ColorProcessor cp = (ColorProcessor) ip;
-        // IJ.showStatus("Converting colour space...");
+
         if (colorSpace == RGB)
             cp.getRGB(hSource, sSource, bSource);
         else if (colorSpace == HSB)
@@ -158,8 +139,6 @@ public class ColourThresholder {
             getLab(cp, hSource, sSource, bSource);
         else if (colorSpace == YUV)
             getYUV(cp, hSource, sSource, bSource);
-
-        // IJ.showStatus("");
 
         // Create a spectrum ColorModel for the Hue histogram plot.
         Color c;
@@ -174,19 +153,9 @@ public class ColourThresholder {
         }
         ColorModel cm = new IndexColorModel(8, 256, reds, greens, blues);
 
-        // Make an image with just the hue from the RGB image and the spectrum
-        // LUT.
-        // This is just for a hue histogram for the plot. Do not show it.
-        // ByteProcessor bpHue = new ByteProcessor(width,height,h,cm);
-        ByteProcessor bpHue = new ByteProcessor(width, height, hSource, cm);
-        // ImagePlus impHue = new ImagePlus("Hue",bpHue);
-
-        ByteProcessor bpSat = new ByteProcessor(width, height, sSource, cm);
-        // ImagePlus impSat = new ImagePlus("Sat",bpSat);
-
-        ByteProcessor bpBri = new ByteProcessor(width, height, bSource, cm);
-        // ImagePlus impBri = new ImagePlus("Bri",bpBri);
-
+//        ByteProcessor bpHue = new ByteProcessor(width, height, hSource, cm);
+//        ByteProcessor bpSat = new ByteProcessor(width, height, sSource, cm);
+//        ByteProcessor bpBri = new ByteProcessor(width, height, bSource, cm);
         return ip != null;
     }
 
@@ -381,15 +350,6 @@ public class ColourThresholder {
                 aa = (int) (Math.floor((1.0625 * aa + 128) + 0.5));
                 bb = (int) (Math.floor((1.0625 * bb + 128) + 0.5));
 
-                // hsb = Color.RGBtoHSB(r, g, b, hsb);
-                // a* and b* range from -120 to 120 in the 8 bit space
-
-                // L[i] = (byte)((int)(La*2.55) & 0xff);
-                // a[i] = (byte)((int)(Math.floor((1.0625 * aa + 128) + 0.5)) &
-                // 0xff);
-                // b[i] = (byte)((int)(Math.floor((1.0625 * bb + 128) + 0.5)) &
-                // 0xff);
-
                 L[i] = (byte) ((int) (La < 0 ? 0 : (La > 255 ? 255 : La)) & 0xff);
                 a[i] = (byte) ((int) (aa < 0 ? 0 : (aa > 255 ? 255 : aa)) & 0xff);
                 b[i] = (byte) ((int) (bb < 0 ? 0 : (bb > 255 ? 255 : bb)) & 0xff);
@@ -430,14 +390,6 @@ public class ColourThresholder {
                 Y[i] = (byte) ((int) Math.floor(yf + 0.5));
                 U[i] = (byte) (128 + (int) Math.floor((0.493 * (b - yf)) + 0.5));
                 V[i] = (byte) (128 + (int) Math.floor((0.877 * (r - yf)) + 0.5));
-
-                // Y[i] = (byte) (Math.floor( 0.299 * r + 0.587 * g + 0.114 *
-                // b)+.5);
-                // U[i] = (byte) (Math.floor(-0.169 * r - 0.332 * g + 0.500 * b
-                // + 128.0)+.5);
-                // V[i] = (byte) (Math.floor( 0.500 * r - 0.419 * g - 0.0813 * b
-                // + 128.0)+.5);
-
                 i++;
             }
         }
