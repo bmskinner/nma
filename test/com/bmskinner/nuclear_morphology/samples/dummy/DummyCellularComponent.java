@@ -379,4 +379,9 @@ public class DummyCellularComponent implements CellularComponent {
 		return 0;
 	}
 
+	@Override
+	public void refreshBorderList(boolean useSplineFitting) {
+		component.refreshBorderList(useSplineFitting);
+	}
+
 }

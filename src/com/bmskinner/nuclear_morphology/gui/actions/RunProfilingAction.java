@@ -85,8 +85,6 @@ public class RunProfilingAction extends SingleDatasetResultAction {
         // ensure the progress bar gets hidden even if it is not removed
         this.setProgressBarVisible(false);
 
-        // The analysis takes place in a new thread to accomodate refolding.
-        // See specific comment in RunSegmentationAction
         Runnable task = () -> {
             
             getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
@@ -107,17 +105,16 @@ public class RunProfilingAction extends SingleDatasetResultAction {
                 getInterfaceEventHandler().removeListener(eh);
                 getDatasetEventHandler().removeListener(eh);
                 //
-                RunProfilingAction.this.countdownLatch();
+                countdownLatch();
 
             } else {
                 // otherwise analyse the next item in the list
                 cancel(); // remove progress bar
 
-                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, progressAcceptors.get(0), eh);
+                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, progressAcceptors.get(0), eh, getLatch().get());
                 p.run();
 
             }
-            countdownLatch();
         };
 
         ThreadManager.getInstance().execute(task);

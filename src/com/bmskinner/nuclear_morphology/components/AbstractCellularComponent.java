@@ -28,6 +28,7 @@ import java.io.ObjectInputStream;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1495,6 +1496,17 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
     public Mask getSourceBooleanMask() {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    /**
+     * Create the border list from the stored int[] points. Mimics makeBorderList
+     * but adds a check that the created border list does not affect tags
+     * 
+     * @param roi
+     */
+    @Override
+	public void refreshBorderList(boolean useSplineFitting) {
+    	// does nothing
     }
 
 }

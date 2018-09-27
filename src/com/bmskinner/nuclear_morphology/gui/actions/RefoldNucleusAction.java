@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -27,12 +28,14 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
@@ -49,6 +52,11 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
      */
     public RefoldNucleusAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
         super(dataset, PROGRESS_LBL, acceptor, eh);
+        this.setLatch(doneSignal);
+    }
+    
+    public RefoldNucleusAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+        super(list, PROGRESS_LBL, acceptor, eh);
         this.setLatch(doneSignal);
     }
 
@@ -99,12 +107,26 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 
     @Override
     public void finished() {
+    	
+    	Thread thr = new Thread() {
 
-        this.cancel();
-        fine("Refolding finished, cleaning up");
-        super.finished();
-        this.countdownLatch();
+            public void run() {
 
+                // if no list was provided, or no more entries remain,
+                // call the finish
+                if (!hasRemainingDatasetsToProcess()) {
+                    countdownLatch();
+                    RefoldNucleusAction.super.finished();
+
+                } else {
+                    // otherwise analyse the next item in the list
+                    cancel(); // remove progress bar
+                    Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get());
+                    task.run();
+                }
+            }
+        };
+        thr.start();
     }
 
 }

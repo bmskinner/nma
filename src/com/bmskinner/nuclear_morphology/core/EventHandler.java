@@ -390,19 +390,54 @@ public class EventHandler implements Loggable, EventListener {
 
             final List<IAnalysisDataset> selectedDatasets = event.getDatasets();
 
-            if (event.method().equals(DatasetEvent.PROFILING_ACTION)) {
-                int flag = 0; // set the downstream analyses to run
-                flag |= SingleDatasetResultAction.ADD_POPULATION;
-                flag |= SingleDatasetResultAction.STATS_EXPORT;
-                flag |= SingleDatasetResultAction.NUCLEUS_ANNOTATE;
-                flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
+            // The full pipeline for a new analysis
+            if (event.method().equals(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION)) {
 
-                Optional<IAnalysisOptions> op = event.firstDataset().getAnalysisOptions();
-                if(op.isPresent() && op.get().refoldNucleus())
-                	flag |= SingleDatasetResultAction.CURVE_REFOLD;
+            	return () ->{
+            		
+            		final CountDownLatch profileLatch = new CountDownLatch(1);
+            		final CountDownLatch segmentLatch = new CountDownLatch(1);
+            		final CountDownLatch refoldLatch  = new CountDownLatch(1);
 
-                // begin a recursive morphology analysis
-                return new RunProfilingAction(selectedDatasets, flag, acceptor, EventHandler.this);
+            		new Thread( ()->{ // run profiling
+            			int flag = 0;
+                        flag |= SingleDatasetResultAction.ADD_POPULATION;
+                        flag |= SingleDatasetResultAction.STATS_EXPORT;
+                        flag |= SingleDatasetResultAction.NUCLEUS_ANNOTATE;
+                        flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
+                        flag |= SingleDatasetResultAction.CURVE_REFOLD;
+            			new RunProfilingAction(selectedDatasets, flag, acceptor, EventHandler.this, profileLatch).run();
+            			
+            		}).start();
+
+            		new Thread( ()-> { // wait for profiling and run segmentation
+            			try {
+            				profileLatch.await();
+            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this, segmentLatch).run();
+            			} catch(InterruptedException e) {
+            				return;
+            			}	
+            		}).start();
+
+            		new Thread( ()-> { // wait for segmentation and run refolding
+            			try {
+            				segmentLatch.await();
+                            Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch);
+                            task.run();
+            			} catch(InterruptedException e) {
+            				return;
+            			}
+            		}).start();   
+            		
+            		new Thread( ()-> { // wait for refolding and recache charts
+            			try {
+            				refoldLatch.await();
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            			} catch(InterruptedException e) {
+            				return;
+            			}	
+            		}).start();
+            	};
             }
 
             if (event.method().equals(DatasetEvent.SEGMENTATION_ACTION)) {
@@ -477,12 +512,22 @@ public class EventHandler implements Loggable, EventListener {
                 return new MergeSourceExtractionAction(event.getDatasets(), acceptor, EventHandler.this);
             
             if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
-                Runnable r = () -> {
-                    for(IAnalysisDataset d : selectedDatasets){
-                        refoldConsensus(d);
-                    }
-                };
-                return r;
+            	return () ->{
+            		final CountDownLatch refoldLatch  = new CountDownLatch(1);
+            		new Thread( ()-> { // run refolding
+            			Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch);
+            			task.run();
+            		}).start();   
+            		
+            		new Thread( ()-> { // wait for refolding and recache charts
+            			try {
+            				refoldLatch.await();
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            			} catch(InterruptedException e) {
+            				return;
+            			}	
+            		}).start();
+            	};
 
             }
             return null;
@@ -626,40 +671,7 @@ public class EventHandler implements Loggable, EventListener {
 			return;
 		}
     }
-    
-
-
-    /**
-     * Begin a refolding of the consensus nucleus for the given dataset
-     * 
-     * @param dataset
-     */
-    private synchronized void refoldConsensus(final IAnalysisDataset dataset) {
-
-        Runnable r = () -> {
-
-            final List<IAnalysisDataset> list = new ArrayList<>();
-            list.add(dataset);
-//            fireDatasetEvent(new DatasetEvent(this, DatasetEvent.CLEAR_CACHE, "EventHandler", list));
-            
-            final CountDownLatch latch = new CountDownLatch(1);
-
-            Runnable task = new RefoldNucleusAction(dataset, acceptor, EventHandler.this, latch);
-            task.run();
-
-            try {
-            	latch.await();
-//            	fireDatasetUpdateEvent(list);
-            	fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", list));
-            } catch (InterruptedException e) {
-                error("Interruption to thread", e);
-            }
-        };
-
-        ThreadManager.getInstance().execute(r);
-    }
-
-    
+        
     private void createWorkspace() {
 
 		try {

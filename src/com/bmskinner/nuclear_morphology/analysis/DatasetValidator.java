@@ -85,10 +85,10 @@ public class DatasetValidator implements Loggable {
 		int errors = 0;
 
 		
-		if (!checkChildMedianProfilesHaveBestAlignmentToRoot(d)) {
-			errorList.add("Error in profiling between datasets");
-			errors++;
-		}
+//		if (!checkChildMedianProfilesHaveBestAlignmentToRoot(d)) {
+//			errorList.add("Error in profiling between datasets");
+//			errors++;
+//		}
 		
 		if (!checkSegmentsAreConsistentInProfileCollections(d)) {
 			errorList.add("Error in segmentation between datasets");

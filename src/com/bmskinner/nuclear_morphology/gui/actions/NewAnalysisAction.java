@@ -19,19 +19,15 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileSystemView;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -49,10 +45,6 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
-
-import net.samuelcampos.usbdrivedetector.USBDeviceDetectorManager;
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 
 /**
  * Run a new analysis
@@ -107,18 +99,6 @@ public class NewAnalysisAction extends VoidResultAction {
                 return;
             }
         }
-        
-        // Files on USB drives are causing issues with path names on dataset opening.
-        // Block for now.
-//        USBDeviceDetectorManager usb = new USBDeviceDetectorManager();
-//       
-//        for(USBStorageDevice u : usb.getRemovableDevices()) {
-//        	if(folder.getAbsolutePath().startsWith(u.getRootDirectory().getName())) {
-//        		warn("Unable to comply. Folder is on a USB stick. Copy images to hard disk.");
-//        		cancel();
-//        		return;
-//        	}
-//        }
 
         fine("Creating for " + folder.getAbsolutePath());
 
@@ -161,17 +141,15 @@ public class NewAnalysisAction extends VoidResultAction {
 
     @Override
     public void finished() {
-        // log("Method finished");
-        List<IAnalysisDataset> datasets;
 
         try {
             IAnalysisResult r = worker.get();
-            datasets = r.getDatasets();
+            List<IAnalysisDataset> datasets = r.getDatasets();
 
             if (datasets == null || datasets.isEmpty()) {
                 log("No datasets returned");
             } else {
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets);
             }
 
         } catch (InterruptedException e) {

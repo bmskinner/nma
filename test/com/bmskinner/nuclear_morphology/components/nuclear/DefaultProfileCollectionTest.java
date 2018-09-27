@@ -5,12 +5,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nuclear_morphology.components.ComponentTest;
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 
-public class DefaultProfileCollectionTest extends ComponentTest {
+public class DefaultProfileCollectionTest extends ComponentTester {
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();

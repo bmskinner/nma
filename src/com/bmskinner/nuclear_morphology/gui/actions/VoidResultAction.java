@@ -108,6 +108,10 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     protected void setLatch(@NonNull final CountDownLatch latch) {
         this.latch = Optional.of(latch);
     }
+    
+    protected Optional<CountDownLatch> getLatch() {
+        return latch;
+    }
 
     /**
      * If the latch is present, count down by one

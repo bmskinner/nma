@@ -1384,6 +1384,9 @@ public class DefaultCellCollection implements ICellCollection {
 			warn("Unable to restore profile aggregate");
 			stack(e);
 		}
+		
+		if(this.hasConsensus())
+			this.getConsensus().alignVertically();
 
 	}
 

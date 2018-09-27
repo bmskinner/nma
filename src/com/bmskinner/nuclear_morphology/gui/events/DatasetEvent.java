@@ -31,6 +31,9 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public class DatasetEvent extends EventObject {
 
+	/** Profile and segment */
+	public static final String MORPHOLOGY_ANALYSIS_ACTION = "Morphology analysis action";
+	
     public static final String PROFILING_ACTION = "Profiling action";
     public static final String SEGMENTATION_ACTION   = "Segment dataset";
 

@@ -1215,7 +1215,7 @@ public class VirtualCellCollection implements ICellCollection {
 
         in.defaultReadObject();
         isRefolding = false;
-        vennCache = new HashMap<UUID, Integer>(); // cache the number of shared
+        vennCache = new HashMap<>(); // cache the number of shared
                                                   // nuclei with other datasets
 
         statsCache = new StatsCache();
@@ -1224,7 +1224,7 @@ public class VirtualCellCollection implements ICellCollection {
         profileManager = new ProfileManager(this);
 
         isRefolding = false;
-        vennCache = new HashMap<UUID, Integer>(); // cache the number of shared
+        vennCache = new HashMap<>(); // cache the number of shared
                                                   // nuclei with other datasets
 
         // Don't try to restore profile aggregates here - the parent collection
@@ -1232,6 +1232,8 @@ public class VirtualCellCollection implements ICellCollection {
         // not finished loading, and will be null. Do the restore in the
         // importing class
         // after reading has finished.
+        if(this.hasConsensus())
+			this.getConsensus().alignVertically();
 
     }
 

@@ -23,8 +23,8 @@ import javax.swing.JCheckBox;
 @SuppressWarnings("serial")
 public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 
-    private JCheckBox checkBox       = new JCheckBox("Show markers");
-    private JCheckBox showNucleiBox = new JCheckBox("Show nuclei");
+    private JCheckBox checkBox       = new JCheckBox("Show tags");
+    private JCheckBox showNucleiBox  = new JCheckBox("Show nuclear profiles");
 
     public ProfileMarkersOptionsPanel() {
         super();

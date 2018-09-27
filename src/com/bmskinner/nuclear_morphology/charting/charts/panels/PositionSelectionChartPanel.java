@@ -83,7 +83,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
         double oldXPct = 0;
         double oldYPct = 0;
 
-        if (overlayRectangle != null) {
+        if (overlayRectangle != null && getChart().getXYPlot()!=null) {
 
             double maxX = getChart().getXYPlot().getDomainAxis().getUpperBound();
             double minX = getChart().getXYPlot().getDomainAxis().getLowerBound();
@@ -136,7 +136,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
      * Update the domain width of the rectangle overlay based on the set percent
      */
     private synchronized void updateDomainWidth() {
-
+    	if(getChart().getXYPlot()==null)
+    		return;
         // Get the x bounds of the plot
         double max = getChart().getXYPlot().getDomainAxis().getUpperBound();
         double min = getChart().getXYPlot().getDomainAxis().getLowerBound();
@@ -152,7 +153,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
      * Update the range width of the rectangle overlay based on the set percent
      */
     private synchronized void updateRangeWidth() {
-
+    	if(getChart().getXYPlot()==null)
+    		return;
         // Get the bounds of the plot
         double max = getChart().getXYPlot().getRangeAxis().getUpperBound();
         double min = getChart().getXYPlot().getRangeAxis().getLowerBound();

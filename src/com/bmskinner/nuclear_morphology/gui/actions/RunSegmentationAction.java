@@ -47,23 +47,20 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 
     private static final String PROGRESS_LBL = "Segmentation analysis";
     private IAnalysisDataset    source       = null;
-    private CountDownLatch      latch        = null;
+//    private CountDownLatch      latch        = null;
 
     /**
      * Carry out a segmentation on a dataset
      * 
-     * @param dataset
-     *            the dataset to work on
-     * @param mode
-     *            the type of morphology analysis to carry out
-     * @param downFlag
-     *            the next analyses to perform
+     * @param dataset the dataset to work on
+     * @param mode the type of morphology analysis to carry out
+     * @param downFlag the next analyses to perform
      */
     public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
             CountDownLatch latch) {
         super(dataset, PROGRESS_LBL, acceptor, eh, downFlag);
         this.mode = mode;
-        this.latch = latch;
+        setLatch(latch);
     }
 
     public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
@@ -71,12 +68,19 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         super(list, PROGRESS_LBL, acceptor, eh, downFlag);
         this.mode = mode;
     }
+    
+    public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
+    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+        super(list, PROGRESS_LBL, acceptor, eh, downFlag);
+        this.mode = mode;
+        setLatch(latch);
+    }
 
     public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
             CountDownLatch latch) {
         super(dataset, "Copying morphology to " + dataset.getName(), acceptor, eh);
         this.downFlag = downFlag;
-        this.latch = latch;
+        setLatch(latch);
         this.mode = MorphologyAnalysisMode.COPY;
         this.source = source;
     }
@@ -155,52 +159,16 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                  */
                 if (mode.equals(MorphologyAnalysisMode.REFRESH)) 
                     dataset.getCollection().updateVerticalNuclei();
-
-                /*
-                 * The refold action is a progressable action, so must not block
-                 * the EDT. Also, the current action must wait for refolding to
-                 * complete, otherwise the next RunSegmentationAction in the
-                 * chain will block the refold from firing a done signal.
-                 * 
-                 * Hence, put a latch on the refold to make this thread wait
-                 * until the refolding is complete.
-                 */
-                if ((downFlag & CURVE_REFOLD) == CURVE_REFOLD) {
-                    finest("Preparing to hold thread while refolding datast");
-                    final CountDownLatch latch = new CountDownLatch(1);
-                    Runnable r = new RefoldNucleusAction(dataset, progressAcceptors.get(0), eh, latch);
-                    r.run();
-                    try {
-                        latch.await();
-                    } catch (InterruptedException e) {
-                        error("Interruption to thread", e);
-                    }
-                }
-
-                /*
-                 * Ideally, wait for the charts to clear before firing the
-                 * selection request
-                 */
-
-                /*
-                 * Save the dataset, regardless of flags
-                 */
-//                finer("Saving the dataset");
-//                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
-
+                
                 if ((downFlag & ADD_POPULATION) == ADD_POPULATION)
                     getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 
                 // if no list was provided, or no more entries remain,
                 // call the finish
                 if (!hasRemainingDatasetsToProcess()) {
-                    finest("No more datasets remain to process");
-                    if (latch != null) 
-                        latch.countDown();
-
-                    finer("Firing select dataset event");
+                    countdownLatch();
                     getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);
-
+                   
                     RunSegmentationAction.super.finished();
 
                 } else {
@@ -210,7 +178,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 
                     Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
                             ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, progressAcceptors.get(0), eh)
-                            : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, progressAcceptors.get(0), eh);
+                            : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, progressAcceptors.get(0), eh, getLatch().get());
 
                     task.run();
                 }
