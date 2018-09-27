@@ -274,7 +274,7 @@ public class EventHandler implements Loggable, EventListener {
                 return () -> setScale(selectedDatasets);
                 
             if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
-            	return () -> saveDataset(selectedDataset, true);
+            	return new SaveDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
             	
             if (event.type().equals(SignalChangeEvent.SAVE_ALL_DATASETS))
                 return () -> saveRootDatasets();
@@ -398,6 +398,7 @@ public class EventHandler implements Loggable, EventListener {
             		final CountDownLatch profileLatch = new CountDownLatch(1);
             		final CountDownLatch segmentLatch = new CountDownLatch(1);
             		final CountDownLatch refoldLatch  = new CountDownLatch(1);
+            		final CountDownLatch saveLatch    = new CountDownLatch(1);
 
             		new Thread( ()->{ // run profiling
             			int flag = 0;
@@ -413,6 +414,7 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { // wait for profiling and run segmentation
             			try {
             				profileLatch.await();
+            				fine("Starting segmentation action");
             				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this, segmentLatch).run();
             			} catch(InterruptedException e) {
             				return;
@@ -422,20 +424,32 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { // wait for segmentation and run refolding
             			try {
             				segmentLatch.await();
-                            Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch);
-                            task.run();
+            				fine("Starting refolding action");
+            				new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch).run();
             			} catch(InterruptedException e) {
             				return;
             			}
             		}).start();   
             		
-            		new Thread( ()-> { // wait for refolding and recache charts
+            		new Thread( ()-> { // wait for refolding and run save
             			try {
             				refoldLatch.await();
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            				fine("Starting save action");
+            				new SaveDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch).run();
             			} catch(InterruptedException e) {
             				return;
             			}	
+            		}).start();
+            		
+
+            		new Thread( ()-> { //  wait for save and recache charts
+            			try {
+            				saveLatch.await();
+            				fine("Starting recache action");
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            			} catch(InterruptedException e) {
+            				return;
+            			}
             		}).start();
             	};
             }
@@ -447,6 +461,14 @@ public class EventHandler implements Loggable, EventListener {
             if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)) {
                 final int flag = 0;
                 return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, acceptor, EventHandler.this);
+            }
+            
+            if (event.method().equals(DatasetEvent.SAVE)) {
+
+            	return () -> {
+            		final CountDownLatch latch = new CountDownLatch(1);
+            		new SaveDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch).run();
+            	};
             }
             
             // Run a completely new analysis on the dataset
@@ -577,9 +599,9 @@ public class EventHandler implements Loggable, EventListener {
             if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET))
             	fireDatasetSelectionEvent(event.firstDataset());
 
-            if (event.method().equals(DatasetEvent.SAVE)) {
-                saveDataset(event.firstDataset(), false);
-            }
+//            if (event.method().equals(DatasetEvent.SAVE)) {
+//                saveDataset(event.firstDataset(), false);
+//            }
 
             if (event.method().equals(DatasetEvent.RECACHE_CHARTS))
             	fireDatasetEvent(event);
@@ -713,42 +735,6 @@ public class EventHandler implements Loggable, EventListener {
 
         ThreadManager.getInstance().execute(r);
     }
-
-    /**
-     * Save the given dataset. If it is root, save directly. If it is not root,
-     * find the root parent and save it.
-     * 
-     * @param d
-     * @param saveAs
-     *            should the action ask for a directory
-     */
-    public synchronized void saveDataset(final IAnalysisDataset d, boolean saveAs) {
-
-        if (d.isRoot()) {
-            final CountDownLatch latch = new CountDownLatch(1);
-
-            Runnable r = new SaveDatasetAction(d, acceptor, EventHandler.this, latch, saveAs);
-            r.run();
-        } else {
-            IAnalysisDataset target = null;
-            for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
-                for (IAnalysisDataset child : root.getAllChildDatasets()) {
-                    if (child.getId().equals(d.getId())) {
-                        target = root;
-                        break;
-                    }
-                }
-                if (target != null) {
-                    break;
-                }
-            }
-            if (target != null) {
-                saveDataset(target, saveAs);
-            }
-        }
-    }
-
-    
 
     public synchronized void addDatasetUpdateEventListener(EventListener l) {
         updateListeners.add(l);

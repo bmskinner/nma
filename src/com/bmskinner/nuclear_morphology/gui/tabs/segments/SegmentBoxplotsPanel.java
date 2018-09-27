@@ -89,9 +89,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
         finest("Dataset list is not empty");
 
         // Check that all the datasets have the same number of segments
-        if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a
-                                                                // boxplot for
-                                                                // each segment
+        if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a boxplot for each segment
 
             ICellCollection collection = activeDataset().getCollection();
             List<IBorderSegment> segments;

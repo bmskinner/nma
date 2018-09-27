@@ -86,8 +86,6 @@ public class RunProfilingAction extends SingleDatasetResultAction {
         this.setProgressBarVisible(false);
 
         Runnable task = () -> {
-            
-            getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
 
             if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
                 finest("Adding dataset to list manager");

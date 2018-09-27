@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -26,7 +27,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
@@ -74,19 +77,24 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
 
         if (chooseSaveLocation) {
 
-            SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
-
-            String fileName = saveDialog.getFileName();
-            String folderName = saveDialog.getDirectory();
-            if (fileName != null && folderName != null) {
-                saveFile = new File(folderName, fileName);
-            } else {
-                this.finished();
-            }
+        	try {
+        		saveFile = eh.getInputSupplier().requestFileSave(dataset.getSavePath().getParentFile(), dataset.getName(), "nmd");
+			} catch (RequestCancelledException e) {
+				cancel();
+				return;
+			}
         } else {
             saveFile = dataset.getSavePath();
         }
 
+    }
+    
+    public SaveDatasetAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+        super(list, PROGRESS_BAR_LABEL, acceptor, eh);
+        this.setLatch(doneSignal);
+        this.setProgressBarIndeterminate();
+        dataset = DatasetListManager.getInstance().getRootParent(dataset);
+        saveFile = dataset.getSavePath();
     }
 
     @Override
@@ -97,7 +105,6 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
             long length = saveFile.exists() ? saveFile.length() : 0;
             IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
             worker = new DefaultAnalysisWorker(m, length);
-
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
         } else {
@@ -107,9 +114,22 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
 
     @Override
     public void finished() {
-//    	fine("Finished save");
-        this.countdownLatch();
-        super.finished();
-    }
+    	
+    	Thread thr = new Thread(()->{
 
+    		// update the stored hashcode for the dataset
+    		DatasetListManager.getInstance().updateHashCode(dataset);
+    		
+    		// if no list was provided, or no more entries remain, finish
+    		if (!hasRemainingDatasetsToProcess()) {
+    			countdownLatch();
+    			SaveDatasetAction.super.finished();
+    		} else { // otherwise analyse the next item in the list
+    			cancel(); // remove progress bar
+    			new SaveDatasetAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get()).run();
+    		}
+    	});
+
+        thr.start();
+    }
 }

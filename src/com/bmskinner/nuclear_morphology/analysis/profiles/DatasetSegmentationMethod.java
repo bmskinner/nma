@@ -155,7 +155,14 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 				n.updateDependentStats();
 			}
 			fine("Updated verticals and stats");
-
+			
+			
+			DatasetValidator dv = new DatasetValidator();
+			if(!dv.validate(dataset)) {
+				warn("Segmentation failed; resulting dataset did not validate");
+				for(String s : dv.getErrors())
+					warn(s);
+			}
 		} catch (Exception e) {
 			result = null;
 			System.out.println("Error in segmentation: "+e.getMessage());

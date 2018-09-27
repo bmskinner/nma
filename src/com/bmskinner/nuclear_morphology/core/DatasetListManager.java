@@ -196,6 +196,23 @@ public final class DatasetListManager implements Loggable {
             error("Error refreshing clusters", e);
         }
     }
+    
+    /**
+     * Get the rott parent dataset to the given dataset. If the given dataset is
+     * root, returns itself
+     * 
+     * @param d
+     * @return
+     */
+    public synchronized IAnalysisDataset getRootParent(@NonNull IAnalysisDataset d) {
+
+        if (d.isRoot())
+            return d;
+        for (IAnalysisDataset root : getRootDatasets())
+            if (root.hasRecursiveChild(d))
+            	return root;
+        return null;
+    }
 
     /**
      * Get the parent dataset to the given dataset. If the given dataset is

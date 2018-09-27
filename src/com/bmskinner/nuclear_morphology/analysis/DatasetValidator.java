@@ -137,6 +137,59 @@ public class DatasetValidator implements Loggable {
 	}
 
 	/**
+	 * Check that all the tags assigned in the root profile collection are present
+	 * in all nuclei, and in all child collections
+	 * @param d
+	 * @return
+	 */
+	private boolean checkChildDatasetsHaveBorderTagsPresentInRoot(@NonNull IAnalysisDataset d) {
+		List<IAnalysisDataset> children = d.getAllChildDatasets();
+		boolean isOk = true;
+
+		List<Tag> rootTags = d.getCollection().getProfileCollection().getBorderTags();
+		for(ICell c : d.getCollection()) {
+			for(Nucleus n : c.getNuclei()) {
+				for(Tag t : rootTags) {
+					if(!n.hasBorderTag(t)) {
+						isOk = false;
+						errorList.add(String.format("Nucleus %s does not have root collection tag", n.getNameAndNumber(), t));
+					}
+				}
+			}
+		}
+		
+		if(d.getCollection().hasConsensus()) {
+			for(Tag t : rootTags) {
+				if(!d.getCollection().getConsensus().hasBorderTag(t)) {
+					isOk = false;
+					errorList.add(String.format("Consensus nucleus does not have root collection tag", t));
+				}
+			}
+		}
+			
+
+		for (IAnalysisDataset child : children) {
+			for(Tag t : rootTags) {
+				if(!child.getCollection().getProfileCollection().getBorderTags().contains(t)) {
+					isOk = false;
+					errorList.add(String.format("Child dataset %s does not have root collection tag", child.getName(), t));
+				}
+			}
+			
+			if(child.getCollection().hasConsensus()) {
+				for(Tag t : rootTags) {
+					if(!child.getCollection().getConsensus().hasBorderTag(t)) {
+						isOk = false;
+						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag", child.getName(), t));
+					}
+				}
+			}
+		}
+
+		return isOk;	
+	}
+
+	/**
 	 * Test if all child collections have the same segmentation pattern applied
 	 * as the parent collection
 	 * 

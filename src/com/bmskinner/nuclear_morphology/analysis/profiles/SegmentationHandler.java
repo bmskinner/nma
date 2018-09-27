@@ -252,38 +252,26 @@ public class SegmentationHandler implements Loggable {
         if (dataset.getCollection().isVirtual())
             return;
         try {
-        	
-        
-        	
-        // If a tag is to be updated to an index with an existing tag, don't perform alignments; just set the index directly
-        // The user is expecting the tags to become the same
-        	
-        List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
-        for(Tag existingTag : tags) {
-        	if(existingTag.equals(tags))
-        		continue;
-        	int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
-        	if(index==existingTagIndex) {
-        		 dataset.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
-            	 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-                     child.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
-                 }
-            	 return;
+
+        	// If a tag is to be updated to an index with an existing tag, don't perform alignments; 
+        	// Just set the tag to the same index directly
+        	// The user is expecting the tags to become the same
+
+        	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+        	for(Tag existingTag : tags) {
+        		if(existingTag.equals(tags))
+        			continue;
+        		int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
+        		if(index==existingTagIndex) {
+        			dataset.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+        			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+        				child.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+        			}
+        			return;
+        		}
         	}
-        }
-        	
-//        if(index==0) {
-//        	 dataset.getCollection().getProfileManager().updateBorderTag(tag, 0);
-//        	 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-//                 child.getCollection().getProfileManager().updateBorderTag(tag, 0);
-//             }
-//        	 return;
-//        }
-        
-        // Otherwise, find the best fit for each child dataset
 
-
-
+        	// Otherwise, find the best fit for each child dataset
 
             double prop = dataset.getCollection().getProfileCollection()
                     .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
@@ -292,9 +280,7 @@ public class SegmentationHandler implements Loggable {
 
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
-                // Update each child median profile to the same proportional
-                // index
-
+                // Update each child median profile to the same proportional index
                 int childIndex = child.getCollection().getProfileCollection()
                         .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
 
