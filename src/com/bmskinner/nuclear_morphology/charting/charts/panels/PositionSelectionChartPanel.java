@@ -79,9 +79,11 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     }
 
     @Override
-    public synchronized void setChart(final @NonNull JFreeChart chart) {
-        if(chart==null)
+    public synchronized void setChart(final JFreeChart chart) {
+        if(chart==null) {
+        	super.setChart(chart);
         	return;
+        }
         double oldXPct = 0;
         double oldYPct = 0;
 

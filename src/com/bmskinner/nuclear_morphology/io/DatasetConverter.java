@@ -56,6 +56,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
@@ -289,22 +291,35 @@ public class DatasetConverter implements Loggable, Importer {
     
     private IAnalysisDataset convert1_13_8To1_14_0(IAnalysisDataset template)  throws DatasetConversionException {
     	try {
+    		
     		for(Nucleus n : template.getCollection().getNuclei()) {
-    			int prev = n.getBorderLength();
-    			n.refreshBorderList(true); 
-    			// interestingly, when spline fitting is used, the border length does not change, but the positions of tags are offset.
-        		// When spline fitting is not used, the border length changes, but the tag positions remain in expected indexes.
+    			n.refreshBorderList(false); // don't use spline fitting, to mimic the original border creation
     			n.calculateProfiles();
-        		int curr = n.getBorderLength();
-        		if(prev!=curr)
-        			log("Border length changed in conversion from "+prev+" to "+curr);
+    			// At this point, some of the cells may have RPs that are not exactly at segment boundaries
+    			// Correct this - find the first index of seg0. Update it to the RP
+    			ISegmentedProfile rpProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+    			IBorderSegment seg = rpProfile.getSegmentAt(0);    				
+    			if(seg.getStartIndex()!=0) {
+    				fine("Found mismatched index");
+    				seg.update(0, seg.getEndIndex());
+    				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, rpProfile);
+    			}
     		}
 
+    		// Update the collection profiles
     		ICellCollection c = template.getCollection();
     		Method m = c.getProfileCollection().getClass().getDeclaredMethod("createAndRestoreProfileAggregate", ICellCollection.class);
-    		m.setAccessible(true);
+    		m.setAccessible(false);
     		m.invoke(c.getProfileCollection(), c);
-    	} catch (ProfileException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+    		
+    		for(IAnalysisDataset d : template.getAllChildDatasets()) {
+    			ICellCollection child = d.getCollection();
+        		Method v = child.getProfileCollection().getClass().getDeclaredMethod("createAndRestoreProfileAggregate", ICellCollection.class);
+        		v.setAccessible(false);
+        		v.invoke(child.getProfileCollection(), child);
+    		}
+    		
+    	} catch (ProfileException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | UnavailableProfileTypeException | UnavailableBorderTagException | SegmentUpdateException e) {
     		stack("Error converting dataset", e);
             throw new DatasetConversionException(e.getCause());
     	}
@@ -314,18 +329,12 @@ public class DatasetConverter implements Loggable, Importer {
     }
 
     private void makeMergeSources(@NonNull IAnalysisDataset template, @NonNull IAnalysisDataset dest) throws DatasetConversionException {
-
         if (template.hasMergeSources()) {
-
             for (IAnalysisDataset d : template.getMergeSources()) {
-
                 dest.addMergeSource(d);
-
             }
-
             log("Added merge sources");
         }
-
     }
 
     /**

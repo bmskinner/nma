@@ -138,7 +138,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
             // if rodent sperm, put tip on left if needed
             if (collection.getNucleusType().equals(NucleusType.RODENT_SPERM)) {
-                if (refoldNucleus.getBorderTag(Tag.REFERENCE_POINT).getX() > 0) {
+                if (refoldNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX() > 0) {
                     refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
                 }
             }

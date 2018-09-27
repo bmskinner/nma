@@ -57,15 +57,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 		testProfilesAreIdenticalForAllCells(dataset);
 		testProfilingIsConsistentBetweenMedianAndCells(dataset);
 	}
-	
-	@Test
-	public void testMultiCellVariableRectangularDataset() throws Exception {
-//		TODO - this test makes no sense, the profiles will not be identical in variable cells
-		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-				.withMaxSizeVariation(20).profiled().build();
-		testProfilingIsConsistentBetweenMedianAndCells(dataset);
-	}
-	
+		
 	@Test
 	public void testProfilingIsIndependentOfCellLocation() throws Exception {
 		// create cells with different x and y bases and no variation. 

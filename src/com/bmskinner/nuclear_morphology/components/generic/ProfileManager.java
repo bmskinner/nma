@@ -280,11 +280,11 @@ public class ProfileManager implements Loggable {
         			n.setBorderTag(tag, existingIndex);
 
         			if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-        				n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
+        				n.alignPointsOnVertical(n.getBorderPoint(Tag.TOP_VERTICAL), n.getBorderPoint(Tag.BOTTOM_VERTICAL));
         				if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
         					n.flipXAroundPoint(n.getCentreOfMass());
         			} else {
-        				n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
+        				n.rotatePointToBottom(n.getBorderPoint(Tag.ORIENTATION_POINT));
         			}
         		}
 
@@ -319,7 +319,7 @@ public class ProfileManager implements Loggable {
             n.setBorderTag(tag, newIndex);
 
             if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-                n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
+                n.alignPointsOnVertical(n.getBorderPoint(Tag.TOP_VERTICAL), n.getBorderPoint(Tag.BOTTOM_VERTICAL));
 
                 if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX()) {
                     // need to flip about the CoM
@@ -327,7 +327,7 @@ public class ProfileManager implements Loggable {
                 }
 
             } else {
-                n.rotatePointToBottom(n.getBorderTag(Tag.ORIENTATION_POINT));
+                n.rotatePointToBottom(n.getBorderPoint(Tag.ORIENTATION_POINT));
             }
             //
             finest("Set border tag in consensus to " + newIndex + " from " + oldNIndex);
@@ -693,7 +693,7 @@ public class ProfileManager implements Loggable {
         			// Update intersection point if needed
         			if (tagToUpdate.equals(Tag.ORIENTATION_POINT)) {
         				n.setBorderTag(Tag.INTERSECTION_POINT,
-        						n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(Tag.ORIENTATION_POINT))));
+        						n.getBorderIndex(n.findOppositeBorder(n.getBorderPoint(Tag.ORIENTATION_POINT))));
         			}
         		}
 

@@ -237,28 +237,19 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     /*
-     * ############################################# 
+     *  
      * Methods implementing the Taggable interface 
-     * #############################################
+     *
      */
 
     @Override
-	public IBorderPoint getBorderTag(@NonNull Tag tag) throws UnavailableBorderTagException {
+    public IBorderPoint getBorderPoint(@NonNull Tag tag) throws UnavailableBorderTagException {
+    	int borderIndex = this.getBorderIndex(tag);
 
-        IBorderPoint result = new DefaultBorderPoint(0, 0);
+    	if (borderIndex < 0 || borderIndex >= this.getBorderLength())
+    		throw new UnavailableBorderTagException(String.format("No tag '%s'; registered as index %s", tag, borderIndex));
 
-        int borderIndex = this.getBorderIndex(tag);
-
-        if (borderIndex < 0 || borderIndex >= this.getBorderLength())
-            throw new UnavailableBorderTagException(String.format("No tag '%s'; registered as index %s", tag, borderIndex));
-
-        result = this.getBorderPoint((this.getBorderIndex(tag)));
-        return result;
-    }
-
-    @Override
-	public IBorderPoint getBorderPoint(@NonNull Tag tag) throws UnavailableBorderTagException {
-        return getBorderTag(tag);
+    	return getBorderPoint(borderIndex);
     }
 
     @Override
@@ -285,7 +276,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public int getBorderIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
-
         if (borderTags.containsKey(tag))
             return borderTags.get(tag);
         throw new UnavailableBorderTagException("Tag "+tag+" is not present");

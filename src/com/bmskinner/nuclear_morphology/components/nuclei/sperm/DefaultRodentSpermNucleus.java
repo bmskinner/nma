@@ -173,7 +173,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          */
         double vertX;
         try {
-            vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
+            vertX = testNucleus.getBorderPoint(Tag.TOP_VERTICAL).getX();
         } catch (UnavailableBorderTagException e) {
             stack("Cannot get border tag", e);
             setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
@@ -237,10 +237,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
         try {
 
-            testPoint = this.getBorderTag(Tag.REFERENCE_POINT);
-            referencePoint = this.getBorderTag(Tag.REFERENCE_POINT);
-            interSectionPoint = this.getBorderTag(Tag.INTERSECTION_POINT);
-            orientationPoint = this.getBorderTag(Tag.ORIENTATION_POINT);
+            testPoint = this.getBorderPoint (Tag.REFERENCE_POINT);
+            referencePoint = this.getBorderPoint (Tag.REFERENCE_POINT);
+            interSectionPoint = this.getBorderPoint (Tag.INTERSECTION_POINT);
+            orientationPoint = this.getBorderPoint (Tag.ORIENTATION_POINT);
 
         } catch (UnavailableBorderTagException e) {
             fine("Cannot get border tag", e);
@@ -452,7 +452,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          */
         double vertX;
         try {
-            vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+            vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
         } catch (UnavailableBorderTagException e) {
             stack("Cannot get RP from vertical nucleus; returning default orientation", e);
             return verticalNucleus;
@@ -492,7 +492,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         // of the true ends of the signal
         double tipToCoMDistance;
         try {
-            tipToCoMDistance = this.getBorderTag(Tag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
+            tipToCoMDistance = this.getBorderPoint (Tag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
         } catch (UnavailableBorderTagException e) {
             fine("Cannot get border tag", e);
             throw new UnavailableBorderTagException("Cannot get RP", e);
@@ -502,7 +502,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         double maxDistance = 0;
         IBorderPoint tail;
 
-        tail = this.getBorderTag(Tag.REFERENCE_POINT);
+        tail = this.getBorderPoint(Tag.REFERENCE_POINT);
         // start at tip, move round
 
         for (int i = 0; i < array.size(); i++) {
@@ -510,7 +510,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
                 double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getBorderPoint(i));
                 double distanceBetweenEnds;
-                distanceBetweenEnds = this.getBorderTag(Tag.REFERENCE_POINT).getLengthTo(getBorderPoint(i));
+                distanceBetweenEnds = this.getBorderPoint(Tag.REFERENCE_POINT).getLengthTo(getBorderPoint(i));
 
                 double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
@@ -539,7 +539,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         double minDistance = this.getStatistic(PlottableStatistic.MAX_FERET);
         IBorderPoint reference;
 
-        reference = this.getBorderTag(Tag.REFERENCE_POINT);
+        reference = this.getBorderPoint(Tag.REFERENCE_POINT);
 
         for (int i = 0; i < this.getBorderLength(); i++) {
 
@@ -566,8 +566,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             IBorderPoint p = this.getBorderPoint(i);
             double angle = this.getCentreOfMass().findSmallestAngle(reference, p);
 
-            if (Math.abs(90 - angle) < difference && p.getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT)) > this
-                    .getCentreOfMass().getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT))) {
+            if (Math.abs(90 - angle) < difference && p.getLengthTo(this.getBorderPoint(Tag.REFERENCE_POINT)) > this
+                    .getCentreOfMass().getLengthTo(this.getBorderPoint(Tag.REFERENCE_POINT))) {
                 difference = 90 - angle;
                 tail = p;
             }
@@ -593,7 +593,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         // at the point the yvalues are closest and not the tail point is the
         // intersesction
         LineEquation lineEquation = new DoubleEquation(this.getCentreOfMass(),
-                this.getBorderTag(Tag.ORIENTATION_POINT));
+                this.getBorderPoint(Tag.ORIENTATION_POINT));
 
         double minDeltaY = 100;
         int minDeltaYIndex = 0;
@@ -603,7 +603,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             double y = this.getBorderPoint(i).getY();
             double yOnLine = lineEquation.getY(x);
 
-            double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag(Tag.ORIENTATION_POINT));
+            double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderPoint(Tag.ORIENTATION_POINT));
 
             double deltaY = Math.abs(y - yOnLine);
             if (deltaY < minDeltaY && distanceToTail > this.getStatistic(PlottableStatistic.MAX_FERET) / 2) { // exclude

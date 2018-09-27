@@ -533,7 +533,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     public XYDataset createSegmentedNucleusOutline(@NonNull ICellCollection collection) throws ChartDatasetCreationException {
         FloatXYDataset ds = new FloatXYDataset();
-        fine("Making segmented outline dataset");
+
         // get the consensus nucleus for the population
         Nucleus n = collection.getConsensus();
 
@@ -563,10 +563,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         	// At this point, the angle profile and the iqr profile should be in sync
         	// The following set of checks confirms this.
-        	int pointIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
-
         	if (angleProfile.hasSegments()) { // only draw if there are segments
-        		fine("Found "+angleProfile.getSegmentCount()+" segments in profile");
+
         		// go through each segment
         		for (IBorderSegment seg : angleProfile.getOrderedSegments()) {
 
@@ -576,8 +574,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         			float[] xpoints = new float[seg.length()];
         			float[] ypoints = new float[seg.length()];
 
-        			fine("Segment has "+seg.length()+" indexes");
-
         			Iterator<Integer> it = seg.iterator();
         			int i = 0;
         			while(it.hasNext()) {
@@ -585,9 +581,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         				IBorderPoint p = n.getBorderPoint(index);
         				xpoints[i] = (float) p.getX();
         				ypoints[i++] = (float) p.getY();
-//        				fine(p.toString());
         			}
-        			fine(i+": "+seg.length());
         			float[][] data = { xpoints, ypoints };
         			ds.addSeries(seg.getName(), data, 0);
         		}
@@ -596,10 +590,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         	if(ds.getSeriesCount()<angleProfile.getSegmentCount())
         		throw new ChartDatasetCreationException("Cannot make segmented nucleus outline: too few series in chart dataset");
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnavailableBorderPointException e) {
-        	fine("Error getting nucleus angle profile from " + Tag.REFERENCE_POINT);
+        	stack("Error getting nucleus angle profile from " + Tag.REFERENCE_POINT, e);
         	throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
-        fine("Segmented outline dataset has "+ds.getSeriesCount()+" series");
         return ds;
     }
 

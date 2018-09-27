@@ -220,8 +220,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         if (PlottableStatistic.OP_RP_ANGLE.equals(stat)) {
             try {
-                result = getCentreOfMass().findSmallestAngle(this.getBorderTag(Tag.REFERENCE_POINT),
-                        this.getBorderTag(Tag.ORIENTATION_POINT));
+                result = getCentreOfMass().findSmallestAngle(this.getBorderPoint(Tag.REFERENCE_POINT),
+                        this.getBorderPoint(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
                 stack("Cannot get border tag", e);
                 result = ERROR_CALCULATING_STAT;
@@ -459,8 +459,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         IBorderPoint topPoint;
         IBorderPoint bottomPoint;
 
-        topPoint = this.getBorderTag(Tag.TOP_VERTICAL);
-        bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
+        topPoint = this.getBorderPoint(Tag.TOP_VERTICAL);
+        bottomPoint = this.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
         // Find the border points between the top and bottom verticals
         List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();

@@ -135,7 +135,7 @@ public class RodentSpermNucleus extends SpermNucleus {
             // BorderPoint[] points = getBorderPointsForVerticalAlignment();
             // testNucleus.alignPointsOnVertical(points[0], points[1] );
 
-            double vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
+            double vertX = testNucleus.getBorderPoint(Tag.TOP_VERTICAL).getX();
 
             /*
              * Find the x values in the bounding box of the vertical nucleus.
@@ -165,7 +165,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 
             double distanceHook = 0;
             double distanceHump = 0;
-            double referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+            double referenceX = testNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
 
             finer("TV is at " + vertX);
             finer("Max bounding x is " + maxBoundingX);
@@ -420,7 +420,7 @@ public class RodentSpermNucleus extends SpermNucleus {
          */
         double vertX;
         try {
-            vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+            vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
         } catch (UnavailableBorderTagException e) {
             return verticalNucleus;
         }

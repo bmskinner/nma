@@ -138,7 +138,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
             	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
             }
             
-            // Colour the border points for tags
             annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), Color.ORANGE, 9);
             annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER), Color.BLUE, 7);
             

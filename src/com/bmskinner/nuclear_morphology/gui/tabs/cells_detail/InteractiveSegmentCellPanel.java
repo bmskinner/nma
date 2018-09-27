@@ -105,7 +105,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
 
 			for(Nucleus n : cell.getNuclei()){
-				an2.annotateSegmentsOnCroppedNucleus(n.duplicate());
+				an2.annotateSegmentsOnCroppedNucleus(n);
 			}    
 			
 			imageLabel.setIcon(an2.toImageIcon());

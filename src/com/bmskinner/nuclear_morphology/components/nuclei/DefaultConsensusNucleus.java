@@ -157,7 +157,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
         in.defaultReadObject();
         try {
         	alignVertically();
-        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderTag(Tag.REFERENCE_POINT).getX() > 0)
+        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderPoint(Tag.REFERENCE_POINT).getX() > 0)
         			flipXAroundPoint(getCentreOfMass());
         } catch (UnavailableBorderTagException e1) {
         	fine("Cannot get border tag", e1);

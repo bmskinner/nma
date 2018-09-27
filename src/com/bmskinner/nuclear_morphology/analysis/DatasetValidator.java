@@ -94,6 +94,11 @@ public class DatasetValidator implements Loggable {
 			errorList.add("Error in segmentation between datasets");
 			errors++;
 		}
+		
+		if (!checkChildDatasetsHaveBorderTagsPresentInRoot(d)) {
+			errorList.add("Error in segmentation between datasets");
+			errors++;
+		}
 
 		if (!checkSegmentsAreConsistentInAllCells(d)) {
 			errorList.add("Error in segmentation between cells");
@@ -158,6 +163,7 @@ public class DatasetValidator implements Loggable {
 					if(!n.hasBorderTag(t)) {
 						isOk = false;
 						errorList.add(String.format("Nucleus %s does not have root collection tag", n.getNameAndNumber(), t));
+						errorCells.add(c);
 					}
 				}
 			}
@@ -194,6 +200,11 @@ public class DatasetValidator implements Loggable {
 		return isOk;	
 	}
 	
+	/**
+	 * Check if the RP is at a segment boundary in all cells
+	 * @param d
+	 * @return
+	 */
 	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull IAnalysisDataset d) {
 		boolean allOk = true;
 		for(ICell c : d.getCollection()) {
@@ -213,6 +224,7 @@ public class DatasetValidator implements Loggable {
 
 				if(!isOk) {
 					errorList.add(String.format("Nucleus %s does not have RP at a segment boundary", n.getNameAndNumber()));
+					errorCells.add(c);
 					allOk = false;
 				}
 			}

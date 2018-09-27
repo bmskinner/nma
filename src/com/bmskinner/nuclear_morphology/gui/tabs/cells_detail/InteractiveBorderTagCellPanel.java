@@ -102,7 +102,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
 
 			for(Nucleus n : cell.getNuclei()){
-				an2.annotateTagsOnCroppedNucleus(n.duplicate());
+				an2.annotateTagsOnCroppedNucleus(n);
 			}    
 			
 			imageLabel.setIcon(an2.toImageIcon());

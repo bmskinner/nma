@@ -655,12 +655,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public int getBorderLength() {
-        return this.borderList.size();
+        return borderList.size();
     }
 
     @Override
 	public IBorderPoint getBorderPoint(int i) {
-        return this.borderList.get(i);
+        return borderList.get(i);
     }
 
     @Override
@@ -669,20 +669,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         double diffX = p.getX() - centreOfMass.getX();
         double diffY = p.getY() - centreOfMass.getY();
-
+        
         // Offset to the original position
-        IBorderPoint ip = IBorderPoint.makeNew(originalCentreOfMass.getX() + diffX,
+        return IBorderPoint.makeNew(originalCentreOfMass.getX() + diffX,
                 originalCentreOfMass.getY() + diffY);
-
-        return ip;
     }
 
     @Override
 	public int getBorderIndex(@NonNull IBorderPoint p) {
         for(int i=0; i<borderList.size(); i++) {
         	IBorderPoint n = borderList.get(i);
-            if (n.getX() == p.getX() && n.getY() == p.getY())
-                return i;
+        	if(n.overlapsPerfectly(p))
+        		return i;
         }
         return -1; // default if no match found
     }

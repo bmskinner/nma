@@ -18,12 +18,12 @@
 
 package com.bmskinner.nuclear_morphology.charting;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.table.TableModel;
 
@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.io.Io;
  */
 public class ChartCache implements Cache {
 
-    private Map<ChartOptions, JFreeChart> chartMap = new HashMap<ChartOptions, JFreeChart>();
+    private final Map<ChartOptions, JFreeChart> chartMap = new ConcurrentHashMap<>();
 
     @Override
     public String toString() {
@@ -59,45 +59,35 @@ public class ChartCache implements Cache {
     }
 
     @Override
-    public synchronized void add(@NonNull ChartOptions options, @NonNull JFreeChart chart) {
+    public synchronized void add(@NonNull final ChartOptions options, @NonNull final JFreeChart chart) {
         chartMap.put(options, chart);
     }
 
     @Override
-    public synchronized void add(@NonNull TableOptions options, @NonNull TableModel model) {
+    public synchronized void add(@NonNull final TableOptions options, @NonNull final TableModel model) {
     }
 
     @Override
-    public synchronized JFreeChart get(ChartOptions options) {
+    public synchronized JFreeChart get(final ChartOptions options) {
         return chartMap.get(options);
 
     }
 
     @Override
-    public synchronized boolean has(ChartOptions options) {
+    public synchronized boolean has(final ChartOptions options) {
         return chartMap.containsKey(options);
     }
     
     @Override
-    public boolean has(TableOptions options) {
+    public boolean has(final TableOptions options) {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.Cache#purge()
-     */
     @Override
     public synchronized void purge() {
-        chartMap = new HashMap<ChartOptions, JFreeChart>();
+        chartMap.clear();;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.Cache#refresh()
-     */
     @Override
     public synchronized void clear() {
         this.purge();
@@ -114,11 +104,11 @@ public class ChartCache implements Cache {
 
         // Make a list of the options that need removed
         // These are the options that contain the datasets in the list
-        Set<ChartOptions> toRemove = new HashSet<ChartOptions>();
+        Set<ChartOptions> toRemove = new HashSet<>();
 
         // Find the options with the datasets
         for (IAnalysisDataset d : list) {
-            for (ChartOptions op : this.chartMap.keySet()) {
+            for (ChartOptions op : chartMap.keySet()) {
                 if (op.hasDatasets()) {
                     if (op.getDatasets().contains(d)) {
                         toRemove.add(op);
@@ -128,17 +118,15 @@ public class ChartCache implements Cache {
         }
 
         // Remove the options with the datasets
-        for (ChartOptions op : toRemove) {
-            finest("Clearing options");
+        for (final ChartOptions op : toRemove) {
             chartMap.remove(op);
         }
     }
 
     @Override
-    public synchronized void clear(ICell cell) {
-        if (cell == null) {
+    public synchronized void clear(final ICell cell) {
+        if (cell == null)
             return;
-        }
 
         // Make a list of the options that need removed
         // These are the options that contain the datasets in the list
@@ -157,7 +145,7 @@ public class ChartCache implements Cache {
     }
 
     @Override
-    public TableModel get(TableOptions options) {
+    public TableModel get(final TableOptions options) {
         return null;
     }
 }

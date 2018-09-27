@@ -72,14 +72,14 @@ public interface Taggable extends Profileable {
      */
     public Tag getBorderTag(int index) throws IndexOutOfBoundsException;
 
-    /**
-     * Get a copy of the border point at the given tag
-     * 
-     * @param tag
-     * @return the point
-     * @throws UnavailableBorderTagException if the tag is not present
-     */
-    public IBorderPoint getBorderTag(@NonNull Tag tag) throws UnavailableBorderTagException;
+//    /**
+//     * Get a copy of the border point at the given tag
+//     * 
+//     * @param tag
+//     * @return the point
+//     * @throws UnavailableBorderTagException if the tag is not present
+//     */
+//    public IBorderPoint getBorderTag(@NonNull Tag tag) throws UnavailableBorderTagException;
 
     /**
      * Check if the nucleus has the given border tag
@@ -171,11 +171,12 @@ public interface Taggable extends Profileable {
 
     /**
      * Get the border index of point in the border list, removing offset to a
-     * reference tag
+     * reference tag. This will return the index of the point in the original
+     * border list of the object.
      * 
      * @param reference the border tag with index zero
-     * @param index  the index to offset. Should be counting from the reference tag
-     * @return the offset index, or throws an UnavailableBorderTagException
+     * @param index  the index in a profile zeroed on the reference tag
+     * @return the index of the point translated back to the original border list
      * @throws UnavailableBorderTagException if the reference tag is not present
      */
     public int getOffsetBorderIndex(@NonNull Tag reference, int index) throws UnavailableBorderTagException;

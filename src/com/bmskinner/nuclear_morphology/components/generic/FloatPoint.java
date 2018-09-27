@@ -61,51 +61,26 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         this(p.getX(), p.getY());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getXAsInt()
-     */
     @Override
     public int getXAsInt() {
-        return (int) Math.round(x);
+        return Math.round(x);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getYAsInt()
-     */
     @Override
     public int getYAsInt() {
-        return (int) Math.round(y);
+        return Math.round(y);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#setX(double)
-     */
     @Override
     public void setX(double x) {
         this.x = (float) x;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#setY(double)
-     */
     @Override
     public void setY(double y) {
         this.y = (float) y;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#set(components.generic.XYPoint)
-     */
     @Override
     public void set(@NonNull IPoint p) {
         if (p==null)
@@ -114,11 +89,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         this.y = (float) p.getY();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getLengthTo(components.generic.IPoint)
-     */
     @Override
     public double getLengthTo(@NonNull final IPoint a) {
 
@@ -134,29 +104,13 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return length;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#overlaps(components.generic.IPoint)
-     */
     @Override
     public boolean overlaps(@NonNull final IPoint a) {
-
         if (a == null)
             throw new IllegalArgumentException("Destination point is null");
-
-        if (this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()) {
-            return true;
-        } else {
-            return false;
-        }
+        return(this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isAbove(components.generic.XYPoint)
-     */
     @Override
     public boolean isAbove(@NonNull IPoint p) {
         if (p==null)
@@ -164,11 +118,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return y > p.getY();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isBelow(components.generic.XYPoint)
-     */
     @Override
     public boolean isBelow(@NonNull IPoint p) {
         if (p==null)
@@ -176,11 +125,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return y < p.getY();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isLeftOf(components.generic.XYPoint)
-     */
     @Override
     public boolean isLeftOf(@NonNull IPoint p) {
         if (p==null)
@@ -188,11 +132,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return x < p.getX();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isRightOf(components.generic.XYPoint)
-     */
     @Override
     public boolean isRightOf(@NonNull IPoint p) {
         if (p==null)
@@ -200,23 +139,12 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return x > p.getX();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#offset(double, double)
-     */
     @Override
     public void offset(double x, double y) {
         this.setX(this.getX() + x);
         this.setY(this.getY() + y);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IPoint#overlapsPerfectly(components.generic.IPoint)
-     */
     @Override
     public boolean overlapsPerfectly(@NonNull final IPoint a) {
         if (a==null)
@@ -323,12 +251,7 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         double dy = y1 - y2;
         return (180.0 / Math.PI) * Math.atan2(dy, dx);
     }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#equals(java.lang.Object)
-     */
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

@@ -138,7 +138,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         
         // Do not use DefaultNucleus::rotateVertically; it will not align properly
         if (cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-            cons.alignPointsOnVertical(cons.getBorderTag(Tag.TOP_VERTICAL), cons.getBorderTag(Tag.BOTTOM_VERTICAL));
+            cons.alignPointsOnVertical(cons.getBorderPoint(Tag.TOP_VERTICAL), cons.getBorderPoint(Tag.BOTTOM_VERTICAL));
 
             if (cons.getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.getCentreOfMass().getX())
                 cons.flipXAroundPoint(cons.getCentreOfMass());
