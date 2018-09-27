@@ -116,6 +116,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                 int newIndex = cons.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
                 fine(String.format("Setting %s in consensus to %s ", tag, newIndex));
                 cons.setBorderTag(tag, newIndex);
+                n.setBorderTag(tag, newIndex);
             }
         }
         cons.alignVertically();
@@ -127,6 +128,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
         	profile.setSegments(newSegs);
         	cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         }
         
         // Do not use DefaultNucleus::rotateVertically; it will not align properly

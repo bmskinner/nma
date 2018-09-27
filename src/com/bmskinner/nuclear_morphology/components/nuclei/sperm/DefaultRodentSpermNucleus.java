@@ -690,30 +690,25 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     @Override
     public void rotate(double angle) {
-
-        if (angle != 0) {
-
+        if (angle != 0)
             super.rotate(angle);
-        }
     }
 
     @Override
     public String dumpInfo(int type) {
         String result = super.dumpInfo(type);
-
         return result;
-
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+        if(!this.hasBorderTag(Tag.REFERENCE_POINT))
+        	warn("Nucleus "+this.getNameAndNumber()+" has no RP");
         calculateHookAndBodyLength();
 
     }
 
     private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting rodent sperm nucleus");
         out.defaultWriteObject();
-
     }
 }

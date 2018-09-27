@@ -90,7 +90,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
     	if(activeDataset()==null)
     		return;
-        if (activeDataset().getCollection().isVirtual()) {
+        if (activeDataset().getCollection().isVirtual() && tag.equals(Tag.REFERENCE_POINT)) {
             warn("Cannot update core border tag for a child dataset");
             return;
         }

@@ -153,7 +153,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	 this.angleWindowProportion = c.angleWindowProportion;
          this.angleProfileWindowSize = c.angleProfileWindowSize;
          for(Tag t : c.borderTags.keySet())
-        	 borderTags.put(t, c.borderTags.get(t));
+        	 borderTags.put(t, c.borderTags.get(t).intValue());
          this.segsLocked = c.segsLocked;
          
          for (ProfileType type : c.profileMap.keySet()) {
@@ -263,25 +263,31 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public Map<Tag, Integer> getBorderTags() {
-        Map<Tag, Integer> result = new HashMap<Tag, Integer>();
+        Map<Tag, Integer> result = new HashMap<>();
         for (Tag b : borderTags.keySet()) {
             result.put(b, borderTags.get(b));
         }
         return result;
     }
 
-    public void setBorderTags(Map<Tag, Integer> m) {
-        if (segsLocked) {
+    
+    /**
+     * Replace the tags in the object with the given tag map
+     * @param m
+     */
+    private void setBorderTags(Map<Tag, Integer> m) {
+        if (segsLocked)
             return;
-        }
-        this.borderTags = m;
+        borderTags.clear();
+        for(Tag t : m.keySet())
+        	borderTags.put(t, m.get(t).intValue());
     }
 
     @Override
 	public int getBorderIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
 
-        if (this.borderTags.containsKey(tag))
-            return this.borderTags.get(tag);
+        if (borderTags.containsKey(tag))
+            return borderTags.get(tag);
         throw new UnavailableBorderTagException("Tag "+tag+" is not present");
     }
 
