@@ -47,7 +47,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 
     private static final String PROGRESS_LBL = "Segmentation analysis";
     private IAnalysisDataset    source       = null;
-//    private CountDownLatch      latch        = null;
+
 
     /**
      * Carry out a segmentation on a dataset
@@ -160,15 +160,13 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                 if (mode.equals(MorphologyAnalysisMode.REFRESH)) 
                     dataset.getCollection().updateVerticalNuclei();
                 
-                if ((downFlag & ADD_POPULATION) == ADD_POPULATION)
-                    getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-
                 // if no list was provided, or no more entries remain,
                 // call the finish
                 if (!hasRemainingDatasetsToProcess()) {
                     countdownLatch();
                     getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);
-                   
+                    getInterfaceEventHandler().removeListener(eh);
+                    getDatasetEventHandler().removeListener(eh);
                     RunSegmentationAction.super.finished();
 
                 } else {

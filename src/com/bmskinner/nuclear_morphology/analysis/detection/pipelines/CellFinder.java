@@ -59,9 +59,8 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 
         final Queue<ICell> list = new ConcurrentLinkedQueue<>();
         File[] arr = folder.listFiles();
-        if (arr == null) {
-            return null;
-        }
+        if (arr == null)
+            return list;
         
         Stream.of(arr).parallel().forEach(f -> {
             

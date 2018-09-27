@@ -66,7 +66,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     }
 
     @Override
-    public synchronized List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
+    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
         List<ICell> list = new ArrayList<>();
 
         try {
@@ -107,7 +107,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         return list;
     }
 
-    private synchronized List<Nucleus> detectNucleus(@NonNull final File imageFile)
+    private List<Nucleus> detectNucleus(@NonNull final File imageFile)
             throws ImageImportException, MissingOptionException {
 
         List<Nucleus> list = new ArrayList<>();
@@ -128,33 +128,43 @@ public class FluorescentNucleusFinder extends CellFinder {
         ImageFilterer filt = new ImageFilterer(ip.duplicate());
         if (cannyOptions.isUseKuwahara()) {
             filt.runKuwaharaFiltering(cannyOptions.getKuwaharaKernel());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
+            }
         }
 
         if (cannyOptions.isUseFlattenImage()) {
             filt.squashChromocentres(cannyOptions.getFlattenThreshold());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
+            }
         }
 
         if (cannyOptions.isUseCanny()) {
             filt.runEdgeDetector(cannyOptions);
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Edge detection");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Edge detection");
+            }
 
             filt.morphologyClose(cannyOptions.getClosingObjectRadius());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Gap closing");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Gap closing");
+            }
         } else {
             filt.threshold(nuclOptions.getThreshold());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Thresholded");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Thresholded");
+            }
         }
 
         GenericDetector gd = new GenericDetector();

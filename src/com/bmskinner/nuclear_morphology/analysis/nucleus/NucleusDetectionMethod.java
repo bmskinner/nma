@@ -213,11 +213,9 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         try {
             final Collection<ICell> cells = finder.findInFolder(folder);
-            for (final ICell cell : cells) 
-                folderCollection.addCell(cell);
-
             if (!cells.isEmpty()) 
                 makeFolder(folder);
+            folderCollection.addAll(cells);
         } catch (ImageImportException e) {
             stack("Error searching folder", e);
         }
