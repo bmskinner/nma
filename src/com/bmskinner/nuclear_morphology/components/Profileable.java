@@ -71,7 +71,9 @@ public interface Profileable extends CellularComponent {
      * Get a copy of the angle profile. The first index of the profile is the
      * first border point in the border list. That is, there is no consistency
      * to the order of values across multiple nuclei. If consistency is needed,
-     * specify a pointType @return @throws
+     * specify a pointType
+     * @return the profile for the object
+     * @throws UnavailableProfileTypeException if the profile type is not found
      */
     ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException;
 

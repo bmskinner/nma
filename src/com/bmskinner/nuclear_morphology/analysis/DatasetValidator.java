@@ -99,6 +99,11 @@ public class DatasetValidator implements Loggable {
 			errorList.add("Error in segmentation between cells");
 			errors++;
 		}
+		
+		if (!checkNucleiHaveRPOnASegmentBoundary(d)) {
+			errorList.add("Error in RP placement between cells");
+			errors++;
+		}
 
 		if (errors == 0) {
 			errorList.add("Dataset OK");
@@ -188,6 +193,34 @@ public class DatasetValidator implements Loggable {
 
 		return isOk;	
 	}
+	
+	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull IAnalysisDataset d) {
+		boolean allOk = true;
+		for(ICell c : d.getCollection()) {
+			for(Nucleus n : c.getNuclei()) {
+				boolean isOk = false;
+				
+				try {
+					int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
+					for(IBorderSegment s : profile.getSegments()){
+						if(s.getStartIndex()==rpIndex)
+							isOk = true;
+					}
+				} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
+					// allow isOk to fall through
+				}
+
+				if(!isOk) {
+					errorList.add(String.format("Nucleus %s does not have RP at a segment boundary", n.getNameAndNumber()));
+					allOk = false;
+				}
+			}
+		}
+		return allOk;
+	}
+
+		
 
 	/**
 	 * Test if all child collections have the same segmentation pattern applied

@@ -290,8 +290,14 @@ public class DatasetConverter implements Loggable, Importer {
     private IAnalysisDataset convert1_13_8To1_14_0(IAnalysisDataset template)  throws DatasetConversionException {
     	try {
     		for(Nucleus n : template.getCollection().getNuclei()) {
-    			n.refreshBorderList(false);
-        		n.calculateProfiles();
+    			int prev = n.getBorderLength();
+    			n.refreshBorderList(true); 
+    			// interestingly, when spline fitting is used, the border length does not change, but the positions of tags are offset.
+        		// When spline fitting is not used, the border length changes, but the tag positions remain in expected indexes.
+    			n.calculateProfiles();
+        		int curr = n.getBorderLength();
+        		if(prev!=curr)
+        			log("Border length changed in conversion from "+prev+" to "+curr);
     		}
 
     		ICellCollection c = template.getCollection();
