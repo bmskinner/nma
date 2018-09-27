@@ -44,11 +44,21 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.BoxView;
+import javax.swing.text.ComponentView;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.Element;
+import javax.swing.text.IconView;
+import javax.swing.text.LabelView;
+import javax.swing.text.ParagraphView;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.View;
+import javax.swing.text.ViewFactory;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -113,12 +123,33 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane();
+       
+        createTextPane();
+        scrollPane.setViewportView(textArea);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        progressPanel = new JPanel();
+
+        progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
+        panel.add(progressPanel, BorderLayout.NORTH);
+        panel.add(console, BorderLayout.SOUTH);
+
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
+                SHOW_CONSOLE_ACTION);
+        this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
+        return panel;
+    }
+    
+    private void createTextPane() {
+    	textArea.setEditorKit(new WrapEditorKit());
+        textArea.setEditable(false);
+        textArea.setBackground(SystemColor.menu);
         Font font = new Font("Monospaced", Font.PLAIN, 13);
-
+        
         // Set the wrapped line indent
         StyledDocument doc = textArea.getStyledDocument();
-
         attrs = new SimpleAttributeSet();
         StyleConstants.setFirstLineIndent(attrs, -70);
         StyleConstants.setLeftIndent(attrs, 70);
@@ -134,25 +165,6 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-
-        textArea.setEditable(false);
-        textArea.setBackground(SystemColor.menu);
-
-        scrollPane.setViewportView(textArea);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        progressPanel = new JPanel();
-
-        progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-        panel.add(progressPanel, BorderLayout.NORTH);
-        panel.add(console, BorderLayout.SOUTH);
-
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
-                SHOW_CONSOLE_ACTION);
-        this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
-        return panel;
     }
     
     private void listDatasets() {
@@ -283,6 +295,54 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         // Does nothing, no datasets are displayed.
         // Using DetailPanel only for signalling access
 
+    }
+    
+    class WrapEditorKit extends StyledEditorKit {
+        ViewFactory defaultFactory=new WrapColumnFactory();
+        public ViewFactory getViewFactory() {
+            return defaultFactory;
+        }
+ 
+    }
+ 
+    class WrapColumnFactory implements ViewFactory {
+        public View create(Element elem) {
+            String kind = elem.getName();
+            if (kind != null) {
+                if (kind.equals(AbstractDocument.ContentElementName)) {
+                    return new WrapLabelView(elem);
+                } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
+                    return new ParagraphView(elem);
+                } else if (kind.equals(AbstractDocument.SectionElementName)) {
+                    return new BoxView(elem, View.Y_AXIS);
+                } else if (kind.equals(StyleConstants.ComponentElementName)) {
+                    return new ComponentView(elem);
+                } else if (kind.equals(StyleConstants.IconElementName)) {
+                    return new IconView(elem);
+                }
+            }
+ 
+            // default to text display
+            return new LabelView(elem);
+        }
+    }
+ 
+    class WrapLabelView extends LabelView {
+        public WrapLabelView(Element elem) {
+            super(elem);
+        }
+ 
+        public float getMinimumSpan(int axis) {
+            switch (axis) {
+                case View.X_AXIS:
+                    return 0;
+                case View.Y_AXIS:
+                    return super.getMinimumSpan(axis);
+                default:
+                    throw new IllegalArgumentException("Invalid axis: " + axis);
+            }
+        }
+ 
     }
     
     /**
