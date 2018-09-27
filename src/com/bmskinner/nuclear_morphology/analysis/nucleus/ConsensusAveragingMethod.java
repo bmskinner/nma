@@ -126,6 +126,11 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
         	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
+        	fine(profile.toString());
+        	for(IBorderSegment s : segs)
+        		fine(s.toString());
+        	for(IBorderSegment s : newSegs)
+        		fine(s.toString());
         	profile.setSegments(newSegs);
         	cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);

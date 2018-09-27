@@ -5,6 +5,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +18,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -38,6 +42,18 @@ public class DefaultBorderSegmentTest {
 	@Before
 	public void setUp(){
 		test = new DefaultBorderSegment(0, 20, 100);
+	}
+	
+	@Test
+	public void testSegmentCannotBeCreatedWithDefaultIdSmallerThanProfile() {
+
+		try {
+			new DefaultBorderSegment(0, 50, 100, IProfileCollection.DEFAULT_SEGMENT_ID);
+			fail("Should have thrown an illegal argument exception");
+		} catch(IllegalArgumentException e) {
+
+		}
+
 	}
 	
 	/**

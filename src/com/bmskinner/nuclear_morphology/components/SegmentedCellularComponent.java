@@ -127,6 +127,15 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         }
     }
 	
+//    @Override
+//	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag)
+//            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
+//        if (!this.hasBorderTag(tag))
+//            throw new UnavailableBorderTagException("Tag " + tag + " not present");
+//        int pointIndex = this.borderTags.get(tag);
+//        return getProfile(type).offset(pointIndex);
+//    }
+	
 	@Override
 	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
         if (segsLocked)
@@ -1236,11 +1245,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				result.segments.addMergeSource(new BorderSegmentTree(s, result.segments));
 			}
 			
-			// root segment update
+			// root segment update - ensure the ends remain identical
 			result.segments.startIndex = wrap(result.segments.startIndex-offset);
-			for(BorderSegmentTree s : result.segments.leaves) {		
-				s.offset(-offset);
-			}
+			result.segments.endIndex   = result.segments.startIndex;
+			for(BorderSegmentTree s : result.segments.leaves) 
+				s.offset(-offset);						
 			return result;
 		}
 
@@ -1678,7 +1687,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param parent the parent segment (can be null)
 			 */
 			protected BorderSegmentTree(@NonNull UUID id, int start, int end, @Nullable BorderSegmentTree parent){
-//				System.out.println(String.format("Creating new segment from %d-%d with parent %s", start, end, parent));
+				if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && start!=end)
+					throw new IllegalArgumentException(String.format("Cannot make default segment %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
 				if(start<0 || start>=size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
 				if(end<0 || end>=size())
@@ -1913,6 +1923,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				for(BorderSegmentTree s : leaves) {
 					s.offset(amount);
 				}
+				
+				if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && startIndex!=endIndex)
+					throw new IllegalArgumentException("Offset has corrupted default segment");
 			}
 
 			@Override
@@ -1973,7 +1986,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			public boolean update(int startIndex, int endIndex) throws SegmentUpdateException {
 				if(isLocked())
 					throw new SegmentUpdateException("Segment is locked");
-								
+				
+				if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && startIndex!=endIndex)
+					throw new SegmentUpdateException(String.format("Cannot update default segment to %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
 				// Check the incoming data
 		        if (startIndex < 0 || startIndex > size()-1)
 		            throw new SegmentUpdateException(String.format("Start index %s is outside the profile range", startIndex));

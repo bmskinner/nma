@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -16,8 +18,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
 /**
  * Specific tests for the border segment tree. Basic methods are in 
@@ -35,6 +39,29 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		singleSegment = singleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+	}
+	
+	@Test
+	public void testSegmentCannotBeCreatedWithDefaultIdSmallerThanProfile() {
+
+		try {
+			Constructor c = BorderSegmentTree.class.getDeclaredConstructor(DefaultSegmentedProfile.class, UUID.class, int.class, int.class, BorderSegmentTree.class);
+			c.setAccessible(true);
+
+			try {
+				c.newInstance(IProfileCollection.DEFAULT_SEGMENT_ID,0, 50, null);
+				fail("Should have thrown an illegal argument exception");
+			} catch(IllegalArgumentException e) {
+				
+			}
+			
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+
+			e.printStackTrace();
+			fail();
+		}
+		
+
 	}
 
 

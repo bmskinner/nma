@@ -25,6 +25,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
@@ -78,19 +79,20 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     }
 
     @Override
-    public synchronized void setChart(final JFreeChart chart) {
-        finest("Setting new chart");
+    public synchronized void setChart(final @NonNull JFreeChart chart) {
+        if(chart==null)
+        	return;
         double oldXPct = 0;
         double oldYPct = 0;
 
-        if (overlayRectangle != null && getChart().getXYPlot()!=null) {
+        if (overlayRectangle != null && chart.getXYPlot()!=null) {
 
-            double maxX = getChart().getXYPlot().getDomainAxis().getUpperBound();
-            double minX = getChart().getXYPlot().getDomainAxis().getLowerBound();
+            double maxX = chart.getXYPlot().getDomainAxis().getUpperBound();
+            double minX = chart.getXYPlot().getDomainAxis().getLowerBound();
             double fullXRange = maxX - minX;
 
-            double maxY = getChart().getXYPlot().getRangeAxis().getUpperBound();
-            double minY = getChart().getXYPlot().getRangeAxis().getLowerBound();
+            double maxY = chart.getXYPlot().getRangeAxis().getUpperBound();
+            double minY = chart.getXYPlot().getRangeAxis().getLowerBound();
             double fullYRange = maxY - minY;
             // finest("Chart range "+fullXRange+": "+minX+" - "+maxX);
             finest("Rectangle is x: " + overlayRectangle.getXMinValue() + " - " + overlayRectangle.getXMaxValue()
