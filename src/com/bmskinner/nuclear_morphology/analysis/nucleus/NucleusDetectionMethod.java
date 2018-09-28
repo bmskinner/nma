@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
  * The method for finding nuclei in fluorescence images
@@ -57,7 +58,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     private static final String SPACER = "---------";
 
-    private final String outputFolder;
+    private final File outputFolder;
 
     private final IAnalysisOptions analysisOptions;
 
@@ -66,13 +67,25 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     private final List<IAnalysisDataset> datasets = new ArrayList<>();
 
     /**
-     * Construct a detector on the given folder, and output the results to the
-     * given output folder
+     * Construct a detector on the given folder, and output the results to a new
+     * folder in the image directory, with the given name
      * 
      * @param outputFolder the name of the folder for results
      * @param options the options to detect with
      */
     public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
+        this.outputFolder = new File(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(),outputFolder);
+        this.analysisOptions = options;
+    }
+    
+    /**
+     * Construct a detector on the given folder, and output the results to the
+     * given output folder
+     * 
+     * @param outputFolder the folder to save the results into
+     * @param options the options to detect with
+     */
+    public NucleusDetectionMethod(@NonNull File outputFolder, @NonNull IAnalysisOptions options) {
         this.outputFolder = outputFolder;
         this.analysisOptions = options;
     }
@@ -153,6 +166,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
             dataset.setAnalysisOptions(analysisOptions);
             dataset.setRoot(true);
+            dataset.setSavePath(new File(outputFolder, dataset.getName()+Io.SAVE_FILE_EXTENSION));
 
             File folder = collection.getFolder();
             log("Analysing: " + folder.getName());
@@ -173,9 +187,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
                 warn("Cannot create collection: " + e.getMessage());
                 stack("Error in nucleus detection", e);
             }
-
-            //
-
         }
         return result;
     }
@@ -203,7 +214,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         if(!containsImageFiles(folder))
         	return;
 
-        ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder, folder.getName(),
+        ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder.getName(), folder.getName(),
                 analysisOptions.getNucleusType());
 
         collectionGroup.put(folder, folderCollection);
@@ -213,29 +224,28 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         try {
             final Collection<ICell> cells = finder.findInFolder(folder);
-            if (!cells.isEmpty()) 
-                makeFolder(folder);
+            if (!cells.isEmpty() && !outputFolder.exists()) 
+            	outputFolder.mkdir();
             folderCollection.addAll(cells);
+            fine("Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath());
         } catch (ImageImportException e) {
             stack("Error searching folder", e);
         }
 
     }
 
-    /**
-     * Create the output folder for the analysis if required. If the folder
-     * cannot be created, returns the input parent folder
-     *
-     * @param folder the folder in which to create the analysis folder
-     * @return a file containing the created folder
-     */
-    protected File makeFolder(File folder) {
-        File output = new File(folder, outputFolder);
-        if (!output.exists()) 
-        	if(output.mkdir())
-        		return output;
-        return folder;
-    }
+//    /**
+//     * Create the output folder for the analysis if required. If the folder
+//     * cannot be created, returns the input parent folder
+//     *
+//     * @param folder the folder in which to create the analysis folder
+//     * @return a file containing the created folder
+//     */
+//    protected void makeFolder() {
+////        File output = new File(folder, outputFolder);
+//        if (!outputFolder.exists()) 
+//        	if(outputFolder.mkdir());
+//    }
     
     /**
      * Test if the given folder has any image files that can be analysed

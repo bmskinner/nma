@@ -113,7 +113,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
         try {
         	ISegmentedProfile p = profileMap.get(type);
-        	finer("Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
+        	finest("Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
         	// When reading old datasets, sometimes the profile length does not match the border list length.
         	// This issue is resolved for datasets created in 1.14.0 onwards.
         	// If this happens, the conversion will fail due to the new length constraints in the profile constructor.
@@ -126,15 +126,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
         }
     }
-	
-//    @Override
-//	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag)
-//            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
-//        if (!this.hasBorderTag(tag))
-//            throw new UnavailableBorderTagException("Tag " + tag + " not present");
-//        int pointIndex = this.borderTags.get(tag);
-//        return getProfile(type).offset(pointIndex);
-//    }
 	
 	@Override
 	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {

@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
@@ -53,6 +54,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	
 	private File xmlFile;
 	private File imageFolder;
+	private File outputFolder = null;
 	private List<IAnalysisDataset> datasets;
 	private final List<IAnalysisMethod> methodsToRun = new ArrayList<>();
 	
@@ -65,7 +67,19 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 */
 	public SavedOptionsAnalysisPipeline(@NonNull final File imageFolder, @NonNull final File xmlFile) {
 		this.xmlFile     = xmlFile;
-		this.imageFolder = imageFolder;
+		this.imageFolder = imageFolder;			
+	}
+	
+	/**
+	 * Build a pipeline covering all the options within the given file
+	 * @param imageFolder the image folder
+	 * @param xmlFile the options for analysis
+	 * @throws Exception
+	 */
+	public SavedOptionsAnalysisPipeline(@NonNull final File imageFolder, @NonNull final File xmlFile, @NonNull final File outputFolder) {
+		this.xmlFile      = xmlFile;
+		this.imageFolder  = imageFolder;
+		this.outputFolder = outputFolder;
 	}
 	
 	@Override
@@ -98,9 +112,10 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 
 		IAnalysisOptions options = readOptions();
 
-    	String outFolder = createOutputFolderName(options);
+		if(outputFolder==null)
+			outputFolder = createOutputFolder(options);
     	if(options.hasDetectionOptions(IAnalysisOptions.NUCLEUS)) {
-    		createNucleusDetectionMethod(options, outFolder);
+    		createNucleusDetectionMethod(options);
     		createRefoldingMethod(options);
     		createSignalDetectionMethods(options);
     		createClusteringMethods();
@@ -118,9 +133,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		return options;
 	}
 	
-	private void createNucleusDetectionMethod(@NonNull IAnalysisOptions options, @NonNull String outFolder) throws Exception {
+	private void createNucleusDetectionMethod(@NonNull IAnalysisOptions options) throws Exception {
 		options.getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(imageFolder);
-		datasets =  new NucleusDetectionMethod(outFolder, options).call().getDatasets();
+		datasets =  new NucleusDetectionMethod(outputFolder, options).call().getDatasets();
 		for(IAnalysisDataset dataset : datasets)
 			methodsToRun.add(new DatasetProfilingMethod(dataset));
 		for(IAnalysisDataset dataset : datasets)
@@ -204,11 +219,11 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		 }
 	}
 		
-	private String createOutputFolderName(@NonNull IAnalysisOptions options) {
+	private File createOutputFolder(@NonNull IAnalysisOptions options) {
 		Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
-		return outputFolderName;
+		return new File(imageFolder, outputFolderName);
 	}
 		
 	private void run(@NonNull List<IAnalysisMethod> methods) throws Exception {

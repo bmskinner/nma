@@ -124,10 +124,10 @@ public class DefaultCellCollection implements ICellCollection {
 	 * 
 	 */
 
-	/**
-	 * Set when the consensus nucleus is refolding
-	 */
-	private volatile transient boolean isRefolding = false;
+//	/**
+//	 * Set when the consensus nucleus is refolding
+//	 */
+//	private volatile transient boolean isRefolding = false;
 
 	/**
 	 * Cache statistics from the cells in the collection. This should be updated
@@ -1364,7 +1364,7 @@ public class DefaultCellCollection implements ICellCollection {
 		in.defaultReadObject();
 		
 		
-		isRefolding = false;
+//		isRefolding = false;
 
 		if (ruleSets == null || ruleSets.isEmpty()) {
 			log("Creating default ruleset for collection");

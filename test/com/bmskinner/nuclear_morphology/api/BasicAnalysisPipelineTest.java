@@ -86,11 +86,11 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
     	IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
 
-    	File testFolder = new File(TESTING_RODENT_FOLDER);
+    	File testFolder = new File(TESTING_MOUSE_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
-    	File outFile = makeOutfile(TESTING_RODENT_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+    	File outFile = makeOutfile(TESTING_MOUSE_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
 
     	testDatasetEquality(exp, obs);         
     }
@@ -108,7 +108,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
 
     	File outFile = makeOutfile(TESTING_PIG_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
 
     	testDatasetEquality(exp, obs);       
 
@@ -127,7 +127,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
     	File outFile = makeOutfile(TESTING_ROUND_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
 
     	testDatasetEquality(exp, obs);        
     }
@@ -158,7 +158,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
     	File outFile = makeOutfile(TESTING_ROUND_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
 
     	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
     	
@@ -251,7 +251,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
     }
     
     private static File makeOutfile(String folder){
-    	return new File(folder+File.separator+OUT_FOLDER, OUT_FOLDER+Io.SAVE_FILE_EXTENSION);
+    	return new File(folder+File.separator+UNIT_TEST_FILENAME, UNIT_TEST_FILENAME+Io.SAVE_FILE_EXTENSION);
     }
 
 }

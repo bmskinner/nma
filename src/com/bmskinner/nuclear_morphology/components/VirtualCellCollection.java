@@ -91,19 +91,17 @@ public class VirtualCellCollection implements ICellCollection {
     private String name;
 
     /** this holds the mapping of tail indexes etc in the median profile arrays */
-    private volatile IProfileCollection profileCollection = new DefaultProfileCollection();
+    private IProfileCollection profileCollection = new DefaultProfileCollection();
 
     /** the refolded consensus nucleus */
-    private volatile Nucleus consensusNucleus;
+    private Nucleus consensusNucleus;
 
     /** Store signal groups separately to allow shell results to be kept */
-    private volatile Map<UUID, IShellResult> shellResults = new HashMap<>(0);
+    private Map<UUID, IShellResult> shellResults = new HashMap<>(0);
 
     /*
      * TRANSIENT FIELDS
      */
-
-    private transient boolean isRefolding = false;
 
     protected volatile transient Map<UUID, Integer> vennCache = new HashMap<>();
 
@@ -1214,27 +1212,18 @@ public class VirtualCellCollection implements ICellCollection {
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-        isRefolding = false;
-        vennCache = new HashMap<>(); // cache the number of shared
-                                                  // nuclei with other datasets
-
+        vennCache  = new HashMap<>(); // cache the number of shared nuclei with other datasets
         statsCache = new StatsCache();
 
         signalManager = new SignalManager(this);
         profileManager = new ProfileManager(this);
 
-        isRefolding = false;
-        vennCache = new HashMap<>(); // cache the number of shared
-                                                  // nuclei with other datasets
-
-        // Don't try to restore profile aggregates here - the parent collection
-        // has
-        // not finished loading, and will be null. Do the restore in the
-        // importing class
-        // after reading has finished.
         if(this.hasConsensus())
 			this.getConsensus().alignVertically();
-
+        
+        // Don't try to restore profile aggregates here - the parent collection has
+        // not finished loading, and so calls to parent will be null. Do the restore in the
+        // parent class after reading this object has finished.
     }
 
 	@Override
@@ -1292,6 +1281,27 @@ public class VirtualCellCollection implements ICellCollection {
 		return true;
 	}
     
+	@Override
+	public String toString() {
+
+		String newLine = System.getProperty("line.separator");
+
+		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
+				.append("Nuclei: " + this.getNucleusCount() + newLine)
+				.append("Source folder: " + this.getFolder().getAbsolutePath() + newLine)
+				.append("Profile collections:" + newLine)
+				.append("Parent: "+parent.getName());
+
+		IProfileCollection pc = this.getProfileCollection();
+		b.append(pc.toString() + newLine);
+
+		if(this.hasConsensus()){
+			b.append("Consensus:" + newLine);
+			b.append(getConsensus().toString()+newLine);
+		}
+
+		return b.toString();
+	}
     
 
 }

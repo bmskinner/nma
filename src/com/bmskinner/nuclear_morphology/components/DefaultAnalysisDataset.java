@@ -588,17 +588,15 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         } else {
         	 int length = pc.length();
              // Update all children to have the same profile lengths and offsets
-
              if (!childDatasets.isEmpty()) {
-                 for (IAnalysisDataset child : getAllChildDatasets()) {
+                 for (IAnalysisDataset child : getAllChildDatasets())
                      child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);
-                 }
              }
 
+             // Allow merge sources to retain their original lengths
              if (!otherDatasets.isEmpty()) {
-                 for (IAnalysisDataset child : otherDatasets) {
+                 for (IAnalysisDataset child : otherDatasets)
                      child.getCollection().getProfileCollection().createAndRestoreProfileAggregate(child.getCollection());
-                 }
              }
         }
         } catch(ProfileException e) {

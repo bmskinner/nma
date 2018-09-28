@@ -15,14 +15,23 @@ import ij.Prefs;
 
 public abstract class AnalysisPipelineTest {
 	
-	protected static final String IMAGE_FOLDER = "test/samples/images/";
+	protected static final String IMAGE_FOLDER   = "test/samples/images/";
+	protected static final String DATASET_FOLDER = "test/samples/datasets/";
 	
-    protected static final String TESTING_RODENT_FOLDER = IMAGE_FOLDER +"Testing";
+    protected static final String TESTING_MOUSE_FOLDER = IMAGE_FOLDER + "Mouse";
+    protected static final String TESTING_PIG_FOLDER   = IMAGE_FOLDER + "Pig";   
+    protected static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER + "Round";
     
-    protected static final String TESTING_PIG_FOLDER = IMAGE_FOLDER +"Testing_pig";    
-    protected static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER +"Testing_round";
     
-    protected static final String OUT_FOLDER = "UnitTest_"+Version.currentVersion();
+    protected static final String TESTING_MOUSE_SIGNALS_FOLDER = IMAGE_FOLDER + "Mouse_with_signals";
+    protected static final String TESTING_PIG_SIGNALS_FOLDER   = IMAGE_FOLDER + "Pig_with_signals";
+    protected static final String TESTING_ROUND_SIGNALS_FOLDER = IMAGE_FOLDER + "Round_with_signals";
+    
+    protected static final String TESTING_MOUSE_CLUSTERS_FOLDER = IMAGE_FOLDER + "Mouse_with_clusters";
+    protected static final String TESTING_PIG_CLUSTERS_FOLDER   = IMAGE_FOLDER + "Pig_with_clusters";
+    protected static final String TESTING_ROUND_CLUSTERS_FOLDER = IMAGE_FOLDER + "Round_with_clusters";
+    
+    protected static final String UNIT_TEST_FILENAME = "UnitTest_"+Version.currentVersion();
     
     protected static Logger logger;
    
@@ -32,7 +41,7 @@ public abstract class AnalysisPipelineTest {
     	Prefs.blackBackground = true;
     	IJ.setBackgroundColor(0, 0, 0);
     	logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
-    	logger.setLevel(Level.FINER);
+    	logger.setLevel(Level.FINE);
     	logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
     }
 

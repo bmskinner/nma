@@ -30,6 +30,10 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileAggregate;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileAggregate;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -85,10 +89,16 @@ public class DatasetValidator implements Loggable {
 		int errors = 0;
 
 		
-//		if (!checkChildMedianProfilesHaveBestAlignmentToRoot(d)) {
-//			errorList.add("Error in profiling between datasets");
-//			errors++;
-//		}
+		if (!checkAllNucleiHaveProfiles(d)) {
+			errorList.add("Error in nucleus profiling");
+			errors++;
+		}
+		
+		if (!checkChildDatasetsHaveProfileCollections(d)) {
+			errorList.add("Error in child dataset profiling");
+			errors++;
+		}
+		
 		
 		if (!checkSegmentsAreConsistentInProfileCollections(d)) {
 			errorList.add("Error in segmentation between datasets");
@@ -120,28 +130,66 @@ public class DatasetValidator implements Loggable {
 	}
 	
 	
-	private boolean checkChildMedianProfilesHaveBestAlignmentToRoot(@NonNull IAnalysisDataset d) {
+	private boolean checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
 		boolean isOk = true;
-		try {
-			ISegmentedProfile rootMedian = d.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+
+		for (ProfileType type : ProfileType.values()) {
+			for(ICell c : d.getCollection()) {
+				for (Nucleus n : c.getNuclei()) {
+
+					try {
+						IProfile profile = n.getProfile(type);
+					} catch (UnavailableProfileTypeException e) {
+						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
+						errorCells.add(c);
+						isOk = false;
+					}
+				}
+			}
+		}
+		return isOk;	
+	}
+	
+	private boolean checkChildDatasetsHaveProfileCollections(@NonNull IAnalysisDataset d) {
+		List<IAnalysisDataset> children = d.getAllChildDatasets();
+		boolean isOk = true;
+		
+		IProfileCollection pc = d.getCollection().getProfileCollection();
+		for (ProfileType type : ProfileType.values()) {
+			try {
+				pc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+				errorList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
+				isOk = false;
+			}
+			
+			try {
+				pc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
+				errorList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
+				isOk = false;
+			}
+			
+
 			
 			for (IAnalysisDataset child : children) {
-				ISegmentedProfile childMedian = child.getCollection().getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-				
-				if(rootMedian.findBestFitOffset(childMedian)!=0) {
-					errorList.add(String.format("Child dataset %s has median offset to root", child.getName()));
+				IProfileCollection childPc = child.getCollection().getProfileCollection();
+				try {
+					childPc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+					errorList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
 					isOk = false;
 				}
 				
+				try {
+					childPc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
+					errorList.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
+					isOk = false;
+				}
 			}
 			
-		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
-				| UnsegmentedProfileException e) {
-			errorList.add(String.format("Root or child dataset profile cannot be found"));
-			isOk = false;
 		}
 		return isOk;	
 	}
