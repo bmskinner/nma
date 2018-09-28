@@ -107,8 +107,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
         refreshChartCache(); // immediate visualisation of result
 
         if (tag.type().equals(BorderTagType.CORE)) {
-
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
         } else {
             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
         }

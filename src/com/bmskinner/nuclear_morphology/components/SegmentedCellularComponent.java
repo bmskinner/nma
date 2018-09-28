@@ -167,6 +167,76 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
             setProfile(type, oldProfile);
         }
     }
+		
+    @Override
+	public void setBorderTag(@NonNull Tag tag, int i) {
+      
+    	if(!tag.equals(Tag.REFERENCE_POINT)) {
+    		super.setBorderTag(tag, i);
+    		return;
+    	}
+    	
+    	if(!this.hasBorderTag(Tag.REFERENCE_POINT)) {
+    		super.setBorderTag(tag, i);
+    		return;
+    	}
+    	
+    	// Update segment boundaries if the tag is the RP
+    	try {
+    		
+    		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
+    		int amountToOffset = oldRP-i;
+			ISegmentedProfile oldProfile = this.getProfile(ProfileType.ANGLE);
+			super.setBorderTag(tag, i);
+
+			ISegmentedProfile newProfile = this.getProfile(ProfileType.ANGLE);
+			
+			// Move the segments to start from the new RP
+			ISegmentedProfile offset = oldProfile.offset(amountToOffset);
+			newProfile.setSegments(offset.getSegments());
+			this.setProfile(ProfileType.ANGLE, newProfile);
+
+		} catch (ProfileException | UnavailableComponentException e) {
+			stack(e);
+			return; // do not perform an update if things will get out of sync
+		}
+
+    }
+	
+    @Override
+	public void setBorderTag(@NonNull Tag reference, @NonNull Tag tag, int i) throws UnavailableBorderTagException {
+      
+    	if(!tag.equals(Tag.REFERENCE_POINT)) {
+    		super.setBorderTag(reference, tag, i);
+    		return;
+    	}
+    	
+    	if(!this.hasBorderTag(Tag.REFERENCE_POINT)) {
+    		super.setBorderTag(tag, i);
+    		return;
+    	}
+    	
+    	// Update segment boundaries if the tag is the RP
+    	try {
+    		
+    		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
+    		int amountToOffset = oldRP-i;
+			ISegmentedProfile oldProfile = this.getProfile(ProfileType.ANGLE);
+			super.setBorderTag(tag, i);
+
+			ISegmentedProfile newProfile = this.getProfile(ProfileType.ANGLE);
+			
+			// Move the segments to start from the new RP
+			ISegmentedProfile offset = oldProfile.offset(amountToOffset);
+			newProfile.setSegments(offset.getSegments());
+			this.setProfile(ProfileType.ANGLE, newProfile);
+
+		} catch (ProfileException | UnavailableComponentException e) {
+			stack(e);
+			return; // do not perform an update if things will get out of sync
+		}
+
+    }
 
 	/**
 	 * An implementation of a profile tied to an object

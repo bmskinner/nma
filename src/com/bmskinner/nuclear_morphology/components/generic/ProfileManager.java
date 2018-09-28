@@ -198,8 +198,8 @@ public class ProfileManager implements Loggable {
     /**
      * Update the location of the given border tag within the profile
      * 
-     * @param tag
-     * @param index the new index within the median profile
+     * @param tag the tag to be updated
+     * @param index the new index of the tag in the median, relative to the current RP
      * @throws IndexOutOfBoundsException
      * @throws UnavailableBorderTagException
      * @throws ProfileException
@@ -209,27 +209,22 @@ public class ProfileManager implements Loggable {
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
         finer("Updating border tag " + tag);
-
-        if (tag.equals(Tag.REFERENCE_POINT)) {
-        	warn("RP cannot be updated");
-            return;
-        }
-
         if (tag.type().equals(BorderTagType.CORE)) {
-            finer("Updating core border tag");
-            updateCoreBorderTagIndex(tag, index);
+            try {
+				updateCoreBorderTagIndex(tag, index);
+			} catch (UnsegmentedProfileException | SegmentUpdateException e) {
+				stack(e);
+			}
             return;
         }
-		finer("Updating extended border tag");
 		updateExtendedBorderTagIndex(tag, index);
-
     }
 
     /**
      * Update the extended border tags that don't need resegmenting
      * 
-     * @param tag
-     * @param index
+     * @param tag the extended tag to be updated
+     * @param index the new index of the tag in the median, relative to the current RP
      * @throws IndexOutOfBoundsException
      * @throws ProfileException
      * @throws UnavailableBorderTagException
@@ -339,162 +334,53 @@ public class ProfileManager implements Loggable {
     }
 
     /**
-     * If a core border tag is moved, segment boundaries must be moved
+     * If a core border tag is moved, segment boundaries must be moved. 
+     * It is left to calling classes to perform a resegmentation of the dataset.
      * 
-     * @param tag
-     * @param index
+     * @param tag the core tag to be updated
+     * @param index the new index of the tag in the median, relative to the current RP
      * @throws ProfileException
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
+     * @throws UnsegmentedProfileException 
+     * @throws SegmentUpdateException 
      */
-    private void updateCoreBorderTagIndex(Tag tag, int index)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
-
-        /*
-         * Updating core border tags:
-         * 
-         * 1) Identify the RP index in the median - save out the
-         * offsets for the old border tags against the old RP
-         * 
-         * 2) Update the RP / OP location in nuclei using frankenprofiling - RP
-         * update requires ofsetting OP also - border tags should save offsets
-         * too
-         * 
-         * 3) Create a new profile aggregate and profile collection - use the
-         * saved offsets from the old RP to calculate the new offsets for border
-         * tags
-         * 
-         * 4) Resegment the median profile, with the new border tag map
-         * 
-         * 5) Apply the new segments to the nucleus profiles
-         */
+    private void updateCoreBorderTagIndex(@NonNull Tag tag, int index)
+            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException, SegmentUpdateException {
 
         fine("Updating core border tag index");
-        // Store the existing core points in a map (OP and RP)
-        // This is to force segmentation at the OP and RP
-        List<Integer> map = new ArrayList<Integer>();
-        for (Tag test : BorderTagObject.values(BorderTagType.CORE)) {
-            int i = collection.getProfileCollection().getIndex(test);
-            map.add(i);
-            finer("Storing existing median " + test + " at index " + i + " in map");
-        }
 
-        finest("Existing median from " + tag + ":");
-        finest(collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN).toString());
+        // Get the median zeroed on the RP
+        ISegmentedProfile oldMedian = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-        // Overwrite the new tag for segmentation
-        map.add(index);
-        finer("Replacing median " + tag + " with index " + index + " in segmenter map");
-
-        // Store the offset for the new point
-        collection.getProfileCollection().addIndex(tag, index);
-        finer("Offset the " + tag + " index in the regular profile to " + index);
-
-        /*
-         * Now we need to update the tag indexes in the nucleus profiles.
-         */
-        IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN);
-        finer("Fetched median from new offset of " + tag);
-
-        finest("New median from " + tag + ":");
-        finest(median.toString());
-
-        // finest("Current state of regular profile collection:");
-        // finest(collection.getProfileCollection(ProfileType.REGULAR).toString());
-        finest("Offsetting individual nucleus indexes");
-        updateTagToMedianBestFit(tag, ProfileType.ANGLE, median);
-
-        finer("Nucleus indexes for " + tag + " updated");
-
-        if (tag.equals(Tag.REFERENCE_POINT)) {
-
-            // We need to rebuild the ProfileAggregate for the new RP
-            // This will reset the RP to index zero
-            // Make new profile collections
-            int rpIndex = collection.getProfileCollection().getIndex(tag);
-            finer("RP index is changing - moved to index " + rpIndex);
-
-            collection.createProfileCollection();// createProfileCollections(false);
-            finer("Recreated profile collections");
-
-            // Get the recreated profile collections from the new RP
-            IProfileCollection pc = collection.getProfileCollection();
-
-            rpIndex = pc.getIndex(tag);
-            finer("New ProfileAggregates move RP index to index " + rpIndex);
-
-            // We need to update the offsets for the BorderTags since zero has
-            // moved
-            for (Tag test : BorderTagObject.values()) {
-
-                // The RP is forced to start at zero
-                if (test.equals(Tag.REFERENCE_POINT)) {
-                    pc.addIndex(tag, 0);
-                    finer("Explicit setting of RP index to zero");
-                    continue;
-
-                }
-
-                // Other points are offset by an appropriate amount relative
-                // to the new RP index
-                int oldIndex = pc.getIndex(test);
-                if (oldIndex != -1) { // Only bother if the tag exists
-
-                	int newIndex = CellularComponent.wrapIndex((oldIndex - index), pc.length()); // offset
-                	// by
-                	// 1
-                	pc.addIndex(test, newIndex);
-                	finer("Explicit setting of " + test + " index to " + newIndex + " from " + oldIndex);
-
-                	// Ensure that core tags (the OP) get segmented
-                	if (test.type().equals(BorderTagType.CORE)) {
-                		map.add(newIndex); // Overwrite the map
-                		finest("Forcing segmentation at index " + newIndex + " for " + test);
-                	}
-                }
-            }
-
-            rpIndex = pc.getIndex(tag);
-            finer("After explicit set, RP index is " + rpIndex);
-
-            map.add(0); // the RP is back at zero
-
-        }
-
-        // Resegment the median
-
-        fine("Resegmenting the median profile from the RP");
-        IProfileCollection pc = collection.getProfileCollection();
-
-        IProfile medianToSegment = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Stats.MEDIAN);
-
-        ProfileSegmenter segmenter = new ProfileSegmenter(medianToSegment, map);
-
-        List<IBorderSegment> segments;
-        try {
-            segments = segmenter.segment();
-        } catch (UnsegmentableProfileException e) {
-            warn("Cannot segment profile: " + e.getMessage());
-            return;
-        }
-
-        pc.addSegments(Tag.REFERENCE_POINT, segments);
-
-        fine("Resegmented the median profile");
+        moveRp(index, oldMedian);
 
         // Update signals as needed
         collection.getSignalManager().recalculateSignalAngles();
-
-        collection.updateVerticalNuclei();
-
-        // Run a new morphological analysis to apply the new segments
-        // TODO: this needs to trigger the progressable action
-        // Temp solution - if a core border tag is detected in the UI selection,
-        // trigger morphological analysis after this step
-
+        collection.updateVerticalNuclei();  
     }
+    
+    /**
+     * Move the RP index in nuclei. Update segments flanking the RP
+     * without moving any other segments.
+     * @param newRpIndex the new index for the RP relative to the old RP
+     * @param oldMedian the old median profile zeroed on the old RP
+     * @throws ProfileException 
+     * @throws SegmentUpdateException 
+     * @throws UnavailableBorderTagException 
+     */
+    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException, SegmentUpdateException, UnavailableBorderTagException {
+    	// This is the median we will use to update individual nuclei
+    	ISegmentedProfile newMedian = oldMedian.offset(newRpIndex);
 
+    	updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, newMedian);
+    	
+    	// Rebuild the profile aggregate in the collection
+    	collection.getProfileCollection().createProfileAggregate(collection, collection.getMedianArrayLength());
+    	
+    	// Resegment the new dataset - call after this returns
+    }
+    
     /**
      * Get the number of segments in the regular profile of the collection. On
      * error return 0

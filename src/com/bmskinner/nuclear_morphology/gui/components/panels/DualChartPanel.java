@@ -136,13 +136,19 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
      * range panel
      */
     protected synchronized void updateChartPanelRange() {
+    	if(chartPanel==null)
+    		return;
+    	if(chartPanel.getChart()==null)
+    		return;
+    	if(chartPanel.getChart().getXYPlot()==null)
+    		return;
 
         RectangleOverlayObject ob = rangePanel.getOverlayRectangle();
 
         double xmin = ob.getXMinValue();
         double xmax = ob.getXMaxValue();
 
-        if (xmin < xmax && chartPanel!=null && chartPanel.getChart() !=null && chartPanel.getChart().getXYPlot()!=null) { // must have a positive range
+        if (xmin < xmax) { // must have a positive range
             chartPanel.getChart().getXYPlot().getDomainAxis().setRange(xmin, xmax);
         }
 

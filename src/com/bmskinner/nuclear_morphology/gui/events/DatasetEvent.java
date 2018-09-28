@@ -35,6 +35,8 @@ public class DatasetEvent extends EventObject {
 	public static final String MORPHOLOGY_ANALYSIS_ACTION = "Morphology analysis action";
 	
     public static final String PROFILING_ACTION = "Profiling action";
+    
+    /** Run segmentation on the datasets using existing tagged profiles */
     public static final String SEGMENTATION_ACTION   = "Segment dataset";
 
     /**
@@ -50,8 +52,8 @@ public class DatasetEvent extends EventObject {
     public static final String REFRESH_MORPHOLOGY = "Refresh morphology";
     
     /**
-     * Run new segmentation on the given datasets, without trying to add as a new
-     * population.
+     * Run new profiling and segmentation on the given datasets. Do not attempt to add
+     * as a new population.
      */
     public static final String REFPAIR_SEGMENTATION = "Repair segmentation";
 

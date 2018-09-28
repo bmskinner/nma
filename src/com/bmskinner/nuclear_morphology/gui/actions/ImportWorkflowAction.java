@@ -98,9 +98,8 @@ public class ImportWorkflowAction  extends VoidResultAction {
             if (datasets == null || datasets.isEmpty()) {
                 log("No datasets returned");
             } else {
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, datasets);
             }
-
         } catch (InterruptedException e) {
             warn("Interruption to swing worker");
             stack("Interruption to swing worker", e);

@@ -372,6 +372,8 @@ public class DefaultProfileCollection implements IProfileCollection {
         this.length = length;
         cache.clear();
         
+        // There are segments, not just the default segment, and the segment 
+        // profile length is different to the required length. Interpolation needed.
         if (segments != null && segments.length>1 && length != segments[0].getProfileLength()) {
         	createProfileAggregateOfDifferentLength(collection, length);
         	return;
@@ -412,9 +414,28 @@ public class DefaultProfileCollection implements IProfileCollection {
     private void createProfileAggregateOfDifferentLength(@NonNull ICellCollection collection, int length) throws ProfileException {
     	indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
     	try {
-    		// Copy the existing segments, adjusting the lengths using profile interpolation
-    		ISegmentedProfile sourceMedian = getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-    		ISegmentedProfile interpolatedMedian = sourceMedian.interpolate(length);
+    		    		
+    		// Copy any existing segments, adjusting the lengths using profile interpolation
+    		
+    		List<IBorderSegment> interpolatedSegments;
+    		if(!map.isEmpty()) {
+    			ISegmentedProfile sourceMedian = getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+    			interpolatedSegments = sourceMedian.interpolate(length).getSegments();
+    		} else {
+    			
+    			// If the map of profile type to aggregate was empty - such as on deserialisation - 
+    			// we have no profile to use to interpolate segments.
+        		// Create an arbitrary profile with the original length.
+    			
+    			List<IBorderSegment> originalSegList = new ArrayList<>();
+    			for(IBorderSegment s : segments)
+    				originalSegList.add(s);
+        		IProfile template = new FloatProfile(0, segments[0].getProfileLength());
+        		ISegmentedProfile segTemplate = new SegmentedFloatProfile(template, originalSegList);
+        		
+        		// Now use the interpolation method to adjust the segment lengths
+        		interpolatedSegments = segTemplate.interpolate(length).getSegments();
+    		}
     		
     		for (ProfileType type : ProfileType.values()) {
 
@@ -426,9 +447,11 @@ public class DefaultProfileCollection implements IProfileCollection {
                     stack("Error making aggregate", e);
                 }
                 map.put(type, agg);
-            } 		
-    		addSegments(Tag.REFERENCE_POINT, interpolatedMedian.getSegments());
+            } 	    		
+    		
+    		addSegments(Tag.REFERENCE_POINT, interpolatedSegments);
     	} catch(Exception e) {
+    		stack(e.getMessage(), e);
     		throw new ProfileException(e);
     	}
     }
@@ -559,7 +582,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         for (int i : values.keySet()) {
             result.add(values.get(i));
-            // IJ.log(" Variable index "+values.get(i));
         }
         return result;
     }
@@ -706,14 +728,10 @@ public class DefaultProfileCollection implements IProfileCollection {
         /**
          * Add a profile with the given keys
          * 
-         * @param type
-         *            the profile type
-         * @param quartile
-         *            the quartile of the dataset
-         * @param tag
-         *            the tag
-         * @param profile
-         *            the profile to save
+         * @param type the profile type
+         * @param quartile the quartile of the dataset
+         * @param tag the tag
+         * @param profile the profile to save
          */
         public void addProfile(final ProfileType type, final double quartile, final Tag tag, IProfile profile) {
             ProfileKey key = new ProfileKey(type, quartile, tag);

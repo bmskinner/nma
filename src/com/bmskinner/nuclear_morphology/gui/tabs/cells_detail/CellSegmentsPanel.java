@@ -24,6 +24,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -46,7 +47,9 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -58,8 +61,6 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     private static final String PANEL_TITLE_LBL = "Segments";
     
     private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
-
-    private JPanel buttonsPanel;
 
     private JButton resegmentButton;
     
@@ -85,39 +86,28 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         
         add(imagePanel, BorderLayout.CENTER);
 
-        buttonsPanel = makeButtonPanel();
-        add(buttonsPanel, BorderLayout.NORTH);
+        JPanel headerPanel = makeHeader();
+        add(headerPanel, BorderLayout.NORTH);
 
 //        resegDialog.addDatasetEventListener(this);
 
         setEnabled(false);
     }
     
-    private JPanel makeButtonPanel() {
-
-        JPanel panel = new JPanel(new FlowLayout()) {
-            @Override
-            public void setEnabled(boolean b) {
-                super.setEnabled(b);
-                for (Component c : this.getComponents()) {
-                    c.setEnabled(b);
-                }
-            }
-        };
-
-//        panel.add(profileOptions);
-//        profileOptions.addActionListener(e -> update());
-
+    private JPanel makeHeader() {
+    	JPanel panel = new JPanel(new FlowLayout());
+        
+        WrappedLabel lbl1 = new WrappedLabel("Click a border point to update segments");
+        panel.add(lbl1);    
+        
         resegmentButton = new JButton("Resegment");
         resegmentButton.setEnabled(false);
         resegmentButton.addActionListener(e -> {
             CellResegmentationDialog d = new CellResegmentationDialog(getCellModel());
             d.load(getCellModel().getCell(), activeDataset());
         });
-//        panel.add(resegmentButton);
-
+//        panel.add(resegmentButton); //TODO: reenable if needed
         return panel;
-
     }
 
     @Override

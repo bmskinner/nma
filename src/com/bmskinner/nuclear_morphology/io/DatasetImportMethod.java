@@ -365,26 +365,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         return dataset;
     }
 
-//    private IAnalysisDataset upgradeDatasetVersion(IAnalysisDataset dataset) {
-//        log("Old format detected");
-//
-//        try {
-//
-//            DatasetConverter conv = new DatasetConverter(dataset);
-//
-//            IAnalysisDataset converted = conv.convert();
-//
-//            dataset = converted;
-//
-//            log("Conversion successful");
-//            wasConverted = true;
-//        } catch (DatasetConversionException e) {
-//            warn("Unable to convert to new format.");
-//            warn("Displaying as old format.");
-//            stack("Error in converter", e);
-//        }
-//        return dataset;
-//    }
 
     /**
      * Check if the image folders are present in the correct relative

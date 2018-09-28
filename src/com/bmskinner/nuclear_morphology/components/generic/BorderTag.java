@@ -65,8 +65,17 @@ public enum BorderTag {
         return list.toArray(new BorderTag[0]);
     }
 
-    // core tags are used in gui; extended are for internal mappings
+
+    /**
+     * The types of border tag that can be present
+     * @author bms41
+     *
+     */
     public enum BorderTagType {
-        CORE, EXTENDED
+    	
+    	/** Core border tags are essential for the software to display or calculate profiles */
+        CORE, 
+        /** Extended border tags are optional, and can be added as needed */
+        EXTENDED
     };
 }
