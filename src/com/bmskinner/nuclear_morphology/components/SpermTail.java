@@ -18,10 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -30,6 +26,10 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 /**
  * The sperm tail is a specialised type of flagellum. It is anchored at the tail

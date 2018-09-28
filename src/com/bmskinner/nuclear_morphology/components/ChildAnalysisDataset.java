@@ -338,6 +338,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 		return result;
 	}
 
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

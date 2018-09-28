@@ -18,11 +18,11 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.gui.Roi;
-
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
+import ij.gui.Roi;
 
 /**
  * A default implementation of the IAcrosome interface

@@ -18,9 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-
 import java.awt.Shape;
 import java.io.Serializable;
 import java.util.List;
@@ -29,14 +26,14 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 /**
  * This interface provides the basic methods for a component of a cell - an

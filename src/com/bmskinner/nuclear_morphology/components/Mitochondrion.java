@@ -18,13 +18,12 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.process.ImageProcessor;
-
-import java.io.File;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 @Deprecated
 public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {

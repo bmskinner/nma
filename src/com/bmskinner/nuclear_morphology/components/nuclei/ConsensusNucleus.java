@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import ij.process.FloatPolygon;
-
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.Serializable;
@@ -29,6 +27,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+
+import ij.process.FloatPolygon;
 
 /**
  * This holds methods for manipulatiing a refolded consensus nucleus

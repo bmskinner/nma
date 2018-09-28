@@ -29,8 +29,6 @@
 */
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import ij.gui.Roi;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +36,8 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+
+import ij.gui.Roi;
 
 @Deprecated
 public class AsymmetricNucleus extends RoundNucleus {

@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import ij.gui.Roi;
-
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +26,8 @@ import java.util.stream.Collectors;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+
+import ij.gui.Roi;
 
 /**
  * The default implementation of the the LobedNucleus interface.

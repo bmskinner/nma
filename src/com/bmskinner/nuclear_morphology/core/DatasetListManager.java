@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ public final class DatasetListManager implements Loggable {
      * the dataset. This is used to compare actual and saved hashcodes, and
      * detect whether a dataset has changed since the last check.
      */
-    private final Map<UUID, Integer> datasetHashcodeMap = new HashMap<>();
+    private final Map<UUID, Integer> datasetHashcodeMap = new ConcurrentHashMap<>();
     
     private final List<IWorkspace> workspaces = new CopyOnWriteArrayList<>();
     

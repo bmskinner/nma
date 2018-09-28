@@ -69,13 +69,14 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     private static final long serialVersionUID = 1L;
 
-    protected int nucleusNumber; // the number of the nucleus in the current
-                                 // image
+    /** The number of the nucleus in its image, for display */
+    protected int nucleusNumber;
 
+    /** FISH signals in the nucleus */
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
-    protected transient Nucleus verticalNucleus = null; // cache the vertically
-                                                        // rotated nucleus
+    /** cache the vertically rotated nucleus */
+    protected transient Nucleus verticalNucleus = null;
 
     protected transient boolean canReverse = true;
 
@@ -586,7 +587,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 		return byName;
 
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;

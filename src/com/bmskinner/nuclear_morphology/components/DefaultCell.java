@@ -483,8 +483,6 @@ public class DefaultCell implements ICell {
 		return result;
 	}
     
-    
-
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 

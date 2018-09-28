@@ -20,13 +20,11 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultProfile;
 
 /**
  * A profile with double precision

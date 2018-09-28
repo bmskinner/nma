@@ -20,7 +20,6 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -237,6 +236,48 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
     }
+    
+//    @Override
+//    public void printHashCodes() {
+//    	log("Object "+this.getID()+this.hashCode());
+//    	
+//    	for(ProfileType type : profileMap.keySet()) {
+//    		log("Profile type  "+this.getID());
+//
+//    		List<Field> result = new ArrayList<>();
+//    	    Class<?> i = this.getClass();
+//    	    while (i != null && i != Object.class) {
+//    	        Collections.addAll(result, i.getDeclaredFields());
+//    	        i = i.getSuperclass();
+//    	    }
+//
+//        	for(Field f : result) {
+//        		try {
+//        			f.setAccessible(true);
+//        			if(f.get(this)==null) {
+//        				log(f.getName()+": null");
+//        				continue;
+//        			}
+//        			
+//        			if(f.get(this).getClass()==float[].class) {
+//        				log(f.getName()+" (farray): "+Arrays.hashCode( (float[])f.get(this)));
+//        			}
+//        			if(f.get(this).getClass()==int[].class) {
+//        				log(f.getName()+" (iarray): "+Arrays.hashCode( (int[])f.get(this)));
+//        			} else {
+//        				log(f.getName()+": "+f.get(this).hashCode());
+//        			
+//        			}
+//        				
+//    			} catch (IllegalArgumentException | IllegalAccessException e) {
+//    				// TODO Auto-generated catch block
+//    				e.printStackTrace();
+//    			}
+//        	}    
+//    		
+//    	}
+//    		
+//    }
 
 	/**
 	 * An implementation of a profile tied to an object
@@ -2201,6 +2242,52 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					b.append(" | Source: "+s.toString());
 				
 				return b.toString();
+			}
+
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + endIndex;
+				result = prime * result + ((id == null) ? 0 : id.hashCode());
+				result = prime * result + (isLocked ? 1231 : 1237);
+				result = prime * result + ((leaves == null) ? 0 : leaves.hashCode());
+				result = prime * result + startIndex;
+				return result;
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				if (this == obj)
+					return true;
+				if (obj == null)
+					return false;
+				if (getClass() != obj.getClass())
+					return false;
+				BorderSegmentTree other = (BorderSegmentTree) obj;
+				if (!getOuterType().equals(other.getOuterType()))
+					return false;
+				if (endIndex != other.endIndex)
+					return false;
+				if (id == null) {
+					if (other.id != null)
+						return false;
+				} else if (!id.equals(other.id))
+					return false;
+				if (isLocked != other.isLocked)
+					return false;
+				if (leaves == null) {
+					if (other.leaves != null)
+						return false;
+				} else if (!leaves.equals(other.leaves))
+					return false;
+				if (startIndex != other.startIndex)
+					return false;
+				return true;
+			}
+
+			private DefaultSegmentedProfile getOuterType() {
+				return DefaultSegmentedProfile.this;
 			}
 		}
 

@@ -192,8 +192,8 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     	// passed upwards here for the import method to handle.
         in.defaultReadObject();
     }
-
-	@Override
+    
+    @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

@@ -205,7 +205,6 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
      * @param cytoplasm
      *            the cytoplasm
      */
-    void setCytoplasm(ICytoplasm cytoplasm);
-    
+    void setCytoplasm(ICytoplasm cytoplasm);    
 
 }

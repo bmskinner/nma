@@ -18,17 +18,15 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.process.ImageProcessor;
-
-import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 /**
  * This covers the things than can be found within an image.

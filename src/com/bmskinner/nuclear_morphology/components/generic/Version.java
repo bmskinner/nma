@@ -20,7 +20,6 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 

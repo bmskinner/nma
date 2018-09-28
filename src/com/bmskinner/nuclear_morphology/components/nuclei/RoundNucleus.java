@@ -26,9 +26,6 @@
 */
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +45,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoD
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -74,7 +72,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 /**
  * @author bms41

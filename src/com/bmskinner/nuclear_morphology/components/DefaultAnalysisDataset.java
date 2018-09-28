@@ -34,7 +34,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
@@ -496,21 +495,17 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         }
         return result > 0;
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((analysisOptions == null) ? 0 : analysisOptions.hashCode());
-        result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
-        result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
-        result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());
         result = prime * result + (isRoot ? 1231 : 1237);
         result = prime * result + ((mergeSources == null) ? 0 : mergeSources.hashCode());
         result = prime * result + ((otherDatasets == null) ? 0 : otherDatasets.hashCode());
         result = prime * result + ((savePath == null) ? 0 : savePath.hashCode());
         result = prime * result + ((cellCollection == null) ? 0 : cellCollection.hashCode());
-        result = prime * result + ((version == null) ? 0 : version.hashCode());
         return result;
     }
 

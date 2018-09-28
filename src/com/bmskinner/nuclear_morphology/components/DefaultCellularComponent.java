@@ -1120,7 +1120,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	return String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+this.getBounds().getWidth(), 
     			this.getBase().getY(), this.getBase().getY()+this.getBounds().getHeight());
     }
-    
+        
     @Override
 	public synchronized int hashCode() {
 		final int prime = 31;
