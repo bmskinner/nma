@@ -149,6 +149,13 @@ public class DatasetConverter implements Loggable, Importer {
     	if(result instanceof AnalysisDataset)
     		result = convert1_13_0ToCurrent(result);
     	
+    	// Try to get the old dataset version
+    	// After converting an AnalysisDataset, the result version will be current
+    	// version, but if the source was older than 1.14.0 we need to adjust the spline fitting
+    	Version oldVersion = oldDataset.getVersion();
+    	if(oldVersion!=null && oldVersion.isOlderThan(Version.v_1_13_3))
+    		result = convert1_13_8To1_14_0(result);
+    	
     	// Now the result will in a format with a checkable version
     	if(result.getVersion().isOlderThan(Version.v_1_13_2))
     		result = convert1_13_1To1_13_2(result);

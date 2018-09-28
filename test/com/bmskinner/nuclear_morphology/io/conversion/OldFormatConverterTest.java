@@ -22,6 +22,8 @@ package com.bmskinner.nuclear_morphology.io.conversion;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +32,9 @@ import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Tests that old datasets can be opened
@@ -48,6 +53,16 @@ public abstract class OldFormatConverterTest {
 	public static final String DIR_1_13_6 = "1.13.6/";
 	public static final String DIR_1_13_7 = "1.13.7/";
 	public static final String DIR_1_13_8 = "1.13.8/";
+	
+	
+	protected Logger logger;
+	
+	@Before
+	public void setUp() throws Exception {
+		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+		logger.setLevel(Level.FINE);
+		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+	}
     
     /**
      * Try to open the dataset in the given file and test if it is valid after any conversions
@@ -60,7 +75,10 @@ public abstract class OldFormatConverterTest {
     		fail("Test file does not exist: "+f.getAbsolutePath());
         IAnalysisDataset d = SampleDatasetReader.openDataset(f);
         DatasetValidator v = new DatasetValidator();
-        assertTrue(v.validate(d));
+        boolean ok = v.validate(d);
+        if(!ok)
+        	v.getErrors().forEach(System.out::println);
+        assertTrue(ok);
         return d;
     }
     

@@ -24,7 +24,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * Test datasets created under older verions of the software for compatability with the
+ * Test datasets created under older verions of the software for compatibility with the
  * current version
  * @author bms41
  * @since 1.14.0
