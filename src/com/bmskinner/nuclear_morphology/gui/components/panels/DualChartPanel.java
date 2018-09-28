@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
@@ -107,12 +108,12 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
         return rangePanel;
     }
 
-    public void restoreAutoBounds() {
+    public synchronized void restoreAutoBounds() {
         chartPanel.restoreAutoBounds();
         rangePanel.restoreAutoBounds();
     }
 
-    public synchronized void setCharts(JFreeChart chart, JFreeChart rangeChart) {
+    public synchronized void setCharts(@NonNull final JFreeChart chart, @NonNull final JFreeChart rangeChart) {
 
         if (chart == rangeChart)
             throw new IllegalArgumentException("Charts cannot be the same object");
@@ -134,7 +135,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
      * Set the main chart panel domain range to centre on the position in the
      * range panel
      */
-    protected void updateChartPanelRange() {
+    protected synchronized void updateChartPanelRange() {
 
         RectangleOverlayObject ob = rangePanel.getOverlayRectangle();
 

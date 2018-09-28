@@ -599,10 +599,6 @@ public class EventHandler implements Loggable, EventListener {
             if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET))
             	fireDatasetSelectionEvent(event.firstDataset());
 
-//            if (event.method().equals(DatasetEvent.SAVE)) {
-//                saveDataset(event.firstDataset(), false);
-//            }
-
             if (event.method().equals(DatasetEvent.RECACHE_CHARTS))
             	fireDatasetEvent(event);
 

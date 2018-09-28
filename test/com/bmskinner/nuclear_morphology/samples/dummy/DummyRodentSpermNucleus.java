@@ -227,11 +227,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public IBorderPoint getBorderTag(Tag tag) throws UnavailableBorderTagException {
-		return nucleus.getBorderTag(tag);
-	}
-
-	@Override
 	public boolean hasBorderTag(Tag tag) {
 		return nucleus.hasBorderTag(tag);
 	}

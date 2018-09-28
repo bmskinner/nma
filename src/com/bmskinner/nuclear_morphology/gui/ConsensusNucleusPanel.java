@@ -120,7 +120,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
          * Used for debugging only - do not include in releases
          */
         JPanel meshPanel = createMeshPanel();
-        panel.add(meshPanel, BorderLayout.CENTER);
+//        panel.add(meshPanel, BorderLayout.CENTER);
 
         JPanel offsetPanel = createTranslatePanel();
         panel.add(offsetPanel, BorderLayout.SOUTH);

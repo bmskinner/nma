@@ -369,6 +369,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         private static final String KILL_CMD  = "kill";
         private static final String REPAIR_CMD  = "unfuck";
         private static final String TASKS_CMD  = "tasks";
+        private static final String HASH_CMD  = "check hash";
 
         private final Map<String, Runnable> runnableCommands = new HashMap<>();
 
@@ -425,6 +426,15 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
                 for (String s : history)
                     log("\t"+s);
             });
+        	
+        	
+        	runnableCommands.put(HASH_CMD, ()->{
+        		Set<IAnalysisDataset> datasets = DatasetListManager.getInstance().getAllDatasets();
+        		
+        		for(IAnalysisDataset d : datasets)
+        			log(d.getName()+": "+d.hashCode());
+        		
+        	});
         	
             runnableCommands.put(CHECK_CMD, ()-> validateDatasets());
             runnableCommands.put(HELP_CMD, () -> {
