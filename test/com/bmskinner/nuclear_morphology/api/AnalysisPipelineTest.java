@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import org.junit.Before;
 
-import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -14,30 +13,9 @@ import ij.IJ;
 import ij.Prefs;
 
 public abstract class AnalysisPipelineTest {
-	
-	protected static final String IMAGE_FOLDER   = "test/samples/images/";
-	protected static final String DATASET_FOLDER = "test/samples/datasets/";
-	
-    protected static final String TESTING_MOUSE_FOLDER = IMAGE_FOLDER + "Mouse";
-    protected static final String TESTING_PIG_FOLDER   = IMAGE_FOLDER + "Pig";   
-    protected static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER + "Round";
 
-    protected static final String TESTING_MULTIPLE_BASE_FOLDER = IMAGE_FOLDER + "Multiple/";
-    protected static final String TESTING_MULTIPLE_SOURCE_1_FOLDER = TESTING_MULTIPLE_BASE_FOLDER + "Multiple_source_1/";
-    protected static final String TESTING_MULTIPLE_SOURCE_2_FOLDER = TESTING_MULTIPLE_BASE_FOLDER + "Multiple_source_2/";
-    
-    protected static final String TESTING_MOUSE_SIGNALS_FOLDER = IMAGE_FOLDER + "Mouse_with_signals";
-    protected static final String TESTING_PIG_SIGNALS_FOLDER   = IMAGE_FOLDER + "Pig_with_signals";
-    protected static final String TESTING_ROUND_SIGNALS_FOLDER = IMAGE_FOLDER + "Round_with_signals";
-    
-    protected static final String TESTING_MOUSE_CLUSTERS_FOLDER = IMAGE_FOLDER + "Mouse_with_clusters";
-    protected static final String TESTING_PIG_CLUSTERS_FOLDER   = IMAGE_FOLDER + "Pig_with_clusters";
-    protected static final String TESTING_ROUND_CLUSTERS_FOLDER = IMAGE_FOLDER + "Round_with_clusters";
-    
-    protected static final String UNIT_TEST_FILENAME = "UnitTest_"+Version.currentVersion();
-    
     protected static Logger logger;
-   
+
     
     @Before
     public void setUp(){

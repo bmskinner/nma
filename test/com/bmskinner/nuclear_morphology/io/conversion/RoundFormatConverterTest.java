@@ -26,6 +26,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -37,21 +38,21 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_0_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_0, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_0, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
     
     @Test
     public void test_1_13_1_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_1, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_1, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
 
     @Test
     public void test_1_13_2_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_2, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_2, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
@@ -59,7 +60,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_3_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_3, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_3, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_3));
     }
@@ -67,7 +68,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_4_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_4, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_4, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_4));
     }
@@ -75,7 +76,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_5_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_5, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_5, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_5));
     }
@@ -83,7 +84,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_6_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_6, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_6, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_6));
     }
@@ -91,7 +92,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_7_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_7, ROUND_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_7, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_7));
     }
@@ -99,7 +100,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
 	public void test_1_13_8_ConvertsToCurrent() throws Exception {
-		 File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_8, ROUND_FILE);
+		 File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_8, ROUND_FILE);
 	        IAnalysisDataset d = testConvertsToCurrent(f);
 	        assertTrue(d.getVersion().equals(Version.v_1_13_8));
 	}

@@ -26,6 +26,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -43,7 +44,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_0_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_0, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_0, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
@@ -52,7 +53,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Test
     @Override
     public void test_1_13_1_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_1, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_1, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
@@ -60,7 +61,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Test
     public void test_1_13_2_ConvertsToCurrent() throws Exception {
 
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_2, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_2, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
@@ -68,7 +69,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_3_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_3, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_3, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_3));
     }
@@ -76,7 +77,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_4_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_4, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_4, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_4));
     }
@@ -84,7 +85,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_5_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_5, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_5, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_5));
     }
@@ -92,7 +93,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_6_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_6, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_6, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_6));
     }
@@ -100,7 +101,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_7_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_7, PIG_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_7, PIG_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.v_1_13_7));
     }
@@ -108,7 +109,7 @@ public class PigFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
 	public void test_1_13_8_ConvertsToCurrent() throws Exception {
-		 File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_8, PIG_FILE);
+		 File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_8, PIG_FILE);
 	        IAnalysisDataset d = testConvertsToCurrent(f);
 	        assertTrue(d.getVersion().equals(Version.v_1_13_8));
 	}

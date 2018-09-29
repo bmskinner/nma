@@ -8,6 +8,7 @@ import java.util.logging.Level;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
@@ -46,73 +47,73 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 
 	@Test
 	public void testCreateRoundDataset() throws Exception {
-		File testFolder   = new File(TESTING_ROUND_FOLDER);
-		File xmlFile      = new File(IMAGE_FOLDER, "Round.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder   = new File(TestResources.TESTING_ROUND_FOLDER);
+		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Round.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreateRoundDatasetWithSignals() throws Exception {
-		File testFolder   = new File(TESTING_ROUND_SIGNALS_FOLDER);
-		File xmlFile      = new File(IMAGE_FOLDER, "Round_with_signals.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder   = new File(TestResources.TESTING_ROUND_SIGNALS_FOLDER);
+		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Round_with_signals.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreateRoundDatasetWithClusters() throws Exception {
-		File testFolder   = new File(TESTING_ROUND_CLUSTERS_FOLDER);
-		File xmlFile      = new File(IMAGE_FOLDER, "Round_with_clusters.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder   = new File(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
+		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Round_with_clusters.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreatePigDataset() throws Exception {
-		File testFolder = new File(TESTING_PIG_FOLDER);
-		File xmlFile = new File(IMAGE_FOLDER, "Pig.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
+		File xmlFile = new File(TestResources.IMAGE_FOLDER, "Pig.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreatePigDatasetWithSignals() throws Exception {
-		File testFolder   = new File(TESTING_PIG_SIGNALS_FOLDER);
-		File xmlFile      = new File(IMAGE_FOLDER, "Pig_with_signals.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder   = new File(TestResources.TESTING_PIG_SIGNALS_FOLDER);
+		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Pig_with_signals.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreatePigDatasetWithClusters() throws Exception {
-		File testFolder   = new File(TESTING_PIG_CLUSTERS_FOLDER);
-		File xmlFile      = new File(IMAGE_FOLDER, "Pig_with_clusters.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder   = new File(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
+		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Pig_with_clusters.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreateMouseDataset() throws Exception {
-		File testFolder = new File(TESTING_MOUSE_FOLDER);
-		File xmlFile = new File(IMAGE_FOLDER, "Mouse.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
+		File xmlFile = new File(TestResources.IMAGE_FOLDER, "Mouse.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreateMouseDatasetWithSignals() throws Exception {
-		File testFolder   = new File(TESTING_MOUSE_SIGNALS_FOLDER);
-		File xmlFile      = new File(IMAGE_FOLDER, "Mouse_with_signals.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder   = new File(TestResources.TESTING_MOUSE_SIGNALS_FOLDER);
+		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Mouse_with_signals.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 	
 	@Test
 	public void testCreateMouseDatasetWithClusters() throws Exception {
-		File testFolder   = new File(TESTING_MOUSE_CLUSTERS_FOLDER);
-		File xmlFile      = new File(IMAGE_FOLDER, "Mouse_with_clusters.xml");
-		File outputFolder = new File(DATASET_FOLDER+Version.currentVersion());
+		File testFolder   = new File(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
+		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Mouse_with_clusters.xml");
+		File outputFolder = new File(TestResources.DATASET_FOLDER+Version.currentVersion());
 		testPipelineCreatesReadableExportFile(testFolder, xmlFile, outputFolder);
 	}
 

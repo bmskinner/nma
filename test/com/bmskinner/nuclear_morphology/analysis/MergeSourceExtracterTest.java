@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -37,7 +38,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class MergeSourceExtracterTest extends SampleDatasetReader {
     
-    public static final String TEST_PATH_1 = SAMPLE_DATASET_PATH + "Merge_of_merge.nmd";
+    public static final String TEST_PATH_1 = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
     
     @Test
     public void testMergedDatasetCopiesSegments() throws Exception {

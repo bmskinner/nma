@@ -21,16 +21,15 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 
 /**
  * Provides a simple access point to open datasets for testing classes
@@ -38,15 +37,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
  * @since 1.13.8
  *
  */
-public class SampleDatasetReader {
-    
-    public static final String SAMPLE_DATASET_PATH = "test/samples/datasets/";
-    
-    public static final String RODENT_TEST_DATASET = "Testing_1_13_8.nmd";
-    public static final String PIG_TEST_DATASET    = "Testing_pig_1_13_8.nmd";
-    public static final String ROUND_TEST_DATASET    = "Testing_round_1_13_8.nmd";
-    public static final String MOUSE_SIGNALS_DATASET  = "Testing_signals.nmd";
-    
+public class SampleDatasetReader {   
     
     /**
      * Open the default rodent testing dataset
@@ -54,7 +45,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestRodentDataset() throws Exception {
-        File f = new File(SAMPLE_DATASET_PATH+RODENT_TEST_DATASET);
+        File f = new File(TestResources.MOUSE_TEST_DATASET);
         return openDataset(f);
     }
     
@@ -64,7 +55,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestPigDataset() throws Exception {
-        File f = new File(SAMPLE_DATASET_PATH+PIG_TEST_DATASET);
+        File f = new File(TestResources.PIG_TEST_DATASET);
         return openDataset(f);
     }
     
@@ -74,7 +65,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestRoundDataset() throws Exception {
-        File f = new File(SAMPLE_DATASET_PATH+ROUND_TEST_DATASET);
+        File f = new File(TestResources.ROUND_TEST_DATASET);
         return openDataset(f);
     }
     
@@ -84,7 +75,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestMouseSignalsDataset() throws Exception {
-        File f = new File(SAMPLE_DATASET_PATH+MOUSE_SIGNALS_DATASET);
+        File f = new File(TestResources.MOUSE_SIGNALS_DATASET);
         return openDataset(f);
     }
         

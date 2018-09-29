@@ -29,6 +29,7 @@ import javax.swing.table.TableModel;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -46,11 +47,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  * @since 1.13.8
  *
  */
-public class DatasetMergeTest extends SampleDatasetReader {
+public class DatasetMergeTest {
     
-    public static final String TEST_PATH_1 = SAMPLE_DATASET_PATH + "1.13.7/Mouse.bak";
-    public static final String TEST_PATH_2 = SAMPLE_DATASET_PATH + "1.13.8/Mouse.bak";
-
     /**
      * This test checks that merging of two sample datasets is possible, and that the number
      * of cells in the merged dataset is the sum of the input datasets. 
@@ -59,13 +57,13 @@ public class DatasetMergeTest extends SampleDatasetReader {
     @Test
     public void testDatasetMergeIncludesAllCells() throws Exception {
         
-        File f1 = new File(TEST_PATH_1);
-        File f2 = new File(TEST_PATH_2);
+        File f1 = new File(TestResources.MULTIPLE_SOURCE_1_DATASET);
+        File f2 = new File(TestResources.MULTIPLE_SOURCE_2_DATASET);
         
         int cells = 0;
 
-        IAnalysisDataset d1 = openDataset(f1);
-        IAnalysisDataset d2 = openDataset(f2);
+        IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+        IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
 
         List<IAnalysisDataset> toMerge = new ArrayList<>();
         toMerge.add(d1);
@@ -74,7 +72,7 @@ public class DatasetMergeTest extends SampleDatasetReader {
         cells += d1.getCollection().getNucleusCount();
         cells += d2.getCollection().getNucleusCount();
 
-        IAnalysisMethod m = new DatasetMergeMethod(toMerge, new File(SAMPLE_DATASET_PATH+"Merge_test.nmd"));  
+        IAnalysisMethod m = new DatasetMergeMethod(toMerge, new File(TestResources.TESTING_MULTIPLE_BASE_FOLDER+"Merge_test.nmd"));  
 
         System.out.println("Merging "+d1.toString()+" and "+d2.toString());
         IAnalysisResult r = m.call();
@@ -91,31 +89,6 @@ public class DatasetMergeTest extends SampleDatasetReader {
             if(!d.getCollection().contains(c))
                 fail("Missing dataset 2 cell "+c.toString());
         }
-
-        // Now get the analysis parameters table model that will be displayed 
-
-        //            System.out.println(d1.getAnalysisOptions().toString());
-        //            System.out.println(d2.getAnalysisOptions().toString());
-        //            
-        //            List<IAnalysisDataset> l = new ArrayList<>();
-        //            l.add(d);
-        //            
-        //            TableOptions op = new TableOptionsBuilder()
-        //                    .setDatasets(l)
-        //                    .setType(TableType.ANALYSIS_PARAMETERS)
-        //                    .build();
-        //            
-        //            AnalysisDatasetTableCreator c = new AnalysisDatasetTableCreator(op);
-
-        //            TableModel tm = c.createAnalysisTable();
-
-        //            for(int row=0; row<tm.getRowCount(); row++){
-        //                for(int col=0; col<tm.getColumnCount(); col++){
-        //                    System.out.println(tm.getValueAt(row, col));
-        //                }
-        //                System.out.println("\n");
-        //            }
-
     }
 
 }

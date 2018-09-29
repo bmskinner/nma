@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
@@ -116,7 +117,7 @@ public class ProfileSegmenterTest {
 	
 	@Test
 	public void testSegmentationOfRodentDataset() throws Exception{
-		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH, "Unsegmented_mouse.nmd");
+		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
 		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
 		ISegmentedProfile template = dataset.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);

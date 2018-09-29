@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -111,7 +112,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
   
     @Test
     public void testSetSavePath() {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+"Test.nmd");
+        File f = new File(TestResources.DATASET_FOLDER+"Test.nmd");
         d.setSavePath(f);
         assertEquals(f, d.getSavePath());
     }

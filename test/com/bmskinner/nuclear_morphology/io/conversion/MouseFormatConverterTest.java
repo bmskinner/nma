@@ -26,6 +26,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -43,7 +44,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_0_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_0, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_0, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.currentVersion(), d.getVersion());
     }
@@ -51,7 +52,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_1_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_1, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_1, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.currentVersion(), d.getVersion());
     }
@@ -60,7 +61,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Test
     public void test_1_13_2_ConvertsToCurrent() throws Exception {
 
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_2, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_2, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.currentVersion(), d.getVersion());
     }
@@ -69,7 +70,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Test
     public void test_1_13_3_ConvertsToCurrent() throws Exception {
 
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_3, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_3, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.v_1_13_3, d.getVersion());
     }
@@ -77,7 +78,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_4_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_4, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_4, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.v_1_13_4, d.getVersion());
     }
@@ -85,7 +86,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_5_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_5, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_5, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.v_1_13_5, d.getVersion());
     }
@@ -93,7 +94,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_6_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_6, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_6, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.v_1_13_6, d.getVersion());
     }
@@ -101,7 +102,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_7_ConvertsToCurrent() throws Exception {
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_7, MOUSE_BACKUP_FILE);
+        File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_7, MOUSE_BACKUP_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertEquals(Version.v_1_13_7, d.getVersion());
     }
@@ -109,7 +110,7 @@ public class MouseFormatConverterTest extends OldFormatConverterTest {
     @Override
     @Test
     public void test_1_13_8_ConvertsToCurrent() throws Exception {
-    	File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_8, MOUSE_BACKUP_FILE);
+    	File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_8, MOUSE_BACKUP_FILE);
     	IAnalysisDataset d = testConvertsToCurrent(f);
     	assertEquals(Version.v_1_13_8, d.getVersion());
     }

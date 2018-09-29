@@ -35,6 +35,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
@@ -86,11 +87,11 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
     	IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
 
-    	File testFolder = new File(TESTING_MOUSE_FOLDER);
+    	File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
-    	File outFile = makeOutfile(TESTING_MOUSE_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
+    	File outFile = makeOutfile(TestResources.TESTING_MOUSE_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
 
     	testDatasetEquality(exp, obs);         
     }
@@ -104,11 +105,11 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
     	IAnalysisDataset exp = SampleDatasetReader.openTestPigDataset();
 
-    	File testFolder = new File(TESTING_PIG_FOLDER);
+    	File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
 
-    	File outFile = makeOutfile(TESTING_PIG_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
+    	File outFile = makeOutfile(TestResources.TESTING_PIG_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
 
     	testDatasetEquality(exp, obs);       
 
@@ -123,11 +124,11 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
     	IAnalysisDataset exp = SampleDatasetReader.openTestRoundDataset();
 
-    	File testFolder = new File(TESTING_ROUND_FOLDER);
+    	File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
-    	File outFile = makeOutfile(TESTING_ROUND_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
+    	File outFile = makeOutfile(TestResources.TESTING_ROUND_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
 
     	testDatasetEquality(exp, obs);        
     }
@@ -154,11 +155,11 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
      */
     public static IAnalysisDataset runSignalDetectionInRoundDataset() throws Exception {
 
-    	File testFolder = new File(TESTING_ROUND_FOLDER);
+    	File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
-    	File outFile = makeOutfile(TESTING_ROUND_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(UNIT_TEST_FILENAME, op, outFile);
+    	File outFile = makeOutfile(TestResources.TESTING_ROUND_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
 
     	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
     	
@@ -251,7 +252,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
     }
     
     private static File makeOutfile(String folder){
-    	return new File(folder+File.separator+UNIT_TEST_FILENAME, UNIT_TEST_FILENAME+Io.SAVE_FILE_EXTENSION);
+    	return new File(folder+File.separator+TestResources.UNIT_TEST_FOLDERNAME, TestResources.UNIT_TEST_FILENAME);
     }
 
 }

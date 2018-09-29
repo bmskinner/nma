@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
@@ -192,7 +193,7 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 	
 	@Test
 	public void testSegmentationOfRodentDataset() throws Exception {
-		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH, "Unsegmented_mouse.nmd");
+		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
 		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
 		ISegmentedProfile template = dataset.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
