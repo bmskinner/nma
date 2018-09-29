@@ -50,10 +50,9 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 
     private static final String DIALOG_TITLE = "Options";
 
-    private JComboBox<Level>        levelBox;
-    private JComboBox<ColourSwatch> colourBox;
-//    private JCheckBox               violinBox;
-    private JCheckBox               fillConsensusBox;
+    private JComboBox<Level>        programLevelBox;
+    private JComboBox<Level>        consoleLevelBox;
+
     private JCheckBox               refoldOverrideBox;
     private JCheckBox               antiAliasBox;
     private JCheckBox               convertDatasetsBox; // should opened
@@ -109,36 +108,24 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         List<JLabel> labels = new ArrayList<JLabel>();
         List<Component> fields = new ArrayList<Component>();
 
-        JLabel logLabel = new JLabel("Logging level");
+        JLabel logLabel = new JLabel("Program log level");
         Level[] levelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
-        levelBox = new JComboBox<Level>(levelArray);
-        levelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
-        levelBox.addActionListener(this);
+        programLevelBox = new JComboBox<Level>(levelArray);
+        programLevelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
+        programLevelBox.addActionListener(this);
 
         labels.add(logLabel);
-        fields.add(levelBox);
+        fields.add(programLevelBox);
+        
+        JLabel consoleLogLabel = new JLabel("Console log level");
+        Level[] consoleLevelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
+        consoleLevelBox = new JComboBox<Level>(consoleLevelArray);
+        consoleLevelBox.setSelectedItem(Logger.getLogger(CONSOLE_LOGGER).getLevel());
+        consoleLevelBox.addActionListener(this);
 
-        JLabel swatchLabel = new JLabel("Colour swatch");
-        colourBox = new JComboBox<ColourSwatch>(ColourSwatch.values());
-        colourBox.setSelectedItem(GlobalOptions.getInstance().getSwatch());
-        colourBox.addActionListener(this);
+        labels.add(consoleLogLabel);
+        fields.add(consoleLevelBox);
 
-        labels.add(swatchLabel);
-        fields.add(colourBox);
-
-//        JLabel violinLabel = new JLabel("Violin plots");
-//        violinBox = new JCheckBox((String) null, GlobalOptions.getInstance().isViolinPlots());
-//        violinBox.addActionListener(this);
-//
-//        labels.add(violinLabel);
-//        fields.add(violinBox);
-
-        JLabel fillConsensusLabel = new JLabel("Fill consensus");
-        fillConsensusBox = new JCheckBox((String) null, GlobalOptions.getInstance().isFillConsensus());
-        fillConsensusBox.addActionListener(this);
-
-        labels.add(fillConsensusLabel);
-        fields.add(fillConsensusBox);
         
         JLabel overrideRefoldLabel = new JLabel("Refold override");
         refoldOverrideBox = new JCheckBox((String) null, GlobalOptions.getInstance().isOverrideRefold());
@@ -168,24 +155,14 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
     @Override
     public void actionPerformed(ActionEvent arg0) {
 
-        Level level = (Level) levelBox.getSelectedItem();
-        if (!level.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())) {
-            Logger.getLogger(PROGRAM_LOGGER).setLevel(level);
-            GlobalOptions.getInstance().setLogLevel(level);
+        Level programLevel = (Level) programLevelBox.getSelectedItem();
+        if (!programLevel.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())) {
+            Logger.getLogger(PROGRAM_LOGGER).setLevel(programLevel);
         }
-
-        ColourSwatch swatch = (ColourSwatch) colourBox.getSelectedItem();
-
-        if (!swatch.equals(GlobalOptions.getInstance().getSwatch())) {
-
-            GlobalOptions.getInstance().setSwatch(swatch);
-            fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-        }
-
-        boolean fillConsensus = fillConsensusBox.isSelected();
-        if (GlobalOptions.getInstance().isFillConsensus() != fillConsensus) {
-            GlobalOptions.getInstance().setFillConsensus(fillConsensus);
-            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+        
+        Level consoleLevel = (Level) consoleLevelBox.getSelectedItem();
+        if (!consoleLevel.equals(Logger.getLogger(CONSOLE_LOGGER).getLevel())) {
+            Logger.getLogger(CONSOLE_LOGGER).setLevel(consoleLevel);
         }
 
         boolean antiAlias = antiAliasBox.isSelected();

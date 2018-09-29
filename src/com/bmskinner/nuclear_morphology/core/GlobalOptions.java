@@ -63,7 +63,8 @@ public class GlobalOptions extends AbstractHashOptions {
 
     private MeasurementScale scale;
 
-    private Level logLevel;
+//    private Level programLogLevel;
+//    private Level conLogLevel;
 
     private ColourSwatch swatch;
 
@@ -81,17 +82,13 @@ public class GlobalOptions extends AbstractHashOptions {
 
         if (instance != null) {
             return instance;
-        } else {
-
-            synchronized (lockObject) {
-                if (instance == null) {
-                    instance = new GlobalOptions();
-                }
-            }
-
-            return instance;
         }
-
+		synchronized (lockObject) {
+		    if (instance == null) {
+		        instance = new GlobalOptions();
+		    }
+		}
+		return instance;
     }
 
     private GlobalOptions() {
@@ -99,7 +96,7 @@ public class GlobalOptions extends AbstractHashOptions {
     }
 
     public void setDefaults() {
-        this.logLevel = Level.INFO;
+//        this.programLogLevel = Level.INFO;
         this.scale = MeasurementScale.PIXELS;
         this.swatch = ColourSwatch.REGULAR_SWATCH;
         setBoolean(IS_VIOLIN_KEY, true);
@@ -136,14 +133,6 @@ public class GlobalOptions extends AbstractHashOptions {
 
     public void setImageScale(double scale) {
         setDouble(DEFAULT_IMAGE_SCALE_KEY, scale);
-    }
-
-    public synchronized Level getLogLevel() {
-        return logLevel;
-    }
-
-    public void setLogLevel(Level logLevel) {
-        this.logLevel = logLevel;
     }
 
     public synchronized ColourSwatch getSwatch() {
