@@ -93,6 +93,10 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
             // Since we're creating a save format, go with nmd: Nuclear
             // Morphology Dataset
             fine("Saving dataset to " + saveFile.getAbsolutePath());
+            
+            File parentFolder = saveFile.getParentFile();
+            if(!parentFolder.exists())
+            	parentFolder.mkdirs();
 
             // use buffering
             OutputStream fos = new FileOutputStream(saveFile);
@@ -130,7 +134,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
             DatasetListManager.getInstance().updateHashCode(dataset);
 
         } catch (FileNotFoundException e) {
-            warn("File not found when saving dataset");
+            warn("Could not find file when saving dataset to "+saveFile.getAbsolutePath());
             return false;
         } catch (IOException e2) {
             error("IO error saving dataset", e2);

@@ -29,6 +29,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -70,6 +72,9 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
      */
     public Nucleus buildInstance(@NonNull List<IPoint> points, File imageFile, int channel, @NonNull IPoint centreOfMass)
             throws ComponentCreationException {
+    	if(points.size()<3)
+    		throw new ComponentCreationException("Cannot create a nucleus with a border list of only "+points.size()+" points");
+    	
         Roi roi = makRoi(points);
         Rectangle bounds = roi.getBounds();
 
@@ -100,32 +105,47 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     		throw new IllegalArgumentException("Roi cannot be null in nucleus factory");
         if (centreOfMass == null)
             throw new IllegalArgumentException("Centre of mass cannot be null in nucleus factory");
-
+        
         Nucleus n = null;
 
-        try {
-
-            // The classes for the constructor
-            Class<?>[] classes = { Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
-
-            Constructor<?> nucleusConstructor = type.getNucleusClass().getConstructor(classes);
-
-            n = (Nucleus) nucleusConstructor.newInstance(roi, centreOfMass, imageFile, channel, originalPosition,
+        switch(type) {
+        	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount); break;
+        	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount); break;
+        	case NEUTROPHIL: n = new DefaultLobedNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount); break;    
+        	case ROUND: 
+        	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                     nucleusCount);
-
-            nucleusCount++;
-
-        } catch (InvocationTargetException e) {
-            stack("Invokation error creating nucleus", e.getCause());
-            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
-        } catch (Error e) {
-            stack("Error creating nucleus", e);
-            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException
-                | SecurityException e) {
-            stack("Error creating nucleus", e);
-            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
+                    
         }
+
+        nucleusCount++;
+
+//        try {
+//
+//            // The classes for the constructor
+//            Class<?>[] classes = { Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
+//
+//            Constructor<?> nucleusConstructor = type.getNucleusClass().getConstructor(classes);
+//
+//            n = (Nucleus) nucleusConstructor.newInstance(roi, centreOfMass, imageFile, channel, originalPosition,
+//                    nucleusCount);
+//
+//            nucleusCount++;
+//
+//        } catch (InvocationTargetException e) {
+//            stack("Invokation error creating nucleus", e.getCause());
+//            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
+//        } catch (Error e) {
+//            stack("Error creating nucleus", e);
+//            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
+//        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException
+//                | SecurityException e) {
+//            stack("Error creating nucleus", e);
+//            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
+//        }
 
         if (n == null)
             throw new ComponentCreationException("Error making nucleus; contstucted object is null");
