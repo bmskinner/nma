@@ -50,7 +50,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
     protected CellSegmentsPanel     segmentProfilePanel;
     
     /** View and cell profiles */
-    protected CellBorderTagPanel   cellBorderTagPanel;
+    protected CellProfilesPanel   cellBorderTagPanel;
     
     /** View and modify cell tags */
     protected CellOutlinePanel     outlinePanel; 
@@ -115,7 +115,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
     private void createSubPanels(@NonNull InputSupplier context) {
         segmentProfilePanel = new CellSegmentsPanel(context, model); // the nucleus angle
                                                            // profile
-        cellBorderTagPanel = new CellBorderTagPanel(context, model);
+        cellBorderTagPanel = new CellProfilesPanel(context, model);
         outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
                                                     // and detected objects
         cellStatsPanel = new CellStatsPanel(context, model); // the stats table
