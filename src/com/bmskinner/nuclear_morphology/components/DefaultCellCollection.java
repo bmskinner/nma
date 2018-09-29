@@ -1137,6 +1137,9 @@ public class DefaultCellCollection implements ICellCollection {
 				n.updateVerticallyRotatedNucleus();
 				n.updateDependentStats();
 			});
+			
+			if(this.hasConsensus())
+				consensusNucleus.alignVertically();
 
 			statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
 			statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);

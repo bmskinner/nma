@@ -564,6 +564,8 @@ public class VirtualCellCollection implements ICellCollection {
     @Override
     public void updateVerticalNuclei() {
         parent.getCollection().updateVerticalNuclei();
+        if(this.hasConsensus())
+			consensusNucleus.alignVertically();
     }
 
     @Override
