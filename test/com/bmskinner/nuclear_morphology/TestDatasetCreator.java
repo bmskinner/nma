@@ -1,18 +1,18 @@
 package com.bmskinner.nuclear_morphology;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.UUID;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
@@ -61,7 +61,14 @@ public class TestDatasetCreator {
 	public void setUp(){
 		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
 		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+
+		boolean hasHandler = false;
+		for(Handler h : logger.getHandlers()) {
+			if(h instanceof ConsoleHandler)
+				hasHandler = true;
+		}
+		if(!hasHandler)
+			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 
 	
@@ -71,7 +78,7 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
+    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
     }
     
     @Test
@@ -80,7 +87,7 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.PIG_TEST_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
+    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
     }
     
     @Test
@@ -89,7 +96,7 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.ROUND_TEST_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
+    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
     }
     
     
@@ -99,7 +106,7 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.MOUSE_CLUSTERS_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
     }
     
     @Test
@@ -108,7 +115,7 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.PIG_CLUSTERS_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
     }
     
     @Test
@@ -117,7 +124,7 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.ROUND_CLUSTERS_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
     }
     
     @Test
@@ -208,6 +215,24 @@ public class TestDatasetCreator {
     	.call();
     	assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
     }
+    
+    public static IAnalysisDataset createTestDataset(String folder, IAnalysisOptions op, boolean makeClusters) throws Exception {
+    	 if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists())
+             throw new IllegalArgumentException("Detection folder does not exist");
+
+         IAnalysisDataset d = new NucleusDetectionMethod(folder, op).call().getFirstDataset();
+         
+         IClusteringOptions clusterOptions = OptionsFactory.makeClusteringOptions();
+         
+         new DatasetProfilingMethod(d)
+ 	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
+ 	    	.then( op.getNucleusType()==NucleusType.ROUND
+ 	    			? new ProfileRefoldMethod(d,CurveRefoldingMode.FAST)
+ 	    			: new ConsensusAveragingMethod(d))
+ 	    	.thenIf(makeClusters, new NucleusClusteringMethod(d, clusterOptions))
+ 	    	.call();
+         return d;
+    }
    
     /**
      * Run a new analysis on the images using the given options.
@@ -217,26 +242,12 @@ public class TestDatasetCreator {
      * @return the new dataset
      * @throws Exception
      */
-    private static void createTestDataset(String folder, IAnalysisOptions op, File saveFile, boolean makeClusters) throws Exception {
-        
-        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists()){
-            throw new IllegalArgumentException("Detection folder does not exist");
-        }
-        IAnalysisMethod m = new NucleusDetectionMethod(folder, op);
-        IAnalysisResult r = m.call();
-        IAnalysisDataset d = r.getFirstDataset();
-        
-        IClusteringOptions clusterOptions = OptionsFactory.makeClusteringOptions();
-        
-        new DatasetProfilingMethod(d)
-	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
-	    	.then( op.getNucleusType()==NucleusType.ROUND
-	    			? new ProfileRefoldMethod(d,CurveRefoldingMode.FAST)
-	    			: new ConsensusAveragingMethod(d))
-	    	.thenIf(makeClusters, new NucleusClusteringMethod(d, clusterOptions))
-	    	.then(new DatasetExportMethod(d, saveFile))
-	    	.call();
-        
+    public static void saveTestDataset(String folder, IAnalysisOptions op, File saveFile, boolean makeClusters) throws Exception {
+        if(saveFile.exists())
+        	saveFile.delete();
+        assertFalse("Expecting output file to be deleted: "+saveFile.getAbsolutePath(), saveFile.exists());
+        IAnalysisDataset d = createTestDataset(folder, op, makeClusters);
+    	new DatasetExportMethod(d, saveFile).call();
         assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
     }
 }

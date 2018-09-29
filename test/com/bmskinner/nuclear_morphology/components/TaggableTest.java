@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,11 +50,18 @@ public class TaggableTest {
 	public Class<? extends Taggable> source;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() throws Exception{
 		taggable = createInstance(source);
 		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
 		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+
+		boolean hasHandler = false;
+		for(Handler h : logger.getHandlers()) {
+			if(h instanceof ConsoleHandler)
+				hasHandler = true;
+		}
+		if(!hasHandler)
+			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 
 	/**

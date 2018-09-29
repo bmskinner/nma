@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,13 +55,20 @@ public class ICellCollectionTest {
 
 	@Parameter(0)
 	public Class<? extends ICellCollection> source;
-
+	
 	@Before
 	public void setUp() throws Exception {
 		collection = createInstance(source);
 		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
 		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+
+		boolean hasHandler = false;
+		for(Handler h : logger.getHandlers()) {
+			if(h instanceof ConsoleHandler)
+				hasHandler = true;
+		}
+		if(!hasHandler)
+			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 
 	/**

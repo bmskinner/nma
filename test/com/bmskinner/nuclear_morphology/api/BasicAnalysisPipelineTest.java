@@ -20,40 +20,24 @@
 package com.bmskinner.nuclear_morphology.api;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestDatasetCreator;
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
@@ -66,181 +50,78 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  */
 public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
-    /**
-     * Run the current pipeline with default settings on the testing
-     * rodent folder and check the created dataset matches expected values.
-     */
-    @Test
-    public void testRodentDetectionMatchesSavedDataset() throws Exception{
+	@Test
+	public void testMouseDatasetMatchesSavedDataset() throws Exception{
+		File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
+		IAnalysisDataset exp = SampleDatasetReader.openDataset(saveFile);
 
-    	IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
+		File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
+		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
-    	File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
-    	IAnalysisOptions op = exp.getAnalysisOptions().get().duplicate();
-    	op.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setFolder(testFolder);
+		IAnalysisDataset obs = TestDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		testDatasetEquality(exp, obs);       
+	}
 
-    	File outFile = makeOutfile(TestResources.TESTING_MOUSE_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, exp.getAnalysisOptions().get(), outFile);
+	@Test
+	public void testPigDatasetMatchesSavedDataset() throws Exception{
+		File saveFile = new File(TestResources.PIG_TEST_DATASET);
+		IAnalysisDataset exp = SampleDatasetReader.openDataset(saveFile);
 
-    	testDatasetEquality(exp, obs);         
-    }
-    
-    /**
-     * Run the current pipeline with default settings on the testing
-     * pig folder and check the created dataset matches expected values.
-     */
-    @Test
-    public void testPigDetectionMatchesSavedDataset() throws Exception{
+		File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
+		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
 
-    	IAnalysisDataset exp = SampleDatasetReader.openTestPigDataset();
+		IAnalysisDataset obs = TestDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		testDatasetEquality(exp, obs);       
+	}
 
-    	File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
-    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
+	@Test
+	public void testRoundDatasetMatchesSavedDataset() throws Exception{
+		File saveFile = new File(TestResources.ROUND_TEST_DATASET);
+		IAnalysisDataset exp = SampleDatasetReader.openDataset(saveFile);
 
-    	File outFile = makeOutfile(TestResources.TESTING_PIG_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
+		File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
+		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
-    	testDatasetEquality(exp, obs);       
+		IAnalysisDataset obs = TestDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		testDatasetEquality(exp, obs);       
+	}
+	
+	
 
-    }
-    
-    /**
-     * Run the current pipeline with default settings on the testing
-     * pig folder and check the created dataset matches expected values.
-     */
-    @Test
-    public void testRoundDetectionMatchesSavedDataset() throws Exception{
 
-    	IAnalysisDataset exp = SampleDatasetReader.openTestRoundDataset();
+	/**
+	 * Check if the two datasets match.
+	 * @param exp the expected (reference) dataset
+	 * @param obs the observed (newly created) dataset
+	 */
+	private void testDatasetEquality(@NonNull IAnalysisDataset exp, @NonNull IAnalysisDataset obs) throws Exception{
+		assertEquals("Dataset name", exp.getName(), obs.getName());
 
-    	File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
+		//    	assertEquals("Options",exp.getAnalysisOptions(), obs.getAnalysisOptions());
 
-    	File outFile = makeOutfile(TestResources.TESTING_ROUND_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
+		assertEquals("Number of images", exp.getCollection().getImageFiles().size(), obs.getCollection().getImageFiles().size());
 
-    	testDatasetEquality(exp, obs);        
-    }
-    
-    @Test
-    public void testSignalDetectionCompletes() throws Exception {
-    	IAnalysisDataset obs = runSignalDetectionInRoundDataset();
-    	UUID redId =  UUID.fromString("00000000-0000-0000-0000-100000000001");
-    	UUID greenId =  UUID.fromString("00000000-0000-0000-0000-100000000002");
-    	
-    	assertTrue(obs.getCollection().hasSignalGroup(redId));
-    	assertTrue(obs.getCollection().hasSignalGroup(greenId));
-    	
-    	assertTrue(obs.getAnalysisOptions().get().getNuclearSignalOptions(redId).hasShellOptions());
-    	assertTrue(obs.getAnalysisOptions().get().getNuclearSignalOptions(greenId).hasShellOptions());
-    }
-    
+		List<Nucleus> expN = new ArrayList<>(exp.getCollection().getNuclei());
+		List<Nucleus> obsN = new ArrayList<>(obs.getCollection().getNuclei());
 
-    /**
-     * Detect nuclei in the round dataset, make a consensus, add red and green signals
-     * and run a shell analysis.
-     * @return
-     * @throws Exception
-     */
-    public static IAnalysisDataset runSignalDetectionInRoundDataset() throws Exception {
+		Collections.sort(expN);
+		Collections.sort(obsN);
 
-    	File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
+		for(int i=0; i<expN.size(); i++)
+			assertEquals("Nucleus file name for: "+expN.get(i).getNameAndNumber(), expN.get(i).getSourceFileName(), obsN.get(i).getSourceFileName());
 
-    	File outFile = makeOutfile(TestResources.TESTING_ROUND_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
+		assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(), obs.getCollection().getNucleusCount());
 
-    	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-    	
-    	UUID redId =  UUID.fromString("00000000-0000-0000-0000-100000000001");
-        ISignalGroup red = new SignalGroup("Test red");
-        red.setGroupColour(Color.RED);
-        obs.getCollection().addSignalGroup(redId, red);
-        
-        
-        INuclearSignalOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-        greenOptions.setChannel(1);
-        UUID greenId =  UUID.fromString("00000000-0000-0000-0000-100000000002");
-        ISignalGroup green = new SignalGroup("Test green");
-        green.setGroupColour(Color.GREEN);
-        obs.getCollection().addSignalGroup(greenId, green);
-        
 
-        obs.getAnalysisOptions().get().setDetectionOptions(redId.toString(), redOptions);
-        obs.getAnalysisOptions().get().setDetectionOptions(greenId.toString(), greenOptions);
-        
-    	new SignalDetectionMethod(obs, redOptions, redId)
-    	.then(new ConsensusAveragingMethod(obs))
-    	.then(new SignalDetectionMethod(obs, greenOptions, greenId))
-    	.then(new ShellAnalysisMethod(obs, new DefaultShellOptions()))
-    	.then(new DatasetExportMethod(obs, outFile))
-    	.call();
-    	return obs;
-    }
-    
-    /**
-     * Run a new analysis on the images using the given options.
-     * @param folder the name of the output folder for the nmd file
-     * @param op the detection options
-     * @param saveFile the full path to the nmd file
-     * @return the new dataset
-     * @throws Exception
-     */
-    private static IAnalysisDataset runNewAnalysis(String folder, IAnalysisOptions op, File saveFile) throws Exception {
-        
-        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists()){
-            throw new IllegalArgumentException("Detection folder does not exist");
-        }
-        IAnalysisMethod m = new NucleusDetectionMethod(folder, op);
-        IAnalysisResult r = m.call();
-        IAnalysisDataset obs = r.getFirstDataset();
-        
-        new DatasetProfilingMethod(obs)
-	    	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW))
-	    	.call();
 
-        return obs;
-    }
-    
-    
-    /**
-     * Check if the two datasets match.
-     * @param exp the expected (reference) dataset
-     * @param obs the observed (newly created) dataset
-     */
-    private void testDatasetEquality(@NonNull IAnalysisDataset exp, @NonNull IAnalysisDataset obs) throws Exception{
-    	assertEquals("Dataset name", exp.getName(), obs.getName());
+		// Check the stats are the same
+		for(PlottableStatistic s : PlottableStatistic.getStats(CellularComponent.NUCLEUS)){
+			System.out.println("Testing equality of "+s);
+			double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
-//    	assertEquals("Options",exp.getAnalysisOptions(), obs.getAnalysisOptions());
-
-    	assertEquals("Number of images", exp.getCollection().getImageFiles().size(), obs.getCollection().getImageFiles().size());
-    	
-    	List<Nucleus> expN = new ArrayList<>(exp.getCollection().getNuclei());
-    	List<Nucleus> obsN = new ArrayList<>(obs.getCollection().getNuclei());
-    	
-    	Collections.sort(expN);
-    	Collections.sort(obsN);
-    	
-    	for(int i=0; i<expN.size(); i++)
-    	    assertEquals("Nucleus file name for: "+expN.get(i).getNameAndNumber(), expN.get(i).getSourceFileName(), obsN.get(i).getSourceFileName());
-
-    	assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(), obs.getCollection().getNucleusCount());
-
-    	
-
-    	// Check the stats are the same
-    	for(PlottableStatistic s : PlottableStatistic.getStats(CellularComponent.NUCLEUS)){
-    		System.out.println("Testing equality of "+s);
-    		double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-    		double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-
-    		assertEquals(s.toString(), eMed, oMed, 0.3);
-    		//            assertEquals(s.toString(), eMed, oMed, 0.00000001); // TODO fails for variability. Not yet sure why. Something different after saving.
-    	}
-    }
-    
-    private static File makeOutfile(String folder){
-    	return new File(folder+File.separator+TestResources.UNIT_TEST_FOLDERNAME, TestResources.UNIT_TEST_FILENAME);
-    }
-
+			assertEquals(s.toString(), eMed, oMed, 0.3);
+			//            assertEquals(s.toString(), eMed, oMed, 0.00000001); // TODO fails for variability. Not yet sure why. Something different after saving.
+		}
+	}
 }
