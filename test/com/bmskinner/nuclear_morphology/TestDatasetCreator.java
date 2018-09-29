@@ -5,11 +5,15 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Color;
 import java.io.File;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
@@ -26,10 +30,14 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Generate the test datasets for the current version, which will be used for comparison
@@ -41,13 +49,29 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
  */
 public class TestDatasetCreator {
 	
+	protected Logger logger;
+	
+	public static final UUID RED_SIGNAL_ID   = UUID.fromString("00000000-0000-0000-0000-100000000001");
+	public static final UUID GREEN_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-100000000002");
+	
+	public static final String RED_SIGNAL_NAME   = "Test red";
+	public static final String GREEN_SIGNAL_NAME = "Test green";
+
+	@Before
+	public void setUp(){
+		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+		logger.setLevel(Level.FINE);
+		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+	}
+
+	
     @Test
     public void createMouseDataset() throws Exception{
 
     	File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile);
+    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
     }
     
     @Test
@@ -56,7 +80,7 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.PIG_TEST_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile);
+    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
     }
     
     @Test
@@ -65,11 +89,39 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.ROUND_TEST_DATASET);
-    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile);
+    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
+    }
+    
+    
+    @Test
+    public void createMouseWithClustersDataset() throws Exception{
+
+    	File testFolder = new File(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	File saveFile = new File(TestResources.MOUSE_CLUSTERS_DATASET);
+    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
     }
     
     @Test
-    public void createMouseWitSignalsDataset() throws Exception {
+    public void createPigWithClustersDataset() throws Exception{
+
+    	File testFolder = new File(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
+    	File saveFile = new File(TestResources.PIG_CLUSTERS_DATASET);
+    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    }
+    
+    @Test
+    public void createRoundWithClustersDataset() throws Exception{
+
+    	File testFolder = new File(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
+    	File saveFile = new File(TestResources.ROUND_CLUSTERS_DATASET);
+    	createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    }
+    
+    @Test
+    public void createMouseWithSignalsDataset() throws Exception {
 
     	File testFolder = new File(TestResources.TESTING_MOUSE_SIGNALS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
@@ -78,80 +130,84 @@ public class TestDatasetCreator {
     	nucleus.setMinSize(4000);
     	File saveFile = new File(TestResources.MOUSE_SIGNALS_DATASET);
 
-        IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
-        
-        new DatasetProfilingMethod(d)
-	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
-	    	.then(new ConsensusAveragingMethod(d))
-	    	.call();
-
-    	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-    	redOptions.setMaxFraction(0.5);
-    	redOptions.setMinSize(5);
-    	
-    	UUID redId =  UUID.fromString("00000000-0000-0000-0000-100000000001");
-        ISignalGroup red = new SignalGroup("Test red");
-        red.setGroupColour(Color.RED);
-        d.getCollection().addSignalGroup(redId, red);
-
-        d.getAnalysisOptions().get().setDetectionOptions(redId.toString(), redOptions);
-        
-    	new SignalDetectionMethod(d, redOptions, redId)
-    	.then(new ShellAnalysisMethod(d, new DefaultShellOptions()))
-    	.then(new DatasetExportMethod(d, saveFile))
-    	.call();
-    	assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
+    	createTestSignalDataset(op, saveFile, true, false);
     }
     
-    /**
-     * Detect nuclei in the round dataset, make a consensus, add red and green signals
-     * and run a shell analysis.
-     * @return
-     * @throws Exception
-     */
     @Test
-    public void createRoundWitSignalsDataset() throws Exception {
+    public void createPigWithSignalsDataset() throws Exception {
+
+    	File testFolder = new File(TestResources.TESTING_PIG_SIGNALS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
+    	IDetectionOptions nucleus = op.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+    	nucleus.setMaxSize(15000);
+    	nucleus.setMinSize(4000);
+    	File saveFile = new File(TestResources.PIG_SIGNALS_DATASET);
+    	
+    	createTestSignalDataset(op, saveFile, false, true);
+    }
+    
+    @Test
+    public void createRoundWithSignalsDataset() throws Exception {
 
     	File testFolder = new File(TestResources.TESTING_ROUND_SIGNALS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.ROUND_SIGNALS_DATASET);
     	
-    	IAnalysisMethod m = new NucleusDetectionMethod(testFolder, op);
-        IAnalysisResult r = m.call();
-        IAnalysisDataset d = r.getFirstDataset();
+    	createTestSignalDataset(op, saveFile, true, true);
+    }
+    
+    
+    /**
+     * Run a new analysis on the images using the given options.
+     * @param op the nucleus detection options
+     * @param saveFile the full path to the nmd file
+     * @param addRed should red signals be detected with default parameters?
+     * @param addGreen should green signals be detected with default parameters?
+     * @throws Exception
+     */
+    private static void createTestSignalDataset(IAnalysisOptions op, File saveFile, boolean addRed, boolean addGreen) throws Exception {
+    	
+    	File testFolder = op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
+    	if(!testFolder.exists()){
+            throw new IllegalArgumentException("Detection folder does not exist");
+        }
+    	
+    	IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
         
         new DatasetProfilingMethod(d)
 	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
-	    	.then(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST))
+	    	.then(op.getNucleusType().equals(NucleusType.ROUND)
+	    			? new ProfileRefoldMethod(d, CurveRefoldingMode.FAST)
+	    		    : new ConsensusAveragingMethod(d))
 	    	.call();
 
-    	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-    	
-    	UUID redId =  UUID.fromString("00000000-0000-0000-0000-100000000001");
-        ISignalGroup red = new SignalGroup("Test red");
-        red.setGroupColour(Color.RED);
-        d.getCollection().addSignalGroup(redId, red);
-        
-        
-        INuclearSignalOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-        greenOptions.setChannel(1);
-        UUID greenId =  UUID.fromString("00000000-0000-0000-0000-100000000002");
-        ISignalGroup green = new SignalGroup("Test green");
-        green.setGroupColour(Color.GREEN);
-        d.getCollection().addSignalGroup(greenId, green);
-        
+        if(addRed) {
+        	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
+        	redOptions.setMaxFraction(0.5);
+        	redOptions.setMinSize(5);
 
-        d.getAnalysisOptions().get().setDetectionOptions(redId.toString(), redOptions);
-        d.getAnalysisOptions().get().setDetectionOptions(greenId.toString(), greenOptions);
+        	ISignalGroup red = new SignalGroup(RED_SIGNAL_NAME);
+        	red.setGroupColour(Color.RED);
+        	d.getCollection().addSignalGroup(RED_SIGNAL_ID, red);
+        	d.getAnalysisOptions().get().setDetectionOptions(RED_SIGNAL_ID.toString(), redOptions);
+        	new SignalDetectionMethod(d, redOptions, RED_SIGNAL_ID).call();
+        }
         
-    	new SignalDetectionMethod(d, redOptions, redId)
-    	.then(new SignalDetectionMethod(d, greenOptions, greenId))
-    	.then(new ShellAnalysisMethod(d, new DefaultShellOptions()))
+        if(addGreen) {
+        	 INuclearSignalOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
+             greenOptions.setChannel(1);
+             ISignalGroup green = new SignalGroup(GREEN_SIGNAL_NAME);
+             green.setGroupColour(Color.GREEN);
+             d.getCollection().addSignalGroup(GREEN_SIGNAL_ID, green);
+             d.getAnalysisOptions().get().setDetectionOptions(GREEN_SIGNAL_ID.toString(), greenOptions);
+             new SignalDetectionMethod(d, greenOptions, GREEN_SIGNAL_ID).call();
+        }
+
+    	new ShellAnalysisMethod(d, new DefaultShellOptions())
     	.then(new DatasetExportMethod(d, saveFile))
     	.call();
     	assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
     }
-    
    
     /**
      * Run a new analysis on the images using the given options.
@@ -161,7 +217,7 @@ public class TestDatasetCreator {
      * @return the new dataset
      * @throws Exception
      */
-    private static void createTestDataset(String folder, IAnalysisOptions op, File saveFile) throws Exception {
+    private static void createTestDataset(String folder, IAnalysisOptions op, File saveFile, boolean makeClusters) throws Exception {
         
         if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists()){
             throw new IllegalArgumentException("Detection folder does not exist");
@@ -170,9 +226,14 @@ public class TestDatasetCreator {
         IAnalysisResult r = m.call();
         IAnalysisDataset d = r.getFirstDataset();
         
+        IClusteringOptions clusterOptions = OptionsFactory.makeClusteringOptions();
+        
         new DatasetProfilingMethod(d)
 	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
-	    	.then( op.getNucleusType()==NucleusType.ROUND?new ProfileRefoldMethod(d,CurveRefoldingMode.FAST):new ConsensusAveragingMethod(d))
+	    	.then( op.getNucleusType()==NucleusType.ROUND
+	    			? new ProfileRefoldMethod(d,CurveRefoldingMode.FAST)
+	    			: new ConsensusAveragingMethod(d))
+	    	.thenIf(makeClusters, new NucleusClusteringMethod(d, clusterOptions))
 	    	.then(new DatasetExportMethod(d, saveFile))
 	    	.call();
         

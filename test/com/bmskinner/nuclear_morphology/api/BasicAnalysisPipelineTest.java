@@ -76,10 +76,11 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
     	IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
 
     	File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	IAnalysisOptions op = exp.getAnalysisOptions().get().duplicate();
+    	op.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setFolder(testFolder);
 
     	File outFile = makeOutfile(TestResources.TESTING_MOUSE_FOLDER);
-    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, op, outFile);
+    	IAnalysisDataset obs = runNewAnalysis(TestResources.UNIT_TEST_FOLDERNAME, exp.getAnalysisOptions().get(), outFile);
 
     	testDatasetEquality(exp, obs);         
     }
@@ -196,7 +197,6 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
         
         new DatasetProfilingMethod(obs)
 	    	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW))
-	    	.then(new DatasetExportMethod(obs, saveFile))
 	    	.call();
 
         return obs;

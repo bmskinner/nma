@@ -136,6 +136,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             counters.put(signalGroupId, new KeyedShellResult( options.getShellNumber(), options.getErosionMethod()));
             
             // Assign the options to each signal group
+            fine("Creating signal counter for group "+signalGroupId);
             dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
         }
     	
