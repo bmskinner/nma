@@ -53,12 +53,11 @@ public class ViolinChartFactory extends AbstractChartFactory {
     /**
      * Create a statistic plot for the given component.
      * 
-     * @param component
-     *            the component. Specified defaults are in
+     * @param component the component. Specified defaults are in
      *            {@link CellularComponent}
      * @return
      */
-    public JFreeChart createStatisticPlot(String component) {
+    public synchronized JFreeChart createStatisticPlot(String component) {
         if (!options.hasDatasets()) 
             return makeEmptyChart();
 
@@ -229,7 +228,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @return
      * @throws Exception
      */
-    private JFreeChart createSignalStatisticPlot() {
+    private synchronized JFreeChart createSignalStatisticPlot() {
 
         ViolinCategoryDataset ds = null;
         if (options.hasDatasets()) {
@@ -286,11 +285,10 @@ public class ViolinChartFactory extends AbstractChartFactory {
     /**
      * Create a segment length boxplot for the given segment name
      * 
-     * @param ds
-     *            the dataset
+     * @param ds the dataset
      * @return
      */
-    private JFreeChart createSegmentPlot() {
+    private synchronized JFreeChart createSegmentPlot() {
 
         ViolinCategoryDataset ds = null;
         if (options.hasDatasets()) {
@@ -298,7 +296,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 ds = new ViolinDatasetCreator(options)
                         .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_BORDER_SEGMENT);
             } catch (ChartDatasetCreationException e) {
-                fine("Error creating volin dataset", e);
+                stack("Error creating volin dataset", e);
                 return makeErrorChart();
             }
         }

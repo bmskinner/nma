@@ -14,7 +14,6 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -116,7 +115,7 @@ public class IterativeSegmentFitter implements Loggable {
     		IBorderSegment prevSegment = newSegments.get(newSegments.size()-1);
     		IBorderSegment lastSegment = new DefaultBorderSegment(prevSegment.getEndIndex(), 0, profile.size(), id);
     		lastSegment.setLocked(true);
-    		fine("Adding final segment "+lastSegment.getDetail());
+    		finer("Adding final segment "+lastSegment.getDetail());
     		newSegments.add(lastSegment);
     		IBorderSegment.linkSegments(newSegments);
     		return newSegments;
@@ -171,9 +170,9 @@ public class IterativeSegmentFitter implements Loggable {
     	IBorderSegment templateSegment = templateProfile.getSegment(segId);
     	IProfile template = templateProfile.getSubregion(templateSegment);
     	
-    	fine("Template end index: "+templateProfile.get(templateSegment.getEndIndex()));
-    	fine(String.format("Template segment length %s, profile length %s, from %s",templateSegment.length(), template.size(), templateSegment.toString()));
-    	fine(String.format("Target profile length %s",tempProfile.size()));
+    	finer("Template end index: "+templateProfile.get(templateSegment.getEndIndex()));
+    	finer(String.format("Template segment length %s, profile length %s, from %s",templateSegment.length(), template.size(), templateSegment.toString()));
+    	finer(String.format("Target profile length %s",tempProfile.size()));
     	
     	// Find indexes that are minima or maxima. 
     	// If these are clear, they should be retained
@@ -195,15 +194,15 @@ public class IterativeSegmentFitter implements Loggable {
         	}
         	
         	if(startIndex==11)
-        		fine(endIndex+"\t"+score+"\t"+tempProfile.get(endIndex));
+        		finer(endIndex+"\t"+score+"\t"+tempProfile.get(endIndex));
 
             if (score < bestScore) {
             	bestIndex = endIndex;
             	bestScore = score;
             }
         }
-        fine(Arrays.toString(testProfile.getSubregion(startIndex, bestIndex).toFloatArray()));
-        fine(String.format("Best end index is %s with score %s", bestIndex, bestScore));
+        finest(Arrays.toString(testProfile.getSubregion(startIndex, bestIndex).toFloatArray()));
+        finest(String.format("Best end index is %s with score %s", bestIndex, bestScore));
         return bestIndex;
     }
 }

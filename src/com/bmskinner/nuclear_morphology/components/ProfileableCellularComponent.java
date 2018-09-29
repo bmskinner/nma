@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -64,7 +65,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
     /** The profiles for this object */
-    protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<>();
+    protected volatile Map<ProfileType, ISegmentedProfile> profileMap = new ConcurrentHashMap<>();
 
     /** The indexes of tags in the profiles and border list */
     protected Map<Tag, Integer> borderTags = new HashMap<>();

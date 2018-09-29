@@ -72,7 +72,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * @throws ChartDatasetCreationException
      *             if any error occurs or the statistic was not recognised
      */
-    public ViolinCategoryDataset createPlottableStatisticViolinDataset(String component)
+    public synchronized ViolinCategoryDataset createPlottableStatisticViolinDataset(@NonNull String component)
             throws ChartDatasetCreationException {
 
         if (CellularComponent.WHOLE_CELL.equals(component))
@@ -212,7 +212,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * @return
      * @throws ChartDatasetCreationException
      */
-    private ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
+    private synchronized ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
 
         finest("Making segment statistic dataset");
 
@@ -239,7 +239,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * @throws ChartDatasetCreationException
      * @throws Exception
      */
-    private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> datasets, int segPosition) throws ChartDatasetCreationException {
+    private synchronized ViolinCategoryDataset createSegmentLengthDataset(@NonNull final List<IAnalysisDataset> datasets, final int segPosition) throws ChartDatasetCreationException {
 
         ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
@@ -253,17 +253,21 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 List<Number> list = new ArrayList<>();
 
                 for (Nucleus n : collection.getNuclei()) {
+                	
+                	try {
 
                     IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
 
                     double length = 0;
-                    if (seg != null) {
-                        int indexLength = seg.length();
-                        double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                        length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
-
-                    }
+                    int indexLength = seg.length();
+                    double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
+                    length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
                     list.add(length);
+                    
+                	} catch (UnavailableComponentException e) {
+                        stack("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
+                        throw new ChartDatasetCreationException("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
+                    }
                 }
 
                 String rowKey = IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i;

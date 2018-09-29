@@ -401,13 +401,7 @@ public class EventHandler implements Loggable, EventListener {
             		final CountDownLatch saveLatch    = new CountDownLatch(1);
 
             		new Thread( ()->{ // run profiling
-            			int flag = 0;
-                        flag |= SingleDatasetResultAction.ADD_POPULATION;
-                        flag |= SingleDatasetResultAction.STATS_EXPORT;
-                        flag |= SingleDatasetResultAction.NUCLEUS_ANNOTATE;
-                        flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-                        flag |= SingleDatasetResultAction.CURVE_REFOLD;
-            			new RunProfilingAction(selectedDatasets, flag, acceptor, EventHandler.this, profileLatch).run();
+            			new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, profileLatch).run();
             			
             		}).start();
 
@@ -415,7 +409,8 @@ public class EventHandler implements Loggable, EventListener {
             			try {
             				profileLatch.await();
             				fine("Starting segmentation action");
-            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this, segmentLatch).run();
+            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.ADD_POPULATION,
+            						acceptor, EventHandler.this, segmentLatch).run();
             			} catch(InterruptedException e) {
             				return;
             			}	
@@ -455,7 +450,7 @@ public class EventHandler implements Loggable, EventListener {
             }
 
             if (event.method().equals(DatasetEvent.SEGMENTATION_ACTION)) {
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this);
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)) {
@@ -479,9 +474,7 @@ public class EventHandler implements Loggable, EventListener {
             		
             		final CountDownLatch l = new CountDownLatch(1);
             		new Thread( ()->{
-            			int flag = 0; 
-            			new RunProfilingAction(selectedDatasets, flag, acceptor, EventHandler.this, l).run();
-            			
+            			new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, l).run();
             		}).start();
 
             		new Thread( ()-> {

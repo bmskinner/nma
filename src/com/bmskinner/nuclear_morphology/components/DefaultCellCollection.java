@@ -99,7 +99,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	private Nucleus consensusNucleus; // the refolded consensus nucleus
 
-	private Set<ICell> cells = new HashSet<>(100); // store all the cells
+	private volatile Set<ICell> cells = new HashSet<>(100); // store all the cells
 	// analysed
 
 	private Map<UUID, ISignalGroup> signalGroups = new HashMap<>(0);
@@ -782,13 +782,13 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
+	public synchronized double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
 			throws Exception {
 		return getMedianStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale,
+	public synchronized double getMedian(PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id) throws Exception {
 
 		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
@@ -802,7 +802,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public double[] getRawValues(PlottableStatistic stat, String component,
+	public synchronized double[] getRawValues(PlottableStatistic stat, String component,
 			MeasurementScale scale) {
 
 		return getRawValues(stat, component, scale, null);
@@ -810,7 +810,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
+	public synchronized double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id) {
 
 		switch(component) {
@@ -842,12 +842,12 @@ public class DefaultCellCollection implements ICellCollection {
 
 
 	@Override
-	public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale) {
+	public synchronized double getMin(@NonNull PlottableStatistic stat, String component, MeasurementScale scale) {
 		return getMinStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale,
+	public synchronized double getMin(@NonNull PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id){
 
 		// Handle old segment and SignalStatistic enums
@@ -861,7 +861,7 @@ public class DefaultCellCollection implements ICellCollection {
 		return getMinStatistic(stat, component, scale, id);
 	}
 
-	private synchronized double getMinStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
+	private synchronized double getMinStatistic(@NonNull PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id) {
 
 		double[] values = getRawValues(stat, component, scale, id);
@@ -869,12 +869,12 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale) {
+	public synchronized double getMax(@NonNull PlottableStatistic stat, String component, MeasurementScale scale) {
 		return getMaxStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale,
+	public synchronized double getMax(@NonNull PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id){
 
 		// Handle old segment andSignalStatistic enums
@@ -885,7 +885,7 @@ public class DefaultCellCollection implements ICellCollection {
 		return getMaxStatistic(stat, component, scale, id);
 	}
 
-	private synchronized double getMaxStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
+	private synchronized double getMaxStatistic(@NonNull PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id) {
 
 		double[] values = getRawValues(stat, component, scale, id);
@@ -901,7 +901,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @return a list of values
 	 * @throws Exception
 	 */
-	private double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
+	private synchronized double[] getCellStatistics(@NonNull PlottableStatistic stat, @NonNull MeasurementScale scale) {
 
 		double[] result = null;
 
@@ -922,7 +922,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @return a list of values
 	 * @throws Exception
 	 */
-	private double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
+	private synchronized double[] getNuclearStatistics(@NonNull PlottableStatistic stat, @NonNull MeasurementScale scale) {
 
 		double[] result = null;
 
@@ -950,12 +950,11 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @return a list of segment lengths
 	 * @throws Exception
 	 */
-	private double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id){
+	private synchronized double[] getSegmentStatistics(@NonNull PlottableStatistic stat, @NonNull MeasurementScale scale, @NonNull UUID id){
 
 		double[] result = null;
 		if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
 			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-
 		}
 		AtomicInteger errorCount= new AtomicInteger(0);
 		result = getNuclei().stream().mapToDouble(n -> {
@@ -963,6 +962,7 @@ public class DefaultCellCollection implements ICellCollection {
 			try {
 				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
 			} catch (ProfileException | UnavailableComponentException e) {
+				stack(String.format("Error getting segment %s from nucleus %s in DefaultCellCollection::getSegmentStatistics", id, n.getNameAndNumber()), e);
 				errorCount.incrementAndGet();
 				return 0;
 			}
@@ -991,15 +991,14 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
 
-		String name = "Filtered_" + predicate.toString();
+		String newName = "Filtered_" + predicate.toString();
 
-		ICellCollection subCollection = new DefaultCellCollection(this, name);
+		ICellCollection subCollection = new DefaultCellCollection(this, newName);
 
 		List<ICell> list = cells.parallelStream().filter(predicate).collect(Collectors.toList());
 
-		for (ICell cell : list) {
+		for (ICell cell : list)
 			subCollection.addCell(new DefaultCell(cell));
-		}
 
 		if (subCollection.size() == 0) {
 			warn("No cells in collection");

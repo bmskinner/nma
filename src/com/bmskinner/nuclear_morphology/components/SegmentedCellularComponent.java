@@ -159,7 +159,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         try {
         	// remove the offset from the profile, by setting the profile to start from the pointIndex
         	ISegmentedProfile offsetNewProfile =  p.offset(-pointIndex);
-        	fine("Setting profile: "+offsetNewProfile.toString());
+        	finer("Setting profile: "+offsetNewProfile.toString());
             setProfile(type, offsetNewProfile);
         } catch (ProfileException e) { // restore the old profile
             stack(String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
@@ -1933,7 +1933,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					if(s.hasMergeSource(uuid))
 						return s.getMergeSource(uuid);
 				}
-				throw new UnavailableComponentException("Merge source not present: "+uuid);
+				throw new UnavailableComponentException(String.format("Merge source %s not present; this segment is %s",uuid, this));
 			}
 
 			@Override
