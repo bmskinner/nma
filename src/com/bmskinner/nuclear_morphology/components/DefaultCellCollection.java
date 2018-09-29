@@ -782,13 +782,13 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
+	public synchronized double getMedian(@NonNull PlottableStatistic stat, String component, MeasurementScale scale)
 			throws Exception {
 		return getMedianStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double getMedian(PlottableStatistic stat, String component, MeasurementScale scale,
+	public synchronized double getMedian(@NonNull PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id) throws Exception {
 
 		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
@@ -802,7 +802,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double[] getRawValues(PlottableStatistic stat, String component,
+	public synchronized double[] getRawValues(@NonNull PlottableStatistic stat, String component,
 			MeasurementScale scale) {
 
 		return getRawValues(stat, component, scale, null);
@@ -810,7 +810,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
+	public synchronized double[] getRawValues(@NonNull PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id) {
 
 		switch(component) {
@@ -1021,7 +1021,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
+	public ICellCollection filterCollection(@NonNull PlottableStatistic stat, MeasurementScale scale, double lower,
 			double upper) {
 		DecimalFormat df = new DecimalFormat("#.##");
 
@@ -1057,49 +1057,48 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public ICellCollection and(ICellCollection other) {
+	public ICellCollection and(@NonNull ICellCollection other) {
 
-		ICellCollection newCollection = chooseNewCollectionType(this, "AND operation");
+		ICellCollection newCollection = chooseNewCollectionType(other, "AND operation");
 
 		other.streamCells()
 		.filter(c->contains(c))
-		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+		.forEach(c->newCollection.addCell(c.duplicate()));
 
 		return newCollection;
 	}
 
 	@Override
-	public ICellCollection not(ICellCollection other) {
+	public ICellCollection not(@NonNull ICellCollection other) {
 
-		ICellCollection newCollection = chooseNewCollectionType(this, "NOT operation");
+		ICellCollection newCollection = chooseNewCollectionType(other, "NOT operation");
 
 		streamCells()
 		.filter(c->!other.contains(c))
-		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+		.forEach(c->newCollection.addCell(c.duplicate()));
 
 		return newCollection;
 	}
 
 	@Override
-	public ICellCollection xor(ICellCollection other) {
-
-		ICellCollection newCollection = chooseNewCollectionType(this, "XOR operation");
+	public ICellCollection xor(@NonNull ICellCollection other) {
+		ICellCollection newCollection = chooseNewCollectionType(other, "XOR operation");
 
 		streamCells()
 		.filter(c->!other.contains(c))
-		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+		.forEach(c->newCollection.addCell(c.duplicate()));
 
 		other.streamCells()
 		.filter(c->!contains(c))
-		.forEach(c->newCollection.addCell(new DefaultCell(c)));
+		.forEach(c->newCollection.addCell(c.duplicate()));
 
 		return newCollection;
 	}
 
 	@Override
-	public ICellCollection or(ICellCollection other) {
+	public ICellCollection or(@NonNull ICellCollection other) {
 
-		ICellCollection newCollection = chooseNewCollectionType(this, "OR operation");
+		ICellCollection newCollection = chooseNewCollectionType(other, "OR operation");
 
 		getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
 
@@ -1108,24 +1107,22 @@ public class DefaultCellCollection implements ICellCollection {
 		return newCollection;
 	}
 
-	private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
+	/**
+	 * Choose if the merged collection for this and another collection should be a child of this,
+	 * a child of the other collection, or a new real collection.
+	 * @param other the other collection which will be merged
+	 * @param newName the name of the new collection
+	 * @return the new collection of the correct type
+	 */
+	private ICellCollection chooseNewCollectionType(@NonNull ICellCollection other, String newName) {
 
-		// Decide if the other collection is also a child of the root parent
-		IAnalysisDataset rootParent = getDatasetOfRealCollection(this);
-		IAnalysisDataset rootOther = other.isVirtual() ?
-				((VirtualCellCollection) other).getRootParent() : getDatasetOfRealCollection(other);
-				return rootParent == rootOther 
-						? new VirtualCellCollection(rootParent, name)
-								: new DefaultCellCollection(this, name);
-	}
-
-	private IAnalysisDataset getDatasetOfRealCollection(ICellCollection other){
-		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
-			if(d.getCollection().equals(other) 
-					|| d.getAllChildDatasets().stream().map(t->t.getCollection()).anyMatch(c->c.getID().equals(other.getID())))
-				return d;
-		}
-		return null;
+		// Decide if the other collection is also a child of the same root parent
+		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootParent(this);
+		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootParent(other);
+		
+		// If the two datasets have different root parents, return a new real collection
+		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
+								   : new DefaultCellCollection(this, newName);
 	}
 
 	/**

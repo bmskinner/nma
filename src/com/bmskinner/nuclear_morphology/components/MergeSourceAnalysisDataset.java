@@ -312,7 +312,6 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((analysisOptions == null) ? 0 : analysisOptions.hashCode());
-		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
 		return result;
 	}
 
@@ -329,11 +328,6 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 			if (other.analysisOptions != null)
 				return false;
 		} else if (!analysisOptions.equals(other.analysisOptions))
-			return false;
-		if (parent == null) {
-			if (other.parent != null)
-				return false;
-		} else if (!parent.equals(other.parent))
 			return false;
 		return true;
 	}

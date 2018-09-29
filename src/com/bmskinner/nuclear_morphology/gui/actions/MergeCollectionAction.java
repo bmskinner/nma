@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
@@ -163,22 +164,9 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
         }
         List<IAnalysisDataset> datasets = r.getDatasets();
 
-        if (datasets == null) {
-            this.cancel();
-            return;
-        }
+        if (datasets != null && datasets.size() > 0)
+        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets);
 
-        if (datasets.size() == 0) {
-            this.cancel();
-            return;
-        }
-
-        int flag = SingleDatasetResultAction.ADD_POPULATION;
-        flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-        flag |= SingleDatasetResultAction.SAVE_DATASET;
-        RunProfilingAction pr = new RunProfilingAction(datasets, flag, progressAcceptors.get(0), eh);
-        ThreadManager.getInstance().execute(pr);
-
-        this.cancel();
+        super.finished();
     }
 }

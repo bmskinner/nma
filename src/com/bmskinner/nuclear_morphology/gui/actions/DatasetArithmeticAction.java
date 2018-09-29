@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
@@ -134,16 +135,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
             } else {
                 newDataset = new DefaultAnalysisDataset(newCollection);
                 newDataset.setRoot(true);
-                int flag = SingleDatasetResultAction.ADD_POPULATION;
-                flag |= SingleDatasetResultAction.SAVE_DATASET;
-                flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-                RunProfilingAction pr = new RunProfilingAction(newDataset, flag, progressAcceptors.get(0), eh);
-                log("Running morphology analysis...");
-                ThreadManager.getInstance().execute(pr);
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, newDataset);
             }
-
-            
-
         } else {
             log("No populations returned");
         }

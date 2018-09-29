@@ -655,35 +655,22 @@ public class VirtualCellCollection implements ICellCollection {
 		return null;
     }
 
-    private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
-        boolean makeVirtual = false;
-        
-        // Decide if the other collection is also a child of the root parent
-        IAnalysisDataset rootParent = this.getRootParent();
-        IAnalysisDataset rootOther = other.isVirtual() ?
-            ((VirtualCellCollection) other).getRootParent() : getDatasetOfRealCollection(other);
-        
-        log(rootParent.getName());
-        log(rootOther.getName());
-        if (rootParent == rootOther)
-            makeVirtual = true;
+	/**
+	 * Choose if the merged collection for this and another collection should be a child of this,
+	 * a child of the other collection, or a new real collection.
+	 * @param other the other collection which will be merged
+	 * @param newName the name of the new collection
+	 * @return the new collection of the correct type
+	 */
+	private ICellCollection chooseNewCollectionType(@NonNull ICellCollection other, String newName) {
 
-        ICellCollection newCollection;
-        if (makeVirtual) {
-            newCollection = new VirtualCellCollection(this.getRootParent(), name);
-        } else {
-            newCollection = new DefaultCellCollection(this, name);
-        }
-        return newCollection;
-    }
-
-	private IAnalysisDataset getDatasetOfRealCollection(ICellCollection other){
-		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
-			if(d.getCollection().equals(other) 
-					|| d.getAllChildDatasets().stream().map(t->t.getCollection()).anyMatch(c->c.getID().equals(other.getID())))
-				return d;
-		}
-		return null;
+		// Decide if the other collection is also a child of the same root parent
+		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootParent(this);
+		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootParent(other);
+		
+		// If the two datasets have different root parents, return a new real collection
+		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
+								   : new DefaultCellCollection(this, newName);
 	}
 
     @Override

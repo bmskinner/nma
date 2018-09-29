@@ -21,7 +21,10 @@ public abstract class AnalysisPipelineTest {
     protected static final String TESTING_MOUSE_FOLDER = IMAGE_FOLDER + "Mouse";
     protected static final String TESTING_PIG_FOLDER   = IMAGE_FOLDER + "Pig";   
     protected static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER + "Round";
-    
+
+    protected static final String TESTING_MULTIPLE_BASE_FOLDER = IMAGE_FOLDER + "Multiple/";
+    protected static final String TESTING_MULTIPLE_SOURCE_1_FOLDER = TESTING_MULTIPLE_BASE_FOLDER + "Multiple_source_1/";
+    protected static final String TESTING_MULTIPLE_SOURCE_2_FOLDER = TESTING_MULTIPLE_BASE_FOLDER + "Multiple_source_2/";
     
     protected static final String TESTING_MOUSE_SIGNALS_FOLDER = IMAGE_FOLDER + "Mouse_with_signals";
     protected static final String TESTING_PIG_SIGNALS_FOLDER   = IMAGE_FOLDER + "Pig_with_signals";

@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -213,6 +214,20 @@ public final class DatasetListManager implements Loggable {
             if (root.hasRecursiveChild(d))
             	return root;
         return null;
+    }
+    
+    /**
+     * Get the root parent dataset to the given collection, if present.
+     * @param collection the collection
+     * @return
+     */
+    public synchronized IAnalysisDataset getRootParent(@NonNull ICellCollection collection) {
+    	for(IAnalysisDataset d : getRootDatasets()){
+			if(d.getCollection().equals(collection) 
+					|| d.getAllChildDatasets().stream().map(t->t.getCollection()).anyMatch(c->c.getID().equals(collection.getID())))
+				return d;
+		}
+		return null;
     }
 
     /**

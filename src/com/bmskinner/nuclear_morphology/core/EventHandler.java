@@ -409,7 +409,7 @@ public class EventHandler implements Loggable, EventListener {
             			try {
             				profileLatch.await();
             				fine("Starting segmentation action");
-            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.ADD_POPULATION,
+            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG,
             						acceptor, EventHandler.this, segmentLatch).run();
             			} catch(InterruptedException e) {
             				return;
@@ -441,7 +441,8 @@ public class EventHandler implements Loggable, EventListener {
             			try {
             				saveLatch.await();
             				fine("Starting recache action");
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
+//            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
             			} catch(InterruptedException e) {
             				return;
             			}

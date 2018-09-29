@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -274,18 +275,20 @@ public class DockableMainWindow extends AbstractMainWindow {
      * 
      * @param dataset
      */
-    private synchronized void addDataset(final IAnalysisDataset dataset) {
-    	fine("Adding dataset "+dataset.getName()+": "+dataset.hashCode());
-    	DatasetListManager.getInstance().addDataset(dataset);
-    	getPopulationsPanel().addDataset(dataset);
-    	for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-    		getPopulationsPanel().addDataset(child);
+    private synchronized void addDataset(final Collection<IAnalysisDataset> datasets) {
+    	IAnalysisDataset last = null;
+    	for(IAnalysisDataset dataset : datasets) {
+    		fine("Adding dataset "+dataset.getName()+": "+dataset.hashCode());
+    		DatasetListManager.getInstance().addDataset(dataset);
+    		getPopulationsPanel().addDataset(dataset);
+    		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+    			getPopulationsPanel().addDataset(child);
+    		}
+    		last = dataset;
     	}
-
     	// This will also trigger a dataset update event as the dataset
-    	// is selected, so don't trigger another update here.
-    	getPopulationsPanel().update(dataset);
-
+		// is selected, so don't trigger another update here.
+		getPopulationsPanel().update(last);
     	//Force all panels to update with the new datasets
     	eh.eventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
     }
@@ -299,7 +302,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 	public void eventReceived(DatasetEvent event) {
 		super.eventReceived(event);
         if (event.method().equals(DatasetEvent.ADD_DATASET))
-            addDataset(event.firstDataset());
+            addDataset(event.getDatasets());
 	}
 	
 	@Override

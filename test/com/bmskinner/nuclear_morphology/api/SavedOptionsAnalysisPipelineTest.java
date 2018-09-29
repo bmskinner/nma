@@ -16,9 +16,15 @@ import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
+/**
+ * Test the workflows can save a valid dataset
+ * @author ben
+ * @since 1.14.0
+ *
+ */
 public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 	
-	private void testPipelineCreatesReadableExportFile(File imageFolder, File xmlFile, File outputFolder) throws Exception {
+	protected void testPipelineCreatesReadableExportFile(File imageFolder, File xmlFile, File outputFolder) throws Exception {
 		assertTrue("Input image folder"+imageFolder.getAbsolutePath(), imageFolder.exists());
 		assertTrue("XML options file"+xmlFile.getAbsolutePath(), xmlFile.exists());
 		
