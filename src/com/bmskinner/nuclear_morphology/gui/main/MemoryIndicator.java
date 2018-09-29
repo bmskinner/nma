@@ -52,6 +52,8 @@ public class MemoryIndicator extends JPanel
     public MemoryIndicator() {
       Thread t = new Thread(this);
       t.start();
+      long max = Runtime.getRuntime().maxMemory();
+      this.setToolTipText("Maximum memory "+formatMemory(max));
     }
     
     @Override
@@ -60,12 +62,11 @@ public class MemoryIndicator extends JPanel
         try {
           Thread.sleep(1000L);
         } catch (InterruptedException e) {
-            
+            // do nothing
         }
         
-        if (mustWarn && !hasWarned) {
+        if (mustWarn && !hasWarned)
           showMemoryWarning();
-        }
         repaint();
       } while(true);
     }
@@ -76,11 +77,9 @@ public class MemoryIndicator extends JPanel
     }
     
     private synchronized void showMemoryWarning(){
-      if (this.hasWarned) {
+      if (this.hasWarned)
         return;
-      }
-      this.hasWarned = true;
-      
+      hasWarned = true;
       JOptionPane.showMessageDialog(null, LOW_MEMORY_MSG, LOW_MEMORY_TTL, JOptionPane.WARNING_MESSAGE);
     }
     
@@ -98,7 +97,7 @@ public class MemoryIndicator extends JPanel
       long max = Runtime.getRuntime().maxMemory();
       long allocated = Runtime.getRuntime().totalMemory();
       long used = allocated - Runtime.getRuntime().freeMemory();
-      
+
       g.setColor(DARK_GREEN);
       g.fillRect(xStart, 0, xWidth, getHeight());
       
@@ -113,15 +112,15 @@ public class MemoryIndicator extends JPanel
       int usedPercentage = (int)(100.0D * ( (double)used / (double)max));
       g.setColor(Color.WHITE);
       g.drawString(usedPercentage + "%", xStart + xWidth / 2 - 10, getHeight() - 5);
-      
-//      log("Memory: "+usedPercentage);
+
       if ((usedPercentage > 90) && (!this.hasWarned)) {
         this.mustWarn = true;
       }
     }
     
-    
-            
-
-    
+    private String formatMemory(long value) {
+    	int mb = 1024 * 1024;
+    	long m = value/mb;
+    	return  m+" MiB";
+    }
 }
