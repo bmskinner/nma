@@ -63,12 +63,6 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
     
     private CosmeticHandler ch = new CosmeticHandler(this);
 
-//    private static final String APPLY_SCALE_ALL_MESSAGE   = "Apply this scale to all cells in the dataset?";
-//    private static final String APPLY_SCALE_ALL_HEADER    = "Apply to all?";
-//    private static final String APPLY_SCALE_ALL_CELLS_LBL = "Apply to all cells";
-//    private static final String APPLY_SCALE_ONE_CELLS_LBL = "Apply to only this cell";
-//    private static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
-
     public CellStatsPanel(@NonNull InputSupplier context, CellViewModel model) {
         super(context, model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());

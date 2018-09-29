@@ -30,20 +30,21 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 
 /**
@@ -55,8 +56,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptions
 @SuppressWarnings("serial")
 public class CellBorderTagPanel extends AbstractCellDetailPanel {
 
-    private static final String PANEL_TITLE_LBL = "Tags"
-            + "";
+    private static final String PANEL_TITLE_LBL = "Profiles";
     private BorderTagDualChartPanel dualPanel;
 
     private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
@@ -162,7 +162,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 
                 setChart(rangeOptions);
 
-                dualPanel.createBorderTagPopup(this.getCellModel().getCell());
+//                dualPanel.createBorderTagPopup(this.getCellModel().getCell());
 
                 profileOptions.setEnabled(true);
 
@@ -189,46 +189,63 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return new ProfileChartFactory(options).createProfileChart();
     }
 
     @Override
-	public void setBorderTagAction(Tag tag, int newTagIndex) {
+	public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
 
         if (tag == null) {
             fine("Tag is null");
             return;
         }
 
-        log("Updating nucleus " + tag + " to index " + newTagIndex);
-        this.setAnalysing(true);
+        ICell cell = getCellModel().getCell();
+        
+        boolean wasLocked = cell.getNucleus().isLocked();
+		cell.getNucleus().setLocked(false);
 
-        boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
-        this.getCellModel().getCell().getNucleus().setLocked(false);
-        try {
-            this.getCellModel().getCell().getNucleus().setBorderTag(Tag.REFERENCE_POINT, tag, newTagIndex);
-        } catch (IndexOutOfBoundsException | UnavailableBorderTagException e) {
-            warn("Cannot update border point");
-            fine("Index not in profile", e);
-            this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
-            return;
-        }
-        this.getCellModel().getCell().getNucleus().updateVerticallyRotatedNucleus();
-        this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
+//		cell.getNucleus().setBorderTag(Tag.REFERENCE_POINT,tag, newTagIndex);
+		cell.getNucleus().updateVerticallyRotatedNucleus();
 
-        if (tag.equals(Tag.REFERENCE_POINT)) {
-            // Update the profile aggregate to use the new RP
-            try {
-            	activeDataset().getCollection().createProfileCollection();
-			} catch (ProfileException e) {
-				warn("Unable to profile cell collection");
-				stack(e);
-			}
-        }
-        this.setAnalysing(false);
-        this.refreshChartCache();
-        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
+		if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
+			cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
+		}
+		cell.getNucleus().updateDependentStats();
+		cell.getNucleus().setLocked(wasLocked);
+		activeDataset().getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
+//		fireCelllUpdateEvent(cell, activeDataset());
+        
+//        
+//        log("Updating nucleus " + tag + " to index " + newTagIndex);
+//        this.setAnalysing(true);
+//
+//        boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
+//        this.getCellModel().getCell().getNucleus().setLocked(false);
+//        try {
+//            this.getCellModel().getCell().getNucleus().setBorderTag(Tag.REFERENCE_POINT, tag, newTagIndex);
+//        } catch (IndexOutOfBoundsException | UnavailableBorderTagException e) {
+//            warn("Cannot update border point");
+//            fine("Index not in profile", e);
+//            this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
+//            return;
+//        }
+//        this.getCellModel().getCell().getNucleus().updateVerticallyRotatedNucleus();
+//        this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
+//
+//        if (tag.equals(Tag.REFERENCE_POINT)) {
+//            // Update the profile aggregate to use the new RP
+//            try {
+//            	activeDataset().getCollection().createProfileCollection();
+//			} catch (ProfileException e) {
+//				warn("Unable to profile cell collection");
+//				stack(e);
+//			}
+//        }
+//        this.setAnalysing(false);
+//        this.refreshChartCache();
+//        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
 
     }
 
@@ -241,7 +258,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
     @Override
     public void borderTagEventReceived(BorderTagEvent event) {
         if (event.getSource() instanceof JMenuItem) {
-            setBorderTagAction(event.getTag(), event.getIndex());
+//            setBorderTagAction(event.getTag(), event.getIndex());
         }
     }
 

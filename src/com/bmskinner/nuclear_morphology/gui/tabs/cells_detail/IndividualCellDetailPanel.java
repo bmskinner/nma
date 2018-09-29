@@ -43,31 +43,28 @@ public class IndividualCellDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Cells";
 
-    protected CellsListPanel       cellsListPanel;       // the list of cells in
-                                                         // the active dataset
-    protected CellSegmentsPanel     segmentProfilePanel;  // = new
-                                                         // CellProfilePanel();
-                                                         // // the nucleus angle
-                                                         // profile
-//    protected CellBorderTagPanel   cellBorderTagPanel;   // = new
-                                                         // CellBorderTagPanel();
-    protected CellOutlinePanel     outlinePanel;         // = new
-                                                         // CellOutlinePanel();
-                                                         // // the outline of
-                                                         // the cell and
-                                                         // detected objects
-    protected CellStatsPanel       cellStatsPanel;       // = new
-                                                         // CellStatsPanel(); //
-                                                         // the stats table
-    protected ComponentListPanel   signalListPanel;      // choose which
-                                                         // background image to
-                                                         // display
-    protected CellSignalStatsPanel cellsignalStatsPanel; // show pairwise
-                                                         // distances for
-                                                         // signals
-    protected CellSegTablePanel    cellSegTablePanel;    // show segments in
-                                                         // cell profiles
-
+    /** Cells in the active dataset */
+    protected CellsListPanel       cellsListPanel;
+    
+    /** View and modify cell segments */
+    protected CellSegmentsPanel     segmentProfilePanel;
+    
+    /** View and cell profiles */
+    protected CellBorderTagPanel   cellBorderTagPanel;
+    
+    /** View and modify cell tags */
+    protected CellOutlinePanel     outlinePanel; 
+    
+    /** View cell info */
+    protected CellStatsPanel       cellStatsPanel;
+    
+    /** Choose image channels to display */
+    protected ComponentListPanel   signalListPanel;
+    
+    /** View pairwise distances for signals */
+    protected CellSignalStatsPanel cellsignalStatsPanel;
+    
+    /** Track the cell on display */
     private CellViewModel model = new CellViewModel(null, null);
 
     public IndividualCellDetailPanel(@NonNull InputSupplier context) {
@@ -81,7 +78,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
             JPanel westPanel = createCellandSignalListPanels(context);
             this.addSubPanel(cellStatsPanel);
             this.addSubPanel(segmentProfilePanel);
-//            this.addSubPanel(cellBorderTagPanel);
+            this.addSubPanel(cellBorderTagPanel);
             this.addSubPanel(outlinePanel);
             this.addSubPanel(cellsListPanel);
             this.addSubPanel(signalListPanel);
@@ -90,8 +87,9 @@ public class IndividualCellDetailPanel extends DetailPanel {
             
             tabPane = new JTabbedPane(JTabbedPane.LEFT);
             tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
+            tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
             tabPane.add(segmentProfilePanel.getPanelTitle(), segmentProfilePanel);
-//            tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
+            
             tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
             tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
             tabPane.setSelectedComponent(outlinePanel);
@@ -117,15 +115,14 @@ public class IndividualCellDetailPanel extends DetailPanel {
     private void createSubPanels(@NonNull InputSupplier context) {
         segmentProfilePanel = new CellSegmentsPanel(context, model); // the nucleus angle
                                                            // profile
-//        cellBorderTagPanel = new CellBorderTagPanel(context, model);
+        cellBorderTagPanel = new CellBorderTagPanel(context, model);
         outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
                                                     // and detected objects
         cellStatsPanel = new CellStatsPanel(context, model); // the stats table
         cellsignalStatsPanel = new CellSignalStatsPanel(context, model);
-        // cellSegTablePanel = new CellSegTablePanel(model);
 
         model.addView(segmentProfilePanel);
-//        model.addView(cellBorderTagPanel);
+        model.addView(cellBorderTagPanel);
         model.addView(outlinePanel);
         model.addView(cellStatsPanel);
         model.addView(cellsignalStatsPanel);

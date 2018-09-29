@@ -445,22 +445,20 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 */
 	private void addBorderTagMarkers(@NonNull Taggable n, @NonNull XYPlot plot) {
 		for (Tag tag : n.getBorderTags().keySet()) {
-
 			try {
-				int index = n.getOffsetBorderIndex(options.getTag(), n.getBorderIndex(tag));
+				// get the index of the tag
+				int index = n.getBorderIndex(tag);
+
+				// Correct to start from RP
+				int offset = n.getBorderIndex(options.getTag());
+
+				// adjust the index to the offset
+				index = n.wrapIndex(index - offset);
 				addMarkerToXYPlot(plot, tag, (double) index);
+
 			} catch (UnavailableBorderTagException e) {
 				stack("Border tag not available", e);
 			}
-//			// get the index of the tag
-//			int index = n.getBorderIndex(tag);
-//
-//			// Correct to start from RP
-//			int offset = n.getBorderIndex(options.getTag());
-//
-//			// adjust the index to the offset
-//			index = n.wrapIndex(index - offset);
-//			addMarkerToXYPlot(plot, tag, (double) index);
 		}
 	}
 
