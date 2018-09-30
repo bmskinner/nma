@@ -81,7 +81,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 	}
 	
 	/**
-	 * Test if the fields of two objects are identical
+	 * Test if the fields of two objects have the same hashcodes.
+	 * Skips cache classes which are not used in hashcode methods. 
 	 * @param original
 	 * @param dup
 	 * @throws Exception
