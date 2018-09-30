@@ -89,7 +89,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private final UUID uuid;
 
 	/** The image folder with the source of the cells */
-	private File   folder;
+	private File folder;
 	
 	/** The name of the folder to save outputs */
 	private String outputFolder;
@@ -159,25 +159,19 @@ public class DefaultCellCollection implements ICellCollection {
 		this.uuid = id;
 		this.folder = folder;
 		this.outputFolder = outputFolder;
-		this.name = name == null ? folder.getName() : name;// if name is null,
-		// use the image
-		// folder name
+		this.name = name == null ? folder.getName() : name;// if name is null, use the image folder name
 		this.nucleusType = nucleusType;
 
 		ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
-		
 	}
 
 	/**
 	 * Construct an empty collection from a template dataset
 	 * 
-	 * @param template
-	 *            the dataset to base on for folders and type
-	 * @param name
-	 *            the collection name
+	 * @param template the dataset to base on for folders and type
+	 * @param name the collection name
 	 */
 	public DefaultCellCollection(IAnalysisDataset template, String name) {
-
 		this(template.getCollection(), name);
 	}
 
@@ -294,11 +288,6 @@ public class DefaultCellCollection implements ICellCollection {
 		return cells.toArray(a);
 	}
 
-	/**
-	 * Get the UUIDs of all the cells in the collection
-	 * 
-	 * @return
-	 */
 	@Override
 	public Set<UUID> getCellIDs() {
 
@@ -376,12 +365,6 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 	}
 
-	/**
-	 * Get the cell with the given UUID
-	 * 
-	 * @param id
-	 * @return
-	 */
 	@Override
 	public ICell getCell(@NonNull UUID id) {
 		return cells.parallelStream()
@@ -394,11 +377,7 @@ public class DefaultCellCollection implements ICellCollection {
 		return this.nucleusType;
 	}
 
-	/*
-	 * 
-	 * METHODS IMPLEMENTING THE REFOLDABLE INTERFACE
-	 * 
-	 */
+	/*  METHODS IMPLEMENTING THE REFOLDABLE INTERFACE  */
 
 	@Override
 	public boolean hasConsensus() {
@@ -415,12 +394,6 @@ public class DefaultCellCollection implements ICellCollection {
 		return consensusNucleus;
 	}
 
-	/**
-	 * Get the profile collection of the given type
-	 * 
-	 * @param type
-	 * @return
-	 */
 	@Override
 	public IProfileCollection getProfileCollection() {
 		return profileCollection;
@@ -436,12 +409,6 @@ public class DefaultCellCollection implements ICellCollection {
 		return outputFolder;
 	}
 
-	/**
-	 * Get the output folder (e.g. to save the dataset into). If an output
-	 * folder name (such as a date) has been input, it will be included
-	 * 
-	 * @return the folder
-	 */
 	@Override
 	public File getOutputFolder() {
 		if (outputFolder == null)
@@ -541,7 +508,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	/*
-	 * -------------------- Profile methods --------------------
+	 * Profile methods
 	 */
 
 	@Override
