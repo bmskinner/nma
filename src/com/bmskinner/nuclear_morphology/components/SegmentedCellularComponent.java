@@ -2265,8 +2265,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				if (getClass() != obj.getClass())
 					return false;
 				BorderSegmentTree other = (BorderSegmentTree) obj;
-				if (!getOuterType().equals(other.getOuterType()))
-					return false;
 				if (endIndex != other.endIndex)
 					return false;
 				if (id == null) {
@@ -2284,10 +2282,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				if (startIndex != other.startIndex)
 					return false;
 				return true;
-			}
-
-			private DefaultSegmentedProfile getOuterType() {
-				return DefaultSegmentedProfile.this;
 			}
 		}
 

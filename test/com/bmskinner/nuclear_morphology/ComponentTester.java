@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Handler;
@@ -95,12 +96,32 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection$ProfileCache")))
 				continue;	
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.stats.StatsCache")))
+				continue;
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.stats.VennCache")))
+				continue;
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.analysis.signals.SignalManager")))
+				continue;
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.generic.ProfileManager")))
+				continue;
 			Object oValue = f.get(original);
 			Object dValue  = f.get(dup);
 			
 			int oHash = oValue==null?-1:oValue.hashCode();
 			int dHash = dValue==null?-1:dValue.hashCode();
-			
+			if(oValue!=null&&oValue.getClass().equals(float[].class)) {
+				oHash = Arrays.hashCode((float[])oValue);
+				dHash = Arrays.hashCode((float[])dValue);
+			}
+			if(oValue!=null&&oValue.getClass().equals(int[].class)) {
+				oHash = Arrays.hashCode((int[])oValue);
+				dHash = Arrays.hashCode((int[])dValue);
+			}
+			if(oValue!=null&&oValue.getClass().equals(double[].class)) {
+				oHash = Arrays.hashCode((double[])oValue);
+				dHash = Arrays.hashCode((double[])dValue);
+			}
+
 			assertThat(f.getName()+": hashcodes: original "+oHash+" | dup "+dHash, oValue, equalTo(dValue));
 		}
 

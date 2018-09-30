@@ -1390,7 +1390,6 @@ public class DefaultCellCollection implements ICellCollection {
 		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
 		result = prime * result + ((ruleSets == null) ? 0 : ruleSets.hashCode());
 		result = prime * result + ((signalGroups == null) ? 0 : signalGroups.hashCode());
-		result = prime * result + ((statsCache == null) ? 0 : statsCache.hashCode());
 		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
 		return result;
 	}
@@ -1445,11 +1444,6 @@ public class DefaultCellCollection implements ICellCollection {
 			if (other.signalGroups != null)
 				return false;
 		} else if (!signalGroups.equals(other.signalGroups))
-			return false;
-		if (statsCache == null) {
-			if (other.statsCache != null)
-				return false;
-		} else if (!statsCache.equals(other.statsCache))
 			return false;
 		if (uuid == null) {
 			if (other.uuid != null)

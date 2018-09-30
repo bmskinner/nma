@@ -19,17 +19,15 @@
 
 package com.bmskinner.nuclear_morphology.io.conversion;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class RoundFormatConverterTest extends OldFormatConverterTest {
 
@@ -43,14 +41,16 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
     
-    @Test
+    @Override
+	@Test
     public void test_1_13_1_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_1, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
         assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
 
-    @Test
+    @Override
+	@Test
     public void test_1_13_2_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_2, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);

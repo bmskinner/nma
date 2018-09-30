@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.io.OptionsXMLWriter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -81,7 +82,8 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
-    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+    	saveTestDataset(d, saveFile);
     }
     
     @Test
@@ -90,7 +92,8 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.PIG_TEST_DATASET);
-    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+    	saveTestDataset(d, saveFile);
     }
     
     @Test
@@ -99,7 +102,8 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.ROUND_TEST_DATASET);
-    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, false);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+    	saveTestDataset(d, saveFile);
     }
     
     
@@ -109,7 +113,8 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.MOUSE_CLUSTERS_DATASET);
-    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, true);
+    	saveTestDataset(d, saveFile);
     }
     
     @Test
@@ -118,7 +123,8 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.PIG_CLUSTERS_DATASET);
-    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, true);
+    	saveTestDataset(d, saveFile);
     }
     
     @Test
@@ -127,7 +133,8 @@ public class TestDatasetCreator {
     	File testFolder = new File(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.ROUND_CLUSTERS_DATASET);
-    	saveTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, saveFile, true);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, true);
+    	saveTestDataset(d, saveFile);
     }
     
     @Test
@@ -139,8 +146,8 @@ public class TestDatasetCreator {
     	nucleus.setMaxSize(12000);
     	nucleus.setMinSize(4000);
     	File saveFile = new File(TestResources.MOUSE_SIGNALS_DATASET);
-
-    	createTestSignalDataset(op, saveFile, true, false);
+    	IAnalysisDataset d = createTestSignalDataset(op, true, false);
+    	saveTestDataset(d, saveFile);
     }
     
     @Test
@@ -153,7 +160,8 @@ public class TestDatasetCreator {
     	nucleus.setMinSize(4000);
     	File saveFile = new File(TestResources.PIG_SIGNALS_DATASET);
     	
-    	createTestSignalDataset(op, saveFile, false, true);
+    	IAnalysisDataset d = createTestSignalDataset(op, false, true);
+    	saveTestDataset(d, saveFile);
     }
     
     @Test
@@ -163,7 +171,8 @@ public class TestDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	File saveFile = new File(TestResources.ROUND_SIGNALS_DATASET);
     	
-    	createTestSignalDataset(op, saveFile, true, true);
+    	IAnalysisDataset d = createTestSignalDataset(op, true, true);
+    	saveTestDataset(d, saveFile);
     }
     
     
@@ -175,7 +184,7 @@ public class TestDatasetCreator {
      * @param addGreen should green signals be detected with default parameters?
      * @throws Exception
      */
-    private static void createTestSignalDataset(IAnalysisOptions op, File saveFile, boolean addRed, boolean addGreen) throws Exception {
+    private static IAnalysisDataset createTestSignalDataset(IAnalysisOptions op, boolean addRed, boolean addGreen) throws Exception {
     	
     	File testFolder = op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
     	if(!testFolder.exists()){
@@ -213,10 +222,8 @@ public class TestDatasetCreator {
              new SignalDetectionMethod(d, greenOptions, GREEN_SIGNAL_ID).call();
         }
 
-    	new ShellAnalysisMethod(d, new DefaultShellOptions())
-    	.then(new DatasetExportMethod(d, saveFile))
-    	.call();
-    	assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
+    	new ShellAnalysisMethod(d, new DefaultShellOptions()).call();
+    	return d;
     }
     
     public static IAnalysisDataset createTestDataset(String folder, IAnalysisOptions op, boolean makeClusters) throws Exception {
@@ -238,24 +245,23 @@ public class TestDatasetCreator {
     }
    
     /**
-     * Run a new analysis on the images using the given options.
-     * @param folder the name of the output folder for the nmd file
-     * @param op the detection options
+     * Save the given dataset to the desired output folder, and create a backup file
+     * in the appropriate {@link TestResources#DATASET_FOLDER}.
+     * @param d the dataset to save
      * @param saveFile the full path to the nmd file
      * @return the new dataset
      * @throws Exception
      */
-    public static void saveTestDataset(String folder, IAnalysisOptions op, File saveFile, boolean makeClusters) throws Exception {
+    public static void saveTestDataset(IAnalysisDataset d, File saveFile) throws Exception {
         if(saveFile.exists())
         	saveFile.delete();
         assertFalse("Expecting output file to be deleted: "+saveFile.getAbsolutePath(), saveFile.exists());
-        IAnalysisDataset d = createTestDataset(folder, op, makeClusters);
     	new DatasetExportMethod(d, saveFile).call();
         assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
         
         // Copy the saved file into backup file for comparison and conversion testing in the next version.
-        String newName = saveFile.getName().replaceAll(".nmd$", ".bak");
-        File bakFile = new File(TestResources.DATASET_FOLDER+Version.currentVersion(), newName);
+        String bakName = saveFile.getName().replaceAll(".nmd$", ".bak");
+        File bakFile = new File(TestResources.DATASET_FOLDER+Version.currentVersion(), bakName);
         if(!bakFile.getParentFile().exists())
         	bakFile.getParentFile().mkdirs();
         if(bakFile.exists())
@@ -263,5 +269,15 @@ public class TestDatasetCreator {
         assertFalse("Expecting backup file to be deleted: "+bakFile.getAbsolutePath(), bakFile.exists());
         Files.copy(saveFile.getAbsoluteFile().toPath(), bakFile.getAbsoluteFile().toPath(), StandardCopyOption.COPY_ATTRIBUTES);
         assertTrue("Expecting backup copied to "+bakFile.getAbsolutePath(), bakFile.exists());
+        
+        // Create an xml representation of the analysis options for pipeline testing
+        String xmlName = saveFile.getName().replaceAll(".nmd$", ".xml");
+        File xmlFile = new File(TestResources.IMAGE_FOLDER, xmlName);
+        if(xmlFile.exists())
+        	xmlFile.delete();
+        assertFalse("Expecting xml file to be deleted: "+xmlFile.getAbsolutePath(), xmlFile.exists());
+        new OptionsXMLWriter().write(d, xmlFile);
+        assertTrue("Expecting xml exported to "+xmlFile.getAbsolutePath(), xmlFile.exists());
+        
     }
 }
