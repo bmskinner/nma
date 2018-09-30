@@ -17,6 +17,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -38,30 +39,18 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @RunWith(Parameterized.class)
-public class TaggableTest {
+public class TaggableTest extends ComponentTester {
 	
-	private static final long SEED = 1234;
-	
-	private Logger logger;
-
 	private Taggable taggable;
 
 	@Parameter(0)
 	public Class<? extends Taggable> source;
 
+	@Override
 	@Before
 	public void setUp() throws Exception{
+		super.setUp();
 		taggable = createInstance(source);
-		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
-		logger.setLevel(Level.FINE);
-
-		boolean hasHandler = false;
-		for(Handler h : logger.getHandlers()) {
-			if(h instanceof ConsoleHandler)
-				hasHandler = true;
-		}
-		if(!hasHandler)
-			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 
 	/**
@@ -73,7 +62,7 @@ public class TaggableTest {
 	public static Taggable createInstance(Class<? extends Taggable> source) throws Exception {
 
 		if(source==DefaultNucleus.class){
-			IAnalysisDataset d = new TestDatasetBuilder(SEED).cellCount(1)
+			IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
 					.ofType(NucleusType.ROUND)
 					.randomOffsetProfiles(true)
 					.profiled().segmented().build();

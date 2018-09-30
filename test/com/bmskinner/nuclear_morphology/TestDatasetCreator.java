@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -249,5 +251,14 @@ public class TestDatasetCreator {
         IAnalysisDataset d = createTestDataset(folder, op, makeClusters);
     	new DatasetExportMethod(d, saveFile).call();
         assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
+        
+        // Copy the saved file into backup file for comparison and conversion testing in the next version.
+        String newName = saveFile.getName().replaceAll(".nmd$", ".bak");
+        File bakFile = new File(TestResources.DATASET_FOLDER+TestResources.UNIT_TEST_FOLDER, newName);
+        if(bakFile.exists())
+        	bakFile.delete();
+        assertFalse("Expecting backup file to be deleted: "+bakFile.getAbsolutePath(), bakFile.exists());
+        Files.copy(saveFile.toPath(), bakFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+        assertTrue("Expecting backup copied to "+bakFile.getAbsolutePath(), bakFile.exists());
     }
 }

@@ -15,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -26,15 +27,17 @@ import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComp
  * @since 1.13.8
  *
  */
-public class DefaultProfileTest {
+public class DefaultProfileTest extends ComponentTester {
 	
 	protected SegmentedCellularComponent comp;
 	protected float[] data;
 	private IProfile profile;
 	
 
+	@Override
 	@Before
 	public void setUp() throws Exception {
+		super.setUp();
 		comp = new DummySegmentedCellularComponent();
 		data = new float[comp.getBorderLength()];
 		for(int i=0; i<data.length; i++) {

@@ -39,16 +39,15 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  */
 public class DefaultCellCollectionTest extends ComponentTester {
 
-	private static final int N_CELLS = 10;
-	private static final int N_CHILD_DATASETS = 2;
-
     private ICellCollection c;
     
     @Rule
     public final ExpectedException exception = ExpectedException.none();
     
-    @Before
+    @Override
+	@Before
     public void setUp() throws Exception {
+    	super.setUp();
     	IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 				.ofType(NucleusType.ROUND)
 				.withMaxSizeVariation(10)

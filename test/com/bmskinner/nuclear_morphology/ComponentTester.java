@@ -9,7 +9,15 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.junit.Before;
+
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for the component tests
@@ -21,7 +29,22 @@ public abstract class ComponentTester extends FloatArrayTester {
 	
 	protected static final long RNG_SEED = 1234;
 	protected static final int N_CELLS = 10;
+	protected static final int N_CHILD_DATASETS = 2;
 	protected Logger logger;
+	
+	@Before
+	public void setUp() throws Exception{
+		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+		logger.setLevel(Level.FINE);
+
+		boolean hasHandler = false;
+		for(Handler h : logger.getHandlers()) {
+			if(h instanceof ConsoleHandler)
+				hasHandler = true;
+		}
+		if(!hasHandler)
+			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+	}
 	
 	/**
 	 * Get all the private fields for the class, including superclass fields

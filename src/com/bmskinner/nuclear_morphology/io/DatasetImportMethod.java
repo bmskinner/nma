@@ -421,7 +421,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         	for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
         		Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(id);
         		INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id);
-        		if(group.isPresent() && signalOptions.getFolder().exists()) {
+        		File signalFolder = signalOptions.getFolder();
+        		if(group.isPresent() && signalFolder!=null && signalFolder.exists()) {
         			map.put(id, signalOptions.getFolder());
         		} else {
         			map.put(id, FileSelector.getSignalDirectory(dataset, id));

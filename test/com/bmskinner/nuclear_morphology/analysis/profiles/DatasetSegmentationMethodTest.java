@@ -36,9 +36,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
-	
-	private Logger logger;
-	
+		
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
 	
@@ -191,17 +189,17 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		}
 	}
 	
-	@Test
-	public void testSegmentationOfRodentDataset() throws Exception {
-		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
-		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
-		ISegmentedProfile template = dataset.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
-
-		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
-		
-		ISegmentedProfile result = dataset.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
-
-	}
+//	@Test
+//	public void testSegmentationOfRodentDataset() throws Exception {
+//		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
+//		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
+//		ISegmentedProfile template = dataset.getCollection()
+//				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
+//
+//		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
+//		
+//		ISegmentedProfile result = dataset.getCollection()
+//				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
+//
+//	}
 }

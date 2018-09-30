@@ -36,7 +36,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 
 	@Test
 	public void testSingleCellDataset() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
 				.baseHeight(40).baseWidth(40).profiled().build();
 		testProfilingIsConsistentBetweenMedianAndCells(d);
 	}
@@ -44,16 +44,16 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 	@Test
 	public void testMultiCellIdenticalRectangularDataset() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-				.ofType(NucleusType.ROUND).profiled().build();
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+				.ofType(NucleusType.ROUND).randomOffsetProfiles(false).profiled().build();
 		testProfilesAreIdenticalForAllCells(d);
 		testProfilingIsConsistentBetweenMedianAndCells(d);
 	}
 	
 	@Test
 	public void testMultiCellIdenticalRectangularDatasetIsNotAffectedByFixedBorderOffset() throws Exception {
-		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-				.withMaxSizeVariation(0).profiled().build();
+		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+				.withMaxSizeVariation(0).fixedProfileOffset(20).profiled().build();
 		testProfilesAreIdenticalForAllCells(dataset);
 		testProfilingIsConsistentBetweenMedianAndCells(dataset);
 	}
@@ -71,7 +71,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				
 				System.out.println("xBase "+xBase+"; yBase "+yBase);
 				
-				IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
+				IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 						.xBase(xBase).yBase(yBase)
 						.randomOffsetProfiles(false).fixedProfileOffset(20)
 						.profiled()
@@ -133,7 +133,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 		// Allow variation in angles from none to 90 degrees
 		for(int angle=0; angle<90; angle++) {
 
-			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
+			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 					.xBase(xBase).yBase(yBase).baseWidth(40).baseHeight(50)
 					.maxRotation(angle).randomOffsetProfiles(false).fixedProfileOffset(20)
 					.profiled()
@@ -155,7 +155,8 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 	
 	@Test
 	public void testSingleSquareCellMedianProfileHasExpectedValuesForQuartiles() throws Exception {
-		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(1).baseHeight(40).baseWidth(40).profiled().build();
+		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(1)
+				.baseHeight(40).baseWidth(40).profiled().build();
 
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
@@ -175,7 +176,8 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 	
 	@Test
 	public void testMultipleSquareCellMedianProfileHasExpectedValuesForQuartiles() throws Exception {
-		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(1).baseHeight(40).baseWidth(40).profiled().build();
+		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(1)
+				.baseHeight(40).baseWidth(40).profiled().build();
 
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()

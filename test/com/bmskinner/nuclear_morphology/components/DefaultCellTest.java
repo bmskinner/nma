@@ -29,9 +29,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 public class DefaultCellTest extends ComponentTester {
 
-	private static final int N_CELLS = 10;
-	private static final int N_CHILD_DATASETS = 2;
-
     private ICell c;
     
     @Rule

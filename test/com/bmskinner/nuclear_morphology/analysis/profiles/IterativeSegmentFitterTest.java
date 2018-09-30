@@ -1,32 +1,24 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /** 
@@ -35,26 +27,16 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.14.0
  *
  */
-public class IterativeSegmentFitterTest {
-	
-	private Logger logger;
-	
+public class IterativeSegmentFitterTest extends ComponentTester {
+
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
 	
 	private IterativeSegmentFitter fitter;
-	
-	@Before
-	public void setUp(){
-		logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
-		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-
-	}
-	
+		
 	@Test
-	public void testFitterExceptsOnTemplateWithNoSegments() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1).ofType(NucleusType.ROUND)
+	public void testFitterTakesNoActionOnTemplateWithNoSegments() throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).profiled().build();
 		
@@ -63,13 +45,14 @@ public class IterativeSegmentFitterTest {
 		
 		ISegmentedProfile target = template.copy();
 		
-		expectedException.expect(IllegalArgumentException.class);
 		fitter = new IterativeSegmentFitter(template.copy());
+		ISegmentedProfile fitted = fitter.fit(target);
+		assertEquals(target, fitted);
 	}
 	
 	@Test
 	public void testFittingIdenticalProfileMakesNoChange() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
@@ -101,14 +84,14 @@ public class IterativeSegmentFitterTest {
 	
 	@Test
 	public void testFittingSquareTemplateToRectangularTarget() throws Exception {
-		IAnalysisDataset d1 = new TestDatasetBuilder(1234).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d1 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
 		ISegmentedProfile template = d1.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 		
-		IAnalysisDataset d2 = new TestDatasetBuilder(1234).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d2 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(false)
 				.baseHeight(50).baseWidth(30).segmented().build();
 		

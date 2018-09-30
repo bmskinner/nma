@@ -61,8 +61,11 @@ public class CellularComponentConversionTest extends ComponentTester {
 		File f = new File(TestResources.DATASET_FOLDER+OldFormatConverterTest.DIR_1_13_8, MouseFormatConverterTest.MOUSE_BACKUP_FILE);
 		IAnalysisDataset d = deserialiseDataset(f);
 		
-		if(d==null)
+		if(d==null) {
 			fail("Dataset could not be opened");
+			return; // stop the null parameter checker complaining
+		}
+		
 		assertEquals(Version.v_1_13_8, d.getVersion());
 		
 		// Check the profile aggregate
@@ -120,16 +123,18 @@ public class CellularComponentConversionTest extends ComponentTester {
 	
 	
 	@Test
-	public void testProfileCollectionsHaveSameIndexesOnDatasetDserialisation() throws Exception {
+	public void testProfileCollectionsHaveSameIndexesOnDatasetDeserialisation() throws Exception {
 		// Version 1.13.8 is the last version before the SegmentedCellualarComponent
 		// was added. When the dataset is opened, profiles are converted on the
 		// first getProfile() invokation.
 
-		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+OldFormatConverterTest.DIR_1_13_8, MouseFormatConverterTest.MOUSE_BACKUP_FILE);
+		File f = new File(TestResources.DATASET_FOLDER+OldFormatConverterTest.DIR_1_13_8, MouseFormatConverterTest.MOUSE_BACKUP_FILE);
 		IAnalysisDataset d = deserialiseDataset(f);
 
-		if(d==null)
+		if(d==null) {
 			fail("Dataset could not be opened");
+			return; // stop the null parameter checker complaining
+		}
 		assertEquals(Version.v_1_13_8, d.getVersion());
 
 		// Check the profile aggregate

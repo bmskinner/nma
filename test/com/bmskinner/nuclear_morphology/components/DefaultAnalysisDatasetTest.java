@@ -54,10 +54,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  *
  */
 public class DefaultAnalysisDatasetTest extends ComponentTester {
-		
-	private static final int N_CELLS = 10;
 	
-	private static final int N_CHILD_DATASETS = 2;
     private IAnalysisDataset d;
     private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");

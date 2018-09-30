@@ -253,11 +253,13 @@ public class TestDatasetBuilder {
 	/**
 	 * Set a fixed offset value for the start index of the border list
 	 * in each cell. The default value is {@link #DEFAULT_BORDER_OFFSET}.
+	 * Setting this paramter disables random offsets in profiles.
 	 * @param i
 	 * @see #randomOffsetProfiles(boolean)
 	 * @return this builder
 	 */
 	public TestDatasetBuilder fixedProfileOffset(int i) {
+		offset=false;
 		fixedOffset = i;
 		return this;
 	}	

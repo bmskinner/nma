@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
@@ -35,18 +37,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.14.0
  *
  */
-public class AbstractProfileMethodTest extends FloatArrayTester {
-	
-	protected Logger logger;
-	public static final long RNG_SEED = 1234;
-	
-	@Before
-	public void setUp(){
-		logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
-		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-	}
-	
+public class AbstractProfileMethodTest extends ComponentTester {
+			
 	/**
 	 * Test that profiles within identical cells dataset are consistent between 
 	 * the median and the cell

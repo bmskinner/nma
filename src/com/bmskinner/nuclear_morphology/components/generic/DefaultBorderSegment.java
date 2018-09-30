@@ -82,7 +82,7 @@ public class DefaultBorderSegment implements IBorderSegment {
      * @param id the id of the segment
      */
     public DefaultBorderSegment(int startIndex, int endIndex, int total, UUID id) {
-    	if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && startIndex!=endIndex)
+    	if(IProfileCollection.DEFAULT_SEGMENT_ID.equals(id) && startIndex!=endIndex)
 			throw new IllegalArgumentException(String.format("Cannot make default segment %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
         if (id == null)
             throw new IllegalArgumentException("Segment ID cannot be null");

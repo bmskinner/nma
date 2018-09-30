@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.components;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,9 +10,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,14 +20,12 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Tests for implementations of the ICellCollection interface
@@ -40,13 +34,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @RunWith(Parameterized.class)
-public class ICellCollectionTest {
-	
-	private static final long RNG_SEED = 1234;
-	
+public class ICellCollectionTest extends ComponentTester {
 	private static final int N_CELLS = 10;
-	
-	private Logger logger;
 
 	private ICellCollection collection;
 	
@@ -56,19 +45,12 @@ public class ICellCollectionTest {
 	@Parameter(0)
 	public Class<? extends ICellCollection> source;
 	
+	@Override
 	@Before
 	public void setUp() throws Exception {
+		super.setUp();
 		collection = createInstance(source);
-		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
-		logger.setLevel(Level.FINE);
-
-		boolean hasHandler = false;
-		for(Handler h : logger.getHandlers()) {
-			if(h instanceof ConsoleHandler)
-				hasHandler = true;
-		}
-		if(!hasHandler)
-			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+		
 	}
 
 	/**
