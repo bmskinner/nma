@@ -6,6 +6,12 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSuite;
 
+/**
+ * Runs all test classes in the analysis package
+ * @author ben
+ * @since 1.14.0
+ *
+ */
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	ImageFiltererTest.class, 

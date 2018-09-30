@@ -24,6 +24,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
+ * Runs all test classes in the io.conversion package.
  * Test datasets created under older verions of the software for compatibility with the
  * current version
  * @author bms41

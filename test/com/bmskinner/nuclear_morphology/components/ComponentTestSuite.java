@@ -8,6 +8,12 @@ import com.bmskinner.nuclear_morphology.components.generic.ComponentGenericTestS
 import com.bmskinner.nuclear_morphology.components.nuclear.ComponentNuclearTestSuite;
 import com.bmskinner.nuclear_morphology.components.nuclei.ComponentNucleiTestSuite;
 
+/**
+ * Runs all test classes in the components package
+ * @author ben
+ * @since 1.14.0
+ *
+ */
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	ComponentGenericTestSuite.class,
