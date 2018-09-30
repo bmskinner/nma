@@ -78,15 +78,9 @@ public class DatasetValidator implements Loggable {
 
 		errorList.clear();
 		errorCells.clear();
-
-		if (!d.isRoot()) {
-			errorList.add(d.getName() + ": Dataset not checked - not root");
-			return false;
-		}
-
+		
 		int errors = 0;
 
-		
 		if (!checkAllNucleiHaveProfiles(d)) {
 			errorList.add("Error in nucleus profiling");
 			errors++;

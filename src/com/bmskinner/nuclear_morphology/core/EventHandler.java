@@ -497,13 +497,29 @@ public class EventHandler implements Loggable, EventListener {
             }
 
             if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
+            	// copy the profile segmentation from one dataset to another
+            	return () ->{
+            		final IAnalysisDataset source = event.secondaryDataset();
+            		if (source == null)
+            			return;
+            		
+            		final CountDownLatch segmentLatch = new CountDownLatch(1);
+            		new Thread( ()-> { // wait for profiling and run segmentation
+            				fine("Starting segmentation action");
+            				new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.NO_FLAG,
+                    				acceptor, EventHandler.this, segmentLatch).run();
+            		}).start();
 
-                final IAnalysisDataset source = event.secondaryDataset();
-                if (source == null) {
-                    return null;
-                }
-                return new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.ADD_POPULATION,
-                        acceptor, EventHandler.this);
+            		new Thread( ()-> { //  wait for save and recache charts
+            			try {
+            				segmentLatch.await();
+            				fine("Adding datasets");
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
+            			} catch(InterruptedException e) {
+            				return;
+            			}
+            		}).start();
+            	};
             }
 
             if (event.method().equals(DatasetEvent.CLUSTER)) {

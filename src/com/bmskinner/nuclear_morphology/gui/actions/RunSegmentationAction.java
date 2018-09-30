@@ -93,11 +93,12 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
      * @param source
      */
     public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, int downFlag,
-    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
         super(list, PROGRESS_LBL, acceptor, eh);
         this.downFlag = downFlag;
         this.mode = MorphologyAnalysisMode.COPY;
         this.source = source;
+        setLatch(latch);
     }
 
     @Override
@@ -175,7 +176,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                     cancel(); // remove progress bar
 
                     Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
-                            ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, progressAcceptors.get(0), eh)
+                            ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, progressAcceptors.get(0), eh, getLatch().get())
                             : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, progressAcceptors.get(0), eh, getLatch().get());
 
                     task.run();

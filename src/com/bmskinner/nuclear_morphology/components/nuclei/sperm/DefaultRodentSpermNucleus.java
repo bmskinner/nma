@@ -191,6 +191,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
         if (vertX < minBoundingX || vertX > maxBoundingX) {
 
+
             // The chosen vertical points is outside the bounding box of the
             // nucleus
             IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical point x is outside nucleus bounds");
@@ -228,7 +229,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
      */
     public List<IBorderPoint> getHookRoi() {
 
-        List<IBorderPoint> result = new ArrayList<IBorderPoint>(0);
+        List<IBorderPoint> result = new ArrayList<>(0);
 
         IBorderPoint testPoint;
         IBorderPoint referencePoint;
