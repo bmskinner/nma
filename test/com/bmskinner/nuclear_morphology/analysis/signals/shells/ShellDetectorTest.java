@@ -27,10 +27,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
@@ -53,17 +53,17 @@ import ij.process.ImageProcessor;
  * @author ben
  *
  */
-public class ShellDetectorTest {
-    
-	private static final long SEED = 1234;
+public class ShellDetectorTest extends ComponentTester {
+
     private ShellDetector sd;
     private Nucleus testNucleus;
     private INuclearSignal testSignal;
 
-    @Before
+    @Override
+	@Before
     public void setUp() throws Exception {
-    	
-    	IAnalysisDataset d = new TestDatasetBuilder(SEED).cellCount(1)
+    	super.setUp();
+    	IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
         		.xBase(50).yBase(50)
         		.baseWidth(200).baseHeight(200)
         		.ofType(NucleusType.ROUND)
@@ -83,7 +83,7 @@ public class ShellDetectorTest {
      * @return
      * @throws UnloadableImageException
      */
-    private ImageProcessor drawShells(Imageable template, ShellDetector sd) throws UnloadableImageException{
+    private static ImageProcessor drawShells(Imageable template, ShellDetector sd) throws UnloadableImageException{
     	ImageProcessor ip = template.getImage();
     	
     	ip.setLineWidth(2);
@@ -109,7 +109,7 @@ public class ShellDetectorTest {
     private void testGetShells(ShrinkType type) throws Exception {
     	sd = new ShellDetector(testNucleus, type, false);
     	ImageProcessor ip = drawShells(testNucleus, sd);
-        ImageViewer.showImage(ip, "Nucleus shells");
+//        ImageViewer.showImage(ip, "Nucleus shells");
     }
     
     @Test
@@ -128,56 +128,7 @@ public class ShellDetectorTest {
         long[] exp = sd.findPixelCounts();
         assertTrue(testEquals(exp, obs));
     }
-    
-    @Test
-    public void testFindPixelCountPerShellByArea() throws Exception {
-
-        sd = new ShellDetector(testNucleus, ShrinkType.AREA, true);
-        long[] obs = sd.findPixelCounts();
         
-        long total = sd.getShells().get(0).getPixelCount();
-        long[] exp = new long[obs.length];
-        Arrays.fill(exp, total/5);
-        testRoughly(exp, obs);
-    }
-
-    @Test
-    public void testFindPixelCountPerShellRadius() throws ComponentCreationException, ShellAnalysisException {
-    	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
-        long[] obs = sd.findPixelCounts();
-        long[] exp = {44572, 35388, 24796, 15492, 5428 };
-        assertTrue(testEquals(exp, obs));
-    }
-    
-    @Test
-    public void testFindPixelIntensityPerShellCellularComponentArea() throws ShellAnalysisException {
-    	 sd = new ShellDetector(testNucleus, ShrinkType.AREA, false);
-         long[] obs = sd.findPixelIntensities(testNucleus);
-         long total = sd.getShells().get(0).getPixelCount();
-         long[] exp = new long[obs.length];
-         Arrays.fill(exp, (total/5)*255);
-         testRoughly(exp, obs);
-    }
-
-    @Test
-    public void testFindPixelIntensityPerShellCellularComponentRadius() throws ComponentCreationException, ShellAnalysisException {
-    	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
-        long[] obs = sd.findPixelIntensities(testNucleus);
-        long[] exp = {44572*255, 35388*255, 24796*255, 15492*255, 5428*255 };
-        assertTrue(testEquals(exp, obs));
-    }
-    
-    @Test
-    public void testFindPixelIntensityPerShellCellularComponentWorksForSignals() throws Exception {
-    	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
-        long[] obs = sd.findPixelIntensities(testSignal);
-        ImageProcessor ip = drawShells(testSignal, sd);
-//    	showImage("Signals", ip);
-        long[] exp = {53040, 565590, 102510, 0, 0 };
-        assertTrue(testEquals(exp, obs));
-    }
-    
-    
     @Test
     public void testRealSignalsDetectedInMouseSpermDataset() throws Exception{
         IAnalysisDataset dataset = SampleDatasetReader.openTestMouseSignalsDataset();
