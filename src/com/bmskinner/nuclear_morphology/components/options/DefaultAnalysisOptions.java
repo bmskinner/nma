@@ -248,17 +248,8 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
             if(!otherSubOp.isPresent())
             	return false;
             IDetectionOptions otherSub = otherSubOp.get();
-            
-            if (!subOptions.equals(otherSub)){
-            	System.out.println("Inequality in suboptions:");
-            	System.out.println(subOptions.getClass().getName());
-            	System.out.println(otherSub.getClass().getName());
-            	System.out.println("This "+key);
-            	System.out.println(subOptions.toString());
-            	System.out.println("Other "+key);
-            	System.out.println(otherSub.toString());
+            if (!subOptions.equals(otherSub))
             	return false;
-            }
         }
 
         if (Double.doubleToLongBits(profileWindowProportion) != Double

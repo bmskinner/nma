@@ -85,37 +85,37 @@ public class DefaultCellCollection implements ICellCollection {
 
 	private static final long serialVersionUID = 1L;
 
-	private final UUID uuid; // the collection id
+	/** Unique collection id */
+	private final UUID uuid;
 
-	private File   folder;       // the source of the nuclei
-	private String outputFolder; // the location to save out data
-	private String name;         // the name of the collection
+	/** The image folder with the source of the cells */
+	private File   folder;
+	
+	/** The name of the folder to save outputs */
+	private String outputFolder;
+	
+	/** The name of the collection */
+	private String name;
 
-	private NucleusType nucleusType; // the type of nuclei this collection
-	// contains
+	/** The type of nuclei this collection contains */
+	private NucleusType nucleusType;
 
-	// this holds the mapping of tail indexes etc in the median profile arrays
+	/** Aggregated profiles from cells, plus medians */
 	private IProfileCollection profileCollection = IProfileCollection.makeNew();
 
-	private Nucleus consensusNucleus; // the refolded consensus nucleus
+	/** Refolded consensus nucleus */
+	private Nucleus consensusNucleus; // 
 
-	private volatile Set<ICell> cells = new HashSet<>(100); // store all the cells
-	// analysed
+	/** All the cells in this collection */
+	private volatile Set<ICell> cells = new HashSet<>(100);
 
+	/** Signal groups, keyed on their unique id */
 	private Map<UUID, ISignalGroup> signalGroups = new HashMap<>(0);
 
+	/** Rules used to identify border points */
 	private RuleSetCollection ruleSets = new RuleSetCollection();
 
-	/*
-	 * 
-	 * TRANSIENT FIELDS
-	 * 
-	 */
-
-//	/**
-//	 * Set when the consensus nucleus is refolding
-//	 */
-//	private volatile transient boolean isRefolding = false;
+	/*  TRANSIENT FIELDS  */
 
 	/**
 	 * Cache statistics from the cells in the collection. This should be updated
@@ -123,7 +123,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	private volatile transient StatsCache statsCache = new StatsCache();
 
-	// cache the number of shared cells with other datasets
+	/** cache the number of shared cells with other datasets */
 	protected volatile transient VennCache vennCache = new VennCache();
 
 	private transient SignalManager  signalManager  = new SignalManager(this);

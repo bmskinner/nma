@@ -18,9 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +34,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Profileable;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -55,7 +51,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.CircleTools;
 
 /**
  * This method refolds the consensus nucleus based on averaging the positions of
@@ -68,6 +63,7 @@ import com.bmskinner.nuclear_morphology.utility.CircleTools;
  */
 public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
+	/** This length was chosen to avoid issues copying segments */
     private static final double PROFILE_LENGTH = 1000d;
 
     public ConsensusAveragingMethod(@NonNull final IAnalysisDataset dataset) {
@@ -151,53 +147,60 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     private List<IPoint> getPointAverage() throws UnavailableBorderTagException, UnavailableProfileTypeException,
             ProfileException, UnavailableBorderPointException, MissingOptionException {
 
-        List<IPoint> result = new ArrayList<>();
+        final Map<Double, List<IPoint>> perimeterPoints = new HashMap<>();
 
-        final Map<Double, List<IPoint>> map = new HashMap<Double, List<IPoint>>();
-
-        IPoint com = IPoint.makeNew(0, 0);
-        dataset.getCollection().getNuclei().stream().forEach(n -> {
+        IPoint zeroCoM = IPoint.makeNew(0, 0);
+        dataset.getCollection().getNuclei().forEach(n -> {
             try {
                 
                 Nucleus v = n.getVerticallyRotatedNucleus();
-
-                v.moveCentreOfMass(com);
+                v.moveCentreOfMass(zeroCoM);
                 IProfile p = v.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
                 for (int i = 0; i < PROFILE_LENGTH; i++) {
 
-                    double d = ((double) i) / PROFILE_LENGTH;
+                    double fractionOfPerimeter = i/ PROFILE_LENGTH;
 
-                    if (map.get(d) == null) {
-                        map.put(d, new ArrayList<IPoint>());
-                    }
-                    List<IPoint> list = map.get(d);
+                    if (perimeterPoints.get(fractionOfPerimeter) == null)
+                    	perimeterPoints.put(fractionOfPerimeter, new ArrayList<>());
+                    List<IPoint> list = perimeterPoints.get(fractionOfPerimeter);
 
-                    int index = p.getIndexOfFraction(d);
-
-                    int offset = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
-
-                    IPoint point = v.getBorderPoint(offset);
+                    int indexInProfile = p.getIndexOfFraction(fractionOfPerimeter);
+                    int borderIndex    = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, indexInProfile);
+                    IPoint point = v.getBorderPoint(borderIndex);
                     list.add(point);
                 }
             } catch (Exception e1) {
-                error("Error on nucleus " + n.getNameAndNumber(), e1);
+                stack("Error on nucleus " + n.getNameAndNumber(), e1);
             }
 
         });
 
+        
+        // Avoid errors in border calculation due to identical points by
+        // checking each average point in the list is different to the 
+        // previous. Needed since we have a large profile length.
+        List<IPoint> averagedPoints = new ArrayList<>();
         for (int i = 0; i < PROFILE_LENGTH; i++) {
+            double d = i/ PROFILE_LENGTH;
+            List<IPoint> list = perimeterPoints.get(d);
+            IPoint avg = calculateMedianPoint(list);
 
-            double d = ((double) i) / PROFILE_LENGTH;
-            List<IPoint> list = map.get(d);
-            result.add(calculateMedianPoint(list));
+            if(averagedPoints.isEmpty() || !averagedPoints.get(averagedPoints.size()-1).equals(avg)) {
+//            	fine(avg.getX()+"\t"+avg.getY());
+            	averagedPoints.add(avg);
+            }
             fireProgressEvent();
         }
-
-        return result;
+        return averagedPoints;
     }
 
-    private synchronized IPoint calculateMedianPoint(List<IPoint> list) {
+    /**
+     * Find the point with the median x and y coordinate of the given points
+     * @param list
+     * @return
+     */
+    private IPoint calculateMedianPoint(List<IPoint> list) {
         double[] xpoints = new double[list.size()];
         double[] ypoints = new double[list.size()];
 
@@ -211,64 +214,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         double xMed = Stats.quartile(xpoints, Stats.MEDIAN);
         double yMed = Stats.quartile(ypoints, Stats.MEDIAN);
 
-        IPoint avgRP = IPoint.makeNew(xMed, yMed);
-        return avgRP;
+        return IPoint.makeNew(xMed, yMed);
     }
-
-    private static boolean intersects(Path2D path, Line2D line) {
-        double x1 = -1, y1 = -1, x2 = -1, y2 = -1;
-        for (PathIterator pi = path.getPathIterator(null); !pi.isDone(); pi.next()) {
-            double[] coordinates = new double[6];
-            switch (pi.currentSegment(coordinates)) {
-            case PathIterator.SEG_MOVETO:
-            case PathIterator.SEG_LINETO: {
-                if (x1 == -1 && y1 == -1) {
-                    x1 = coordinates[0];
-                    y1 = coordinates[1];
-                    break;
-                }
-                if (x2 == -1 && y2 == -1) {
-                    x2 = coordinates[0];
-                    y2 = coordinates[1];
-                    break;
-                }
-                break;
-            }
-            }
-            if (x1 != -1 && y1 != -1 && x2 != -1 && y2 != -1) {
-                Line2D segment = new Line2D.Double(x1, y1, x2, y2);
-                if (segment.intersectsLine(line)) {
-                    return true;
-                }
-                x1 = -1;
-                y1 = -1;
-                x2 = -1;
-                y2 = -1;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Find the points at the intersection of two circles, and return one of
-     * them
-     * 
-     * @param first
-     * @param r1
-     * @param com
-     * @param r2
-     * @return
-     */
-    private IPoint calculateSecondPoint(IPoint first, double r1, IPoint com, double r2) {
-        /*
-         * Looking for the intersection of the circles with radii described
-         */
-        IPoint[] inters = CircleTools.findIntersections(first, r1, com, r2);
-
-        IPoint i0 = inters[0];
-        IPoint i1 = inters[1];
-
-        return i0.getX() < 0 ? i0 : i1;
-    }
-
 }
