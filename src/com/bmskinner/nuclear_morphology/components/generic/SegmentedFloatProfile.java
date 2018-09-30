@@ -681,25 +681,10 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             }
         }
 
-        // This will remove merge sources
+        // This will remove merge sources of segment 0 if the start index is not already in the correct place 
         IBorderSegment.linkSegments(newSegs);
         
-
-        	for(IBorderSegment s : newSegs) {
-        		if(s.getID().equals(id))
-        			fine("After linking merged segment has source 1: "+s.hasMergeSource(seg1));
-        	}
-			
-
-
         this.setSegments(newSegs);
-        
-        try {
-			fine("After setting merged segment has source 1: "+this.getSegment(id).hasMergeSource(seg1));
-		} catch (UnavailableComponentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
     }
     
     @Override
