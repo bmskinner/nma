@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
@@ -26,6 +27,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  * @since 1.14.0
  *
  */
+@Ignore
 public class OutlineChartFactoryTest extends ChartFactoryTest {
 		
 	private static final boolean IS_FIXED_ASPECT = true;

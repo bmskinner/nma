@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
@@ -27,6 +28,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
  * @since 1.14.0
  *
  */
+@Ignore
 public class ProfileChartFactoryTest extends ChartFactoryTest {
 	
 	private static final boolean IS_FIXED_ASPECT = false;
@@ -163,7 +165,7 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 				.segmented().build();
 		generateChartsforOptions(d, "Single nucleus, segmented");
 	}
-	
+
 	@Test
 	public void testMultipleNucleusDatasetProfileWithSingleSegment() throws Exception {
 		
