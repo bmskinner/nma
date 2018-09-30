@@ -321,7 +321,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     @Override
     protected synchronized void updateSingle() {
         super.updateSingle();
-        runRefoldingButton.setVisible(true);
+
 
         showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
         showMeshFacesBox.setEnabled(showMeshBox.isSelected());
@@ -340,12 +340,17 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                 .build();
 
         setChart(options);
-
+        
+        if(activeDataset()==null) {
+        	runRefoldingButton.setVisible(false);
+        	offsetsPanel.setVisible(false);
+        	return;
+        }
         ICellCollection collection = activeDataset().getCollection();
-
         // hide the refold button when not needed
         runRefoldingButton.setVisible(!collection.hasConsensus());
         offsetsPanel.setVisible(collection.hasConsensus());
+
         consensusChartPanel.restoreAutoBounds();
     }
 

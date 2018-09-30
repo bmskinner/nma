@@ -164,6 +164,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // reconstructed.
         double epsilon = 1;
         Polygon polygon = roi.getPolygon();
+//        log("Roi polygon has "+polygon.npoints);
         Rectangle2D bounds = polygon.getBounds().getFrame();
 
         // // since small signals can have imprecision on the CoM that puts them
@@ -216,7 +217,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     private void makeBorderList() {
 
-    	finest("Creating border list from "+xpoints.length+" integer points");
+    	finer("Creating border list from "+xpoints.length+" integer points");
     	
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
@@ -233,7 +234,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         borderList = new ArrayList<>();
 
         // convert the roi positions to a list of border points
-        // Each object decides whether it should be smoothed.
         boolean isSmooth = isSmoothByDefault();
         roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
 
@@ -255,8 +255,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         moveCentreOfMass(oldCoM);
         calculateBounds();
-        finest("Component has "+getBorderLength()+" border points");
-
     }
 
     private void calculateBounds() {

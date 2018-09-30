@@ -330,13 +330,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
     public synchronized void update(final List<IAnalysisDataset> list) {
 
         setUpdating(true);
-
-        for (TabPanel t : this.getSubPanels()) {
+        for (TabPanel t : this.getSubPanels())
             t.update(list);
-        }
-
-        updateDetail(list);
-
+        final List<IAnalysisDataset> result = new ArrayList<>();
+        result.addAll(list);
+        updateDetail(result);
     }
 
     /**

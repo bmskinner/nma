@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpe
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 /**
  * Constructs nuclei for an image. Tracks the number of nuclei created.
@@ -43,8 +44,7 @@ import ij.gui.Roi;
  */
 public class NucleusFactory implements ComponentFactory<Nucleus> {
 
-    private int               nucleusCount = 0; // store the number of nuclei
-                                                // created by this factory
+    private int nucleusCount = 0; // store the number of nuclei  created by this factory
     private final NucleusType type;
 
     /**
@@ -76,6 +76,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     		throw new ComponentCreationException("Cannot create a nucleus with a border list of only "+points.size()+" points");
     	
         Roi roi = makRoi(points);
+        
         Rectangle bounds = roi.getBounds();
 
         int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(),
@@ -89,13 +90,16 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 
         for (int i = 0; i < list.size(); i++) {
             IPoint p = list.get(i);
-
             xpoints[i] = (float) p.getX();
             ypoints[i] = (float) p.getY();
         }
 
+        // If the points are closer than 1 pixel, the float polygon smoothing
+        // during object creation may disrupt the border. Ensure the spacing
+        // is corrected to something larger
         Roi roi = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
-        return roi;
+        FloatPolygon smoothed = roi.getInterpolatedPolygon(2, false);
+        return new PolygonRoi(smoothed.xpoints, smoothed.ypoints, Roi.POLYGON);
     }
 
     @Override
@@ -118,35 +122,9 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         	case ROUND: 
         	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                     nucleusCount);
-                    
         }
 
         nucleusCount++;
-
-//        try {
-//
-//            // The classes for the constructor
-//            Class<?>[] classes = { Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
-//
-//            Constructor<?> nucleusConstructor = type.getNucleusClass().getConstructor(classes);
-//
-//            n = (Nucleus) nucleusConstructor.newInstance(roi, centreOfMass, imageFile, channel, originalPosition,
-//                    nucleusCount);
-//
-//            nucleusCount++;
-//
-//        } catch (InvocationTargetException e) {
-//            stack("Invokation error creating nucleus", e.getCause());
-//            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
-//        } catch (Error e) {
-//            stack("Error creating nucleus", e);
-//            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
-//        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException
-//                | SecurityException e) {
-//            stack("Error creating nucleus", e);
-//            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
-//        }
-
         if (n == null)
             throw new ComponentCreationException("Error making nucleus; contstucted object is null");
         finer("Created nucleus with border length "+n.getBorderLength());

@@ -86,11 +86,11 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
     }
 
-    public void createBorderTagPopup(IAnalysisDataset dataset) {
-
+    public synchronized void createBorderTagPopup(IAnalysisDataset dataset) {
+    	if(dataset==null)
+    		return;
         List<Tag> list = dataset.getCollection().getProfileCollection().getBorderTags();
         makePopup(list);
-
     }
 
     private void makePopup(List<Tag> list) {

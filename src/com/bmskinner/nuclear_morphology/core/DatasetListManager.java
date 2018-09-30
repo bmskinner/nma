@@ -71,7 +71,7 @@ public final class DatasetListManager implements Loggable {
     private final List<IWorkspace> workspaces = new CopyOnWriteArrayList<>();
     
     /** Hashcodes for workspaces */
-    private final Map<UUID, Integer> workspaceHashcodeMap = new HashMap<>();
+    private final Map<UUID, Integer> workspaceHashcodeMap = new ConcurrentHashMap<>();
 
     private DatasetListManager() { }
 
@@ -98,7 +98,9 @@ public final class DatasetListManager implements Loggable {
      * @return
      */
     public synchronized final List<IAnalysisDataset> getRootDatasets() {
-        return list;
+        List<IAnalysisDataset> result = new ArrayList<>();
+        result.addAll(list);
+    	return result;
     }
 
     /**
@@ -116,7 +118,9 @@ public final class DatasetListManager implements Loggable {
      * @return
      */
     public synchronized final List<IAnalysisDataset> getSelectedDatasets() {
-        return selected;
+    	 List<IAnalysisDataset> result = new ArrayList<>();
+         result.addAll(selected);
+         return result;
     }
 
     /**

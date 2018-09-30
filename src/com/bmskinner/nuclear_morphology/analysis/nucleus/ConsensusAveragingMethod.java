@@ -97,6 +97,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         // Calculate the stats for the new consensus
         // Required for angle window size calculation
         double perim = ComponentMeasurer.calculatePerimeter(n);
+        fine("Consensus perimeter is "+perim);
         n.setStatistic(PlottableStatistic.PERIMETER, perim);
         n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 

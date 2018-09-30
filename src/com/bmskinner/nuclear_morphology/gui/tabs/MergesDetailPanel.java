@@ -213,7 +213,7 @@ public class MergesDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
 
         headerLabel.setText(
                 Labels.SINGLE_DATASET + " with " + activeDataset().getAllMergeSources().size() + " merge sources");
@@ -232,13 +232,13 @@ public class MergesDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         updateNull();
         headerLabel.setText(Labels.MULTIPLE_DATASETS);
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         headerLabel.setText(Labels.NULL_DATASETS);
         sourceButtonPanel.setVisible(false);
 
@@ -251,16 +251,14 @@ public class MergesDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return null;
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        if (options.getType().equals(TableType.MERGE_SOURCES)) {
+    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
+        if (options.getType().equals(TableType.MERGE_SOURCES))
             return new AnalysisDatasetTableCreator(options).createMergeSourcesTable();
-        } else {
-            return new AnalysisDatasetTableCreator(options).createAnalysisTable();
-        }
+		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
     }
 }

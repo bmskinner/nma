@@ -124,14 +124,14 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
     /**
      * Create the nodes in the tree
      * 
-     * @param root
-     *            the root node
-     * @param dataset
-     *            the dataset to use
+     * @param root the root node
+     * @param dataset the dataset to use
      */
-    private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
-
-        List<ICell> cells = new ArrayList<ICell>(dataset.getCollection().getCells());
+    private synchronized void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
+    	if(dataset==null)
+    		return;
+    	
+        List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
         Collections.sort(cells);
 
         for (ICell cell : cells) {

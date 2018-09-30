@@ -679,7 +679,8 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return
      */
     static boolean segmentCountsMatch(@NonNull final List<IAnalysisDataset> list) {
-
+    	if(list.isEmpty())
+    		return false;
         int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         for (IAnalysisDataset d : list) {
             if (d.getCollection().getProfileManager().getSegmentCount() != segCount) {

@@ -257,7 +257,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
             consensusAndCheckboxPanel.repaint();
             consensusAndCheckboxPanel.setVisible(true);
 
-            if (activeDataset().getCollection().hasConsensus()
+            if (activeDataset()!=null && activeDataset().getCollection().hasConsensus()
                     && activeDataset().getCollection().getSignalManager().hasSignals()) {
                 warpButton.setEnabled(true);
             }

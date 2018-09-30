@@ -252,7 +252,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     }
 
     @Override
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
     	return new ProfileChartFactory(options).createProfileChart();
     }
 
@@ -262,7 +262,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
      * @param options
      * @throws Exception
      */
-    private void configureButtons(ChartOptions options) {
+    private synchronized void configureButtons(ChartOptions options) {
     	if(options.isMultipleDatasets()) {
     		setButtonsEnabled(false);
     		return;

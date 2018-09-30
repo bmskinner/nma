@@ -87,7 +87,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
             moveCentreOfMass(IPoint.makeNew(0, 0));
         }
     }
-
+    
     public NucleusType getType() {
         return type;
     }
