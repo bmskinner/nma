@@ -34,8 +34,9 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ 
     MouseFormatConverterTest.class, 
     PigFormatConverterTest.class, 
-    RoundFormatConverterTest.class })
+    RoundFormatConverterTest.class,
+    CellularComponentConversionTest.class})
 
-public class ConversionTestSuite {
+public class IoConversionTestSuite {
 
 }

@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.FloatArrayTester;
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -57,7 +58,7 @@ public class CellularComponentConversionTest extends ComponentTester {
 		// was added. When the dataset is opened, profiles are converted on the
 		// first getProfile() invokation.
 		
-		File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+OldFormatConverterTest.DIR_1_13_8, MouseFormatConverterTest.MOUSE_BACKUP_FILE);
+		File f = new File(TestResources.DATASET_FOLDER+OldFormatConverterTest.DIR_1_13_8, MouseFormatConverterTest.MOUSE_BACKUP_FILE);
 		IAnalysisDataset d = deserialiseDataset(f);
 		
 		if(d==null)

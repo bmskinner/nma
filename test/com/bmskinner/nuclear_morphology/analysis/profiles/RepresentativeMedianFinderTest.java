@@ -105,56 +105,56 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 		
 		IProfile result = finder.findMedian();
 		
-		List<IProfile> profiles = new ArrayList<>();
-		profiles.add(template);
-		profiles.add(result);
-		
-		List<String> names = new ArrayList<>();
-		names.add("Overall median");
-		names.add("Representative median");
-		
+//		List<IProfile> profiles = new ArrayList<>();
+//		profiles.add(template);
+//		profiles.add(result);
+//		
+//		List<String> names = new ArrayList<>();
+//		names.add("Overall median");
+//		names.add("Representative median");
+//		
 //		if(!template.equals(result))
 //			ChartFactoryTest.showProfiles(profiles, names, "Identical profiles in fitter");
 		
-//		equals(template.toFloatArray(), result.toFloatArray(), 0);
+		equals(template.toFloatArray(), result.toFloatArray(), 0);
 	}
 	
-	@Test
-	public void testMedianFindingInRodentDataset() throws Exception {
-		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
-		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
-		ISegmentedProfile template = dataset.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());
-		
-//		IProfile nucleus = finder.findMostConsistentNucleusProfile();
-				
-		IProfile result = finder.findMedian();
-		
-		List<IProfile> profilesInMedian = finder.findBestProfiles(result);
-		
-		List<IProfile> profiles = new ArrayList<>();
-		profiles.add(template);
-//		profiles.add(nucleus);
-		profiles.add(result);
-		
-		for(IProfile p : profilesInMedian) {
-			profiles.add(p);
-		}
-		
-		List<String> names = new ArrayList<>();
-		names.add("Overall median");
-		names.add("Nucleus template");
-		names.add("Representative median");
-		for(IProfile p : profilesInMedian) {
-			names.add("Profile");
-		}
-		
-		
-//		if(!template.equals(result))
-//			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");
-	}
+//	@Test
+//	public void testMedianFindingInRodentDataset() throws Exception {
+//		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
+//		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
+//		ISegmentedProfile template = dataset.getCollection()
+//				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+//
+//		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());
+//		
+////		IProfile nucleus = finder.findMostConsistentNucleusProfile();
+//				
+//		IProfile result = finder.findMedian();
+//		
+//		List<IProfile> profilesInMedian = finder.findBestProfiles(result);
+//		
+//		List<IProfile> profiles = new ArrayList<>();
+//		profiles.add(template);
+////		profiles.add(nucleus);
+//		profiles.add(result);
+//		
+//		for(IProfile p : profilesInMedian) {
+//			profiles.add(p);
+//		}
+//		
+//		List<String> names = new ArrayList<>();
+//		names.add("Overall median");
+//		names.add("Nucleus template");
+//		names.add("Representative median");
+//		for(IProfile p : profilesInMedian) {
+//			names.add("Profile");
+//		}
+//		
+//		
+////		if(!template.equals(result))
+////			ChartFactoryTest.showProfiles(profiles, names, "Messy mouse dataset");
+//	}
 	
 	@Test
 	public void testMultipleIdenticalCells() throws Exception {
