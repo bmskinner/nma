@@ -19,22 +19,17 @@
 
 package com.bmskinner.nuclear_morphology.io.conversion;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Tests that old datasets can be opened
@@ -42,7 +37,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.8
  *
  */
-public abstract class OldFormatConverterTest {
+public abstract class OldFormatConverterTest extends ComponentTester {
     
 	public static final String DIR_1_13_0 = "1.13.0/";
 	public static final String DIR_1_13_1 = "1.13.1/";
@@ -53,16 +48,6 @@ public abstract class OldFormatConverterTest {
 	public static final String DIR_1_13_6 = "1.13.6/";
 	public static final String DIR_1_13_7 = "1.13.7/";
 	public static final String DIR_1_13_8 = "1.13.8/";
-	
-	
-	protected Logger logger;
-	
-	@Before
-	public void setUp() throws Exception {
-		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
-		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-	}
     
     /**
      * Try to open the dataset in the given file and test if it is valid after any conversions
