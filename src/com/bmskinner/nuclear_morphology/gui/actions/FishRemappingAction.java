@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -28,6 +29,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
@@ -77,9 +79,18 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 
                 log("Reapplying morphology...");
 
-                Runnable r = new RunSegmentationAction(newList, dataset, ADD_POPULATION, progressAcceptors.get(0), eh);
-                r.run();
-                finished();
+                CountDownLatch latch = new CountDownLatch(1);
+                new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0), eh, latch).run();
+                new Thread( ()->{
+                	try {
+						latch.await();
+						getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, newList);
+						finished();
+					} catch (InterruptedException e) {
+						
+					}
+                }).start();;
+                
 
             } else {
                 log("Remapping cancelled");
