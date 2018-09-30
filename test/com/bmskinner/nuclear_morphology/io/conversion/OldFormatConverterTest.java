@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -61,9 +62,9 @@ public abstract class OldFormatConverterTest extends ComponentTester {
         IAnalysisDataset d = SampleDatasetReader.openDataset(f);
         DatasetValidator v = new DatasetValidator();
         boolean ok = v.validate(d);
-        if(!ok)
-        	v.getErrors().forEach(System.out::println);
-        assertTrue(ok);
+        
+        String errors = v.getErrors().stream().collect(Collectors.joining("\n"));
+        assertTrue(errors, ok);
         return d;
     }
     

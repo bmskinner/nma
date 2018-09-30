@@ -147,7 +147,7 @@ public class DatasetConverter implements Loggable, Importer {
     	
     	// The oldest format did not implement a version field 
     	if(result instanceof AnalysisDataset)
-    		result = convert1_13_0ToCurrent(result);
+    		result = convertAnalysisDatasetToCurrent(result);
     	
     	// Try to get the old dataset version
     	// After converting an AnalysisDataset, the result version will be current
@@ -228,7 +228,7 @@ public class DatasetConverter implements Loggable, Importer {
      * @return
      * @throws DatasetConversionException
      */
-    private IAnalysisDataset convert1_13_0ToCurrent(IAnalysisDataset template) throws DatasetConversionException {
+    private IAnalysisDataset convertAnalysisDatasetToCurrent(IAnalysisDataset template) throws DatasetConversionException {
     	
     	 try {
              log("Old dataset version : " + template.getVersion());

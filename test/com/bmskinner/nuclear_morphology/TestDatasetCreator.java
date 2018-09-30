@@ -106,6 +106,26 @@ public class TestDatasetCreator {
     	saveTestDataset(d, saveFile);
     }
     
+    @Test
+    public void createMultipleSource1Dataset() throws Exception{
+
+    	File testFolder = new File(TestResources.TESTING_MULTIPLE_SOURCE_1_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	File saveFile = new File(TestResources.MULTIPLE1_TEST_DATASET);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+    	saveTestDataset(d, saveFile);
+    }
+    
+    @Test
+    public void createMultipleSource2Dataset() throws Exception{
+
+    	File testFolder = new File(TestResources.TESTING_MULTIPLE_SOURCE_2_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	File saveFile = new File(TestResources.MULTIPLE2_TEST_DATASET);
+    	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+    	saveTestDataset(d, saveFile);
+    }
+    
     
     @Test
     public void createMouseWithClustersDataset() throws Exception{

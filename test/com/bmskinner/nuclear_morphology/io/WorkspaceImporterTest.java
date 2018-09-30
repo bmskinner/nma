@@ -20,8 +20,8 @@ public class WorkspaceImporterTest {
 		File f = new File(TestResources.DATASET_FOLDER+FILE_NAME_1_14_0);
 		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
 
-		assertEquals("Example", w.getName());
-		assertEquals(0, w.getBioSamples().size());
+		assertEquals(TestResources.MOUSE, w.getName());
+		assertEquals(1, w.getBioSamples().size());
 	}
 	
 	@Test
