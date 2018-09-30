@@ -276,6 +276,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             return;
     	}
     	
+    	if(!options.firstDataset().isRoot()) // only allow resegmentation of root datasets
+    		segmentButton.setEnabled(false);
+    	
     	ISegmentedProfile medianProfile;
     	try {
     		medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,

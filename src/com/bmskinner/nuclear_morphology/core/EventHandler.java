@@ -442,7 +442,6 @@ public class EventHandler implements Loggable, EventListener {
             				saveLatch.await();
             				fine("Starting recache action");
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
-//            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
             			} catch(InterruptedException e) {
             				return;
             			}
@@ -472,21 +471,31 @@ public class EventHandler implements Loggable, EventListener {
 
             	// begin a new morphology analysis
             	return () ->{
-            		
-            		final CountDownLatch l = new CountDownLatch(1);
+            		final CountDownLatch profileLatch = new CountDownLatch(1);
+            		final CountDownLatch segmentLatch = new CountDownLatch(1);
             		new Thread( ()->{
-            			new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, l).run();
+            			new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, profileLatch).run();
             		}).start();
 
             		new Thread( ()-> {
             			
             			try {
-            				l.await();
-            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, 0, acceptor, EventHandler.this).run();
+            				profileLatch.await();
+            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this, segmentLatch).run();
             			} catch(InterruptedException e) {
             				return;
             			}
             			
+            		}).start();
+            		
+            		new Thread( ()-> { //  wait for save and recache charts
+            			try {
+            				segmentLatch.await();
+            				fine("Adding datasets");
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            			} catch(InterruptedException e) {
+            				return;
+            			}
             		}).start();
 
             	};
