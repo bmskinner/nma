@@ -19,6 +19,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile;
@@ -34,7 +35,7 @@ import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComp
  *
  */
 @RunWith(Parameterized.class)
-public class ISegmentedProfileTester {
+public class ISegmentedProfileTester extends ComponentTester {
 	
 	public final static int profileLength = 330;
 	
@@ -52,8 +53,10 @@ public class ISegmentedProfileTester {
 	@Parameter(0)
 	public Class<? extends ISegmentedProfile> source;
 
+	@Override
 	@Before
     public void setUp() throws Exception {
+		super.setUp();
 		profile = createInstance(source);
     }
 
@@ -742,7 +745,38 @@ public class ISegmentedProfileTester {
 	    assertEquals("Merged segment end", s2.getEndIndex(), m.getEndIndex());
 	    assertEquals("Number of segments", expCount, profile.getSegmentCount());
 	}
-				
+	
+	@Test
+	public void testMergeSegmentsWorksForAllPairsNotSpanningRP() throws Exception {
+		int expCount = profile.getSegmentCount()-1;
+		
+	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+	    
+	    for(int i=0, j=1; j<profile.getSegmentCount(); i++, j++) {
+	    	profile = createInstance(source);
+	    	IBorderSegment s1 = profile.getSegmentAt(i);
+		    IBorderSegment s2 = profile.getSegmentAt(j);
+		    profile.mergeSegments(s1, s2, mergedId);
+		    
+	        List<UUID> segIds = profile.getSegmentIDs();
+	        
+	        assertFalse("Pair "+i+"-"+j, segIds.contains(s1.getID()));
+	        assertFalse("Pair "+i+"-"+j, segIds.contains(s2.getID()));
+	        assertTrue("Pair "+i+"-"+j, segIds.contains(mergedId));
+	        
+	        IBorderSegment m = profile.getSegment(mergedId);
+	        assertTrue("Pair "+i+"-"+j, m.hasMergeSources());
+	        assertTrue("Pair "+i+"-"+j, m.hasMergeSource(s1.getID()));
+	        assertTrue("Pair "+i+"-"+j, m.hasMergeSource(s2.getID()));
+
+		    
+		    assertEquals("Merged segment start", s1.getStartIndex(), m.getStartIndex());
+		    assertEquals("Merged segment end", s2.getEndIndex(), m.getEndIndex());
+		    assertEquals("Number of segments", expCount, profile.getSegmentCount());
+	    }
+	    
+	}
+					
 	@Test
     public void testMergeSegmentsExceptsWhenSegment1NotInProfile() throws ProfileException, UnavailableComponentException {
 

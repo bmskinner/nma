@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -64,7 +65,7 @@ public class SegmentationHandler implements Loggable {
         if (segID1 == null || segID2 == null)
             throw new IllegalArgumentException("Segment IDs cannot be null");
 
-        if (dataset.getCollection().isVirtual())
+        if(!dataset.isRoot())
             return;
 
         // Give the new merged segment a new ID
@@ -72,7 +73,7 @@ public class SegmentationHandler implements Loggable {
         
         ISegmentedProfile medianProfile = null;
         try {
-
+        	fine("Merging segments in root dataset "+dataset.getName());
         	medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                     Tag.REFERENCE_POINT, Stats.MEDIAN);
 
@@ -98,6 +99,13 @@ public class SegmentationHandler implements Loggable {
             } else {
                 warn("Segments are not mergable");
             }
+            
+            DatasetValidator dv = new DatasetValidator();
+			if(!dv.validate(dataset)) {
+				warn("Merging failed; resulting dataset did not validate");
+				for(String s : dv.getErrors())
+					warn(s);
+			}
 
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
             warn("Error merging segments");
@@ -115,8 +123,7 @@ public class SegmentationHandler implements Loggable {
      * Unmerge segments with the given ID in this collection and its children,
      * as long as the collection is real. Restore the original state on error.
      * 
-     * @param segID
-     *            the segment ID to be unmerged
+     * @param segID the segment ID to be unmerged
      */
     public void unmergeSegments(@NonNull final UUID segID) {
 

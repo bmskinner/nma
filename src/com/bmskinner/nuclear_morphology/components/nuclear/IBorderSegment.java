@@ -528,7 +528,8 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
                 boolean lockState = list.get(0).isLocked();
                 s.setLocked(false);
                 try {
-                    s.update(list.get(p).getEndIndex(), s.getEndIndex());
+                	if(s.getStartIndex()!=list.get(p).getEndIndex()) // only update if really necessary, to stop merge sources being lost
+                		s.update(list.get(p).getEndIndex(), s.getEndIndex());
                 } catch (IllegalArgumentException | SegmentUpdateException e) {
                     throw new ProfileException("Error linking final segment: " + e.getMessage(), e);
                 }
@@ -538,7 +539,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
             s.setPrevSegment(list.get(p));
             s.setNextSegment(list.get(n));
             s.setPosition(i);
-
         }
     }
 

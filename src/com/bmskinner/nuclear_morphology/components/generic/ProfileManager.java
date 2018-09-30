@@ -672,10 +672,7 @@ public class ProfileManager implements Loggable {
         for (Tag tag : BorderTagObject.values(BorderTagType.CORE)) {
 
              // Find the position of the border tag in the median profile
-            int tagIndex = collection.getProfileCollection().getIndex(tag);
-
-            int difference = tagIndex - rpIndex;
-            
+            int tagIndex = collection.getProfileCollection().getIndex(tag);            
             if(seg1.getEndIndex()==tagIndex || seg2.getStartIndex() == tagIndex)
             	return false;
         }
@@ -730,20 +727,16 @@ public class ProfileManager implements Loggable {
         if (!medianProfile.hasSegment(seg2.getID()))
             throw new IllegalArgumentException("Median profile does not have segment 2 ID");
 
-        
         if(collection.isReal()){
             int error = countNucleiNotMatchingMedianSegmentation();
-
             if(error>0){
                 warn(String.format("Segments are out of sync with median for %d nuclei", error));
                 warn("Canceling merge");
                 return;
             }
         }
-
-                
+    
         // merge the two segments in the median
-        
         try {
             medianProfile.mergeSegments(seg1, seg2, newID);
          // put the new segment pattern back with the appropriate offset
@@ -759,7 +752,6 @@ public class ProfileManager implements Loggable {
          */
         if(collection.isReal()){
             for (Nucleus n : collection.getNuclei()) {
-
                 boolean wasLocked = n.isLocked();
                 n.setLocked(false); // Merging segments is not destructive
                 mergeSegments(n, seg1, seg2, newID);

@@ -447,9 +447,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
                 JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
 
         if (mergeOption != null) {
-
             this.setAnalysing(true);
-
             SegmentationHandler sh = new SegmentationHandler(activeDataset());
             sh.mergeSegments(mergeOption.getOne().getID(), mergeOption.getTwo().getID());
 

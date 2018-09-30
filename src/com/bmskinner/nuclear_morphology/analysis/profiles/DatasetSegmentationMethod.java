@@ -183,7 +183,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @throws Exception
 	 */
 	private IAnalysisResult runNewAnalysis() throws Exception {
-
+		if(!dataset.isRoot()) {
+			fine("Dataset is not root, not segmenting");
+			return new DefaultAnalysisResult(dataset);
+		}
+		
 		dataset.getCollection().setConsensus(null); // clear if present
 		fine("Before segmentation median length: "+collection.getMedianArrayLength());
 		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
@@ -207,15 +211,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			for(IAnalysisDataset child: dataset.getAllChildDatasets()){
 				child.getCollection().setConsensus(null);
 				dataset.getCollection().getProfileManager().copyCollectionOffsets(child.getCollection());				
-			}
-		}
-		
-		fine("Validating dataset after segmentation");
-		DatasetValidator v = new DatasetValidator();
-		boolean ok = v.validate(dataset);
-		if(!ok) {
-			for(String s : v.getErrors()){
-				fine(s);
 			}
 		}
 		return new DefaultAnalysisResult(dataset);
