@@ -27,6 +27,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
@@ -254,11 +255,13 @@ public class TestDatasetCreator {
         
         // Copy the saved file into backup file for comparison and conversion testing in the next version.
         String newName = saveFile.getName().replaceAll(".nmd$", ".bak");
-        File bakFile = new File(TestResources.DATASET_FOLDER+TestResources.UNIT_TEST_FOLDER, newName);
+        File bakFile = new File(TestResources.DATASET_FOLDER+Version.currentVersion(), newName);
+        if(!bakFile.getParentFile().exists())
+        	bakFile.getParentFile().mkdirs();
         if(bakFile.exists())
         	bakFile.delete();
         assertFalse("Expecting backup file to be deleted: "+bakFile.getAbsolutePath(), bakFile.exists());
-        Files.copy(saveFile.toPath(), bakFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+        Files.copy(saveFile.getAbsoluteFile().toPath(), bakFile.getAbsoluteFile().toPath(), StandardCopyOption.COPY_ATTRIBUTES);
         assertTrue("Expecting backup copied to "+bakFile.getAbsolutePath(), bakFile.exists());
     }
 }
