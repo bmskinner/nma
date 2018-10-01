@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
@@ -149,69 +150,30 @@ public class Screenshotter {
 			
 			File outputFolder = new File(rootFolder, prefix+"/");
 			outputFolder.mkdirs();
-
+			DetailPanelScreenshotter dps = new DetailPanelScreenshotter(mw, robot);
+			
 			Field detailPanels = getDeclaredPrivateField(mw.getClass(),"detailPanels");
-			detailPanels.setAccessible(true);
 			List<TabPanel> panels = (List<TabPanel>) detailPanels.get(mw);
 			for(TabPanel p : panels) {
-				if(((Component)p).isShowing())
-					takeAnnotatedScreenShot(rootFolder, prefix+"_"+p.getClass().getSimpleName()+"_annotated", (Component)p);
+				if(((Component)p).isShowing()) {
+					Thread.sleep(SLEEP_TIME_MILLIS);
+					dps.takeScreenShots((DetailPanel)p, outputFolder, prefix+"_"+p.getClass().getSimpleName()+"_annotated");
+				}
 			}
+			
+			
 			
 			TabPanelSwitcher s = new TabPanelSwitcher(mw);
 			while(s.hasNext()) {
 				DetailPanel d = s.nextTab();
 				Thread.sleep(SLEEP_TIME_MILLIS);
-				takeScreenShot(outputFolder, prefix+"_"+d.getPanelTitle());
-				exportDetailPanel(d, outputFolder, prefix+"_"+d.getPanelTitle());
-				
+				dps.takeScreenShots(d, outputFolder, prefix+"_"+d.getPanelTitle());				
 			}
 
-		} catch (AWTException | IOException | InterruptedException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+		} catch (IOException | InterruptedException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			
-		}
-	}
-	
-	/**
-	 * Take screenshots of all panels within this display
-	 * @param d
-	 * @param folder
-	 * @param fileNamePrefix
-	 * @throws AWTException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InterruptedException
-	 * @throws IOException
-	 */
-	private void exportDetailPanel(DetailPanel d, File folder, String fileNamePrefix) throws AWTException, IllegalArgumentException, IllegalAccessException, InterruptedException, IOException {
-		
-		Field subPanelField = null;
-		List<Field> fields = getInheritedPrivateFields(d.getClass());
-		
-		for(Field f : fields) {
-			f.setAccessible(true);
-			
-			if(f.get(d) instanceof DetailPanel) {
-				DetailPanel subPanel = (DetailPanel) f.get(d);
-				exportDetailPanel(subPanel, folder, fileNamePrefix );
-				if(subPanel.isShowing())
-					takeAnnotatedScreenShot(folder, fileNamePrefix+"_"+subPanel.getClass().getSimpleName()+"_annotated", subPanel);
-			}
-			
-			if(f.get(d) instanceof JTabbedPane) {
-				subPanelField = f;
-				subPanelField.setAccessible(true);
-				JTabbedPane subPanel = (JTabbedPane) subPanelField.get(d);
-				int tabs = subPanel.getTabCount();
-				for(int j=0; j<tabs; j++) {
-					subPanel.setSelectedIndex(j);
-					Thread.sleep(SLEEP_TIME_MILLIS);
-					takeScreenShot(folder, fileNamePrefix+"_"+j+"_"+subPanel.getTitleAt(j));
-					takeAnnotatedScreenShot(folder, fileNamePrefix+"_"+j+"_"+subPanel.getTitleAt(j)+"_annotated", subPanel);
-				}	
-			}
 		}
 	}
 	
@@ -245,31 +207,6 @@ public class Screenshotter {
 	    		return f;
 	    	}
 	    return null;
-	}
-	
-	
-	
-	
-	private void takeAnnotatedScreenShot(File folder, String title, Component component) throws IOException {
-		Point topLeft = mw.getLocationOnScreen();
-		BufferedImage img = robot.createScreenCapture(makeCroppedBounds(mw));
-		Graphics2D g2 =img.createGraphics();
-		g2.setStroke(new BasicStroke(3));
-		g2.setColor(Color.RED);
-		Point componentTopLeft = component.getLocationOnScreen();
-		int x = componentTopLeft.x-topLeft.x;
-		int y = componentTopLeft.y-topLeft.y;
-		g2.drawRect(x, y, component.getWidth(), component.getHeight());
-		
-		
-		File outputfile = new File(folder, title+Io.PNG_FILE_EXTENSION);
-		ImageIO.write(img, "png", outputfile);
-	}
-	
-	private void takeScreenShot(File folder, String title) throws IOException {
-		BufferedImage img = robot.createScreenCapture(makeCroppedBounds(mw));
-		File outputfile = new File(folder, title+Io.PNG_FILE_EXTENSION);
-		ImageIO.write(img, "png", outputfile);
 	}
 
 }
