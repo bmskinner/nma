@@ -93,9 +93,7 @@ public class SignalCountsPanel extends DetailPanel {
         			dialog.filter();
         });
         panel.add(filterBtn);
-        
-        setEnabled(false);
-
+        filterBtn.setEnabled(false);
         return panel;
     }
 

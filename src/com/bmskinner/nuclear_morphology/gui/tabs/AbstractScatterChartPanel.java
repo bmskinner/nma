@@ -153,6 +153,9 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
         statABox.addActionListener(e->update(getDatasets()));
         statBBox.addActionListener(e->update(getDatasets()));
+        
+        statABox.setEnabled(false);
+        statBBox.setEnabled(false);
 
         gateButton = new JButton(FILTER_BTN_LBL);
         gateButton.setToolTipText(FILTER_BTN_TOOLTIP);
@@ -215,6 +218,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         chartPanel.setChart(AbstractChartFactory.createEmptyChart());
         rhoTable.setModel(AbstractTableCreator.createBlankTable());
         gateButton.setEnabled(false);
+        statABox.setEnabled(false);
+        statBBox.setEnabled(false);
     }
 
     @Override
