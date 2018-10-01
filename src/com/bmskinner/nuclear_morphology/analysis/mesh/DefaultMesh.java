@@ -124,7 +124,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             this.createEdgesAndFaces();
 
         } catch (IllegalArgumentException e) {
-            stack("Error creating mesh", e);
+            fine("Error creating mesh");
             throw new MeshCreationException("Unable to create mesh for component", e);
         }
     }
@@ -773,9 +773,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             }
 
         } catch (Exception e) {
-            warn("Error linking edges and vertices in mesh");
-            log(Level.FINE, "Error linking edges and vertices in mesh", e);
-            fine(this.toString());
+            stack("Error linking edges and vertices in mesh", e);
         }
 
     }

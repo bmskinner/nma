@@ -204,17 +204,17 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    warpedImages.add(meshImage.drawImage(meshConsensus));
 
 		} catch (IllegalArgumentException e) {
-		    stack(e.getMessage(), e);
+		    fine(e.getMessage());
 		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
 		} catch (UnloadableImageException | ImageImportException e) {
-		    stack("Unable to load signal image for signal group " + signalGroup + " in nucleus "
-		            + n.getNameAndNumber(), e);
+			fine(String.format("Unable to load signal image for signal group %s in nucleus %s ",
+					 signalGroup, n.getNameAndNumber()));
 		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
 		} catch (MeshCreationException e1) {
-		    stack("Error creating mesh", e1);
+			fine("Error creating mesh");
 		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
 		} catch (UncomparableMeshImageException | MeshImageCreationException e) {
-			 stack("Cannot make mesh for " + n.getNameAndNumber(), e);
+			fine("Cannot make mesh for " + n.getNameAndNumber());
 			 warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
 		} finally {
 		    mergedImage = ImageFilterer.averageByteImages(warpedImages);

@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -148,7 +149,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         statABox = new JComboBox<>(PlottableStatistic.getStats(component));
         statBBox = new JComboBox<>(PlottableStatistic.getStats(component));
         
-        statABox.setSelectedItem(PlottableStatistic.VARIABILITY); // default if present
+        statABox.setSelectedItem(component.equals(CellularComponent.NUCLEAR_SIGNAL)?PlottableStatistic.FRACT_DISTANCE_FROM_COM:PlottableStatistic.VARIABILITY); // default if present
 
         statABox.addActionListener(e->update(getDatasets()));
         statBBox.addActionListener(e->update(getDatasets()));
@@ -193,7 +194,14 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
         setTable(tableOptions);
 
-        gateButton.setEnabled(true);
+        // Check if the panel component is present
+        boolean isActive = activeDataset()!=null;
+        if(isActive && component.equals(CellularComponent.NUCLEAR_SIGNAL))
+        	isActive &= activeDataset().getCollection().getSignalManager().hasSignals();
+        
+        gateButton.setEnabled(isActive);
+        statABox.setEnabled(isActive);
+        statBBox.setEnabled(isActive);
     }
 
     @Override

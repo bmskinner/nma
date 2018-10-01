@@ -102,7 +102,8 @@ public class SignalCountsPanel extends DetailPanel {
     @Override
     protected void updateSingle() {
         updateMultiple();
-        filterBtn.setEnabled(true);
+        if(activeDataset()!=null && activeDataset().getCollection().getSignalManager().hasSignals())
+        	filterBtn.setEnabled(true);
     }
 
     @Override
