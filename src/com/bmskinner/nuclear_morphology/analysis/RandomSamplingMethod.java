@@ -91,6 +91,12 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
             second.addCell(cells.get(i));
         }
         finer("Added second set");
+        
+        if(stat.equals(PlottableStatistic.VARIABILITY)) {
+        	first.createProfileCollection();
+        	second.createProfileCollection();
+        }
+        
         result[0] = first;
         result[1] = second;
 

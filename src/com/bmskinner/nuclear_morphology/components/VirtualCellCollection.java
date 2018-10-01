@@ -1207,8 +1207,10 @@ public class VirtualCellCollection implements ICellCollection {
         signalManager = new SignalManager(this);
         profileManager = new ProfileManager(this);
 
-        if(this.hasConsensus())
+        if(this.hasConsensus()) {
+			this.getConsensus().getVerticallyRotatedNucleus();
 			this.getConsensus().alignVertically();
+		}
         
         // Don't try to restore profile aggregates here - the parent collection has
         // not finished loading, and so calls to parent will be null. Do the restore in the

@@ -1339,8 +1339,10 @@ public class DefaultCellCollection implements ICellCollection {
 			stack(e);
 		}
 		
-		if(this.hasConsensus())
+		if(this.hasConsensus()) {
+			this.getConsensus().getVerticallyRotatedNucleus();
 			this.getConsensus().alignVertically();
+		}
 
 	}
 	
