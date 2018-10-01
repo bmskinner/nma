@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
@@ -44,7 +46,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
  */
 public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     
-    public MergeSourceExtractionMethod(List<IAnalysisDataset> toExtract) {
+    public MergeSourceExtractionMethod(@NonNull List<IAnalysisDataset> toExtract) {
         super(toExtract);
     }
     
@@ -55,7 +57,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
         return r;
     }
     
-    public List<IAnalysisDataset> extractSourceDatasets(){
+    private List<IAnalysisDataset> extractSourceDatasets(){
         List<IAnalysisDataset> result = new ArrayList<>();     
         
         for (IAnalysisDataset virtualMergeSource : datasets) {
@@ -104,6 +106,10 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
             Optional<IAnalysisOptions> op = virtualMergeSource.getAnalysisOptions();
             if(op.isPresent())
                 newDataset.setAnalysisOptions(op.get());
+            
+            DatasetValidator dv = new DatasetValidator();
+        	if(!dv.validate(newDataset))
+        		warn("New dataset failed to validate");
 
             result.add(newDataset);
 

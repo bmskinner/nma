@@ -19,94 +19,94 @@
 
 package com.bmskinner.nuclear_morphology.analysis;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractionMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class MergeSourceExtracterTest extends SampleDatasetReader {
     
-    public static final String TEST_PATH_1 = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
+	private Logger logger;
+    public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
+        
+    @Before
+    public void setUp() throws Exception {
+    	logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+		logger.setLevel(Level.FINE);
+
+		boolean hasHandler = false;
+		for(Handler h : logger.getHandlers()) {
+			if(h instanceof ConsoleHandler)
+				hasHandler = true;
+		}
+		if(!hasHandler)
+			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+    }
     
     @Test
-    public void testMergedDatasetCopiesSegments() throws Exception {
+    public void testExtractorReturnsEmptyResultOnEmptyInput() throws Exception {
+    	 MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(new ArrayList<>());
+    	 List<IAnalysisDataset> extracted = mse.call().getDatasets();
+    	 assertTrue(extracted.isEmpty());
+    }
+    
+    
+    @Test
+    public void testSourceExtractedFromMergedDatasetEqualsInput() throws Exception {
+    	File f1 = new File(TestResources.MOUSE_CLUSTERS_DATASET);
+    	File f2 = new File(TestResources.MOUSE_TEST_DATASET);
+    	File f3 = new File(MERGED_DATASET_FILE);
 
-        File f = new File(TEST_PATH_1);
+    	IAnalysisDataset d1 = openDataset(f1);
+    	IAnalysisDataset d2 = openDataset(f2);
 
-        IAnalysisDataset d = openDataset(f);
+    	List<IAnalysisDataset> datasets = new ArrayList<>();
+    	datasets.add(d1);
+    	datasets.add(d2);
 
-        System.out.println("Merged dataset segment ids in profile collection:");
-        List<UUID> srcPcIds = d.getCollection().getProfileCollection().getSegmentIDs();
-        for(UUID id : srcPcIds){
-            System.out.println(id);
-        }
+    	DatasetMergeMethod dm = new DatasetMergeMethod(datasets, f3);
+    	IAnalysisDataset merged = dm.call().getFirstDataset();
+    	
+    	new DatasetProfilingMethod(merged)
+    	.then(new DatasetSegmentationMethod(merged, MorphologyAnalysisMode.NEW))
+    	.then(new DatasetExportMethod(merged, f3))
+    	.call();
+    	DatasetValidator dv = new DatasetValidator();
+    	if(!dv.validate(merged))
+			fail("Dataset "+merged.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
+    	
+    	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(datasets);
+    	List<IAnalysisDataset> extracted = mse.call().getDatasets();
 
-        Iterator<Nucleus> it = d.getCollection().getNuclei().iterator();
+    	
+//    	for(IAnalysisDataset m : extracted){
+//    		if(!dv.validate(m))
+//    			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
+//    	}
 
-        System.out.println("Merged dataset segment ids in nuclei:");
-        List<UUID> srcNuIds = new ArrayList<>();
-        while(it.hasNext()){
-            Nucleus n = it.next();
-            for(UUID id : n.getProfile(ProfileType.ANGLE).getSegmentIDs()){
-                System.out.println(id);
-                srcNuIds.add(id);
-            }
-            break;
-        }
-
-        List<IAnalysisDataset> idsToExtact = new ArrayList<>();
-        for(IAnalysisDataset m : d.getAllMergeSources()){
-            System.out.println(m.getName());
-            if(m.getName().equals("Test 1a - Rodent small")){
-                System.out.println("Found merge source to extract");
-                idsToExtact.add(m);
-            }
-        }
-
-
-        MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(idsToExtact);
-        List<IAnalysisDataset> extracted = mse.call().getDatasets();
-
-        System.out.println("Extracted "+extracted.size()+" datasets");
-
-        for(IAnalysisDataset m : extracted){
-            System.out.println("Extracted dataset segment ids in profile collection");
-
-            List<UUID> dstPcIds = m.getCollection().getProfileCollection().getSegmentIDs();
-            assertEquals(srcPcIds.size(), dstPcIds.size());
-            for(int i=0; i<dstPcIds.size(); i++){
-                assertEquals("Profile collection segment id match", srcPcIds.get(i), dstPcIds.get(i));
-            }
-
-            Iterator<Nucleus> im = m.getCollection().getNuclei().iterator();
-
-            System.out.println("Extracted dataset segment ids in nuclei:");
-            List<UUID> dstNuIds = new ArrayList<>();
-            while(im.hasNext()){
-                Nucleus n = im.next();
-                for(UUID id : n.getProfile(ProfileType.ANGLE).getSegmentIDs()){
-                    System.out.println(id);
-                    dstNuIds.add(id);
-                }
-                break;
-            }
-
-            for(int i=0; i<dstPcIds.size(); i++){
-                assertEquals("Nucleus segment id match", srcNuIds.get(i), dstNuIds.get(i));
-            }
-        }
+    	assertEquals(d1, extracted.get(0));
+    	assertEquals(d2, extracted.get(1));
 
     }
 

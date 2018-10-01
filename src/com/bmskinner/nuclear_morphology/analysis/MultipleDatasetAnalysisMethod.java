@@ -22,6 +22,8 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
@@ -31,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  * @since 1.13.8
  *
  */
-public abstract class MultipleDatasetAnalysisMethod  extends AbstractAnalysisMethod {
+public abstract class MultipleDatasetAnalysisMethod extends AbstractAnalysisMethod {
     
     final protected List<IAnalysisDataset> datasets = new ArrayList<>();
     
@@ -39,7 +41,7 @@ public abstract class MultipleDatasetAnalysisMethod  extends AbstractAnalysisMet
      * Construct with a list of datasets to be analysed
      * @param datasets
      */
-    public MultipleDatasetAnalysisMethod(List<IAnalysisDataset> datasets) {
+    public MultipleDatasetAnalysisMethod(@NonNull List<IAnalysisDataset> datasets) {
         super();
         this.datasets.addAll(datasets);
     }
@@ -48,7 +50,7 @@ public abstract class MultipleDatasetAnalysisMethod  extends AbstractAnalysisMet
      * Construct with a single dataset to be analysed
      * @param datasets
      */
-    public MultipleDatasetAnalysisMethod(IAnalysisDataset dataset) {
+    public MultipleDatasetAnalysisMethod(@NonNull IAnalysisDataset dataset) {
         super();
         datasets.add(dataset);
     }

@@ -39,7 +39,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
     private File saveFile;
 
-    private List<IAnalysisDataset> resultDatasets = new ArrayList<IAnalysisDataset>();
+    private List<IAnalysisDataset> resultDatasets = new ArrayList<>();
 
     private Map<UUID, Set<UUID>> pairedSignalGroups = null;
 
@@ -48,10 +48,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     /**
      * Create the merger for the given datasets.
      * 
-     * @param datasets
-     * @param function
-     * @param saveFile
-     *            the file to save the new dataset as
+     * @param datasets the datasets to be merged
+     * @param saveFile the file to specify as the new dataset save path. Note, this method
+     * does not save out the file to the save path 
      */
     public DatasetMergeMethod(List<IAnalysisDataset> datasets, File saveFile) {
         super(datasets);
