@@ -1,7 +1,11 @@
 package com.bmskinner.nuclear_morphology.documentation;
 
 import java.awt.AWTException;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
@@ -16,7 +20,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
-import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -24,8 +27,8 @@ import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.javadocking.dock.TabDock;
 
 import ij.IJ;
 
@@ -131,12 +134,13 @@ public class Screenshotter {
 	 * @return
 	 */
 	private Rectangle makeCroppedBounds(Component c) {
-		Rectangle r = c.getBounds();
-		int topCrop = 6;
-		int btmCrop = 8;
-		int leftCrop = 8;
-		int rightCrop = 8;
-		return new Rectangle(r.x+leftCrop, r.y+topCrop, r.width-(rightCrop+leftCrop), r.height-(topCrop+btmCrop));
+//		Rectangle r = c.getBounds();
+		Point p = c.getLocationOnScreen();
+		int topCrop = 0;
+		int btmCrop = 0;
+		int leftCrop = 0;
+		int rightCrop = 0;
+		return new Rectangle(p.x+leftCrop, p.y+topCrop, c.getWidth()-(rightCrop+leftCrop), c.getHeight()-(topCrop+btmCrop));
 	}
 
 	private void takeScreens(File rootFolder, String prefix) {
@@ -145,35 +149,42 @@ public class Screenshotter {
 			
 			File outputFolder = new File(rootFolder, prefix+"/");
 			outputFolder.mkdirs();
-			
-			Field tabDock = mw.getClass().getDeclaredField("tabDock");
-			tabDock.setAccessible(true);
-			TabDock dock = (TabDock) tabDock.get(mw);
-			
-			int docks = dock.getDockableCount();
-			for(int i=0; i<docks; i++) {
-				dock.setSelectedDockable(dock.getDockable(i));
-				Thread.sleep(SLEEP_TIME_MILLIS);
-				takeScreenShot(outputFolder, prefix+"_"+i+"_"+dock.getDockable(i).getTitle());
-				
-				// Child tabs
-				Component c = dock.getDockable(i).getContent();
-				if(!(c instanceof DetailPanel)) {
-					System.out.println(c.getClass().getName());
-					continue;
-				}
-				
-				DetailPanel d = (DetailPanel)c;
-				exportDetailPanel(d, outputFolder, prefix+"_"+i+"_"+dock.getDockable(i).getTitle());
+
+			Field detailPanels = getDeclaredPrivateField(mw.getClass(),"detailPanels");
+			detailPanels.setAccessible(true);
+			List<TabPanel> panels = (List<TabPanel>) detailPanels.get(mw);
+			for(TabPanel p : panels) {
+				if(((Component)p).isShowing())
+					takeAnnotatedScreenShot(rootFolder, prefix+"_"+p.getClass().getSimpleName()+"_annotated", (Component)p);
 			}
 			
-		} catch (AWTException | IOException | InterruptedException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			TabPanelSwitcher s = new TabPanelSwitcher(mw);
+			while(s.hasNext()) {
+				DetailPanel d = s.nextTab();
+				Thread.sleep(SLEEP_TIME_MILLIS);
+				takeScreenShot(outputFolder, prefix+"_"+d.getPanelTitle());
+				exportDetailPanel(d, outputFolder, prefix+"_"+d.getPanelTitle());
+				
+			}
+
+		} catch (AWTException | IOException | InterruptedException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			
 		}
 	}
 	
+	/**
+	 * Take screenshots of all panels within this display
+	 * @param d
+	 * @param folder
+	 * @param fileNamePrefix
+	 * @throws AWTException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
 	private void exportDetailPanel(DetailPanel d, File folder, String fileNamePrefix) throws AWTException, IllegalArgumentException, IllegalAccessException, InterruptedException, IOException {
 		
 		Field subPanelField = null;
@@ -182,8 +193,12 @@ public class Screenshotter {
 		for(Field f : fields) {
 			f.setAccessible(true);
 			
-			if(f.get(d) instanceof DetailPanel)
-				exportDetailPanel((DetailPanel) f.get(d), folder, fileNamePrefix );
+			if(f.get(d) instanceof DetailPanel) {
+				DetailPanel subPanel = (DetailPanel) f.get(d);
+				exportDetailPanel(subPanel, folder, fileNamePrefix );
+				if(subPanel.isShowing())
+					takeAnnotatedScreenShot(folder, fileNamePrefix+"_"+subPanel.getClass().getSimpleName()+"_annotated", subPanel);
+			}
 			
 			if(f.get(d) instanceof JTabbedPane) {
 				subPanelField = f;
@@ -194,6 +209,7 @@ public class Screenshotter {
 					subPanel.setSelectedIndex(j);
 					Thread.sleep(SLEEP_TIME_MILLIS);
 					takeScreenShot(folder, fileNamePrefix+"_"+j+"_"+subPanel.getTitleAt(j));
+					takeAnnotatedScreenShot(folder, fileNamePrefix+"_"+j+"_"+subPanel.getTitleAt(j)+"_annotated", subPanel);
 				}	
 			}
 		}
@@ -213,6 +229,41 @@ public class Screenshotter {
 	        i = i.getSuperclass();
 	    }
 	    return result;
+	}
+	
+	/**
+	 * Get all the private fields for the class, including superclass fields
+	 * @param type
+	 * @return
+	 */
+	private Field getDeclaredPrivateField(Class<?> type, String name) {
+	    List<Field> result = getInheritedPrivateFields(type);
+
+	    for(Field f : result)
+	    	if(f.getName().equals(name)) {
+	    		f.setAccessible(true);
+	    		return f;
+	    	}
+	    return null;
+	}
+	
+	
+	
+	
+	private void takeAnnotatedScreenShot(File folder, String title, Component component) throws IOException {
+		Point topLeft = mw.getLocationOnScreen();
+		BufferedImage img = robot.createScreenCapture(makeCroppedBounds(mw));
+		Graphics2D g2 =img.createGraphics();
+		g2.setStroke(new BasicStroke(3));
+		g2.setColor(Color.RED);
+		Point componentTopLeft = component.getLocationOnScreen();
+		int x = componentTopLeft.x-topLeft.x;
+		int y = componentTopLeft.y-topLeft.y;
+		g2.drawRect(x, y, component.getWidth(), component.getHeight());
+		
+		
+		File outputfile = new File(folder, title+Io.PNG_FILE_EXTENSION);
+		ImageIO.write(img, "png", outputfile);
 	}
 	
 	private void takeScreenShot(File folder, String title) throws IOException {
