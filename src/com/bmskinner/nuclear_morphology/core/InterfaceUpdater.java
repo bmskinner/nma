@@ -6,6 +6,6 @@ package com.bmskinner.nuclear_morphology.core;
  * @since 1.14.0
  *
  */
-public interface InterfaceUpdater {
+public interface InterfaceUpdater extends Runnable {
 
 }

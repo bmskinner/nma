@@ -122,7 +122,7 @@ public class ThreadManager implements Loggable {
     	if(r instanceof InterfaceUpdater) {
     		uiQueue.removeIf(e->{
     			if(e instanceof TrackedRunnable) {
-    				boolean b = ((TrackedRunnable)e).getSubmittedRunnable() instanceof PanelUpdater;
+    				boolean b = ((TrackedRunnable)e).getSubmittedRunnable() instanceof PanelUpdater; // cancel entire update batches, not individual updates
     				if(b) 
     					uiQueueLength.decrementAndGet();
     				return b;

@@ -60,6 +60,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
@@ -284,7 +285,7 @@ public class ImagesTabPanel extends DetailPanel {
     			return;
     		}
 
-    		Runnable r = () -> {
+    		InterfaceUpdater r = () -> {
     			try {
     				ImageProcessor ip = f.exists() ? new ImageImporter(f).importToColorProcessor()
     						: ImageAnnotator.createBlankColorProcessor(1500, 1500); //TODO - check space needed by cells

@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
@@ -86,7 +87,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 	 * @param component
 	 */
 	private void createCellImage() {
-		ThreadManager.getInstance().submit(() ->{
+		InterfaceUpdater u = () ->{
 			output= null;
 			ImageProcessor ip;
 			try{
@@ -226,7 +227,8 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 			});
 
-		});
+		};
+		ThreadManager.getInstance().submit(u);
 	}
 	
 	@Override

@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -82,7 +83,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 	 * @param component
 	 */
 	private void createCellImage() {
-		ThreadManager.getInstance().submit(() ->{
+		InterfaceUpdater u = () ->{
 			output= null;
 			ImageProcessor ip;
 			try{
@@ -248,11 +249,12 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 
 			});
 
-		});
+		};
+		ThreadManager.getInstance().submit(u);
 	}
 	
 	private void createMeshImage() {
-		ThreadManager.getInstance().submit(() ->{
+		InterfaceUpdater u = () ->{
 			try {
 				output= null;
 				ImageProcessor ip;
@@ -282,11 +284,12 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				stack("Error making mesh or loading image", e);
 				setNull();
 			}
-		});
+		};
+		ThreadManager.getInstance().submit(u);
 	}
 	
 	private void createWarpImage() {
-		ThreadManager.getInstance().submit(() ->{
+		InterfaceUpdater u = () ->{
 			try {
 				output= null;
 				ImageProcessor ip;
@@ -317,7 +320,8 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				stack("Error making mesh or loading image", e);
 				setNull();
 			}
-		});
+		};
+		ThreadManager.getInstance().submit(u);
 	}
 	
 	@Override
