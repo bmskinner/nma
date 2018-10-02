@@ -96,8 +96,8 @@ public class FloatPoint extends Point2D.Float implements IPoint {
             throw new IllegalArgumentException("Destination point is null");
 
         // a2 = b2 + c2
-        double dx = Math.abs(this.getX() - a.getX());
-        double dy = Math.abs(this.getY() - a.getY());
+        double dx = (a instanceof Point2D ? x-((FloatPoint)a).x : Math.abs(x - a.getX()));
+        double dy = (a instanceof Point2D ? y-((FloatPoint)a).y : Math.abs(y - a.getY()));
         double dx2 = dx * dx;
         double dy2 = dy * dy;
         double length = Math.sqrt(dx2 + dy2);

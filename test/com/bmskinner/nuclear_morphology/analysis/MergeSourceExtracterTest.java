@@ -50,8 +50,8 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
 	private Logger logger;
     public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
     
-    /** A 1k cell dataset with 3 merge sources created in 1.13.8 on a different computer */
-    public static final String MERGED_1_13_8_DATASET_FILE = TestResources.DATASET_FOLDER + "LEWxPWK.nmd";
+//    /** A 1k cell dataset with 3 merge sources created in 1.13.8 on a different computer */
+//    public static final String MERGED_1_13_8_DATASET_FILE = TestResources.DATASET_FOLDER + "LEWxPWK.nmd";
         
     @Before
     public void setUp() throws Exception {

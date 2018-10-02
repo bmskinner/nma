@@ -874,7 +874,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
 			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-		result = cells.stream().mapToDouble(c -> c.getStatistic(stat, scale)).sorted().toArray();
+		result = cells.parallelStream().mapToDouble(c -> c.getStatistic(stat, scale)).sorted().toArray();
 		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
 		return result;
 
@@ -924,7 +924,7 @@ public class DefaultCellCollection implements ICellCollection {
 			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 		}
 		AtomicInteger errorCount= new AtomicInteger(0);
-		result = getNuclei().stream().mapToDouble(n -> {
+		result = getNuclei().parallelStream().mapToDouble(n -> {
 			IBorderSegment segment;
 			try {
 				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);

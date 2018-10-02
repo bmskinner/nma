@@ -304,7 +304,11 @@ public abstract class AbstractOptions implements DisplayOptions {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((list == null) ? 0 : list.hashCode());
+        
+        if(list!=null) // calculating the hashcode for the entire dataset is pointless and unnecessary
+        	for(IAnalysisDataset d : list)
+        		result = prime * result + ((d == null) ? 0 : d.getId().hashCode());
+
         result = prime * result + ((scale == null) ? 0 : scale.hashCode());
         result = prime * result + ((segID == null) ? 0 : segID.hashCode());
         result = prime * result + segPosition;

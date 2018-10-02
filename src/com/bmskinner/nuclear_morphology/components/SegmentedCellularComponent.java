@@ -316,9 +316,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			if(p.size()!=getBorderLength())
 				throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) in DefaultProfile constructor", p.size(), getBorderLength()));
 
-			this.array = new float[p.size()];
-			for (int i = 0; i < p.size(); i++) {
-				array[i] = (float) p.get(i);
+			if(p instanceof DefaultProfile) {
+				DefaultProfile other = (DefaultProfile)p;
+				this.array = Arrays.copyOf(other.array,other.array.length);
+			} else {
+				this.array = p.toFloatArray();
 			}
 		}
 

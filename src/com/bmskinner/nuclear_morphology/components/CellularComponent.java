@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components;
 
 import java.awt.Shape;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -431,17 +432,10 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return the index within the array
      */
     static int wrapIndex(int i, int length) {
-        if (i < 0) {
-            // if the inputs are (-336, 330), this will return -6. Recurse until
-            // positive
-            i = length + i;
-            return wrapIndex(i, length);
-        }
-
-        if (i < length) { // if not wrapping
+        if (i < 0) // Recurse until positive
+            return wrapIndex(length + i, length);
+        if (i < length) // if not wrapping
             return i;
-        }
-
         return i % length;
     }
 
@@ -454,34 +448,31 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return the index within the array
      */
     static double wrapIndex(double i, int length) {
-        if (i < 0) {
-            i = length + i;
-            return wrapIndex(i, length); // correct for values multiple profile
-                                         // lengths below zero
-        }
-
-        if (i < length) { // if not wrapping
+    	if (i < 0) // Recurse until positive
+            return wrapIndex(length + i, length);
+        if (i < length) // if not wrapping
             return i;
-        }
-
-        // i is greater than array length
-
         return i % length;
-
     }
     
     /**
-	 * Offset an array by the given amount
+	 * Offset an array to start from the 
+	 * given index
 	 * 
 	 * @param arr the array
-	 * @param j the offset
-	 * @return
+	 * @param j the offset to apply; the new start index
+	 * @return the offset array
 	 */
 	static float[] offset(float[] arr, int j) {
 		float[] newArray = new float[arr.length];
-		for (int i = 0; i < arr.length; i++) {
-			newArray[i] = arr[CellularComponent.wrapIndex(i + j, arr.length)];
-		}
+		
+		int newStartIndex = CellularComponent.wrapIndex(j, arr.length);
+		int nElements = arr.length-newStartIndex;
+		
+		// Copy from the new start index to the end of the array 
+		System.arraycopy(arr, newStartIndex, newArray, 0, nElements);
+		// copy from the start of the array to the new start index
+		System.arraycopy(arr, 0, newArray, nElements, newStartIndex);
 		return newArray;
 	}
 	
@@ -521,7 +512,6 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
 				bestIndex = i;
 				
 			}
-//			System.out.println(String.format("Offset %s has score %s", i, score));
 		}
 		return bestIndex;
 	}

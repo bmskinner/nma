@@ -60,13 +60,17 @@ public class FloatProfile implements IProfile {
      * @param p the profile to copy
      */
     public FloatProfile(@NonNull final IProfile p) {
-        if (p==null)
-            throw new IllegalArgumentException("Profile is null");
-        this.array = new float[p.size()];
-        for (int i = 0; i < p.size(); i++)
-            array[i] = (float) p.get(i);
-    }
+    	if (p==null)
+    		throw new IllegalArgumentException("Profile is null");
+    	if(p instanceof FloatProfile) {
+    		FloatProfile other = (FloatProfile)p;
+    		this.array = Arrays.copyOf(other.array,other.array.length);
+    	} else {
+    		this.array = p.toFloatArray();
+    	}
 
+    }
+    
     /**
      * Constructor based on an fixed value and the profile length
      * 

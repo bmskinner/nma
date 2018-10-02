@@ -1095,13 +1095,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) {
         // Find the point that is closest to 180 degrees across the CoM
     	double distToCom = p.getLengthTo(centreOfMass);
-//    	LineEquation eq = new DoubleEquation(p, centreOfMass);
-//    	return borderList.stream()
-//    			.filter(point->point.getLengthTo(p)>distToCom)
-//                .min(Comparator.comparing(point->eq.getClosestDistanceToPoint(point) ))
-//                .get();
         return borderList.stream()
-        	.filter(point->point.getLengthTo(p)>distToCom)
+        	.filter(point->point.getLengthTo(p)>distToCom+point.getLengthTo(centreOfMass)-1)
             .min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
             .get();
     }
