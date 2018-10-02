@@ -49,6 +49,9 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     
 	private Logger logger;
     public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
+    
+    /** A 1k cell dataset with 3 merge sources created in 1.13.8 on a different computer */
+    public static final String MERGED_1_13_8_DATASET_FILE = TestResources.DATASET_FOLDER + "LEWxPWK.nmd";
         
     @Before
     public void setUp() throws Exception {
@@ -71,6 +74,24 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	 assertTrue(extracted.isEmpty());
     }
     
+    
+    @Test
+    public void testSourceExtractedFrom1_13_8DatasetGetsRPReassigned() throws Exception {
+    	IAnalysisDataset merged = SampleDatasetReader.openDataset(new File(MERGED_1_13_8_DATASET_FILE));
+
+    	List<IAnalysisDataset> sources = new ArrayList<>();
+    	sources.addAll(merged.getAllMergeSources());
+    	
+    	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(sources);
+    	List<IAnalysisDataset> extracted = mse.call().getDatasets();
+
+    	DatasetValidator dv = new DatasetValidator();
+    	for(IAnalysisDataset m : extracted){
+    		if(!dv.validate(m))
+    			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
+    	}
+    	
+    }
     
     @Test
     public void testSourceExtractedFromMergedDatasetEqualsInput() throws Exception {

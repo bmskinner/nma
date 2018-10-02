@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -39,6 +40,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.io.DatasetConverter;
+import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 
 /**
  * Extract virtual merge source datasets into real root datasets.
@@ -68,10 +71,11 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
         for (IAnalysisDataset virtualMergeSource : datasets) {
             
         	IAnalysisDataset extracted = extractMergeSource(virtualMergeSource);
-        	
             fine("Checking new datasets from merge source "+extracted.getName());
-         	if(!dv.validate(extracted))
+         	if(!dv.validate(extracted)) {
          		warn("New dataset failed to validate");
+         		fine(dv.getErrors().stream().collect(Collectors.joining("\n")));
+         	}
 
             result.add(extracted);
 
@@ -92,6 +96,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
     	IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
     	newDataset.setRoot(true);
+    	
     	try {
     		// Copy over the profile collections
     		newDataset.getCollection().createProfileCollection();
@@ -116,7 +121,16 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
          Optional<IAnalysisOptions> op = template.getAnalysisOptions();
          if(op.isPresent())
-             newDataset.setAnalysisOptions(op.get());
+             newDataset.setAnalysisOptions(op.get().duplicate());
+
+         
+         try {
+     		fine("Ensure dataset segmentation is valid");
+ 			DatasetConverter.realignSegmentsToRP(newDataset);
+ 		} catch (DatasetConversionException e1) {
+ 			fine("Unable to convert template dataset to current version");
+ 		}
+         
          return newDataset;
     }
     

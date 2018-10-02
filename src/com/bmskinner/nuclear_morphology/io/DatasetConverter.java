@@ -154,17 +154,17 @@ public class DatasetConverter implements Loggable, Importer {
     	// version, but if the source was older than 1.14.0 we need to adjust the spline fitting
     	Version oldVersion = oldDataset.getVersion();
     	if(oldVersion!=null && oldVersion.isOlderThan(Version.v_1_13_3))
-    		result = convert1_13_8To1_14_0(result);
+    		result = convertUpTo1_14_0(result);
     	
     	// Now the result will in a format with a checkable version
     	if(result.getVersion().isOlderThan(Version.v_1_13_2))
-    		result = convert1_13_1To1_13_2(result);
+    		result = convertUpTo1_13_2(result);
     	if(result.getVersion().isOlderThan(Version.v_1_14_0))
-    		result = convert1_13_8To1_14_0(result);
+    		result = convertUpTo1_14_0(result);
     	return result;
     }
     
-    private IAnalysisDataset convert1_13_1To1_13_2(IAnalysisDataset template) throws DatasetConversionException {
+    private IAnalysisDataset convertUpTo1_13_2(IAnalysisDataset template) throws DatasetConversionException {
     	// Correct signal border locations from older versions for all
     	// imported datasets
         fine("Updating signal locations for pre-1.13.2 dataset");
@@ -296,7 +296,13 @@ public class DatasetConverter implements Loggable, Importer {
     	
     }
     
-    private IAnalysisDataset convert1_13_8To1_14_0(IAnalysisDataset template)  throws DatasetConversionException {
+    
+    /**
+     * Check nuclei for profiles with segments not ending at the RP, and adjust as needed.
+     * @param template the dataset to convert
+     * @throws DatasetConversionException
+     */
+    public static void realignSegmentsToRP(IAnalysisDataset template) throws DatasetConversionException {
     	try {
     		
     		for(Nucleus n : template.getCollection().getNuclei()) {
@@ -307,7 +313,6 @@ public class DatasetConverter implements Loggable, Importer {
     			ISegmentedProfile rpProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
     			IBorderSegment seg = rpProfile.getSegmentAt(0);    				
     			if(seg.getStartIndex()!=0) {
-    				fine("Found mismatched index");
     				seg.update(0, seg.getEndIndex());
     				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, rpProfile);
     			}
@@ -327,10 +332,12 @@ public class DatasetConverter implements Loggable, Importer {
     		}
     		
     	} catch (ProfileException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | UnavailableProfileTypeException | UnavailableBorderTagException | SegmentUpdateException e) {
-    		stack("Error converting dataset", e);
             throw new DatasetConversionException(e.getCause());
     	}
-
+    }
+    
+    private IAnalysisDataset convertUpTo1_14_0(IAnalysisDataset template)  throws DatasetConversionException {
+    	realignSegmentsToRP(template);
     	return template;
 
     }
@@ -821,7 +828,7 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    public class DatasetConversionException extends Exception {
+    public static class DatasetConversionException extends Exception {
         private static final long serialVersionUID = 1L;
 
         public DatasetConversionException() {
