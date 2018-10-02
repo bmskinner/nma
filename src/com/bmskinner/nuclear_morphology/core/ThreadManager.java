@@ -37,30 +37,41 @@ public class ThreadManager implements Loggable {
     private static volatile ThreadManager instance   = null;
     private static final Object           lockObject = new Object(); // synchronisation
    
-    /*
-     * Handle threading
-     */
     public static final int keepAliveTime   = 10000;
     
-    private final BlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1024);
+    /** A queue for UI update tasks */
+    private final BlockingQueue<Runnable> methodQueue = new LinkedBlockingQueue<>(1024);
+    
+    /** A queue for analysis method update tasks */
+    private final BlockingQueue<Runnable> uiQueue     = new LinkedBlockingQueue<>(1024);
 
-    private final ExecutorService executorService;
+    /** Thread pool for method update tasks */
+    private final ExecutorService methodExecutorService;
+    
+    /** Thread pool for UI update tasks */
+    private final ExecutorService uiExecutorService;
 
     Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
 
-    AtomicInteger queueLength = new AtomicInteger();
+    private AtomicInteger uiQueueLength     = new AtomicInteger();
+    private AtomicInteger methodQueueLength = new AtomicInteger();
 
     protected ThreadManager() {
     	int maxThreads = Runtime.getRuntime().availableProcessors();
     	if(maxThreads>1)
     		maxThreads-=1; // leave something for the OS, EDT etc.
-    	log("Creating thread manager with max pool size of "+maxThreads);
-    	executorService = new ThreadPoolExecutor(maxThreads, maxThreads, keepAliveTime,
-                TimeUnit.MILLISECONDS, executorQueue);
+    	
+    	int uiThreads = maxThreads-1;
+    	
+    	fine("Creating thread manager with max pool size of "+maxThreads);
+    	methodExecutorService = new ThreadPoolExecutor(1, 1, keepAliveTime,
+                TimeUnit.MILLISECONDS, methodQueue);
+    	uiExecutorService = new ThreadPoolExecutor(uiThreads, uiThreads, keepAliveTime,
+                TimeUnit.MILLISECONDS, uiQueue);
     }
     
     public int queueLength(){
-    	return queueLength.get();
+    	return uiQueueLength.get();
     }
 
     /**
@@ -82,17 +93,17 @@ public class ThreadManager implements Loggable {
     
     @Override
 	public String toString() {
-    	return executorQueue.toString();
+    	return uiQueue.toString();
     }
 
     public synchronized Future<?> submit(Runnable r) {
 //    	System.out.println("Task submitted to queue");
-        return executorService.submit(new TrackedRunnable(r));
+        return methodExecutorService.submit(new TrackedRunnable(r));
     }
 
     public synchronized Future<?> submit(Callable r) {
-    	queueLength.incrementAndGet();
-        return executorService.submit(makeSubmitableCallable(r));
+    	methodQueueLength.incrementAndGet();
+        return methodExecutorService.submit(makeSubmitableCallable(r));
     }
     
     /**
@@ -104,33 +115,36 @@ public class ThreadManager implements Loggable {
 //    	System.out.println("Task executed to queue");
     	 // if a new update is requested, clear older queued updates
     	if(r instanceof PanelUpdater) {
-    		executorQueue.removeIf(e->{
+    		uiQueue.removeIf(e->{
     			if(e instanceof TrackedRunnable) {
     				boolean b = ((TrackedRunnable)e).getSubmittedRunnable() instanceof PanelUpdater;
     				if(b) 
-    					queueLength.decrementAndGet();
+    					uiQueueLength.decrementAndGet();
     				return b;
     			}
     			return false;
     		});
+    		uiExecutorService.execute(new TrackedRunnable(r));
+    	} else {
+    		methodExecutorService.execute(new TrackedRunnable(r));
     	}
-
-       
-        executorService.execute(new TrackedRunnable(r));
     }
     
     private synchronized Callable makeSubmitableCallable(Callable r){
     	return () -> {
+    		
+    		Object o = null;
     		try {
-				Object o = r.call();
-				queueLength.decrementAndGet();
-	    		return o;
+				o = r.call();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				queueLength.decrementAndGet();
 				return null;
 			}
+    		finally {
+    			methodQueueLength.decrementAndGet();
+    		}
+    		return o;
     		
     	};
     }
@@ -146,14 +160,20 @@ public class ThreadManager implements Loggable {
     	private Runnable r;
     	
 		public TrackedRunnable(Runnable r) {
-			queueLength.incrementAndGet(); // Increment queue when submitting task.
+			if(r  instanceof PanelUpdater) // Increment queue when submitting task.
+				uiQueueLength.incrementAndGet();
+			else
+				methodQueueLength.incrementAndGet();
 			this.r = r;
 		}
     	
     	@Override
 		public void run() {
 			r.run();
-    		queueLength.decrementAndGet();
+			if(r  instanceof PanelUpdater)
+				uiQueueLength.decrementAndGet();
+			else
+				methodQueueLength.decrementAndGet();
 		}
     	
     	public Runnable getSubmittedRunnable() {
