@@ -96,18 +96,24 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	if(!dv.validate(merged))
 			fail("Dataset "+merged.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
     	
-    	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(datasets);
+    	List<IAnalysisDataset> sources = new ArrayList<>();
+    	sources.addAll(merged.getAllMergeSources());
+    	
+    	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(sources);
     	List<IAnalysisDataset> extracted = mse.call().getDatasets();
 
     	
-//    	for(IAnalysisDataset m : extracted){
-//    		if(!dv.validate(m))
-//    			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
-//    	}
-
-    	assertEquals(d1, extracted.get(0));
-    	assertEquals(d2, extracted.get(1));
-
+    	for(IAnalysisDataset m : extracted){
+    		if(!dv.validate(m))
+    			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
+    	}
+    	
+    	DatasetComparator dc = new DatasetComparator();
+    	assertEquals(d1.getCollection().size(), extracted.get(0).getCollection().size());
+    	assertEquals(d2.getCollection().size(), extracted.get(1).getCollection().size());
+    	
+    	assertEquals(d1.getAnalysisOptions(), extracted.get(0).getAnalysisOptions());
+    	assertEquals(d2.getAnalysisOptions(), extracted.get(1).getAnalysisOptions());
     }
 
 }

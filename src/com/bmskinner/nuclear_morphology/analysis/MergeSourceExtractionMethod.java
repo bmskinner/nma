@@ -27,12 +27,14 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.MergeSourceAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -58,65 +60,103 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     }
     
     private List<IAnalysisDataset> extractSourceDatasets(){
-        List<IAnalysisDataset> result = new ArrayList<>();     
-        
+    	fine("Extracting merge sources");
+    	List<IAnalysisDataset> result = new ArrayList<>();     
+    	
+    	DatasetValidator dv = new DatasetValidator();
+    	
         for (IAnalysisDataset virtualMergeSource : datasets) {
             
-            ICellCollection templateCollection = virtualMergeSource.getCollection();
-            // Make a new real cell collection from the virtual collection
-            ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), null,
-                    templateCollection.getName(), templateCollection.getNucleusType());
+        	IAnalysisDataset extracted = extractMergeSource(virtualMergeSource);
+        	
+            fine("Checking new datasets from merge source "+extracted.getName());
+         	if(!dv.validate(extracted))
+         		warn("New dataset failed to validate");
 
-            templateCollection.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-
-            IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
-            newDataset.setRoot(true);
-            try {
-            	// Copy over the profile collections
-            	newDataset.getCollection().createProfileCollection();
-
-            	// Copy the merged dataset segmentation into the new dataset.
-            	// This wil match cell segmentations by default, since the cells
-            	// have been copied from the merged dataset.
-            	if (virtualMergeSource instanceof MergeSourceAnalysisDataset) {
-
-            		MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
-
-
-            		IAnalysisDataset parent =  d.getParent();
-            		// When the parent is also a virtual cell collection, recurse up to the root dataset
-            		while (parent instanceof MergeSourceAnalysisDataset) {
-            			parent = ((MergeSourceAnalysisDataset) parent).getParent();
-            		}
-
-            		parent.getCollection().getProfileManager()
-            		.copyCollectionOffsets(newDataset.getCollection());
-
-
-            	}
-
-            } catch (ProfileException e) {
-            	error("Cannot copy profile offsets to recovered merge source", e);
-            }
-
-            // Copy over the signal collections where appropriate
-            copySignalGroups(templateCollection, newDataset);
-
-            Optional<IAnalysisOptions> op = virtualMergeSource.getAnalysisOptions();
-            if(op.isPresent())
-                newDataset.setAnalysisOptions(op.get());
-            
-            DatasetValidator dv = new DatasetValidator();
-        	if(!dv.validate(newDataset))
-        		warn("New dataset failed to validate");
-
-            result.add(newDataset);
+            result.add(extracted);
 
         }
+        fine("Finished extracting merge sources");
         return result;
     }
     
+    private IAnalysisDataset extractMergeSource(IAnalysisDataset template) {
+
+    	ICellCollection templateCollection = template.getCollection();
+    	// Make a new real cell collection from the virtual collection
+    	ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), null,
+    			templateCollection.getName(), templateCollection.getNucleusType());
+
+    	templateCollection.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
+
+
+    	IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
+    	newDataset.setRoot(true);
+    	try {
+    		// Copy over the profile collections
+    		newDataset.getCollection().createProfileCollection();
+
+    		IAnalysisDataset parent = getRootParent(template);
+
+    		// Copy the merged dataset segmentation into the new dataset.
+    		// This wil match cell segmentations by default, since the cells
+    		// have been copied from the merged dataset.
+    		parent.getCollection().getProfileManager()
+    		.copyCollectionOffsets(newDataset.getCollection());
+
+    		// Copy over the signal collections where appropriate
+    		copySignalGroups(templateCollection, newDataset);
+
+    		// Child datasets are not present in merge sources
+//    		copyChildDatasets(template, newDataset);
+
+    	} catch (ProfileException e) {
+    		error("Cannot copy profile offsets to recovered merge source", e);
+    	}
+
+         Optional<IAnalysisOptions> op = template.getAnalysisOptions();
+         if(op.isPresent())
+             newDataset.setAnalysisOptions(op.get());
+         return newDataset;
+    }
+    
+    private IAnalysisDataset getRootParent(IAnalysisDataset dataset) {
+    	if(dataset.isRoot())
+    		return dataset;
+    	if (dataset instanceof MergeSourceAnalysisDataset) {
+
+     		MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) dataset;
+     		IAnalysisDataset parent =  d.getParent();
+     		if(parent.isRoot())
+     			return parent;
+     		return getRootParent(parent);
+     	}
+    	return null;
+    }
+    
+    
+//    private void copyChildDatasets(IAnalysisDataset template, IAnalysisDataset newDataset) throws ProfileException{
+//    	 fine("Adding children of "+template.getName());
+//    	for(IAnalysisDataset childTemplate : template.getChildDatasets()) {
+//    		fine("Adding child "+childTemplate.getName());
+//    		ICellCollection templateCollection = childTemplate.getCollection();
+//    		
+//            // Make a new real cell collection from the virtual collection
+//            ICellCollection newCollection = new VirtualCellCollection(newDataset, templateCollection.getName());
+//            
+//            templateCollection.getCells().forEach(c->newCollection.addCell(c));
+//
+//            IAnalysisDataset newChildDataset = new ChildAnalysisDataset(newDataset, newCollection);
+//            newDataset.addChildDataset(newChildDataset);
+//            newChildDataset.getCollection().createProfileCollection();
+//            
+//            // Recursive copy
+//            copyChildDatasets(childTemplate, newChildDataset);
+//    		
+//    	}
+//    	
+//    	
+//    }
     
     private void copySignalGroups(ICellCollection templateCollection, IAnalysisDataset newDataset){
         ICellCollection newCollection = newDataset.getCollection();
