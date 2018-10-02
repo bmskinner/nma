@@ -70,12 +70,19 @@ public class Stats implements Loggable {
     public static final int MEDIAN         = 50;
     public static final int ONE_HUNDRED_PERCENT = 100;
 
-    static double max(double[] array) {
+    public static double max(double[] array) {
         return DoubleStream.of(array).max().orElse(0);
     }
 
-    static double min(double[] array) {
+    public static double min(double[] array) {
         return DoubleStream.of(array).min().orElse(0);
+    }
+    
+    public static float max(float[] array) {
+    	float max = -Float.MAX_VALUE;
+    	for(float f : array)
+    		max = Math.max(max, f);
+        return max;
     }
 
     /**

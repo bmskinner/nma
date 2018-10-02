@@ -117,9 +117,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         	// This issue is resolved for datasets created in 1.14.0 onwards.
         	// If this happens, the conversion will fail due to the new length constraints in the profile constructor.
         	// As a stopgap, interpolate profiles as needed.
-        	if(p.size()!=getBorderLength())
+        	if(p.size()!=getBorderLength()) {
         		p = p.interpolate(getBorderLength());
-        	assignProfile(type, new DefaultSegmentedProfile(p));
+        		assignProfile(type, new DefaultSegmentedProfile(p));
+        	}
         	return profileMap.get(type).copy();
         } catch (IndexOutOfBoundsException | ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);

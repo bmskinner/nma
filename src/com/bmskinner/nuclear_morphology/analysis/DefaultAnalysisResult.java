@@ -35,10 +35,10 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public class DefaultAnalysisResult implements IAnalysisResult {
 
-    List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>();
+    List<IAnalysisDataset> datasets = new ArrayList<>();
 
     // Store boolean options as needed
-    Map<Integer, Boolean> booleans = new HashMap<Integer, Boolean>();
+    Map<Integer, Boolean> booleans = new HashMap<>();
 
     public DefaultAnalysisResult(IAnalysisDataset d) {
         datasets.add(d);

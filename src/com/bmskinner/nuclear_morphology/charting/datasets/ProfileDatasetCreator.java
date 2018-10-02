@@ -54,6 +54,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public class ProfileChartDataset {
 		private final FloatXYDataset lines = new FloatXYDataset(); // values that will be drawn with a line renderer
 		private final Map<Integer, XYSeriesCollection> ranges = new HashMap<>(); // values that will be drawn with a difference renderer
+		private float maxYValue = -Float.MAX_VALUE;
 		
 		/**
 		 * Add a line series
@@ -63,6 +64,11 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		 */
 		public void addLines(String seriesKey, float[][] data, int datasetIndex) {
 			lines.addSeries(seriesKey, data, datasetIndex);
+			maxYValue = Math.max(maxYValue, Stats.max(data[1]));
+		}
+		
+		public double maxRangeValue() {
+			return maxYValue;
 		}
 		
 		/**
@@ -81,6 +87,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	        for (int j = 0; j < x.length; j++) {
 	        	series.add(x[j], y[j]);
 	        }
+	        maxYValue = Math.max(maxYValue, Stats.max(y));
 	        ranges.get(datasetIndex).addSeries(series);
 		}
 		
@@ -213,9 +220,9 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 //				System.out.println(String.format("Fetched %s median segments for %s", segments.size(), borderTag));
 
 				if (isNormalised) {
-					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), DEFAULT_PROFILE_LENGTH, 0, 0);
+					addSegmentsFromProfile(segments, medianProfile, ds, DEFAULT_PROFILE_LENGTH, 0, 0);
 				} else {
-					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), collection.getMedianArrayLength(), offset, 0);
+					addSegmentsFromProfile(segments, medianProfile, ds, collection.getMedianArrayLength(), offset, 0);
 				}
 			} else {
 				// add the median profile
@@ -290,7 +297,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					if(options.firstDataset().getCollection().getProfileCollection().hasSegments()) {
 						List<IBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 								.getOrderedSegments();
-						addSegmentsFromProfile(segments, profile, ds.getLines(), nucleus.getBorderLength(), 0, 0);
+						addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0, 0);
 					} else {
 						IProfile xpoints = createXPositions(profile, nucleus.getBorderLength());
 						float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
@@ -317,7 +324,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				ISegmentedProfile segProfile = (ISegmentedProfile)profile;
 				if(segProfile.hasSegments()) {
 					List<IBorderSegment> segments = segProfile.getOrderedSegments();
-					addSegmentsFromProfile(segments, segProfile, ds.getLines(), segProfile.size(), 0, 0);
+					addSegmentsFromProfile(segments, segProfile, ds, segProfile.size(), 0, 0);
 				} 
 			} else {
 				IProfile xpoints = createXPositions(profile, profile.size());
@@ -358,7 +365,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @throws ProfileException
 	 * @throws ChartDatasetCreationException 
 	 */
-	private void addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, FloatXYDataset ds,
+	private void addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, ProfileChartDataset ds,
 			int length, double offset, int datasetIndex) throws ProfileException, ChartDatasetCreationException {
 
 		IProfile xpoints = createXPositions(profile, length).add(offset);
@@ -382,7 +389,8 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 							          Arrays.copyOfRange(yvalues, start, prevIndex+1)};
 					start = index;
 					
-					ds.addSeries(seg.getName() + "_A", data, datasetIndex);
+					ds.addLines(seg.getName() + "_A", data, datasetIndex);
+//					ds.addSeries(seg.getName() + "_A", data, datasetIndex);
 				}
 				
 				prevIndex = index;
@@ -392,7 +400,8 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				if(prevIndex>-1) { // only happens when segmentation has gone wrong - but those are the times we need to check the chartstrek
 					float[][] data = {Arrays.copyOfRange(xvalues, start, prevIndex+1),
 							          Arrays.copyOfRange(yvalues, start, prevIndex+1)};
-					ds.addSeries(seg.getName(), data, datasetIndex);
+					ds.addLines(seg.getName(), data, datasetIndex);
+//					ds.addSeries(seg.getName(), data, datasetIndex);
 				}
 			} catch(IllegalArgumentException e) {
 				throw new ChartDatasetCreationException(String.format("Cannot make segment range for indexes %s to %s in segment %s", start, prevIndex, seg.getDetail()));
@@ -415,7 +424,8 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	private XYDataset createSegmentedProfileDataset(Nucleus nucleus) throws ChartDatasetCreationException {
 
 		ProfileType type = options.getType();
-		FloatXYDataset ds = new FloatXYDataset();
+		ProfileChartDataset ds = new ProfileChartDataset();
+//		FloatXYDataset ds = new FloatXYDataset();
 
 		ISegmentedProfile profile;
 
@@ -439,7 +449,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			throw new ChartDatasetCreationException("Cannot get segmented profile for " + nucleus.getNameAndNumber());
 		}
 
-		return ds;
+		return ds.getLines();
 	}
 
 	/**
@@ -490,7 +500,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             if(collection.getProfileCollection().hasSegments()) {
             	List<IBorderSegment> segments = collection.getProfileCollection()
                         .getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN).getOrderedSegments();
-            	addSegmentsFromProfile(segments, profile, ds.getLines(), DEFAULT_PROFILE_LENGTH, 0, 0);
+            	addSegmentsFromProfile(segments, profile, ds, DEFAULT_PROFILE_LENGTH, 0, 0);
             } else {
             	IProfile xpoints = createXPositions(profile, DEFAULT_PROFILE_LENGTH);
 				float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };

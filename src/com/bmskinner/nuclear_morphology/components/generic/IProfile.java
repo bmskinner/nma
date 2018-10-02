@@ -149,25 +149,27 @@ public interface IProfile extends Serializable, Loggable {
 	 * @return
 	 */
     static float getInterpolatedValue(float[] array2, float fraction) {
+    	if(fraction==0)
+    		return array2[0];
+    	if(fraction==1)
+    		return array2[array2.length-1];
+    	
+    	double index = fraction * array2.length;
 		// Get the equivalent index of the fraction in the array
-		double index = fraction * array2.length;
-		double indexFloor = Math.floor(index);
+    	int indexLower = (int)index;
+//
+//		// Get the integer portion and find the bounding indices
 
-		// Get the integer portion and find the bounding indices
-		int indexLower = (int) indexFloor;
-		if (indexLower == array2.length) { // only wrap possible if fraction is
-			// range 0-1
+		if (indexLower == array2.length) // only wrap possible if fraction is range 0-1
 			indexLower = 0;
-		}
 
 		int indexHigher = indexLower + 1;
-		if (indexHigher == array2.length) { // only wrap possible if fraction is
-			// range 0-1
+		if (indexHigher == array2.length) // only wrap possible if fraction is range 0-1
 			indexHigher = 0;
-		}
 
+		
 		// Find the fraction between the indices
-		double diffFraction = index - indexFloor;
+		double diffFraction = index - indexLower;
 
 		// Calculate the linear interpolation
 		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);

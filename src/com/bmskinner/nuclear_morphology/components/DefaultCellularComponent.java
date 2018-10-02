@@ -43,7 +43,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -1092,7 +1094,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) {
         // Find the point that is closest to 180 degrees across the CoM
+    	double distToCom = p.getLengthTo(centreOfMass);
+//    	LineEquation eq = new DoubleEquation(p, centreOfMass);
+//    	return borderList.stream()
+//    			.filter(point->point.getLengthTo(p)>distToCom)
+//                .min(Comparator.comparing(point->eq.getClosestDistanceToPoint(point) ))
+//                .get();
         return borderList.stream()
+        	.filter(point->point.getLengthTo(p)>distToCom)
             .min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
             .get();
     }

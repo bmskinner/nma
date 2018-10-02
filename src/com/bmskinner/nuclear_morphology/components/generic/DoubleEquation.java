@@ -40,10 +40,8 @@ public class DoubleEquation implements LineEquation {
     /**
      * Constructor using gradient and intercept.
      *
-     * @param m
-     *            the gradient of the line
-     * @param c
-     *            the y-intercept of the line
+     * @param m the gradient of the line
+     * @param c the y-intercept of the line
      * @return An Equation describing the line
      */
     public DoubleEquation(final double m, final double c) {
@@ -71,10 +69,8 @@ public class DoubleEquation implements LineEquation {
     /**
      * Constructor using two XYPoints.
      *
-     * @param a
-     *            the first XYPoint
-     * @param b
-     *            the second XYPoint
+     * @param a the first XYPoint
+     * @param b the second XYPoint
      */
     public DoubleEquation(IPoint a, IPoint b) {
 

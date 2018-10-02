@@ -115,11 +115,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                     this.profileMap.put(type, oldProfile.copy());
 
                 } catch (UnavailableProfileTypeException e) {
-                    stack("Cannot get profile type " + type + " from template", e);
-                    warn("Error copying profile");
+                	// not present in this profile; possibly a deprecated type; ignore and continue
                 } catch (ProfileException e) {
-                    stack("Cannot make new profile type " + type + " from template", e);
-                    warn("Error copying profile");
+                    stack("Cannot copy " + type + " from template", e);
                 }
             }
             this.setBorderTags(comp.getBorderTags());

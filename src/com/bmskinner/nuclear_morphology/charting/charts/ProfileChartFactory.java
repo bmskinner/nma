@@ -355,10 +355,15 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		for(int i=0; i<ds.getDatasetCount(); i++) { // IQR range charts are added above
 			plot.setDataset(i+1, ds.getRanges(i));
 		}
-
+		
+		plot.getRangeAxis().setAutoRange(false);
+		plot.getDomainAxis().setRange(0, options.getType()==ProfileType.ANGLE?360:ds.maxRangeValue());
+		
+		plot.getDomainAxis().setAutoRange(false);
 		// Start the x-axis at -1 so tags can be seen clearly
 		plot.getDomainAxis().setRange(DEFAULT_PROFILE_START_INDEX, xLength);
 		XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
+
 		lineRenderer.setBaseShapesVisible(options.isShowPoints());
 		lineRenderer.setBaseLinesVisible(options.isShowLines());
 		lineRenderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
