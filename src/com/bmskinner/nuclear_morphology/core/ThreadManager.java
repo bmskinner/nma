@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.core;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -29,7 +27,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -51,8 +48,6 @@ public class ThreadManager implements Loggable {
     /** Thread pool for UI update tasks */
     private final ExecutorService uiExecutorService;
 
-//    Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
-
     private AtomicInteger uiQueueLength     = new AtomicInteger();
     private AtomicInteger methodQueueLength = new AtomicInteger();
 
@@ -61,9 +56,7 @@ public class ThreadManager implements Loggable {
     	if(maxThreads>1)
     		maxThreads-=1; // leave something for the OS, EDT etc.
     	
-    	int uiThreads = maxThreads-1;
-    	
-    	fine("Creating thread manager with max pool size of "+maxThreads);
+    	int uiThreads = Math.max(1, maxThreads-1);
     	methodExecutorService = new ThreadPoolExecutor(1, 1, keepAliveTime,
                 TimeUnit.MILLISECONDS, methodQueue);
     	uiExecutorService = new ThreadPoolExecutor(uiThreads, uiThreads, keepAliveTime,

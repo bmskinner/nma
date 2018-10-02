@@ -175,7 +175,6 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
      * Trigger a recache of all charts and tables
      */
     protected synchronized void recacheCharts() {
-
         Runnable task = () -> {
             for (TabPanel panel : getTabPanels()) {
                 panel.refreshChartCache();
@@ -195,9 +194,6 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
     			panel.refreshChartCache(list);
     			panel.refreshTableCache(list);
     		}
-    		// Trigger a panel update for the given datasets
-//    		ThreadManager.getInstance().execute(new PanelUpdater(list));
-
     	};
     	ThreadManager.getInstance().execute(task);
 
@@ -275,6 +271,8 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 	        	recacheCharts();
 	        	break;
 	        }
+			default:
+				break;
 	        }
 		}
 	}
@@ -291,11 +289,14 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 
         public PanelUpdater(final @NonNull List<IAnalysisDataset> datasets) {
             this.list.addAll(datasets);
+//            log("Ping");
+//        	for(StackTraceElement e :Thread.currentThread().getStackTrace())
+//        		log(e.toString());
         }
 
         @Override
         public synchronized void run() {
-
+        	
         	// Set the loading state
         	for (TabPanel p : getTabPanels()) {
         		p.setChartsAndTablesLoading();

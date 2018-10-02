@@ -291,8 +291,6 @@ public class DockableMainWindow extends AbstractMainWindow {
     	// This will also trigger a dataset update event as the dataset
 		// is selected, so don't trigger another update here.
 		getPopulationsPanel().update(last);
-    	//Force all panels to update with the new datasets
-    	eh.eventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
     }
 
 	@Override
