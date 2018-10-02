@@ -159,6 +159,17 @@
 								<runtimeBits>64/32</runtimeBits>
 								<maxHeapPercent>80</maxHeapPercent>
 							</jre>
+							<versionInfo>
+								<fileVersion>${project.version}.0</fileVersion>
+								<txtFileVersion>${project.version}</txtFileVersion>
+								<fileDescription>Biological analysis software for nuclear shape</fileDescription>
+								<productVersion>${project.version}.0</productVersion>
+								<txtProductVersion>${project.version}</txtProductVersion>
+								<productName>Nuclear Morphology Analysis</productName>
+								<originalFilename>${jar.finalName}.exe</originalFilename>
+								<copyright>Ben Skinner</copyright>
+								<internalName>Nuclear Morphology Analysis</internalName>
+							</versionInfo>
 						</configuration>
 					</execution>
 				</executions>
