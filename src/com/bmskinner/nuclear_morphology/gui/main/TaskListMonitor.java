@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class TaskListMonitor extends JLabel
 implements Runnable, Loggable {
     
-    private static final int PREFERRED_WIDTH = 30;
+    private static final int PREFERRED_WIDTH = 50;
     private static final int PREFERRED_HEIGHT = 20;
     
     private static final long SLEEP_TIME = 1000L;
@@ -30,6 +30,7 @@ implements Runnable, Loggable {
 	public TaskListMonitor() {
 		super("0", SwingConstants.CENTER);
 		Thread t = new Thread(this);
+		t.setName("Task list tracking thread");
 		t.start();
 	}
 
@@ -42,8 +43,9 @@ implements Runnable, Loggable {
 
 			}
 			
-			int l = ThreadManager.getInstance().queueLength();
-			setText(""+l);
+			int l = ThreadManager.getInstance().uiQueueLength();
+			int m = ThreadManager.getInstance().methodQueueLength();
+			setText(l+"/"+m);
 		} while(true);
 	}
 

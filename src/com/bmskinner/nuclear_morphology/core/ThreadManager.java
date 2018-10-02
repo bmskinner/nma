@@ -51,7 +51,7 @@ public class ThreadManager implements Loggable {
     /** Thread pool for UI update tasks */
     private final ExecutorService uiExecutorService;
 
-    Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
+//    Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
 
     private AtomicInteger uiQueueLength     = new AtomicInteger();
     private AtomicInteger methodQueueLength = new AtomicInteger();
@@ -70,8 +70,12 @@ public class ThreadManager implements Loggable {
                 TimeUnit.MILLISECONDS, uiQueue);
     }
     
-    public int queueLength(){
+    public int uiQueueLength(){
     	return uiQueueLength.get();
+    }
+    
+    public int methodQueueLength(){
+    	return methodQueueLength.get();
     }
 
     /**
@@ -97,8 +101,10 @@ public class ThreadManager implements Loggable {
     }
 
     public synchronized Future<?> submit(Runnable r) {
-//    	System.out.println("Task submitted to queue");
-        return methodExecutorService.submit(new TrackedRunnable(r));
+    	TrackedRunnable t = new TrackedRunnable(r);
+    	if(r instanceof InterfaceUpdater)
+    		return uiExecutorService.submit(t);
+        return methodExecutorService.submit(t);
     }
 
     public synchronized Future<?> submit(Callable r) {
@@ -112,9 +118,8 @@ public class ThreadManager implements Loggable {
      * @param r
      */
     public synchronized void execute(Runnable r) {
-//    	System.out.println("Task executed to queue");
     	 // if a new update is requested, clear older queued updates
-    	if(r instanceof PanelUpdater) {
+    	if(r instanceof InterfaceUpdater) {
     		uiQueue.removeIf(e->{
     			if(e instanceof TrackedRunnable) {
     				boolean b = ((TrackedRunnable)e).getSubmittedRunnable() instanceof PanelUpdater;
@@ -160,7 +165,7 @@ public class ThreadManager implements Loggable {
     	private Runnable r;
     	
 		public TrackedRunnable(Runnable r) {
-			if(r  instanceof PanelUpdater) // Increment queue when submitting task.
+			if(r  instanceof InterfaceUpdater) // Increment queue when submitting task.
 				uiQueueLength.incrementAndGet();
 			else
 				methodQueueLength.incrementAndGet();
@@ -170,7 +175,7 @@ public class ThreadManager implements Loggable {
     	@Override
 		public void run() {
 			r.run();
-			if(r  instanceof PanelUpdater)
+			if(r instanceof InterfaceUpdater)
 				uiQueueLength.decrementAndGet();
 			else
 				methodQueueLength.decrementAndGet();

@@ -51,6 +51,7 @@ public class MemoryIndicator extends JPanel
     
     public MemoryIndicator() {
       Thread t = new Thread(this);
+      t.setName("Memory use tracking thread");
       t.start();
       long max = Runtime.getRuntime().maxMemory();
       this.setToolTipText("Maximum memory "+formatMemory(max));

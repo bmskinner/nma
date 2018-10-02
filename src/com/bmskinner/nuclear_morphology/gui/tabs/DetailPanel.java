@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
@@ -745,7 +746,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * @author bms41
      *
      */
-    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable {
+    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable, InterfaceUpdater {
 
         final private ChartOptions options;
 
@@ -805,7 +806,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
      * @author bms41
      *
      */
-    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable {
+    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable, InterfaceUpdater {
 
         final private TableOptions options;
 

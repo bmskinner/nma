@@ -19,6 +19,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -212,10 +213,6 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
         updateListeners.add(l);
     }
 
-    public synchronized void removeDatasetUpdateEventListener(EventListener l) {
-        updateListeners.remove(l);
-    }
-    
     protected abstract PopulationsPanel getPopulationsPanel();
     
     @Override
@@ -243,6 +240,10 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
         	getPopulationsPanel().update();
 	}
 	
+	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
+	    updateListeners.remove(l);
+	}
+
 	@Override
 	public void eventReceived(InterfaceEvent event) {
 
@@ -283,13 +284,13 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
      * @author ben
      *
      */
-    public class PanelUpdater implements CancellableRunnable {
-        private final List<IAnalysisDataset> list;
+    public class PanelUpdater implements CancellableRunnable, InterfaceUpdater {
+        private final List<IAnalysisDataset> list = new ArrayList<>();
         
         private final AtomicBoolean isCancelled = new AtomicBoolean(false);
 
-        public PanelUpdater(final @NonNull List<IAnalysisDataset> list) {
-            this.list = list;
+        public PanelUpdater(final @NonNull List<IAnalysisDataset> datasets) {
+            this.list.addAll(datasets);
         }
 
         @Override
