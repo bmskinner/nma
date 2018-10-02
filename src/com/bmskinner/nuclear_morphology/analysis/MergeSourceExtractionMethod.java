@@ -73,7 +73,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
         	IAnalysisDataset extracted = extractMergeSource(virtualMergeSource);
             fine("Checking new datasets from merge source "+extracted.getName());
          	if(!dv.validate(extracted)) {
-         		warn("New dataset failed to validate");
+         		warn("New dataset failed to validate; resegmentation is recommended");
          		fine(dv.getErrors().stream().collect(Collectors.joining("\n")));
          	}
 
@@ -91,7 +91,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     	ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), null,
     			templateCollection.getName(), templateCollection.getNucleusType());
 
-    	templateCollection.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
+    	templateCollection.getCells().forEach(c->newCollection.addCell(c.duplicate()));
 
 
     	IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
@@ -122,14 +122,6 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
          Optional<IAnalysisOptions> op = template.getAnalysisOptions();
          if(op.isPresent())
              newDataset.setAnalysisOptions(op.get().duplicate());
-
-         
-         try {
-     		fine("Ensure dataset segmentation is valid");
- 			DatasetConverter.realignSegmentsToRP(newDataset);
- 		} catch (DatasetConversionException e1) {
- 			fine("Unable to convert template dataset to current version");
- 		}
          
          return newDataset;
     }

@@ -241,14 +241,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
             for (String s : dv.getErrors()) {
-                warn(s);
+                stack(s);
             }
-            warn("Dataset is corrupted");
-            warn("Saving child dataset info");
+            warn("The dataset is not properly segmented");
             new CellFileExporter().exportCellLocations(dataset);
-
-            warn("Curated cells saved");
-            warn("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
+            warn("Curated datasets and groups have been saved");
+            warn("Either resegment (Editing>Segmentation>Segment profile) or redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
         }
     }
 

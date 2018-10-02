@@ -75,23 +75,23 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     }
     
     
-    @Test
-    public void testSourceExtractedFrom1_13_8DatasetGetsRPReassigned() throws Exception {
-    	IAnalysisDataset merged = SampleDatasetReader.openDataset(new File(MERGED_1_13_8_DATASET_FILE));
-
-    	List<IAnalysisDataset> sources = new ArrayList<>();
-    	sources.addAll(merged.getAllMergeSources());
-    	
-    	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(sources);
-    	List<IAnalysisDataset> extracted = mse.call().getDatasets();
-
-    	DatasetValidator dv = new DatasetValidator();
-    	for(IAnalysisDataset m : extracted){
-    		if(!dv.validate(m))
-    			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
-    	}
-    	
-    }
+//    @Test
+//    public void testSourceExtractedFrom1_13_8DatasetGetsRPReassigned() throws Exception {
+//    	IAnalysisDataset merged = SampleDatasetReader.openDataset(new File(MERGED_1_13_8_DATASET_FILE));
+//
+//    	List<IAnalysisDataset> sources = new ArrayList<>();
+//    	sources.addAll(merged.getAllMergeSources());
+//    	
+//    	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(sources);
+//    	List<IAnalysisDataset> extracted = mse.call().getDatasets();
+//
+//    	DatasetValidator dv = new DatasetValidator();
+//    	for(IAnalysisDataset m : extracted){
+//    		if(!dv.validate(m))
+//    			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
+//    	}
+//    	
+//    }
     
     @Test
     public void testSourceExtractedFromMergedDatasetEqualsInput() throws Exception {

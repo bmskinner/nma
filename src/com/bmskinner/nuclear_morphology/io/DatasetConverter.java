@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -129,7 +130,7 @@ public class DatasetConverter implements Loggable, Importer {
      * 
      * @param old the old format dataset
      */
-    public DatasetConverter(IAnalysisDataset old) {
+    public DatasetConverter(@NonNull IAnalysisDataset old) {
         this.oldDataset = old;
     }
     
@@ -164,7 +165,7 @@ public class DatasetConverter implements Loggable, Importer {
     	return result;
     }
     
-    private IAnalysisDataset convertUpTo1_13_2(IAnalysisDataset template) throws DatasetConversionException {
+    private IAnalysisDataset convertUpTo1_13_2(@NonNull IAnalysisDataset template) throws DatasetConversionException {
     	// Correct signal border locations from older versions for all
     	// imported datasets
         fine("Updating signal locations for pre-1.13.2 dataset");
@@ -191,7 +192,7 @@ public class DatasetConverter implements Loggable, Importer {
      * 
      * @param dataset
      */
-    private void updateSignalPositions(IAnalysisDataset dataset) {
+    private void updateSignalPositions(@NonNull IAnalysisDataset dataset) {
         dataset.getCollection().getNuclei().parallelStream().forEach(n -> {
 
             if (n.getSignalCollection().hasSignal()) {
@@ -228,7 +229,7 @@ public class DatasetConverter implements Loggable, Importer {
      * @return
      * @throws DatasetConversionException
      */
-    private IAnalysisDataset convertAnalysisDatasetToCurrent(IAnalysisDataset template) throws DatasetConversionException {
+    private IAnalysisDataset convertAnalysisDatasetToCurrent(@NonNull IAnalysisDataset template) throws DatasetConversionException {
     	
     	 try {
              log("Old dataset version : " + template.getVersion());
@@ -302,24 +303,19 @@ public class DatasetConverter implements Loggable, Importer {
      * @param template the dataset to convert
      * @throws DatasetConversionException
      */
-    public static void realignSegmentsToRP(IAnalysisDataset template) throws DatasetConversionException {
+    public void realignSegmentsToRP(@NonNull IAnalysisDataset template) throws DatasetConversionException {
     	try {
     		
     		for(Nucleus n : template.getCollection().getNuclei()) {
-    			n.refreshBorderList(false); // don't use spline fitting, to mimic the original border creation
-    			n.calculateProfiles();
-    			// At this point, some of the cells may have RPs that are not exactly at segment boundaries
-    			// Correct this - find the first index of seg0. Update it to the RP
-    			ISegmentedProfile rpProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-    			IBorderSegment seg = rpProfile.getSegmentAt(0);    				
-    			if(seg.getStartIndex()!=0) {
-    				seg.update(0, seg.getEndIndex());
-    				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, rpProfile);
-    			}
+    			realignSegmentsToRP(n);
     		}
 
     		// Update the collection profiles
     		ICellCollection c = template.getCollection();
+    		
+    		if(c.hasConsensus())
+    			realignSegmentsToRP(c.getConsensus());
+    		
     		Method m = c.getProfileCollection().getClass().getDeclaredMethod("createAndRestoreProfileAggregate", ICellCollection.class);
     		m.setAccessible(false);
     		m.invoke(c.getProfileCollection(), c);
@@ -331,13 +327,55 @@ public class DatasetConverter implements Loggable, Importer {
         		v.invoke(child.getProfileCollection(), child);
     		}
     		
-    	} catch (ProfileException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | UnavailableProfileTypeException | UnavailableBorderTagException | SegmentUpdateException e) {
-            throw new DatasetConversionException(e.getCause());
+    	} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+    		throw new DatasetConversionException("Error updating segment boundaries", e);
     	}
     }
     
-    private IAnalysisDataset convertUpTo1_14_0(IAnalysisDataset template)  throws DatasetConversionException {
+    private void realignSegmentsToRP(@NonNull Taggable n) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException, DatasetConversionException {
+    	n.refreshBorderList(false); // don't use spline fitting, to mimic the original border creation
+		n.calculateProfiles();
+		// At this point, some of the cells may have RPs that are not exactly at segment boundaries
+		// Correct this - find the first index of seg0. Update it to the RP
+		ISegmentedProfile rpProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IBorderSegment seg = rpProfile.getSegmentAt(0);    				
+		if(seg.getStartIndex()!=0) {
+			try {
+				seg.update(0, seg.getEndIndex());
+			} catch(SegmentUpdateException e) {
+				// Update failed, likely because the prev segment would become too short
+				// Try moving the prev segment start index back by the minimum number of points
+				// required.
+				IBorderSegment prevSeg = seg.prevSegment();
+				int testedLength = prevSeg.testLength(prevSeg.getStartIndex(), 0);
+				if(testedLength<=IBorderSegment.INTERPOLATION_MINIMUM_LENGTH) {
+					// yes, this was the issue. Try updating this segment
+					int adjustment = IBorderSegment.INTERPOLATION_MINIMUM_LENGTH-testedLength;
+					int prevStartUpdated = prevSeg.getStartIndex()-adjustment;
+					try {
+					prevSeg.update(prevStartUpdated, 0); // adjust both segments in one operation
+					} catch(SegmentUpdateException e1) {
+						// that failed too, rethrow
+						throw new DatasetConversionException("Unable to update previous segment boundaries", e1);
+					}
+				}
+				else {
+					// that was not the issue, rethrow
+					throw new DatasetConversionException("Unable to update current or previous segment boundaries; previous segment would be length "+testedLength, e);
+				}
+				
+			}
+			
+			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, rpProfile);
+		}
+    }
+    
+    private IAnalysisDataset convertUpTo1_14_0(@NonNull IAnalysisDataset template)  throws DatasetConversionException {
+    	try {
     	realignSegmentsToRP(template);
+    	} catch (DatasetConversionException e) {
+    		stack(e.getMessage(), e.getCause());
+    	}
     	return template;
 
     }

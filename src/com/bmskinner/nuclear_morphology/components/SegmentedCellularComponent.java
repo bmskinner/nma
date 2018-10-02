@@ -2122,15 +2122,13 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new SegmentUpdateException(String.format("Segment will become too short (%d)", newLength));
 				
 				// All checks passed
-				
-				fine("Segment update checks passed");
-				fine("Perform update  of "+this.toString()+" to "+startIndex+"-"+endIndex);
+				finer("Perform update  of "+this.toString()+" to "+startIndex+"-"+endIndex);
 				
 
 				int segIndex = parent.leaves.indexOf(this);
 				if(segIndex==-1) {
-					fine("The segment was not found in the leaves!");
-					fine("Behold the leaves!");
+					finest("The segment was not found in the leaves!");
+					finest("Behold the leaves!");
 					for(BorderSegmentTree s : parent.leaves)
 						fine(s.getDetail());
 				}
@@ -2140,19 +2138,19 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				// Pass on the updated positions to the surrounding segments
 
-				fine("This is segment index "+segIndex);
+				finest("This is segment index "+segIndex);
 				
 				int nextSegIndex = wrapSegmentIndex(segIndex+1);
 				
 				BorderSegmentTree nextSeg = parent.leaves.get(nextSegIndex);
-				fine("Updating next segment "+nextSegIndex+": "+nextSeg);
+				finest("Updating next segment "+nextSegIndex+": "+nextSeg);
 				nextSeg.startIndex = endIndex;
-				fine("Next segment "+nextSegIndex+" now: "+nextSeg);
+				finest("Next segment "+nextSegIndex+" now: "+nextSeg);
 				
 				int prevSegIndex = wrapSegmentIndex(segIndex-1);
-				fine("Updating prev segment "+prevSegIndex);
+				finest("Updating prev segment "+prevSegIndex);
 				BorderSegmentTree prevSeg = parent.leaves.get(prevSegIndex);
-				fine("Prev segment "+prevSegIndex+" now: "+prevSeg);
+				finest("Prev segment "+prevSegIndex+" now: "+prevSeg);
 				prevSeg.endIndex = startIndex;
 				
 				return true;

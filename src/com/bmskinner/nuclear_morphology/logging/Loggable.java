@@ -77,6 +77,20 @@ public interface Loggable {
         Logger.getLogger(ERROR_LOGGER).log(Level.SEVERE, message, t);
         Logger.getLogger(CONSOLE_LOGGER).log(Level.SEVERE, message, t);
     }
+    
+    /**
+     * Log an error to the program log window and to the error log file with a
+     * stack trace. The TRACE error level has a level value of 600, so will
+     * display ahead of FINE.
+     * 
+     * @param message the error messsage
+     * @param t the exception
+     */
+    default void stack(String message) {
+        Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message);
+        Logger.getLogger(ERROR_LOGGER).log(TRACE, message);
+        Logger.getLogger(CONSOLE_LOGGER).log(TRACE, message);
+    }
 
     /**
      * Log an error to the program log window and to the error log file with a
@@ -89,7 +103,7 @@ public interface Loggable {
     default void stack(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
-        Logger.getLogger(CONSOLE_LOGGER).log(Level.SEVERE, message, t);
+        Logger.getLogger(CONSOLE_LOGGER).log(TRACE, message, t);
     }
 
     /**

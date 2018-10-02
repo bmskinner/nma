@@ -54,7 +54,7 @@ public class CellFileExporter implements Exporter, Loggable {
             exportFile = new File(folder, fileName);
         }
 
-        log("Exporting to " + exportFile.getAbsolutePath());
+        log("Exporting cells to " + exportFile.getAbsolutePath());
 
         if (exportFile.exists()) {
             exportFile.delete();
