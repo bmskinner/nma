@@ -136,6 +136,7 @@
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
 				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.7.23</version>
 				<executions>
 					<execution>
 						<id>l4j-gui</id>
@@ -156,8 +157,9 @@
 								<bundledJreAsFallback>false</bundledJreAsFallback>
 								<minVersion>1.8.0</minVersion>
 								<jdkPreference>preferJdk</jdkPreference>
-								<runtimeBits>64/32</runtimeBits>
-								<maxHeapPercent>80</maxHeapPercent>
+								<runtimeBits>64</runtimeBits>
+								<initialHeapPercent>50</initialHeapPercent>
+								<maxHeapPercent>90</maxHeapPercent>
 							</jre>
 							<versionInfo>
 								<fileVersion>${project.version}.0</fileVersion>
