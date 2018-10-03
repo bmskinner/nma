@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,8 @@ import javax.swing.JTabbedPane;
 
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellsListPanel;
 import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
@@ -49,8 +52,11 @@ public class DetailPanelScreenshotter {
 	}
 	
 	public void takeScreenShots(DetailPanel panel, File folder, String title) throws IOException {
+		if(panel instanceof ImagesTabPanel)
+			selectImage((ImagesTabPanel) panel);
 		takeAnnotatedScreenShot(panel, folder, title);
 		takeScreenShot(folder, title);
+
 		for(Component c : panel.getComponents()) {
 			takeScreenShots(c, folder, title+"_"+panel.getPanelTitle());
 		}
@@ -59,6 +65,11 @@ public class DetailPanelScreenshotter {
 	private void takeScreenShots(Component panel, File folder, String title) throws IOException {
 		if(panel instanceof DetailPanel) {
 			DetailPanel dp = (DetailPanel)panel;
+			if(dp instanceof CellsListPanel)
+				selectSingleCell((CellsListPanel) dp);
+			
+			
+			
 			takeAnnotatedScreenShot(dp, folder, title+"_"+dp.getPanelTitle());
 			takeScreenShots(dp, folder, title+"_"+dp.getPanelTitle());
 			for(Component c : dp.getComponents()) {
@@ -82,6 +93,35 @@ public class DetailPanelScreenshotter {
 			for(Component c : jc.getComponents()) {
 				takeScreenShots(c, folder, title+"_"+jc.getClass().getSimpleName());
 			}
+		}
+	}
+	
+	private void selectSingleCell(CellsListPanel dp) {
+		Point listPos = dp.getLocationOnScreen();
+		robot.mouseMove(listPos.x+60, listPos.y+120);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		try {
+			Thread.sleep(20);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+	}
+	
+	private void selectImage(ImagesTabPanel dp) {
+		Point listPos = dp.getLocationOnScreen();
+		robot.mouseMove(listPos.x+90, listPos.y+90);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		try {
+			Thread.sleep(20);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		try {
+			Thread.sleep(100); // give time for image to load
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 	
