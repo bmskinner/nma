@@ -63,7 +63,7 @@ public class ThreadManager implements Loggable {
     	
     	System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", String.valueOf(maxForkJoinThreads));
     	
-    	methodExecutorService = new ThreadPoolExecutor(1, 1, keepAliveTime,
+    	methodExecutorService = new ThreadPoolExecutor(2, 2, keepAliveTime,
                 TimeUnit.MILLISECONDS, methodQueue);
     	uiExecutorService = new ThreadPoolExecutor(uiThreads, uiThreads, keepAliveTime,
                 TimeUnit.MILLISECONDS, uiQueue);

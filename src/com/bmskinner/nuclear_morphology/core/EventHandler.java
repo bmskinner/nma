@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.core;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,7 +28,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
@@ -47,12 +45,13 @@ import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportSign
 import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExtractRandomCellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkflowAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
@@ -61,17 +60,16 @@ import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener.PopulationListUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
@@ -399,6 +397,7 @@ public class EventHandler implements Loggable, EventListener {
             		final CountDownLatch segmentLatch = new CountDownLatch(1);
             		final CountDownLatch refoldLatch  = new CountDownLatch(1);
             		final CountDownLatch saveLatch    = new CountDownLatch(1);
+            		            		
 
             		new Thread( ()->{ // run profiling
             			new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, profileLatch).run();
@@ -730,23 +729,25 @@ public class EventHandler implements Loggable, EventListener {
      */
     public synchronized void saveRootDatasets() {
 
-        Runnable r = () -> {
-            for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
-                final CountDownLatch latch = new CountDownLatch(1);
+    	Runnable r = () -> {
+    		for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
+    			final CountDownLatch latch = new CountDownLatch(1);
 
-                Runnable task = new SaveDatasetAction(root, acceptor, EventHandler.this, latch, false);
-                task.run();
-                try {
-                    latch.await();
-                } catch (InterruptedException e) {
-                    error("Interruption to thread", e);
-                }
-                
-                Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
-                wrk.run();
-            }
-            fine("All root datasets attempted to be saved");
-        };
+    			new Thread( () ->{
+    				Runnable task = new SaveDatasetAction(root, acceptor, EventHandler.this, latch, false);
+    				task.run();
+    				try {
+    					latch.await();
+    				} catch (InterruptedException e) {
+    					error("Interruption to thread", e);
+    				}
+
+    				Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
+    				wrk.run();
+    			}).start();
+    		}
+    		fine("All root datasets attempted to be saved");
+    	};
 
         ThreadManager.getInstance().execute(r);
     }

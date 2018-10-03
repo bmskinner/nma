@@ -32,6 +32,7 @@ import javax.swing.JProgressBar;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
@@ -226,5 +227,4 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     protected InterfaceEventHandler getInterfaceEventHandler(){
         return ih;
     }
-
 }
