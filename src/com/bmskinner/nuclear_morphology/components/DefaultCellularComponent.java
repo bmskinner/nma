@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -130,7 +131,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private transient List<IBorderPoint> borderList = new ArrayList<>();
 
     /** Cache images while memory is available. */
-    private transient SoftReference<ImageProcessor> imageRef = new SoftReference<>(null);
+    private transient WeakReference <ImageProcessor> imageRef = new WeakReference <>(null);
 
     /** Cached object shapes. */
     private transient ShapeCache shapeCache = new ShapeCache();
@@ -444,7 +445,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         	ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
         	ip.invert();
 
-        	imageRef = new SoftReference<>(ip);
+        	imageRef = new WeakReference <>(ip);
         	return ip;
 
         } catch (ImageImportException e) {
@@ -475,21 +476,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
     public ImageProcessor getRGBImage() throws UnloadableImageException {
 
-        ImageProcessor ip = imageRef.get();
-        if (ip != null) {
-            return ip;
-        }
         if (!getSourceFile().exists())
             throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
 
-
         try {
-        	ip = new ImageImporter(getSourceFile()).importToColorProcessor();
-
-        	imageRef = new SoftReference<>(ip);
-
-        	return ip;
-
+        	return new ImageImporter(getSourceFile()).importToColorProcessor();
         } catch (ImageImportException e) {
         	stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
         	throw new UnloadableImageException("Source image is not available");
@@ -1262,7 +1253,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         in.defaultReadObject();
 
         // Fill the transient fields
-        imageRef = new SoftReference<>(null);
+        imageRef = new WeakReference<>(null);
         shapeCache = new ShapeCache();
 
         // needs to be traced to allow interpolation into the border list
