@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.core;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -50,13 +51,18 @@ public class ThreadManager implements Loggable {
 
     private AtomicInteger uiQueueLength     = new AtomicInteger();
     private AtomicInteger methodQueueLength = new AtomicInteger();
-
+    
     protected ThreadManager() {
     	int maxThreads = Runtime.getRuntime().availableProcessors();
     	if(maxThreads>1)
     		maxThreads-=1; // leave something for the OS, EDT etc.
     	
     	int uiThreads = Math.max(1, maxThreads-1);
+    	
+    	int maxForkJoinThreads =  Math.max(1, uiThreads-1); // ensure FJPs don't block the ui
+    	
+    	System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", String.valueOf(maxForkJoinThreads));
+    	
     	methodExecutorService = new ThreadPoolExecutor(1, 1, keepAliveTime,
                 TimeUnit.MILLISECONDS, methodQueue);
     	uiExecutorService = new ThreadPoolExecutor(uiThreads, uiThreads, keepAliveTime,
@@ -70,7 +76,7 @@ public class ThreadManager implements Loggable {
     public int methodQueueLength(){
     	return methodQueueLength.get();
     }
-
+    
     /**
      * Fetch an instance
      * 

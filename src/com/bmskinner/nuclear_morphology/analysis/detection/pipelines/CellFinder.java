@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -57,27 +59,27 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     @Override
     public Collection<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
 
-        final Queue<ICell> list = new ConcurrentLinkedQueue<>();
-        File[] arr = folder.listFiles();
-        if (arr == null)
-            return list;
-        
-        Stream.of(arr).parallel().forEach(f -> {
-            
-            if(Thread.interrupted())
-                return;
-            if(f.isDirectory())
-            	return;
-            if (!ImageImporter.fileIsImportable(f))
-            	return;
-            try {
-            	list.addAll(findInImage(f));
-            } catch (ImageImportException e) {
-            	stack("Error searching image", e);
-            }
-        });
+    	final Queue<ICell> list = new ConcurrentLinkedQueue<>();
+    	File[] arr = folder.listFiles();
+    	if (arr == null)
+    		return list;
 
-        return list;
+    	// Submitted to the FJP::commonPool, which is thread limited by the ThreadManger
+    	Stream.of(arr).parallel().forEach(f -> {
+
+    		if(Thread.interrupted())
+    			return;
+    		if(f.isDirectory())
+    			return;
+    		if (!ImageImporter.fileIsImportable(f))
+    			return;
+    		try {
+    			list.addAll(findInImage(f));
+    		} catch (ImageImportException e) {
+    			stack("Error searching image", e);
+    		}
+    	});
+    	return list;
     }
 
 }

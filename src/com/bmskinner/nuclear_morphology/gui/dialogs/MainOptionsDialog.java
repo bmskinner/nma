@@ -117,14 +117,16 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         labels.add(logLabel);
         fields.add(programLevelBox);
         
+        
         JLabel consoleLogLabel = new JLabel("Console log level");
         Level[] consoleLevelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
         consoleLevelBox = new JComboBox<Level>(consoleLevelArray);
         consoleLevelBox.setSelectedItem(Logger.getLogger(CONSOLE_LOGGER).getLevel());
         consoleLevelBox.addActionListener(this);
-
-        labels.add(consoleLogLabel);
-        fields.add(consoleLevelBox);
+        if(System.console()!=null) { // if the gui is launched with not console, don't make the option
+        	labels.add(consoleLogLabel);
+        	fields.add(consoleLevelBox);
+        }
 
         
         JLabel overrideRefoldLabel = new JLabel("Refold override");
