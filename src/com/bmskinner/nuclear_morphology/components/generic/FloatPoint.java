@@ -52,12 +52,20 @@ public class FloatPoint extends Point2D.Float implements IPoint {
     public FloatPoint(double x, double y) {
         super((float) x, (float) y);
     }
+    
+    /**
+     * Create from an existing point
+     * @param p
+     */
+    public FloatPoint(@NonNull FloatPoint p){
+    	super(p.x, p.y);
+    }
 
     /**
      * Create from an existing point
      * @param p
      */
-    public FloatPoint(@NonNull IPoint p) {
+    public FloatPoint(@NonNull IPoint p) {    	
         this(p.getX(), p.getY());
     }
 
@@ -88,16 +96,11 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         this.x = (float) p.getX();
         this.y = (float) p.getY();
     }
-
-    @Override
-    public double getLengthTo(@NonNull final IPoint a) {
-
-        if (a == null)
-            throw new IllegalArgumentException("Destination point is null");
-
-        // a2 = b2 + c2
-        double dx = (a instanceof Point2D ? x-((FloatPoint)a).x : Math.abs(x - a.getX()));
-        double dy = (a instanceof Point2D ? y-((FloatPoint)a).y : Math.abs(y - a.getY()));
+    
+    private double getLengthTo(final FloatPoint a) {
+    	 // a2 = b2 + c2
+        double dx = x - a.x;
+        double dy = y - a.y;
         double dx2 = dx * dx;
         double dy2 = dy * dy;
         double length = Math.sqrt(dx2 + dy2);
@@ -105,9 +108,22 @@ public class FloatPoint extends Point2D.Float implements IPoint {
     }
 
     @Override
+    public double getLengthTo(@NonNull final IPoint a) {
+
+        if (a instanceof FloatPoint)
+            return getLengthTo((FloatPoint)a);
+
+        // a2 = b2 + c2
+        double dx = x - a.getX();
+        double dy = y - a.getY();
+        double dx2 = dx * dx;
+        double dy2 = dy * dy;
+        double length = Math.sqrt(dx2 + dy2);
+        return length;
+    }
+    
+    @Override
     public boolean overlaps(@NonNull final IPoint a) {
-        if (a == null)
-            throw new IllegalArgumentException("Destination point is null");
         return(this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt());
     }
 
@@ -141,14 +157,18 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
     @Override
     public void offset(double x, double y) {
-        this.setX(this.getX() + x);
-        this.setY(this.getY() + y);
+        this.x += x;
+        this.y += y;
+    }
+    
+    public boolean overlapsPerfectly(@NonNull final FloatPoint a) {
+        return (this.x == a.x && this.y == a.y);
     }
 
     @Override
     public boolean overlapsPerfectly(@NonNull final IPoint a) {
-        if (a==null)
-            throw new IllegalArgumentException("Point is null");
+        if (a instanceof FloatPoint)
+        	return overlapsPerfectly((FloatPoint)a);
         return (this.getX() == a.getX() && this.getY() == a.getY());
     }
 
@@ -168,6 +188,9 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
         if (a == null || c == null)
             throw new IllegalArgumentException("An input point is null in angle finding");
+        
+        if(a instanceof FloatPoint && c instanceof FloatPoint)
+        	return findSmallestAngle( (FloatPoint)a, (FloatPoint)c);
 
         /*
          * Test of rotation and comparison to a horizontal axis From
@@ -175,7 +198,7 @@ public class FloatPoint extends Point2D.Float implements IPoint {
          * 
          * The vectors are rotated so one is on the xaxis, at which point atan2 does the rest
          */
-
+        
         IPoint ab = IPoint.makeNew(x - a.getX(), y - a.getY());
         IPoint cb = IPoint.makeNew(x - c.getX(), y - c.getY());
 
@@ -185,29 +208,19 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         double alpha = Math.atan2(cross, dot);
 
         return Math.abs(alpha * 180 / Math.PI);
+    }
+    
+    private double findSmallestAngle(@NonNull FloatPoint a, @NonNull FloatPoint c) {
 
-        /*
-         * Copy of ImageJ angle code from ij.gui.PolygonRoi#getAngleAsString()
-         */
+    	float abx = x-a.x;
+    	float aby = y-a.y;
+    	float cbx = x-c.x;
+    	float cby = y-c.y;
 
-        // float[] xpoints = { (float) a.getX(), (float) getX(), (float)
-        // b.getX()};
-        // float[] ypoints = { (float) a.getY(), (float) getY(), (float)
-        // b.getY()};
-        //
-        // double angle1 = 0.0;
-        // double angle2 = 0.0;
-        //
-        // angle1 = getFloatAngle(xpoints[0], ypoints[0], xpoints[1],
-        // ypoints[1]);
-        // angle2 = getFloatAngle(xpoints[1], ypoints[1], xpoints[2],
-        // ypoints[2]);
-        //
-        // double degrees = Math.abs(180-Math.abs(angle1-angle2));
-        // if (degrees>180.0)
-        // degrees = 360.0-degrees;
-        //
-        // return degrees;
+    	double dot = (abx * cbx + aby * cby); // dot product
+    	double cross = (abx * cby - aby * cbx); // cross product
+    	double alpha = Math.atan2(cross, dot);
+    	return Math.abs(alpha * 180 / Math.PI);
     }
     
     @Override

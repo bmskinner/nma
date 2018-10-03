@@ -98,20 +98,11 @@ public interface IProfile extends Serializable, Loggable {
 
 		float[] result = new float[length];
 
-		// where in the old curve index is the new curve index?
 		for (int i = 0; i < length; i++) {
-			// we have a point in the new array.
-			// we want to know which points it lies between in the old profile
-			float fraction = ((float) i / (float) length); // get the fractional
-			// index position
-			// needed
-
-			// get the value in the old profile at the given fractional index
-			// position
+			float fraction = ((float) i / (float) length); // get the fractional index 
 			result[i] = getInterpolatedValue(array2, fraction);
 		}
 		return result;
-
 	}
         
 	/**
@@ -127,18 +118,10 @@ public interface IProfile extends Serializable, Loggable {
 
 		// where in the old curve index is the new curve index?
 		for (int i = 0; i < length; i++) {
-			// we have a point in the new array.
-			// we want to know which points it lies between in the old profile
-			float fraction = ((float) i / (float) length); // get the fractional
-			// index position
-			// needed
-
-			// get the value in the old profile at the given fractional index
-			// position
+			float fraction = ((float) i / (float) length); // get the fractional index
 			result[i] = getInterpolatedValue(array2, fraction);
 		}
 		return result;
-
 	}
 	
 	/**
@@ -521,8 +504,7 @@ public interface IProfile extends Serializable, Loggable {
      * Multiply all values within the profile by the value within the given
      * Profile
      * 
-     * @param multiplier
-     *            the profile to multiply by. Must be the same length as this
+     * @param multiplier the profile to multiply by. Must be the same length as this
      *            profile
      * @return the new profile
      */
@@ -531,8 +513,7 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Multiply all values within the profile by a given value
      * 
-     * @param multiplier
-     *            the value to multiply by
+     * @param multiplier the value to multiply by
      * @return the new profile
      */
     IProfile multiply(double multiplier);
@@ -558,8 +539,7 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Add all values within the profile by the value within the given Profile
      * 
-     * @param adder
-     *            the profile to add. Must be the same length as this profile
+     * @param adder the profile to add. Must be the same length as this profile
      * @return the new profile
      */
     IProfile add(@NonNull IProfile adder);

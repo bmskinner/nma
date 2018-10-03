@@ -33,10 +33,8 @@ public interface IPoint {
     /**
      * Create a new point of the default type
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final float x, final float y) {
@@ -46,10 +44,8 @@ public interface IPoint {
     /**
      * Create a new point of the default type
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final double x, final double y) {
@@ -59,23 +55,19 @@ public interface IPoint {
     /**
      * Create a new point of the default type based on the given point
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final IPoint a) {
-        return makeNew(a.getX(), a.getY());
+        return new FloatPoint(a);
     }
 
     /**
      * Create a new point of the default type based on the given point
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final Point2D a) {
@@ -113,8 +105,7 @@ public interface IPoint {
     /**
      * Find the distance between this point and a given point
      *
-     * @param a
-     *            the point to measure to
+     * @param a the point to measure to
      * @return the distance between the points
      */
     double getLengthTo(@NonNull IPoint a);

@@ -111,9 +111,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             for (ProfileType type : ProfileType.values()) {
 
                 try {
-                    ISegmentedProfile oldProfile = comp.getProfile(type);
-                    this.profileMap.put(type, oldProfile.copy());
-
+                    profileMap.put(type, comp.getProfile(type).copy());
                 } catch (UnavailableProfileTypeException e) {
                 	// not present in this profile; possibly a deprecated type; ignore and continue
                 } catch (ProfileException e) {
@@ -130,7 +128,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
     
     /**
-     * Used when duplicating components
+     * Faster constructor used when duplicating components
      * @param c
      * @throws UnprofilableObjectException
      */
