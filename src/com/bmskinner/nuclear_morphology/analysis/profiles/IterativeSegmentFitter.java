@@ -170,6 +170,8 @@ public class IterativeSegmentFitter implements Loggable {
     	IBorderSegment templateSegment = templateProfile.getSegment(segId);
     	IProfile template = templateProfile.getSubregion(templateSegment);
     	
+    	double templateSegmentProportion = (double)templateSegment.length()/(double)templateProfile.size();
+    	
     	finer("Template end index: "+templateProfile.get(templateSegment.getEndIndex()));
     	finer(String.format("Template segment length %s, profile length %s, from %s",templateSegment.length(), template.size(), templateSegment.toString()));
     	finer(String.format("Target profile length %s",tempProfile.size()));
@@ -187,6 +189,13 @@ public class IterativeSegmentFitter implements Loggable {
         	IProfile segmentProfile = testProfile.getSubregion(startIndex, endIndex);
         	
         	double score =  template.absoluteSquareDifference(segmentProfile, 100);
+        	
+        	double testSegmentProportion = (double)segmentProfile.size()/(double)testProfile.size();
+        	
+        	// apply a penalty as we get further from the proportional length of the template
+        	double difference = Math.abs(testSegmentProportion-templateSegmentProportion);
+        	// as difference increases from 0, increase the score
+        	score = Math.pow(score, 1+difference);
         	
         	if(minimaMaxima.get(endIndex)) {
         		score *= 0.25; //TODO: formalise this rule and find the best value to use

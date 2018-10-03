@@ -158,7 +158,7 @@
 								<minVersion>1.8.0</minVersion>
 								<jdkPreference>preferJdk</jdkPreference>
 								<runtimeBits>64</runtimeBits>
-								<initialHeapPercent>50</initialHeapPercent>
+								<initialHeapPercent>5</initialHeapPercent>
 								<maxHeapPercent>90</maxHeapPercent>
 							</jre>
 							<versionInfo>
