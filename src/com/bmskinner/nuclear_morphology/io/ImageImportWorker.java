@@ -71,48 +71,38 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
     protected Boolean doInBackground() throws Exception {
 
         for (ICell c : dataset.getCollection().getCells()) {
-        	
         	if(isCancelled())
         		return false;
-
             try {
-
                 ImageIcon ic = importCellImage(c);
-
                 LabelInfo inf = new LabelInfo(ic, c);
-
                 publish(inf);
             } catch (Exception e) {
-                error("Error opening cell image", e);
+                stack("Error importing cell image", e);
             }
-
         }
-
         return true;
     }
 
     @Override
     public void done() {
 
-        finest("Worker completed task");
-
+        if(isCancelled()) {
+    		firePropertyChange(IAnalysisWorker.CANCELLED_MSG, getProgress(), IAnalysisWorker.CANCELLED);
+    		return;
+    	}
         try {
-            if (this.get()) {
-                finest("Firing trigger for sucessful task");
-                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);
-
-            } else {
-                finest("Firing trigger for failed task");
-                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-            }
+            if (this.get())
+                firePropertyChange(IAnalysisWorker.FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+            else
+                firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
-            error("Interruption error in worker", e);
-            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+            stack("Interruption error in worker", e);
+            firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-            error("Execution error in worker", e);
-            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+        	stack("Execution error in worker", e);
+            firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         }
-
     }
 
     protected ImageIcon importCellImage(ICell c) {
@@ -124,9 +114,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
             } else {
                 ip = c.getNucleus().getComponentImage();
             }
-
-            // Nucleus n = c.getNucleus();
-            // ip = n.getComponentImage();
 
         } catch (UnloadableImageException e) {
             stack("Cannot load image for component", e);
@@ -147,7 +134,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
                         an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
                     }
                 }
-                // an = an.annotateSegments(n, n);
             }
 
         } else {
@@ -158,8 +144,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         }
 
         ip = an.toProcessor();
-
-        // drawNucleus(c, ip);
 
         if (rotate) {
             try {

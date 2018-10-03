@@ -36,15 +36,22 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface IAnalysisWorker extends RunnableFuture<IAnalysisResult>, ProgressListener, Loggable {
 
-	String FINISHED_MSG = "Finished";
-	String ERROR_MSG    = "Error";
-	String INDETERMINATE_MSG    = "Cooldown";
+	String FINISHED_MSG       = "Finished";
+	String ERROR_MSG          = "Error";
+	String INDETERMINATE_MSG  = "Cooldown";
+	String CANCELLED_MSG      = "Cancelled";
 	
-    int FINISHED = -1; // signal cleanup of progress bar
+	/** Task completed normally */
+    int FINISHED = -1;
 
-    int ERROR = -2; // signal error occurred in analysis
+    /** Task had an error */
+    int ERROR = -2;
 
-    int INDETERMINATE = -3; // signal switch to indeterminate bar
+    /** Task has switched to an indeterminate progress state */
+    int INDETERMINATE = -3; 
+    
+    /** Task has been cancelled */
+    int CANCELLED = -4; 
 
     /**
      * Add a listener for changes to the analysis progress.
