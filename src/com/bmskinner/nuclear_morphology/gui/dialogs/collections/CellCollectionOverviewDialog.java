@@ -23,6 +23,8 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +69,16 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 		worker = new ImageImportWorker(dataset, table.getModel(), true);
         worker.addPropertyChangeListener(this);
         worker.execute();
+        
+        this.addWindowListener(new WindowAdapter() {
+        	
+        	 @Override
+        	    public void windowClosing(WindowEvent e) {
+        	        worker.cancel(true);
+        	 }
+        });
 	}
-	
+		
 	@Override
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());

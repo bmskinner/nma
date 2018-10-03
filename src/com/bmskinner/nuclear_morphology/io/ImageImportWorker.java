@@ -71,6 +71,9 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
     protected Boolean doInBackground() throws Exception {
 
         for (ICell c : dataset.getCollection().getCells()) {
+        	
+        	if(isCancelled())
+        		return false;
 
             try {
 
