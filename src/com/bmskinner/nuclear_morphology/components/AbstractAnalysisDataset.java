@@ -100,13 +100,13 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     }
 
     public boolean hasChild(IAnalysisDataset child) {
-        return childDatasets.contains(child);
+        return hasChild(child.getId());
     }
 
     public abstract Set<UUID> getChildUUIDs();
 
     public boolean hasChild(UUID child) {
-        return this.getChildUUIDs().contains(child);
+        return getChildUUIDs().contains(child);
     }
 
     public boolean hasRecursiveChild(IAnalysisDataset child) {

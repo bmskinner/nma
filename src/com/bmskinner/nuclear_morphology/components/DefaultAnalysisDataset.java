@@ -138,20 +138,12 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * @param id the child ID to be deleted
      */
     private void removeChildCollection(UUID id) {
+    	    	
+    	childDatasets = childDatasets.stream().filter(d->!d.getId().equals(id)).collect(Collectors.toSet());
 
-        Iterator<IAnalysisDataset> it = childDatasets.iterator();
-
-        while (it.hasNext()) {
-            IAnalysisDataset child = it.next();
-
-            if (child.getId().equals(id)) {
-                for (IClusterGroup g : clusterGroups) {
-                    if (g.hasDataset(id)) {
-                        g.removeDataset(id);
-                    }
-                }
-                it.remove();
-                break;
+    	for (IClusterGroup g : clusterGroups) {
+            if (g.hasDataset(id)) {
+                g.removeDataset(id);
             }
         }
     }

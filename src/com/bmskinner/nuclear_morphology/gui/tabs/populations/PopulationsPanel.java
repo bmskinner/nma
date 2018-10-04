@@ -357,7 +357,7 @@ public class PopulationsPanel extends DetailPanel  {
     		return;
 
 
-    	DatasetDeleter deleter = new DatasetDeleter();
+    	DatasetDeleter deleter = new DatasetDeleter(getInputSupplier());
     	deleter.deleteDatasets(datasets);
     	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
     	update();  

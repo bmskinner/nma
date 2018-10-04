@@ -342,10 +342,13 @@ public final class DatasetListManager implements Loggable {
         if (!d.isRoot()) // only remove root datasets
             return;
 
-        if (!list.contains(d))
+        if (!list.stream().anyMatch(e->e.getId().equals(d.getId())))
         	return;
 
-        list.remove(d);
+        list = list.stream()
+        		.filter(  e->!e.getId().equals(d.getId())  )
+        		.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
         datasetHashcodeMap.remove(d.getId());
         selected.remove(d);
     }
