@@ -121,7 +121,7 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<finalName>Nuclear_Morphology_Analysis_${project.version}_COMPLETE_INSTALL</finalName>
+							<finalName>${jar.finalName}_ImageJ_plugin</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 							<descriptors>
 								<descriptor>assembly.xml</descriptor>
@@ -177,6 +177,17 @@
 				</executions>
 			</plugin>
 
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.3</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.7</version>
+			</plugin>
 
 		</plugins>
 	</build>
@@ -287,4 +298,16 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<name>Nuclear Morphology Analysis</name>
+	<url>https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Home</url>
+	<description>Nuclear Morphology Analysis  is a program that allows for automated detection of round or asymmetric nuclei in images, and subsequent morphological analysis.</description>
+	<inceptionYear>2015</inceptionYear>
+	<licenses>
+  <license>
+    <name>GNU General Public License, Version 3</name>
+    <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+    <distribution>manual</distribution>
+    <comments>Free software license</comments>
+  </license>
+</licenses>
 </project>
