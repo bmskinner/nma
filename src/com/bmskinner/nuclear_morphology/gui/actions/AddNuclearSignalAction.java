@@ -106,6 +106,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
         finer("Finished signal detection");
         cleanup(); // remove the property change listener
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
         cancel();
     }
 

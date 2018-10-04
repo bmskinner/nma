@@ -144,7 +144,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                 int column = table.columnAtPoint(e.getPoint());
 
                 // double click
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == 2&&column>0) {
 
                     IAnalysisDataset d = getDatasets().get(column - 1);
 
@@ -367,12 +367,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return new OutlineChartFactory(options).makeSignalOutlineChart();
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
         return new NuclearSignalTableCreator(options).createSignalStatsTable();
     }
 
