@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.Collection;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -31,7 +32,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 
-public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
+public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	
 	final private SignalChangeEventHandler sh;
 	final private InterfaceEventHandler ih;
@@ -222,20 +223,16 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 		return menu;
 	}
 
-	@Override
-	public void updateSelectionContext(int nObjects) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void updateSelectionContext(ActiveTypeContext type) {
-		switch(type) {
-			case DATASET: contextMenu = createDatasetMenu(); break;
-			case CLUSTER_GROUP: contextMenu = createClusterGroupMenu(); break;
-			case WORKSPACE: contextMenu = createWorkspaceMenu(); break;
-		}
-		
-	}
+//	@Override
+//	public void updateSelectionContext(Collection<Object> objects) {
+//		
+//		switch(type) {
+//			case DATASET: contextMenu = createDatasetMenu(); break;
+//			case CLUSTER_GROUP: contextMenu = createClusterGroupMenu(); break;
+//			case WORKSPACE: contextMenu = createWorkspaceMenu(); break;
+//		}
+//		
+//	}
 
 }

@@ -392,15 +392,11 @@ public class PopulationsPanel extends DetailPanel  {
     			treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue(String.format("Dataset (%d)", datasetSelectionOrder.size()));
     			treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue(String.format("Cells (%d)", getCellTotal()));
 
-    			int totalSelectionCount = lsm.getSelectionCount();
-
-    			if (totalSelectionCount==1) { // single dataset, cluster or workspace
-    				int index = treeTable.getSelectedRow();
-    				populationPopup.updateSelectionContext(treeTable.getValueAt(index, PopulationTreeTable.COLUMN_NAME));
-    			} else {
-    				populationPopup.updateSelectionContext(totalSelectionCount);
+    			final List<Object> selectedObjects = new ArrayList<>();
+    			for(int i : selectedIndexes.keySet()) {
+    				selectedObjects.add(treeTable.getValueAt(i, PopulationTreeTable.COLUMN_NAME));
     			}
-
+    			populationPopup.updateSelectionContext(selectedObjects);
     			getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
     		} catch (Exception ex) {

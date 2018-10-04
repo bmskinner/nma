@@ -53,7 +53,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     public static final int EM           = 0; // expectation maximisation
     public static final int HIERARCHICAL = 1;
 
-    private Map<Integer, ICellCollection> clusterMap = new HashMap<Integer, ICellCollection>();
+    private Map<Integer, ICellCollection> clusterMap = new HashMap<>();
 
     /**
      * Construct from a dataset and options
