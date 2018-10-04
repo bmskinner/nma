@@ -42,7 +42,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
     private static final long serialVersionUID = 1L;
-
+    
+    /**The parent dataset to which this child belongs */
     private IAnalysisDataset parent;
 
     /**

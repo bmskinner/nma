@@ -48,16 +48,19 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
 
     private static final long serialVersionUID = 1L;
 
+    /**The software version in which the dataset was created */
     protected final Version version;
 
-    // direct child collections
+    /** Direct child datasets to this dataset */
     protected Set<IAnalysisDataset> childDatasets = new HashSet<>();
 
+    /** The cell collection for this dataset */
     protected ICellCollection cellCollection;
 
+    /** The colour to draw this dataset in charts */
     protected Paint datasetColour = null;
 
-    // groups of cluster results
+    /** Clusters identified in this dataset */
     protected List<IClusterGroup> clusterGroups = new ArrayList<>();
 
     /**
