@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +93,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 			f.setAccessible(true);	
 
 			if(f.getType().equals(SoftReference.class))
+				continue;
+			if(f.getType().equals(WeakReference.class))
 				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.DefaultCellularComponent$ShapeCache")))
 				continue;

@@ -88,7 +88,7 @@ public class NucleusTest {
 	@Test
 	public void testMinDiameter() throws Exception {
 		double expected = 100;
-		double epsilon = 0.01; // the amount of difference permitted
+		double epsilon = 2; // the amount of difference permitted
 		assertEquals(expected, nucleus.getStatistic(PlottableStatistic.MIN_DIAMETER), epsilon);
 	}
 		
