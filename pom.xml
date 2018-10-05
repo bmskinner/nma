@@ -157,7 +157,7 @@
 								<bundledJreAsFallback>false</bundledJreAsFallback>
 								<minVersion>1.8.0</minVersion>
 								<jdkPreference>preferJdk</jdkPreference>
-								<runtimeBits>64</runtimeBits>
+								<runtimeBits>64/32</runtimeBits>
 								<initialHeapPercent>5</initialHeapPercent>
 								<maxHeapPercent>90</maxHeapPercent>
 							</jre>
