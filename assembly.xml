@@ -4,30 +4,44 @@
       xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
       <!-- Create the zip file for uploading to website. This
      holds the files needed to install as a plugin to Image -->
-    <id>release</id>
+    <id>build-imagej-folder</id>
     <formats>
         <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
+    
+   		<!-- Dependency jars -->
         <fileSet>
-            <directory>target/dependency-jars</directory>
-            <outputDirectory>Nuclear_Morphology_Analysis</outputDirectory>
+            <directory>${project.build.directory}/dependency-jars</directory>
+            <outputDirectory>${project.full.name}</outputDirectory>
             <includes>
                 <include>*.jar</include>
             </includes>
         </fileSet>
+        
+        <!-- Main jar -->
         <fileSet>
-            <outputDirectory>Nuclear_Morphology_Analysis</outputDirectory>
-            <directory>target</directory>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>${project.full.name}</outputDirectory>
             <includes>
-                <include>Nuclear_Morphology_${project.version}.jar</include>
+                <include>${jar.finalName}.jar</include>
             </includes>
         </fileSet>
+        
+        <!-- Readme -->
+        <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory>${project.full.name}</outputDirectory>
+            <includes>
+                <include>README.md</include>
+            </includes>
+        </fileSet>
+        
+        <!-- ImageJ helper scripts -->
          <fileSet>
-            <!-- ImageJ helper scripts -->
-            <outputDirectory>Nuclear_Morphology_Analysis</outputDirectory>
-            <directory>scripts</directory>
+            <outputDirectory>${project.full.name}</outputDirectory>
+            <directory>${project.scripts.directory</directory>
             <includes>
                 <include>*.ijm</include>
             </includes>

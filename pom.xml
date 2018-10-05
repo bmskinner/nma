@@ -5,10 +5,20 @@
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nuclear_morphology</artifactId>
 	<version>1.14.0</version>
+	
+	<!-- Define custom properties -->
 	<properties>
+		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
+		<version.suffix>rc2</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
-		<jar.finalName>Nuclear_Morphology_Analysis_${project.version}</jar.finalName>
+		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
+		<project.template.directory>templates</project.template.directory>
+		<project.scripts.directory>scripts</project.scripts.directory>
+		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+  		<project.current.year>${maven.build.timestamp}</project.current.year>
 	</properties>
+	
+	
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>test</testSourceDirectory>
@@ -30,6 +40,12 @@
 					<exclude>**/*.java</exclude>
 				</excludes>
 			</resource>
+			<resource>
+				<directory>screenshots</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
 		</resources>
 		<testResources>
 			<testResource>
@@ -39,9 +55,41 @@
 				</includes>
 			</testResource>
 		</testResources>
+		
 		<plugins>
+		
+			<!-- Write the version info into the readme -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+				
+					<!-- Copy the readme to the base directory so the repo is up to date -->
+					<execution>
+						<id>readme-md</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.template.directory}</directory>
+									<includes>
+										<include>README.md</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-			<!-- Compile to a java version -->
+			<!-- Compile to desired java version -->
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.5.1</version>
@@ -51,7 +99,7 @@
 				</configuration>
 			</plugin>
 
-			<!-- Make this jar executable -->
+			<!-- Make an executable jar -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -88,10 +136,12 @@
 				</executions>
 			</plugin>
 
-			<!-- Create a jar with the dependencies included as a standalone version -->
+			
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.5.5</version>
+				
+				<!-- Create a jar with the dependencies included as a standalone version -->
 				<executions>
 					<execution>
 						<id>create-executable-jar</id>
@@ -112,6 +162,7 @@
 							</archive>
 						</configuration>
 					</execution>
+					
 					<!-- Create a zip with the jar file and dependencies for distribution 
 						as ImageJ plugin install file -->
 					<execution>
@@ -146,8 +197,8 @@
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<jar>target/${jar.finalName}_standalone.jar</jar>
-							<outfile>target/${jar.finalName}.exe</outfile>
+							<jar>${project.build.directory}/${jar.finalName}_standalone.jar</jar>
+							<outfile>${project.build.directory}/${jar.finalName}.exe</outfile>
 							<downloadUrl>http://java.com/download</downloadUrl>
 							<classPath>
 								<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
@@ -159,18 +210,18 @@
 								<jdkPreference>preferJdk</jdkPreference>
 								<runtimeBits>64/32</runtimeBits>
 								<initialHeapPercent>5</initialHeapPercent>
-								<maxHeapPercent>90</maxHeapPercent>
+								<maxHeapPercent>80</maxHeapPercent>
 							</jre>
 							<versionInfo>
 								<fileVersion>${project.version}.0</fileVersion>
-								<txtFileVersion>${project.version}</txtFileVersion>
+								<txtFileVersion>${project.version}${version.suffix}</txtFileVersion>
 								<fileDescription>Biological analysis software for nuclear shape</fileDescription>
 								<productVersion>${project.version}.0</productVersion>
-								<txtProductVersion>${project.version}</txtProductVersion>
-								<productName>Nuclear Morphology Analysis</productName>
+								<txtProductVersion>${project.version}${version.suffix}</txtProductVersion>
+								<productName>${project.full.name}</productName>
 								<originalFilename>${jar.finalName}.exe</originalFilename>
-								<copyright>Ben Skinner</copyright>
-								<internalName>Nuclear Morphology Analysis</internalName>
+								<copyright>Ben Skinner ${inceptionYear}-${project.current.year}</copyright>
+								<internalName>${project.full.name}</internalName>
 							</versionInfo>
 						</configuration>
 					</execution>
