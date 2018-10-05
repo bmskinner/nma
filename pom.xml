@@ -5,20 +5,21 @@
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nuclear_morphology</artifactId>
 	<version>1.14.0</version>
-	
+
 	<!-- Define custom properties -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
+		<project.code.name>Daedalus</project.code.name>
 		<version.suffix>rc2</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
 		<project.scripts.directory>scripts</project.scripts.directory>
-		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-  		<project.current.year>${maven.build.timestamp}</project.current.year>
+		<maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
+
 	</properties>
-	
-	
+
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>test</testSourceDirectory>
@@ -56,192 +57,249 @@
 			</testResource>
 		</testResources>
 		
-		<plugins>
 		
-			<!-- Write the version info into the readme -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.0.1</version>
-				<executions>
-				
-					<!-- Copy the readme to the base directory so the repo is up to date -->
-					<execution>
-						<id>readme-md</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.basedir}</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.template.directory}</directory>
-									<includes>
-										<include>README.md</include>
-									</includes>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-							<encoding>UTF-8</encoding>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+		<pluginManagement>
+		
+			<plugins>
 
-			<!-- Compile to desired java version -->
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
+				<!-- Store the current year in a variable -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.12</version>
+					<executions>
+						<execution>
+							<id>timestamp-property</id>
+							<goals>
+								<goal>timestamp-property</goal>
+							</goals>
+							<phase>validate</phase>
+							<configuration>
+								<name>current.year</name>
+								<pattern>yyyy</pattern>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 
-			<!-- Make an executable jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
-							<classpathPrefix>dependency-jars/</classpathPrefix>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
+				<!-- Write the version info into the readme -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.0.1</version>
+					<executions>
 
-			<!-- Copy project dependencies to new folder -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.5.1</version>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<!-- exclude junit, we need runtime dependency only -->
-							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+						<!-- Copy the readme to the base directory so the repo is up to date -->
+						<execution>
+							<id>readme-md</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>${project.basedir}</outputDirectory>
+								<resources>
+									<resource>
+										<directory>${project.template.directory}</directory>
+										<includes>
+											<include>README.md</include>
+										</includes>
+										<filtering>true</filtering>
+									</resource>
+								</resources>
+								<encoding>UTF-8</encoding>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 
-			
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.5.5</version>
-				
-				<!-- Create a jar with the dependencies included as a standalone version -->
-				<executions>
-					<execution>
-						<id>create-executable-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<finalName>${jar.finalName}_standalone</finalName>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-							<appendAssemblyId>false</appendAssemblyId>
-							<archive>
-								<manifest>
-									<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</execution>
-					
-					<!-- Create a zip with the jar file and dependencies for distribution 
-						as ImageJ plugin install file -->
-					<execution>
-						<id>create-packaged-zip</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<finalName>${jar.finalName}_ImageJ_plugin</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-							<descriptors>
-								<descriptor>assembly.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+				<!-- Write the version info to the ImageJ plugins config file -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.0.1</version>
+					<executions>
 
+						<!-- Copy the readme to the base directory so the repo is up to date -->
+						<execution>
+							<id>imagej-plugins-config</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>src</outputDirectory>
+								<resources>
+									<resource>
+										<directory>${project.template.directory}</directory>
+										<includes>
+											<include>plugins.config</include>
+										</includes>
+										<filtering>true</filtering>
+									</resource>
+								</resources>
+								<encoding>UTF-8</encoding>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 
-			<!-- Use Launch4J to create an exe file for Windows standalone version -->
-			<plugin>
-				<groupId>com.akathist.maven.plugins.launch4j</groupId>
-				<artifactId>launch4j-maven-plugin</artifactId>
-				<version>1.7.23</version>
-				<executions>
-					<execution>
-						<id>l4j-gui</id>
-						<phase>package</phase>
-						<goals>
-							<goal>launch4j</goal>
-						</goals>
-						<configuration>
-							<headerType>gui</headerType>
-							<jar>${project.build.directory}/${jar.finalName}_standalone.jar</jar>
-							<outfile>${project.build.directory}/${jar.finalName}.exe</outfile>
-							<downloadUrl>http://java.com/download</downloadUrl>
-							<classPath>
+				<!-- Compile to desired java version -->
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.5.1</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+
+				<!-- Make an executable jar -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addClasspath>true</addClasspath>
 								<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
-							</classPath>
-							<jre>
-								<bundledJre64Bit>false</bundledJre64Bit>
-								<bundledJreAsFallback>false</bundledJreAsFallback>
-								<minVersion>1.8.0</minVersion>
-								<jdkPreference>preferJdk</jdkPreference>
-								<runtimeBits>64/32</runtimeBits>
-								<initialHeapPercent>5</initialHeapPercent>
-								<maxHeapPercent>80</maxHeapPercent>
-							</jre>
-							<versionInfo>
-								<fileVersion>${project.version}.0</fileVersion>
-								<txtFileVersion>${project.version}${version.suffix}</txtFileVersion>
-								<fileDescription>Biological analysis software for nuclear shape</fileDescription>
-								<productVersion>${project.version}.0</productVersion>
-								<txtProductVersion>${project.version}${version.suffix}</txtProductVersion>
-								<productName>${project.full.name}</productName>
-								<originalFilename>${jar.finalName}.exe</originalFilename>
-								<copyright>Ben Skinner ${inceptionYear}-${project.current.year}</copyright>
-								<internalName>${project.full.name}</internalName>
-							</versionInfo>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+								<classpathPrefix>dependency-jars/</classpathPrefix>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+
+				<!-- Copy project dependencies to new folder -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.5.1</version>
+					<executions>
+						<execution>
+							<id>copy-dependencies</id>
+							<phase>package</phase>
+							<goals>
+								<goal>copy-dependencies</goal>
+							</goals>
+							<configuration>
+								<!-- exclude junit, we need runtime dependency only -->
+								<includeScope>runtime</includeScope>
+								<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.3</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.7</version>
-			</plugin>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.5.5</version>
 
-		</plugins>
+					<!-- Create a jar with the dependencies included as a standalone version -->
+					<executions>
+						<execution>
+							<id>create-executable-jar</id>
+							<phase>package</phase>
+							<goals>
+								<goal>single</goal>
+							</goals>
+							<configuration>
+								<finalName>${jar.finalName}_standalone</finalName>
+								<descriptorRefs>
+									<descriptorRef>jar-with-dependencies</descriptorRef>
+								</descriptorRefs>
+								<appendAssemblyId>false</appendAssemblyId>
+								<archive>
+									<manifest>
+										<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
+									</manifest>
+								</archive>
+							</configuration>
+						</execution>
+
+						<!-- Create a zip with the jar file and dependencies for distribution 
+							as ImageJ plugin install file -->
+						<execution>
+							<id>create-packaged-zip</id>
+							<phase>package</phase>
+							<goals>
+								<goal>single</goal>
+							</goals>
+							<configuration>
+								<finalName>${jar.finalName}_ImageJ_plugin</finalName>
+								<appendAssemblyId>false</appendAssemblyId>
+								<descriptors>
+									<descriptor>assembly.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+
+				<!-- Use Launch4J to create an exe file for Windows standalone version -->
+				<plugin>
+					<groupId>com.akathist.maven.plugins.launch4j</groupId>
+					<artifactId>launch4j-maven-plugin</artifactId>
+					<version>1.7.23</version>
+					<executions>
+						<execution>
+							<id>l4j-gui</id>
+							<phase>package</phase>
+							<goals>
+								<goal>launch4j</goal>
+							</goals>
+							<configuration>
+								<headerType>gui</headerType>
+								<jar>${project.build.directory}/${jar.finalName}_standalone.jar</jar>
+								<outfile>${project.build.directory}/${jar.finalName}.exe</outfile>
+								<downloadUrl>http://java.com/download</downloadUrl>
+								<classPath>
+									<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
+								</classPath>
+								<jre>
+									<bundledJre64Bit>false</bundledJre64Bit>
+									<bundledJreAsFallback>false</bundledJreAsFallback>
+									<minVersion>1.8.0</minVersion>
+									<jdkPreference>preferJdk</jdkPreference>
+									<runtimeBits>64/32</runtimeBits>
+									<initialHeapPercent>5</initialHeapPercent>
+									<maxHeapPercent>80</maxHeapPercent>
+								</jre>
+								<versionInfo>
+									<fileVersion>${project.version}.0</fileVersion>
+									<txtFileVersion>${project.version}${version.suffix}</txtFileVersion>
+									<fileDescription>Biological analysis software for nuclear shape</fileDescription>
+									<productVersion>${project.version}.0</productVersion>
+									<txtProductVersion>${project.version}${version.suffix}</txtProductVersion>
+									<productName>${project.full.name}</productName>
+									<originalFilename>${jar.finalName}.exe</originalFilename>
+									<copyright>Ben Skinner ${inceptionYear}-${current.year}</copyright>
+									<internalName>${project.code.name}</internalName>
+									 <language>ENGLISH_UK</language>
+								</versionInfo>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
 	</build>
+	
 	<dependencies>
 		<dependency>
 			<groupId>fr.inra.ijpb</groupId>
@@ -354,11 +412,11 @@
 	<description>Nuclear Morphology Analysis  is a program that allows for automated detection of round or asymmetric nuclei in images, and subsequent morphological analysis.</description>
 	<inceptionYear>2015</inceptionYear>
 	<licenses>
-  <license>
-    <name>GNU General Public License, Version 3</name>
-    <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
-    <distribution>manual</distribution>
-    <comments>Free software license</comments>
-  </license>
-</licenses>
+		<license>
+			<name>GNU General Public License, Version 3</name>
+			<url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+			<distribution>manual</distribution>
+			<comments>Free software license</comments>
+		</license>
+	</licenses>
 </project>
