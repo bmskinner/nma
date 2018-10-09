@@ -70,7 +70,7 @@ public class DatasetDeleter implements Loggable {
             if (rootHasChanged(list)) {
                 warn("A root dataset has changed since last save");
                 String[] buttonLabels = { KEEP_LBL, DELETE_LBL };
-                int option = is.requestOption(buttonLabels, 0, KEEP_LBL, TITLE_LBL);
+                int option = is.requestOption(buttonLabels, 0, WARNING_LBL, TITLE_LBL);
                 if(option==0)
                 	return;
             }

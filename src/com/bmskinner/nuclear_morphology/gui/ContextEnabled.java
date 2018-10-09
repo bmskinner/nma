@@ -20,7 +20,8 @@ import java.util.Collection;
 
 /**
  * Interface for components that have their enabled state driven 
- * by the number and type of selected objects
+ * by the number and type of selected objects. Components should specify a
+ * bitmask describing the combinations of objects they will respond to. 
  * @author bms41
  * @since 1.14.0
  *
@@ -39,26 +40,4 @@ public interface ContextEnabled {
      * @param nItems the number of selected items
      */
 	void updateSelectionContext(Collection<Object> objects);
-	
-//	void updateSelectionContext(ActiveTypeContext type);
-		
-	/**
-     * Track when a menu item should be active.
-     * Objects can be datasets, cluster groups, workspaces,
-     * or anything else in the populations menu
-     * @author bms41
-     * @since 1.14.0
-     *
-     */
-//    public enum ActiveCountContext {
-//    	SINGLE_OBJECT_ONLY,
-//    	MULTIPLE_OBJECTS_ONLY,
-//    	SINGLE_AND_MULTIPLE_OBJECTS
-//    }
-//    
-//    public enum ActiveTypeContext {
-//    	DATASET,
-//    	CLUSTER_GROUP,
-//    	WORKSPACE
-//    }
 }
