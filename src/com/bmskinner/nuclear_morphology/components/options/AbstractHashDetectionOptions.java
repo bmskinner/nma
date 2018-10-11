@@ -263,7 +263,8 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
 
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + folder.hashCode();
+        if(folder!=null)
+        	result = prime * result + folder.hashCode();
         result = prime * result + subMap.hashCode();
         return result;
 

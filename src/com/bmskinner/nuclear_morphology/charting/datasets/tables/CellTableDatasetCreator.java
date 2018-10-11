@@ -49,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -373,7 +374,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
                 if(!g.isPresent())
                 	continue;
-                INuclearSignalOptions signalOptions = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup);
+                Optional<IAnalysisOptions> datasetOptionsOptional = d.getAnalysisOptions();
+                if(!datasetOptionsOptional.isPresent())
+                	continue;
+                INuclearSignalOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup);
 
                 fieldNames.add("");
                 rowData.add("");

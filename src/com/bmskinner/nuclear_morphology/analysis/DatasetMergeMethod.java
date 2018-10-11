@@ -31,6 +31,13 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
@@ -193,15 +200,128 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
             newDataset.addMergeSource(d);
         }
 
-        // a merged dataset should not have analysis options
-        // of its own; it lets each merge source display options
-        // appropriately
         //TODO need to keep the signal folder settings preserved. Copy the analysis options where
         // possible
-        newDataset.setAnalysisOptions(null);
+        
+        IAnalysisOptions mergedOptions = mergeOptions(newDataset);
+        newDataset.setAnalysisOptions(mergedOptions);
 
         return newDataset;
     }
+    
+    /**
+     * Merge any identical options amongst the datasets
+     * @return
+     * @throws MissingOptionException 
+     */
+    private IAnalysisOptions mergeOptions(IAnalysisDataset newDataset) throws MissingOptionException {
+    	IAnalysisOptions mergedOptions = OptionsFactory.makeAnalysisOptions();
+    	IDetectionOptions nucleus = OptionsFactory.makeNucleusDetectionOptions((File)null);
+
+    	IAnalysisDataset d1 = datasets.get(0);
+    	IAnalysisOptions d1Options = d1.getAnalysisOptions().get();
+		
+		List<IDetectionOptions> templates = new ArrayList<>();
+		for (IAnalysisDataset d : datasets) {
+			IAnalysisOptions dOptions = d.getAnalysisOptions().get();
+			templates.add(dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
+		}
+		mergeDetectionOptions(nucleus, templates);
+
+    	mergedOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleus);
+    	mergedOptions.setNucleusType(d1Options.getNucleusType());
+    	mergedOptions.setAngleWindowProportion(d1Options.getProfileWindowProportion());
+
+    	
+    	// Merge signal group options
+    	for(UUID signalGroupId : newDataset.getCollection().getSignalGroupIDs()) {
+    		INuclearSignalOptions signal = OptionsFactory.makeNuclearSignalOptions((File)null);    		
+    		//TODO: Merge the signal detection options
+    		mergedOptions.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+signalGroupId.toString(), signal);
+    	}
+    	
+    	
+    	return mergedOptions;
+    }
+    
+    private void mergeDetectionOptions(IDetectionOptions merged, List<IDetectionOptions> templates) throws MissingOptionException {
+    	IDetectionOptions t1 = templates.get(0);
+    	for(String s : t1.getFloatKeys()){
+			float result = t1.getFloat(s);
+			boolean canAdd = true;
+			for (IAnalysisDataset d : datasets) {
+				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				canAdd &= nOptions.getFloat(s)==result;
+			}
+			if(canAdd)
+				merged.setFloat(s, result);
+			else
+				merged.setFloat(s, Float.NaN);
+		}
+    	
+    	for(String s : t1.getDoubleKeys()){
+			double result = t1.getDouble(s);
+			boolean canAdd = true;
+			for (IAnalysisDataset d : datasets) {
+				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				canAdd &= nOptions.getDouble(s)==result;
+			}
+			if(canAdd)
+				merged.setDouble(s, result);
+			else
+				merged.setDouble(s, Double.NaN);
+		}
+		
+		for(String s : t1.getIntegerKeys()){
+			int result = t1.getInt(s);
+			boolean canAdd = true;
+			for (IAnalysisDataset d : datasets) {
+				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				canAdd &= nOptions.getInt(s)==result;
+			}
+			if(canAdd)
+				merged.setInt(s, result);
+			else
+				merged.setInt(s, Integer.MAX_VALUE);
+		}
+		
+		for(String s : t1.getStringKeys()){
+			String result = t1.getString(s);
+			boolean canAdd = true;
+			for (IAnalysisDataset d : datasets) {
+				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				canAdd &= nOptions.getString(s).equals(result);
+			}
+			if(canAdd)
+				merged.setString(s, result);
+			else
+				merged.setString(s, Labels.NA_MERGE);
+		}
+		
+		for(String s : t1.getSubOptionKeys()){
+			IDetectionSubOptions result = t1.getSubOptions(s);
+			boolean canAdd = true;
+			for (IAnalysisDataset d : datasets) {
+				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				if(nOptions.hasSubOptions(s))
+					canAdd &= nOptions.getSubOptions(s).equals(result);
+				else
+					canAdd=false;
+			}
+			if(canAdd)
+				merged.setSubOptions(s, result);
+			else
+				merged.setSubOptions(s, null);
+		}
+    	
+    }
+    
+    
 
     private void mergeSignalGroups(ICellCollection newCollection) {
         if (pairedSignalGroups == null) {
@@ -213,7 +333,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
         // Decide which signal groups get which new ids
         // Key is old signal group. Entry is new id
-        Map<UUID, UUID> mergedSignalGroups = new HashMap<UUID, UUID>();
+        Map<UUID, UUID> mergedSignalGroups = new HashMap<>();
 
         for (UUID id1 : pairedSignalGroups.keySet()) {
 

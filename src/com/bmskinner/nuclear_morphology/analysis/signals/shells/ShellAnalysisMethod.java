@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.KeyedShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.RandomShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -135,7 +137,12 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             
             // Assign the options to each signal group
             fine("Creating signal counter for group "+signalGroupId);
-            dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
+            Optional<IAnalysisOptions> datasetOptions = dataset.getAnalysisOptions();
+            if(!datasetOptions.isPresent()) {
+            	warn("No analysis options in dataset; unable to set shell options");
+            	return;
+            }
+            datasetOptions.get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
         }
     	
     	// Ensure a random distribution exists
