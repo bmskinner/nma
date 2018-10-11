@@ -242,9 +242,15 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 stack(s);
             }
             warn("The dataset is not properly segmented");
-            new CellFileExporter().exportCellLocations(dataset);
             warn("Curated datasets and groups have been saved");
             warn("Either resegment (Editing>Segmentation>Segment profile) or redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
+            try {
+				new CellFileExporter(dataset).call();
+			} catch (Exception e) {
+				warn("Unable to save cell locations");
+				warn("Redetect these nuclei");
+			}
+           
         }
     }
 

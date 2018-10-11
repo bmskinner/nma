@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportOptionsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportShellsAction;
@@ -289,14 +290,7 @@ public class EventHandler implements Loggable, EventListener {
             };
                             
             if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
-            	return () ->{
-                    log("Exporting cell locations...");
-                    if (new CellFileExporter().exportCellLocations(selectedDataset)) {
-                        log("Export complete");
-                    } else {
-                        log("Export failed");
-                    }
-                };
+            	return new ExportCellLocationsAction(selectedDatasets, acceptor, EventHandler.this);
                     
             if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX))
             	return () ->{

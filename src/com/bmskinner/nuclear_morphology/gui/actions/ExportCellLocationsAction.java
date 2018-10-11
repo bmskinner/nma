@@ -1,0 +1,53 @@
+package com.bmskinner.nuclear_morphology.gui.actions;
+
+import java.io.File;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.CellFileExporter;
+import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
+
+/**
+ * The action for exporting cell locations from datasets
+ * 
+ * @author bms41
+ * @since 1.14.0
+ *
+ */
+public class ExportCellLocationsAction extends MultiDatasetResultAction {
+	
+	private static final @NonNull String PROGRESS_LBL = "Exporting cell location";
+
+    public ExportCellLocationsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, PROGRESS_LBL, acceptor, eh);
+    }
+
+
+    @Override
+    public void run() {
+
+//    	File file = FileSelector.chooseStatsExportFile(datasets, "stats");
+//
+//    	if (file == null) {
+//    		cancel();
+//    		return;
+//    	}
+
+
+    	IAnalysisMethod m = new CellFileExporter(datasets);
+    	worker = new DefaultAnalysisWorker(m, datasets.size());
+    	worker.addPropertyChangeListener(this);
+    	this.setProgressMessage("Exporting stats");
+    	ThreadManager.getInstance().submit(worker);
+    }
+
+
+}

@@ -47,10 +47,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetStatsExporter extends StatsExporter implements Loggable {
 
-//    private static final String EXPORT_MESSAGE          = "Exporting stats...";
-//    private File                exportFile;
-//    private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
-
     private boolean includeProfiles = true;
     private boolean includeSegments = false;
     private int segCount = 0;
