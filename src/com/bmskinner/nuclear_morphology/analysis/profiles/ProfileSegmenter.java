@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -143,6 +144,13 @@ public class ProfileSegmenter implements Loggable {
          */
         IBorderSegment seg = IBorderSegment.newSegment(segmentStart, 0, profile.size());
         segments.add(seg);
+        
+        if(segments.size()==1) {
+        	// We were unable to detect more than a single segment
+        	// Ensure it has the default ID
+        	segments.clear();
+        	segments.add(IBorderSegment.newSegment(segmentStart, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID));
+        }
 
         try {
             IBorderSegment.linkSegments(segments);

@@ -190,10 +190,13 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		fine("Before segmentation median length: "+collection.getMedianArrayLength());
 		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
 		
-		if(median.getSegmentCount()<=1) {
-			warn("Unable to find segments in median profile");
+		if(median.getSegmentCount()<=0) {
+			warn("Error finding segments in median profile");
 			return new DefaultAnalysisResult(dataset);
 		}
+		
+		if(median.getSegmentCount()==1)
+			warn("Unable to segment the median profile");
 		
 		// Make a new collection and aggregate to invalidate previous cached data, possibly
 		// with different profile lengths
@@ -262,11 +265,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		// At this point the collection has only a regular profile collections.
 		// No Frankenprofile has been copied.
-		
-		
-
-//		reviseSegments();
-
 		fine("Re-profiling complete");
 	}
 	
@@ -281,8 +279,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		// choose the best subset of nuclei and make a median profile from them
 		fine("Collection median length "+collection.getMedianArrayLength());
 		fine("Profile collection length "+collection.getProfileCollection().length());
-		
-		
+
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
 		
 		IProfile median = finder.findMedian();
@@ -304,268 +301,18 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @throws Exception
 	 */
 	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template) throws ProfileException, SegmentUpdateException, UnavailableComponentException {
-		// Find the approximate segment boundary position using least-squares fitting
+		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
 		for(Nucleus n : collection.getNuclei()) {
-			bestFitAlignSegments(template, n);
-			if(n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentCount()!=template.getSegmentCount()){
-				throw new ProfileException("Segments were not fitted to nucleus");
-			}
+			if (n.isLocked())
+				continue;
+			ISegmentedProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			nucleusProfile = fitter.fit(nucleusProfile);
+			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, nucleusProfile);
+			if(nucleusProfile.getSegmentCount()!=template.getSegmentCount())
+				throw new ProfileException("Segments could not be fitted to nucleus");				
 		}
 	}
 	
-	
-	/**
-	 * Create a frankenmedian based on the current segmentation patterns of the nuclei in the 
-	 * collection.
-	 * @return
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
-	 * @throws ProfileException
-	 * @throws UnsegmentedProfileException
-	 */
-//	private ISegmentedProfile createFrankenMedianFromNuclei(@NonNull ISegmentedProfile template) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
-//
-//		IProfileAggregate agg = new DefaultProfileAggregate(template.size(), collection.getNucleusCount());
-//		
-//		for(Nucleus n : collection.getNuclei()) {
-//			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-//			ISegmentedProfile franken = profile.frankenNormaliseToProfile(template);
-//			agg.addValues(franken);
-//		}
-//		return new SegmentedFloatProfile(agg.getMedian(), template.getSegments());
-//	}
-
-	
-	/**
-	 * Calculate the sum of sum-of-squares differences between the give profile and each nucleus profile.
-	 * The template profile is assumed to be indexed at the reference point.
-	 * @param template the profile to be compared to each nucleus in the collection.
-	 * @return
-	 * @throws ProfileException
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
-	 */
-//	private double calculateDifferenceScoresToProfile(ISegmentedProfile template) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
-//		double score = 0;
-//		for(Nucleus n : collection.getNuclei()) {
-//			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-//			ISegmentedProfile franken = profile.frankenNormaliseToProfile(template);
-//			score += template.absoluteSquareDifference(franken);
-//		}
-//		return score;
-//	}
-	
-	
-//	private void iterateFrankenprofiles() throws ProfileException, UnsegmentedProfileException, UnsegmentableProfileException, SegmentUpdateException, UnavailableComponentException {
-//		
-//		// Debugging charts only
-//		List<IProfile> profiles = new ArrayList<>();
-//		List<String> names = new ArrayList<>();
-//
-//		// Calculate new difference scores
-//		ISegmentedProfile median = collection.getProfileCollection()
-//				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-//
-//		
-//		List<IBorderSegment> frankenSegments = median.getSegments(); // to restore from if frankenprofiling fails
-//		double score = calculateDifferenceScoresToProfile(median);
-//		profiles.add(median.copy());
-//		names.add("Starting median: score "+score);
-//		
-//		fine(String.format("Starting median has %s segments", median.getSegmentCount()));
-//		
-//		fine("Starting score: "+score);
-//		double prevScore = Double.MAX_VALUE;
-//		while(score<prevScore) {
-//			prevScore = score;
-//			// 5 - Generate frankenprofiles for each nucleus against the median
-//			// 6 - Profile the frankencollection
-//			// 7 - Create a new frankenmedian
-//			ISegmentedProfile frankenMedian = createFrankenMedianFromNuclei(median);
-//
-//			// 8 - Segment the frankenmedian
-//			ProfileSegmenter segmenter = new ProfileSegmenter(frankenMedian);
-//			List<IBorderSegment> testFrankenSegments = segmenter.segment();
-//			if(testFrankenSegments.size()==1)
-//				break; // that went wrong, we should get more segments out, not fewer/equal
-//			
-//			
-//			frankenMedian.setSegments(testFrankenSegments);
-//			median.setSegments(testFrankenSegments);
-//
-//			profiles.add(frankenMedian.copy());
-//
-//			fine(String.format("Frankenmedian has %s segments", testFrankenSegments.size()));
-//
-//			// 9 - Fit the frankensegments to each nucleus
-//			assignSegmentsToNuclei(frankenMedian);
-//			
-//			// Calculate new difference scores
-//			score = calculateDifferenceScoresToProfile(frankenMedian);
-//			fine("Score after frankenprofiling: "+score);
-//			
-//			if(score>=prevScore) { // go back to the previous segments
-//
-//				frankenMedian.setSegments(frankenSegments);
-//				median.setSegments(frankenSegments);
-//				assignSegmentsToNuclei(frankenMedian);
-//				profiles.add(frankenMedian.copy());
-//				fine(String.format("Final frankenmedian has %s segments", frankenSegments.size()));
-//				score = calculateDifferenceScoresToProfile(frankenMedian);
-//			} else {
-//				frankenSegments = testFrankenSegments;
-//			}
-//			
-//			names.add("Frankenmedian iteration: score "+score);
-//		}
-//		fine("Final score: "+score);
-//		// Add the new segments back to the profile collection
-//		collection.getProfileCollection().addSegments(frankenSegments);
-//		
-//		
-//		
-////		try {
-////			ChartFactoryTest.showProfiles(profiles, names, "Segmentation method");
-////		} catch (InterruptedException e) {
-////			throw new ProfileException("Charting error", e);
-////		}
-//	}
-	
-	/**
-	 * Assign segments to a nucleus, finding the best match of the
-	 * nucleus profile to the template profile. Segments are matched using a sliding
-	 * window offset of the entire profile.
-	 *  
-	 * @param n the nucleus to assign segments to
-	 * @param template the segmented template profile
-	 * @throws SegmentUpdateException 
-	 * @throws UnavailableComponentException 
-	 */
-	private void bestFitAlignSegments(@NonNull ISegmentedProfile template, @NonNull Nucleus n) throws ProfileException, SegmentUpdateException, UnavailableComponentException {
-
-		if (n.isLocked())
-			return;
-		ISegmentedProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-//		nucleusProfile = bestFitAlignSegments(template, nucleusProfile);
-		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
-		nucleusProfile = fitter.fit(nucleusProfile);
-		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, nucleusProfile);
-	}
-	
-	/**
-	 * Assign segments from a template to a target, finding the best match of the
-	 * target profile to the template profile. Segments are matched using a sliding
-	 * window offset of the entire profile.
-	 * 
-	 * Step 1 is to create segments in the target at the proportional indexes of the template.
-	 * Step 2 is to adjust the segment boundaries based on the best-fit offsets 
-	 * 
-	 * Is is assumed that the template and target have the same reference points at index zero.
-	 *  
-	 * @param template the segmented template profile
-	 * @param target the profile to be segmented
-	 * @return the target profile with segments
-	 * @throws SegmentUpdateException 
-	 * @throws UnavailableComponentException 
-	 */
-//	private ISegmentedProfile bestFitAlignSegments(@NonNull ISegmentedProfile template, @NonNull ISegmentedProfile target) throws ProfileException, SegmentUpdateException, UnavailableComponentException {
-//
-//		// Debugging charts only
-//		List<IProfile> profiles = new ArrayList<>();
-//		List<String> names = new ArrayList<>();
-//
-//		profiles.add(template.copy());
-//		names.add("Input template profile");
-//		target.clearSegments();
-//		/* TODO: What happens when an object is symmetric about at least one axis?
-//		   The offset could land in either of at least two places, causing segments 
-//		   to be placed on top
-//		   of each other. See the test method with varying border offsets.
-//
-//		   Step 1 is designed to avoid this, by ensuring the segments are all present
-//		   and non-overlapping. Once in place, Step 2 involves updating the boundaries to a 
-//		   valid best fit index.
-//		 */
-//
-//		List<IBorderSegment> targetSegments = new ArrayList<>();
-//
-//		int prevEnd = 0; // Always start at the RP
-//		for (IBorderSegment segment : template.getSegments()) {
-//
-//			int medianEnd   = segment.getEndIndex();
-//			double propEnd  = template.getFractionOfIndex(medianEnd);
-//			
-//			int targetStart = prevEnd;
-//			int targetEnd   = target.getIndexOfFraction(propEnd);
-//			
-//			IBorderSegment seg = IBorderSegment.newSegment(targetStart, targetEnd, target.size(),
-//					segment.getID());
-//			
-//			targetSegments.add(seg);
-//			prevEnd = targetEnd;
-//		}
-//
-//		IBorderSegment.linkSegments(targetSegments);
-//		target.setSegments(targetSegments);
-//		fine("Assigned segments to target profile by proportional matching");
-//
-//		/*
-//		 * Step 2:
-//		 * Find the best fit offset for the segment endpoints within
-//		 * the range of the current segment and previous segment.
-//		 * 
-//		 * The first segment must still start at index zero.
-//		 * 
-//		 * The end segment must still end at index zero.
-//		 * 
-//		 */
-//
-//		for(int i=0; i<targetSegments.size(); i++) {
-//			if(i==0)
-//				continue;
-//			
-//			IBorderSegment templateSeg = template.getSegments().get(i);
-//			IBorderSegment targetSeg   = targetSegments.get(i);
-//
-//			profiles.add(target.copy());
-//			names.add("Target input for segment fitting to "+templateSeg.getDetail());
-//
-//			// Profile starting at the segment start
-//			IProfile startOffsetTemplate = template.offset(templateSeg.getStartIndex());
-//			
-//			// Test shows the template profile is correctly offset
-////			System.out.println(Arrays.toString(startOffsetTemplate.toFloatArray()));
-//			
-//			// search within the previous and current segment range of the target
-//			
-//			int minOffset = target.wrap(targetSeg.prevSegment().getStartIndex()+IBorderSegment.MINIMUM_SEGMENT_LENGTH);
-//			int maxOffset = target.wrap(targetSeg.getEndIndex()-IBorderSegment.MINIMUM_SEGMENT_LENGTH);
-//			
-////			System.out.println(String.format("Testing segment offsets %s-%s", minOffset, maxOffset));
-//			
-//			profiles.add(startOffsetTemplate.copy());
-//			names.add("Template offset to "+templateSeg.getStartIndex());
-//
-//			int startIndex = target.findBestFitOffset(startOffsetTemplate, minOffset, maxOffset);
-//			fine(String.format("Optimum start index found at %s for %s", startIndex, targetSeg.getDetail()));
-//
-//			
-//			targetSeg.update(startIndex, targetSeg.getEndIndex());			
-//		}
-////		try {
-////			ChartFactoryTest.showProfiles(profiles, names, "Segmentation method");
-////		} catch (InterruptedException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-////		}
-//		target.setSegments(targetSegments);
-//		if(target.getSegmentCount()!=template.getSegmentCount())
-//			throw new ProfileException("Nucleus does not have the correct segment count");
-//
-//		fine(String.format("Completed segment assignment for target profile"));
-//		return target;
-//	}
-
 	@Override
 	public void progressEventReceived(ProgressEvent event) {
 		fireProgressEvent();

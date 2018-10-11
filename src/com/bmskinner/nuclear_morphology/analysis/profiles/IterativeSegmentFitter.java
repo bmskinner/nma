@@ -71,7 +71,7 @@ public class IterativeSegmentFitter implements Loggable {
         if (target==null)
             throw new IllegalArgumentException("Target profile is null");
         
-        if(templateProfile.getSegmentCount()<=1)
+        if(templateProfile.getSegmentCount()==1)
         	return new SegmentedFloatProfile(target);
 
 		try {
