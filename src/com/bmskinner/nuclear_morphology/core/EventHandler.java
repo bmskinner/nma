@@ -259,7 +259,7 @@ public class EventHandler implements Loggable, EventListener {
                 return new ExportShellsAction(selectedDatasets, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_OPTIONS))
-                return new ExportOptionsAction(selectedDataset, acceptor, EventHandler.this);
+                return new ExportOptionsAction(selectedDatasets, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.LOBE_DETECTION))
                 return new LobeDetectionAction(selectedDataset, acceptor, EventHandler.this);

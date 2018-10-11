@@ -17,14 +17,18 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.OptionsXMLWriter;
 
 /**
@@ -33,30 +37,63 @@ import com.bmskinner.nuclear_morphology.io.OptionsXMLWriter;
  * @since 1.14.0
  *
  */
-public class ExportOptionsAction extends SingleDatasetResultAction {
+public class ExportOptionsAction extends MultiDatasetResultAction {
 	
 	private static final String PROGRESS_LBL = "Exporting options";
 	
-	public ExportOptionsAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(dataset, PROGRESS_LBL, acceptor, eh);
-    }
+//	public ExportOptionsAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+//        List<IAnalysisDataset> list = new ArrayList<>();
+//        list.add(dataset);
+//		super(list, PROGRESS_LBL, acceptor, eh);
+//    }
 	
+	public ExportOptionsAction(@NonNull List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, PROGRESS_LBL, acceptor, eh);
+    }
+		
 	 @Override
      public void run() {
 		 setProgressBarIndeterminate();
-         File file = FileSelector.chooseOptionsExportFile(dataset);
+		 
+		 if(datasets.size()==1) {
+			 File file = FileSelector.chooseOptionsExportFile(datasets.get(0));
 
-         if (file == null) {
-             cancel();
-             return;
-         }
+	         if (file == null) {
+	             cancel();
+	             return;
+	         }
 
-         Runnable r = () ->{
-        	 OptionsXMLWriter m = new OptionsXMLWriter();
-        	 m.write(dataset, file);
-        	 cancel();
-         };
-         ThreadManager.getInstance().submit(r);
+	         Runnable r = () ->{
+	        	 OptionsXMLWriter m = new OptionsXMLWriter();
+	        	 m.write(datasets.get(0), file);
+	        	 cancel();
+	         };
+	         ThreadManager.getInstance().submit(r);
+		 } else {
+			 
+			 // More than one dataset, choose folder only
+			 try {
+				File folder = eh.getInputSupplier().requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
+				Runnable r = () ->{
+					
+					for(IAnalysisDataset d : datasets) {
+						File f = new File(folder, d.getName()+Io.XML_FILE_EXTENSION);
+						OptionsXMLWriter m = new OptionsXMLWriter();
+						m.write(d, f);
+						log(String.format("Exported %s options to %s", d.getName(), f.getAbsolutePath()));
+					}
+					 cancel();
+		         };
+		         ThreadManager.getInstance().submit(r);
+			} catch (RequestCancelledException e) {
+				cancel();
+	             return;
+			}
+			 
+			 
+		 }
+		 
+         
      }
 
 }
