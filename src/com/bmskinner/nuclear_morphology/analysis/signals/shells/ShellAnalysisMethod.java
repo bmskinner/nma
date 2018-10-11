@@ -104,7 +104,13 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         		if(parent.getSignalGroup(signalGroupId).get().hasShellResult())
 					copyShellResults(signalGroupId, parent, collection);	
         	}
-        	if(parent.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().hasShellResult())
+        	
+        	Optional<ISignalGroup> randomGroup = parent.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
+        	if(!randomGroup.isPresent()) {
+        		warn("Parent dataset does not have shell results to copy");
+        		return;
+        	}
+        	if(randomGroup.get().hasShellResult())
         		copyShellResults(IShellResult.RANDOM_SIGNAL_ID, parent, collection);	        	
         	return;
         }
