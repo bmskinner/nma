@@ -16,6 +16,9 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -26,42 +29,59 @@ import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 
+/**
+ * An extension to a JTable that allows the table contents to be exported
+ * to file, or copied to the clipboard.
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class ExportableTable extends JTable {
 
-    final private TablePopupMenu popup;
-
+    /**
+     * Create an empty table
+     */
     public ExportableTable() {
         super();
-        popup = new TablePopupMenu(this);
-        this.setComponentPopupMenu(popup);
+        setComponentPopupMenu(new TablePopupMenu());
     }
 
+    /**
+     * Create with a table model
+     * @param model the table model
+     */
     public ExportableTable(TableModel model) {
         super(model);
-        popup = new TablePopupMenu(this);
-        this.setComponentPopupMenu(popup);
+        setComponentPopupMenu(new TablePopupMenu());
     }
 
+    /**
+     * The popup menu for the table
+     * @author bms41
+     *
+     */
     private class TablePopupMenu extends JPopupMenu {
+    	
+    	private static final String EXPORT_LBL = "Export";
+    	private static final String COPY_LBL   = "Copy";
 
-        final private ExportableTable table;
-
-        final private JMenuItem exportMenuItem = new JMenuItem(new AbstractAction("Export") {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                export();
-            }
-        });
-
-        public TablePopupMenu(final ExportableTable table) {
-
+        public TablePopupMenu() {
             super("Popup");
-            this.table = table;
-            this.add(exportMenuItem);
-
+            createButtons();
+           
+        }
+        
+        private void createButtons() {
+        	JMenuItem exportItem = new JMenuItem(EXPORT_LBL);
+        	exportItem.addActionListener(e->export());
+        	
+        	JMenuItem copyItem = new JMenuItem(COPY_LBL);
+        	copyItem.addActionListener(e->copy());
+        	
+        	add(copyItem);
+        	add(exportItem);
         }
 
         private void export() {
@@ -69,16 +89,22 @@ public class ExportableTable extends JTable {
             File saveFile = FileSelector.chooseTableExportFile();
 
             if(saveFile!=null){
-
                 String string = makeExportString();
-                Io.Exporter.writeString(string,saveFile);
+                Exporter.writeString(string,saveFile);
             }
 
+        }
+        
+        private void copy() {
+        	 String string = makeExportString();
+        	 StringSelection stringSelection = new StringSelection(string);
+        	 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        	 clipboard.setContents(stringSelection, null);
         }
 
         private String makeExportString() {
             StringBuilder builder = new StringBuilder();
-            TableModel model = table.getModel();
+            TableModel model = getModel();
             for (int col = 0; col < model.getColumnCount(); col++) {
                 builder.append(model.getColumnName(col) + Io.TAB);
                 ;
