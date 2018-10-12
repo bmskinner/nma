@@ -1186,6 +1186,9 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public void removeSignalGroup(@NonNull UUID id) {
 		this.signalGroups.remove(id);
+        cells.stream().flatMap(c->c.getNuclei().stream())
+        .forEach(n->n.getSignalCollection().removeSignals(id));
+
 	}
 
 	/**

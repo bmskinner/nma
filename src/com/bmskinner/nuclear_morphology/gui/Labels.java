@@ -125,10 +125,13 @@ public class Labels {
     	public static final String SIGNAL_LABEL_SINGULAR   = "Signal";
     	public static final String SIGNALS_PER_NUCLEUS     = "Signals per nucleus";
     	public static final String AVERAGE_POSITION        = "Average shell";
+        public static final String SIGNAL_ID_LABEL         = "ID";
     	public static final String NO_SIGNAL_GROUPS        = "No signal groups in datasets";
     	public static final String CHOOSE_SIGNAL_COLOUR    = "Choose signal color";
     	public static final String SIGNAL_SOURCE_LABEL     = "Source (double click to change)";
     	public static final String SIGNAL_CHANNEL_LABEL    = "Channel";
+    	public static final String WARP_BTN_LBL            = "Warp signals";
+    	public static final String WARP_BTN_TOOLTIP        = "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments";
     	
         /*
          * signal detection

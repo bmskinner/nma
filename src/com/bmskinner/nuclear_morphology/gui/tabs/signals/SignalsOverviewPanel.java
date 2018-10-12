@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
@@ -66,40 +67,44 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
 
     private static final String PANEL_TITLE_LBL = "Overview";
-    private ConsensusNucleusChartPanel chartPanel;                // consensus
-                                                                  // nucleus
-                                                                  // plus
-                                                                  // signals
-    private ExportableTable            statsTable;                // table for
-                                                                  // signal
-                                                                  // stats
-    private JPanel                     consensusAndCheckboxPanel; // holds the
-                                                                  // consensus
-                                                                  // chart and
-                                                                  // the
-                                                                  // checkbox
-    private JPanel                     checkboxPanel;
+    
+    
+    /** Consensus nucleus with signals overlaid  */
+    private ConsensusNucleusChartPanel chartPanel;
+    
+    /** signal stats */
+    private ExportableTable statsTable;
+    
+    /** consensus chart and signal visibility checkboxes */
+    private JPanel consensusAndCheckboxPanel;
+    
+    /** Signal visibility checkbox panel */
+    private JPanel checkboxPanel;
 
+    /** Launch signal warping */
     private JButton warpButton;
 
+    /** Messages to clarify when UI is disabled */
     private JLabel headerText;
 
     private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
-    private static final String WARP_LBL                        = "Warp signals";
-
 
     private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
-    public SignalsOverviewPanel(@NonNull InputSupplier context) {
-        super(context);
+    /**
+     * Create with an input supplier
+     * @param context the input supplier
+     */
+    public SignalsOverviewPanel(@NonNull InputSupplier inputSupplier) {
+        super(inputSupplier);
 
-        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         JScrollPane scrollPane = createStatsPane();
-        this.add(scrollPane);
+        add(scrollPane);
 
         consensusAndCheckboxPanel = createConsensusPanel();
-        this.add(consensusAndCheckboxPanel);
+        add(consensusAndCheckboxPanel);
 
     }
     
@@ -141,8 +146,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                 int row = table.rowAtPoint(e.getPoint());
                 int column = table.columnAtPoint(e.getPoint());
 
-                // double click
-                if (e.getClickCount() == 2&&column>0) {
+                if (e.getClickCount() == DOUBLE_CLICK && column>0) {
 
                     IAnalysisDataset d = getDatasets().get(column - 1);
 
@@ -153,7 +157,31 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 
+                    
+                    if( table.getModel().getValueAt(row, 0).toString().equals(Labels.Signals.SIGNAL_ID_LABEL)) {
+                        
+                        UUID signalGroup = UUID.fromString(table.getModel().getValueAt(row, column).toString());
+
+                        // Option to delete signal
+                        String[] options = { "Don't delete signal group", "Delete signal group" };
+                        
+
+						try {
+							int result = getInputSupplier().requestOption(options, 0, "Delete signal group "+signalGroup+"?", "Delete signal group?");
+							if (result!=0) { 
+	                             d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
+	                             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+	                         }
+							
+						} catch (RequestCancelledException e1) {
+							// no action
+						}
+                         
+                    }
                 }
+                
+                
+
 
             }
         });
@@ -174,14 +202,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
-        warpButton = new JButton(WARP_LBL);
-        warpButton.setToolTipText(
-                "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
-        warpButton.addActionListener(e -> {
-
-            new SignalWarpingDialog(getDatasets());
-        });
-
+        warpButton = new JButton(Labels.Signals.WARP_BTN_LBL);
+        warpButton.setToolTipText(Labels.Signals.WARP_BTN_TOOLTIP);
+        warpButton.addActionListener(e ->  new SignalWarpingDialog(getDatasets()));
         warpButton.setEnabled(false);
 
         panel.add(warpButton);
@@ -312,8 +335,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
             setChart(options);
 
         } catch (Exception e) {
-            warn("Error updating signal overview panel");
-            log(Level.FINE, "Error updating signal overview panel", e);
+        	chartPanel.setChart(AbstractChartFactory.makeErrorChart());
+            stack("Error updating signal overview panel", e);
         }
     }
 

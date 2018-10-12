@@ -76,6 +76,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, CellUpdatedEventListener {
+	
+	protected static final int SINGLE_CLICK = 1;
+	protected static final int DOUBLE_CLICK = 2;
 
     private final List<Object> listeners = new CopyOnWriteArrayList<>();
     
