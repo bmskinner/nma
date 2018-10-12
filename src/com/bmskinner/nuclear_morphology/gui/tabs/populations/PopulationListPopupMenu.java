@@ -98,7 +98,9 @@ public void createButtons() {
 
         workspaceSubMenu =  fact.makeMenu(Labels.Populations.ADD_TO_WORKSPACE_LBL,
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
-				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+        		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
+				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT|
+				ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
         
         createWorkspaceMenu(null);
         biosampleSubMenu =  fact.makeMenu(Labels.Populations.ADD_TO_BIOSAMPLE_LBL,
@@ -263,7 +265,9 @@ public void createButtons() {
     		String action = w.has(d) ? SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX : SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX;
     		workspaceSubMenu.add(fact.makeItem(name+w.getName(), action+w.getName(), 
     				ContextEnabled.ACTIVE_ON_ROOT_DATASET|
-    				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+    				ContextEnabled.ACTIVE_ON_CHILD_DATASET|
+    				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT|
+    				ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
     	}    	
     }
     

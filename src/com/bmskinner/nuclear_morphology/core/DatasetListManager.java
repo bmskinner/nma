@@ -202,7 +202,23 @@ public final class DatasetListManager implements Loggable {
     }
     
     /**
-     * Get the rott parent dataset to the given dataset. If the given dataset is
+     * Get the unique root parent datasets to the given list of datasets.
+     * @param d
+     * @return
+     */
+    public synchronized Set<IAnalysisDataset> getRootParents(@NonNull List<IAnalysisDataset> datasets) {
+    	Set<IAnalysisDataset> result = new HashSet<>();
+    	for(IAnalysisDataset d : datasets) {
+    		if (d.isRoot())
+    			result.add(d);
+    		else
+    			result.add(getRootParent(d));
+    	}
+        return result;
+    }
+    
+    /**
+     * Get the root parent dataset to the given dataset. If the given dataset is
      * root, returns itself
      * 
      * @param d

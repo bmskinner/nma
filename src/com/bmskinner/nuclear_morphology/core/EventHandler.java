@@ -297,9 +297,8 @@ public class EventHandler implements Loggable, EventListener {
             		String workspaceName = event.type().replace(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
             		IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
             				.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
-            		for(IAnalysisDataset d : selectedDatasets) {
-        				ws.remove(d);
-        			}
+            		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
+            				ws.remove(d);
             		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
             	};
             
@@ -308,9 +307,9 @@ public class EventHandler implements Loggable, EventListener {
         			String workspaceName = event.type().replace(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX, "");
         			IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
         					.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
-        			for(IAnalysisDataset d : selectedDatasets) {
+        			
+        			for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
         				ws.add(d);
-        			}
         			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
         		};
 
