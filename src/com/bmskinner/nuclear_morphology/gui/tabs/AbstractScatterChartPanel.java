@@ -241,16 +241,16 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
      	int result;
 		try {
-			String[] options = { "Filter collection", "Do not filter", };
-			result = this.getInputSupplier().requestOption(options, 1, "Filter selected datasets on visible values?");
+			String[] options = { "Do not filter", "Filter collection"};
+			result = this.getInputSupplier().requestOption(options, 0, "Filter selected datasets on visible values?", "Filter datasets?");
 		} catch (RequestCancelledException e2) {
 			return;
 		}
 
-        if (result != 0) { // button at index 0 - continue
+        if (result == 0)
             return;
-        }
-        finer("Gating datasets on " + statABox.getSelectedItem().toString() + " and "
+
+        finer("Filtering datasets on " + statABox.getSelectedItem().toString() + " and "
                 + statBBox.getSelectedItem().toString());
 
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
@@ -285,52 +285,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         		continue;
         	}
         }
-    
-        
-        
-//        Filterer<ICellCollection> f = new CellCollectionFilterer();
-//
-//        for (IAnalysisDataset d : getDatasets()) {
-//
-//            Range domain = getDomainBounds();
-//            Range range = getRangeBounds();
-//
-//            PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
-//            PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
-//
-//            try {
-//
-//                ICellCollection stat1 = f.filter(d.getCollection(), component, statA, domain.getLowerBound(),
-//                        domain.getUpperBound(), scale);
-//
-//                ICellCollection stat2 = f.filter(stat1, component, statB, range.getLowerBound(), range.getUpperBound(), scale);
-//
-//                ICellCollection virt = new VirtualCellCollection(d, stat2.getName());
-//                
-//                stat2.getCells().forEach(c->virt.addCell(c));
-//
-//                virt.setName("Filtered_" + statA + "_" + statB);
-//
-//                d.addChildCollection(virt);
-//                try {
-//
-//                    d.getCollection().getProfileManager().copyCollectionOffsets(virt);
-//                } catch (ProfileException e) {
-//                    warn("Error copying collection offsets for " + d.getName());
-//                    stack("Error in offsetting", e);
-//                    continue;
-//                }
-//
-//            } catch (CollectionFilteringException e1) {
-//                stack("Unable to filter collection for " + d.getName(), e1);
-//                continue;
-//            }
-//
-//        }
-        log("Filtered datasets");
 
-        finer("Firing population update request");
-//        getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_POPULATION_PANELS);
+        log(String.format("Filtered datasets by %s and %s", statA, statB));
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
     }
 

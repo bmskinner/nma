@@ -67,8 +67,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
 
     private static final String PANEL_TITLE_LBL = "Overview";
-    
-    
+
     /** Consensus nucleus with signals overlaid  */
     private ConsensusNucleusChartPanel chartPanel;
     

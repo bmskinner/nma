@@ -285,9 +285,9 @@ public class EventHandler implements Loggable, EventListener {
                 
             if (event.type().equals(SignalChangeEvent.CURATE_DATASET))
             	return () ->{
-                CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
-                d.addDatasetEventListener(EventHandler.this);
-            };
+	                CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
+	                d.addDatasetEventListener(EventHandler.this);
+	            };
                             
             if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
             	return new ExportCellLocationsAction(selectedDatasets, acceptor, EventHandler.this);
