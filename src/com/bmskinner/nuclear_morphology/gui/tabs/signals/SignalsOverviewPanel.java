@@ -149,25 +149,29 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                 if (e.getClickCount() == DOUBLE_CLICK && column>0) {
 
                     IAnalysisDataset d = getDatasets().get(column - 1);
-
-                    String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
+                    int nextRow = row+1;
+                    String nextRowName = table.getModel().getValueAt(nextRow, 0).toString();
                     if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
+                        SignalTableCell signalGroup = getSignalGroupFromTable(table, nextRow, column);
                         cosmeticHandler.changeSignalColour(d, signalGroup.getID());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 
                     
                     if( table.getModel().getValueAt(row, 0).toString().equals(Labels.Signals.SIGNAL_ID_LABEL)) {
-                        
+                    	int signalGroupNameRow = row-3;
+                    	String signalGroupRowName = table.getModel().getValueAt(signalGroupNameRow, 0).toString();
+                    	String signalGroupName = table.getModel().getValueAt(row, column).toString();
+                    	if(signalGroupRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL))                    		
+                    		signalGroupName = table.getModel().getValueAt(signalGroupNameRow, column).toString();
+                           
                         UUID signalGroup = UUID.fromString(table.getModel().getValueAt(row, column).toString());
 
-                        // Option to delete signal
-                        String[] options = { "Don't delete signal group", "Delete signal group" };
+                        String[] options = { "Don't delete signals", "Delete signals" };
                         
 
 						try {
-							int result = getInputSupplier().requestOption(options, 0, "Delete signal group "+signalGroup+"?", "Delete signal group?");
+							int result = getInputSupplier().requestOption(options, 0, String.format("Delete signal group %s in %s?", signalGroupName, d.getName()), "Delete signal group?");
 							if (result!=0) { 
 	                             d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
 	                             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
@@ -179,10 +183,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                          
                     }
                 }
-                
-                
-
-
             }
         });
 
