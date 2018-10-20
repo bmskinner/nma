@@ -315,8 +315,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			}
 			if(canAdd)
 				merged.setSubOptions(s, result);
-			else
-				merged.setSubOptions(s, null);
 		}
     	
     }
