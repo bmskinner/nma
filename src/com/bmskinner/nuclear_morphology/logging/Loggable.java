@@ -109,10 +109,8 @@ public interface Loggable {
      * stack trace. The TRACE error level has a level value of 600, so will
      * display ahead of FINE.
      * 
-     * @param message
-     *            the error messsage
-     * @param t
-     *            the exception
+     * @param message the error messsage
+     * @param t the exception
      */
     default void stack(Throwable t) {
         stack(t.getMessage(), t);
@@ -121,8 +119,7 @@ public interface Loggable {
     /**
      * Log a message to the program log window with Level.FINE
      * 
-     * @param message
-     *            the messsage
+     * @param message the messsage
      */
     default void fine(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
@@ -175,8 +172,7 @@ public interface Loggable {
     /**
      * Log a message to the program log window with Level.INFO
      * 
-     * @param message
-     *            the error messsage
+     * @param message the error messsage
      */
     default void log(String message) {
         log(Level.INFO, message);

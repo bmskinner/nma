@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.io;
+package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,16 +84,16 @@ public class OptionsXMLReader implements Loggable {
 
 			Element rootElement = document.getRootElement();
 
-			if(!rootElement.getName().equals(OptionsXMLWriter.DETECTION_LBL))
+			if(!rootElement.getName().equals(OptionsXMLCreator.DETECTION_LBL))
 				return op;
 
-			NucleusType type = NucleusType.valueOf(rootElement.getChild(OptionsXMLWriter.NUCLEUS_TYPE).getText());
+			NucleusType type = NucleusType.valueOf(rootElement.getChild(OptionsXMLCreator.NUCLEUS_TYPE).getText());
 			op.setNucleusType(type);
-			double windowSize = Double.parseDouble(rootElement.getChild(OptionsXMLWriter.PROFILE_WINDOW).getText());
+			double windowSize = Double.parseDouble(rootElement.getChild(OptionsXMLCreator.PROFILE_WINDOW).getText());
 			op.setAngleWindowProportion(windowSize);
 
 			// should be single elements with options class
-			for(Element component : rootElement.getChildren(OptionsXMLWriter.DETECTION_METHOD))
+			for(Element component : rootElement.getChildren(OptionsXMLCreator.DETECTION_METHOD))
 				addComponent(component, op);
 
 			return op;
@@ -117,9 +117,9 @@ public class OptionsXMLReader implements Loggable {
 		try {
 			document = saxBuilder.build(file);
 			Element rootElement = document.getRootElement();
-			Element clusters = rootElement.getChild(OptionsXMLWriter.CLUSTERS);
+			Element clusters = rootElement.getChild(OptionsXMLCreator.CLUSTERS);
 			if(clusters!=null) { // may not be present
-				for(Element component : clusters.getChildren(OptionsXMLWriter.CLUSTER_GROUP)) {
+				for(Element component : clusters.getChildren(OptionsXMLCreator.CLUSTER_GROUP)) {
 					IClusteringOptions o = buildClusteringOptions(component);
 					result.add(o);
 				}
@@ -143,12 +143,12 @@ public class OptionsXMLReader implements Loggable {
 		try {
 			document = saxBuilder.build(file);
 			Element rootElement = document.getRootElement();
-			for(Element signal : rootElement.getChildren(OptionsXMLWriter.DETECTION_METHOD)) {
-				if(signal.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
-					Element idElement = signal.getChild(OptionsXMLWriter.SIGNAL_ID);
+			for(Element signal : rootElement.getChildren(OptionsXMLCreator.DETECTION_METHOD)) {
+				if(signal.getAttribute(OptionsXMLCreator.DETECTED_OBJECT).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+					Element idElement = signal.getChild(OptionsXMLCreator.SIGNAL_ID);
 					UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());		
 					
-					Element nameElement = signal.getChild(OptionsXMLWriter.SIGNAL_NAME);
+					Element nameElement = signal.getChild(OptionsXMLCreator.SIGNAL_NAME);
 					String name = nameElement.getText();
 					result.put(id, name);
 				}
@@ -167,14 +167,14 @@ public class OptionsXMLReader implements Loggable {
 	}
 	
 	private String replaceKeyModifications(@NonNull String s) {
-		String r = s.replaceAll(OptionsXMLWriter.SPACE_REPLACEMENT, " ")
-				.replace(OptionsXMLWriter.UUID_PREFIX, "");
+		String r = s.replaceAll(OptionsXMLCreator.SPACE_REPLACEMENT, " ")
+				.replace(OptionsXMLCreator.UUID_PREFIX, "");
 		return r;
 	}
 	
 	private void addKeyedValues(@NonNull Element e, @NonNull HashOptions o) {
 		// Primary keys
-		List<Element> boolContainer = e.getChildren(OptionsXMLWriter.BOOLEAN_KEY);
+		List<Element> boolContainer = e.getChildren(OptionsXMLCreator.BOOLEAN_KEY);
 		if(!boolContainer.isEmpty()) {
 			for(Element el : boolContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
@@ -184,7 +184,7 @@ public class OptionsXMLReader implements Loggable {
 			}
 		}
 		
-		List<Element> floatContainer = e.getChildren(OptionsXMLWriter.FLOAT_KEY);
+		List<Element> floatContainer = e.getChildren(OptionsXMLCreator.FLOAT_KEY);
 		if(!floatContainer.isEmpty()) {
 			for(Element el : floatContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
@@ -194,7 +194,7 @@ public class OptionsXMLReader implements Loggable {
 			}
 		}
 		
-		List<Element> intContainer = e.getChildren(OptionsXMLWriter.INT_KEY);
+		List<Element> intContainer = e.getChildren(OptionsXMLCreator.INT_KEY);
 		if(!intContainer.isEmpty()) {
 			for(Element el : intContainer.get(0).getChildren()) {
 				String key = replaceKeyModifications(el.getName());
@@ -204,7 +204,7 @@ public class OptionsXMLReader implements Loggable {
 			}
 		}
 		
-		List<Element> doubleContainer = e.getChildren(OptionsXMLWriter.DOUBLE_KEY);
+		List<Element> doubleContainer = e.getChildren(OptionsXMLCreator.DOUBLE_KEY);
 		if(!doubleContainer.isEmpty()) {
 			for(Element el : doubleContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
@@ -214,7 +214,7 @@ public class OptionsXMLReader implements Loggable {
 			}
 		}
 		
-		List<Element> stringContainer = e.getChildren(OptionsXMLWriter.STRING_KEY);
+		List<Element> stringContainer = e.getChildren(OptionsXMLCreator.STRING_KEY);
 		if(!stringContainer.isEmpty()) {
 			for(Element el : stringContainer.get(0).getChildren()) {
 				System.out.println(el.getName()+": "+el.getText());
@@ -226,7 +226,7 @@ public class OptionsXMLReader implements Loggable {
 	
 	private void addComponent(@NonNull Element e, @NonNull IAnalysisOptions op) {
 		
-		String detectedObject = e.getAttribute(OptionsXMLWriter.DETECTED_OBJECT).getValue();
+		String detectedObject = e.getAttribute(OptionsXMLCreator.DETECTED_OBJECT).getValue();
 		
 		if(detectedObject.equals(IAnalysisOptions.NUCLEUS)) {			
 			File f = op.getDetectionOptions(IAnalysisOptions.NUCLEUS).isPresent() 
@@ -237,8 +237,8 @@ public class OptionsXMLReader implements Loggable {
 			// Primary keys
 			addKeyedValues(e, o);
 
-			for(Element component : e.getChildren(OptionsXMLWriter.SUB_OPTION_KEY)) {
-				String subType = component.getAttribute(OptionsXMLWriter.SUB_TYPE_KEY).getValue();
+			for(Element component : e.getChildren(OptionsXMLCreator.SUB_OPTION_KEY)) {
+				String subType = component.getAttribute(OptionsXMLCreator.SUB_TYPE_KEY).getValue();
 				System.out.println("Component: "+component.getName()+ ": "+subType);
 				
 				if(subType.equals(IDetectionSubOptions.BACKGROUND_OPTIONS)) {
@@ -265,12 +265,12 @@ public class OptionsXMLReader implements Loggable {
 		if(detectedObject.startsWith(IAnalysisOptions.NUCLEAR_SIGNAL) ) {
 			try {
 				
-				Element idElement = e.getChild(OptionsXMLWriter.SIGNAL_ID);
+				Element idElement = e.getChild(OptionsXMLCreator.SIGNAL_ID);
 				UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());				
 				INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
 				addKeyedValues(e, n);				
-				for(Element component : e.getChildren(OptionsXMLWriter.SUB_OPTION_KEY)) {
-					String subType = component.getAttribute(OptionsXMLWriter.SUB_TYPE_KEY).getValue();
+				for(Element component : e.getChildren(OptionsXMLCreator.SUB_OPTION_KEY)) {
+					String subType = component.getAttribute(OptionsXMLCreator.SUB_TYPE_KEY).getValue();
 					System.out.println("Component: "+component.getName()+ ": "+subType);
 					if(subType.equals(IDetectionSubOptions.SHELL_OPTIONS)) {
 						IShellOptions s = new DefaultShellOptions();

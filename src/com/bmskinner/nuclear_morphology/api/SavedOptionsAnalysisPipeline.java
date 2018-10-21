@@ -57,7 +57,7 @@ import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
 import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
 
 /**

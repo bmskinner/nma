@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.io;
+package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,19 +61,4 @@ public abstract class XMLWriter implements Loggable {
 		}
 	}
 	
-	/**
-	 * Test if the given string could be a UUID 
-	 * @param s
-	 * @return
-	 */
-	public static boolean isUUID(String s) {
-		if(s==null)
-			return false;
-		if(s.length()!=36)
-			return false;
-		if(s.matches("[\\w|\\d]{8}-[\\w|\\d]{4}-[\\w|\\d]{4}-[\\w|\\d]{4}-[\\w|\\d]{12}"))
-			return true;
-		return false;
-	}
-
 }

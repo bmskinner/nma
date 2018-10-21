@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.io;
+package com.bmskinner.nuclear_morphology.io.xml;
 
 import static org.junit.Assert.*;
 
@@ -16,6 +16,9 @@ import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLCreator;
+import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
 
 /**
  * Tests for the options reader. Also implicitly tests the options writer
@@ -37,7 +40,7 @@ public class OptionsXMLReaderTest {
 				.addSignalsInChannel(1)
 				.numberOfClusters(2)
 				.segmented().build();
-		Document doc = OptionsXMLWriter.createDocument(dataset);
+		Document doc = new OptionsXMLCreator(dataset).create();
 		OptionsXMLWriter.writeXML(doc, XML_FILE);
 	}
 

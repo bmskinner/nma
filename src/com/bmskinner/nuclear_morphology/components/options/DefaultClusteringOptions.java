@@ -24,7 +24,8 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.io.XMLWriter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
+import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 /**
  * Clustering optins using the hash options interface
@@ -91,7 +92,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	public Set<UUID> getSegments() {
 		Set<UUID> result = new HashSet<>();
 		for(String s : boolMap.keySet()) {
-			if(XMLWriter.isUUID(s))
+			if(XMLCreator.isUUID(s))
 				result.add(UUID.fromString(s));
 		}
 		return result;

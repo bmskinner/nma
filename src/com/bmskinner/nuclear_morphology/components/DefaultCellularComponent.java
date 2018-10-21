@@ -703,6 +703,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         }
         return result;
     }
+    
+    
+    @Override
+	public int[][] getUnsmoothedBorderCoordinates(){
+    	int[][] points = { xpoints, ypoints};
+    	return points;
+    }
 
     /**
      * Check if a given point lies within the nucleus

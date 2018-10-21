@@ -1,23 +1,5 @@
-/*******************************************************************************
- * Copyright (C) 2018 Ben Skinner
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
-package com.bmskinner.nuclear_morphology.io;
+package com.bmskinner.nuclear_morphology.io.xml;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -33,13 +15,12 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Write the complete set of options for all analyses in a dataset
- * to an XML file. The file will be compatible with the options reader.
+ * Serialise analysis options to be used for new analyses.
  * @author ben
  * @since 1.14.0
  *
  */
-public class OptionsXMLWriter extends XMLWriter implements Loggable {
+public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements Loggable {
 	
 	public static final String DETECTION_LBL    = "Detection_settings";
 	public static final String DETECTION_METHOD = "Detection_method";
@@ -69,22 +50,19 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 	public static final String CLUSTER_GROUP = "ClusterGroup";
 	public static final String CLUSTER_NAME  = "ClusterGroupName";
 	
-	public void write(@NonNull IAnalysisDataset dataset, @NonNull File outFile) {
-		Document doc = OptionsXMLWriter.createDocument(dataset);
-		try {
-			writeXML(doc, outFile);
-		} catch (IOException e) {
-			 warn("Cannot export options file");
-		}
+	public OptionsXMLCreator(@NonNull IAnalysisDataset dataset) {
+		super(dataset);
 	}
 	
-	public static Document createDocument(@NonNull IAnalysisDataset dataset) {
+	
+	@Override
+	public Document create() {
 		Element rootElement = new Element(DETECTION_LBL);
-		if(dataset.hasAnalysisOptions())
-			appendElement(dataset, dataset.getAnalysisOptions().get(), rootElement);
+		if(template.hasAnalysisOptions())
+			appendElement(template, template.getAnalysisOptions().get(), rootElement);
 		
 		Element clusters = new Element(CLUSTERS);
-		for(IClusterGroup g : dataset.getClusterGroups()) {
+		for(IClusterGroup g : template.getClusterGroups()) {
 			if(g.getOptions().isPresent()) {
 				Element cluster = new Element(CLUSTER_GROUP);
 				cluster.setAttribute(CLUSTER_NAME, g.getName());
@@ -127,11 +105,11 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
 				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
 				
-				Element signalId = new Element(OptionsXMLWriter.SIGNAL_ID);
+				Element signalId = new Element(OptionsXMLCreator.SIGNAL_ID);
 				signalId.setText(signalGroup.toString());
 				element.addContent(signalId);
 				
-				Element signalName = new Element(OptionsXMLWriter.SIGNAL_NAME);
+				Element signalName = new Element(OptionsXMLCreator.SIGNAL_NAME);
 				signalName.setText(groupName);
 				element.addContent(signalName);
 			}
@@ -233,5 +211,5 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 			rootElement.addContent(stringElement);
 		}
 	}
-	
+
 }

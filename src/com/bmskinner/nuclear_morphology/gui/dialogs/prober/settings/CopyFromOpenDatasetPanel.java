@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
 
 /**
  * A copy button that allows nuclear detection options to be copied from an open

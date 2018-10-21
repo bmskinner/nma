@@ -615,14 +615,11 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             result.add(IBorderPoint.makeNew(p.getX() + diffX, p.getY() + diffY));
         }
         return result;
-
-        // List<IBorderPoint> result = new
-        // ArrayList<IBorderPoint>(borderList.size());
-        // for(IBorderPoint p : borderList){
-        // result.add(new DefaultBorderPoint( p.getX() + getPosition()[X_BASE],
-        // p.getY() + getPosition()[Y_BASE]));
-        // }
-        // return result;
+    }
+    
+    @Override
+	public int[][] getUnsmoothedBorderCoordinates(){
+    	return null;
     }
 
     public void setBorderList(List<IBorderPoint> list) {

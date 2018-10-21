@@ -188,6 +188,12 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return
      */
     List<IBorderPoint> getOriginalBorderList() throws UnavailableBorderPointException;
+    
+    /**
+     * Get the integer roi positions used to create the object before smoothing and interpolation
+     * @return an array with two elements:  the x coordinate array, and the y coordinate array
+     */
+    int[][] getUnsmoothedBorderCoordinates();
 
     /**
      * Test if the given point is within the offset nucleus

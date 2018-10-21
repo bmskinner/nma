@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.io.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
 
 public class ImportWorkflowAction  extends VoidResultAction {
 

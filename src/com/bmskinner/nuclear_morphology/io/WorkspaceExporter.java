@@ -33,6 +33,7 @@ import org.jdom2.output.XMLOutputter;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.io.Io.Exporter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
