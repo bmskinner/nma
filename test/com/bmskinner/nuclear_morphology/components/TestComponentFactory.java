@@ -1,25 +1,20 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.UUID;
 
-import org.assertj.swing.util.Arrays;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultSignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
@@ -28,7 +23,6 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 

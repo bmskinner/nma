@@ -19,17 +19,14 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
-import java.io.File;
-
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 
 public class ShellAnalysisMethodTest {
     

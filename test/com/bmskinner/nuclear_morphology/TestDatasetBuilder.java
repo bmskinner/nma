@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology;
 
 import java.awt.Color;
 import java.io.File;
@@ -12,6 +12,12 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;

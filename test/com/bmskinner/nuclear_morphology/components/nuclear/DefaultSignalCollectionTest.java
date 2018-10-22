@@ -1,17 +1,11 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Field;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
-import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * Tests for the default signal collection class

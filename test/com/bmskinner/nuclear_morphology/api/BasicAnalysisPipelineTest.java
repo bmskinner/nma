@@ -29,7 +29,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.TestDatasetCreator;
+import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 /**
  * Test the detection methods to ensure new analyses match previously 
  * saved datasets. The test sets should have been created using the 
- * {@link TestDatasetCreator} before these tests are invoked.
+ * {@link TestImageDatasetCreator} before these tests are invoked.
  * @author bms41
  * @since 1.13.8
  *
@@ -58,7 +58,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 		File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
-		IAnalysisDataset obs = TestDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
 		testDatasetEquality(exp, obs);       
 	}
 
@@ -70,7 +70,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 		File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
 		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
 
-		IAnalysisDataset obs = TestDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
 		testDatasetEquality(exp, obs);       
 	}
 
@@ -82,7 +82,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 		File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
 		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
-		IAnalysisDataset obs = TestDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
 		testDatasetEquality(exp, obs);       
 	}
 	

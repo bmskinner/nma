@@ -384,4 +384,10 @@ public class DummyCellularComponent implements CellularComponent {
 		component.refreshBorderList(useSplineFitting);
 	}
 
+	@Override
+	public int[][] getUnsmoothedBorderCoordinates() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -1,6 +1,6 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.Map;
@@ -10,15 +10,9 @@ import org.jdom2.Document;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipelineTest;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLCreator;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
 
 /**
  * Tests for the options reader. Also implicitly tests the options writer

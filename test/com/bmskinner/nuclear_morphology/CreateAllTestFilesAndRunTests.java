@@ -18,7 +18,7 @@ import com.bmskinner.nuclear_morphology.io.IoTestSuite;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ 
-	TestDatasetCreator.class, // make test datasets for subsequent tests to read 
+	TestImageDatasetCreator.class, // make test datasets for subsequent tests to read 
 	AnalysisTestSuite.class,
 	ApiTestSuite.class,
 	ComponentTestSuite.class,

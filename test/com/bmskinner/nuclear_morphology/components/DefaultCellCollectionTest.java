@@ -19,9 +19,8 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Field;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,8 +28,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
  * @author bms41
