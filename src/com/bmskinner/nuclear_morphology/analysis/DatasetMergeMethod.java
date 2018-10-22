@@ -24,13 +24,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
@@ -40,15 +44,21 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
+/**
+ * Merge multiple datasets into a single dataset
+ * @author bms41
+ *
+ */
 public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
     private File saveFile;
 
-    private List<IAnalysisDataset> resultDatasets = new ArrayList<>();
-
+    /** Describe which signal groups will be merged */
     private Map<UUID, Set<UUID>> pairedSignalGroups = null;
 
     private static final int MAX_PROGRESS = 100;
+    private static final int MILLISECONDS_TO_SLEEP = 10;
+    
 
     /**
      * Create the merger for the given datasets.
@@ -57,132 +67,135 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * @param saveFile the file to specify as the new dataset save path. Note, this method
      * does not save out the file to the save path 
      */
-    public DatasetMergeMethod(List<IAnalysisDataset> datasets, File saveFile) {
+    public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, File saveFile) {
         super(datasets);
         this.saveFile = saveFile;
     }
 
-    public DatasetMergeMethod(List<IAnalysisDataset> datasets, File saveFile, Map<UUID, Set<UUID>> pairedSignalGroups) {
+    /**
+     * Create the merger for the given datasets.
+     * 
+     * @param datasets the datasets to be merged
+     * @param saveFile the file to specify as the new dataset save path. Note, this method
+     * does not save out the file to the save path 
+     * @param pairedSignalGroups the signal groups which are to be merged
+     */
+    public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, File saveFile, Map<UUID, Set<UUID>> pairedSignalGroups) {
         this(datasets, saveFile);
         this.pairedSignalGroups = pairedSignalGroups;
     }
 
     @Override
     public IAnalysisResult call() throws Exception {
-        run();
-        IAnalysisResult r = new DefaultAnalysisResult(resultDatasets);
-        return r;
+    	IAnalysisDataset merged = run();
+        return new DefaultAnalysisResult(merged);
     }
 
-    private void run() {
-        try {
-            merge();
-        } catch (Exception e) {
-            error("Error merging datasets", e);
-        }
-    }
+    private IAnalysisDataset run() {
 
-    public List<IAnalysisDataset> getResults() {
-        return resultDatasets;
+    	if(!datasetsAreValidToMerge())
+    		return null;
+
+    	try {
+    		fine("Finding new file name");
+
+    		// Set the names for the new collection
+    		File newDatasetFolder = saveFile.getParentFile();
+    		File newDatasetFile = saveFile;
+
+    		// ensure the new file name is valid
+    		newDatasetFile = checkName(newDatasetFile);
+
+    		String newDatasetName = newDatasetFile.getName().replace(Importer.SAVE_FILE_EXTENSION, "");
+    		fine("Checked new file names");
+
+    		// make a new collection
+    		ICellCollection newCollection = new DefaultCellCollection(newDatasetFolder, null, newDatasetName,
+    				datasets.get(0).getCollection().getNucleusType());
+
+    		IAnalysisDataset newDataset = performMerge(newCollection);
+
+    		spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
+    		
+    		return newDataset;
+    	} catch (Exception e) {
+    		error("Error merging datasets", e);
+    		return null;
+    	}
+    }
+    
+    /**
+     * Check that the given datasets can be merged
+     * @return true if the datasets can be merged, false otherwise
+     */
+    private boolean datasetsAreValidToMerge() {
+    	if (datasets.size() <= 1) {
+    		warn("Must have multiple datasets to merge");
+    		return false;
+    	}
+
+    	// check we are not merging a parent and child (would just get parent)
+    	if (datasets.size() == 2) {
+    		if (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0))) {
+    			warn("Merging parent and child would be silly.");
+    			return false;
+    		}
+    	}
+    	
+    	// check all collections are of the same type
+		if (!nucleiHaveSameType()) {
+			warn("Cannot merge collections of different nucleus type");
+			return false;
+		}
+    	return true;
     }
 
     /**
      * Check if the nucleus classes of all datasets match Cannot merge
      * collections with different classes
      * 
-     * @return ok or not
+     * @return true if all collection have the same nucleus type, false otherwise
      */
-    private boolean checkNucleusClass() {
-        boolean result = true;
+    private boolean nucleiHaveSameType() {
         NucleusType testClass = datasets.get(0).getCollection().getNucleusType();
         for (IAnalysisDataset d : datasets) {
-
-            if (!d.getCollection().getNucleusType().equals(testClass)) {
-                result = false;
-            }
-        }
-        return result;
-    }
-
-    private boolean merge() {
-
-        if (datasets.size() <= 1) {
-            warn("Must have multiple datasets to merge");
-            return false;
-        }
-
-        // check we are not merging a parent and child (would just get parent)
-        if (datasets.size() == 2) {
-            if (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0))) {
-                warn("Merging parent and child would be silly.");
+            if (!d.getCollection().getNucleusType().equals(testClass))
                 return false;
-            }
         }
-
-        try {
-            fine("Finding new names");
-
-            // Set the names for the new collection
-            File newDatasetFolder = saveFile.getParentFile();
-            File newDatasetFile = saveFile;
-
-            // ensure the new file name is valid
-            newDatasetFile = checkName(newDatasetFile);
-
-            String newDatasetName = newDatasetFile.getName().replace(Importer.SAVE_FILE_EXTENSION, "");
-            fine("Checked new file names");
-
-            // check all collections are of the same type
-            if (!checkNucleusClass()) {
-                warn("Error: cannot merge collections of different class");
-                return false;
-            }
-            fine("Checked nucleus classes match");
-
-            // // make a new collection based on the first dataset
-            ICellCollection templateCollection = datasets.get(0).getCollection();
-
-            ICellCollection newCollection = new DefaultCellCollection(newDatasetFolder, null, newDatasetName,
-                    templateCollection.getNucleusType());
-
-            IAnalysisDataset newDataset = performMerge(newCollection, datasets);
-
-            resultDatasets.add(newDataset);
-
-            spinWheels();
-
-            return true;
-        } catch (Exception e) {
-            error("Error in merging", e);
-            return false;
-        }
-
+        return true;
     }
 
     /**
-     * Merge the given datasets, copying each cell into the new collection.
+     * Merge the given datasets, copying each cell into the new collection and removing
+     * existing segmentation patterns.
      * 
      * @param newCollection
      * @param sources
-     * @return
+     * @return the merged dataset
      * @throws Exception
      */
-    private IAnalysisDataset performMerge(ICellCollection newCollection, List<IAnalysisDataset> sources)
+    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection)
             throws Exception {
 
         for (IAnalysisDataset d : datasets) {
             
             d.getCollection().streamCells()
                 .filter(c->!newCollection.contains(c))
-                .forEach(c->newCollection.addCell(new DefaultCell(c)));
+                .forEach(c->newCollection.addCell(c.duplicate()));
 
             // All the existing signal groups before merging
             for (UUID signalGroupID : d.getCollection().getSignalGroupIDs()) {
                 newCollection.addSignalGroup(signalGroupID,
                         new SignalGroup(d.getCollection().getSignalGroup(signalGroupID).get()));
             }
-
         }
+        
+        for(Nucleus n : newCollection.getNuclei()) {
+        	for(ProfileType t : ProfileType.values())
+        		n.getProfile(t).clearSegments();
+        }
+        
+
 
         // Replace signal groups
         mergeSignalGroups(newCollection);
@@ -211,7 +224,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     
     /**
      * Merge any identical options amongst the datasets
-     * @return
+     * @return the merged options
      * @throws MissingOptionException 
      */
     private IAnalysisOptions mergeOptions(IAnalysisDataset newDataset) throws MissingOptionException {
@@ -390,16 +403,5 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         return newFile;
     }
 
-    // Ensure the progress bar does something for debugging
-    private void spinWheels() {
-        for (int i = 0; i < MAX_PROGRESS; i++) {
-            fireProgressEvent();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                error("Thread interrupted", e);
-            }
-        }
-    }
-
+    
 }

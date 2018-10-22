@@ -100,8 +100,7 @@ public class DefaultCell implements ICell {
     /**
      * Duplicate a cell. The ID is kept consistent
      * 
-     * @param c
-     *            the cell to duplicate
+     * @param c the cell to duplicate
      */
     public DefaultCell(ICell c) {
 

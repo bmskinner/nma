@@ -115,5 +115,22 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     public void progressEventReceived(ProgressEvent event) {
         fireProgressEvent(); // pass upwards
     }
+    
+    /**
+     * Fire a progress event, then sleep for the given number of milliseconds.
+     * Repeat for the given number of steps.
+     * @param total the total number of steps
+     * @param millisToSleep the number of milliseconds to sleep between each step
+     */
+    protected void spinWheels(int total, int millisToSleep) {
+        for (int i = 0; i < total; i++) {
+            fireProgressEvent();
+            try {
+                Thread.sleep(millisToSleep);
+            } catch (InterruptedException e) {
+                error("Thread interrupted", e);
+            }
+        }
+    }
 
 }

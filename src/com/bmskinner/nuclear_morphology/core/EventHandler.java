@@ -439,14 +439,13 @@ public class EventHandler implements Loggable, EventListener {
             	};
             }
 
-            if (event.method().equals(DatasetEvent.SEGMENTATION_ACTION)) {
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
-            }
+            if (event.method().equals(DatasetEvent.SEGMENTATION_ACTION))
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 
+                		SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
 
-            if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)) {
-                final int flag = 0;
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, acceptor, EventHandler.this);
-            }
+            if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY))
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, 
+                		SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
             
             if (event.method().equals(DatasetEvent.SAVE)) {
 

@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.13.6
  *
  */
-public class DatasetValidator implements Loggable {
+public class DatasetValidator {
 
 	public static final List<String> errorList = new ArrayList<>();
 	public static final Set<ICell> errorCells  = new HashSet<>();
@@ -408,8 +408,6 @@ public class DatasetValidator implements Loggable {
 
 		} catch (ProfileException | UnavailableComponentException e) {
 			errorList.add(String.format("Error getting segments for object %s: %s", n.getID(), e.getMessage()));
-			stack(e);
-			e.printStackTrace();
 			errorCount++;
 		}
 		return errorCount;

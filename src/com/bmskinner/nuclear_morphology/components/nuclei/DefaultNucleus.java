@@ -103,7 +103,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         super(n);
         nucleusNumber = n.getNucleusNumber();
         signalCollection = new DefaultSignalCollection(n.getSignalCollection());
-        finest("Created new nucleus");
     }
 
     @Override
