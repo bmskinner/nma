@@ -1343,10 +1343,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				result.segments.addMergeSource(new BorderSegmentTree(s, result.segments));			
 			
 			// root segment update - ensure the ends remain identical
-			fine("Offsetting root segment start to "+offset);
-			result.segments.startIndex = wrapIndex(-offset);
-//			result.segments.startIndex = wrapIndex(result.segments.startIndex-offset);
-			fine("New root segment start is "+result.segments.startIndex);
+			int currentIndex = segments.startIndex;
+			result.segments.startIndex = wrapIndex(currentIndex-offset);
 			result.segments.endIndex   = result.segments.startIndex;
 			
 			/*  Apply the offset to each of the segments. */

@@ -611,7 +611,6 @@ public class ISegmentedProfileTester extends ComponentTester {
 	public void testOffsetOfSingleSegmentProfileIsReversible() throws Exception {
 
 		for(int i=-profile.size(); i<profile.size()*2; i++) {
-//			profile = createInstance(source);
 			profile.clearSegments();
 			assertEquals(1, profile.getSegmentCount());
 			int exp = profile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getStartIndex();
