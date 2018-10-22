@@ -107,31 +107,66 @@ public class TaggableTest extends ComponentTester {
 	}
 	
 	@Test
-	public void testSettingSingleSegmentProfile() throws Exception {
-		IProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		
-		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
-
-		IBorderSegment templateSeg = templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);	
-		
-		assertEquals("Single segment count", 1, templateProfile.getSegmentCount());
-		assertEquals("Template segment start", 0, templateSeg.getStartIndex());
+	public void testSettingMultiSegmentProfileIsReversible() throws Exception {
+		// Fetch the profile zeroed on the RP
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile);
 		
 		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, templateProfile);
-		
 		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		IBorderSegment testSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);	
 		
-		System.out.println("Added to nucleus: "+templateProfile.toString());
-		System.out.println("Value at index 0: "+templateProfile.get(0));
-		System.out.println("Seg in profile added: "+templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getDetail());
-		System.out.println("Fetched from nucleus: "+testProfile.toString());
-		System.out.println("Value at index 0: "+testProfile.get(0));
-		System.out.println("Seg in profile fetched: "+testSeg.getDetail());
-		System.out.println("RP in nucleus: "+taggable.getBorderIndex(Tag.REFERENCE_POINT));
+		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
+		assertEquals("Segment count", 1, oldProfile.getSegmentCount(), testProfile.getSegmentCount());
 		
+		// Test multi segments
+		IBorderSegment oldSeg = oldProfile.getSegmentAt(0);	
+		IBorderSegment testSeg = testProfile.getSegmentAt(0);	
+		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
+		
+		// Test default segments
+		IBorderSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IBorderSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
+		
+		
+	}
+	
+	@Test
+	public void testSettingSingleSegmentProfile() throws Exception {
+		
+		// Fetch the profile zeroed on the RP
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		
+		// Create a new single segment profile, zeroed on the RP
+		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
+		System.out.println("Template profile: "+templateProfile.toString());
+		
+		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, templateProfile);
+		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		
+		assertEquals("Segment count", templateProfile.getSegmentCount(), testProfile.getSegmentCount());
+		assertEquals("Value at index 0", templateProfile.get(0), testProfile.get(0), 0);
 		assertEquals("Test segment count", 1, templateProfile.getSegmentCount());
-		assertEquals("Test segment start", 0, testSeg.getStartIndex());
+		
+		// Test default segments
+		IBorderSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IBorderSegment templateDefaultSeg = templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IBorderSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
+//		assertEquals("Default segment start", templateDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
+
+		// Test multi segments
+//		IBorderSegment oldSeg = oldProfile.getSegmentAt(0);	
+//		IBorderSegment testSeg = testProfile.getSegmentAt(0);	
+//		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
+//
+
+//		System.out.println("Seg in profile added: "+templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getDetail());
+//		System.out.println("Fetched from nucleus: "+testProfile.toString());
+//		System.out.println("Seg in profile fetched: "+testSeg.getDetail());
+//		System.out.println("RP in nucleus: "+taggable.getBorderIndex(Tag.REFERENCE_POINT));
+		
+		
 	}
 	
 

@@ -118,6 +118,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         		p = p.interpolate(getBorderLength());
         		assignProfile(type, new DefaultSegmentedProfile(p));
         	}
+        	fine("Raw profile: "+p.toString());
         	return profileMap.get(type).copy();
         } catch (IndexOutOfBoundsException | ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
@@ -156,11 +157,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         ISegmentedProfile oldProfile = getProfile(type);
         
         try {
-        	// subtract the tag offset from the profile
-        	int removedOffset = wrapIndex(-tagIndex);
-        	
-        	ISegmentedProfile offsetNewProfile =  p.offset(removedOffset);
-        	fine("Setting profile to start from "+removedOffset);
+        	// subtract the tag offset from the profile    
+        	int newStartIndex = wrapIndex(-tagIndex);
+        	ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
+        	fine("Setting profile to start from "+newStartIndex);
             setProfile(type, offsetNewProfile);
         } catch (ProfileException e) { // restore the old profile
             stack(String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);

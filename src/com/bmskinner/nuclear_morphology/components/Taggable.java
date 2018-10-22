@@ -131,11 +131,12 @@ public interface Taggable extends Profileable {
             throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
 
     /**
-     * Set the profile for the given type, offset to a border tag
+     * Set the profile for the given type, offset to a border tag. The profile can be
+     * considered to start from the provided tag.
      * 
      * @param type the type of profile to set
      * @param tag the tag the profile starts from
-     * @param profile the profile
+     * @param profile the profile to be set
      * @throws UnavailableBorderTagException if the tag is not present
      * @throws UnavailableProfileTypeException if the profile type is not present
      */
