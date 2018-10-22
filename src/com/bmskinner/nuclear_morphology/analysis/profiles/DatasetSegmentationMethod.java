@@ -97,7 +97,15 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 
 	public enum MorphologyAnalysisMode {
-		NEW, COPY, REFRESH
+		
+		/** Segment the median and update nuclei to match */
+		NEW, 
+		
+		/** Copy the segments from another dataset and update nuclei to match */
+		COPY,
+		
+		/** Keep the median segmentation, and update nuclei to match */
+		REFRESH
 	}
 
 	/**
@@ -158,8 +166,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			DatasetValidator dv = new DatasetValidator();
 			if(!dv.validate(dataset)) {
 				warn("Segmentation failed; resulting dataset did not validate");
-				for(String s : dv.getErrors())
-					warn(s);
+//				for(String s : dv.getErrors())
+//					warn(s);
 			}
 		} catch (Exception e) {
 			result = null;
@@ -273,8 +281,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * collection starting from the reference point
 	 * 
 	 * @param collection
+	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderTagException 
 	 */
-	private ISegmentedProfile createSegmentsInMedian() throws Exception {
+	private ISegmentedProfile createSegmentsInMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		
 		// choose the best subset of nuclei and make a median profile from them
 		fine("Collection median length "+collection.getMedianArrayLength());
@@ -297,19 +308,24 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @throws UnavailableComponentException 
 	 * @throws SegmentUpdateException 
 	 * @throws ProfileException 
-	 * 
-	 * @throws Exception
 	 */
 	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template) throws ProfileException, SegmentUpdateException, UnavailableComponentException {
 		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
 		for(Nucleus n : collection.getNuclei()) {
 			if (n.isLocked())
 				continue;
-			ISegmentedProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			nucleusProfile = fitter.fit(nucleusProfile);
-			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, nucleusProfile);
-			if(nucleusProfile.getSegmentCount()!=template.getSegmentCount())
-				throw new ProfileException("Segments could not be fitted to nucleus");				
+			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
+			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, segProfile);
+			if(segProfile.getSegmentCount()!=template.getSegmentCount())
+				throw new ProfileException("Segments could not be fitted to nucleus");
+			if(template.getSegmentCount()==1) {
+				ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				IBorderSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+				if(seg.getStartIndex()!=0) {
+					throw new ProfileException("Single segment does not start at RP in nucleus");
+				}
+			}
 		}
 	}
 	

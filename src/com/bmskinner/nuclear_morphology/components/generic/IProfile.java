@@ -333,10 +333,15 @@ public interface IProfile extends Serializable, Loggable {
 
     /**
      * Create a profile offset to start from the given index. For example, a
-     * profile { 1, 2, 3, 4} offset by 1 will become { 2, 3, 4, 1 }
+     * profile {@code 1, 2, 3, 4} offset by 1 will become {@code 2, 3, 4, 1 }.
+     * 
+     * Offsetting the profile to -1 will produce {@code 4, 1, 2, 3 }.
+     * 
+     * Offsetting is reversible: {@code profile.offset(x).offset(-x)} will return the original
+     * profile position.
 
      * @param j the index to set as index zero
-     * @return a new offset profile
+     * @return a new profile with the offset applied
      * @throws ProfileException
      */
     IProfile offset(int j) throws ProfileException;

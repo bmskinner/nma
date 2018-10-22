@@ -58,7 +58,9 @@ public class IterativeSegmentFitter implements Loggable {
     }
 
     /**
-     * Find the best fit positions of the segment endpoints to the target profile
+     * Find the best fit positions of the segment endpoints in the 
+     * template to the target profile. New segments are created in the target
+     * profile.
      * 
      * @param target the profile to fit to the current template profile 
      * @return the profile with fitted segments, or on error, the original profile

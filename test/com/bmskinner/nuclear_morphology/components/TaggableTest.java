@@ -16,8 +16,11 @@ import org.junit.runners.Parameterized.Parameters;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
@@ -59,9 +62,8 @@ public class TaggableTest extends ComponentTester {
 			IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
 					.ofType(NucleusType.ROUND)
 					.randomOffsetProfiles(true)
-					.profiled().segmented().build();
+					.segmented().build();
 			return d.getCollection().getCells().stream().findFirst().get().getNucleus();
-//			return TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20);
 		}
 
 		throw new Exception("Unable to create instance of "+source);
@@ -101,10 +103,36 @@ public class TaggableTest extends ComponentTester {
 		
 		// Confirm everything was saved properly
 		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		
 		assertEquals(oldProfile.toString(), newProfile.toString());
 	}
 	
+	@Test
+	public void testSettingSingleSegmentProfile() throws Exception {
+		IProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		
+		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
+
+		IBorderSegment templateSeg = templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);	
+		
+		assertEquals("Single segment count", 1, templateProfile.getSegmentCount());
+		assertEquals("Template segment start", 0, templateSeg.getStartIndex());
+		
+		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, templateProfile);
+		
+		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IBorderSegment testSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);	
+		
+		System.out.println("Added to nucleus: "+templateProfile.toString());
+		System.out.println("Value at index 0: "+templateProfile.get(0));
+		System.out.println("Seg in profile added: "+templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getDetail());
+		System.out.println("Fetched from nucleus: "+testProfile.toString());
+		System.out.println("Value at index 0: "+testProfile.get(0));
+		System.out.println("Seg in profile fetched: "+testSeg.getDetail());
+		System.out.println("RP in nucleus: "+taggable.getBorderIndex(Tag.REFERENCE_POINT));
+		
+		assertEquals("Test segment count", 1, templateProfile.getSegmentCount());
+		assertEquals("Test segment start", 0, testSeg.getStartIndex());
+	}
 	
 
 }

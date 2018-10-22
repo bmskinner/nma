@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
@@ -31,10 +30,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
  * @author bms41
  *
  */
-public interface Nucleus extends CellularComponent, Profileable, Taggable, Comparable<Nucleus> {
-    // Note that we use Rotatable here although it is provided to objects
-    // already through the AbstractCellularComponent
-    // so that it can be accessed by the Nucleus interface itself.
+public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus> {
 
     // for debugging - use in calling dumpInfo()
     static final int ALL_POINTS    = 0;

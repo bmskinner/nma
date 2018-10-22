@@ -463,9 +463,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         	fine("Getting profile: "+type);
         	ISegmentedProfile template = profileMap.get(type);
         	return template.copy();
-//        	if(template.getSegmentCount()>1)
-//        		return new SegmentedFloatProfile(template);
-//        	return new SegmentedFloatProfile( (IProfile)template);
         	
         } catch (ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
@@ -481,14 +478,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag)
             throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 
-        // fetch the index of the pointType (the new zero)
         if (!this.hasBorderTag(tag))
             throw new UnavailableBorderTagException("Tag " + tag + " not present");
 
-        int pointIndex = this.borderTags.get(tag);
+        // fetch the index of the pointType (the new zero)
+        int tagIndex = borderTags.get(tag);
 
         // offset the angle profile to start at the pointIndex
-        return getProfile(type).offset(pointIndex);
+        return getProfile(type).offset(tagIndex);
     }
     
     /**
@@ -511,15 +508,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         	throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d)", p.size(), getBorderLength()));
 
         // fetch the index of the pointType (the zero of the input profile)
-        int pointIndex = this.borderTags.get(tag);
-
+        int tagIndex = this.borderTags.get(tag);
         
         // Store the old profile in case
         ISegmentedProfile oldProfile = getProfile(type);
         
         try {
             // remove the offset from the profile, by setting the profile to start from the pointIndex
-            assignProfile(type, p.offset(-pointIndex));
+            assignProfile(type, p.offset(-tagIndex));
         } catch (ProfileException e) {
             stack("Error setting profile " + type + " at " + tag, e);
             assignProfile(type, oldProfile);

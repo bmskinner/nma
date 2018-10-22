@@ -83,7 +83,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             throw new IllegalArgumentException(INVALID_FILE_ERROR);
 
         if (! (f.getName().endsWith(SAVE_FILE_EXTENSION) || f.getName().endsWith(BACKUP_FILE_EXTENSION)) )
-            throw new IllegalArgumentException("File is not nmd or bak format or has been renamed");
+            throw new IllegalArgumentException("File is not nmd or bak format or has been renamed: "+f.getAbsolutePath());
 
         this.file = f;
     }

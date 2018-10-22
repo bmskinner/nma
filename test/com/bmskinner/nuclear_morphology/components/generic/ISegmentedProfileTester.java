@@ -409,6 +409,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	    profile.clearSegments();
 	 // A profile always has a default segment
 	    assertEquals(1, profile.getSegmentCount());
+	    assertEquals(IProfileCollection.DEFAULT_SEGMENT_ID, profile.getSegmentAt(0).getID());
 	}
 	
 	@Test
@@ -536,30 +537,8 @@ public class ISegmentedProfileTester extends ComponentTester {
 		assertEquals("Old end "+oldEnd+" + "+offset, expEnd, newEnd);
 	}
 	
-//	@Test
-//	public void testOffsetOnStatelessProfiles() throws Exception {
-//
-//		// Test that offsetting the profile offsets each individual segment properly
-//		for(int i=-profile.size()-1; i<profile.size()*2; i++) {
-////			System.out.println(String.format("Testing offset of %s", i));
-//			ISegmentedProfile testProfile = profile.copy().offset(i);
-//
-//			 List<IBorderSegment> testSegments = testProfile.getSegments();
-//
-//			 List<IBorderSegment> expectedSegments = makeTestSegments();
-//			 
-//			 for(IBorderSegment testSeg : testSegments){
-//				 UUID segId = testSeg.getID();
-//				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
-//				 expSeg.offset(-i);
-//				 
-//				 assertEquals(expSeg.toString(), testSeg.toString());
-//			 }
-//		}
-//	}
-	
 	@Test
-	public void testOffsetOnStatefulProfiles() throws Exception {
+	public void testOffsetOfMultiSegmentProfile() throws Exception {
 
 		// Test that offsetting the profile offsets each individual segment properly.
 		// The difference to the test above is that the profile is not explicitly copied.
@@ -590,6 +569,58 @@ public class ISegmentedProfileTester extends ComponentTester {
 		}
 	}
 	
+	@Test
+	public void testOffsetOfMultiSegmentProfileIsReversible() throws Exception {
+		
+		for(int i=-profile.size(); i<profile.size()*2; i++) {
+
+			ISegmentedProfile testProfile = profile.offset(i).offset(-i);
+			 List<IBorderSegment> testSegments = testProfile.getSegments();
+
+			 List<IBorderSegment> expectedSegments = makeTestSegments();
+			 
+			 for(IBorderSegment testSeg : testSegments){
+				 UUID segId = testSeg.getID();
+				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
+				 if(!expSeg.toString().equals(testSeg.toString())) {
+					 System.out.println(String.format("Offset: %s Exp: %s", i, expSeg.getDetail()));
+					 System.out.println(String.format("Offset: %s Act: %s", i, testSeg.getDetail()));
+				 }
+				 assertEquals("Index "+i, expSeg.toString(), testSeg.toString());
+			 }
+
+		}
+	}
+	
+	@Test
+	public void testOffsetOfSingleSegmentProfile() throws Exception {
+
+		for(int i=-profile.size(); i<profile.size()*2; i++) {
+			profile.clearSegments();
+			assertEquals(1, profile.getSegmentCount());
+			
+			ISegmentedProfile testProfile = profile.offset(i);
+
+			IBorderSegment testSegment = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+
+			assertEquals("Offset profile by "+i, CellularComponent.wrapIndex(-i, testProfile.size()), testSegment.getStartIndex());
+		}
+	}
+	
+	@Test
+	public void testOffsetOfSingleSegmentProfileIsReversible() throws Exception {
+
+		for(int i=-profile.size(); i<profile.size()*2; i++) {
+//			profile = createInstance(source);
+			profile.clearSegments();
+			assertEquals(1, profile.getSegmentCount());
+			int exp = profile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getStartIndex();
+			ISegmentedProfile testProfile = profile.offset(i).offset(-i);
+			IBorderSegment testSegment = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+			assertEquals("Offset of "+i+" applied and reversed", exp, testSegment.getStartIndex());
+		}
+	}
+		
 	@Test
 	public void testSegmentTotalLengthsMatchProfileSize() {
 		for(IBorderSegment s : profile.getSegments()){

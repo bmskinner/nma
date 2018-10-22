@@ -102,13 +102,12 @@ public class ProfileSegmenter implements Loggable {
      * @param splitIndex an index point that must be segmented on
      * @return a list of segments
      */
-    public List<IBorderSegment> segment() throws UnsegmentableProfileException {
+    public List<IBorderSegment> segment()  {
     	fine("-------------------------");
     	fine("Beginning segmentation   ");
     	fine("-------------------------");
-        /*
-         * Prepare segment start index
-         */
+        
+    	/* Prepare segment start index  */
         int segmentStart = 0;
         finer("Profile length "+profile.size());
         
@@ -145,25 +144,28 @@ public class ProfileSegmenter implements Loggable {
         IBorderSegment seg = IBorderSegment.newSegment(segmentStart, 0, profile.size());
         segments.add(seg);
         
-        if(segments.size()==1) {
-        	// We were unable to detect more than a single segment
-        	// Ensure it has the default ID
-        	segments.clear();
-        	segments.add(IBorderSegment.newSegment(segmentStart, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID));
-        }
+        if(segments.size()==1)  // We were unable to detect more than a single segment
+        	createSingleSegment();
 
         try {
             IBorderSegment.linkSegments(segments);
+            finer("Segments linked");
         } catch (ProfileException e) {
-            warn("Cannot link segments in profile");
-            throw new UnsegmentableProfileException("Error making final profile", e);
+            warn("Cannot link segments in profile");            
         }
 
-        finer("Segments linked");
         fine(String.format("Created %s segments in profile", segments.size()));
         return segments;
     }
 
+    
+    /**
+     * Create a single segment spanning the entire profile
+     */
+    private void createSingleSegment() {
+    	segments.clear();
+    	segments.add(IBorderSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID));
+    }
     
     
     /**

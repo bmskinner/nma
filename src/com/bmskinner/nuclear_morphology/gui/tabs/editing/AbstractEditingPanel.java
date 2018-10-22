@@ -122,7 +122,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
     protected void refreshEditingPanelCharts() {
         this.refreshChartCache();
 
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
 
         list.addAll(getDatasets());
         list.addAll(activeDataset().getAllChildDatasets());

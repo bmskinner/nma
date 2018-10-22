@@ -148,16 +148,19 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         if (!this.hasBorderTag(tag))
             throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
 
-        // fetch the index of the pointType (the zero of the input profile)
-        int pointIndex = this.borderTags.get(tag);
-
+        // fetch the index of the tag (the zero of the input profile)
+        int tagIndex = borderTags.get(tag);
+        fine(tag+" is at "+tagIndex);
+        
         // Keep a copy of the old profile
         ISegmentedProfile oldProfile = getProfile(type);
         
         try {
-        	// remove the offset from the profile, by setting the profile to start from the pointIndex
-        	ISegmentedProfile offsetNewProfile =  p.offset(-pointIndex);
-        	finer("Setting profile: "+offsetNewProfile.toString());
+        	// subtract the tag offset from the profile
+        	int removedOffset = wrapIndex(-tagIndex);
+        	
+        	ISegmentedProfile offsetNewProfile =  p.offset(removedOffset);
+        	fine("Setting profile to start from "+removedOffset);
             setProfile(type, offsetNewProfile);
         } catch (ProfileException e) { // restore the old profile
             stack(String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
@@ -1027,11 +1030,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 		
 		public int wrap(int index) {
-			if (index < 0)
-	            return wrap(size() + index);
-	        if (index < size())
-	            return index;
-	        return index % size();
+			return wrapIndex(index);
 		}
 		
 		
@@ -1337,19 +1336,20 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * make them line up.
 
 			 */
-			
-			/*
-			 * Apply the offset to each of the segments.
-			 */
+
 
 			DefaultSegmentedProfile result = new DefaultSegmentedProfile(offsetProfile);
-			for(BorderSegmentTree s : segments.leaves) {
-				result.segments.addMergeSource(new BorderSegmentTree(s, result.segments));
-			}
+			for(BorderSegmentTree s : segments.leaves)
+				result.segments.addMergeSource(new BorderSegmentTree(s, result.segments));			
 			
 			// root segment update - ensure the ends remain identical
-			result.segments.startIndex = wrap(result.segments.startIndex-offset);
+			fine("Offsetting root segment start to "+offset);
+			result.segments.startIndex = wrapIndex(-offset);
+//			result.segments.startIndex = wrapIndex(result.segments.startIndex-offset);
+			fine("New root segment start is "+result.segments.startIndex);
 			result.segments.endIndex   = result.segments.startIndex;
+			
+			/*  Apply the offset to each of the segments. */
 			for(BorderSegmentTree s : result.segments.leaves) 
 				s.offset(-offset);						
 			return result;
@@ -1809,8 +1809,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			/**
 			 * Construct by copying existing segments
-			 * @param seg
-			 * @param parent
+			 * @param seg the segment to copy
+			 * @param parent the parent of the new segment
 			 */
 			protected BorderSegmentTree(@NonNull IBorderSegment seg, @Nullable BorderSegmentTree parent) {
 				this(seg.getID(), seg.getStartIndex(), seg.getEndIndex(), parent);

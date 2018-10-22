@@ -104,7 +104,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         setProgressBarIndeterminate();
         switch (mode) {
 	        case COPY:    runCopyAnalysis(); return;
-	        case REFRESH: runRefreshAnalysis(); return;
+//	        case REFRESH: runRefreshAnalysis(); return;
 	        case NEW:
 	        default:      runNewAnalysis(); return;
         }
@@ -156,8 +156,8 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                  * dataset. Also force the consensus nucleus to be refolded at
                  * the next step.
                  */
-                if (mode.equals(MorphologyAnalysisMode.REFRESH)) 
-                    dataset.getCollection().updateVerticalNuclei();
+//                if (mode.equals(MorphologyAnalysisMode.REFRESH)) 
+//                    dataset.getCollection().updateVerticalNuclei();
                 
                 // if no list was provided, or no more entries remain,
                 // call the finish

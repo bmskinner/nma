@@ -299,6 +299,23 @@ public class IBorderSegmentTester {
 		exception.expect(IllegalArgumentException.class);
 		segment.getProportionalIndex(1.1);
 	}
+	
+	@Test
+	public void testOffset() {
+		
+		for(int i=-profileLength; i<profileLength; i++) {
+			segment = createInstance(source);
+			segment.offset(i);
+			assertEquals("Offsetting by "+i, CellularComponent.wrapIndex(i, profileLength), segment.getStartIndex());
+		}
+	}
+	
+	@Test
+	public void testOffsetByZeroHasNoEffect() {
+		int exp = segment.getStartIndex();
+		segment.offset(0);
+		assertEquals(exp, segment.getStartIndex());
+	}
 
 	@Test
 	public void testGetIndexProportion() {
