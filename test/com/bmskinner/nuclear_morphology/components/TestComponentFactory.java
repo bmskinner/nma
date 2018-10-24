@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import java.awt.Color;
+import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.util.UUID;
 
@@ -21,9 +22,11 @@ import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
+import ij.gui.OvalRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ColorProcessor;
+import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 /**
@@ -50,6 +53,21 @@ public class TestComponentFactory {
 	 */
 	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
 		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation, fixedStartOffset));
+	}
+	
+	/**
+	 * Create a cell with a rectangular nucleus
+	 * @param w the width of the rectangle
+	 * @param h the height of the rectangle
+	 * @param xBase the starting x value
+	 * @param yBase the starting y value
+	 * @param rotation the rotation of the nuclei
+	 * @param fixedStartOffset an offset to apply to the border array
+	 * @return
+	 * @throws ComponentCreationException
+	 */
+	public static ICell roundCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
+		return new DefaultCell(roundNucleus(w, h, xBase, yBase, rotation, fixedStartOffset));
 	}
 		
 	/**
@@ -86,6 +104,43 @@ public class TestComponentFactory {
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
 		int[] position = {xBase, yBase, w, h};		
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
+		Nucleus n = createNucleus(roi, com, f, 0, position, 0);
+		n.rotate(rotation);
+		
+		// Note - the roi interpolation will smooth corners
+		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+		n.findPointsAroundBorder();		
+		return n;
+	}
+	
+	public static Nucleus roundNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
+		if(fixedStartOffset<0 || fixedStartOffset>=(w+h)*2)
+			throw new ComponentCreationException("Offset cannot be less than zero or more than perimeter: "+fixedStartOffset);
+
+		Roi r = new OvalRoi(xBase, yBase, w, h);
+		FloatPolygon smoothed = r.getInterpolatedPolygon(2, false);
+		float[] xpoints = smoothed.xpoints;
+		float[] ypoints = smoothed.ypoints;
+				
+		// Choose offset so not all objects will start on the RP
+			xpoints = offsetArray(xpoints, fixedStartOffset);
+			ypoints = offsetArray(ypoints, fixedStartOffset);
+				
+		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
+		int[] position = {xBase, yBase, w, h};		
+		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
+		
+		Nucleus n = createNucleus(roi, com, f, 0, position, 0);
+		n.rotate(rotation);
+		
+		// Note - the roi interpolation will smooth corners
+		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+		n.findPointsAroundBorder();		
+		return n;
+	}
+	
+	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int[] position, int number ) {
 		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0) {
 			
 			private static final long serialVersionUID = 1L;
@@ -125,14 +180,9 @@ public class TestComponentFactory {
 			}
 			
 		};
-		
-		n.rotate(rotation);
-		
-		// Note - the roi interpolation will smooth corners
-		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		n.findPointsAroundBorder();		
 		return n;
 	}
+
 	
 	/**
 	 * Create a signal within the bounds of the given component, occupying at most
@@ -205,6 +255,19 @@ public class TestComponentFactory {
 		return result;
 	}
 	
+	/**
+	 * Offset the int array by the given amount with wrapping
+	 * @param array
+	 * @param offset the offset. Positive integer only between 0 and array length.
+	 * @return
+	 */
+	private static float[] offsetArray(float[] array, int offset) {
+		float[] result = new float[array.length];
+		System.arraycopy(array, offset, result, 0, array.length-offset);
+		System.arraycopy(array, 0, result, array.length-offset, offset);
+		return result;
+	}
+		
 	@Test
 	public void testOffsettingWithZeroOffset() {
 		int[] arr = { 1, 2, 3, 4, 5 };
@@ -259,30 +322,4 @@ public class TestComponentFactory {
 		}
 		
 	}
-	
-//	@Test
-//	public void testCellCreatedWithChangingVariables() throws ComponentCreationException {
-//		int variation = 10;
-//		for(int w=TestDatasetBuilder.DEFAULT_BASE_WIDTH-variation; w<TestDatasetBuilder.DEFAULT_BASE_WIDTH+variation; w++) {
-//
-//			for(int h=TestDatasetBuilder.DEFAULT_BASE_HEIGHT-variation; h<TestDatasetBuilder.DEFAULT_BASE_HEIGHT+variation; h++) {
-//
-//				for(int x=TestDatasetBuilder.DEFAULT_X_BASE-variation; x<TestDatasetBuilder.DEFAULT_X_BASE+variation; x++) {
-//
-//					for(int y=TestDatasetBuilder.DEFAULT_Y_BASE-variation; y<TestDatasetBuilder.DEFAULT_Y_BASE+variation; y++) {
-//
-//						for(int offset=0; offset<TestDatasetBuilder.DEFAULT_BORDER_OFFSET+variation; offset++) {
-//							System.out.println(String.format("W %s H %s X %s Y %s Offset %s", w, h, x, y, offset));
-//							ICell c = new DefaultCell(rectangularNucleus(w, h, x, y, 
-//									TestDatasetBuilder.DEFAULT_ROTATION, offset));
-//						}
-//					}
-//
-//				}
-//
-//			}
-//
-//		}
-//	}
-
 }

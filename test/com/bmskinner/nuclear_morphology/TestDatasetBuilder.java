@@ -55,6 +55,9 @@ public class TestDatasetBuilder {
 	public static final boolean DEFAULT_RED_SIGNALS = false;
 	public static final boolean DEFAULT_GREEN_SIGNALS = false;
 	
+	/** The default shape for nuclei; a square */
+	public static final TestComponentShape DEFAULT_NUCLEUS_SHAPE = TestComponentShape.SQUARE;
+	
 	private IAnalysisDataset d;
 	private NucleusType type = NucleusType.ROUND;
 	private int nCells = 1;
@@ -82,12 +85,16 @@ public class TestDatasetBuilder {
 	public static final String GREEN_SIGNAL_GROUP_NAME = "Green";
 	
 	
-	private TestComponentShape nucleusShape = TestComponentShape.SQUARE;
+	private TestComponentShape nucleusShape = DEFAULT_NUCLEUS_SHAPE;
 	
 	private Random rng;
 	
 	public enum TestComponentShape {
-		SQUARE, ROUND
+		/** A rectangle */
+		SQUARE, 
+		
+		/** An ellipse */
+		ROUND
 	}
 	
 	/**
@@ -154,6 +161,12 @@ public class TestDatasetBuilder {
 		return this;
 	}
 	
+	/**
+	 * The shape for the nuclei. The default shape is {@link #DEFAULT_NUCLEUS_SHAPE}.
+	 * @param shape the shape to create.
+	 * @return this builder
+	 * @throws Exception
+	 */
 	public TestDatasetBuilder withNucleusShape(TestComponentShape shape) throws Exception {
 		nucleusShape = shape;
 		return this;
@@ -333,8 +346,7 @@ public class TestDatasetBuilder {
 			int borderLength = (width+height)*2;
 			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
 			
-			ICell cell = TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
-					borderOffset);			
+			ICell cell = createCell(width, height, degreeRot, borderOffset);		
 			collection.addCell(cell);
 			
 			
@@ -355,4 +367,16 @@ public class TestDatasetBuilder {
 
 		return d;
 	}
+
+	private ICell createCell(int width, int height, double degreeRot, int borderOffset) throws ComponentCreationException {
+		switch(nucleusShape) {
+			case SQUARE: return  TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
+					borderOffset);
+			case ROUND:
+			default: return  TestComponentFactory.roundCell(width, height, xBase, yBase, degreeRot, 
+					borderOffset);
+
+		}
+	}
+
 }

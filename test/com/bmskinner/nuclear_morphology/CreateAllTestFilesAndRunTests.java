@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology;
 
+import java.util.logging.Logger;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -8,6 +10,7 @@ import com.bmskinner.nuclear_morphology.analysis.AnalysisTestSuite;
 import com.bmskinner.nuclear_morphology.api.ApiTestSuite;
 import com.bmskinner.nuclear_morphology.components.ComponentTestSuite;
 import com.bmskinner.nuclear_morphology.io.IoTestSuite;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This suite runs the test file creators, then runs the
@@ -25,5 +28,7 @@ import com.bmskinner.nuclear_morphology.io.IoTestSuite;
 	IoTestSuite.class
 	})
 public class CreateAllTestFilesAndRunTests {
+	
+	static final Logger logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
 
 }
