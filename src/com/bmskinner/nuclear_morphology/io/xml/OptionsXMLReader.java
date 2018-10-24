@@ -172,54 +172,57 @@ public class OptionsXMLReader implements Loggable {
 		return r;
 	}
 	
+	
+	
 	private void addKeyedValues(@NonNull Element e, @NonNull HashOptions o) {
 		// Primary keys
 		List<Element> boolContainer = e.getChildren(OptionsXMLCreator.BOOLEAN_KEY);
 		if(!boolContainer.isEmpty()) {
-			for(Element el : boolContainer.get(0).getChildren()) {
-				System.out.println(el.getName()+": "+el.getText());
-				String key = replaceKeyModifications(el.getName());
-				boolean b = Boolean.valueOf(el.getText());
-				o.setBoolean(key, b);
+			for(Element el : boolContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
+				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
+				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+				System.out.println(key+": "+val);
+				o.setBoolean(key, Boolean.valueOf(val));
 			}
 		}
 		
 		List<Element> floatContainer = e.getChildren(OptionsXMLCreator.FLOAT_KEY);
 		if(!floatContainer.isEmpty()) {
-			for(Element el : floatContainer.get(0).getChildren()) {
-				System.out.println(el.getName()+": "+el.getText());
-				String key = replaceKeyModifications(el.getName());
-				float b = Float.valueOf(el.getText());
-				o.setFloat(key, b);
+			for(Element el : floatContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
+				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
+				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+				System.out.println(key+": "+val);
+				o.setFloat(key, Float.valueOf(val));
 			}
 		}
 		
 		List<Element> intContainer = e.getChildren(OptionsXMLCreator.INT_KEY);
 		if(!intContainer.isEmpty()) {
-			for(Element el : intContainer.get(0).getChildren()) {
-				String key = replaceKeyModifications(el.getName());
-				System.out.println(el.getName()+": "+el.getText());
-				int b = Integer.valueOf(el.getText());
-				o.setInt(key, b);
+			for(Element el : intContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
+				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
+				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+				System.out.println(key+": "+val);
+				o.setInt(key, Integer.valueOf(val));
 			}
 		}
 		
 		List<Element> doubleContainer = e.getChildren(OptionsXMLCreator.DOUBLE_KEY);
 		if(!doubleContainer.isEmpty()) {
-			for(Element el : doubleContainer.get(0).getChildren()) {
-				System.out.println(el.getName()+": "+el.getText());
-				String key = replaceKeyModifications(el.getName());
-				double b = Double.valueOf(el.getText());
-				o.setDouble(key, b);
+			for(Element el : doubleContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
+				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
+				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+				System.out.println(key+": "+val);
+				o.setDouble(key, Double.valueOf(val));
 			}
 		}
 		
 		List<Element> stringContainer = e.getChildren(OptionsXMLCreator.STRING_KEY);
 		if(!stringContainer.isEmpty()) {
-			for(Element el : stringContainer.get(0).getChildren()) {
-				System.out.println(el.getName()+": "+el.getText());
-				String key = replaceKeyModifications(el.getName());
-				o.setString(key, el.getText());
+			for(Element el : stringContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
+				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
+				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+				System.out.println(key+": "+val);
+				o.setString(key, val);
 			}
 		}
 	}

@@ -34,6 +34,9 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	public static final String DOUBLE_KEY  = "Doubles";
 	public static final String INT_KEY     = "Ints";
 	public static final String STRING_KEY  = "Strings";
+	public static final String PAIR_KEY    = "Option";
+	public static final String KEY_KEY     = "Key";
+	public static final String VALUE_KEY   = "Value";
 	
 	public static final String SUB_OPTION_KEY = "Sub_option";
 	public static final String SUB_TYPE_KEY   = "Sub_option_type";
@@ -147,67 +150,75 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	 * @param key
 	 * @return
 	 */
-	private static String createKeyModifications(String key) {
-		String r = key.replaceAll(" ", SPACE_REPLACEMENT);
-		if(isUUID(key))
-			r = UUID_PREFIX+r;
-		return r;
+//	private static String createKeyModifications(String key) {
+//		String r = key.replaceAll(" ", SPACE_REPLACEMENT);
+//		if(isUUID(key))
+//			r = UUID_PREFIX+r;
+//		return r;
+//	}
+	
+	private static Element createKeyPairElement(String key, String value) {
+		Element pair = new Element(PAIR_KEY);
+		Element keyElement = new Element(KEY_KEY);
+		keyElement.setText(key);
+		Element valElement = new Element(VALUE_KEY);
+		valElement.setText(value);
+		
+		pair.addContent(keyElement);
+		pair.addContent(valElement);
+		return pair;
+	}
+	
+	private static Element createKeyPairElement(String key, boolean value) {
+		return createKeyPairElement(key, String.valueOf(value));
+	}
+	
+	private static Element createKeyPairElement(String key, int value) {
+		return createKeyPairElement(key, String.valueOf(value));
+	}
+	
+	private static Element createKeyPairElement(String key, float value) {
+		return createKeyPairElement(key, String.valueOf(value));
+	}
+	
+	private static Element createKeyPairElement(String key, double value) {
+		return createKeyPairElement(key, String.valueOf(value));
 	}
 		
 	private static void appendElement(@NonNull HashOptions options, Element rootElement) {
 		
 		if(!options.getBooleanKeys().isEmpty()) {
 			Element boolElement = new Element(BOOLEAN_KEY);
-			for(String key : options.getBooleanKeys()){
-				String elKey = createKeyModifications(key);	
-				Element keyElement = new Element(elKey);
-				keyElement.setText(String.valueOf(options.getBoolean(key)));
-				boolElement.addContent(keyElement);
-			}
+			for(String key : options.getBooleanKeys())
+				boolElement.addContent(createKeyPairElement(key, options.getBoolean(key)));
 			rootElement.addContent(boolElement);
 		}
 		
 		if(!options.getIntegerKeys().isEmpty()) {
 			Element intElement = new Element(INT_KEY);
-			for(String key : options.getIntegerKeys()){
-				String elKey = createKeyModifications(key);	
-				Element keyElement = new Element(elKey);
-				keyElement.setText(String.valueOf(options.getInt(key)));
-				intElement.addContent(keyElement);
-			}
+			for(String key : options.getIntegerKeys())
+				intElement.addContent(createKeyPairElement(key, options.getInt(key)));
 			rootElement.addContent(intElement);
 		}
 
 		if(!options.getFloatKeys().isEmpty()) {
 			Element floatElement = new Element(FLOAT_KEY);
-			for(String key : options.getFloatKeys()){
-				String elKey = createKeyModifications(key);	
-				Element keyElement = new Element(elKey);
-				keyElement.setText(String.valueOf(options.getFloat(key)));
-				floatElement.addContent(keyElement);
-			}
+			for(String key : options.getFloatKeys())
+				floatElement.addContent(createKeyPairElement(key, options.getFloat(key)));
 			rootElement.addContent(floatElement);
 		}
 		
 		if(!options.getDoubleKeys().isEmpty()) {
 			Element doubleElement = new Element(DOUBLE_KEY);
-			for(String key : options.getDoubleKeys()){
-				String elKey = createKeyModifications(key);	
-				Element keyElement = new Element(elKey);
-				keyElement.setText(String.valueOf(options.getDouble(key)));
-				doubleElement.addContent(keyElement);
-			}
+			for(String key : options.getDoubleKeys())
+				doubleElement.addContent(createKeyPairElement(key, options.getDouble(key)));
 			rootElement.addContent(doubleElement);
 		}
 		
 		if(!options.getStringKeys().isEmpty()) {
 			Element stringElement = new Element(STRING_KEY);
-			for(String key : options.getStringKeys()){
-				String elKey = createKeyModifications(key);	
-				Element keyElement = new Element(elKey);
-				keyElement.setText(options.getString(key));
-				stringElement.addContent(keyElement);
-			}
+			for(String key : options.getStringKeys())
+				stringElement.addContent(createKeyPairElement(key, options.getString(key)));
 			rootElement.addContent(stringElement);
 		}
 	}
