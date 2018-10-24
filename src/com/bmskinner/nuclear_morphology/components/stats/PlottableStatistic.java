@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -32,12 +34,21 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  *
  */
 public interface PlottableStatistic extends Serializable {
+	
+	interface Names {
+		 static final String AREA = "Area";
+		 static final String PERIMETER = "Perimeter";
+		 static final String MAX_FERET = "Max feret";
+		 static final String MIN_DIAMETER = "Min diameter";
+		 static final String ASPECT = "Aspect";
+		 static final String CIRCULARITY = "Circularity";
+	}
 
     // Old nucleus statistics
-    static final PlottableStatistic AREA            = new GenericStatistic("Area", StatisticDimension.AREA);
-    static final PlottableStatistic PERIMETER       = new GenericStatistic("Perimeter", StatisticDimension.LENGTH);
-    static final PlottableStatistic MAX_FERET       = new GenericStatistic("Max feret", StatisticDimension.LENGTH);
-    static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic("Min diameter", StatisticDimension.LENGTH);
+    static final PlottableStatistic AREA            = new GenericStatistic(Names.AREA, StatisticDimension.AREA);
+    static final PlottableStatistic PERIMETER       = new GenericStatistic(Names.PERIMETER, StatisticDimension.LENGTH);
+    static final PlottableStatistic MAX_FERET       = new GenericStatistic(Names.MAX_FERET, StatisticDimension.LENGTH);
+    static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic(Names.MIN_DIAMETER, StatisticDimension.LENGTH);
     static final PlottableStatistic ASPECT          = new GenericStatistic("Aspect", StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic CIRCULARITY     = new GenericStatistic("Circularity",
             StatisticDimension.DIMENSIONLESS);
@@ -76,14 +87,14 @@ public interface PlottableStatistic extends Serializable {
 
     // Old segment statistics
     static final PlottableStatistic LENGTH       = new GenericStatistic("Length", StatisticDimension.LENGTH);
-    static final PlottableStatistic DISPLACEMENT = new GenericStatistic("Displacement", StatisticDimension.ANGLE);
+    static final PlottableStatistic DISPLACEMENT = new GenericStatistic("Displacement", StatisticDimension.ANGLE);    
+    
 
     /**
      * Get stats for the given component. Use the keys in
      * {@link CellularComponent}
      * 
-     * @param component
-     *            the component to get stats for
+     * @param component the component to get stats for
      * @return applicable stats, or null if the component was not recognised
      */
     static PlottableStatistic[] getStats(String component) {
@@ -95,9 +106,58 @@ public interface PlottableStatistic extends Serializable {
             return getSegmentStats().toArray(new PlottableStatistic[0]);
         return null;
     }
+    /**
+     * All available stats
+     * 
+     * @return
+     */
+    static List<PlottableStatistic> getAllStatsTypes() {
+    	List<PlottableStatistic> list = new ArrayList<>();
+    	list.add(AREA);
+    	list.add(PERIMETER);
+    	list.add(MAX_FERET);
+    	list.add(MIN_DIAMETER);
+    	list.add(ASPECT);
+    	list.add(CIRCULARITY);
+    	list.add(VARIABILITY);
+    	list.add(BOUNDING_HEIGHT);
+    	list.add(BOUNDING_WIDTH);
+    	list.add(OP_RP_ANGLE);
+    	list.add(HOOK_LENGTH);
+    	list.add(BODY_WIDTH);
+    	list.add(LOBE_COUNT);
+    	list.add(PATH_LENGTH);
+    	list.add(CELL_NUCLEUS_COUNT);
+    	list.add(CELL_NUCLEAR_AREA);
+    	list.add(CELL_NUCLEAR_RATIO);
+    	list.add(NUCLEUS_SIGNAL_COUNT);
+    	list.add(ANGLE);
+    	list.add(DISTANCE_FROM_COM);
+    	list.add(FRACT_DISTANCE_FROM_COM);
+    	list.add(RADIUS);
+    	list.add(LENGTH);
+    	list.add(DISPLACEMENT);
+    	
+    	 return list;
+    }
 
     /**
-     * ~Get stats for generic cellular components.
+     * Fetch the stat with the given name, if available.
+     * @param name the name of the stat
+     * @return the stat, or null if none is present
+     */
+    static PlottableStatistic of(String name) {
+    	List<PlottableStatistic> all = getAllStatsTypes();
+    	
+    	for(PlottableStatistic stat : all) {
+    		if(stat.toString().equals(name))
+    			return stat;
+    	}
+    	return null;
+    }
+
+    /**
+     * Get stats for generic cellular components.
      * 
      * @return
      */

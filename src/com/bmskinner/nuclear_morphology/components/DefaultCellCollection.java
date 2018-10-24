@@ -87,6 +87,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private final UUID uuid;
 
 	/** The image folder with the source of the cells */
+	@Deprecated // this should be only specified in the analysis options, and per cell
 	private File folder;
 	
 	/** The name of the folder to save outputs */

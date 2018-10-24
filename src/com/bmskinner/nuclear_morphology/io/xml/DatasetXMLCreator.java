@@ -21,7 +21,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements Loggable {
 	
-	public static final String ROOT_LBL                       = "AnalysisDataset";
+	
 	
 	public static final String DATASET_NAME_KEY               = "DatasetName";
 	public static final String DATASET_ID_KEY                 = "DatasetId";
@@ -44,7 +44,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	
 	@Override
 	public Document create() {
-		Element rootElement = new Element(ROOT_LBL);
+		Element rootElement = new Element(ANALYSIS_DATASET_KEY);
 		
 		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, template.getVersion().toString()));
 		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion().toString()));

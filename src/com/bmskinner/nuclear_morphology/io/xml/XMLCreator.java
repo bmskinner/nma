@@ -40,7 +40,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public abstract class XMLCreator<T> {
 	
+	public static final String ANALYSIS_DATASET_KEY           = "AnalysisDataset";
 	public static final String CELL_COLLECTION_KEY            = "CellCollection";
+	public static final String OUTPUT_FOLDER_KEY              = "OutputFolder";
 	public static final String NUCLEUS_TYPE_KEY               = "NucleusType";
 	public static final String CELL_IDS_KEY                   = "CellIds";
 	public static final String DATASET_IDS_KEY                = "DatasetIds";
@@ -183,7 +185,8 @@ public abstract class XMLCreator<T> {
 	protected Element create(ICellCollection collection) {
 		Element e = new Element(CELL_COLLECTION_KEY);
 		e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType().toString()));
-		
+		e.addContent(createElement(OUTPUT_FOLDER_KEY, collection.getOutputFolder().getAbsolutePath()));
+
 		for(ICell cell : collection)
 			e.addContent(create(cell));
 		

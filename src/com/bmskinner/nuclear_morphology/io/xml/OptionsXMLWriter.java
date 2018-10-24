@@ -26,6 +26,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -51,7 +52,5 @@ public class OptionsXMLWriter extends XMLWriter implements Loggable {
 			 warn("Cannot export options file");
 		}
 	}
-	
-	
-	
+
 }

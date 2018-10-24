@@ -76,18 +76,38 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     /** The chosen window size based on the window proportion */
     protected transient int angleProfileWindowSize;
 
+    
     /**
      * Construct with an ROI, a source image and channel, and the original
-     * position in the source image
+     * position in the source image. It sets the immutable original centre of
+     * mass, and the mutable current centre of mass. It also assigns a random ID
+     * to the component.
      * 
-     * @param roi
-     * @param f
-     * @param channel
-     * @param position
-     * @param centreOfMass
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
      */
-    public ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position) {
-        super(roi, centreOfMass, f, channel, position);
+    public ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
+    	super(roi, centreOfMass, source, channel, position);
+    }
+    
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image. It sets the immutable original centre of
+     * mass, and the mutable current centre of mass. It also assigns a random ID
+     * to the component.
+     * 
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
+     * @param id the id of the component. Only use when deserialising!
+     */
+    public ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, @NonNull UUID id) {
+        super(roi, centreOfMass, source, channel, position, id);
     }
 
     /**

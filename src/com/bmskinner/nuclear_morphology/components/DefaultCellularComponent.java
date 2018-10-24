@@ -136,6 +136,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     private transient Rectangle2D bounds;
 
+    
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image. It sets the immutable original centre of
@@ -149,6 +150,24 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param position the bounding position of the component in the original image
      */
     public DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
+    	this(roi, centreOfMass, source, channel, position, UUID.randomUUID() );
+    }
+    
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image. It sets the immutable original centre of
+     * mass, and the mutable current centre of mass. It also assigns a random ID
+     * to the component.
+     * 
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
+     * @param id the id of the component. Only use when deserialising!
+     */
+    public DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, @NonNull UUID id) {
+    
         if (centreOfMass == null)
             throw new IllegalArgumentException("Centre of mass cannot be null");
         if (roi == null)
@@ -156,7 +175,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
         this.centreOfMass = IPoint.makeNew(centreOfMass);
-        this.id = java.util.UUID.randomUUID();
+        this.id = id;
         this.sourceFile = source;
         this.channel = channel;
         this.position = position;

@@ -21,6 +21,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -81,6 +82,20 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
                 (int) bounds.getHeight() };
         return buildInstance(roi, imageFile, channel, original, centreOfMass);
     }
+    
+    public Nucleus buildInstance(@NonNull List<IPoint> points, File imageFile, int channel, @NonNull IPoint centreOfMass, @NonNull UUID id)
+            throws ComponentCreationException {
+    	if(points.size()<3)
+    		throw new ComponentCreationException("Cannot create a nucleus with a border list of only "+points.size()+" points");
+    	
+        Roi roi = makRoi(points);
+        
+        Rectangle bounds = roi.getBounds();
+
+        int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(),
+                (int) bounds.getHeight() };
+        return buildInstance(roi, imageFile, channel, original, centreOfMass, id);
+    }
 
     private Roi makRoi(List<IPoint> list) {
         float[] xpoints = new float[list.size()];
@@ -99,7 +114,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         FloatPolygon smoothed = roi.getInterpolatedPolygon(2, false);
         return new PolygonRoi(smoothed.xpoints, smoothed.ypoints, Roi.POLYGON);
     }
-
+    
     @Override
     public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
             throws ComponentCreationException {
@@ -120,6 +135,35 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         	case ROUND: 
         	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                     nucleusCount);
+        }
+
+        nucleusCount++;
+        if (n == null)
+            throw new ComponentCreationException("Error making nucleus; contstucted object is null");
+        finer("Created nucleus with border length "+n.getBorderLength());
+        return n;
+    }
+
+    @Override
+    public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id)
+            throws ComponentCreationException {
+    	if (roi == null)
+    		throw new IllegalArgumentException("Roi cannot be null in nucleus factory");
+        if (centreOfMass == null)
+            throw new IllegalArgumentException("Centre of mass cannot be null in nucleus factory");
+        
+        Nucleus n = null;
+
+        switch(type) {
+        	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount, id); break;
+        	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount, id); break;
+        	case NEUTROPHIL: n = new DefaultLobedNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount, id); break;    
+        	case ROUND: 
+        	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount, id);
         }
 
         nucleusCount++;

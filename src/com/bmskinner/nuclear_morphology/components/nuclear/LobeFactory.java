@@ -17,6 +17,9 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.File;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -38,5 +41,11 @@ public class LobeFactory implements ComponentFactory<Lobe> {
 
         return new DefaultLobe(roi, centreOfMass, imageFile, channel, originalPosition);
     }
+
+	@Override
+	public Lobe buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition,
+			@NonNull IPoint centreOfMass, @NonNull UUID id) throws ComponentCreationException {
+		return new DefaultLobe(roi, centreOfMass, file, channel, originalPosition, id);
+	}
 
 }

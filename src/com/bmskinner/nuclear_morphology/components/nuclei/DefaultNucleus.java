@@ -77,6 +77,24 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     protected transient Nucleus verticalNucleus = null;
 
     protected transient boolean canReverse = true;
+    
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image. It sets the immutable original centre of
+     * mass, and the mutable current centre of mass. It also assigns a random ID
+     * to the component.
+     * 
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
+     * @param id the id of the component. Only use when deserialising!
+     */
+    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, int number, @NonNull UUID id) {
+        super(roi, centreOfMass, source, channel, position, id);
+        this.nucleusNumber = number;
+    }
 
     /**
      * Construct with an ROI, a source image and channel, and the original

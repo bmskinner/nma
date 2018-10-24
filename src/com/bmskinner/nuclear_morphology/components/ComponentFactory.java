@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -49,6 +50,22 @@ public interface ComponentFactory<E extends CellularComponent> extends Loggable 
      * @throws ComponentCreationException if creation fails
      */
     E buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
+            throws ComponentCreationException;
+    
+    /**
+     * Create a component of the appropriate class for the factory
+     * 
+     * @param roi the roi to create a nucleus from
+     * @param file the image file the component is found in
+     * @param channel the RGB image channel
+     * @param originalPosition the position of the roi in the source image in the format of
+     *            {@link CellularComponent#getPosition()}
+     * @param centreOfMass the centre of mass of the roi
+     * @param id the id for the object.
+     * @return a component of the type for this factory
+     * @throws ComponentCreationException if creation fails
+     */
+    E buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, @NonNull UUID id)
             throws ComponentCreationException;
 
     /**
