@@ -43,7 +43,6 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	
 	public static final String SIGNAL_DETECTION_MODE_KEY   = "Detection_mode";
 	
-	public static final String SPACE_REPLACEMENT = "_sp_";
 	public static final String UUID_PREFIX = "UUID_";
 	
 	public static final String SIGNAL_GROUP_PREFIX = "SignalGroup_";
@@ -144,19 +143,7 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 			
 		}
 	}
-	
-	/**
-	 * Replace illegal characters for XML names
-	 * @param key
-	 * @return
-	 */
-//	private static String createKeyModifications(String key) {
-//		String r = key.replaceAll(" ", SPACE_REPLACEMENT);
-//		if(isUUID(key))
-//			r = UUID_PREFIX+r;
-//		return r;
-//	}
-	
+		
 	private static Element createKeyPairElement(String key, String value) {
 		Element pair = new Element(PAIR_KEY);
 		Element keyElement = new Element(KEY_KEY);
