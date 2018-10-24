@@ -17,6 +17,9 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.File;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -34,8 +37,15 @@ public class SignalFactory implements ComponentFactory<INuclearSignal> {
 
     @Override
     public INuclearSignal buildInstance(Roi roi, File file, int channel, int[] originalPosition, IPoint centreOfMass)
-            throws com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException {
+            throws ComponentCreationException {
         return new DefaultNuclearSignal(roi, centreOfMass, file, channel, originalPosition);
     }
+
+	@Override
+	public INuclearSignal buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition,
+			@NonNull IPoint centreOfMass, @NonNull UUID id) throws ComponentCreationException {
+		// TODO Auto-generated method stub
+		return new DefaultNuclearSignal(roi, centreOfMass, file, channel, originalPosition, id);
+	}
 
 }

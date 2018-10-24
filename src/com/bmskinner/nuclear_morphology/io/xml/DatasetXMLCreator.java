@@ -20,22 +20,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements Loggable {
-	
-	
-	
-	public static final String DATASET_NAME_KEY               = "DatasetName";
-	public static final String DATASET_ID_KEY                 = "DatasetId";
-	public static final String DATASET_COLOUR_KEY             = "DatasetColour";
-	public static final String DATASET_ROOT_KEY               = "DatasetIsRoot";
-	
-	public static final String MERGE_SOURCES_SECTION_KEY      = "MergeSources";
-	public static final String MERGE_SOURCE_KEY               = "MergeSource";
 
-	
-	public static final String CHILD_DATASETS_SECTION_KEY     = "ChildDatasets";
-	public static final String CHILD_DATASET_KEY              = "ChildDataset";
-
-	public static final String ANALYSIS_OPTIONS_KEY           = "AnalysisOptions";
 
 	public DatasetXMLCreator(@NonNull final IAnalysisDataset dataset) {
 		super(dataset);

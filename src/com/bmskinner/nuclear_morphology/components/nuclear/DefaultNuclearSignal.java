@@ -16,15 +16,15 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import ij.gui.Roi;
-
 import java.io.File;
-import java.io.IOException;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
+import ij.gui.Roi;
 
 /**
  * An implementation of {@link INuclearSignal}.
@@ -39,6 +39,10 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 
     private int closestNuclearBorderPoint;
 
+    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position, @NonNull UUID id) {
+        super(roi, centreOfMass, f, channel, position, id);
+    }
+    
     public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position) {
         super(roi, centreOfMass, f, channel, position);
     }

@@ -58,6 +58,18 @@ public abstract class XMLCreator<T> {
 	public static final String INDEX_KEY                      = "Index";
 	public static final String STATS_KEY                      = "MeasuredStatistics";
 	public static final String STAT_KEY                       = "Statistic";
+
+	public static final String DATASET_NAME_KEY               = "DatasetName";
+	public static final String DATASET_ID_KEY                 = "DatasetId";
+	public static final String DATASET_COLOUR_KEY             = "DatasetColour";
+	public static final String DATASET_ROOT_KEY               = "DatasetIsRoot";
+	
+	public static final String MERGE_SOURCES_SECTION_KEY      = "MergeSources";
+	public static final String MERGE_SOURCE_KEY               = "MergeSource";
+
+	
+	public static final String CHILD_DATASETS_SECTION_KEY     = "ChildDatasets";
+	public static final String CHILD_DATASET_KEY              = "ChildDataset";
 	
 	public static final String SOFTWARE_CREATION_VERSION_KEY  = "VersionCreated";
 	public static final String SOFTWARE_SERIALISE_VERSION_KEY = "VersionSerialised";

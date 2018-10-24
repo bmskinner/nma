@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 
 	private NucleusFactory fact = null;
+	private double windowProportion = 0.05;
 	
 	/**
 	 * Create with a file to be read
@@ -50,18 +51,15 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 	public IAnalysisDataset read() {
 		
 		try {
-		
-			SAXBuilder saxBuilder = new SAXBuilder();
-			Document document = saxBuilder.build(file);
-			XMLOutputter xmlOutput = new XMLOutputter();
-			xmlOutput.setFormat(Format.getPrettyFormat());
-			xmlOutput.output(document, System.out); 
+			Document document = readDocument();	
 			
-			NucleusType type = NucleusType.valueOf(document.getRootElement().getChild(XMLCreator.NUCLEUS_TYPE_KEY).getText());
+			Element rootElement = document.getRootElement();
+			Element analysisOptions = rootElement.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY);
+			NucleusType type = NucleusType.valueOf(analysisOptions.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
 			fact = new NucleusFactory(type);
+			windowProportion = Double.valueOf(analysisOptions.getChildText(XMLCreator.PROFILE_WINDOW_KEY));
 			
-			
-			return readDataset(document.getRootElement().getChild(XMLCreator.ANALYSIS_DATASET_KEY), type );
+			return readDataset(document.getRootElement(), type );
 			
 		} catch (JDOMException | IOException | ComponentCreationException e) {
 			stack(e);
@@ -70,16 +68,23 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		return null;
 	}
 	
+	@Override
+	public Document readDocument() throws JDOMException, IOException {
+		SAXBuilder saxBuilder = new SAXBuilder();
+		return saxBuilder.build(file);
+	}
+	
 	private IAnalysisDataset readDataset(Element e, NucleusType type) throws ComponentCreationException {
-		String name = e.getChildText(XMLCreator.NAME_KEY);
-		ICellCollection c = readCollection(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, name);
+		String name = e.getChildText(XMLCreator.DATASET_NAME_KEY);
+		UUID id = UUID.fromString(e.getChildText(XMLCreator.DATASET_ID_KEY));
+		ICellCollection c = readCollection(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, name, id);
 		IAnalysisDataset d = new DefaultAnalysisDataset(c, file);
+		d.setName(name);
 		return d;
 	}
 	
-	private ICellCollection readCollection(Element e, NucleusType type, String name) throws ComponentCreationException {
-		
-		UUID id = UUID.fromString(e.getChildText(XMLCreator.ID_KEY));
+	private ICellCollection readCollection(Element e, NucleusType type, String name, UUID id) throws ComponentCreationException {
+
 		String outFolder = e.getChildText(XMLCreator.OUTPUT_FOLDER_KEY);
 
 		ICellCollection collection = new DefaultCellCollection(null,outFolder, name, type, id);
@@ -123,8 +128,9 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 			n.setStatistic(s, d);
 		}
 		
+		n.initialise(windowProportion);
+		
 		return n;
 	}
-
 	
 }

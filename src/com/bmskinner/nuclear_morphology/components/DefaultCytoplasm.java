@@ -17,6 +17,9 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.File;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
@@ -33,6 +36,11 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
 
     private static final long serialVersionUID = 1L;
 
+    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int[] position, @NonNull UUID id) {
+        super(roi, centreOfMass, f, channel, position, id);
+    }
+
+    
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image
@@ -43,7 +51,7 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
      * @param position
      * @param centreOfMass
      */
-    public DefaultCytoplasm(Roi roi, IPoint centreOfMass, File f, int channel, int[] position) {
+    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int[] position) {
         super(roi, centreOfMass, f, channel, position);
     }
 

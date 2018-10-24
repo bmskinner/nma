@@ -398,7 +398,7 @@ public class DefaultCellCollection implements ICellCollection {
 		return profileCollection;
 	}
 
-	@Override
+	@Override @Deprecated
 	public File getFolder() {
 		return folder;
 	}
@@ -408,7 +408,7 @@ public class DefaultCellCollection implements ICellCollection {
 		return outputFolder;
 	}
 
-	@Override
+	@Override @Deprecated
 	public File getOutputFolder() {
 		if (outputFolder == null)
 			return getFolder();
@@ -1288,7 +1288,6 @@ public class DefaultCellCollection implements ICellCollection {
 		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
 				.append("Collection:" + getName() + newLine).append("Nuclei: " + this.getNucleusCount() + newLine)
 				.append("Clockwise: " + this.countClockWiseRPNuclei() + newLine)
-				.append("Source folder: " + this.getFolder().getAbsolutePath() + newLine)
 				.append("Nucleus type: " + this.nucleusType + newLine).append("Profile collections:" + newLine);
 
 		IProfileCollection pc = this.getProfileCollection();
