@@ -47,15 +47,5 @@ public class XMLWriterTest {
 		assertFalse(XMLCreator.isUUID("This is not a UUID"));
 		assertFalse(XMLCreator.isUUID("00001111-2222-333-44444-555566667777")); // too few in 3
 	}
-	
-//	@Test
-//	public void testDatasetXmlCreated() throws Exception {
-//		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(4).segmented().build();
-//		Document doc = new DatasetXMLCreator(d).create();
-//		XMLOutputter xmlOutput = new XMLOutputter();
-//		xmlOutput.setFormat(Format.getPrettyFormat());
-//		xmlOutput.output(doc, System.out); 
-//		fail("Not yet implemented");
-//	}
 
 }

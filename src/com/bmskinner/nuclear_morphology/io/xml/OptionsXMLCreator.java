@@ -8,6 +8,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -22,35 +23,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements Loggable {
 	
-	public static final String DETECTION_LBL    = "Detection_settings";
-	public static final String DETECTION_METHOD = "Detection_method";
-	public static final String DETECTED_OBJECT  = "Detected_object";
-	public static final String NUCLEUS_TYPE     = "Nucleus_type";
-	public static final String PROFILE_WINDOW   = "Profile_window";
-	public static final String SOFTWARE_VERSION = "SoftwareVersion";
 	
-	public static final String BOOLEAN_KEY = "Booleans";
-	public static final String FLOAT_KEY   = "Floats";
-	public static final String DOUBLE_KEY  = "Doubles";
-	public static final String INT_KEY     = "Ints";
-	public static final String STRING_KEY  = "Strings";
-	public static final String PAIR_KEY    = "Option";
-	public static final String KEY_KEY     = "Key";
-	public static final String VALUE_KEY   = "Value";
-	
-	public static final String SUB_OPTION_KEY = "Sub_option";
-	public static final String SUB_TYPE_KEY   = "Sub_option_type";
-	
-	public static final String SIGNAL_DETECTION_MODE_KEY   = "Detection_mode";
-	
-	public static final String UUID_PREFIX = "UUID_";
-	
-	public static final String SIGNAL_GROUP_PREFIX = "SignalGroup_";
-	public static final String SIGNAL_ID         = "SignalGroupId";
-	public static final String SIGNAL_NAME       = "SignalGroupName";
-	public static final String CLUSTERS = "Clusters";
-	public static final String CLUSTER_GROUP = "ClusterGroup";
-	public static final String CLUSTER_NAME  = "ClusterGroupName";
 	
 	public OptionsXMLCreator(@NonNull IAnalysisDataset dataset) {
 		super(dataset);
@@ -59,7 +32,7 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	
 	@Override
 	public Document create() {
-		Element rootElement = new Element(DETECTION_LBL);
+		Element rootElement = new Element(DETECTION_SETTINGS_KEY);
 		if(template.hasAnalysisOptions())
 			appendElement(template, template.getAnalysisOptions().get(), rootElement);
 		
@@ -68,7 +41,7 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 			if(g.getOptions().isPresent()) {
 				Element cluster = new Element(CLUSTER_GROUP);
 				cluster.setAttribute(CLUSTER_NAME, g.getName());
-				appendElement(g.getOptions().get().duplicate(), cluster);
+				appendElement(cluster, g.getOptions().get().duplicate());
 				clusters.addContent(cluster);
 			}
 		}
@@ -77,33 +50,32 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	}
 
 	private static Document createDocument(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options) {
-		Element rootElement = new Element(DETECTION_LBL);
+		Element rootElement = new Element(DETECTION_SETTINGS_KEY);
 		appendElement(dataset, options, rootElement);
 		return new Document(rootElement);
 	}
 
 	static Document createDocument(@NonNull HashOptions options) {
-		Element rootElement = new Element(DETECTION_LBL);
-		appendElement(options, rootElement);
+		Element rootElement = new Element(DETECTION_SETTINGS_KEY);
+		appendElement(rootElement, options );
 		return new Document(rootElement);
 	}
 	
 	private static void appendElement(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options, Element rootElement) {
 		
-		Element versionElement = new Element(SOFTWARE_VERSION);
-		versionElement.setText(dataset.getVersion().toString());
-		rootElement.addContent(versionElement);
+		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, dataset.getVersion().toString())); 
+		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion().toString()));
 		
 		for(String key : options.getDetectionOptionTypes()){
-			Element element = new Element(DETECTION_METHOD);
+			Element element = new Element(DETECTION_METHOD_KEY);
 			if(isUUID(key) || key.startsWith(IAnalysisOptions.SIGNAL_GROUP)){ // signal group without prefix
-				element.setAttribute(DETECTED_OBJECT, IAnalysisOptions.NUCLEAR_SIGNAL);
+				element.setAttribute(DETECTED_OBJECT_KEY, IAnalysisOptions.NUCLEAR_SIGNAL);
 			} else {
-				element.setAttribute(DETECTED_OBJECT, key);
+				element.setAttribute(DETECTED_OBJECT_KEY, key);
 			}
 			
 			// add signal group names
-			if(element.getAttribute(DETECTED_OBJECT).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
 				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
 				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
 				
@@ -116,98 +88,17 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 				element.addContent(signalName);
 			}
 			
-			appendElement(options.getDetectionOptions(key).get(), element);
+			appendElement(element, options.getDetectionOptions(key).get());
 			rootElement.addContent(element);
 		}
-		Element ntElement = new Element(NUCLEUS_TYPE);
+		Element ntElement = new Element(NUCLEUS_TYPE_KEY);
 		ntElement.setText(options.getNucleusType().name());
 		rootElement.addContent(ntElement);
 		
-		Element anElement = new Element(PROFILE_WINDOW);
+		Element anElement = new Element(PROFILE_WINDOW_KEY);
 		anElement.setText(String.valueOf(options.getProfileWindowProportion()));
 		rootElement.addContent(anElement);
 	}
 
-	private static void appendElement(@NonNull IDetectionOptions options, Element rootElement) {
-		appendElement( (HashOptions)options, rootElement);
-		for(String key : options.getSubOptionKeys()){
-			Element element = new Element(SUB_OPTION_KEY);
-			element.setAttribute(SUB_TYPE_KEY, key);
-			try {
-				appendElement(options.getSubOptions(key), element);
-				rootElement.addContent(element);
-			} catch (MissingOptionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		}
-	}
 		
-	private static Element createKeyPairElement(String key, String value) {
-		Element pair = new Element(PAIR_KEY);
-		Element keyElement = new Element(KEY_KEY);
-		keyElement.setText(key);
-		Element valElement = new Element(VALUE_KEY);
-		valElement.setText(value);
-		
-		pair.addContent(keyElement);
-		pair.addContent(valElement);
-		return pair;
-	}
-	
-	private static Element createKeyPairElement(String key, boolean value) {
-		return createKeyPairElement(key, String.valueOf(value));
-	}
-	
-	private static Element createKeyPairElement(String key, int value) {
-		return createKeyPairElement(key, String.valueOf(value));
-	}
-	
-	private static Element createKeyPairElement(String key, float value) {
-		return createKeyPairElement(key, String.valueOf(value));
-	}
-	
-	private static Element createKeyPairElement(String key, double value) {
-		return createKeyPairElement(key, String.valueOf(value));
-	}
-		
-	private static void appendElement(@NonNull HashOptions options, Element rootElement) {
-		
-		if(!options.getBooleanKeys().isEmpty()) {
-			Element boolElement = new Element(BOOLEAN_KEY);
-			for(String key : options.getBooleanKeys())
-				boolElement.addContent(createKeyPairElement(key, options.getBoolean(key)));
-			rootElement.addContent(boolElement);
-		}
-		
-		if(!options.getIntegerKeys().isEmpty()) {
-			Element intElement = new Element(INT_KEY);
-			for(String key : options.getIntegerKeys())
-				intElement.addContent(createKeyPairElement(key, options.getInt(key)));
-			rootElement.addContent(intElement);
-		}
-
-		if(!options.getFloatKeys().isEmpty()) {
-			Element floatElement = new Element(FLOAT_KEY);
-			for(String key : options.getFloatKeys())
-				floatElement.addContent(createKeyPairElement(key, options.getFloat(key)));
-			rootElement.addContent(floatElement);
-		}
-		
-		if(!options.getDoubleKeys().isEmpty()) {
-			Element doubleElement = new Element(DOUBLE_KEY);
-			for(String key : options.getDoubleKeys())
-				doubleElement.addContent(createKeyPairElement(key, options.getDouble(key)));
-			rootElement.addContent(doubleElement);
-		}
-		
-		if(!options.getStringKeys().isEmpty()) {
-			Element stringElement = new Element(STRING_KEY);
-			for(String key : options.getStringKeys())
-				stringElement.addContent(createKeyPairElement(key, options.getString(key)));
-			rootElement.addContent(stringElement);
-		}
-	}
-
 }

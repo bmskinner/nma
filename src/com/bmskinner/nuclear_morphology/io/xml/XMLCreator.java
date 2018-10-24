@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.io.xml;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
@@ -23,6 +24,10 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -50,6 +55,37 @@ public abstract class XMLCreator<T> {
 	public static final String INDEX_KEY                      = "Index";
 	public static final String STATS_KEY                      = "MeasuredStatistics";
 	public static final String STAT_KEY                       = "Statistic";
+	
+	public static final String SOFTWARE_CREATION_VERSION_KEY  = "VersionCreated";
+	public static final String SOFTWARE_SERIALISE_VERSION_KEY = "VersionSerialised";
+	
+	public static final String BOOLEAN_KEY = "Booleans";
+	public static final String FLOAT_KEY   = "Floats";
+	public static final String DOUBLE_KEY  = "Doubles";
+	public static final String INT_KEY     = "Ints";
+	public static final String STRING_KEY  = "Strings";
+	public static final String PAIR_KEY    = "Option";
+	public static final String KEY_KEY     = "Key";
+	
+	public static final String SUB_OPTION_KEY = "Sub_option";
+	public static final String SUB_TYPE_KEY   = "Sub_option_type";
+	
+	public static final String ANALYSIS_OPTIONS_KEY    = "AnalysisOptions";
+	public static final String DETECTION_SETTINGS_KEY  = "DetectionSettings";
+	public static final String DETECTION_METHOD_KEY    = "DetectionMethod";
+	public static final String DETECTED_OBJECT_KEY     = "DetectedObject";
+	public static final String PROFILE_WINDOW_KEY      = "ProfileWindow";
+
+	public static final String SIGNAL_DETECTION_MODE_KEY   = "Detection_mode";
+	
+	public static final String UUID_PREFIX = "UUID_";
+	
+	public static final String SIGNAL_GROUP_PREFIX = "SignalGroup_";
+	public static final String SIGNAL_ID         = "SignalGroupId";
+	public static final String SIGNAL_NAME       = "SignalGroupName";
+	public static final String CLUSTERS = "Clusters";
+	public static final String CLUSTER_GROUP = "ClusterGroup";
+	public static final String CLUSTER_NAME  = "ClusterGroupName";
 	
 	
 	public static final String SOURCE_FILE_KEY                = "SourceFile";
@@ -85,7 +121,7 @@ public abstract class XMLCreator<T> {
 	 */
 	public abstract Document create();
 	
-	protected Element createElement(String key, String value) {
+	protected static Element createElement(String key, String value) {
 		Element e = new Element(key);
 		e.setText(value);
 		return e;
@@ -106,6 +142,36 @@ public abstract class XMLCreator<T> {
 		return false;
 	}
 	
+	
+	/**
+	 * Create XML for the given analysis options
+	 * @param collection
+	 * @return
+	 */
+	protected Element create(IAnalysisOptions options) {
+		Element e = new Element(ANALYSIS_OPTIONS_KEY);
+		
+		for(String key : options.getDetectionOptionTypes()){
+			Element element = new Element(DETECTION_METHOD_KEY);
+			if(isUUID(key) || key.startsWith(IAnalysisOptions.SIGNAL_GROUP)){ // signal group without prefix
+				element.setAttribute(DETECTED_OBJECT_KEY, IAnalysisOptions.NUCLEAR_SIGNAL);
+			} else {
+				element.setAttribute(DETECTED_OBJECT_KEY, key);
+			}
+			
+			// add signal group names
+			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
+				element.addContent(createElement(SIGNAL_ID, signalGroup.toString()));
+			}
+			
+			appendElement(element, options.getDetectionOptions(key).get());
+			e.addContent(element);
+		}
+		e.addContent(createElement(NUCLEUS_TYPE_KEY, options.getNucleusType().name()));
+		e.addContent(createElement(PROFILE_WINDOW_KEY, String.valueOf(options.getProfileWindowProportion())));
+		return e;
+	}
 	
 	/**
 	 * Create XML for the given collection of cells
@@ -204,6 +270,7 @@ public abstract class XMLCreator<T> {
 				}
 				signals.addContent(group);
 			}
+			e.addContent(signals);
 		}
 		
 		return e;
@@ -298,6 +365,88 @@ public abstract class XMLCreator<T> {
 		e.addContent(createElement(X, String.valueOf(x)));
 		e.addContent(createElement(Y, String.valueOf(y)));
 		return e;
+	}
+	
+	private static Element createKeyPairElement(String key, String value) {
+		Element pair = new Element(PAIR_KEY);
+		Element keyElement = new Element(KEY_KEY);
+		keyElement.setText(key);
+		Element valElement = new Element(VALUE_KEY);
+		valElement.setText(value);
+		
+		pair.addContent(keyElement);
+		pair.addContent(valElement);
+		return pair;
+	}
+	
+	private static Element createKeyPairElement(String key, boolean value) {
+		return createKeyPairElement(key, String.valueOf(value));
+	}
+	
+	private static Element createKeyPairElement(String key, int value) {
+		return createKeyPairElement(key, String.valueOf(value));
+	}
+	
+	private static Element createKeyPairElement(String key, float value) {
+		return createKeyPairElement(key, String.valueOf(value));
+	}
+	
+	private static Element createKeyPairElement(String key, double value) {
+		return createKeyPairElement(key, String.valueOf(value));
+	}
+	
+	protected static void appendElement(Element rootElement, @NonNull IDetectionOptions options) {
+		appendElement(rootElement, (HashOptions)options);
+		for(String key : options.getSubOptionKeys()){
+			Element element = new Element(SUB_OPTION_KEY);
+			element.setAttribute(SUB_TYPE_KEY, key);
+			try {
+				appendElement(element, options.getSubOptions(key));
+				rootElement.addContent(element);
+			} catch (MissingOptionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+		
+	protected static void appendElement(Element rootElement, @NonNull HashOptions options) {
+		
+		if(!options.getBooleanKeys().isEmpty()) {
+			Element boolElement = new Element(BOOLEAN_KEY);
+			for(String key : options.getBooleanKeys())
+				boolElement.addContent(createKeyPairElement(key, options.getBoolean(key)));
+			rootElement.addContent(boolElement);
+		}
+		
+		if(!options.getIntegerKeys().isEmpty()) {
+			Element intElement = new Element(INT_KEY);
+			for(String key : options.getIntegerKeys())
+				intElement.addContent(createKeyPairElement(key, options.getInt(key)));
+			rootElement.addContent(intElement);
+		}
+
+		if(!options.getFloatKeys().isEmpty()) {
+			Element floatElement = new Element(FLOAT_KEY);
+			for(String key : options.getFloatKeys())
+				floatElement.addContent(createKeyPairElement(key, options.getFloat(key)));
+			rootElement.addContent(floatElement);
+		}
+		
+		if(!options.getDoubleKeys().isEmpty()) {
+			Element doubleElement = new Element(DOUBLE_KEY);
+			for(String key : options.getDoubleKeys())
+				doubleElement.addContent(createKeyPairElement(key, options.getDouble(key)));
+			rootElement.addContent(doubleElement);
+		}
+		
+		if(!options.getStringKeys().isEmpty()) {
+			Element stringElement = new Element(STRING_KEY);
+			for(String key : options.getStringKeys())
+				stringElement.addContent(createKeyPairElement(key, options.getString(key)));
+			rootElement.addContent(stringElement);
+		}
 	}
 
 }

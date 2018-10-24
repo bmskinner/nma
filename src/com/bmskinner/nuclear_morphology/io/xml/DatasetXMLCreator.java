@@ -7,6 +7,7 @@ import org.jdom2.Element;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -19,8 +20,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements Loggable {
 	
 	public static final String ROOT_LBL                       = "AnalysisDataset";
-	public static final String SOFTWARE_CREATION_VERSION_KEY  = "VersionCreated";
-	public static final String SOFTWARE_SERIALISE_VERSION_KEY = "VersionSerialised";
+	
 	public static final String DATASET_NAME_KEY               = "DatasetName";
 	public static final String DATASET_ID_KEY                 = "DatasetId";
 	public static final String DATASET_COLOUR_KEY             = "DatasetColour";
@@ -58,17 +58,27 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		if(template.hasChildren())
 			rootElement.addContent(createChildDatasets());
 		
+		if(template.hasClusters())
+			rootElement.addContent(createClusterGroups());
+		
 		rootElement.addContent(create(template.getCollection()));
-		rootElement.addContent(createAnalysisOptions());
+		rootElement.addContent(create(template.getAnalysisOptions().get()));
 		
 		
 		return new Document(rootElement);
 	}
 	
-	private Element createAnalysisOptions() {
-		Element e = new Element(ANALYSIS_OPTIONS_KEY);
-		
-		return e;
+	private Element createClusterGroups() {
+		Element clusters = new Element(CLUSTERS);
+		for(IClusterGroup g : template.getClusterGroups()) {
+			if(g.getOptions().isPresent()) {
+				Element cluster = new Element(CLUSTER_GROUP);
+				cluster.setAttribute(CLUSTER_NAME, g.getName());
+				appendElement(cluster, g.getOptions().get().duplicate());
+				clusters.addContent(cluster);
+			}
+		}
+		return clusters;
 	}
 	
  	private Element createMergeSources() {
@@ -87,13 +97,17 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		for(ICell cell : mge.getCollection())
 			cells.addContent(createElement(ID_KEY, cell.getId().toString()));
 		e.addContent(cells);
+		e.addContent(create(mge.getAnalysisOptions().get()));
+		
+		for(IAnalysisDataset subMge : mge.getMergeSources())
+			addMergeSource(e, subMge);
 		
 		element.addContent(e);
 	}
 	
 	private Element createChildDatasets() {
 		Element e = new Element(CHILD_DATASETS_SECTION_KEY);
-		for(IAnalysisDataset src : template.getMergeSources())
+		for(IAnalysisDataset src : template.getChildDatasets())
 			addChildDataset(e, src);
 		return e;
 	}
@@ -108,6 +122,9 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 			cells.addContent(createElement(ID_KEY, cell.getId().toString()));
 		e.addContent(cells);
 		
+		for(IAnalysisDataset subChild : child.getChildDatasets())
+			addChildDataset(e, subChild);
+
 		element.addContent(e);
 	}
 	
