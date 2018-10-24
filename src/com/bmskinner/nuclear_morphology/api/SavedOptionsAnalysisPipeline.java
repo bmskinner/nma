@@ -145,7 +145,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	
 	private IAnalysisOptions readOptions() {
 		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
-		IAnalysisOptions options = r.readAnalysisOptions();
+		IAnalysisOptions options = r.read();
 		return options;
 	}
 	

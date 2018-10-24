@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
+import java.util.UUID;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -64,7 +66,6 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		rootElement.addContent(create(template.getCollection()));
 		rootElement.addContent(create(template.getAnalysisOptions().get()));
 		
-		
 		return new Document(rootElement);
 	}
 	
@@ -73,8 +74,16 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		for(IClusterGroup g : template.getClusterGroups()) {
 			if(g.getOptions().isPresent()) {
 				Element cluster = new Element(CLUSTER_GROUP);
-				cluster.setAttribute(CLUSTER_NAME, g.getName());
+				cluster.addContent(createElement(CLUSTER_NAME, g.getName()));
 				appendElement(cluster, g.getOptions().get().duplicate());
+				if(g.hasTree())
+					cluster.addContent(createElement(CLUSTER_TREE_KEY, g.getTree()));
+				
+				Element datasets = new Element(DATASET_IDS_KEY);
+				for(UUID id : g.getUUIDs())
+					datasets.addContent(createElement(ID_KEY, id.toString()));
+				cluster.addContent(datasets);
+				
 				clusters.addContent(cluster);
 			}
 		}

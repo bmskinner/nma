@@ -31,7 +31,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
@@ -56,25 +56,20 @@ import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
  * @since 1.14.0
  *
  */
-public class OptionsXMLReader implements Loggable {
+public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	
 	public static final File EMPTY_FILE = new File("empty");
-	
-	private final File file;
 	
 	/**
 	 * Create with a file to be read
 	 * @param f
 	 */
 	public OptionsXMLReader(@NonNull final File f) {
-		file=f;
+		super(f);
 	}
 
-	/**
-	 * Read the analysis options within the file
-	 * @return
-	 */
-	public IAnalysisOptions readAnalysisOptions() {
+	@Override
+	public IAnalysisOptions read() {
 
 		try {
 			SAXBuilder saxBuilder = new SAXBuilder();

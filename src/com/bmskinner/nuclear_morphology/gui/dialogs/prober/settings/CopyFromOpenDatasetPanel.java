@@ -112,7 +112,7 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         	File f = FileSelector.chooseOptionsImportFile(folder);
         	if(f==null)
         		return;
-        	IAnalysisOptions o = new OptionsXMLReader(f).readAnalysisOptions(); //read
+        	IAnalysisOptions o = new OptionsXMLReader(f).read(); //read
         	options.set(o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
         	parent.setNucleusType(o.getNucleusType());
         	parent.setAngleWindowProportion(o.getProfileWindowProportion());

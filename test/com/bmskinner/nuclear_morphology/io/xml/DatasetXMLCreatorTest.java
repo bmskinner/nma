@@ -18,7 +18,8 @@ public class DatasetXMLCreatorTest {
 	
 	@Test 
 	public void testXMLCreated() throws Exception {
-		IAnalysisDataset d = SampleDatasetReader.openTestMouseSignalsDataset();
+		File f = new File(TestResources.ROUND_CLUSTERS_DATASET);
+		IAnalysisDataset d = SampleDatasetReader.openDataset(f);
 		
 		DatasetXMLCreator dxc = new DatasetXMLCreator(d);
 		

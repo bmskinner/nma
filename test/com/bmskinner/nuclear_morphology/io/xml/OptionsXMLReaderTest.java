@@ -43,7 +43,7 @@ public class OptionsXMLReaderTest {
 
 
 		OptionsXMLReader r = new OptionsXMLReader(XML_FILE);
-		IAnalysisOptions o = r.readAnalysisOptions();
+		IAnalysisOptions o = r.read();
 		assertEquals(dataset.getAnalysisOptions().get(), o);
 	}
 	

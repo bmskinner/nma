@@ -43,6 +43,7 @@ public abstract class XMLCreator<T> {
 	public static final String CELL_COLLECTION_KEY            = "CellCollection";
 	public static final String NUCLEUS_TYPE_KEY               = "NucleusType";
 	public static final String CELL_IDS_KEY                   = "CellIds";
+	public static final String DATASET_IDS_KEY                = "DatasetIds";
 	public static final String CELL_KEY                       = "Cell";
 	public static final String ID_KEY                         = "Id";
 	public static final String COM_KEY                        = "CentreOfMass";
@@ -86,6 +87,7 @@ public abstract class XMLCreator<T> {
 	public static final String CLUSTERS = "Clusters";
 	public static final String CLUSTER_GROUP = "ClusterGroup";
 	public static final String CLUSTER_NAME  = "ClusterGroupName";
+	public static final String CLUSTER_TREE_KEY  = "ClusterGroupTree";
 	
 	
 	public static final String SOURCE_FILE_KEY                = "SourceFile";
