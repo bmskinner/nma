@@ -118,7 +118,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         		p = p.interpolate(getBorderLength());
         		assignProfile(type, new DefaultSegmentedProfile(p));
         	}
-        	fine("Raw profile: "+p.toString());
+//        	fine("Raw profile: "+p.toString());
         	return profileMap.get(type).copy();
         } catch (IndexOutOfBoundsException | ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
@@ -143,30 +143,28 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	@Override
 	public void setProfile(@NonNull ProfileType type, @NonNull Tag tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
-        if (segsLocked)
-            return;
+		if (segsLocked)
+			return;
 
-        if (!this.hasBorderTag(tag))
-            throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
+		if (!this.hasBorderTag(tag))
+			throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
 
-        // fetch the index of the tag (the zero of the input profile)
-        int tagIndex = borderTags.get(tag);
-        fine(tag+" is at "+tagIndex);
-        
-        // Keep a copy of the old profile
-        ISegmentedProfile oldProfile = getProfile(type);
-        
-        try {
-        	// subtract the tag offset from the profile    
-        	int newStartIndex = wrapIndex(-tagIndex);
-        	ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
-        	fine("Setting profile to start from "+newStartIndex);
-            setProfile(type, offsetNewProfile);
-        } catch (ProfileException e) { // restore the old profile
-            stack(String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
-            setProfile(type, oldProfile);
-        }
-    }
+		// fetch the index of the tag (the zero of the input profile)
+		int tagIndex = borderTags.get(tag);
+
+		// Keep a copy of the old profile
+		ISegmentedProfile oldProfile = getProfile(type);
+
+		try {
+			// subtract the tag offset from the profile   
+			int newStartIndex = wrapIndex(-tagIndex);
+			ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
+			setProfile(type, offsetNewProfile);
+		} catch (ProfileException e) { // restore the old profile
+			stack(String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
+			setProfile(type, oldProfile);
+		}
+	}
 		
     @Override
 	public void setBorderTag(@NonNull Tag tag, int i) {
@@ -238,48 +236,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
     }
     
-//    @Override
-//    public void printHashCodes() {
-//    	log("Object "+this.getID()+this.hashCode());
-//    	
-//    	for(ProfileType type : profileMap.keySet()) {
-//    		log("Profile type  "+this.getID());
-//
-//    		List<Field> result = new ArrayList<>();
-//    	    Class<?> i = this.getClass();
-//    	    while (i != null && i != Object.class) {
-//    	        Collections.addAll(result, i.getDeclaredFields());
-//    	        i = i.getSuperclass();
-//    	    }
-//
-//        	for(Field f : result) {
-//        		try {
-//        			f.setAccessible(true);
-//        			if(f.get(this)==null) {
-//        				log(f.getName()+": null");
-//        				continue;
-//        			}
-//        			
-//        			if(f.get(this).getClass()==float[].class) {
-//        				log(f.getName()+" (farray): "+Arrays.hashCode( (float[])f.get(this)));
-//        			}
-//        			if(f.get(this).getClass()==int[].class) {
-//        				log(f.getName()+" (iarray): "+Arrays.hashCode( (int[])f.get(this)));
-//        			} else {
-//        				log(f.getName()+": "+f.get(this).hashCode());
-//        			
-//        			}
-//        				
-//    			} catch (IllegalArgumentException | IllegalAccessException e) {
-//    				// TODO Auto-generated catch block
-//    				e.printStackTrace();
-//    			}
-//        	}    
-//    		
-//    	}
-//    		
-//    }
-
 	/**
 	 * An implementation of a profile tied to an object
 	 * @author ben
@@ -1064,17 +1020,18 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				if(!s.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID))
 					segments.addMergeSource(s.copy());
 			}
+			updateDefaultSegmentToRp();
 		}
 
 		/**
-		 * Construct using an existing profile. Copies the data and segments
+		 * Construct using an existing profile. Copies the data and segments.
 		 * 
 		 * @param profile the segmented profile to copy
 		 * @throws ProfileException
 		 * @throws IndexOutOfBoundsException
 		 */
 		protected DefaultSegmentedProfile(@NonNull final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
-			this(profile, profile.getSegments());
+			this(profile, profile.getSegments());				
 		}
 
 		/**
@@ -1095,6 +1052,24 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public DefaultSegmentedProfile(float[] values) {
 			super(values);
 			segments = new BorderSegmentTree(IProfileCollection.DEFAULT_SEGMENT_ID);
+			updateDefaultSegmentToRp();
+		}
+		
+		/**
+		 * If the RP has been set, ensure the default segment starts from 
+		 * the RP index
+		 */
+		private void updateDefaultSegmentToRp() {
+			if(hasBorderTag(Tag.REFERENCE_POINT)) {
+				try {
+					int rpIndex = getBorderIndex(Tag.REFERENCE_POINT);
+					segments.startIndex = rpIndex;
+					segments.endIndex   = rpIndex;
+					
+				} catch (UnavailableBorderTagException e) {
+					stack(e);
+				}
+			}
 		}
 		
 		@Override

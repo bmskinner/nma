@@ -483,12 +483,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         // fetch the index of the pointType (the new zero)
         int tagIndex = borderTags.get(tag);
-        fine("Getting "+tag+" at index "+tagIndex);
+//        fine("Getting "+tag+" at index "+tagIndex);
         // offset the angle profile to start at the pointIndex
         
         ISegmentedProfile profile = getProfile(type);
         ISegmentedProfile offsetProfile = profile.offset(tagIndex);
-        fine("Offset to "+offsetProfile.toString());
+//        fine("Offset to "+offsetProfile.toString());
         return offsetProfile;
     }
     
