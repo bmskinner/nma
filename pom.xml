@@ -305,7 +305,7 @@
 								<txtProductVersion>${project.version}${version.suffix}</txtProductVersion>
 								<productName>${project.full.name}</productName>
 								<originalFilename>${jar.finalName}.exe</originalFilename>
-								<copyright>Ben Skinner ${inceptionYear}-${build.year}</copyright>
+								<copyright>Ben Skinner ${project.inceptionYear}-${build.year}</copyright>
 								<internalName>${project.code.name}</internalName>
 								<language>ENGLISH_UK</language>
 							</versionInfo>

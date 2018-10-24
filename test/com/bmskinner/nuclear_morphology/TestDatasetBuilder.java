@@ -48,6 +48,7 @@ public class TestDatasetBuilder {
 	public static final int DEFAULT_ROTATION    = 0;
 	public static final int DEFAULT_BORDER_OFFSET = 0;
 	public static final int DEFAULT_CHILD_CLUSTERS = 0;
+	public static final int DEFAULT_N_CELLS     = 1;
 	
 	/** Should the start index of the border list be randomly offset? */
 	public static final boolean DEFAULT_IS_RANDOM_OFFSET = true;
@@ -60,7 +61,7 @@ public class TestDatasetBuilder {
 	
 	private IAnalysisDataset d;
 	private NucleusType type = NucleusType.ROUND;
-	private int nCells = 1;
+	private int nCells = DEFAULT_N_CELLS;
 	private int maxVariation = DEFAULT_VARIATION;
 	private int xBase = DEFAULT_X_BASE;
 	private int yBase = DEFAULT_Y_BASE;
@@ -177,6 +178,12 @@ public class TestDatasetBuilder {
 		return this;
 	}
 	
+	/**
+	 * Set the number of cells in the  dataset. 
+	 * Default value {@link #DEFAULT_N_CELLS}.
+	 * @param i the number of cells
+	 * @return this builder
+	 */
 	public TestDatasetBuilder cellCount(int i) {
 		nCells = i;
 		return this;

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
@@ -162,17 +163,22 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		}
 	}
 	
-//	@Test
-//	public void testSegmentationOfRodentDataset() throws Exception {
-//		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
-//		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
-//		ISegmentedProfile template = dataset.getCollection()
-//				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
-//
-//		new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW).call();
-//		
-//		ISegmentedProfile result = dataset.getCollection()
-//				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).copy();
-//
-//	}
+	
+	/**
+	 * A perfectly round cell will not be segmentable. Test that this does not impair
+	 * the positioning of the RP, or the ability to assign the single default segment.
+	 * @throws Exception
+	 */
+	@Test
+	public void testRoundDatasetGeneratesSegmentableProfiles() throws Exception {
+		
+		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(10)
+				.baseHeight(40).baseWidth(40)
+				.withNucleusShape(TestComponentShape.ROUND)
+				.randomOffsetProfiles(false)
+				.segmented().build();
+		testSegmentationIsConsistent(dataset);
+		
+	}
+
 }

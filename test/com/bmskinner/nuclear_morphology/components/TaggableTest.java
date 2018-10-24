@@ -154,8 +154,6 @@ public class TaggableTest extends ComponentTester {
 		IBorderSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 		assertEquals("Default segment start", templateDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
 		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
-		
-		
 	}
 
 }
