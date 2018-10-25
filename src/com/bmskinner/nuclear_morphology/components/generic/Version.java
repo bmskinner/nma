@@ -164,7 +164,7 @@ public class Version implements Serializable {
      * versions are not checked.
      * 
      * @param version
-     * @return true if the version is supported
+     * @return true if the version is supported, false otherwise
      */
     public static boolean versionIsSupported(@NonNull Version version) {
 
@@ -196,7 +196,7 @@ public class Version implements Serializable {
      * @author ben
      *
      */
-    public class UnsupportedVersionException extends IOException {
+    public static class UnsupportedVersionException extends IOException {
     	
         private static final long serialVersionUID = 1L;
         

@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
 import java.io.Serializable;
@@ -392,14 +393,14 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param colour
      *            the new colour
      */
-    void setDatasetColour(Paint colour);
+    void setDatasetColour(Color colour);
 
     /**
      * Get the currently set dataset colour, or null if not set
      * 
      * @return colour or null
      */
-    Optional<Paint> getDatasetColour();
+    Optional<Color> getDatasetColour();
 
     /**
      * Test if the dataset colour is set or null

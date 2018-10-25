@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
+import java.awt.Color;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -37,7 +38,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		rootElement.addContent(createElement(DATASET_ID_KEY, template.getId().toString()));
 		rootElement.addContent(createElement(DATASET_ROOT_KEY, String.valueOf(template.isRoot())));
 		if(template.hasDatasetColour())
-			rootElement.addContent(createElement(DATASET_COLOUR_KEY, template.getDatasetColour().get().toString()));
+			rootElement.addContent(createElement(DATASET_COLOUR_KEY, toHex(template.getDatasetColour().get())));
 		
 		if(template.hasMergeSources())
 			rootElement.addContent(createMergeSources());
@@ -52,6 +53,10 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		rootElement.addContent(create(template.getAnalysisOptions().get()));
 		
 		return new Document(rootElement);
+	}
+	
+	private String toHex(Color c) {
+		return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());  
 	}
 	
 	private Element createClusterGroups() {

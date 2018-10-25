@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
@@ -839,7 +840,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#setDatasetColour(java.awt.Color)
      */
     @Override
-    public void setDatasetColour(Paint colour) {
+    public void setDatasetColour(Color colour) {
         this.datasetColour = colour;
     }
 
@@ -849,8 +850,8 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getDatasetColour()
      */
     @Override
-    public Optional<Paint> getDatasetColour() {
-        return Optional.ofNullable(this.datasetColour);
+    public Optional<Color> getDatasetColour() {
+        return Optional.ofNullable( (Color)this.datasetColour);
     }
 
     /*

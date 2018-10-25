@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.awt.Paint;
 import java.io.IOException;
 import java.io.Serializable;
@@ -87,13 +88,13 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         cellCollection.setName(s);
     }
 
-    public void setDatasetColour(Paint colour) {
+    public void setDatasetColour(Color colour) {
         datasetColour = colour;
 
     }
 
-    public Optional<Paint> getDatasetColour() {
-        return Optional.ofNullable(datasetColour);
+    public Optional<Color> getDatasetColour() {
+        return Optional.ofNullable((Color)datasetColour);
     }
 
     public boolean hasDatasetColour() {

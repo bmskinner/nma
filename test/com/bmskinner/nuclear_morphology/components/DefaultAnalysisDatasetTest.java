@@ -157,7 +157,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     @Test
     public void testHasDatasetColour() {
         assertFalse(d.hasDatasetColour());
-        Paint c = ColourSelecter.getColor(0);
+        Color c = ColourSelecter.getColor(0);
         d.setDatasetColour(c);
         assertTrue(d.hasDatasetColour());
     }

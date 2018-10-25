@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.jdom2.Document;
@@ -27,11 +29,11 @@ public class DatasetXMLReaderTest extends ComponentTester {
 
 	@Test
 	public void test() throws Exception {
-		File f = new File(TestResources.ROUND_CLUSTERS_DATASET);
+		File f = new File(TestResources.ROUND_CLUSTERS_DATASET).getAbsoluteFile();
 		IAnalysisDataset d = SampleDatasetReader.openDataset(f);
 		
 		DatasetXMLCreator dxc = new DatasetXMLCreator(d);
-		File xmlFile = new File(d.getSavePath().getParentFile(), d.getName()+".serial.xml");
+		File xmlFile = new File(d.getSavePath().getParentFile(), d.getName()+".xml.nmd");
 		XMLWriter.writeXML(dxc.create(), xmlFile);
 
 		DatasetXMLReader dxr = new DatasetXMLReader(xmlFile);
@@ -49,7 +51,9 @@ public class DatasetXMLReaderTest extends ComponentTester {
 			
 			Nucleus wroteNucleus = wroteCell.getNucleus();
 			Nucleus readNucleus = readCell.getNucleus();
-			testDuplicatesByField(wroteNucleus, readNucleus);
+			List<String> skip = new ArrayList<>();
+			skip.add("profileMap");
+			testDuplicatesByField(wroteNucleus, readNucleus, skip);
 		}
 		
 		assertEquals(d.getCollection(), read.getCollection());

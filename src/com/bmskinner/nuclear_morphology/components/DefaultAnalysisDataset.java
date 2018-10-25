@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         for(IAnalysisDataset mge : this.getMergeSources())
         	result.addMergeSource(mge.duplicate());
         
-        result.setDatasetColour(datasetColour);
+        result.setDatasetColour((Color) datasetColour);
         result.setRoot(isRoot);
         
         return result;

@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
@@ -28,10 +30,15 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -77,14 +84,47 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		
 		return null;
 	}
-		
+	
 	private IAnalysisDataset readDataset(Element e, NucleusType type) throws ComponentCreationException {
+		
+		Version created = Version.parseString(e.getChildText(XMLCreator.SOFTWARE_CREATION_VERSION_KEY));
+		Version saved   = Version.parseString(e.getChildText(XMLCreator.SOFTWARE_SERIALISE_VERSION_KEY));
+
+		// Add to this to handle version changes
+		if(Version.v_1_14_0.equals(created))
+			return readDataset_1_14_0(e, type);
+		
+		return readDataset_1_14_0(e, type);
+	}
+		
+	private IAnalysisDataset readDataset_1_14_0(Element e, NucleusType type) throws ComponentCreationException {
 		String name = e.getChildText(XMLCreator.DATASET_NAME_KEY);
 		UUID id = UUID.fromString(e.getChildText(XMLCreator.DATASET_ID_KEY));
 		ICellCollection c = readCollection(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, name, id);
 		IAnalysisDataset d = new DefaultAnalysisDataset(c, file);
+		
+		Element colour = e.getChild(XMLCreator.DATASET_COLOUR_KEY);
+		if(colour!=null)
+			d.setDatasetColour(Color.decode(colour.getText()));
 		d.setName(name);
+		
+		IAnalysisOptions options = readOptions(e.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY));
+		d.setAnalysisOptions(options);
 		return d;
+	}
+	
+	private IAnalysisOptions readOptions(Element e) {
+		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+		NucleusType type = NucleusType.valueOf(e.getChild(XMLCreator.NUCLEUS_TYPE_KEY).getText());
+		op.setNucleusType(type);
+		double windowSize = Double.parseDouble(e.getChild(XMLCreator.PROFILE_WINDOW_KEY).getText());
+		op.setAngleWindowProportion(windowSize);
+
+		// should be single elements with options class
+		for(Element component : e.getChildren(XMLCreator.DETECTION_METHOD_KEY))
+			addComponent(component, op);
+
+		return op;
 	}
 	
 	private ICellCollection readCollection(Element e, NucleusType type, String name, UUID id) throws ComponentCreationException {
@@ -95,10 +135,57 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		
 		for(Element cell : e.getChildren(XMLCreator.CELL_KEY))
 			collection.add(readCell(cell));
-
+		
+		try {
+			collection.createProfileCollection();
+		} catch (ProfileException e1) {
+			stack(e1);
+		}
+		
+		Element tags = e.getChild(XMLCreator.BORDER_TAGS_KEY);
+		for(Element tag : tags.getChildren()) {			
+			Tag t = readTag(tag);
+			int index = Integer.valueOf(tag.getChildText(XMLCreator.INDEX_KEY));
+			collection.getProfileCollection().addIndex(t, index);
+		}
+		
+		// Add stats
+		Element segs = e.getChild(XMLCreator.BORDER_SEGS_KEY);
+		readCollectionSegments(segs, collection);
+		
+		// Add consensus
+		try {
+			Nucleus consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
+			collection.setConsensus(consensus);
+		} catch (UnprofilableObjectException e1) {
+			stack(e1);
+		}
+		
 		
 		collection.updateVerticalNuclei();
 		return collection;
+	}
+	
+	private void readCollectionSegments(Element segs, ICellCollection collection) {
+		int profileLength = collection.getProfileCollection().length();
+		List<IBorderSegment> newSegs = new ArrayList<>();
+		int prevStart = -1;
+		UUID prevId = null;
+		for(Element seg : segs.getChildren()) {			
+			UUID id = readUUID(seg);
+			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
+			if(prevStart!=-1) {
+				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, profileLength, prevId);
+				newSegs.add(newSeg);
+			}
+			prevStart = startIndex;
+			prevId = id;
+		}
+		IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
+		newSegs.add(lastSeg);
+		
+		collection.getProfileCollection().addSegments(newSegs);
+
 	}
 	
 	private ICell readCell(Element e) throws ComponentCreationException {
@@ -108,6 +195,11 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		for(Element n : e.getChildren((XMLCreator.NUCLEUS_KEY)))
 			cell.addNucleus(readNucleus(n));
 		return cell;
+	}
+	
+	private Nucleus readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException {
+		Nucleus template = readNucleus(e.getChild(XMLCreator.NUCLEUS_KEY));
+		return new DefaultConsensusNucleus(template, type);
 	}
 	
 	private Nucleus readNucleus(Element e) throws ComponentCreationException {
@@ -145,7 +237,6 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		Nucleus n = fact.buildInstance(roi, imageFile, channel, originalPosition, com, id, nucleusNumber);
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
         IPoint offsetCoM = IPoint.makeNew(com.getX() - xbase, com.getY() - ybase);
-
         n.moveCentreOfMass(offsetCoM);
 		
 		
@@ -205,16 +296,16 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
 		newSegs.add(lastSeg);
 
-		try {
-			
-			IProfile profile = n.getProfile(ProfileType.ANGLE);
-			ISegmentedProfile segmented = new SegmentedFloatProfile(profile, newSegs);
-			n.setProfile(ProfileType.ANGLE, segmented);
-//			for(ProfileType type : ProfileType.exportValues()) {
-//				IProfile profile = n.getProfile(type);
-//				ISegmentedProfile segmented = new SegmentedFloatProfile(profile, newSegs);
-//				n.setProfile(type, segmented);
-//			}
+		try {			
+			for(ProfileType type : ProfileType.values()) { 
+				IProfile profile = n.getProfile(type);
+				ISegmentedProfile segmented = new SegmentedFloatProfile(profile, newSegs);
+				n.setProfile(type, segmented);
+				
+				ISegmentedProfile p = n.getProfile(type, Tag.REFERENCE_POINT); // ensure all profiles are updated to RP
+				n.setProfile(type, Tag.REFERENCE_POINT, p);
+			}
+
 		} catch(Exception e1) {
 			stack(e1);
 		}

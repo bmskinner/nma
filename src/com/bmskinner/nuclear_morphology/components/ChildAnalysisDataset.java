@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,7 +76,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
         for(IAnalysisDataset mge : this.getMergeSources())
         	cd.addMergeSource(mge.duplicate());
         
-        cd.setDatasetColour(datasetColour);
+        cd.setDatasetColour((Color) datasetColour);
 
     	return cd;
     }

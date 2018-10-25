@@ -23,6 +23,7 @@ import java.io.FilenameFilter;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.OptionalDataException;
+import java.nio.file.spi.FileTypeDetector;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +50,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLReader;
 
 /**
  * Method to read a dataset from file
@@ -84,7 +86,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
         if (! (f.getName().endsWith(SAVE_FILE_EXTENSION) || f.getName().endsWith(BACKUP_FILE_EXTENSION)) )
             throw new IllegalArgumentException("File is not nmd or bak format or has been renamed: "+f.getAbsolutePath());
-
+        
         this.file = f;
     }
         
@@ -123,9 +125,14 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             cleanLockFilesInDir(file.getParentFile());
 
             try {
-                // Deserialise whatever is in the file
-                dataset = readDataset(file);
-                fireIndeterminateState();
+            	// Deserialise whatever is in the file
+            	try {
+            		dataset = readXMLDataset(file);
+            	}  catch (UnloadableDatasetException e) {  // not xml format, try to deserialise directly
+            		fine("Dataset is not a readable XML format; deserialising directly");
+            		dataset = readDataset(file);
+            	}
+            	fireIndeterminateState();
             } catch (UnsupportedVersionException e) {
             	warn("Version "+e.getMessage()+" not supported");
             	if(e.getDetectedVersion().isNewerThan(Version.currentVersion()))
@@ -133,12 +140,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             	if(e.getDetectedVersion().isOlderThan(Version.currentVersion()))
             		warn(String.format("Dataset version %s is too old to read in this software", e.getDetectedVersion()));
             	throw(e);
-                
+
             } catch (UnloadableDatasetException e) {
-                warn(e.getMessage());
-                stack("Error reading dataset", e);
+            	warn(e.getMessage());
+            	stack("Error reading dataset", e);
             }
-            
+
             if(dataset==null)
                 return; // Exception will be thrown in call() method
             
@@ -279,6 +286,19 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         }
     }
 
+    
+    private IAnalysisDataset readXMLDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
+    	
+    	DatasetXMLReader dxr = new DatasetXMLReader(inputFile);
+    	
+    	IAnalysisDataset d =  dxr.read();
+    	if(d==null)
+    		throw new UnloadableDatasetException("Cannot read as XML dataset");
+    	if(!Version.versionIsSupported(d.getVersion()))
+    		throw new UnsupportedVersionException(d.getVersion());
+    	return d;
+    }
+    
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
         IAnalysisDataset dataset = null;
         FileInputStream fis = null;

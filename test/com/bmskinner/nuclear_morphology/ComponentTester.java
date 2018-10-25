@@ -87,10 +87,14 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * Skips cache classes which are not used in hashcode methods. 
 	 * @param original
 	 * @param dup
+	 * @param fieldsToSkip skip fields in the object with these names
 	 * @throws Exception
 	 */
-	protected void testDuplicatesByField(Object original, Object dup) throws Exception {
+	protected void testDuplicatesByField(Object original, Object dup, List<String> fieldsToSkip) throws Exception {
 		for(Field f : getInheritedPrivateFields(dup.getClass())) {
+			
+			if(fieldsToSkip.contains(f.getName()))
+				continue;
 			f.setAccessible(true);	
 
 			if(f.getType().equals(SoftReference.class))
@@ -133,6 +137,18 @@ public abstract class ComponentTester extends FloatArrayTester {
 		}
 
 		assertEquals("Equals method", original, dup);
+	}
+	
+	/**
+	 * Test if the fields of two objects have the same hashcodes.
+	 * Skips cache classes which are not used in hashcode methods. 
+	 * @param original
+	 * @param dup
+	 * @throws Exception
+	 */
+	protected void testDuplicatesByField(Object original, Object dup) throws Exception {
+		List<String> fieldsToSkip = new ArrayList<>();
+		testDuplicatesByField(original, dup, fieldsToSkip);
 	}
 
 }
