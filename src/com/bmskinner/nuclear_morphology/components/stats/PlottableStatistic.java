@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**
- * This interface is implemented by the enums describing statistical measures
+ * This interface describes statistical measures
  * that can be plotted in charts.
  * 
  * @author ben
@@ -35,59 +36,71 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  */
 public interface PlottableStatistic extends Serializable {
 	
+	/**
+	 * The names of the measured statistics
+	 * @author bms41
+	 *
+	 */
 	interface Names {
-		 static final String AREA = "Area";
-		 static final String PERIMETER = "Perimeter";
-		 static final String MAX_FERET = "Max feret";
-		 static final String MIN_DIAMETER = "Min diameter";
-		 static final String ASPECT = "Aspect";
-		 static final String CIRCULARITY = "Circularity";
+
+		static final String AREA             = "Area";
+		static final String PERIMETER        = "Perimeter";
+		static final String MAX_FERET        = "Max feret";
+		static final String MIN_DIAMETER     = "Min diameter";
+		static final String ASPECT           = "Aspect";
+		static final String CIRCULARITY      = "Circularity";
+		static final String VARIABILITY      = "Difference from median";
+		static final String BOUNDING_HEIGHT  = "Bounding height";
+		static final String BOUNDING_WIDTH   = "Bounding width";
+		static final String OP_RP_ANGLE      = "Angle between reference points";
+		static final String HOOK_LENGTH      = "Length of hook";
+		static final String BODY_WIDTH       = "Width of body";
+		static final String LOBE_COUNT       = "Number of lobes";
+		static final String PATH_LENGTH      = "Path length";
+		static final String CELL_NUCLEUS_COUNT   = "Nuclei per cell";
+		static final String CELL_NUCLEAR_AREA    = "Nuclear area";
+		static final String CELL_NUCLEAR_RATIO   = "Nucleus : Cytoplasm area ratio";
+		static final String NUCLEUS_SIGNAL_COUNT = "Signals per nucleus";
+		static final String ANGLE                = "Angle";
+		static final String DISTANCE_FROM_COM        = "Distance from CoM";
+		static final String FRACT_DISTANCE_FROM_COM  = "Fractional distance from CoM";
+		static final String RADIUS                   = "Radius";
+		static final String LENGTH                   = "Length";
+		static final String DISPLACEMENT             = "Displacement";
+		
 	}
 
-    // Old nucleus statistics
-    static final PlottableStatistic AREA            = new GenericStatistic(Names.AREA, StatisticDimension.AREA);
-    static final PlottableStatistic PERIMETER       = new GenericStatistic(Names.PERIMETER, StatisticDimension.LENGTH);
-    static final PlottableStatistic MAX_FERET       = new GenericStatistic(Names.MAX_FERET, StatisticDimension.LENGTH);
-    static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic(Names.MIN_DIAMETER, StatisticDimension.LENGTH);
-    static final PlottableStatistic ASPECT          = new GenericStatistic("Aspect", StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic CIRCULARITY     = new GenericStatistic("Circularity",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic VARIABILITY     = new GenericStatistic("Difference from median",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic("Bounding height",
-            StatisticDimension.LENGTH);
-    static final PlottableStatistic BOUNDING_WIDTH  = new GenericStatistic("Bounding width", StatisticDimension.LENGTH);
-    static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic("Angle between reference points",
-            StatisticDimension.ANGLE);
-    static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic("Length of hook", StatisticDimension.LENGTH);
-    static final PlottableStatistic BODY_WIDTH      = new GenericStatistic("Width of body", StatisticDimension.LENGTH);
-    static final PlottableStatistic LOBE_COUNT      = new GenericStatistic("Number of lobes",
-            StatisticDimension.DIMENSIONLESS);
-
-    static final PlottableStatistic PATH_LENGTH = new GenericStatistic("Path length", StatisticDimension.DIMENSIONLESS);
+    // General component statistics
+    static final PlottableStatistic AREA            = new GenericStatistic(Names.AREA,            StatisticDimension.AREA);
+    static final PlottableStatistic PERIMETER       = new GenericStatistic(Names.PERIMETER,       StatisticDimension.LENGTH);
+    static final PlottableStatistic MAX_FERET       = new GenericStatistic(Names.MAX_FERET,       StatisticDimension.LENGTH);
+    static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic(Names.MIN_DIAMETER,    StatisticDimension.LENGTH);
+    static final PlottableStatistic ASPECT          = new GenericStatistic(Names.ASPECT,          StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic CIRCULARITY     = new GenericStatistic(Names.CIRCULARITY,     StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic VARIABILITY     = new GenericStatistic(Names.VARIABILITY,     StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic(Names.BOUNDING_HEIGHT, StatisticDimension.LENGTH);
+    static final PlottableStatistic BOUNDING_WIDTH  = new GenericStatistic(Names.BOUNDING_WIDTH,  StatisticDimension.LENGTH);
+    static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic(Names.OP_RP_ANGLE,     StatisticDimension.ANGLE);
+    static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic(Names.HOOK_LENGTH,     StatisticDimension.LENGTH);
+    static final PlottableStatistic BODY_WIDTH      = new GenericStatistic(Names.BODY_WIDTH,      StatisticDimension.LENGTH);
+    static final PlottableStatistic LOBE_COUNT      = new GenericStatistic(Names.LOBE_COUNT,      StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic PATH_LENGTH     = new GenericStatistic(Names.PATH_LENGTH,     StatisticDimension.DIMENSIONLESS);
 
     // Stats for the whole cell, aggregated across sub-components
-    static final PlottableStatistic CELL_NUCLEUS_COUNT = new GenericStatistic("Nuclei per cell",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic CELL_NUCLEAR_AREA  = new GenericStatistic("Nuclear area", StatisticDimension.AREA);
-    static final PlottableStatistic CELL_NUCLEAR_RATIO = new GenericStatistic("Nucleus : Cytoplasm area ratio",
-            StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic CELL_NUCLEUS_COUNT = new GenericStatistic(Names.CELL_NUCLEUS_COUNT, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic CELL_NUCLEAR_AREA  = new GenericStatistic(Names.CELL_NUCLEAR_AREA, StatisticDimension.AREA);
+    static final PlottableStatistic CELL_NUCLEAR_RATIO = new GenericStatistic(Names.CELL_NUCLEAR_RATIO, StatisticDimension.DIMENSIONLESS);
     
     // Signal count in nuclei
-    static final PlottableStatistic NUCLEUS_SIGNAL_COUNT = new GenericStatistic("Signals per nucleus",
-            StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic NUCLEUS_SIGNAL_COUNT = new GenericStatistic(Names.NUCLEUS_SIGNAL_COUNT, StatisticDimension.DIMENSIONLESS);
 
-    // Old signal statistics minus overlaps with nucleus stats
-    static final PlottableStatistic ANGLE                   = new GenericStatistic("Angle", StatisticDimension.ANGLE);
-    static final PlottableStatistic DISTANCE_FROM_COM       = new GenericStatistic("Distance from CoM",
-            StatisticDimension.LENGTH);
-    static final PlottableStatistic FRACT_DISTANCE_FROM_COM = new GenericStatistic("Fractional distance from CoM",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic RADIUS                  = new GenericStatistic("Radius", StatisticDimension.LENGTH);
-
-    // Old segment statistics
-    static final PlottableStatistic LENGTH       = new GenericStatistic("Length", StatisticDimension.LENGTH);
-    static final PlottableStatistic DISPLACEMENT = new GenericStatistic("Displacement", StatisticDimension.ANGLE);    
+    // Signal statistics
+    static final PlottableStatistic ANGLE                   = new GenericStatistic(Names.ANGLE,                   StatisticDimension.ANGLE);
+    static final PlottableStatistic DISTANCE_FROM_COM       = new GenericStatistic(Names.DISTANCE_FROM_COM,       StatisticDimension.LENGTH);
+    static final PlottableStatistic FRACT_DISTANCE_FROM_COM = new GenericStatistic(Names.FRACT_DISTANCE_FROM_COM, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic RADIUS                  = new GenericStatistic(Names.RADIUS,                  StatisticDimension.LENGTH);
+    static final PlottableStatistic LENGTH                  = new GenericStatistic(Names.LENGTH,                  StatisticDimension.LENGTH);
+    static final PlottableStatistic DISPLACEMENT            = new GenericStatistic(Names.DISPLACEMENT,            StatisticDimension.ANGLE);    
     
 
     /**
@@ -106,6 +119,7 @@ public interface PlottableStatistic extends Serializable {
             return getSegmentStats().toArray(new PlottableStatistic[0]);
         return null;
     }
+    
     /**
      * All available stats
      * 
@@ -147,10 +161,11 @@ public interface PlottableStatistic extends Serializable {
      * @return the stat, or null if none is present
      */
     static PlottableStatistic of(String name) {
+    	
     	List<PlottableStatistic> all = getAllStatsTypes();
     	
     	for(PlottableStatistic stat : all) {
-    		if(stat.toString().equals(name))
+    		if(stat.name().equals(name))
     			return stat;
     	}
     	return null;
@@ -280,6 +295,12 @@ public interface PlottableStatistic extends Serializable {
      */
     @Override
 	String toString();
+    
+    /**
+     * Get the name of the stat
+     * @return
+     */
+    String name();
 
     /**
      * Test if the statistic has units

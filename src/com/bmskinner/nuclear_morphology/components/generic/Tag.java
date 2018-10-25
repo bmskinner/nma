@@ -39,6 +39,20 @@ public interface Tag extends Comparable<Tag>, Serializable {
     @NonNull public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
     @NonNull public static final BorderTagObject CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
 
+    
+    /**
+     * Create a tag with the given name
+     * @param name the name of the tag. Must be one of {@link BorderTag#values()}
+     * @return
+     */
+    static Tag of(String name) {
+    	for(BorderTag t : BorderTag.values()) {
+    		if(t.toString().equals(name))
+    			return new BorderTagObject(t);
+    	}
+    	return null;
+    }
+    
     /**
      * Get the name of the tag
      * 

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,8 +126,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 				oHash = Arrays.hashCode((double[])oValue);
 				dHash = Arrays.hashCode((double[])dValue);
 			}
-
-			assertThat(f.getName()+": hashcodes: original "+oHash+" | dup "+dHash, oValue, equalTo(dValue));
+			
+			// ignore transient fields
+			if(!Modifier.isTransient(f.getModifiers()))
+				assertThat("Field "+f.getName()+" in "+original.getClass().getSimpleName()+": hashcodes: original "+oHash+" | dup "+dHash, dValue, equalTo(oValue));
 		}
 
 		assertEquals("Equals method", original, dup);

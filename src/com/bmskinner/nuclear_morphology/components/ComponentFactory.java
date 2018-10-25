@@ -22,6 +22,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
@@ -67,7 +68,7 @@ public interface ComponentFactory<E extends CellularComponent> extends Loggable 
      */
     E buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, @NonNull UUID id)
             throws ComponentCreationException;
-
+    
     /**
      * Thrown when a component cannot be created or initialised (includes when
      * profile collection or segmented profile has no assigned segments)

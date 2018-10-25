@@ -35,6 +35,11 @@ public class GenericStatistic implements PlottableStatistic {
         name = s;
         dim = d;
     }
+    
+    @Override
+    public String name() {
+    	return name;
+    }
 
     @Override
     public boolean isDimensionless() {

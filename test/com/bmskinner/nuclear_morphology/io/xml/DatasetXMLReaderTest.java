@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.jdom2.Document;
 import org.jdom2.output.Format;
@@ -11,11 +12,14 @@ import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
-public class DatasetXMLReaderTest {
+public class DatasetXMLReaderTest extends ComponentTester {
 
 	@Before
 	public void setUp() throws Exception {
@@ -26,16 +30,28 @@ public class DatasetXMLReaderTest {
 		File f = new File(TestResources.ROUND_CLUSTERS_DATASET);
 		IAnalysisDataset d = SampleDatasetReader.openDataset(f);
 		
+		DatasetXMLCreator dxc = new DatasetXMLCreator(d);
 		File xmlFile = new File(d.getSavePath().getParentFile(), d.getName()+".serial.xml");
+		XMLWriter.writeXML(dxc.create(), xmlFile);
+
 		DatasetXMLReader dxr = new DatasetXMLReader(xmlFile);
 		IAnalysisDataset read = dxr.read();
-		Document doc = dxr.readDocument();
-		XMLOutputter xmlOutput = new XMLOutputter();
-//		xmlOutput.setFormat(Format.getPrettyFormat());
-//		xmlOutput.output(doc, System.out); 
+//		Document doc = dxr.readDocument();
+//		XMLOutputter xmlOutput = new XMLOutputter();
 		
 		assertEquals(d.getName(), read.getName());
+		assertEquals(d.getId(), read.getId());
 		assertEquals(d.getDatasetColour(), read.getDatasetColour());
+		
+		for(UUID cellId : d.getCollection().getCellIDs()) {
+			ICell wroteCell = d.getCollection().getCell(cellId);
+			ICell readCell  = read.getCollection().getCell(cellId);
+			
+			Nucleus wroteNucleus = wroteCell.getNucleus();
+			Nucleus readNucleus = readCell.getNucleus();
+			testDuplicatesByField(wroteNucleus, readNucleus);
+		}
+		
 		assertEquals(d.getCollection(), read.getCollection());
 		
 		assertEquals(d, read);

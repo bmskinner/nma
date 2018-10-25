@@ -72,8 +72,7 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	public IAnalysisOptions read() {
 
 		try {
-			SAXBuilder saxBuilder = new SAXBuilder();
-			Document document = saxBuilder.build(file);
+			Document document =  readDocument();
 
 			IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
 
@@ -100,6 +99,8 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	      }
 	    return null;
 	}
+	
+
 	
 	/**
 	 * Read the clustering options from file
@@ -269,5 +270,6 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 			}
 		}
 	}
+
 
 }

@@ -12,6 +12,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -44,6 +45,7 @@ public abstract class XMLCreator<T> {
 	public static final String CELL_COLLECTION_KEY            = "CellCollection";
 	public static final String OUTPUT_FOLDER_KEY              = "OutputFolder";
 	public static final String NUCLEUS_TYPE_KEY               = "NucleusType";
+	public static final String NUCLEUS_NUMBER_KEY             = "NucleusNumber";
 	public static final String CELL_IDS_KEY                   = "CellIds";
 	public static final String DATASET_IDS_KEY                = "DatasetIds";
 	public static final String CELL_KEY                       = "Cell";
@@ -51,6 +53,11 @@ public abstract class XMLCreator<T> {
 	public static final String COM_KEY                        = "CentreOfMass";
 	public static final String X                              = "X";
 	public static final String Y                              = "Y";
+	public static final String BASE_KEY                       = "Base";
+	public static final String X_BASE_KEY                     = "XBase";
+	public static final String Y_BASE_KEY                     = "YBase";
+	public static final String W_BASE_KEY                     = "WBase";
+	public static final String H_BASE_KEY                     = "HBase";
 	public static final String BORDER_POINTS_KEY              = "UninterpolatedBorderPoints";
 	public static final String POINT_KEY                      = "Point";
 	public static final String NAME_KEY                       = "Name";
@@ -268,6 +275,8 @@ public abstract class XMLCreator<T> {
 		Element e = new Element(NUCLEUS_KEY);
 		create(e, nucleus);
 		
+		e.addContent(createElement(NUCLEUS_NUMBER_KEY, String.valueOf(nucleus.getNucleusNumber())));
+		
 		// Add signals
 		
 		ISignalCollection sc = nucleus.getSignalCollection();
@@ -346,6 +355,14 @@ public abstract class XMLCreator<T> {
 		e.addContent(createElement(SOURCE_CHANNEL_KEY, String.valueOf(component.getChannel())));
 		e.addContent(createElement(SOURCE_SCALE_KEY, String.valueOf(component.getScale())));
 		e.addContent(createElement(BORDER_LENGTH_KEY, String.valueOf(component.getBorderLength())));
+		
+		// add base
+		Element base = new Element(BASE_KEY);	
+		base.addContent(createElement(X_BASE_KEY, String.valueOf(component.getPosition()[Imageable.X_BASE])));
+		base.addContent(createElement(Y_BASE_KEY, String.valueOf(component.getPosition()[Imageable.Y_BASE])));
+		base.addContent(createElement(W_BASE_KEY, String.valueOf(component.getPosition()[Imageable.WIDTH])));
+		base.addContent(createElement(H_BASE_KEY, String.valueOf(component.getPosition()[Imageable.HEIGHT])));
+		e.addContent(base);
 		
 		// add border points
 		Element border = new Element(BORDER_POINTS_KEY);		

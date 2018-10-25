@@ -172,5 +172,31 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         finer("Created nucleus with border length "+n.getBorderLength());
         return n;
     }
+    
+    public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id, int nucleusNumber)
+            throws ComponentCreationException {
+    	if (roi == null)
+    		throw new IllegalArgumentException("Roi cannot be null in nucleus factory");
+        if (centreOfMass == null)
+            throw new IllegalArgumentException("Centre of mass cannot be null in nucleus factory");
+        
+        Nucleus n = null;
+
+        switch(type) {
+        	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+        			nucleusNumber, id); break;
+        	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+        			nucleusNumber, id); break;
+        	case NEUTROPHIL: n = new DefaultLobedNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+        			nucleusNumber, id); break;    
+        	case ROUND: 
+        	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+        			nucleusNumber, id);
+        }
+        if (n == null)
+            throw new ComponentCreationException("Error making nucleus; contstucted object is null");
+        finer("Created nucleus with border length "+n.getBorderLength());
+        return n;
+    }
 
 }
