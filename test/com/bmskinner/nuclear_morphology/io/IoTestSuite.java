@@ -7,6 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.bmskinner.nuclear_morphology.io.conversion.IoConversionTestSuite;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReaderTest;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriterTest;
+import com.bmskinner.nuclear_morphology.io.xml.IoXmlTestSuite;
 
 /**
  * Runs all test classes in the io package
@@ -17,11 +18,11 @@ import com.bmskinner.nuclear_morphology.io.xml.XMLWriterTest;
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	IoConversionTestSuite.class,
+	IoXmlTestSuite.class,
 	DatasetMergeTest.class, 
-	OptionsXMLReaderTest.class,
 	WorkspaceExporterTest.class,
 	WorkspaceImporterTest.class, 
-	XMLWriterTest.class })
+})
 public class IoTestSuite {
 
 }

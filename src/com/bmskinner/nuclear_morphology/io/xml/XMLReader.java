@@ -43,6 +43,25 @@ public abstract class XMLReader<T> implements Loggable {
 	
 	protected final File file;
 	
+	
+	/**
+	 * Thrown when an xml file cannot be read
+	 * @author bms41
+	 * @since 1.14.0
+	 *
+	 */
+	public static class XMLReadingException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+	    public XMLReadingException() { super(); }
+	    
+	    public XMLReadingException(String message) {super(message); }
+
+	    public XMLReadingException(String message, Throwable cause) { super(message, cause); }
+
+	    public XMLReadingException(Throwable cause) { super(cause); }
+	}
+	
 	public XMLReader(@NonNull final File f) {
 		if(!f.exists())
 			throw new IllegalArgumentException("File "+f.getAbsolutePath()+" does not exist");
@@ -53,11 +72,16 @@ public abstract class XMLReader<T> implements Loggable {
 	 * Read the XML representation and create the object
 	 * @return
 	 */
-	public abstract T read();
+	public abstract T read() throws XMLReadingException;
 	
-	public Document readDocument() throws JDOMException, IOException {
+	public Document readDocument() throws XMLReadingException{
 		SAXBuilder saxBuilder = new SAXBuilder();
-		return saxBuilder.build(file);
+		try {
+			return saxBuilder.build(file);
+		} catch(JDOMException | IOException e) {
+			fine("Unable to read file as XML");
+			throw new XMLReadingException(e);
+		}
 	}
 	
 	protected int readX(Element e) {

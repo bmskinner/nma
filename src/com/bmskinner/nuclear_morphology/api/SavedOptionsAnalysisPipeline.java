@@ -59,6 +59,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
 
 /**
@@ -144,7 +145,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
     	run(methodsToRun);
 	}
 	
-	private IAnalysisOptions readOptions() {
+	private IAnalysisOptions readOptions() throws XMLReadingException {
 		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
 		IAnalysisOptions options = r.read();
 		return options;

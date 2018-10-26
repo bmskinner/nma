@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * A copy button that allows nuclear detection options to be copied from an open
@@ -112,12 +113,19 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         	File f = FileSelector.chooseOptionsImportFile(folder);
         	if(f==null)
         		return;
-        	IAnalysisOptions o = new OptionsXMLReader(f).read(); //read
-        	options.set(o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
-        	parent.setNucleusType(o.getNucleusType());
-        	parent.setAngleWindowProportion(o.getProfileWindowProportion());
-        	options.setFolder(folder);
-        	fireOptionsChangeEvent();
+        	
+			try {
+				IAnalysisOptions o = new OptionsXMLReader(f).read();
+				options.set(o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
+	        	parent.setNucleusType(o.getNucleusType());
+	        	parent.setAngleWindowProportion(o.getProfileWindowProportion());
+	        	options.setFolder(folder);
+	        	fireOptionsChangeEvent();
+				
+			} catch (XMLReadingException e1) {
+				stack(e1);
+			}
+        	
         });
         openBtn.setToolTipText(OPEN_SETTINGS_TOOLTIP);
 

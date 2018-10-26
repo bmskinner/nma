@@ -67,35 +67,28 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	}
 
 	@Override
-	public IAnalysisOptions read() {
+	public IAnalysisOptions read() throws XMLReadingException {
 
-		try {
-			Document document =  readDocument();
+//		try {
+		Document document =  readDocument();
 
-			IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
 
-			Element rootElement = document.getRootElement();
+		Element rootElement = document.getRootElement();
 
-			if(!rootElement.getName().equals(XMLCreator.DETECTION_SETTINGS_KEY))
-				return op;
-
-			NucleusType type = NucleusType.valueOf(rootElement.getChild(XMLCreator.NUCLEUS_TYPE_KEY).getText());
-			op.setNucleusType(type);
-			double windowSize = Double.parseDouble(rootElement.getChild(XMLCreator.PROFILE_WINDOW_KEY).getText());
-			op.setAngleWindowProportion(windowSize);
-
-			// should be single elements with options class
-			for(Element component : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY))
-				addComponent(component, op);
-
+		if(!rootElement.getName().equals(XMLCreator.DETECTION_SETTINGS_KEY))
 			return op;
-        
-	      } catch(JDOMException e) {
-	         e.printStackTrace();
-	      } catch(IOException ioe) {
-	         ioe.printStackTrace();
-	      }
-	    return null;
+
+		NucleusType type = NucleusType.valueOf(rootElement.getChild(XMLCreator.NUCLEUS_TYPE_KEY).getText());
+		op.setNucleusType(type);
+		double windowSize = Double.parseDouble(rootElement.getChild(XMLCreator.PROFILE_WINDOW_KEY).getText());
+		op.setAngleWindowProportion(windowSize);
+
+		// should be single elements with options class
+		for(Element component : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY))
+			addComponent(component, op);
+
+		return op;
 	}
 	
 
@@ -106,10 +99,10 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	 */
 	public List<IClusteringOptions> readClusteringOptions(){
 		List<IClusteringOptions> result = new ArrayList<>();
-		SAXBuilder saxBuilder = new SAXBuilder();
-		Document document;
+
 		try {
-			document = saxBuilder.build(file);
+			Document document =  readDocument();
+
 			Element rootElement = document.getRootElement();
 			Element clusters = rootElement.getChild(OptionsXMLCreator.CLUSTERS);
 			if(clusters!=null) { // may not be present
@@ -118,8 +111,8 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 					result.add(o);
 				}
 			}
-		} catch (JDOMException | IOException e) {
-			fine("Unable to read clustering options", e);
+		} catch (XMLReadingException e) {
+			stack("Unable to read clustering options", e);
 			return result;
 		}
 		return result;
@@ -132,10 +125,9 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	 */
 	public Map<UUID, String> readSignalGroupNames(){
 		Map<UUID, String> result = new HashMap<>();
-		SAXBuilder saxBuilder = new SAXBuilder();
-		Document document;
 		try {
-			document = saxBuilder.build(file);
+			Document document =  readDocument();
+
 			Element rootElement = document.getRootElement();
 			for(Element signal : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY)) {
 				if(signal.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
@@ -147,8 +139,8 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 					result.put(id, name);
 				}
 			}
-		} catch (JDOMException | IOException e) {
-			fine("Unable to read signal names", e);
+		} catch (XMLReadingException e) {
+			stack("Unable to read signal group names", e);
 			return result;
 		}
 		return result;

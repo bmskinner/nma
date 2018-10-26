@@ -65,7 +65,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 	}
 	
 	@Override
-	public IAnalysisDataset read() {
+	public IAnalysisDataset read() throws XMLReadingException {
 		
 		try {
 			Document document = readDocument();	
@@ -78,11 +78,9 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 			
 			return readDataset(document.getRootElement(), type );
 			
-		} catch (JDOMException | IOException | ComponentCreationException e) {
-			stack(e);
+		} catch (ComponentCreationException e) {
+			throw new XMLReadingException("Could not create component from XML", e);
 		}
-		
-		return null;
 	}
 	
 	private IAnalysisDataset readDataset(Element e, NucleusType type) throws ComponentCreationException {

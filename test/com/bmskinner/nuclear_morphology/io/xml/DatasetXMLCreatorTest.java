@@ -1,5 +1,8 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 
 import org.jdom2.Document;
@@ -12,10 +15,14 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
+/**
+ * Test XML files are created and exported correctly 
+ * @author bms41
+ * @since 1.14.0
+ *
+ */
 public class DatasetXMLCreatorTest {
-	
-	
-	
+
 	@Test 
 	public void testXMLCreated() throws Exception {
 		File f = new File(TestResources.ROUND_CLUSTERS_DATASET);
@@ -26,10 +33,15 @@ public class DatasetXMLCreatorTest {
 		Document doc = dxc.create();
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(doc, System.out); 
 		
-		File outputFile = new File(d.getSavePath().getParentFile(), d.getName()+".serial.xml");
+		File outputFile = new File(d.getSavePath().getParentFile(), d.getName()+".xml.nmd");
+		
+		if(outputFile.exists())
+			outputFile.delete();
+		
+		assertFalse(outputFile.exists());
 		XMLWriter.writeXML(doc, outputFile);
+		assertTrue(outputFile.exists());
 	}
 
 }

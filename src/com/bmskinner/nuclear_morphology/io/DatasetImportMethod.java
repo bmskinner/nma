@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * Method to read a dataset from file
@@ -288,15 +289,17 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
     
     private IAnalysisDataset readXMLDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
-    	
+
     	DatasetXMLReader dxr = new DatasetXMLReader(inputFile);
-    	
-    	IAnalysisDataset d =  dxr.read();
-    	if(d==null)
-    		throw new UnloadableDatasetException("Cannot read as XML dataset");
-    	if(!Version.versionIsSupported(d.getVersion()))
-    		throw new UnsupportedVersionException(d.getVersion());
-    	return d;
+
+    	try {
+    		IAnalysisDataset d =  dxr.read();
+    		if(!Version.versionIsSupported(d.getVersion()))
+    			throw new UnsupportedVersionException(d.getVersion());
+    		return d;
+    	} catch(XMLReadingException e) {
+    		throw new UnloadableDatasetException("Cannot read as XML dataset", e);
+    	}
     }
     
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
