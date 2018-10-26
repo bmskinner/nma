@@ -17,6 +17,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
@@ -24,6 +25,7 @@ import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -108,6 +110,9 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		
 		IAnalysisOptions options = readOptions(e.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY));
 		d.setAnalysisOptions(options);
+		
+		readChildDatasets(e.getChild(XMLCreator.CHILD_DATASETS_SECTION_KEY), d);
+		
 		return d;
 	}
 	
@@ -155,13 +160,39 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		try {
 			Nucleus consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
 			collection.setConsensus(consensus);
+			consensus.alignVertically();
 		} catch (UnprofilableObjectException e1) {
 			stack(e1);
 		}
-		
-		
+
 		collection.updateVerticalNuclei();
 		return collection;
+	}
+	
+	private void readChildDatasets(Element children, IAnalysisDataset parent) {
+		if(children.getChild(XMLCreator.CHILD_DATASET_KEY)==null)
+			return;
+//		if(children.getChildren(XMLCreator.CHILD_DATASET_KEY).isEmpty())
+//			return;
+		for(Element childElement : children.getChildren(XMLCreator.CHILD_DATASET_KEY)) {			
+			String name = childElement.getChildText(XMLCreator.DATASET_NAME_KEY);
+			UUID id = UUID.fromString(childElement.getChildText(XMLCreator.DATASET_ID_KEY));
+			ICellCollection childCollection = new VirtualCellCollection(parent, name, id);
+			
+			for(Element cellElement : childElement.getChildren(XMLCreator.CELL_IDS_KEY)) {
+				UUID cellId = readUUID(cellElement);
+				childCollection.add(parent.getCollection().getCell(cellId));
+			}
+			IAnalysisDataset child = new ChildAnalysisDataset(parent, childCollection);
+			readClusterGroups(childElement.getChild(XMLCreator.CLUSTERS), child);
+			parent.addChildDataset(child);
+			if(childElement.getChild(XMLCreator.CHILD_DATASETS_SECTION_KEY)!=null)
+				readChildDatasets(childElement.getChild(XMLCreator.CHILD_DATASETS_SECTION_KEY), child);
+		}
+	}
+	
+	private void readClusterGroups(Element e, IAnalysisDataset dataset) {
+		//TODO
 	}
 	
 	private void readCollectionSegments(Element segs, ICellCollection collection) {

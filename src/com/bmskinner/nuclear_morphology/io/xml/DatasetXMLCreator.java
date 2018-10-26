@@ -47,7 +47,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 			rootElement.addContent(createChildDatasets());
 		
 		if(template.hasClusters())
-			rootElement.addContent(createClusterGroups());
+			rootElement.addContent(createClusterGroups(template));
 		
 		rootElement.addContent(create(template.getCollection()));
 		rootElement.addContent(create(template.getAnalysisOptions().get()));
@@ -59,7 +59,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());  
 	}
 	
-	private Element createClusterGroups() {
+	private Element createClusterGroups(IAnalysisDataset template) {
 		Element clusters = new Element(CLUSTERS);
 		for(IClusterGroup g : template.getClusterGroups()) {
 			if(g.getOptions().isPresent()) {
@@ -116,13 +116,22 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		e.addContent(createElement(DATASET_NAME_KEY, child.getName()));
 		e.addContent(createElement(DATASET_ID_KEY, child.getId().toString()));
 		
+		if(child.hasDatasetColour())
+			e.addContent(createElement(DATASET_COLOUR_KEY, toHex(child.getDatasetColour().get())));
+						
+		if(child.hasClusters())
+			e.addContent(createClusterGroups(child));
+		
 		Element cells = new Element(CELL_IDS_KEY);
 		for(ICell cell : child.getCollection())
 			cells.addContent(createElement(ID_KEY, cell.getId().toString()));
 		e.addContent(cells);
 		
+		Element children = new Element(CHILD_DATASETS_SECTION_KEY);
 		for(IAnalysisDataset subChild : child.getChildDatasets())
-			addChildDataset(e, subChild);
+			addChildDataset(children, subChild);
+		if(children.getContentSize()>0)
+			e.addContent(children);
 
 		element.addContent(e);
 	}
