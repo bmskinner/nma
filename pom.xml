@@ -112,14 +112,13 @@
 				</configuration>
 			</plugin>
 
-			<!-- Write the version info into the readme -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>3.0.1</version>
 				<executions>
 
-					<!-- Copy the readme to the base directory so the repo is up to date -->
+					<!-- Copy the readme with version info to the base directory so the repo is up to date -->
 					<execution>
 						<id>readme-md</id>
 						<phase>process-resources</phase>
@@ -140,17 +139,8 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
-
-			<!-- Write the version info to the ImageJ plugins config file -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.0.1</version>
-				<executions>
-
-					<!-- Copy the readme to the base directory so the repo is up to date -->
+					
+					<!-- Write the version info to the ImageJ plugins config file -->
 					<execution>
 						<id>imagej-plugins-config</id>
 						<phase>process-resources</phase>
@@ -173,6 +163,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 
 			<!-- Compile to desired java version -->
 			<plugin>
