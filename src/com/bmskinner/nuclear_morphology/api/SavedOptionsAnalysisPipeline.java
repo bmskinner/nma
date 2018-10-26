@@ -57,6 +57,7 @@ import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
 import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
 
@@ -137,7 +138,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
     		createClusteringMethods();
     		
     		for(IAnalysisDataset dataset : datasets)
-    			methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath())); 
+    			methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath(), ExportFormat.JAVA)); 
     	}
     	
     	run(methodsToRun);

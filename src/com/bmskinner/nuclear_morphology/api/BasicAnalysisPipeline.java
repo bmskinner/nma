@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.io.Io;
 
@@ -79,7 +80,7 @@ public class BasicAnalysisPipeline {
         
         new DatasetProfilingMethod(obs)
         	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW))
-        	.then(new DatasetExportMethod(obs, saveFile))
+        	.then(new DatasetExportMethod(obs, saveFile, ExportFormat.JAVA))
         	.then(new DatasetStatsExporter(statsFile, obs))
         	.call();
     }

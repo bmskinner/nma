@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -132,7 +133,7 @@ public class ShellDetectorTest extends ComponentTester {
         IAnalysisDataset dataset = SampleDatasetReader.openTestMouseSignalsDataset();
         IAnalysisMethod m = new ShellAnalysisMethod(dataset, new DefaultShellOptions());
         m.call();
-        IAnalysisMethod s = new DatasetExportMethod(dataset, dataset.getSavePath());
+        IAnalysisMethod s = new DatasetExportMethod(dataset, dataset.getSavePath(), ExportFormat.JAVA);
         s.call();
     }
           

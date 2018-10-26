@@ -68,6 +68,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -368,6 +369,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         private static final String REPAIR_CMD  = "unfuck";
         private static final String TASKS_CMD  = "tasks";
         private static final String HASH_CMD  = "check hash";
+        private static final String EXPORT_CMD = "export xml";
 
         private final Map<String, Runnable> runnableCommands = new HashMap<>();
 
@@ -434,7 +436,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         		
         	});
         	
-            runnableCommands.put(CHECK_CMD, ()-> validateDatasets());
+            
             runnableCommands.put(HELP_CMD, () -> {
                 log("Available commands: ");
                 for (String key : commandMap.keySet()) {
@@ -443,10 +445,11 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
                 }
                 log(" check - validate the open root datasets");
                 log(" list  - list the open root datasets");
+                log(" export xml - export the selected dataset in XML format");
+                log(" tasks - list the current task list");
+                log(" "+HASH_CMD+" - print the hashes of the selected datasets");
             });
-            runnableCommands.put(CLEAR_CMD, () -> {
-                clear();
-            });
+           
             runnableCommands.put(THROW_CMD, () -> {
                 log("Throwing exception");
                 try {
@@ -455,20 +458,14 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
                     error("Caught expected exception", e);
                 }
             });
-            runnableCommands.put(LIST_CMD, () -> {
-                listDatasets();
-            });
-            runnableCommands.put(KILL_CMD, () -> {
-                killAllTasks();
-            });
             
-            runnableCommands.put(TASKS_CMD, () -> {
-            	listTasks();
-            });
-            
-            runnableCommands.put(REPAIR_CMD, () ->{
-            	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets());
-            });
+            runnableCommands.put(CHECK_CMD,  () -> validateDatasets());
+            runnableCommands.put(CLEAR_CMD,  () -> clear());
+            runnableCommands.put(LIST_CMD,   () -> listDatasets());
+            runnableCommands.put(KILL_CMD,   () -> killAllTasks());
+            runnableCommands.put(TASKS_CMD,  () -> listTasks());
+            runnableCommands.put(REPAIR_CMD, () -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets()));
+            runnableCommands.put(EXPORT_CMD, () -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_XML_DATASET));
         }
     	
         /**

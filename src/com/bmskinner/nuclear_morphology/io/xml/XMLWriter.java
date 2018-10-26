@@ -57,7 +57,7 @@ public abstract class XMLWriter implements Loggable {
 			){
 			XMLOutputter xmlOutput = new XMLOutputter();
 			xmlOutput.setFormat(Format.getPrettyFormat());
-			xmlOutput.output(doc, System.out); 
+//			xmlOutput.output(doc, System.out); 
 			xmlOutput.output(doc, cos);
 		} catch (IOException e) {
 			System.out.println(String.format("Unable to write to file %s: %s", outputFile.getAbsolutePath(), e.getMessage()));

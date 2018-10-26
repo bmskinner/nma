@@ -23,6 +23,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 
 /**
  * This holds the options set globally for the program
@@ -69,6 +70,8 @@ public class GlobalOptions extends AbstractHashOptions {
     private static double DEFAULT_SCALE = 1;
 
     private NucleusType defaultType;
+    
+    private ExportFormat datasetExportFormat;
 
 
     /**
@@ -106,6 +109,7 @@ public class GlobalOptions extends AbstractHashOptions {
         setBoolean(REFOLD_OVERRIDE_KEY, false);
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
         setBoolean(IS_DOCKABLE_INTERFACE_KEY, true);
+        this.datasetExportFormat = ExportFormat.JAVA;
     }
 
     public NucleusType getDefaultType() {
@@ -122,6 +126,15 @@ public class GlobalOptions extends AbstractHashOptions {
 
     public void setScale(MeasurementScale scale) {
         this.scale = scale;
+    }
+
+    
+    public ExportFormat getExportFormat() {
+    	return datasetExportFormat;
+    }
+    
+    public void setExportFormat(ExportFormat format) {
+        this.datasetExportFormat = format;
     }
 
     public synchronized double getImageScale() {

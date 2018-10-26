@@ -72,6 +72,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -271,8 +272,11 @@ public class EventHandler implements Loggable, EventListener {
                 return () -> setScale(selectedDatasets);
                 
             if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
-            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
-            	
+            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true, GlobalOptions.getInstance().getExportFormat());
+            
+            if (event.type().equals(SignalChangeEvent.EXPORT_XML_DATASET))
+            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true, ExportFormat.XML);
+            
             if (event.type().equals(SignalChangeEvent.SAVE_ALL_DATASETS))
                 return () -> saveRootDatasets();
             	
@@ -420,7 +424,7 @@ public class EventHandler implements Loggable, EventListener {
             			try {
             				refoldLatch.await();
             				fine("Starting save action");
-            				new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch).run();
+            				new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch, GlobalOptions.getInstance().getExportFormat()).run();
             			} catch(InterruptedException e) {
             				return;
             			}	
@@ -451,7 +455,7 @@ public class EventHandler implements Loggable, EventListener {
 
             	return () -> {
             		final CountDownLatch latch = new CountDownLatch(1);
-            		new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch).run();
+            		new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch, GlobalOptions.getInstance().getExportFormat()).run();
             	};
             }
             
@@ -724,7 +728,7 @@ public class EventHandler implements Loggable, EventListener {
     			final CountDownLatch latch = new CountDownLatch(1);
 
     			new Thread( () ->{
-    				Runnable task = new ExportDatasetAction(root, acceptor, EventHandler.this, latch, false);
+    				Runnable task = new ExportDatasetAction(root, acceptor, EventHandler.this, latch, false, GlobalOptions.getInstance().getExportFormat());
     				task.run();
     				try {
     					latch.await();

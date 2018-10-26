@@ -47,16 +47,35 @@ import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLCreator;
 public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 
     private File saveFile = null;
+    private ExportFormat format;
 
+    
+    /**
+     * The formats in which an nmd file can be written.
+     * Used because users should not need to deal with a ton of
+     * different file extensions.
+     * @author bms41
+     * @since 1.14.0
+     *
+     */
+    public enum ExportFormat {
+    	
+    	/** Java serialisation */
+    	JAVA,
+    	
+    	/** XML serialisation */
+    	XML;
+    }
     /**
      * Construct with a dataset to export and the file location
      * 
      * @param dataset the dataset to be exported
      * @param saveFile the file to export to
      */
-    public DatasetExportMethod(@NonNull IAnalysisDataset dataset, @NonNull File saveFile) {
+    public DatasetExportMethod(@NonNull IAnalysisDataset dataset, @NonNull File saveFile, ExportFormat format) {
         super(dataset);
         this.saveFile = saveFile;
+        this.format = format;
     }
 
     @Override
@@ -69,7 +88,19 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     protected void run() {
 
     	try {
-    		if (saveAnalysisDataset(dataset, saveFile)) 
+    		
+    		boolean isOk = false;
+    		switch(format) {    		
+	    		case XML: {
+	    			backupExistingSaveFile();
+	    			isOk = saveAnalysisDatasetToXML(dataset, saveFile); 
+	    			break;
+	    		}
+	    		case JAVA: 
+	    		default: isOk = saveAnalysisDataset(dataset, saveFile); break;
+    		}
+
+    		if (isOk) 
     			fine("Save was sucessful");
     		else
     			warn("Save was unsucessful");
@@ -89,9 +120,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
      */
     public boolean saveAnalysisDatasetToXML(IAnalysisDataset dataset, File saveFile) {
     	 boolean ok = true;
-         // Since we're creating a save format, go with nmd: Nuclear
- 		// Morphology Dataset
- 		fine("Saving dataset to " + saveFile.getAbsolutePath());
+ 		fine("Saving XML dataset to " + saveFile.getAbsolutePath());
  		
  		File parentFolder = saveFile.getParentFile();
  		if(!parentFolder.exists())
@@ -112,6 +141,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  			cos.addCountListener( (l) -> fireProgressEvent(l));
  			Document doc = new DatasetXMLCreator(dataset).create();
  			XMLOutputter xmlOutput = new XMLOutputter();
+ 			xmlOutput.setFormat(Format.getPrettyFormat());
  			xmlOutput.output(doc, cos);
  		} catch (IOException e) {
  			stack(String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
@@ -178,13 +208,25 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     public boolean saveAnalysisDataset(IAnalysisDataset dataset) {
 
         File saveFile = dataset.getSavePath();
-        if (saveFile.exists()) {
+        if (saveFile.exists())
             saveFile.delete();
-        }
-
         return saveAnalysisDataset(dataset, saveFile);
 
     }
+
+    private void backupExistingSaveFile() {
+    	File saveFile = dataset.getSavePath();
+    	if (!saveFile.exists())
+    		return;
+
+    	File backupFile = new File(saveFile.getParent(), saveFile.getName().replaceAll(Io.SAVE_FILE_EXTENSION, Io.BACKUP_FILE_EXTENSION));
+    	try {
+    		copyFile(saveFile, backupFile);
+    	} catch (IOException e) {
+    		stack(e.getMessage(), e);
+    	}     
+    }
+
 
     /**
      * Directly copy the source file to the destination file

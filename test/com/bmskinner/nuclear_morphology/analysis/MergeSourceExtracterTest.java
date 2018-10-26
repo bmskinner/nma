@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -111,7 +112,7 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	
     	new DatasetProfilingMethod(merged)
     	.then(new DatasetSegmentationMethod(merged, MorphologyAnalysisMode.NEW))
-    	.then(new DatasetExportMethod(merged, f3))
+    	.then(new DatasetExportMethod(merged, f3, ExportFormat.JAVA))
     	.call();
     	DatasetValidator dv = new DatasetValidator();
     	if(!dv.validate(merged))

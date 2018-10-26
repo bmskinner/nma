@@ -32,12 +32,14 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 
 import ij.io.SaveDialog;
 
 public class ExportDatasetAction extends SingleDatasetResultAction {
 
     private File saveFile = null;
+    private ExportFormat format = ExportFormat.JAVA;
     
     private static final String PROGRESS_BAR_LABEL = "Saving dataset";
 
@@ -51,8 +53,10 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
      * @param mw the main window, to access program logger
      * @param doneSignal a latch to hold threads until the save is complete
      */
-    public ExportDatasetAction(@NonNull IAnalysisDataset dataset, File saveFile, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+    public ExportDatasetAction(@NonNull IAnalysisDataset dataset, File saveFile, @NonNull final ProgressBarAcceptor acceptor, 
+    		@NonNull final EventHandler eh, CountDownLatch doneSignal, ExportFormat format) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+        this.format = format;
         setLatch(doneSignal);
         this.setProgressBarIndeterminate();
     }
@@ -65,9 +69,11 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
      * @param doneSignal a latch to hold threads until the save is complete
      * @param chooseSaveLocation save to the default dataset save file, or choose another location
      */
-    public ExportDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal,
-            boolean chooseSaveLocation) {
+    public ExportDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, 
+    		@NonNull final EventHandler eh, CountDownLatch doneSignal,
+            boolean chooseSaveLocation, ExportFormat format) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+        this.format = format;
         if(doneSignal!=null)
         	setLatch(doneSignal);
 
@@ -87,10 +93,12 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
     }
     
-    public ExportDatasetAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+    public ExportDatasetAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, 
+    		@NonNull final EventHandler eh, CountDownLatch doneSignal, ExportFormat format) {
         super(list, PROGRESS_BAR_LABEL, acceptor, eh);
         this.setLatch(doneSignal);
         this.setProgressBarIndeterminate();
+        this.format = format;
         dataset = DatasetListManager.getInstance().getRootParent(dataset);
         saveFile = dataset.getSavePath();
     }
@@ -101,7 +109,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
         if (saveFile != null) {
             log("Saving as " + saveFile.getAbsolutePath() + "...");
             long length = saveFile.exists() ? saveFile.length() : 0;
-            IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
+            IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile, format);
             worker = new DefaultAnalysisWorker(m, length);
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
@@ -124,7 +132,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
     			ExportDatasetAction.super.finished();
     		} else { // otherwise analyse the next item in the list
     			cancel(); // remove progress bar
-    			new ExportDatasetAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get()).run();
+    			new ExportDatasetAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get(), format).run();
     		}
     	});
 

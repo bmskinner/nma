@@ -570,7 +570,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
                 double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
                 DecimalFormat df = new DecimalFormat("#0.000");
                 XYTextAnnotation annotation = new XYTextAnnotation(
-                        "Markers for non-unimodal positions (p<" + df.format(significance) + ")", 1, ymax);
+                        String.format("Markers for non-unimodal positions (p<%s)", df.format(significance)), 1, ymax);
                 annotation.setTextAnchor(TextAnchor.TOP_LEFT);
                 plot.addAnnotation(annotation);
             } catch (IllegalArgumentException ex) {
@@ -587,7 +587,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
     private JFreeChart makeMultiVariabilityChart() throws Exception {
     	ProfileChartDataset ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
 
-    	JFreeChart chart = makeProfileChart(ds, 100);
+    	JFreeChart chart = makeProfileChart(ds, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
         XYPlot plot = chart.getXYPlot();
 
         plot.getRangeAxis().setAutoRange(true);
