@@ -26,6 +26,7 @@ import org.jdom2.Document;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import com.bmskinner.nuclear_morphology.io.CountedOutputStream;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -50,11 +51,14 @@ public abstract class XMLWriter implements Loggable {
 		if(!outputFile.getParentFile().canWrite())
 			throw new IllegalArgumentException(String.format("Parent directory %s is not writable", outputFile.getParentFile().getName()));
 
-		try(OutputStream os = new FileOutputStream(outputFile)){
+		try(
+				OutputStream os = new FileOutputStream(outputFile);
+				CountedOutputStream cos = new CountedOutputStream(os);
+			){
 			XMLOutputter xmlOutput = new XMLOutputter();
 			xmlOutput.setFormat(Format.getPrettyFormat());
 			xmlOutput.output(doc, System.out); 
-			xmlOutput.output(doc, os);
+			xmlOutput.output(doc, cos);
 		} catch (IOException e) {
 			System.out.println(String.format("Unable to write to file %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
 			e.printStackTrace();

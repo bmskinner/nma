@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 
 import ij.io.SaveDialog;
 
-public class SaveDatasetAction extends SingleDatasetResultAction {
+public class ExportDatasetAction extends SingleDatasetResultAction {
 
     private File saveFile = null;
     
@@ -51,7 +51,7 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
      * @param mw the main window, to access program logger
      * @param doneSignal a latch to hold threads until the save is complete
      */
-    public SaveDatasetAction(@NonNull IAnalysisDataset dataset, File saveFile, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+    public ExportDatasetAction(@NonNull IAnalysisDataset dataset, File saveFile, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
         setLatch(doneSignal);
         this.setProgressBarIndeterminate();
@@ -65,7 +65,7 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
      * @param doneSignal a latch to hold threads until the save is complete
      * @param chooseSaveLocation save to the default dataset save file, or choose another location
      */
-    public SaveDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal,
+    public ExportDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal,
             boolean chooseSaveLocation) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
         if(doneSignal!=null)
@@ -87,7 +87,7 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
 
     }
     
-    public SaveDatasetAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+    public ExportDatasetAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
         super(list, PROGRESS_BAR_LABEL, acceptor, eh);
         this.setLatch(doneSignal);
         this.setProgressBarIndeterminate();
@@ -121,10 +121,10 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
     		// if no list was provided, or no more entries remain, finish
     		if (!hasRemainingDatasetsToProcess()) {
     			countdownLatch();
-    			SaveDatasetAction.super.finished();
+    			ExportDatasetAction.super.finished();
     		} else { // otherwise analyse the next item in the list
     			cancel(); // remove progress bar
-    			new SaveDatasetAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get()).run();
+    			new ExportDatasetAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get()).run();
     		}
     	});
 

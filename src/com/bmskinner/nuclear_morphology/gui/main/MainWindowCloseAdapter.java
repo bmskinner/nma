@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
-import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -111,7 +111,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
     		
     		for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
     			final CountDownLatch cl = new CountDownLatch(1);
-    			Runnable task = new SaveDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), cl, false);
+    			Runnable task = new ExportDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), cl, false);
     			new Thread(task).run();
     			try {
     				cl.await();

@@ -27,12 +27,16 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Document;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLCreator;
 
 /**
  * Export the dataset to an nmd file
@@ -59,7 +63,6 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	public IAnalysisResult call() {
         run();
         IAnalysisResult r = new DefaultAnalysisResult(dataset);
-//        fine("Returning saved dataset");
         return r;
     }
 
@@ -77,6 +80,48 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     	}
     }
 
+    
+    /**
+     * Save the given dataset in XML format
+     * @param dataset the dataset to save
+     * @param saveFile the file to save to
+     * @return
+     */
+    public boolean saveAnalysisDatasetToXML(IAnalysisDataset dataset, File saveFile) {
+    	 boolean ok = true;
+         // Since we're creating a save format, go with nmd: Nuclear
+ 		// Morphology Dataset
+ 		fine("Saving dataset to " + saveFile.getAbsolutePath());
+ 		
+ 		File parentFolder = saveFile.getParentFile();
+ 		if(!parentFolder.exists())
+ 			parentFolder.mkdirs();
+
+
+ 		if(saveFile.isDirectory())
+ 			throw new IllegalArgumentException(String.format("File %s is a directory", saveFile.getName()));
+ 		if(saveFile.getParentFile()==null)
+ 			throw new IllegalArgumentException(String.format("Parent directory is null", saveFile.getAbsolutePath()));
+ 		if(!saveFile.getParentFile().canWrite())
+ 			throw new IllegalArgumentException(String.format("Parent directory %s is not writable", saveFile.getParentFile().getName()));
+
+ 		try(
+ 				OutputStream os = new FileOutputStream(saveFile);
+ 				CountedOutputStream cos = new CountedOutputStream(os);
+ 				){
+ 			cos.addCountListener( (l) -> fireProgressEvent(l));
+ 			Document doc = new DatasetXMLCreator(dataset).create();
+ 			XMLOutputter xmlOutput = new XMLOutputter();
+ 			xmlOutput.output(doc, cos);
+ 		} catch (IOException e) {
+ 			stack(String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
+ 			ok = false;
+ 		}
+ 		
+
+ 		return ok;
+    }
+    
     /**
      * Save the given dataset to the given file
      * 
@@ -87,65 +132,47 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile) {
 
         boolean ok = true;
-        try {
-            // Since we're creating a save format, go with nmd: Nuclear
-            // Morphology Dataset
-            fine("Saving dataset to " + saveFile.getAbsolutePath());
-            
-            File parentFolder = saveFile.getParentFile();
-            if(!parentFolder.exists())
-            	parentFolder.mkdirs();
+        // Since we're creating a save format, go with nmd: Nuclear
+		// Morphology Dataset
+		fine("Saving dataset to " + saveFile.getAbsolutePath());
+		
+		File parentFolder = saveFile.getParentFile();
+		if(!parentFolder.exists())
+			parentFolder.mkdirs();
 
-            // use buffering
-            OutputStream fos = new FileOutputStream(saveFile);
 
-            CountedOutputStream cos = new CountedOutputStream(fos);
-            OutputStream buffer = new BufferedOutputStream(cos);
-            ObjectOutputStream output = new ObjectOutputStream(buffer);
-            
-            cos.addCountListener( (l) ->{
-            	fireProgressEvent(l);
-            });
+		try(OutputStream fos        = new FileOutputStream(saveFile);
+		    CountedOutputStream cos = new CountedOutputStream(fos);
+		    OutputStream buffer     = new BufferedOutputStream(cos);
+		    ObjectOutputStream output = new ObjectOutputStream(buffer);
+		   ) {
+			
+			 cos.addCountListener( (l) -> fireProgressEvent(l));
 
-            try {
+		    output.writeObject(dataset);
 
-                output.writeObject(dataset);
+		} catch (IOException e) {
+		    error("IO error saving dataset", e);
+		    ok = false;
+		} catch (Exception e1) {
+		    error("Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
+		    ok = false;
+		} catch (StackOverflowError e) {
+		    error("StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
+		    ok = false;
+		}
 
-            } catch (IOException e) {
-                error("IO error saving dataset", e);
-                ok = false;
-            } catch (Exception e1) {
-                error("Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
-                ok = false;
-            } catch (StackOverflowError e) {
-                error("StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
-                ok = false;
-            } finally {
-                output.close();
-                buffer.close();
-                fos.close();
-            }
+		if (!ok)
+		    return false;
 
-            if (!ok)
-                return false;
-
-            DatasetListManager.getInstance().updateHashCode(dataset);
-
-        } catch (FileNotFoundException e) {
-            warn("Could not find file when saving dataset to "+saveFile.getAbsolutePath());
-            return false;
-        } catch (IOException e2) {
-            error("IO error saving dataset", e2);
-            return false;
-        }
+		DatasetListManager.getInstance().updateHashCode(dataset);
         return true;
     }
 
     /**
      * Save the given dataset to it's preferred save path
      * 
-     * @param dataset
-     *            the dataset
+     * @param dataset the dataset
      * @return ok or not
      */
     public boolean saveAnalysisDataset(IAnalysisDataset dataset) {

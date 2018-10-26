@@ -34,7 +34,7 @@ public class CountedOutputStream extends FilterOutputStream {
 	private long totalBytes = 0;
 	private List<CountListener> listeners = new ArrayList<>();
 	
-	protected CountedOutputStream(OutputStream out) {
+	public CountedOutputStream(OutputStream out) {
 		super(out);
 	}
 	
