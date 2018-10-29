@@ -79,8 +79,7 @@ public abstract class XMLReader<T> implements Loggable {
 		try {
 			return saxBuilder.build(file);
 		} catch(JDOMException | IOException e) {
-			fine("Unable to read file as XML");
-			throw new XMLReadingException(e);
+			throw new XMLReadingException("Unable to read file as XML: "+e.getMessage(), e);
 		}
 	}
 	
@@ -114,6 +113,10 @@ public abstract class XMLReader<T> implements Loggable {
 	
 	protected int readInt(Element e, String name) {
 		return Integer.valueOf(e.getChildText(name));
+	}
+	
+	protected double readDouble(Element e, String name) {
+		return Double.valueOf(e.getChildText(name));
 	}
 	
 	protected void addKeyedValues(@NonNull Element e, @NonNull HashOptions o) {
@@ -205,7 +208,7 @@ public abstract class XMLReader<T> implements Loggable {
 		if(detectedObject.startsWith(IAnalysisOptions.NUCLEAR_SIGNAL) ) {
 			try {
 				
-				Element idElement = e.getChild(OptionsXMLCreator.SIGNAL_ID);
+				Element idElement = e.getChild(XMLCreator.ID_KEY);
 				UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());				
 				INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
 				addKeyedValues(e, n);				

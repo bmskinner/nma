@@ -74,6 +74,11 @@ public class SignalGroup implements ISignalGroup {
 	public ISignalGroup duplicate() {
 		return new SignalGroup(this);
 	}
+	
+	@Override
+	public boolean hasWarpedSignals() {
+		return warpedSignals!=null;
+	}
     
 	@Override
 	public Optional<IWarpedSignal> getWarpedSignals() {

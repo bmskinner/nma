@@ -40,6 +40,49 @@ import ij.process.ImageProcessor;
 public interface IWarpedSignal extends Serializable, Loggable {
 	
 	/**
+	 * Create a byte array from the given image processor
+	 * @param ip
+	 * @return
+	 */
+	static byte[][] toByteArrayArray(ByteProcessor ip) {
+		byte[][] arr = new byte[ip.getWidth()][ip.getHeight()];
+
+		for(int w=0; w<ip.getWidth(); w++) {
+			for(int h=0; h<ip.getHeight(); h++) {
+				arr[w][h] = (byte) ip.get(w, h);
+			}
+		}
+		return arr;
+	}
+	
+	static byte[] toByteArray(ByteProcessor ip) {
+		byte[] arr = new byte[ip.getWidth()*ip.getHeight()];
+		return (byte[])ip.getPixels();
+//		
+//		for(int w=0; w<ip.getWidth(); w++) {
+//			for(int h=0; h<ip.getHeight(); h++) {
+//				arr[w][h] = (byte) ip.get(w, h);
+//			}
+//		}
+//		return arr;
+	}
+	
+	/**
+	 * Create a byte processor from the given array
+	 * @param arr
+	 * @return
+	 */
+	static ImageProcessor toImageProcessor(byte[][] arr) {
+		ByteProcessor image = new ByteProcessor(arr.length, arr[0].length);
+		for(int w=0; w<image.getWidth(); w++) {
+			for(int h=0; h<image.getHeight(); h++) {
+				image.set(w, h, arr[w][h]);
+			}
+		}
+		return image;
+	}
+	
+	/**
 	 * Create a copy of this signal
 	 * @return
 	 */

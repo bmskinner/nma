@@ -1,7 +1,12 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -23,7 +28,11 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -31,6 +40,8 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
+
+import ij.process.ByteProcessor;
 
 /**
  * Base class for creating XML representations of datasets 
@@ -43,6 +54,7 @@ public abstract class XMLCreator<T> {
 	
 	public static final String ANALYSIS_DATASET_KEY           = "AnalysisDataset";
 	public static final String CELL_COLLECTION_KEY            = "CellCollection";
+	public static final String CELLS_SECTION_KEY              = "Cells";
 	public static final String OUTPUT_FOLDER_KEY              = "OutputFolder";
 	public static final String NUCLEUS_TYPE_KEY               = "NucleusType";
 	public static final String NUCLEUS_NUMBER_KEY             = "NucleusNumber";
@@ -65,10 +77,11 @@ public abstract class XMLCreator<T> {
 	public static final String INDEX_KEY                      = "Index";
 	public static final String STATS_KEY                      = "MeasuredStatistics";
 	public static final String STAT_KEY                       = "Statistic";
+	public static final String COLOUR_KEY                     = "Colour";
 
 	public static final String DATASET_NAME_KEY               = "DatasetName";
 	public static final String DATASET_ID_KEY                 = "DatasetId";
-	public static final String DATASET_COLOUR_KEY             = "DatasetColour";
+	
 	public static final String DATASET_ROOT_KEY               = "DatasetIsRoot";
 	
 	public static final String MERGE_SOURCES_SECTION_KEY      = "MergeSources";
@@ -102,10 +115,19 @@ public abstract class XMLCreator<T> {
 	
 	public static final String UUID_PREFIX = "UUID_";
 	
+	public static final String SIGNAL_GROUPS_SECTION_KEY   = "SignalGroups";
+	public static final String SIGNAL_GROUP_KEY    = "SignalGroup";
 	public static final String SIGNAL_GROUP_PREFIX = "SignalGroup_";
-	public static final String SIGNAL_ID         = "SignalGroupId";
-	public static final String SIGNAL_NAME       = "SignalGroupName";
-	public static final String CLUSTERS = "Clusters";
+	public static final String SHELL_RESULT_KEY    = "ShellResult";
+	
+	public static final String WARPED_SIGNALS_SECTION_KEY  = "WarpedSignals";
+	public static final String WARPED_SIGNAL_KEY   = "WarpedSignal";
+	public static final String WARPED_TARGET_KEY   = "TargetShape";
+	public static final String WARPED_SIG_ONLY_KEY = "SignalsOnly";
+	public static final String WARPED_BYTE_KEY     = "ByteArray";
+	public static final String WARPED_BYTE_SEP_KEY = "|"; // separate width and col byte arrays
+
+	public static final String CLUSTERS_SECTION_KEY = "Clusters";
 	public static final String CLUSTER_GROUP = "ClusterGroup";
 	public static final String CLUSTER_NAME  = "ClusterGroupName";
 	public static final String CLUSTER_TREE_KEY  = "ClusterGroupTree";
@@ -165,6 +187,10 @@ public abstract class XMLCreator<T> {
 		return false;
 	}
 	
+	public String toHex(Color c) {
+		return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());  
+	}
+	
 	
 	/**
 	 * Create XML for the given analysis options
@@ -185,7 +211,7 @@ public abstract class XMLCreator<T> {
 			// add signal group names
 			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
 				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
-				element.addContent(createElement(SIGNAL_ID, signalGroup.toString()));
+				element.addContent(createElement(ID_KEY, signalGroup.toString()));
 			}
 			
 			appendElement(element, options.getDetectionOptions(key).get());
@@ -206,9 +232,12 @@ public abstract class XMLCreator<T> {
 		e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType().toString()));
 		e.addContent(createElement(OUTPUT_FOLDER_KEY, collection.getOutputFolder().getAbsolutePath()));
 
+		Element cellsElement = new Element(CELLS_SECTION_KEY);
 		for(ICell cell : collection)
-			e.addContent(create(cell));
+			cellsElement.addContent(create(cell));
+		e.addContent(cellsElement);
 		
+		// Add consensus
 		if(collection.hasConsensus()) {
 			Element consensus = new Element(CONSENSUS_KEY);
 			consensus.addContent(create(collection.getConsensus()));
@@ -248,8 +277,66 @@ public abstract class XMLCreator<T> {
 			// ignore missing profiles
 		}
 		
+		// Add signal groups
+		if(collection.getSignalManager().hasSignals()) {
+			Element signalGroups = new Element(SIGNAL_GROUPS_SECTION_KEY);
+			for(UUID signalGroupId : collection.getSignalGroupIDs())
+				signalGroups.addContent(create(collection.getSignalGroup(signalGroupId).get(), signalGroupId));
+			e.addContent(signalGroups);
+		}
+		
 		return e;
 	}
+	
+	protected Element create(ISignalGroup signalGroup, UUID signalGroupId) {
+		Element e = new Element(SIGNAL_GROUP_KEY);
+		
+		e.addContent(createElement(ID_KEY, signalGroupId.toString()));
+		e.addContent(createElement(NAME_KEY, signalGroup.getGroupName()));
+		if(signalGroup.hasColour())
+			e.addContent(createElement(COLOUR_KEY, toHex(signalGroup.getGroupColour().get())));
+		
+		if(signalGroup.hasShellResult())
+			e.addContent(create(signalGroup.getShellResult().get()));
+		if(signalGroup.hasWarpedSignals())
+			e.addContent(create(signalGroup.getWarpedSignals().get()));
+		
+		return e;
+	}
+	
+	protected Element create(IShellResult shellResult) {
+		Element e = new Element(SHELL_RESULT_KEY);		
+		return e;
+	}
+	
+	
+	protected Element create(IWarpedSignal warpedSignal) {
+		Element e = new Element(WARPED_SIGNALS_SECTION_KEY);		
+		
+		for(WarpedSignalKey key : warpedSignal.getWarpedSignalKeys()) {
+			Element warp = new Element(WARPED_SIGNAL_KEY);	
+			warp.addContent(createElement(ID_KEY, warpedSignal.getSignalGroupId().toString()));
+			warp.addContent(createElement(NAME_KEY, warpedSignal.getTargetName(key)));
+			
+			Element target = new Element(WARPED_TARGET_KEY);
+			create(target, key.getTargetShape());
+			warp.addContent(target);
+			warp.addContent(createElement(WARPED_SIG_ONLY_KEY, String.valueOf(key.isCellWithSignalsOnly())));
+			
+			// Fetch the byte array corresponding to the warped image and stringify
+			ByteProcessor bp = (ByteProcessor) warpedSignal.getWarpedImage(key).get();
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append(Base64.getEncoder().encodeToString(IWarpedSignal.toByteArray(bp)));
+
+			warp.addContent(createElement(W_BASE_KEY, String.valueOf(bp.getWidth())));
+			warp.addContent(createElement(H_BASE_KEY, String.valueOf(bp.getHeight())));
+//			warp.addContent(createElement(WARPED_BYTE_KEY, sb.toString() ));
+			e.addContent(warp);
+		}		
+		return e;
+	}
+	
 	
 	protected Element create(ICell cell) {
 		Element e = new Element(CELL_KEY);

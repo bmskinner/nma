@@ -36,7 +36,7 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		if(template.hasAnalysisOptions())
 			appendElement(template, template.getAnalysisOptions().get(), rootElement);
 		
-		Element clusters = new Element(CLUSTERS);
+		Element clusters = new Element(CLUSTERS_SECTION_KEY);
 		for(IClusterGroup g : template.getClusterGroups()) {
 			if(g.getOptions().isPresent()) {
 				Element cluster = new Element(CLUSTER_GROUP);
@@ -79,11 +79,11 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
 				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
 				
-				Element signalId = new Element(OptionsXMLCreator.SIGNAL_ID);
+				Element signalId = new Element(XMLCreator.ID_KEY);
 				signalId.setText(signalGroup.toString());
 				element.addContent(signalId);
 				
-				Element signalName = new Element(OptionsXMLCreator.SIGNAL_NAME);
+				Element signalName = new Element(XMLCreator.NAME_KEY);
 				signalName.setText(groupName);
 				element.addContent(signalName);
 			}

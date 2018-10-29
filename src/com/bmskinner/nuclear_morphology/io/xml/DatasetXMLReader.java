@@ -76,12 +76,16 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 			Element analysisOptions = rootElement.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY);
 			NucleusType type = NucleusType.valueOf(analysisOptions.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
 			fact = new NucleusFactory(type);
-			windowProportion = Double.valueOf(analysisOptions.getChildText(XMLCreator.PROFILE_WINDOW_KEY));
+			windowProportion = readDouble(analysisOptions, XMLCreator.PROFILE_WINDOW_KEY);
 			
 			return readDataset(document.getRootElement(), type );
 			
 		} catch (ComponentCreationException e) {
+
 			throw new XMLReadingException("Could not create component from XML", e);
+		} catch(Exception e) {
+			stack(e);
+			throw new XMLReadingException("Error reading XML: invalid XML format", e);
 		}
 	}
 	
@@ -103,7 +107,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		ICellCollection c = readCollection(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, name, id);
 		IAnalysisDataset d = new DefaultAnalysisDataset(c, file);
 		
-		Element colour = e.getChild(XMLCreator.DATASET_COLOUR_KEY);
+		Element colour = e.getChild(XMLCreator.COLOUR_KEY);
 		if(colour!=null)
 			d.setDatasetColour(Color.decode(colour.getText()));
 		d.setName(name);
@@ -120,7 +124,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
 		NucleusType type = NucleusType.valueOf(e.getChild(XMLCreator.NUCLEUS_TYPE_KEY).getText());
 		op.setNucleusType(type);
-		double windowSize = Double.parseDouble(e.getChild(XMLCreator.PROFILE_WINDOW_KEY).getText());
+		double windowSize = readDouble(e, XMLCreator.PROFILE_WINDOW_KEY);
 		op.setAngleWindowProportion(windowSize);
 
 		// should be single elements with options class
@@ -136,7 +140,8 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 
 		ICellCollection collection = new DefaultCellCollection(null,outFolder, name, type, id);
 		
-		for(Element cell : e.getChildren(XMLCreator.CELL_KEY))
+		Element cellsElement = e.getChild(XMLCreator.CELLS_SECTION_KEY);
+		for(Element cell : cellsElement.getChildren(XMLCreator.CELL_KEY))
 			collection.add(readCell(cell));
 		
 		try {
@@ -148,7 +153,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		Element tags = e.getChild(XMLCreator.BORDER_TAGS_KEY);
 		for(Element tag : tags.getChildren()) {			
 			Tag t = readTag(tag);
-			int index = Integer.valueOf(tag.getChildText(XMLCreator.INDEX_KEY));
+			int index = readInt(tag, XMLCreator.INDEX_KEY);
 			collection.getProfileCollection().addIndex(t, index);
 		}
 		
@@ -170,10 +175,11 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 	}
 	
 	private void readChildDatasets(Element children, IAnalysisDataset parent) {
+		if(children==null)
+			return;
 		if(children.getChild(XMLCreator.CHILD_DATASET_KEY)==null)
 			return;
-//		if(children.getChildren(XMLCreator.CHILD_DATASET_KEY).isEmpty())
-//			return;
+
 		for(Element childElement : children.getChildren(XMLCreator.CHILD_DATASET_KEY)) {			
 			String name = childElement.getChildText(XMLCreator.DATASET_NAME_KEY);
 			UUID id = UUID.fromString(childElement.getChildText(XMLCreator.DATASET_ID_KEY));
@@ -184,7 +190,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 				childCollection.add(parent.getCollection().getCell(cellId));
 			}
 			IAnalysisDataset child = new ChildAnalysisDataset(parent, childCollection);
-			readClusterGroups(childElement.getChild(XMLCreator.CLUSTERS), child);
+			readClusterGroups(childElement.getChild(XMLCreator.CLUSTERS_SECTION_KEY), child);
 			parent.addChildDataset(child);
 			if(childElement.getChild(XMLCreator.CHILD_DATASETS_SECTION_KEY)!=null)
 				readChildDatasets(childElement.getChild(XMLCreator.CHILD_DATASETS_SECTION_KEY), child);

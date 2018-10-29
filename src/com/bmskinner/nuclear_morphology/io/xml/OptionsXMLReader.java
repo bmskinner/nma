@@ -104,9 +104,9 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 			Document document =  readDocument();
 
 			Element rootElement = document.getRootElement();
-			Element clusters = rootElement.getChild(OptionsXMLCreator.CLUSTERS);
+			Element clusters = rootElement.getChild(XMLCreator.CLUSTERS_SECTION_KEY);
 			if(clusters!=null) { // may not be present
-				for(Element component : clusters.getChildren(OptionsXMLCreator.CLUSTER_GROUP)) {
+				for(Element component : clusters.getChildren(XMLCreator.CLUSTER_GROUP)) {
 					IClusteringOptions o = buildClusteringOptions(component);
 					result.add(o);
 				}
@@ -131,10 +131,10 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 			Element rootElement = document.getRootElement();
 			for(Element signal : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY)) {
 				if(signal.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
-					Element idElement = signal.getChild(OptionsXMLCreator.SIGNAL_ID);
+					Element idElement = signal.getChild(XMLCreator.ID_KEY);
 					UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());		
 					
-					Element nameElement = signal.getChild(OptionsXMLCreator.SIGNAL_NAME);
+					Element nameElement = signal.getChild(XMLCreator.NAME_KEY);
 					String name = nameElement.getText();
 					result.put(id, name);
 				}

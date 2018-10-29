@@ -38,7 +38,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		rootElement.addContent(createElement(DATASET_ID_KEY, template.getId().toString()));
 		rootElement.addContent(createElement(DATASET_ROOT_KEY, String.valueOf(template.isRoot())));
 		if(template.hasDatasetColour())
-			rootElement.addContent(createElement(DATASET_COLOUR_KEY, toHex(template.getDatasetColour().get())));
+			rootElement.addContent(createElement(COLOUR_KEY, toHex(template.getDatasetColour().get())));
 		
 		if(template.hasMergeSources())
 			rootElement.addContent(createMergeSources());
@@ -54,13 +54,9 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		
 		return new Document(rootElement);
 	}
-	
-	private String toHex(Color c) {
-		return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());  
-	}
-	
+		
 	private Element createClusterGroups(IAnalysisDataset template) {
-		Element clusters = new Element(CLUSTERS);
+		Element clusters = new Element(CLUSTERS_SECTION_KEY);
 		for(IClusterGroup g : template.getClusterGroups()) {
 			if(g.getOptions().isPresent()) {
 				Element cluster = new Element(CLUSTER_GROUP);
@@ -98,8 +94,13 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		e.addContent(cells);
 		e.addContent(create(mge.getAnalysisOptions().get()));
 		
+		Element sources = new Element(MERGE_SOURCES_SECTION_KEY);
+		
 		for(IAnalysisDataset subMge : mge.getMergeSources())
-			addMergeSource(e, subMge);
+			addMergeSource(sources, subMge);
+		
+		if(sources.getContentSize()>0)
+			e.addContent(sources);
 		
 		element.addContent(e);
 	}
@@ -117,7 +118,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		e.addContent(createElement(DATASET_ID_KEY, child.getId().toString()));
 		
 		if(child.hasDatasetColour())
-			e.addContent(createElement(DATASET_COLOUR_KEY, toHex(child.getDatasetColour().get())));
+			e.addContent(createElement(COLOUR_KEY, toHex(child.getDatasetColour().get())));
 						
 		if(child.hasClusters())
 			e.addContent(createClusterGroups(child));

@@ -76,13 +76,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	@Override
 	public void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, boolean isCellWithSignalsOnly, @NonNull ByteProcessor image) {
 
-		byte[][] arr = new byte[image.getWidth()][image.getHeight()];
-		
-		for(int w=0; w<image.getWidth(); w++) {
-			for(int h=0; h<image.getHeight(); h++) {
-				arr[w][h] = (byte) image.get(w, h);
-			}
-		}
+		byte[][] arr = IWarpedSignal.toByteArrayArray(image);
 		
 		WarpedSignalKey k = new WarpedSignalKey(template, isCellWithSignalsOnly);
 		
@@ -96,13 +90,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			return Optional.empty();
 		
 		byte[][] arr = images.get(k);
-		ByteProcessor image = new ByteProcessor(arr.length, arr[0].length);
-		for(int w=0; w<image.getWidth(); w++) {
-			for(int h=0; h<image.getHeight(); h++) {
-				image.set(w, h, arr[w][h]);
-			}
-		}
-		return Optional.of(image);
+		return Optional.of(IWarpedSignal.toImageProcessor(arr));
 	}
 
 	@Override
@@ -117,6 +105,8 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			return targetNames.get(key);
 		return targetNames.get(new WarpedSignalKey(key.getTargetShape(), !key.isCellWithSignalsOnly()));
 	}
+	
+
 
 	@Override
 	public int hashCode() {

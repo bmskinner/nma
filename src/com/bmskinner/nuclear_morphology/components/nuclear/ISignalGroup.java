@@ -41,6 +41,12 @@ public interface ISignalGroup extends Serializable {
 	ISignalGroup duplicate();
 	
 	/**
+	 * Test if the group has warp results
+	 * @return true if warped signals are present, false otherwise
+	 */
+	boolean hasWarpedSignals();
+	
+	/**
      * Get the warped signals for the group, if present
      * 
      * @return
