@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,22 +12,23 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
-
-import ij.gui.Roi;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+
+import ij.gui.Roi;
 
 /**
  * The class of non-round nuclei from which all other assymetric nuclei derive
@@ -39,31 +40,28 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
 
     private static final long serialVersionUID = 1L;
 
-    private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<IBorderPoint>(3); // holds
-                                                                                              // the
-                                                                                              // points
-                                                                                              // considered
-                                                                                              // to
-                                                                                              // be
-                                                                                              // sperm
-                                                                                              // tails
-                                                                                              // before
-                                                                                              // filtering
-    protected transient boolean          clockwiseRP        = false;                          // is
-                                                                                              // the
-                                                                                              // original
-                                                                                              // orientation
-                                                                                              // of
-                                                                                              // the
-                                                                                              // nucleus
-                                                                                              // with
-                                                                                              // RP
-                                                                                              // clockwise
-                                                                                              // to
-                                                                                              // the
-                                                                                              // CoM,
-                                                                                              // or
-                                                                                              // not
+    // points considered to be sperm tails before filtering
+    private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<>(3);
+    
+   // Does the orientation of the nucleus have RP clockwise to the CoM. Only applicable to hooked sperm
+    protected transient boolean clockwiseRP = false;
+    
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image. It sets the immutable original centre of
+     * mass, and the mutable current centre of mass. It also assigns a random ID
+     * to the component.
+     * 
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
+     * @param id the id of the component. Only use when deserialising!
+     */
+    public AbstractAsymmetricNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, int number, @NonNull UUID id) {
+        super(roi, centreOfMass, source, channel, position, number, id);
+    }
 
     /**
      * Construct with an ROI, a source image and channel, and the original
@@ -84,21 +82,21 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
     }
 
     public List<IBorderPoint> getEstimatedTailPoints() {
-        return this.tailEstimatePoints;
+        return tailEstimatePoints;
     }
 
     protected void addTailEstimatePosition(IBorderPoint p) {
-        this.tailEstimatePoints.add(p);
+        tailEstimatePoints.add(p);
     }
 
     @Override
     public boolean isClockwiseRP() {
-        return this.clockwiseRP;
+        return clockwiseRP;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        tailEstimatePoints = new ArrayList<IBorderPoint>(0);
+        tailEstimatePoints = new ArrayList<>(0);
         clockwiseRP = false;
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.IOException;
@@ -158,6 +156,41 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
 
         MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions",
                 com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions.class);      
+        
+        /*
+         * Changes from 1.13.7 to 1.13.8
+         */
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions",
+        		com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.class);  
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableLobeDetectionOptions",
+        		com.bmskinner.nuclear_morphology.components.options.ILobeDetectionOptions.class);  
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions",
+        		com.bmskinner.nuclear_morphology.components.options.ICannyOptions.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions",
+        		com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions",
+        		com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.generic.IMutablePoint",
+                com.bmskinner.nuclear_morphology.components.generic.IPoint.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.IMutableCell",
+                com.bmskinner.nuclear_morphology.components.ICell.class); 
+        
+        /*
+         * Changes from 1.13.8 to 1.14.0
+         */
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.ClusteringOptions$ClusteringMethod",
+        		com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.ClusteringOptions$HierarchicalClusterMethod",
+        		com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod.class); 
+        
         
     }
 

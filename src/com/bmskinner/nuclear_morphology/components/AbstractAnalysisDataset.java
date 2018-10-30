@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,12 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.awt.Paint;
 import java.io.IOException;
 import java.io.Serializable;
@@ -29,6 +28,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -46,17 +47,20 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
 
     private static final long serialVersionUID = 1L;
 
+    /**The software version in which the dataset was created */
     protected final Version version;
 
-    // direct child collections
-    protected Set<IAnalysisDataset> childDatasets = new HashSet<IAnalysisDataset>(1);
+    /** Direct child datasets to this dataset */
+    protected Set<IAnalysisDataset> childDatasets = new HashSet<>();
 
+    /** The cell collection for this dataset */
     protected ICellCollection cellCollection;
 
+    /** The colour to draw this dataset in charts */
     protected Paint datasetColour = null;
 
-    // groups of cluster results
-    protected List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0);
+    /** Clusters identified in this dataset */
+    protected List<IClusterGroup> clusterGroups = new ArrayList<>();
 
     /**
      * Create a dataset from a cell collection
@@ -67,12 +71,12 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         this.cellCollection = collection;
         this.version = Version.currentVersion();
     }
-
+    
     public Version getVersion() {
         return this.version;
     }
 
-    public UUID getUUID() {
+    public UUID getId() {
         return cellCollection.getID();
     }
 
@@ -84,13 +88,13 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         cellCollection.setName(s);
     }
 
-    public void setDatasetColour(Paint colour) {
+    public void setDatasetColour(Color colour) {
         datasetColour = colour;
 
     }
 
-    public Optional<Paint> getDatasetColour() {
-        return Optional.ofNullable(datasetColour);
+    public Optional<Color> getDatasetColour() {
+        return Optional.ofNullable((Color)datasetColour);
     }
 
     public boolean hasDatasetColour() {
@@ -98,13 +102,13 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     }
 
     public boolean hasChild(IAnalysisDataset child) {
-        return childDatasets.contains(child);
+        return hasChild(child.getId());
     }
 
     public abstract Set<UUID> getChildUUIDs();
 
     public boolean hasChild(UUID child) {
-        return this.getChildUUIDs().contains(child);
+        return getChildUUIDs().contains(child);
     }
 
     public boolean hasRecursiveChild(IAnalysisDataset child) {
@@ -119,7 +123,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         return false;
     }
 
-    public abstract void deleteClusterGroup(IClusterGroup group);
+    public abstract void deleteClusterGroup(@NonNull IClusterGroup group);
 
     public void addClusterGroup(IClusterGroup group) {
         this.clusterGroups.add(group);
@@ -190,5 +194,56 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     	// passed upwards here for the import method to handle.
         in.defaultReadObject();
     }
+    
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cellCollection == null) ? 0 : cellCollection.hashCode());
+		result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
+		result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
+		result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractAnalysisDataset other = (AbstractAnalysisDataset) obj;
+		if (cellCollection == null) {
+			if (other.cellCollection != null)
+				return false;
+		} else if (!cellCollection.equals(other.cellCollection))
+			return false;
+		if (childDatasets == null) {
+			if (other.childDatasets != null)
+				return false;
+		} else if (!childDatasets.equals(other.childDatasets))
+			return false;
+		if (clusterGroups == null) {
+			if (other.clusterGroups != null)
+				return false;
+		} else if (!clusterGroups.equals(other.clusterGroups))
+			return false;
+		if (datasetColour == null) {
+			if (other.datasetColour != null)
+				return false;
+		} else if (!datasetColour.equals(other.datasetColour))
+			return false;
+		if (version == null) {
+			if (other.version != null)
+				return false;
+		} else if (!version.equals(other.version))
+			return false;
+		return true;
+	}
+    
+    
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
@@ -52,60 +50,43 @@ public class FloatPoint extends Point2D.Float implements IPoint {
     public FloatPoint(double x, double y) {
         super((float) x, (float) y);
     }
+    
+    /**
+     * Create from an existing point
+     * @param p
+     */
+    public FloatPoint(@NonNull FloatPoint p){
+    	super(p.x, p.y);
+    }
 
     /**
      * Create from an existing point
      * @param p
      */
-    public FloatPoint(@NonNull IPoint p) {
+    public FloatPoint(@NonNull IPoint p) {    	
         this(p.getX(), p.getY());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getXAsInt()
-     */
     @Override
     public int getXAsInt() {
-        return (int) Math.round(x);
+        return Math.round(x);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getYAsInt()
-     */
     @Override
     public int getYAsInt() {
-        return (int) Math.round(y);
+        return Math.round(y);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#setX(double)
-     */
     @Override
     public void setX(double x) {
         this.x = (float) x;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#setY(double)
-     */
     @Override
     public void setY(double y) {
         this.y = (float) y;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#set(components.generic.XYPoint)
-     */
     @Override
     public void set(@NonNull IPoint p) {
         if (p==null)
@@ -113,50 +94,37 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         this.x = (float) p.getX();
         this.y = (float) p.getY();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getLengthTo(components.generic.IPoint)
-     */
-    @Override
-    public double getLengthTo(@NonNull final IPoint a) {
-
-        if (a == null)
-            throw new IllegalArgumentException("Destination point is null");
-
-        // a2 = b2 + c2
-        double dx = Math.abs(this.getX() - a.getX());
-        double dy = Math.abs(this.getY() - a.getY());
+    
+    private double getLengthTo(final FloatPoint a) {
+    	 // a2 = b2 + c2
+        double dx = x - a.x;
+        double dy = y - a.y;
         double dx2 = dx * dx;
         double dy2 = dy * dy;
         double length = Math.sqrt(dx2 + dy2);
         return length;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#overlaps(components.generic.IPoint)
-     */
+    @Override
+    public double getLengthTo(@NonNull final IPoint a) {
+
+        if (a instanceof FloatPoint)
+            return getLengthTo((FloatPoint)a);
+
+        // a2 = b2 + c2
+        double dx = x - a.getX();
+        double dy = y - a.getY();
+        double dx2 = dx * dx;
+        double dy2 = dy * dy;
+        double length = Math.sqrt(dx2 + dy2);
+        return length;
+    }
+    
     @Override
     public boolean overlaps(@NonNull final IPoint a) {
-
-        if (a == null)
-            throw new IllegalArgumentException("Destination point is null");
-
-        if (this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()) {
-            return true;
-        } else {
-            return false;
-        }
+        return(this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isAbove(components.generic.XYPoint)
-     */
     @Override
     public boolean isAbove(@NonNull IPoint p) {
         if (p==null)
@@ -164,11 +132,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return y > p.getY();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isBelow(components.generic.XYPoint)
-     */
     @Override
     public boolean isBelow(@NonNull IPoint p) {
         if (p==null)
@@ -176,11 +139,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return y < p.getY();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isLeftOf(components.generic.XYPoint)
-     */
     @Override
     public boolean isLeftOf(@NonNull IPoint p) {
         if (p==null)
@@ -188,11 +146,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return x < p.getX();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#isRightOf(components.generic.XYPoint)
-     */
     @Override
     public boolean isRightOf(@NonNull IPoint p) {
         if (p==null)
@@ -200,38 +153,27 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return x > p.getX();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#offset(double, double)
-     */
     @Override
     public void offset(double x, double y) {
-        this.setX(this.getX() + x);
-        this.setY(this.getY() + y);
+        this.x += x;
+        this.y += y;
+    }
+    
+    public boolean overlapsPerfectly(@NonNull final FloatPoint a) {
+        return (this.x == a.x && this.y == a.y);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IPoint#overlapsPerfectly(components.generic.IPoint)
-     */
     @Override
     public boolean overlapsPerfectly(@NonNull final IPoint a) {
-        if (a==null)
-            throw new IllegalArgumentException("Point is null");
+        if (a instanceof FloatPoint)
+        	return overlapsPerfectly((FloatPoint)a);
         return (this.getX() == a.getX() && this.getY() == a.getY());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#toString()
-     */
+
     @Override
     public String toString() {
-        return String.format("%d - %d", getXAsInt(), getYAsInt());
+    	return getX() + " - " + getY();
     }
 
     @Override
@@ -239,87 +181,70 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#findAngle(components.generic.IPoint,
-     * components.generic.IPoint)
-     */
     @Override
-    public double findAngle(@NonNull IPoint a, @NonNull IPoint c) {
+    public double findSmallestAngle(@NonNull IPoint a, @NonNull IPoint c) {
 
-        if (a == null || c == null) {
+        if (a == null || c == null)
             throw new IllegalArgumentException("An input point is null in angle finding");
-        }
+        
+        if(a instanceof FloatPoint && c instanceof FloatPoint)
+        	return findSmallestAngle( (FloatPoint)a, (FloatPoint)c);
 
         /*
          * Test of rotation and comparison to a horizontal axis From
          * http://stackoverflow.com/questions/3486172/angle-between-3-points
+         * 
+         * The vectors are rotated so one is on the xaxis, at which point atan2 does the rest
          */
-
+        
         IPoint ab = IPoint.makeNew(x - a.getX(), y - a.getY());
         IPoint cb = IPoint.makeNew(x - c.getX(), y - c.getY());
 
-        double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot
-                                                                      // product
-        double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross
-                                                                        // product
+        double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
+        double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product
 
         double alpha = Math.atan2(cross, dot);
 
         return Math.abs(alpha * 180 / Math.PI);
+    }
+    
+    private double findSmallestAngle(@NonNull FloatPoint a, @NonNull FloatPoint c) {
 
-        /*
-         * Copy of ImageJ angle code from ij.gui.PolygonRoi#getAngleAsString()
-         */
+    	float abx = x-a.x;
+    	float aby = y-a.y;
+    	float cbx = x-c.x;
+    	float cby = y-c.y;
 
-        // float[] xpoints = { (float) a.getX(), (float) getX(), (float)
-        // b.getX()};
-        // float[] ypoints = { (float) a.getY(), (float) getY(), (float)
-        // b.getY()};
-        //
-        // double angle1 = 0.0;
-        // double angle2 = 0.0;
-        //
-        // angle1 = getFloatAngle(xpoints[0], ypoints[0], xpoints[1],
-        // ypoints[1]);
-        // angle2 = getFloatAngle(xpoints[1], ypoints[1], xpoints[2],
-        // ypoints[2]);
-        //
-        // double degrees = Math.abs(180-Math.abs(angle1-angle2));
-        // if (degrees>180.0)
-        // degrees = 360.0-degrees;
-        //
-        // return degrees;
+    	double dot = (abx * cbx + aby * cby); // dot product
+    	double cross = (abx * cby - aby * cbx); // cross product
+    	double alpha = Math.atan2(cross, dot);
+    	return Math.abs(alpha * 180 / Math.PI);
+    }
+    
+    @Override
+    public double findAbsoluteAngle(@NonNull IPoint start, @NonNull IPoint end) {
 
-        /*
-         * Test code - not working
-         */
+        if (start == null || end == null)
+            throw new IllegalArgumentException("Input points cannot be null for angle calculation");
+        IPoint ab = IPoint.makeNew(x - start.getX(), y - start.getY());
+        IPoint cb = IPoint.makeNew(x - end.getX(), y - end.getY());
 
-        // Use the cosine rule: a-b^2 = this-b^2 + this-a^2 - 2 * this-b *
-        // this-a * cos (theta)
+        double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
+        double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product
 
-        // double ab = a.getLengthTo(b);
-        // double bc = getLengthTo(b);
-        // double ac = getLengthTo(a);
-        //
-        // double ab2cosT = Math.pow(bc,2) + Math.pow(ac,2) - Math.pow(ab,2);
-        //
-        // double cosT = ab2cosT / (2 * ac * bc);
-        //
-        // double t = Math.acos(cosT);
-        // return Math.toDegrees(t);
-
-        /*
-         * OLD CODE - WORKING
-         */
-
-        // float[] xpoints = { (float) a.getX(), (float) getX(), (float)
-        // b.getX()};
-        // float[] ypoints = { (float) a.getY(), (float) getY(), (float)
-        // b.getY()};
-        // PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-        // return roi.getAngle();
+        double alpha = Math.atan2(cross, dot);
+                
+        double angle = alpha * 180 / Math.PI;
+//        System.out.println("Angle: "+angle);
+        
+        double neg = 0-angle;
+//        System.out.println("Negated angle: "+neg);
+        
+        double mod = (neg+360)%360;
+//        System.out.println("Mod angle: "+mod);
+        return mod;
+//        return (360+angle)%360;
+//        return Math.abs();
     }
 
     /**
@@ -337,12 +262,7 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         double dy = y1 - y2;
         return (180.0 / Math.PI) * Math.atan2(dy, dx);
     }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#equals(java.lang.Object)
-     */
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

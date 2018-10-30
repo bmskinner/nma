@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -25,8 +24,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
@@ -51,7 +50,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     public static final String  THRESHOLDING_LBL   = "Thresholding";
     private static final String RELOAD_LBL         = "Reload";
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
 
     private JPanel mainPanel;
 
@@ -60,7 +59,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * 
      * @param options
      */
-    public ConstructableSettingsPanel(IMutableAnalysisOptions options) {
+    public ConstructableSettingsPanel(IAnalysisOptions options) {
         this.options = options;
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -117,7 +116,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addEdgeThresholdSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-        Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         
@@ -154,7 +153,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addThresholdPanel(String optionsKey, String label) throws MissingOptionException {
-        Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ThresholdSettingsPanel(subOptions.get());
@@ -188,7 +187,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColourThresholdWatershedSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ColourThresholdWatershedSwitchPanel(subOptions.get());
@@ -221,7 +220,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addTopHatPanel(String optionsKey, String label) throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new TophatPanel(subOptions.get());
@@ -257,7 +256,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColorThresholdPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ColourThresholdingSettingsPanel(subOptions.get());
@@ -293,7 +292,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageProcessingPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ImagePreprocessingSettingsPanel(subOptions.get());
@@ -328,7 +327,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addSizePanel(String optionsKey, String label) throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ComponentSizeSettingsPanel(subOptions.get());
@@ -341,10 +340,8 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     /**
      * Add a panel for nucleus type and angle window size
      * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @param label
-     *            the label to give the panel
+     * @param optionsKey the options subtype to select
+     * @param label the label to give the panel
      * @return
      */
     public ConstructableSettingsPanel addNucleusProfilePanel(String optionsKey) {
@@ -354,42 +351,12 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     /**
      * Add a panel for nucleus type and angle window size
      * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @param label
-     *            the label to give the panel
+     * @param optionsKey the options subtype to select
+     * @param label the label to give the panel
      * @return
      */
     public ConstructableSettingsPanel addNucleusProfilePanel(String optionsKey, String label) {
         SettingsPanel panel = new NucleusProfileSettingsPanel(options);
-        panel.setBorder(BorderFactory.createTitledBorder(label));
-        this.addSubPanel(panel);
-        mainPanel.add(panel);
-        return this;
-    }
-
-    /**
-     * Add a panel for misc settings. E.g. keep filtered nuclei
-     * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @return
-     */
-    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey) {
-        return addMiscNucleusSettingsPanel(optionsKey, MISC_LBL);
-    }
-
-    /**
-     * Add a panel for misc settings. E.g. keep filtered nuclei
-     * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @param label
-     *            the label to give the panel
-     * @return
-     */
-    public ConstructableSettingsPanel addMiscNucleusSettingsPanel(String optionsKey, String label) {
-        SettingsPanel panel = new MiscNucleusSettingsPanel(options);
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -420,7 +387,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageChannelPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ImageChannelSettingsPanel(subOptions.get());
@@ -456,10 +423,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addCopyFromOpenPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
-        SettingsPanel panel = new CopyFromOpenDatasetPanel(subOptions.get());
+        SettingsPanel panel = new CopyFromOpenDatasetPanel(options, subOptions.get());
         if (label != null) {
             panel.setBorder(BorderFactory.createTitledBorder(label));
         }
@@ -472,18 +439,18 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     public void optionsChangeEventReceived(OptionsChangeEvent e) {
         super.optionsChangeEventReceived(e);
         if (this.hasSubPanel((SettingsPanel) e.getSource())) {
-            // update();
-
-            // if(e.getSource() instanceof EdgeThresholdSwitchPanel
-            // || e.getSource() instanceof ImagePreprocessingSettingsPanel
-            // || e.getSource() instanceof ImagePreprocessingSettingsPanel
-            // || e.getSource() instanceof ComponentSizeSettingsPanel
-            // || e.getSource() instanceof ImageChannelSettingsPanel){
-            fireProberReloadEvent(); // don't fire an update for values that
-                                     // have no effect on a prober
-            // }
+            fireProberReloadEvent();
         }
-
+    }
+    
+    /**
+     * Set the options values and update the spinners to match
+     * 
+     * @param options
+     */
+    public void set(IAnalysisOptions options) {
+    	this.options.set(options);
+    	update();
     }
 
 }

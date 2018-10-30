@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 
 import java.awt.Dimension;
@@ -26,6 +24,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -40,17 +39,18 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class SegmentHistogramsPanel extends HistogramsTabPanel {
 
     private Dimension preferredSize = new Dimension(200, 100);
 
-    public SegmentHistogramsPanel() {
-        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+    public SegmentHistogramsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
         JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");
         SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
@@ -61,12 +61,12 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateMultiple();
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         this.setEnabled(true);
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -127,7 +127,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel {
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         this.setEnabled(true);
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));

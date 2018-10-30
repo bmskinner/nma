@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 
 import java.awt.BorderLayout;
@@ -27,33 +25,36 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class SegmentsDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Nuclear segments";
+    
+    private JTabbedPane tabPanel;
 
-    public SegmentsDetailPanel() {
-        super();
+    public SegmentsDetailPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
 
-        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+        tabPanel = new JTabbedPane(JTabbedPane.TOP);
         tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        DetailPanel segmentProfilePanel = new SegmentProfilePanel();
-        DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel();
-        DetailPanel segmentHistogramsPanel = new SegmentHistogramsPanel();
-        DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel();
-        DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel();
-        DetailPanel segmentStatsPanel = new SegmentStatsPanel();
+        DetailPanel segmentProfilePanel = new SegmentProfilePanel(context);
+        DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel(context);
+        DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel(context);
+        DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel(context);
+        DetailPanel segmentStatsPanel = new SegmentStatsPanel(context);
 
         Dimension minimumChartSize = new Dimension(100, 100);
 
         segmentProfilePanel.setMinimumSize(minimumChartSize);
         segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
-        segmentHistogramsPanel.setMinimumSize(minimumChartSize);
         segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
         segmentMagnitudePanel.setMinimumSize(minimumChartSize);
         segmentStatsPanel.setMinimumSize(minimumChartSize);
@@ -61,13 +62,11 @@ public class SegmentsDetailPanel extends DetailPanel {
 
         this.addSubPanel(segmentProfilePanel);
         this.addSubPanel(segmentBoxplotsPanel);
-        this.addSubPanel(segmentHistogramsPanel);
         this.addSubPanel(segmentWilcoxonPanel);
         this.addSubPanel(segmentMagnitudePanel);
         this.addSubPanel(segmentStatsPanel);
 
         tabPanel.addTab(segmentBoxplotsPanel.getPanelTitle(), segmentBoxplotsPanel);
-        tabPanel.addTab(segmentHistogramsPanel.getPanelTitle(), segmentHistogramsPanel);
         tabPanel.addTab(segmentWilcoxonPanel.getPanelTitle(), segmentWilcoxonPanel);
         tabPanel.addTab(segmentMagnitudePanel.getPanelTitle(), segmentMagnitudePanel);
 

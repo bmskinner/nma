@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.BorderLayout;
@@ -23,20 +21,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.SystemColor;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,24 +42,36 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.BoxView;
+import javax.swing.text.ComponentView;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.Document;
 import javax.swing.text.Element;
+import javax.swing.text.IconView;
+import javax.swing.text.LabelView;
+import javax.swing.text.ParagraphView;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.View;
+import javax.swing.text.ViewFactory;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
-//import com.bmskinner.nuclear_morphology.io.Importer;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
-import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
@@ -80,44 +81,91 @@ import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
  *
  */
 @SuppressWarnings("serial")
-public class LogPanel extends DetailPanel implements ActionListener {
+public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
     private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
-    private static final String NEXT_HISTORY_ACTION = "Next";
-    private static final String PREV_HISTORY_ACTION = "Prev";
-
-    private static final String CHECK_CMD = "check";
-    private static final String HELP_CMD  = "help";
-    private static final String CLEAR_CMD = "clear";
-    private static final String THROW_CMD = "throw";
-    private static final String LIST_CMD  = "list";
-    private static final String KILL_CMD  = "kill";
-    private static final String REPAIR_CMD  = "unfuck";
-
-    private static final Map<String, Runnable> LOCAL_CMDS = new HashMap<>();
+    
+    private final EventHandler eh;
 
     private JTextPane textArea = new JTextPane();
+    
+    private final Console console = new Console();
 
     private JPanel logPanel;      // messages and errors
     private JPanel progressPanel; // progress bars for analyses
-
-    private JTextField console = new JTextField();
-
     private SimpleAttributeSet attrs; // the styling attributes
 
-    private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
-
-    int          historyIndex = -1;
-    List<String> history      = new LinkedList<String>();
-
-    {
-        commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
-        commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
-        commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
-        commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
-        commandMap.put("info", InterfaceMethod.INFO);
+    public LogPanel(@NonNull InputSupplier context, @NonNull EventHandler eh) {
+    	super(context);
+    	this.eh = eh;
+    	this.setLayout(new BorderLayout());
+    	this.logPanel = createLogPanel();
+    	
+    	addDatasetEventListener(eh);
+    	addInterfaceEventListener(eh);
+    	addSignalChangeListener(eh);
+    	textArea.setDropTarget(new MainDragAndDropTarget(eh));
+    	this.add(logPanel, BorderLayout.CENTER);
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return "Log panel";
     }
 
+    /**
+     * Create the log panel for updates
+     * 
+     * @return a scrollable panel
+     */
+    private JPanel createLogPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane();
+       
+        createTextPane();
+        scrollPane.setViewportView(textArea);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        progressPanel = new JPanel();
+
+        progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
+        panel.add(progressPanel, BorderLayout.NORTH);
+        panel.add(console, BorderLayout.SOUTH);
+
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
+                SHOW_CONSOLE_ACTION);
+        this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
+        return panel;
+    }
+    
+    private void createTextPane() {
+    	textArea.setEditorKit(new WrapEditorKit());
+        textArea.setEditable(false);
+        textArea.setBackground(SystemColor.menu);
+        Font font = new Font("Monospaced", Font.PLAIN, 13);
+        
+        // Set the wrapped line indent
+        StyledDocument doc = textArea.getStyledDocument();
+        attrs = new SimpleAttributeSet();
+        StyleConstants.setFirstLineIndent(attrs, -70);
+        StyleConstants.setLeftIndent(attrs, 70);
+        StyleConstants.setFontFamily(attrs, font.getFamily());
+        StyleConstants.setFontSize(attrs, font.getSize());
+        StyleConstants.setForeground(attrs, Color.BLACK);
+        StyleConstants.setBackground(attrs, SystemColor.menu);
+        StyleConstants.setItalic(attrs, false);
+        StyleConstants.setBold(attrs, false);
+
+        doc.setParagraphAttributes(0, doc.getLength() + 1, attrs, true);
+        doc.setCharacterAttributes(0, doc.getLength() + 1, attrs, true);
+
+        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+    }
+    
     private void listDatasets() {
         int i = 0;
         for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
@@ -138,199 +186,16 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
     }
     
-    @Override
-    public void setChartsAndTablesLoading() {
+    private void listTasks() {
+    	log(ThreadManager.getInstance().toString());
     }
 
-    public LogPanel() {
-        super();
-        this.setLayout(new BorderLayout());
-        this.logPanel = createLogPanel();
-        makeCommandList();
-        this.add(logPanel, BorderLayout.CENTER);
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return "Log panel";
-    }
+   
 
     /**
-     * Create the log panel for updates
-     * 
-     * @return a scrollable panel
+     * Print the given string
+     * @param s
      */
-    private JPanel createLogPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        JScrollPane scrollPane = new JScrollPane();
-
-        Font font = new Font("Monospaced", Font.PLAIN, 13);
-
-        // Set the wrapped line indent
-        StyledDocument doc = textArea.getStyledDocument();
-
-        attrs = new SimpleAttributeSet();
-        StyleConstants.setFirstLineIndent(attrs, -70);
-        StyleConstants.setLeftIndent(attrs, 70);
-        StyleConstants.setFontFamily(attrs, font.getFamily());
-        StyleConstants.setFontSize(attrs, font.getSize());
-        StyleConstants.setForeground(attrs, Color.BLACK);
-        StyleConstants.setBackground(attrs, SystemColor.menu);
-        StyleConstants.setItalic(attrs, false);
-        StyleConstants.setBold(attrs, false);
-
-        doc.setParagraphAttributes(0, doc.getLength() + 1, attrs, true);
-        doc.setCharacterAttributes(0, doc.getLength() + 1, attrs, true);
-
-        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-
-        textArea.setEditable(false);
-        textArea.setBackground(SystemColor.menu);
-
-        scrollPane.setViewportView(textArea);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        progressPanel = new JPanel();
-
-        progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-        panel.add(progressPanel, BorderLayout.NORTH);
-
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
-                SHOW_CONSOLE_ACTION); // grave accent new Character('\u0065')
-        this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
-
-        console.setFont(font);
-        panel.add(console, BorderLayout.SOUTH);
-        console.setVisible(false);
-        console.addActionListener(this);
-
-        console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
-                PREV_HISTORY_ACTION);
-
-        console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
-
-        console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
-                NEXT_HISTORY_ACTION);
-        console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
-
-        // Need an extra drop target for file opening as well as in the main
-        // window
-        DropTarget dropTarget = makePanelDropTarget();
-        textArea.setDropTarget(dropTarget);
-
-        return panel;
-    }
-
-    /**
-     * Make the list of local commands to run
-     */
-    private void makeCommandList() {
-        LOCAL_CMDS.put(CHECK_CMD, () -> {
-            validateDatasets();
-        });
-        LOCAL_CMDS.put(HELP_CMD, () -> {
-            log("Available commands: ");
-            for (String key : commandMap.keySet()) {
-                InterfaceMethod im = commandMap.get(key);
-                log(" " + key + " - " + im.toString());
-            }
-            log(" build - show the version info ");
-            log(" check - validate the open root datasets");
-            log(" list  - list the open root datasets");
-        });
-        LOCAL_CMDS.put(CLEAR_CMD, () -> {
-            clear();
-        });
-        LOCAL_CMDS.put(THROW_CMD, () -> {
-            log("Throwing exception");
-            try {
-                throw new IllegalArgumentException("Throwing an exception");
-            } catch (Exception e) {
-                error("Caught expected exception", e);
-            }
-        });
-        LOCAL_CMDS.put(LIST_CMD, () -> {
-            listDatasets();
-        });
-        LOCAL_CMDS.put(KILL_CMD, () -> {
-            killAllTasks();
-        });
-        
-        LOCAL_CMDS.put(REPAIR_CMD, () ->{
-        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets());
-        });
-    }
-
-    private DropTarget makePanelDropTarget() {
-        DropTarget d = new DropTarget() {
-
-            @Override
-            public synchronized void drop(DropTargetDropEvent dtde) {
-
-                try {
-                    fine("Drop event heard");
-                    dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-                    Transferable t = dtde.getTransferable();
-
-                    Set<File> fileList = new HashSet<File>();
-
-                    // Check that what was provided is a list
-                    if (t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>) {
-
-                        // Check that what is in the list is files
-                        List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
-                        for (Object o : tempList) {
-                            fine("Checking dropped object");
-
-                            if (o instanceof File) {
-                                fine("Object is a file");
-                                fileList.add((File) o);
-                            }
-                        }
-
-                        // Open the files - we open *.nmd files and analyse
-                        // directories
-
-                        for (File f : fileList) {
-                            fine("Checking dropped file");
-                            if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)) {
-                                finer("Opening file " + f.getAbsolutePath());
-
-                                getSignalChangeEventHandler().fireSignalChangeEvent("Open|" + f.getAbsolutePath());
-
-                            }
-                            
-                            if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
-                                fine("File is wrk");
-                                getSignalChangeEventHandler().fireSignalChangeEvent("Wrk|" + f.getAbsolutePath());
-
-                            }
-
-                            if (f.isDirectory()) {
-                                // Pass to new analysis
-                                getSignalChangeEventHandler().fireSignalChangeEvent("New|" + f.getAbsolutePath());
-
-                            }
-
-                        }
-                    }
-
-                } catch (UnsupportedFlavorException e) {
-                    error("Error in DnD", e);
-                } catch (IOException e) {
-                    error("IO error in DnD", e);
-                }
-
-            }
-
-        };
-        return d;
-    }
-
     public void print(String s) {
         StyledDocument doc = textArea.getStyledDocument();
 
@@ -346,14 +211,13 @@ public class LogPanel extends DetailPanel implements ActionListener {
         SwingUtilities.invokeLater(r);
 
     }
-
+    
     /**
-     * Set the text of the console
-     * 
+     * Print the given string with a new line
      * @param s
      */
-    private void setConsoleText(String s) {
-        console.setText(s);
+    public void println(String s) {
+    	print(s+System.getProperty("line.separator"));
     }
 
     /**
@@ -368,7 +232,8 @@ public class LogPanel extends DetailPanel implements ActionListener {
      * 
      * @return
      */
-    public List<JProgressBar> getProgressBars() {
+    @Override
+	public List<JProgressBar> getProgressBars() {
         List<JProgressBar> result = new ArrayList<JProgressBar>();
         for (Component c : progressPanel.getComponents()) {
             if (c.getClass().isInstance(JProgressBar.class)) {
@@ -379,12 +244,18 @@ public class LogPanel extends DetailPanel implements ActionListener {
         return result;
     }
 
-    public void addProgressBar(JProgressBar progressBar) {
+    @Override
+	public void addProgressBar(JProgressBar progressBar) {
         progressPanel.add(progressBar);
+        revalidate();
+        repaint();
     }
 
-    public void removeProgressBar(JProgressBar progressBar) {
+    @Override
+	public void removeProgressBar(JProgressBar progressBar) {
         progressPanel.remove(progressBar);
+        revalidate();
+        repaint();
     }
 
     private class ShowConsoleAction extends AbstractAction {
@@ -393,85 +264,13 @@ public class LogPanel extends DetailPanel implements ActionListener {
             super("Show console");
         }
 
-        public void actionPerformed(ActionEvent e) {
-            finest("Button pressed: " + e.getActionCommand());
-            if (console.isVisible()) {
-                console.setVisible(false);
-            } else {
-                console.setText(null);
-                console.setVisible(true);
-                console.grabFocus();
-                console.requestFocus();
-                console.requestFocusInWindow();
-            }
-            revalidate();
-            repaint();
+        @Override
+		public void actionPerformed(ActionEvent e) {
+            console.toggle();
         }
     }
 
-    private class PrevHistoryAction extends AbstractAction {
-
-        public PrevHistoryAction() {
-            super("Prev");
-        }
-
-        public void actionPerformed(ActionEvent e) {
-
-            if (history.isEmpty()) {
-                return;
-            }
-
-            if (historyIndex == history.size()) {
-                return;
-            }
-
-            historyIndex++;
-            console.setText(history.get(historyIndex));
-
-        }
-    }
-
-    private class NextHistoryAction extends AbstractAction {
-
-        public NextHistoryAction() {
-            super("Next");
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            if (history.isEmpty()) {
-                return;
-            }
-            if (historyIndex < 0) {
-                return;
-            }
-            if (historyIndex == 0) {
-                console.setText("");
-                return;
-            }
-
-            historyIndex--;
-            console.setText(history.get(historyIndex));
-
-        }
-    }
-
-    /*
-     * Listener for the console
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        if (e.getSource().equals(console)) {
-
-            log(console.getText());
-            history.add(console.getText());
-            // historyIndex=0;
-            runCommand(console.getText());
-
-            console.setText("");
-        }
-
-    }
+    
 
     private void validateDatasets() {
 
@@ -490,157 +289,258 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
     }
 
-    /**
-     * Run the given command from the console
-     * 
-     * @param command
-     */
-    private void runCommand(String command) {
-    	if (commandMap.containsKey(command)) {
-            getInterfaceEventHandler().fireInterfaceEvent(commandMap.get(command));
-        } else {
-
-            if (LOCAL_CMDS.containsKey(command)) {
-                LOCAL_CMDS.get(command).run();
-            } else {
-                log("Command not recognised");
-            }
-
-        }
-    }
-
     @Override
     public void update(List<IAnalysisDataset> list) {
         // Does nothing, no datasets are displayed.
         // Using DetailPanel only for signalling access
 
     }
-
-    /*
-     * 
-     * Copied from
-     * https://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/ A
-     * class to control the maximum number of lines to be stored in a Document
-     *
-     * Excess lines can be removed from the start or end of the Document
-     * depending on your requirement.
-     *
-     * a) if you append text to the Document, then you would want to remove
-     * lines from the start. b) if you insert text at the beginning of the
-     * Document, then you would want to remove lines from the end.
-     */
-    public class LimitLinesDocumentListener implements DocumentListener {
-        private int     maximumLines;
-        private boolean isRemoveFromStart;
-
-        /*
-         * Specify the number of lines to be stored in the Document. Extra lines
-         * will be removed from the start of the Document.
-         */
-        public LimitLinesDocumentListener(int maximumLines) {
-            this(maximumLines, true);
+    
+    class WrapEditorKit extends StyledEditorKit {
+        ViewFactory defaultFactory=new WrapColumnFactory();
+        public ViewFactory getViewFactory() {
+            return defaultFactory;
         }
-
-        /*
-         * Specify the number of lines to be stored in the Document. Extra lines
-         * will be removed from the start or end of the Document, depending on
-         * the boolean value specified.
-         */
-        public LimitLinesDocumentListener(int maximumLines, boolean isRemoveFromStart) {
-            setLimitLines(maximumLines);
-            this.isRemoveFromStart = isRemoveFromStart;
-        }
-
-        /*
-         * Return the maximum number of lines to be stored in the Document
-         */
-        public int getLimitLines() {
-            return maximumLines;
-        }
-
-        /*
-         * Set the maximum number of lines to be stored in the Document
-         */
-        public void setLimitLines(int maximumLines) {
-            if (maximumLines < 1) {
-                String message = "Maximum lines must be greater than 0";
-                throw new IllegalArgumentException(message);
+ 
+    }
+ 
+    class WrapColumnFactory implements ViewFactory {
+        public View create(Element elem) {
+            String kind = elem.getName();
+            if (kind != null) {
+                if (kind.equals(AbstractDocument.ContentElementName)) {
+                    return new WrapLabelView(elem);
+                } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
+                    return new ParagraphView(elem);
+                } else if (kind.equals(AbstractDocument.SectionElementName)) {
+                    return new BoxView(elem, View.Y_AXIS);
+                } else if (kind.equals(StyleConstants.ComponentElementName)) {
+                    return new ComponentView(elem);
+                } else if (kind.equals(StyleConstants.IconElementName)) {
+                    return new IconView(elem);
+                }
             }
-
-            this.maximumLines = maximumLines;
+ 
+            // default to text display
+            return new LabelView(elem);
         }
+    }
+ 
+    class WrapLabelView extends LabelView {
+        public WrapLabelView(Element elem) {
+            super(elem);
+        }
+ 
+        public float getMinimumSpan(int axis) {
+            switch (axis) {
+                case View.X_AXIS:
+                    return 0;
+                case View.Y_AXIS:
+                    return super.getMinimumSpan(axis);
+                default:
+                    throw new IllegalArgumentException("Invalid axis: " + axis);
+            }
+        }
+ 
+    }
+    
+    /**
+     * Allow typed commands for functions that are not ready to expose through the GUI 
+     * @author ben
+     *
+     */
+    private class Console extends JPanel implements ActionListener {
+    	 private JTextField console = new JTextField();
+    	 private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
 
-        // Handle insertion of new text into the Document
+    	private int historyIndex = -1;
+    	private List<String> history = new LinkedList<>();
+    	
+        private static final String NEXT_HISTORY_ACTION = "Next";
+        private static final String PREV_HISTORY_ACTION = "Prev";
 
-        public void insertUpdate(final DocumentEvent e) {
-            // Changes to the Document can not be done within the listener
-            // so we need to add the processing to the end of the EDT
+        private static final String HIST_CMD  = "history";
+        private static final String CHECK_CMD = "check";
+        private static final String HELP_CMD  = "help";
+        private static final String CLEAR_CMD = "clear";
+        private static final String THROW_CMD = "throw";
+        private static final String LIST_CMD  = "list";
+        private static final String KILL_CMD  = "kill";
+        private static final String REPAIR_CMD  = "unfuck";
+        private static final String TASKS_CMD  = "tasks";
+        private static final String HASH_CMD  = "check hash";
+        private static final String EXPORT_CMD = "export xml";
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    removeLines(e);
+        private final Map<String, Runnable> runnableCommands = new HashMap<>();
+
+    	{
+    		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
+    		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
+    		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
+    		commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
+    		commandMap.put("info", InterfaceMethod.INFO);
+    	}
+    	
+    	public Console() {
+    		setLayout(new BorderLayout());
+    		makeCommandList();
+    		Font font = new Font("Monospaced", Font.PLAIN, 13);
+    		console.setFont(font);
+            add(console, BorderLayout.CENTER);
+            setVisible(false);
+            console.addActionListener(this);
+
+            console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+                    PREV_HISTORY_ACTION);
+
+            console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
+
+            console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+                    NEXT_HISTORY_ACTION);
+            console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
+    	}
+    	
+    	/**
+    	 * Toggle the visibilty of the console
+    	 */
+    	public void toggle() {
+    		if (isVisible()) {
+                setVisible(false);
+            } else {
+            	setVisible(true);
+            	console.setText(null);
+                console.grabFocus();
+                console.requestFocus();
+                console.requestFocusInWindow();
+            }
+            revalidate();
+            repaint();
+    	}
+    	
+    	 /**
+         * Make the list of local commands to run
+         */
+        private void makeCommandList() {
+        	runnableCommands.put(HIST_CMD, () -> {
+                log("History: ");
+                for (String s : history)
+                    log("\t"+s);
+            });
+        	
+        	
+        	runnableCommands.put(HASH_CMD, ()->{
+        		Set<IAnalysisDataset> datasets = DatasetListManager.getInstance().getAllDatasets();
+        		
+        		for(IAnalysisDataset d : datasets)
+        			log(d.getName()+": "+d.hashCode());
+        		
+        	});
+        	
+            
+            runnableCommands.put(HELP_CMD, () -> {
+                log("Available commands: ");
+                for (String key : commandMap.keySet()) {
+                    InterfaceMethod im = commandMap.get(key);
+                    log(" " + key + " - " + im.toString());
+                }
+                log(" check - validate the open root datasets");
+                log(" list  - list the open root datasets");
+                log(" export xml - export the selected dataset in XML format");
+                log(" tasks - list the current task list");
+                log(" "+HASH_CMD+" - print the hashes of the selected datasets");
+            });
+           
+            runnableCommands.put(THROW_CMD, () -> {
+                log("Throwing exception");
+                try {
+                    throw new IllegalArgumentException("Throwing an exception");
+                } catch (Exception e) {
+                    error("Caught expected exception", e);
                 }
             });
+            
+            runnableCommands.put(CHECK_CMD,  () -> validateDatasets());
+            runnableCommands.put(CLEAR_CMD,  () -> clear());
+            runnableCommands.put(LIST_CMD,   () -> listDatasets());
+            runnableCommands.put(KILL_CMD,   () -> killAllTasks());
+            runnableCommands.put(TASKS_CMD,  () -> listTasks());
+            runnableCommands.put(REPAIR_CMD, () -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets()));
+            runnableCommands.put(EXPORT_CMD, () -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_XML_DATASET));
         }
-
-        public void removeUpdate(DocumentEvent e) {
-        }
-
-        public void changedUpdate(DocumentEvent e) {
-        }
-
-        /*
-         * Remove lines from the Document when necessary
+    	
+        /**
+         * Run the given command from the console
+         * 
+         * @param command
          */
-        private void removeLines(DocumentEvent e) {
-            // The root Element of the Document will tell us the total number
-            // of line in the Document.
+        private void runCommand(String command) {
+        	if (commandMap.containsKey(command)) {
+                getInterfaceEventHandler().fire(InterfaceEvent.of(this, commandMap.get(command)));
+            } else {
 
-            Document document = e.getDocument();
-            Element root = document.getDefaultRootElement();
-
-            while (root.getElementCount() > maximumLines) {
-                if (isRemoveFromStart) {
-                    removeFromStart(document, root);
+                if (runnableCommands.containsKey(command)) {
+                    runnableCommands.get(command).run();
                 } else {
-                    removeFromEnd(document, root);
+                    log("Command not recognised");
                 }
+
+            }
+        }
+    	
+    	/*
+         * Listener for the console
+         */
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            if (e.getSource().equals(console)) {
+                log(console.getText());
+                history.add(console.getText());
+                historyIndex=history.size();
+                runCommand(console.getText());
+                console.setText("");
+            }
+        }
+    	
+    	private class PrevHistoryAction extends AbstractAction {
+
+            public PrevHistoryAction() {
+                super("Prev");
+            }
+
+            @Override
+    		public void actionPerformed(ActionEvent e) {
+            	if (history.isEmpty())
+                    return;
+                if (historyIndex > -1) {
+                	historyIndex--;
+                }
+                if (historyIndex == -1) {
+                    console.setText("");
+                    return;
+                }
+                console.setText(history.get(historyIndex));
             }
         }
 
-        /*
-         * Remove lines from the start of the Document
-         */
-        private void removeFromStart(Document document, Element root) {
-            Element line = root.getElement(0);
-            int end = line.getEndOffset();
+        private class NextHistoryAction extends AbstractAction {
 
-            try {
-
-                document.remove(0, end);
-            } catch (BadLocationException ble) {
-
-                logToImageJ("Error removing lines", ble);
+            public NextHistoryAction() {
+                super("Next");
             }
-        }
 
-        /*
-         * Remove lines from the end of the Document
-         */
-        private void removeFromEnd(Document document, Element root) {
-            // We use start minus 1 to make sure we remove the newline
-            // character of the previous line
+            @Override
+    		public void actionPerformed(ActionEvent e) {
+            	if (history.isEmpty()) {
+            		historyIndex=0;
+                    return;
+            	}
+                if (historyIndex >= history.size()-1)
+                    return;
+                historyIndex++;
+                console.setText(history.get(historyIndex));
 
-            Element line = root.getElement(root.getElementCount() - 1);
-            int start = line.getStartOffset();
-            int end = line.getEndOffset();
-
-            try {
-                document.remove(start - 1, end - start);
-            } catch (BadLocationException ble) {
-                logToImageJ("Error removing lines", ble);
             }
         }
     }
-
 }

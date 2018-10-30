@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.GridBagLayout;
@@ -28,7 +27,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 /**
  * Set the radius for top hat filtering
@@ -48,9 +46,9 @@ public class TophatPanel extends SettingsPanel {
 
     private JSpinner radiusSpinner;
 
-    private IMutableDetectionOptions options;
+    private IDetectionOptions options;
 
-    public TophatPanel(final IMutableDetectionOptions options) {
+    public TophatPanel(final IDetectionOptions options) {
         this.options = options;
         createSpinners();
         createPanel();
@@ -106,10 +104,10 @@ public class TophatPanel extends SettingsPanel {
     /**
      * Update the display to the given options
      * 
-     * @param options
-     *            the options values to be used
+     * @param options the options values to be used
      */
-    protected void update() {
+    @Override
+	protected void update() {
         super.update();
         isUpdating = true;
         radiusSpinner.setValue(options.getInt(IDetectionOptions.TOP_HAT_RADIUS));

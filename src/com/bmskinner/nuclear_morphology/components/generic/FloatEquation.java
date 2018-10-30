@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
@@ -33,11 +31,8 @@ public class FloatEquation implements LineEquation {
     /**
      * Constructor using gradient and intercept.
      *
-     * @param m
-     *            the gradient of the line
-     * @param c
-     *            the y-intercept of the line
-     * @return An Equation describing the line
+     * @param m the gradient of the line
+     * @param c  the y-intercept of the line
      */
     public FloatEquation(final float m, final float c) {
 
@@ -55,28 +50,22 @@ public class FloatEquation implements LineEquation {
 
 
     /**
-     * Constructor using two Points.
+     * Constructor using two points.
      *
-     * @param a
-     *            the first IPoint
-     * @param b
-     *            the second IPoint
-     * @return An Equation describing the line between the points
+     * @param a the first point
+     * @param b the second point
      */
     public FloatEquation(IPoint a, IPoint b) {
-
         this(a.toPoint2D(), b.toPoint2D());
     }
     
     public FloatEquation(Point2D a, Point2D b) {
 
-        if (a == null || b == null) {
+        if (a == null || b == null)
             throw new IllegalArgumentException("Point a or b is null");
-        }
         
-        if(a.getX()==b.getX() && a.getY()==b.getY()){
+        if(a.getX()==b.getX() && a.getY()==b.getY())
             throw new IllegalArgumentException("Point a and b are identical: "+a.toString());
-        }
         
         float aX = (float) a.getX();
         float bX = (float) b.getX();
@@ -96,68 +85,34 @@ public class FloatEquation implements LineEquation {
         this.c = (float) (a.getY() - (m * aX));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#getX(double)
-     */
     @Override
     public double getX(double y) {
         // x = (y-c)/m
         return isVert?xf:(y - c) / m;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#getY(double)
-     */
     @Override
     public double getY(double x) {
         return (this.m * x) + this.c;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getM()
-     */
     @Override
     public double getM() {
         return this.m;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getC()
-     */
     @Override
     public double getC() {
         return this.c;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#isOnLine(com
-     * .bmskinner.nuclear_morphology.components.generic.IPoint)
-     */
+
     @Override
     public boolean isOnLine(IPoint p) {
         return isVert?Math.abs(p.getX()-xf)<0.0000001:Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#
-     * getPointOnLine(com.bmskinner.nuclear_morphology.components.generic.
-     * IPoint, double)
-     */
+
     @Override
     public IPoint getPointOnLine(IPoint p, double distance) {
         if(isVert) return IPoint.makeNew(p.getX(), p.getY()+distance);
@@ -175,13 +130,6 @@ public class FloatEquation implements LineEquation {
         return IPoint.makeNew(newX, newY);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#
-     * getPerpendicular(com.bmskinner.nuclear_morphology.components.generic.
-     * IPoint)
-     */
     @Override
     public LineEquation getPerpendicular(IPoint p) {
 
@@ -199,13 +147,6 @@ public class FloatEquation implements LineEquation {
         return new DoubleEquation(pM, pC);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#translate(
-     * com.bmskinner.nuclear_morphology.components.generic.IPoint)
-     */
     @Override
     public LineEquation translate(IPoint p) {
         if(isVert) return this;
@@ -219,13 +160,6 @@ public class FloatEquation implements LineEquation {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#getIntercept
-     * (com.bmskinner.nuclear_morphology.components.generic.Equation)
-     */
     @Override
     public IPoint getIntercept(LineEquation eq) {
         // (this.m * x) + this.c = (eq.m * x) + eq.c
@@ -240,13 +174,6 @@ public class FloatEquation implements LineEquation {
         return IPoint.makeNew(x, y);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#intersects(
-     * com.bmskinner.nuclear_morphology.components.generic.DoubleEquation)
-     */
     @Override
     public boolean intersects(DoubleEquation eq) {
         if (Math.abs(m - eq.m) < 0.000001) { // they are parallel
@@ -280,13 +207,6 @@ public class FloatEquation implements LineEquation {
         return p;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#
-     * getClosestDistanceToPoint(com.bmskinner.nuclear_morphology.components.
-     * generic.IPoint)
-     */
     @Override
     public double getClosestDistanceToPoint(IPoint p) {
 

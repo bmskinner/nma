@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.event.WindowAdapter;
@@ -23,11 +21,12 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JOptionPane;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MessagingDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 /**
  * This dialog contins a CellViewModel and is used as a base for any dialogs
@@ -132,10 +131,15 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
             dataset.getCollection().replaceCell(workingCell);
 
             // Trigger a dataset update and reprofiling
-            dataset.getCollection().createProfileCollection();
+            try {
+				dataset.getCollection().createProfileCollection();
+			} catch (ProfileException e) {
+				warn("Unable to profile cell collection");
+				stack(e);
+			}
             cellModel.swapCell(workingCell);
 
-            fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+            fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
         }
     }
 

@@ -1,22 +1,19 @@
 /*******************************************************************************
- *      Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.Color;
@@ -51,7 +48,10 @@ public class MemoryIndicator extends JPanel
     
     public MemoryIndicator() {
       Thread t = new Thread(this);
+      t.setName("Memory use tracking thread");
       t.start();
+      long max = Runtime.getRuntime().maxMemory();
+      this.setToolTipText("Maximum memory "+formatMemory(max));
     }
     
     @Override
@@ -60,12 +60,11 @@ public class MemoryIndicator extends JPanel
         try {
           Thread.sleep(1000L);
         } catch (InterruptedException e) {
-            
+            // do nothing
         }
         
-        if (mustWarn && !hasWarned) {
+        if (mustWarn && !hasWarned)
           showMemoryWarning();
-        }
         repaint();
       } while(true);
     }
@@ -76,11 +75,9 @@ public class MemoryIndicator extends JPanel
     }
     
     private synchronized void showMemoryWarning(){
-      if (this.hasWarned) {
+      if (this.hasWarned)
         return;
-      }
-      this.hasWarned = true;
-      
+      hasWarned = true;
       JOptionPane.showMessageDialog(null, LOW_MEMORY_MSG, LOW_MEMORY_TTL, JOptionPane.WARNING_MESSAGE);
     }
     
@@ -98,7 +95,7 @@ public class MemoryIndicator extends JPanel
       long max = Runtime.getRuntime().maxMemory();
       long allocated = Runtime.getRuntime().totalMemory();
       long used = allocated - Runtime.getRuntime().freeMemory();
-      
+
       g.setColor(DARK_GREEN);
       g.fillRect(xStart, 0, xWidth, getHeight());
       
@@ -113,15 +110,15 @@ public class MemoryIndicator extends JPanel
       int usedPercentage = (int)(100.0D * ( (double)used / (double)max));
       g.setColor(Color.WHITE);
       g.drawString(usedPercentage + "%", xStart + xWidth / 2 - 10, getHeight() - 5);
-      
-//      log("Memory: "+usedPercentage);
+
       if ((usedPercentage > 90) && (!this.hasWarned)) {
         this.mustWarn = true;
       }
     }
     
-    
-            
-
-    
+    private String formatMemory(long value) {
+    	int mb = 1024 * 1024;
+    	long m = value/mb;
+    	return  m+" MiB";
+    }
 }

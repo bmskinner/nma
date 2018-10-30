@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -32,8 +31,10 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 
 /**
  * A size settings panel for signals, which replaces the max size with a max
@@ -63,7 +64,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
     private JSpinner minCircSpinner;
     private JSpinner maxCircSpinner;
 
-    public SignalSizeSettingsPanel(final IMutableNuclearSignalOptions options) {
+    public SignalSizeSettingsPanel(final INuclearSignalOptions options) {
         super(options);
         this.add(createPanel(), BorderLayout.CENTER);
 
@@ -73,7 +74,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
      * Create the settings spinners based on the input options
      */
     private void createSpinners() {
-        IMutableNuclearSignalOptions op = (IMutableNuclearSignalOptions) options;
+    	INuclearSignalOptions op = (INuclearSignalOptions) options;
 
         minSizeSpinner = new JSpinner(
                 new SpinnerNumberModel(new Integer((int) options.getMinSize()), MIN_RANGE_SIZE, null, SIZE_STEP_SIZE));
@@ -137,7 +138,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
     @Override
     protected void update() {
         super.update();
-        IMutableNuclearSignalOptions op = (IMutableNuclearSignalOptions) options;
+        INuclearSignalOptions op = (INuclearSignalOptions) options;
 
         minSizeSpinner.setValue((int) options.getMinSize());
         maxSizeSpinner.setValue(op.getMaxFraction());
@@ -154,21 +155,21 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
         maxCircSpinner.setEnabled(b);
 
     }
-
+    
     /**
      * Set the options values and update the spinners to match
      * 
      * @param options
      */
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
+    public void set(@NonNull INuclearSignalOptions options) {
+    	this.options.set(options);
+    	update();
     }
 
     @Override
     public void stateChanged(ChangeEvent e) {
 
-        IMutableNuclearSignalOptions op = (IMutableNuclearSignalOptions) options;
+    	INuclearSignalOptions op = (INuclearSignalOptions) options;
 
         try {
 

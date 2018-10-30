@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,15 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
 
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 public class ColourSelecter {
 
@@ -68,8 +66,9 @@ public class ColourSelecter {
      *
      */
     public enum ColourSwatch {
-        REGULAR_SWATCH("Regular"), NO_SWATCH("No colours"), ACCESSIBLE_SWATCH(
-                "Acessible colours");
+        REGULAR_SWATCH("Regular"), 
+        NO_SWATCH("No colours"), 
+        ACCESSIBLE_SWATCH("Accessible colours");
 
         private final String name;
 
@@ -84,44 +83,29 @@ public class ColourSelecter {
 
     /**
      * Get an appropriate segment colour for the given number, and the current
-     * swatch
+     * global swatch
      * 
-     * @param i
-     *            the number of the colour to return
+     * @param i the number of the colour to return
      * @return a colour
      */
     public static Color getColor(int i) {
-
-        Color color = null;
-        ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
-        switch (swatch) {
-        case ACCESSIBLE_SWATCH:
-            color = getOptimisedColor(i);
-            break;
-        case NO_SWATCH:
-            color = Color.BLACK;
-            break;
-        case REGULAR_SWATCH:
-            color = getRegularColor(i);
-            break;
-//        case AI_SWATCH:
-//            color = getAIColor(i);
-//            break;
-        default:
-            color = getRegularColor(i);
-            break;
-
-        }
-
-        return color;
+        return getColor(i, GlobalOptions.getInstance().getSwatch());
+    }
+    
+    public static Color getColor(int i, ColourSwatch swatch) {
+    	switch (swatch) {
+	        case ACCESSIBLE_SWATCH: return getOptimisedColor(i);
+	        case NO_SWATCH:         return Color.BLACK;
+	        case REGULAR_SWATCH:    return getRegularColor(i);
+	        default:                return getRegularColor(i);
+    	}
     }
 
     /**
      * Get an appropriate colour for the given number from the AI colour set.
      * Loops through 8 colours.
      * 
-     * @param i
-     *            the number of the colour to return
+     * @param i the number of the colour to return
      * @return a colour
      */
     private static Color getAIColor(int i) {

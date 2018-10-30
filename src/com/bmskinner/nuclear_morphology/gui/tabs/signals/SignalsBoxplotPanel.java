@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
@@ -25,6 +23,7 @@ import java.util.logging.Level;
 
 import javax.swing.JScrollPane;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
@@ -34,14 +33,15 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
-    public SignalsBoxplotPanel() {
-        super(CellularComponent.NUCLEAR_SIGNAL);
+    public SignalsBoxplotPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_SIGNAL);
         createUI();
     }
 
@@ -70,7 +70,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
         }
 
         // add the scroll pane to the tab
-        scrollPane = new JScrollPane(mainPanel);
+//        scrollPane = new JScrollPane(mainPanel);
         this.add(scrollPane, BorderLayout.CENTER);
 
     }

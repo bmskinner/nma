@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
-import java.awt.event.ActionEvent;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -34,6 +34,7 @@ import java.util.List;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
@@ -45,20 +46,23 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYZDataset;
 
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
+import com.bmskinner.nuclear_morphology.charting.datasets.FloatXYDataset;
+import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.io.SaveDialog;
 
 /**
- * This panel should add a right click menu item for 'Export' This will extract
- * the chart data, and save it to a desired location. It also redraws the chart
+ * This extension to a standard ChartPanel adds a popup menu item for copying
+ * and exporting the underlying chart data. It also redraws the chart
  * as the panel is resized for better UX. The flag setFixedAspectRatio can be
  * used to give the chart a fixed aspect ratio. This replaces the dedicated
  * FixedAspectRatioChartPanel class
@@ -68,51 +72,45 @@ import ij.io.SaveDialog;
  */
 @SuppressWarnings("serial")
 public class ExportableChartPanel extends ChartPanel implements Loggable, ChartSetEventListener {
+	
+	private static final String EXPORT_LBL = "Export data";
+	private static final String COPY_LBL   = "Copy data";
 
-    protected final List<Object> listeners = new ArrayList<Object>();
+    protected final List<Object> listeners = new ArrayList<>();
 
-    /**
-     * Control if the axis scales should be set to maintain aspect ratio
-     */
+    /** Control if the axis scales should be set to maintain aspect ratio */
     protected boolean isFixedAspectRatio = false;
 
-    /**
-     * Used for subclasses with mouse listeners
-     */
+    /** Used for subclasses with mouse listeners */
     protected volatile boolean mouseIsDown = false;
 
-    /**
-     * Used for subclasses with mouse listeners
-     */
+    /**  Used for subclasses with mouse listeners */
     protected volatile boolean isRunning = false;
 
     /**
      * The default bounds of the chart when empty: both axes run
-     * -DEFAULT_AUTO_RANGE to +DEFAULT_AUTO_RANGE
+     * -{@link #DEFAULT_AUTO_RANGE} to +{@link #DEFAULT_AUTO_RANGE}
      */
     protected static final double DEFAULT_AUTO_RANGE = 10;
 
-    public static final String NEWLINE = System.getProperty("line.separator");
-
-    public ExportableChartPanel(JFreeChart chart) {
+    public ExportableChartPanel(@NonNull JFreeChart chart) {
         super(chart, false);
-
-        // getChartRenderingInfo().setEntityCollection(null);
 
         JPopupMenu popup = this.getPopupMenu();
         popup.addSeparator();
+        
+        JMenuItem copyItem = new JMenuItem(COPY_LBL);
+        copyItem.addActionListener(e->copy());
+        copyItem.setEnabled(true);
+        popup.add(copyItem);
 
-        JMenuItem exportItem = new JMenuItem("Export data...");
-        exportItem.addActionListener(this);
-        exportItem.setActionCommand("Export");
+        JMenuItem exportItem = new JMenuItem(EXPORT_LBL);
+        exportItem.addActionListener(e->export());
         exportItem.setEnabled(true);
-
         popup.add(exportItem);
 
-        this.setPopupMenu(popup);
-
         // Ensure that the chart text and images are redrawn to
-        // a proper aspect ratio when the panel is resized
+        // a proper aspect ratio when the panel is resized        
         this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -129,6 +127,13 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         setMinimumDrawHeight(this.getHeight());
     }
 
+    /**
+     * Set if the panel should be considered to have a fixed aspect ratio.
+     * If true, the tick units of the x and y axes will have the same size
+     * on screen, and the axis ranges will update to fit the dimensions of the
+     * chart panel.
+     * @param b
+     */
     public void setFixedAspectRatio(boolean b) {
         isFixedAspectRatio = b;
 
@@ -147,6 +152,10 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         }
     }
 
+    /**
+     * Test if the panel is set to use a fixed aspect ratio
+     * @return
+     */
     public boolean isFixedAspectRatio() {
         return isFixedAspectRatio;
     }
@@ -178,14 +187,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
         return w / h;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jfree.chart.ChartPanel#setChart(org.jfree.chart.JFreeChart)
-     * 
-     * Allows a message to be sent to registered ChartSetEventListeners that a
-     * new chart has been set
-     */
+
     @Override
     public void setChart(JFreeChart chart) {
         super.setChart(chart);
@@ -193,7 +195,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             fireChartSetEvent();
         } catch (NullPointerException e) {
             // This occurs during init because setChart is called internally in
-            // ChartPanel
+            // ChartPanel constructor
             // Catch and ignore
         }
 
@@ -335,149 +337,158 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
     }
 
-    private String getData() {
-
-        String result = "";
+    private String getChartData() {
 
         try {
 
             if (this.getChart().getPlot() instanceof CategoryPlot) {
-
-                if (this.getChart().getCategoryPlot().getDataset() instanceof ShellResultDataset) {
-
+            	CategoryPlot plot = this.getChart().getCategoryPlot();
+                if (plot.getDataset() instanceof ShellResultDataset)
                     return getShellData();
-                }
-
-                if (this.getChart().getCategoryPlot().getDataset() instanceof BoxAndWhiskerCategoryDataset) {
-
+                if (plot.getDataset() instanceof BoxAndWhiskerCategoryDataset)
                     return getBoxplotData();
-                }
 
             } else {
-
-                if (this.getChart().getXYPlot().getDataset() instanceof DefaultXYDataset) {
-
-                    return getXYProfileData(); // single profiles
-
-                }
-
-                if (this.getChart().getXYPlot().getDataset() instanceof HistogramDataset) {
-
+            	XYPlot plot = getChart().getXYPlot();
+            	if (plot.getDataset() instanceof XYZDataset)
+                    return getHeatMapData();
+                if (plot.getDataset() instanceof FloatXYDataset || plot.getDataset() instanceof DefaultXYDataset)
+                    return getXYData();
+                if (plot.getDataset() instanceof HistogramDataset)
                     return getHistogramData();
-                }
 
             }
 
         } catch (ClassCastException e2) {
 
             StringBuilder builder = new StringBuilder();
-            builder.append("Class cast error: " + e2.getMessage() + NEWLINE);
+            builder.append("Class cast error: " + e2.getMessage() + Io.NEWLINE);
 
             for (StackTraceElement el : e2.getStackTrace()) {
-                builder.append(el.toString() + NEWLINE);
+                builder.append(el.toString() + Io.NEWLINE);
             }
             return builder.toString();
         }
-        return result;
+        return "";
     }
 
+    
+
+    private void copy() {
+    	
+    	new Thread(()->{
+    		String string = getChartData();
+    		StringSelection stringSelection = new StringSelection(string);
+    		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    		clipboard.setContents(stringSelection, null);
+    	}).start();
+    }
+    
+    
     private void export() {
+    	File saveFile = FileSelector.chooseTableExportFile();
 
-        // get a place to save to
-        SaveDialog saveDialog = new SaveDialog("Export data to...", "Chart data", Exporter.TAB_FILE_EXTENSION);
+    	new Thread(()->{
+    		String string = getChartData();
 
-        String fileName = saveDialog.getFileName();
-        String folderName = saveDialog.getDirectory();
+    		try(PrintWriter out = new PrintWriter(saveFile) ) {
+    			out.println(string);
+    		} catch (FileNotFoundException e) {
+    			warn("Cannot export to file");
+    			stack("Error exporting", e);
+    		}
+    	}).start();
+    }
+    
+    private String getHeatMapData() throws ClassCastException {
+        XYPlot plot = this.getChart().getXYPlot();
+        StringBuilder builder = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#0.0000");
 
-        if (fileName != null && folderName != null) {
-            File saveFile = new File(folderName + File.separator + fileName);
+        int datasetCount = plot.getDatasetCount();
+        // header
+        builder.append("Dataset");
+        int shells = plot.getDataset(0).getItemCount(0);
+        
+        for(int i=0; i<shells; i++) 
+        	builder.append(Io.TAB+"Shell_"+i);
+        builder.append(Io.NEWLINE);
 
-            String string = getData();
-            PrintWriter out;
-            try {
+        for (int dataset = 0; dataset < datasetCount; dataset++) {
+            XYZDataset ds = (XYZDataset) plot.getDataset(dataset);
 
-                out = new PrintWriter(saveFile);
-                out.println(string);
-                out.close();
-            } catch (FileNotFoundException e) {
-                warn("Cannot export to file");
-                stack("Error exporting", e);
+            for (int series = 0; series<ds.getSeriesCount(); series++) {
+                String columnName = ds.getSeriesKey(series).toString();
+                builder.append(columnName);
+               
+                for (int item = 0; item < ds.getItemCount(series); item++) {
+                   double value = ds.getZValue(series, item);
+                    builder.append(Io.TAB+df.format(value));
+                }
+                builder.append(Io.NEWLINE);
             }
-
         }
-
+        return builder.toString();
     }
 
-    // Invoke when dealing with an XY chart
     private String getShellData() throws ClassCastException {
         CategoryPlot plot = this.getChart().getCategoryPlot();
         StringBuilder builder = new StringBuilder();
-        DecimalFormat df = new DecimalFormat("#0.00");
-
+        DecimalFormat df = new DecimalFormat("#0.0000");
+        
         int datasetCount = plot.getDatasetCount();
+        // header
+        builder.append("Dataset");
+        int shells = plot.getDataset(0).getColumnCount();        
+        for(int i=0; i<shells; i++) 
+        	builder.append(Io.TAB+"Shell_"+i);
+        builder.append(Io.NEWLINE);
 
         for (int dataset = 0; dataset < datasetCount; dataset++) {
             ShellResultDataset ds = (ShellResultDataset) plot.getDataset(dataset);
-
-            for (int column = 0; column < ds.getColumnCount(); column++) {
-                String columnName = ds.getColumnKey(column).toString();
-                builder.append("Shell_" + columnName + ":" + NEWLINE);
-
-                for (int row = 0; row < ds.getRowCount(); row++) {
-                    String rowName = ds.getRowKey(row).toString();
-                    builder.append("\t" + rowName + ":" + NEWLINE);
-
-                    double value = ds.getValue(row, column).doubleValue();
-                    builder.append("\t\t" + df.format(value) + NEWLINE);
-                }
+            for (int row = 0; row < ds.getRowCount(); row++) {
+            	
+            	String datasetKey = ds.getRowKey(row).toString();
+            	builder.append(datasetKey);
+            	for (int column = 0; column < shells; column++) {
+            		double value = ds.getValue(row, column).doubleValue();
+            		builder.append(Io.TAB + df.format(value));
+            	}
+            	builder.append(Io.NEWLINE);
             }
         }
-
-        builder.append(NEWLINE);
         return builder.toString();
     }
 
     // Invoke when dealing with an XY chart
-    private String getXYProfileData() throws ClassCastException {
-
-        StringBuilder builder = new StringBuilder();
-
+    private String getXYData() throws ClassCastException {
+    	 XYPlot plot = this.getChart().getXYPlot();
+    	String xAxisName = plot.getDomainAxis().getLabel();
+    	String yAxisName = plot.getRangeAxis().getLabel();
+    	
+        StringBuilder builder = new StringBuilder("Series"+Io.TAB+xAxisName+Io.TAB+yAxisName+Io.NEWLINE);
         DecimalFormat df = new DecimalFormat("#0.00");
-
-        XYPlot plot = this.getChart().getXYPlot();
 
         for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
 
-            XYDataset ds;
-            try {
-                ds = (DefaultXYDataset) plot.getDataset(dataset);
-            } catch (ClassCastException e) {
-                ds = (XYSeriesCollection) plot.getDataset(dataset); // try
-                                                                    // getting a
-                                                                    // collection
-                                                                    // instead
-            }
+            XYDataset ds = plot.getDataset(dataset);
 
             for (int series = 0; series < ds.getSeriesCount(); series++) {
 
                 String seriesName = ds.getSeriesKey(series).toString();
-                builder.append(seriesName + ":" + NEWLINE);
 
                 for (int i = 0; i < ds.getItemCount(series); i++) {
-
                     double x = ds.getXValue(series, i);
                     double y = ds.getYValue(series, i);
 
-                    builder.append("\t" + df.format(x) + "\t" + df.format(y) + NEWLINE);
+                    builder.append(seriesName+Io.TAB + df.format(x) + Io.TAB + df.format(y) + Io.NEWLINE);
                 }
             }
-            builder.append(NEWLINE);
         }
 
         return builder.toString();
-
     }
-
+    
     private String getBoxplotData() throws ClassCastException {
 
         CategoryPlot plot = this.getChart().getCategoryPlot();
@@ -486,53 +497,34 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
         for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
 
-            DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot.getDataset(dataset);
+        	DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot.getDataset(dataset);
 
-            for (int column = 0; column < ds.getColumnCount(); column++) {
+        	if (ds instanceof ExportableBoxAndWhiskerCategoryDataset) {
+        		
+        		for (int column = 0; column < ds.getColumnCount(); column++) {
 
-                String columnName = ds.getColumnKey(column).toString();
-                builder.append(columnName + ":" + NEWLINE);
+        			String columnName = ds.getColumnKey(column).toString();
+        			for (int row = 0; row < ds.getRowCount(); row++) {
+        				String rowName = ds.getRowKey(row).toString();
+        				double value = ds.getValue(row, column).doubleValue();
+        				
+        				List rawData = ((ExportableBoxAndWhiskerCategoryDataset) ds).getRawData(rowName, columnName);
+                		Collections.sort(rawData);
 
-                for (int row = 0; row < ds.getRowCount(); row++) {
+        				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Min_value"+Io.TAB+df.format(rawData.get(0)) + Io.NEWLINE);
+        				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Lower_whisker"+Io.TAB + df.format(ds.getMinRegularValue(row, column)) + Io.NEWLINE);
+        				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Lower_quartile"+Io.TAB + df.format(ds.getQ1Value(row, column)) + Io.NEWLINE);
+        				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Median"+Io.TAB + df.format(value) + Io.NEWLINE);
+        				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Upper_quartile"+Io.TAB + df.format(ds.getQ3Value(row, column)) + Io.NEWLINE);
+        				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Upper_whisker"+Io.TAB + df.format(ds.getMaxRegularValue(row, column)) + Io.NEWLINE);
+        				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Max_value"+Io.TAB + df.format(rawData.get(rawData.size()-1)) + Io.NEWLINE);
 
-                    String rowName = ds.getRowKey(row).toString();
-                    builder.append("\t" + rowName + ":" + NEWLINE);
+        				for (Object o : rawData)
+        					builder.append(rowName+Io.TAB+columnName+Io.TAB+"Raw_value"+Io.TAB + o.toString() + Io.NEWLINE);
 
-                    double value = ds.getValue(row, column).doubleValue();
-
-                    builder.append("\tMin   : " + df.format(ds.getMinOutlier(row, column)) + NEWLINE);
-                    builder.append("\tLower : " + df.format(ds.getMinRegularValue(row, column)) + NEWLINE);
-                    builder.append("\tQ1    : " + df.format(ds.getQ1Value(row, column)) + NEWLINE);
-                    builder.append("\tMedian: " + df.format(value) + NEWLINE);
-                    builder.append("\tQ3    : " + df.format(ds.getQ3Value(row, column)) + NEWLINE);
-                    builder.append("\tUpper : " + df.format(ds.getMaxRegularValue(row, column)) + NEWLINE);
-                    builder.append("\tMax   : " + df.format(ds.getMaxOutlier(row, column)) + NEWLINE);
-                    builder.append(NEWLINE);
-
-                    if (ds instanceof ExportableBoxAndWhiskerCategoryDataset) {
-
-                        List rawData = ((ExportableBoxAndWhiskerCategoryDataset) ds).getRawData(rowName, columnName);
-                        Collections.sort(rawData);
-                        for (Object o : rawData) {
-                            builder.append("\t\t" + o.toString() + NEWLINE);
-                        }
-                        builder.append(NEWLINE);
-                    }
-
-                    // if(ds instanceof ViolinCategoryDataset){
-                    //
-                    // List<Number> pdfValues = ( ( ViolinCategoryDataset)
-                    // ds).getPdfValues(rowName, columnName);
-                    //
-                    // Range range = ( ( ViolinCategoryDataset)
-                    // ds).getProbabiltyRange();
-                    //
-                    //
-                    //
-                    // }
-
-                }
-            }
+        			}
+        		}
+        	}
         }
         return builder.toString();
     }
@@ -550,29 +542,18 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             for (int series = 0; series < ds.getSeriesCount(); series++) {
 
                 String seriesName = ds.getSeriesKey(series).toString();
-                builder.append(seriesName + ":" + NEWLINE);
+                builder.append(seriesName + ":" + Io.NEWLINE);
 
                 for (int i = 0; i < ds.getItemCount(series); i++) {
 
                     double x = ds.getXValue(series, i);
                     double y = ds.getYValue(series, i);
-                    builder.append("\t" + df.format(x) + "\t" + df.format(y) + NEWLINE);
+                    builder.append(Io.TAB + df.format(x) + Io.TAB + df.format(y) + Io.NEWLINE);
                 }
-                builder.append(NEWLINE);
+                builder.append(Io.NEWLINE);
             }
         }
         return builder.toString();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        super.actionPerformed(arg0);
-
-        // Align two points to the vertical
-        if (arg0.getActionCommand().equals("Export")) {
-
-            export();
-        }
     }
 
     /**

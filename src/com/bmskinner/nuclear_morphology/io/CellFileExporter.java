@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +12,29 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * Export the locations of the centre of mass of nuclei in a dataset to a file
@@ -37,9 +42,35 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
  * @author ben
  *
  */
-public class CellFileExporter implements Exporter, Loggable {
+public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
+	
+	/**
+     * Create specifying the folder cell files will be exported into
+     * 
+     * @param folder
+     */
+    public CellFileExporter(@NonNull List<IAnalysisDataset> list) {
+        super(list);
+    }
 
-    public boolean exportCellLocations(IAnalysisDataset d) {
+    /**
+     * Create specifying the folder cell files will be exported into
+     * 
+     * @param folder
+     */
+    public CellFileExporter(@NonNull IAnalysisDataset dataset) {
+        super(dataset);
+    }
+
+    @Override
+    public IAnalysisResult call() throws Exception{
+    	for(IAnalysisDataset d :  datasets) {
+    		exportCellLocations(d);
+    	}
+        return new DefaultAnalysisResult(datasets);
+    }
+
+    private boolean exportCellLocations(IAnalysisDataset d) {
 
         String fileName = d.getName() + "." + Importer.LOC_FILE_EXTENSION;
         File exportFile = new File(d.getCollection().getOutputFolder(), fileName);
@@ -53,7 +84,7 @@ public class CellFileExporter implements Exporter, Loggable {
             exportFile = new File(folder, fileName);
         }
 
-        log("Exporting to " + exportFile.getAbsolutePath());
+        log("Exporting cells to " + exportFile.getAbsolutePath());
 
         if (exportFile.exists()) {
             exportFile.delete();
@@ -64,7 +95,7 @@ public class CellFileExporter implements Exporter, Loggable {
         /*
          * Add the cells from the root dataset
          */
-        builder.append(makeDatasetHeaderString(d, d.getUUID()));
+        builder.append(makeDatasetHeaderString(d, d.getId()));
         builder.append(makeDatasetCellsString(d));
 
         /*
@@ -91,7 +122,7 @@ public class CellFileExporter implements Exporter, Loggable {
         StringBuilder builder = new StringBuilder();
 
         for (IAnalysisDataset child : d.getChildDatasets()) {
-            builder.append(makeDatasetHeaderString(child, d.getUUID()));
+            builder.append(makeDatasetHeaderString(child, d.getId()));
             builder.append(makeDatasetCellsString(child));
 
             if (child.hasChildren()) {
@@ -127,26 +158,14 @@ public class CellFileExporter implements Exporter, Loggable {
             try {
 
                 if (c.getNucleus().getSourceFile() != null) {
-
-                    // IJ.log(" Found nucleus source image:
-                    // "+c.getNucleus().getSourceFile().getAbsolutePath());
-
                     builder.append(c.getNucleus().getSourceFile().getAbsolutePath());
                     builder.append("\t");
                     builder.append(x);
                     builder.append("-");
                     builder.append(y);
-
-                    // IJ.log(" Added all but newline");
-
                     builder.append(NEWLINE);
-
-                    // IJ.log(" Appended position");
-                } else {
-                    // IJ.log(" Cannot get nucleus image path");
                 }
             } catch (Exception e) {
-                // IJ.log("Cannot make line: "+e.getMessage());
                 return null;
             }
 
@@ -165,7 +184,7 @@ public class CellFileExporter implements Exporter, Loggable {
         StringBuilder builder = new StringBuilder();
 
         builder.append("UUID\t");
-        builder.append(child.getUUID().toString());
+        builder.append(child.getId().toString());
         builder.append(NEWLINE);
 
         builder.append("Name\t");

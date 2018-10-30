@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,14 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
@@ -30,15 +31,15 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
- * This is a testbed for rule based identification of indexes in a profile.
- * Ideally, the rules can be saved in the description of a nucleus, saving
- * hard-coding of identification for new nucleus types
+ * Allows rule based identification of indexes in a profile.
  * 
  * @author bms41
+ * @since 1.13.0
  *
  */
 public class ProfileIndexFinder implements Loggable {
@@ -78,36 +79,30 @@ public class ProfileIndexFinder implements Loggable {
     /**
      * Get the indexes in the profile that match the given RuleSet
      * 
-     * @param p
-     * @param r
-     * @return
+     * @param p the profile
+     * @param r the ruleset to use for identification
+     * @return the indexes matching the ruleset
      */
-    public BooleanProfile getMatchingIndexes(final IProfile p, final RuleSet r) {
-
-        if (p == null) {
+    public BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final RuleSet r) {
+        if (p == null)
             throw new IllegalArgumentException(NULL_PROFILE_ERROR);
-        }
-        if (r == null) {
+        if (r == null)
             throw new IllegalArgumentException(NULL_RULE_ERROR);
-        }
-
         return isApplicable(p, r);
     }
 
     /**
      * Get the indexes in the profile that match the given Rule
      * 
-     * @param p
-     * @param r
-     * @return
+     * @param p the profile
+     * @param r the rule to use for identification
+     * @return the indexes matching the rule
      */
-    public BooleanProfile getMatchingIndexes(final IProfile p, final Rule r) {
-        if (p == null) {
+    public BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final Rule r) {
+        if (p == null)
             throw new IllegalArgumentException(NULL_PROFILE_ERROR);
-        }
-        if (r == null) {
+        if (r == null)
             throw new IllegalArgumentException(NULL_RULE_ERROR);
-        }
         BooleanProfile result = new BooleanProfile(p, true);
         return isApplicable(p, r, result);
     }
@@ -115,11 +110,11 @@ public class ProfileIndexFinder implements Loggable {
     /**
      * Count the indexes in the profile that match the given RuleSet
      * 
-     * @param p
-     * @param r
-     * @return
+     * @param p the profile
+     * @param r the ruleset to use for identification
+     * @return the number of indexes matching the ruleset
      */
-    public int countMatchingIndexes(final IProfile p, final RuleSet r) {
+    public int countMatchingIndexes(@NonNull final IProfile p, @NonNull final RuleSet r) {
 
         BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
 
@@ -138,15 +133,12 @@ public class ProfileIndexFinder implements Loggable {
      * Use the provided RuleSet to identify an index within a profile. Returns
      * the first matching index in the profile
      * 
-     * @param p
-     *            the profile
-     * @param r
-     *            the ruleset to use for identification
+     * @param p the profile
+     * @param r the ruleset to use for identification
      * @return the first matching index in the profile
-     * @throws NoDetectedIndexException
-     *             if no indexes match
+     * @throws NoDetectedIndexException if no indexes match
      */
-    public int identifyIndex(final IProfile p, final RuleSet r) throws NoDetectedIndexException {
+    public int identifyIndex(@NonNull final IProfile p, @NonNull final RuleSet r) throws NoDetectedIndexException {
 
         BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
 
@@ -166,17 +158,15 @@ public class ProfileIndexFinder implements Loggable {
      * Note that this ignores the RuleSet's ProfileType preference, and works
      * directly on the given profile
      * 
-     * @param p
-     *            the profile
-     * @param list
-     *            the rulesets to use for identification
+     * @param p the profile
+     * @param list the rulesets to use for identification
      * @return the first index matching the ruleset 
+     * @throws NoDetectedIndexException if the index is not found
      */
-    public int identifyIndex(final IProfile p, final List<RuleSet> list) throws NoDetectedIndexException {
+    public int identifyIndex(@NonNull final IProfile p, @NonNull final List<RuleSet> list) throws NoDetectedIndexException {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
-        }
 
         BooleanProfile indexes = new BooleanProfile(p, true);
 
@@ -186,7 +176,6 @@ public class ProfileIndexFinder implements Loggable {
         }
 
         for (int i = 0; i < p.size(); i++) {
-
             if (indexes.get(i)) {
                 return i;
             }
@@ -195,23 +184,30 @@ public class ProfileIndexFinder implements Loggable {
     }
 
     /**
-     * Identify the index for the median profile of the collection based on the
-     * internal RuleSets for the given border tag
+     * Identify the index in the median profile of the collection matching the
+     * internal RuleSets for the border tag
      * 
-     * @param collection
-     * @param tag
-     * @return -2 if the RuleSet list is empty; -1 if the index is not found;
-     *         else the index
+     * @param collection the cell collection
+     * @param tag the border tag to find
+     * @return the index in the profile corresponding to the tag
+     * @throws NoDetectedIndexException if the index is not found
      */
-    public int identifyIndex(final ICellCollection collection, final Tag tag) throws NoDetectedIndexException {
+    public int identifyIndex(@NonNull final ICellCollection collection, @NonNull final Tag tag) throws NoDetectedIndexException {
 
         List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
-        }
+        
+        try {
         return identifyIndex(collection, list);
-
+        } catch(NoDetectedIndexException e) {
+        	// No index was found, fall back 
+        	warn("No reference point could be found using the default rules; falling back on longest diameter");
+        	List<RuleSet> rules = new ArrayList<>();
+        	rules.add(RuleSet.roundRPRuleSet());
+        	return identifyIndex(collection, rules);
+        }
     }
 
     /**
@@ -220,34 +216,35 @@ public class ProfileIndexFinder implements Loggable {
      * 
      * @param collection
      * @param list
-     * @return -2 if the RuleSet list is empty; -1 if the index is not found;
-     *         else the index
+     * @return the index in the profile corresponding to the tag
+     * @throws NoDetectedIndexException if the index is not found
      */
-    public int identifyIndex(final ICellCollection collection, final List<RuleSet> list)
+    public int identifyIndex(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list)
             throws NoDetectedIndexException {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
-        }
 
         BooleanProfile indexes = getMatchingProfile(collection, list);
 
         // Find the first true in the result profile
         for (int i = 0; i < indexes.size(); i++) {
-
-            if (indexes.get(i)) {
+            if (indexes.get(i)) 
                 return i;
-            }
         }
         throw new NoDetectedIndexException();
-
     }
 
-    public BooleanProfile getMatchingProfile(final ICellCollection collection, final List<RuleSet> list) {
+    /**
+     * Get a boolean profile of indexes matching the given rulesets 
+     * @param collection the cell collection to test
+     * @param list the rulesets to be tested against the collection
+     * @return
+     */
+    public BooleanProfile getMatchingProfile(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list) {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
-        }
 
         // Make a 'true' profile
         BooleanProfile indexes;
@@ -290,9 +287,7 @@ public class ProfileIndexFinder implements Loggable {
 
         BooleanProfile result = new BooleanProfile(p, true);
         for (Rule rule : r.getRules()) {
-            // BooleanProfile b = isApplicable(p, rule, result);
             result = isApplicable(p, rule, result);
-            // result = result.and(b);
         }
         return result;
     }
@@ -300,12 +295,9 @@ public class ProfileIndexFinder implements Loggable {
     /**
      * Test a profile for the applicability of a rule in a ruleset
      * 
-     * @param p
-     *            the profile to test
-     * @param r
-     *            the rule to test
-     * @param existing
-     *            the existing profile of valid indexes on which the rule will
+     * @param p the profile to test
+     * @param r the rule to test
+     * @param existing the existing profile of valid indexes on which the rule will
      *            be applied
      * @return
      */
@@ -314,6 +306,9 @@ public class ProfileIndexFinder implements Loggable {
         RuleType type = r.getType();
 
         switch (type) {
+        
+        case IS_ZERO_INDEX:
+        	return  findZeroIndex(p);
 
         case IS_LOCAL_MINIMUM:
             return findLocalMinima(p, limits, r.getBooleanValue(), r.getValue(1));
@@ -759,6 +754,20 @@ public class ProfileIndexFinder implements Loggable {
             }
         }
         result = result.and(limits);
+        return result;
+
+    }
+    
+    /**
+     * Make a boolean profile where only the first index is true
+     * 
+     * @param p
+     * @return
+     */
+    private BooleanProfile findZeroIndex(final IProfile p) {
+
+        BooleanProfile result = new BooleanProfile(p, false);
+        result.set(0, true);
         return result;
 
     }

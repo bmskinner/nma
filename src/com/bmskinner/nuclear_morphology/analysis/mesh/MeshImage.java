@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,22 +12,22 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 import ij.process.ImageProcessor;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 /**
  * A mesh image converts the pixels within an image to coordinates within each
  * face of a Mesh. It provides the mechanisms to convert a mesh back into an
- * image
+ * image given a template Mesh
  * 
  * @author bms41
  * @since 1.13.3
@@ -36,23 +36,20 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 public interface MeshImage<E extends CellularComponent> {
 
     /**
-     * Draw the image in this object at the coordinates in the given mesh
+     * Draw the image in this object onto the coordinates in the given mesh
      * 
-     * @param mesh
-     *            the mesh to use to position pixels in cartesian space
-     * @return
-     * @throws UncomparableMeshImageException
-     *             if the mesh does not match this MeshImage
+     * @param mesh the mesh to use to position pixels in cartesian space
+     * @return an image processor with the image drawn according to the mesh
+     * @throws UncomparableMeshImageException if the mesh does not match this MeshImage
      */
-    ImageProcessor drawImage(Mesh<E> mesh) throws UncomparableMeshImageException;
+    ImageProcessor drawImage(@NonNull Mesh<E> mesh) throws UncomparableMeshImageException;
 
     /**
      * Get the pixels for the given face in the mesh
      * 
-     * @param f
-     *            the face
+     * @param f the face
      * @return the pixels within the face
      */
-    List<MeshPixel> getMeshPixels(MeshFace f);
+    List<MeshPixel> getMeshPixels(@NonNull MeshFace f);
 
 }

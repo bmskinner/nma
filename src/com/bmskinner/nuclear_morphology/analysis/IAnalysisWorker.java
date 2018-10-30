@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
 import java.beans.PropertyChangeListener;
@@ -36,29 +34,34 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface IAnalysisWorker extends RunnableFuture<IAnalysisResult>, ProgressListener, Loggable {
 
-	String FINISHED_MSG = "Finished";
-	String ERROR_MSG    = "Error";
-	String INDETERMINATE_MSG    = "Cooldown";
+	String FINISHED_MSG       = "Finished";
+	String ERROR_MSG          = "Error";
+	String INDETERMINATE_MSG  = "Cooldown";
+	String CANCELLED_MSG      = "Cancelled";
 	
-    int FINISHED = -1; // signal cleanup of progress bar
+	/** Task completed normally */
+    int FINISHED = -1;
 
-    int ERROR = -2; // signal error occurred in analysis
+    /** Task had an error */
+    int ERROR = -2;
 
-    int INDETERMINATE = -3; // signal switch to indeterminate bar
+    /** Task has switched to an indeterminate progress state */
+    int INDETERMINATE = -3; 
+    
+    /** Task has been cancelled */
+    int CANCELLED = -4; 
 
     /**
      * Add a listener for changes to the analysis progress.
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
     void addPropertyChangeListener(PropertyChangeListener l);
 
     /**
      * Remove a listener for changes to the analysis progress.
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
     void removePropertyChangeListener(PropertyChangeListener l);
 

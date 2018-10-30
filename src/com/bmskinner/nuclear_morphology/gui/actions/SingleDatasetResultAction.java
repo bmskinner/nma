@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,17 +12,19 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Extends the VoidResultAction to include a dataset or list of datasets to be
@@ -49,21 +51,18 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
     protected IAnalysisDataset dataset     = null; 
     
     // list of datasets that need processing next
-    private List<IAnalysisDataset> processList = new ArrayList<>(0);
+    private final List<IAnalysisDataset> processList = new ArrayList<>(0);
 
     /**
      * Construct with a dataset to analyse, a message to display, and the window
      * to send messages to
      * 
-     * @param dataset
-     *            the analysis dataset
-     * @param barMessage
-     *            the progress bar message
-     * @param mw
-     *            the main window for analysis
+     * @param dataset the analysis dataset
+     * @param barMessage the progress bar message
+     * @param mw the main window for analysis
      */
-    public SingleDatasetResultAction(IAnalysisDataset dataset, String barMessage, MainWindow mw) {
-        super(barMessage, mw);
+    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(barMessage, acceptor, eh);
         if (dataset == null) {
             warn("Unable to create action");
             throw new IllegalArgumentException("Must have dataset for progressable action");
@@ -79,9 +78,9 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param barMessage
      * @param mw
      */
-    public SingleDatasetResultAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw) {
-        this(list.get(0), barMessage, mw);
-        processList = list;
+    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        this(list.get(0), barMessage, acceptor, eh);
+        processList.addAll(list);
         processList.remove(0); // remove the first entry
     }
 
@@ -94,8 +93,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param mw
      * @param flag
      */
-    public SingleDatasetResultAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw, int flag) {
-        this(list, barMessage, mw);
+    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, int flag) {
+        this(list, barMessage, acceptor, eh);
         this.downFlag = flag;
     }
 
@@ -107,16 +106,16 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param mw
      * @param flag
      */
-    public SingleDatasetResultAction(IAnalysisDataset dataset, String barMessage, MainWindow mw, int flag) {
-        this(dataset, barMessage, mw);
+    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, int flag) {
+        this(dataset, barMessage, acceptor, eh);
         this.downFlag = flag;
     }
 
-    protected List<IAnalysisDataset> getRemainingDatasetsToProcess() {
+    protected synchronized List<IAnalysisDataset> getRemainingDatasetsToProcess() {
         return this.processList;
     }
 
-    protected boolean hasRemainingDatasetsToProcess() {
+    protected synchronized boolean hasRemainingDatasetsToProcess() {
         return processList.size() > 0;
     }
 }

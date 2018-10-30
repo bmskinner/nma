@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,19 +12,16 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.process.ImageProcessor;
-
-import java.io.File;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 @Deprecated
 public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {
@@ -102,16 +99,15 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
         return null;
     }
 
-    @Override
-    public void updateSourceFolder(File newFolder) {
-        // TODO Auto-generated method stub
-
-    }
-
 	@Override
 	public IPoint getBase() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, getBorderLength());
 	}
 
 }

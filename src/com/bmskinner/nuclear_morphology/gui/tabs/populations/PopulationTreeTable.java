@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.util.ArrayList;
@@ -28,16 +26,18 @@ import javax.swing.ListSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel.TreeSelectionHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 @SuppressWarnings("serial")
 public class PopulationTreeTable extends JXTreeTable implements Loggable {
@@ -106,15 +106,15 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * 
      * @return the index
      */
-    public int getRowIndex(IAnalysisDataset dataset) {
+    public int getRowIndex(@NonNull IAnalysisDataset dataset) {
 
         for (int row = 0; row < this.getRowCount(); row++) {
 
             Object rowObject = this.getValueAt(row, COLUMN_NAME);
 
             if (rowObject instanceof IAnalysisDataset) {
-                UUID targetID = ((IAnalysisDataset) rowObject).getUUID();
-                if (dataset.getUUID().equals(targetID)) {
+                UUID targetID = ((IAnalysisDataset) rowObject).getId();
+                if (dataset.getId().equals(targetID)) {
                     return row;
                 }
             }
@@ -128,7 +128,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * 
      * @param dataset the dataset to select
      */
-    public void selectDatasets(List<IAnalysisDataset> list) {
+    public void selectDatasets(@NonNull List<IAnalysisDataset> list) {
         Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
         int selectedIndexOrder = 0;
         for (IAnalysisDataset dataset : list) {
@@ -253,10 +253,17 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      */
     public boolean isDataset(int rowIndex) {
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-        if (columnOneObject instanceof IAnalysisDataset) {
-            return true;
-        }
-        return false;
+        return columnOneObject instanceof IAnalysisDataset;
+    }
+    
+    public boolean isClusterGroup(int rowIndex) {
+        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+        return columnOneObject instanceof IClusterGroup;
+    }
+    
+    public boolean isWorkspace(int rowIndex) {
+        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+        return columnOneObject instanceof IWorkspace;
     }
 
     /**
@@ -265,7 +272,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * @param rowIndex
      * @return
      */
-    public IAnalysisDataset getDatasetAtRow(int rowIndex) {
+    public @Nullable IAnalysisDataset getDatasetAtRow(int rowIndex) {
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
         if (columnOneObject instanceof IAnalysisDataset) {
@@ -280,7 +287,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * @param rowIndex
      * @return
      */
-    public IClusterGroup getClusterGroupAtRow(int rowIndex) {
+    public @Nullable IClusterGroup getClusterGroupAtRow(int rowIndex) {
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
         if (columnOneObject instanceof ClusterGroup) {
@@ -295,7 +302,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * @param rowIndex
      * @return
      */
-    public IWorkspace getWorkspaceAtRow(int rowIndex){
+    public @Nullable IWorkspace getWorkspaceAtRow(int rowIndex){
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
         if (columnOneObject instanceof IWorkspace) {

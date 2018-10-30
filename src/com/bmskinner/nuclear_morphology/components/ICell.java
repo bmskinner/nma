@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.Serializable;
@@ -24,12 +22,11 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * All cell types implement this interface. A cell can have a nucleus, and zero,
+ * All cell types implement this interface. A cell can have multiple nuclei, and zero,
  * one or many acrosomes, flagella and mitochondria.
  * 
  * @author bms41
@@ -38,6 +35,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface ICell extends Serializable, Loggable, Statistical, Comparable<ICell> {
 
+	/**
+	 * Create a copy of this cell
+	 * @return
+	 */
+	ICell duplicate();
+	
     /**
      * Get the ID of the cell
      * 
@@ -48,9 +51,11 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
     /**
      * Get the first nucleus of the cell. Use {@link #getNuclei()} instead to
      * ensure cells with multiple nuclei are handled correctly
+     * Was deprecated from 1.13.5 to 1.14.0, but reenabled because it is a useful
+     * shortcut 
      * 
      * @return
-     * @deprecated from 1.13.5
+     * 
      */
     Nucleus getNucleus();
 
@@ -178,5 +183,26 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
      */
     boolean hasNuclearSignals(UUID signalGroupId);
     
+    /**
+     * Add a new mitochondrion to the cell
+     * 
+     * @param mitochondrion
+     */
+    void addMitochondrion(IMitochondrion mitochondrion);
+
+    /**
+     * Add a flagellum to the cell
+     * 
+     * @param tail
+     */
+    void addFlagellum(Flagellum tail);
+
+    /**
+     * Set the cytoplasm of the cell
+     * 
+     * @param cytoplasm
+     *            the cytoplasm
+     */
+    void setCytoplasm(ICytoplasm cytoplasm);    
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import javax.swing.ImageIcon;
@@ -32,21 +30,38 @@ import ij.process.ImageProcessor;
 public class ProberTableModel extends DefaultTableModel implements DetectionEventListener {
 
     private static final long serialVersionUID = 1L;
+    
+    private final int maxDimension;
+    
+    public static final int DEFAULT_MAX_DIMENSION = 200;
+    
+    /**
+     * Default constructor with two columns. Images will be drawn at the size best
+     * fitting {@link DEFAULT_MAX_DIMENSION}
+     */
+    public ProberTableModel() {
+        this(DEFAULT_MAX_DIMENSION);
+    }
 
     /**
      * Default constructor with two columns 
+     * @param maxDimension the maximum width or height an image in the table will be drawn, preserving aspect ratio
      */
-    public ProberTableModel() {
+    public ProberTableModel(int maxDimension) {
         super();
+        this.maxDimension = maxDimension;
         this.setColumnCount(2);
-        // this.setColumnIdentifiers(new Object[]{ "Process", "Preview"});
+    }
+    
+    public int getMaxDimension() {
+    	return maxDimension;
     }
 
     @Override
     public void detectionEventReceived(DetectionEvent e) {
         ProberTableCell cell = makeIconCell(e.getProcessor(), e.getMessage(), true);
-
-        ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(200, 200), "", true);
+        System.out.println(e.getMessage()+": Resizing to "+maxDimension);
+        ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(maxDimension, maxDimension), "", true);
 
         if (getRowCount() == 0) {
             addRow(new ProberTableCell[] { cell, blank });
@@ -77,8 +92,8 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
         ImageFilterer filt = new ImageFilterer(ip);
         ImageIcon ic = filt.toImageIcon();
         ProberTableCell iconCell = new ProberTableCell(ic, label, enabled);
-
-        ImageIcon small = filt.resize((int) 200, (int) 200).toImageIcon();
+        filt.resize(maxDimension, maxDimension);
+        ImageIcon small = filt.toImageIcon();
 
         iconCell.setSmallIcon(small);
         return iconCell;

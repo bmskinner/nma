@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 
 import ij.gui.Roi;
@@ -25,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
@@ -58,6 +59,23 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image. It sets the immutable original centre of
+     * mass, and the mutable current centre of mass. It also assigns a random ID
+     * to the component.
+     * 
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
+     * @param id the id of the component. Only use when deserialising!
+     */
+    public DefaultRodentSpermNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, int number, @NonNull UUID id) {
+        super(roi, centreOfMass, source, channel, position, number, id);
+    }
+    
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image
@@ -109,7 +127,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         super.setBorderTag(tag, i);
 
         // If the flat region moved, update the cached lengths
-        if (this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+        if (this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL) && hasBorderTag(Tag.REFERENCE_POINT)) {
 
             if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
 
@@ -173,7 +191,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          */
         double vertX;
         try {
-            vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
+            vertX = testNucleus.getBorderPoint(Tag.TOP_VERTICAL).getX();
         } catch (UnavailableBorderTagException e) {
             stack("Cannot get border tag", e);
             setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
@@ -191,6 +209,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
         if (vertX < minBoundingX || vertX > maxBoundingX) {
 
+
             // The chosen vertical points is outside the bounding box of the
             // nucleus
             IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical point x is outside nucleus bounds");
@@ -201,30 +220,12 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         }
         
         /*
-         * Find the distance from the vertical X position to the min and max
-         * points of the bounding box. VertX must lie between these points.
-         * 
-         */
-
-//        double distanceLower = vertX - minBoundingX;
-//        double distanceHigher = maxBoundingX - vertX;
-
-        /*
          * To determine if the point is hook or hump, take the X position of the
          * tip. This must lie on the hook side of the vertX
          */
 
         double dHook = 0;
         double dBody = 0;
-//        double referenceX;
-//        try {
-//            referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
-//        } catch (UnavailableBorderTagException e) {
-//            stack("Cannot get border tag", e);
-//            setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-//            setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
-//            return;
-//        }
 
         if(testNucleus.isClockwiseRP()){
         	dBody = vertX - minBoundingX;
@@ -237,11 +238,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
         setStatistic(PlottableStatistic.HOOK_LENGTH, dHook);
         setStatistic(PlottableStatistic.BODY_WIDTH, dBody);
-
-//        fine("Hook length is " + dHook);
-//        fine("Body width is " + dBody);
-//
-//        finest("Hook length and body width calculated");
     }
 
     /**
@@ -251,7 +247,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
      */
     public List<IBorderPoint> getHookRoi() {
 
-        List<IBorderPoint> result = new ArrayList<IBorderPoint>(0);
+        List<IBorderPoint> result = new ArrayList<>(0);
 
         IBorderPoint testPoint;
         IBorderPoint referencePoint;
@@ -260,10 +256,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
         try {
 
-            testPoint = this.getBorderTag(Tag.REFERENCE_POINT);
-            referencePoint = this.getBorderTag(Tag.REFERENCE_POINT);
-            interSectionPoint = this.getBorderTag(Tag.INTERSECTION_POINT);
-            orientationPoint = this.getBorderTag(Tag.ORIENTATION_POINT);
+            testPoint = this.getBorderPoint (Tag.REFERENCE_POINT);
+            referencePoint = this.getBorderPoint (Tag.REFERENCE_POINT);
+            interSectionPoint = this.getBorderPoint (Tag.INTERSECTION_POINT);
+            orientationPoint = this.getBorderPoint (Tag.ORIENTATION_POINT);
 
         } catch (UnavailableBorderTagException e) {
             fine("Cannot get border tag", e);
@@ -466,7 +462,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     public Nucleus getVerticallyRotatedNucleus() {
         super.getVerticallyRotatedNucleus();
         if (verticalNucleus == null) {
-            warn("Unknown error creating vertical nucleus");
+            fine("Unknown error creating vertical nucleus");
             return null;
         }
 
@@ -475,9 +471,9 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          */
         double vertX;
         try {
-            vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+            vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
         } catch (UnavailableBorderTagException e) {
-            stack("Cannot get RP from vertical nucleus. Not checking horizontal orientation", e);
+            stack("Cannot get RP from vertical nucleus; returning default orientation", e);
             return verticalNucleus;
         }
         /*
@@ -495,10 +491,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         return verticalNucleus;
     }
 
-    /*
-     * ----------------------- Methods for detecting the tail
-     * -----------------------
-     */
 
     /*
      * Detect the tail based on a list of local minima in an NucleusBorderPoint
@@ -519,7 +511,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         // of the true ends of the signal
         double tipToCoMDistance;
         try {
-            tipToCoMDistance = this.getBorderTag(Tag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
+            tipToCoMDistance = this.getBorderPoint (Tag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
         } catch (UnavailableBorderTagException e) {
             fine("Cannot get border tag", e);
             throw new UnavailableBorderTagException("Cannot get RP", e);
@@ -529,7 +521,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         double maxDistance = 0;
         IBorderPoint tail;
 
-        tail = this.getBorderTag(Tag.REFERENCE_POINT);
+        tail = this.getBorderPoint(Tag.REFERENCE_POINT);
         // start at tip, move round
 
         for (int i = 0; i < array.size(); i++) {
@@ -537,7 +529,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
                 double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getBorderPoint(i));
                 double distanceBetweenEnds;
-                distanceBetweenEnds = this.getBorderTag(Tag.REFERENCE_POINT).getLengthTo(getBorderPoint(i));
+                distanceBetweenEnds = this.getBorderPoint(Tag.REFERENCE_POINT).getLengthTo(getBorderPoint(i));
 
                 double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
@@ -566,7 +558,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         double minDistance = this.getStatistic(PlottableStatistic.MAX_FERET);
         IBorderPoint reference;
 
-        reference = this.getBorderTag(Tag.REFERENCE_POINT);
+        reference = this.getBorderPoint(Tag.REFERENCE_POINT);
 
         for (int i = 0; i < this.getBorderLength(); i++) {
 
@@ -591,10 +583,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         for (int i = 0; i < this.getBorderLength(); i++) {
 
             IBorderPoint p = this.getBorderPoint(i);
-            double angle = this.getCentreOfMass().findAngle(reference, p);
+            double angle = this.getCentreOfMass().findSmallestAngle(reference, p);
 
-            if (Math.abs(90 - angle) < difference && p.getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT)) > this
-                    .getCentreOfMass().getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT))) {
+            if (Math.abs(90 - angle) < difference && p.getLengthTo(this.getBorderPoint(Tag.REFERENCE_POINT)) > this
+                    .getCentreOfMass().getLengthTo(this.getBorderPoint(Tag.REFERENCE_POINT))) {
                 difference = 90 - angle;
                 tail = p;
             }
@@ -620,7 +612,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         // at the point the yvalues are closest and not the tail point is the
         // intersesction
         LineEquation lineEquation = new DoubleEquation(this.getCentreOfMass(),
-                this.getBorderTag(Tag.ORIENTATION_POINT));
+                this.getBorderPoint(Tag.ORIENTATION_POINT));
 
         double minDeltaY = 100;
         int minDeltaYIndex = 0;
@@ -630,7 +622,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             double y = this.getBorderPoint(i).getY();
             double yOnLine = lineEquation.getY(x);
 
-            double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag(Tag.ORIENTATION_POINT));
+            double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderPoint(Tag.ORIENTATION_POINT));
 
             double deltaY = Math.abs(y - yOnLine);
             if (deltaY < minDeltaY && distanceToTail > this.getStatistic(PlottableStatistic.MAX_FERET) / 2) { // exclude
@@ -717,30 +709,25 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     @Override
     public void rotate(double angle) {
-
-        if (angle != 0) {
-
+        if (angle != 0)
             super.rotate(angle);
-        }
     }
 
     @Override
     public String dumpInfo(int type) {
         String result = super.dumpInfo(type);
-
         return result;
-
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+        if(!this.hasBorderTag(Tag.REFERENCE_POINT))
+        	warn("Nucleus "+this.getNameAndNumber()+" has no RP");
         calculateHookAndBodyLength();
 
     }
 
     private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting rodent sperm nucleus");
         out.defaultWriteObject();
-
     }
 }

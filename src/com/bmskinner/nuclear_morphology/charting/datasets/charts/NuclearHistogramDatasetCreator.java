@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets.charts;
 
 import java.util.ArrayList;
@@ -249,7 +247,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                 try {
                     seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
                     int indexLength = seg.length();
-                    double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+                    double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
                     double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;
@@ -297,7 +295,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                     seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
 
                     int indexLength = seg.length();
-                    double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+                    double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
                     double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;

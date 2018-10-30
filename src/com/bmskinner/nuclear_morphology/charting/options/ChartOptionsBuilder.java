@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.options;
 
 import java.util.ArrayList;
@@ -112,8 +110,8 @@ public class ChartOptionsBuilder {
         return this;
     }
 
-    public ChartOptionsBuilder setHideProfiles(boolean b) {
-        options.setHideProfiles(b);
+    public ChartOptionsBuilder setShowProfiles(boolean b) {
+        options.setShowProfiles(b);
         return this;
     }
 
@@ -124,6 +122,11 @@ public class ChartOptionsBuilder {
 
     public ChartOptionsBuilder setShowLines(boolean b) {
         options.setShowLines(b);
+        return this;
+    }
+    
+    public ChartOptionsBuilder setShowIQR(boolean b) {
+        options.setShowIQR(b);
         return this;
     }
 

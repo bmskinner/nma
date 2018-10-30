@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,490 +12,326 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileAggregate;
+import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
+/**
+ * Run the segmentation of datasets. This allows for the median profile
+ * of a collection to be segmented, and the segments to be assigned to 
+ * each nucleus in the dataset.
+ * 
+ * The complete analysis pipeline operates via the following pseudocode:
+ * 1) From the collection median, find the representative median
+ * 2) Segment the representative median
+ * 3) For each nucleus, use iterative segment fitting to map the segments 
+ * 
+ * The below refers to a previous version
+ * The complete analysis pipeline operates via the following pseudocode:<br>
+ * <br>
+ * 	1) Profile the cell collection<br>
+ * 		- identify the RP via dataset RuleSets<br>
+ *      - generate a median profile <br>
+ * 	2) Find the best fit of each nucleus to the median to refine RP and other Tags<br>
+ * 	3) Segment the median profile<br>
+ *  4) Fit the segments to the nuclei using best-fit alignments<br>
+ *  5) Generate frankenprofiles of each nucleus to the median<br>
+ *  6) Profile the frankencollection - generate a new frankenmedian<br>
+ *  7) Segment the frankenmedian; new segments may emerge from the reduced variation<br>
+ *  8) Fit the frankensegments to the nuclei<br>
+ *  9) Measure the sum of profile differences between the nuclei and the frankenmedian<br>
+ *  <br>
+ *   While this value is decreasing, repeat steps 5-9<br>
+ *   <br>
+ *   This class contains the methods to carry out steps 3-9.
+ * 
+ * @author bms41
+ *
+ */
 public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
-    private ICellCollection sourceCollection = null; // a collection to take
-                                                     // segments from
-
-    private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
-
-    public enum MorphologyAnalysisMode {
-        NEW, COPY, REFRESH
-    }
-
-    /**
-     * Segment a dataset with the given mode
-     * 
-     * @param dataset
-     * @param mode
-     * @param programLogger
-     */
-    public DatasetSegmentationMethod(IAnalysisDataset dataset, MorphologyAnalysisMode mode) {
-        super(dataset);
-        this.mode = mode;
-    }
-
-    /**
-     * Copy the segmentation pattern from the source collection onto the given
-     * dataset
-     * 
-     * @param dataset
-     * @param source
-     * @param programLogger
-     */
-    public DatasetSegmentationMethod(IAnalysisDataset dataset, ICellCollection source) {
-        this(dataset, MorphologyAnalysisMode.COPY);
-        this.sourceCollection = source;
-    }
-
-    @Override
-    public IAnalysisResult call() throws Exception {
-
-        try {
-
-            switch (mode) {
-            case COPY:
-                result = runCopyAnalysis();
-                break;
-            case NEW:
-                result = runNewAnalysis();
-                break;
-            case REFRESH:
-                result = runRefreshAnalysis();
-                break;
-            default:
-                result = null;
-                break;
-            }
-
-            // Ensure segments are copied appropriately to verticals
-            // Ensure hook statistics are generated appropriately
-            // log("Updating verticals");
-            for (Nucleus n : dataset.getCollection().getNuclei()) {
-                // log("Updating "+n.getNameAndNumber());
-                n.updateVerticallyRotatedNucleus();
-                n.updateDependentStats();
-
-            }
-            fine("Updated verticals and stats");
-
-        } catch (Exception e) {
-            result = null;
-            stack("Error in segmentation analysis", e);
-        }
-
-        return result;
-
-    }
-
-    /**
-     * This has to do everything: segment the median, appy the segments to
-     * nuclei, generate the frankenmedian, and adjust the nuclear segments based
-     * on the frankenprofiles.
-     * 
-     * @return
-     * @throws Exception
-     */
-    private IAnalysisResult runNewAnalysis() throws Exception {
-        Tag pointType = Tag.REFERENCE_POINT;
-        dataset.getCollection().setConsensus(null); // clear if present
-        runSegmentation(dataset.getCollection(), pointType);
-        
-        if(dataset.hasChildren()){
-        	DatasetValidator v = new DatasetValidator();
-        	for(IAnalysisDataset child: dataset.getAllChildDatasets()){
-        		child.getCollection().setConsensus(null);
-        		dataset.getCollection().getProfileManager().copyCollectionOffsets(child.getCollection());
-        	}
-        	v.validate(dataset);
-            for(String s : v.getErrors()){
-                warn(s);
-            }
-        }
-
-        return new DefaultAnalysisResult(dataset);
-    }
-
-    private IAnalysisResult runCopyAnalysis() throws Exception {
-        if (sourceCollection == null) {
-            warn("Cannot copy: source collection is null");
-            return null;
-        } else {
-
-            fine("Copying segmentation pattern");
-            reapplyProfiles(dataset.getCollection(), sourceCollection);
-            fine("Copying complete");
-            return new DefaultAnalysisResult(dataset);
-        }
-    }
-
-    private IAnalysisResult runRefreshAnalysis() throws Exception {
-        refresh(dataset.getCollection());
-        return new DefaultAnalysisResult(dataset);
-    }
-
-    /*
-     * ////////////////////////////////////////////////// Analysis methods
-     * //////////////////////////////////////////////////
-     */
-
-    /**
-     * When a population needs to be reanalysed do not offset nuclei or
-     * recalculate best fits; just get the new median profile
-     * 
-     * @param collection
-     *            the collection of nuclei
-     * @param sourceCollection
-     *            the collection with segments to copy
-     */
-    public boolean reapplyProfiles(ICellCollection collection, ICellCollection sourceCollection) throws Exception {
-
-        fine("Applying existing segmentation profile to population");
-
-        sourceCollection.getProfileManager().copyCollectionOffsets(collection);
-
-        // At this point the collection has only a regular profile collections.
-        // No Frankenprofile has been copied.
-
-        reviseSegments(collection, Tag.REFERENCE_POINT);
-
-        fine("Re-profiling complete");
-        return true;
-    }
-
-    /**
-     * Refresh the given collection. Assumes that the segmentation in the
-     * median profile is correct, and updates all nuclei to match
-     * 
-     * @param collection
-     * @return
-     */
-    public boolean refresh(ICellCollection collection) throws Exception {
-        Tag pointType = Tag.REFERENCE_POINT;
-        assignMedianSegmentsToNuclei(collection, pointType);
-        return true;
-    }
-
-    /**
-     * Run the segmentation part of the analysis.
-     * 
-     * @param collection
-     * @param pointType
-     */
-    private void runSegmentation(ICellCollection collection, Tag pointType) throws Exception {
-        createSegmentsInMedian(collection);
-        assignMedianSegmentsToNuclei(collection, pointType);
-    }
-
-    /**
-     * Given a cell collection with a segmented median profile, apply the
-     * segmentation pattern to the nuclei within the colleciton.
-     * 
-     * @param collection
-     *            the collection
-     * @param pointType
-     *            the tag to begin from
-     * @throws Exception
-     */
-    private void assignMedianSegmentsToNuclei(ICellCollection collection, Tag pointType) throws Exception {
-
-        // map the segments from the median directly onto the nuclei
-        assignMedianSegmentsToNuclei(collection);
-        
-        int error = collection.getProfileManager().countNucleiNotMatchingMedianSegmentation();
-        if(error>0){
-            warn(String.format("%d nuclei have a different number of segments to the median before frankenprofiling", error));
-        }
-
-        // adjust the segments to better fit each nucleus
-        try {
-            reviseSegments(collection, pointType);
-        } catch (Exception e) {
-            warn("Error revising segments");
-            stack("Error revising segments", e);
-        }
-        
-        error = collection.getProfileManager().countNucleiNotMatchingMedianSegmentation();
-        if(error>0){
-            warn(String.format("%d nuclei have a different number of segments to the median after frankenprofiling", error));
-        }
-
-        // update the aggregate in case any borders have changed
-        collection.getProfileCollection().createProfileAggregate(collection,
-                collection.getProfileCollection().length());
-
-    }
-
-    /**
-     * Assign the segments in the median profile to the nuclei within the
-     * collection
-     * 
-     * @param collection
-     * @throws Exception
-     */
-    private void assignMedianSegmentsToNuclei(ICellCollection collection) throws Exception {
-//        fine("Assigning segments to nuclei");
-        IProfileCollection pc = collection.getProfileCollection();
-
-        // find the corresponding point in each Nucleus
-        ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-        /*
-         * NEW CODE
-         */
-
-        collection.getNuclei().parallelStream().forEach(n -> {
-            try {
-                assignSegmentsToNucleus(median, n);
-            } catch (ProfileException e) {
-                warn("Error setting profile offsets in " + n.getNameAndNumber());
-                stack(e.getMessage(), e);
-            }
-        });
-
-        if (!checkRPmatchesSegments(collection)) {
-            warn("Segments do not all start on reference point after offsetting");
-        }
-
-    }
-
-    /**
-     * Assign the median segments to the nucleus, finding the best match of the
-     * nucleus profile to the median profile
-     * 
-     * @param n
-     *            the nucleus to segment
-     * @param median
-     *            the segmented median profile
-     */
-    private void assignSegmentsToNucleus(ISegmentedProfile median, Nucleus n) throws ProfileException {
-
-        if (n.isLocked()) {
-            return;
-        }
-
-        // remove any existing segments in the nucleus
-        ISegmentedProfile nucleusProfile;
-        try {
-            nucleusProfile = n.getProfile(ProfileType.ANGLE);
-        } catch (UnavailableProfileTypeException e1) {
-            warn("Cannot get angle profile for nucleus");
-            stack("Profile type angle is not available", e1);
-            return;
-        }
-        nucleusProfile.clearSegments();
-
-        List<IBorderSegment> nucleusSegments = new ArrayList<>();
-
-        // go through each segment defined for the median curve
-        IBorderSegment prevSeg = null;
-
-        for (IBorderSegment segment : median.getSegments()) {
-
-            // get the positions the segment begins and ends in the median
-            // profile
-            int startIndexInMedian = segment.getStartIndex();
-            int endIndexInMedian = segment.getEndIndex();
-
-            // find the positions these correspond to in the offset profiles
-
-            // get the median profile, indexed to the start or end point
-            IProfile startOffsetMedian = median.offset(startIndexInMedian);
-            IProfile endOffsetMedian = median.offset(endIndexInMedian);
-
-            try {
-
-                // find the index at the point of the best fit
-                int startIndex = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
-                int endIndex = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
-
-                IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, n.getBorderLength(),
-                        segment.getID());
-                if (prevSeg != null) {
-                    seg.setPrevSegment(prevSeg);
-                    prevSeg.setNextSegment(seg);
-                }
-
-                nucleusSegments.add(seg);
-
-                prevSeg = seg;
-
-            } catch (IllegalArgumentException | UnavailableProfileTypeException e) {
-                warn("Cannot make segment");
-                stack("Error making segment for nucleus " + n.getNameAndNumber(), e);
-                break;
-
-            }
-
-        }
-
-        IBorderSegment.linkSegments(nucleusSegments);
-        nucleusProfile.setSegments(nucleusSegments);
-        
-        if(nucleusProfile.getSegmentCount()!=median.getSegmentCount())
-            throw new ProfileException("Nucleus does not have the correct segment count");
-
-        n.setProfile(ProfileType.ANGLE, nucleusProfile);
-    }
-
-    /**
-     * Check if the reference point of the nuclear profiles is at a segment
-     * boundary for all nuclei
-     * 
-     * @param collection
-     * @return
-     */
-    private boolean checkRPmatchesSegments(ICellCollection collection) {
-        return collection.getNuclei().stream().allMatch(n -> {
-            try {
-
-                boolean hit = false;
-                for (IBorderSegment s : n.getProfile(ProfileType.ANGLE).getSegments()) {
-                    if (s.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT)) {
-                        hit = true;
-                    }
-                }
-                if (!hit) {
-                    // The RP is not at the start of a segment
-                    // Update the segment boundary closest to the RP
-                    int end = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentAt(0).getEndIndex();
-
-                    ISegmentedProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-
-                    p.getSegmentAt(0).update(0, end);
-
-                    n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, p);
-                }
-                return n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentAt(0).getStartIndex() == 0;
-            } catch (UnavailableComponentException | ProfileException | SegmentUpdateException e) {
-                warn("Error checking profile offsets");
-                stack(e);
-                return false;
-            }
-        });
-    }
-
-    /**
-     * Use a ProfileSegmenter to segment the regular median profile of the
-     * collection starting from the reference point
-     * 
-     * @param collection
-     */
-    private void createSegmentsInMedian(ICellCollection collection) throws Exception {
-
-        IProfileCollection pc = collection.getProfileCollection();
-
-        // the reference point is always index 0, so the segments will match
-        // the profile
-        IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-        Map<Tag, Integer> map = new HashMap<Tag, Integer>();
-        int opIndex = pc.getIndex(Tag.ORIENTATION_POINT);
-        map.put(Tag.ORIENTATION_POINT, opIndex);
-
-        List<IBorderSegment> segments;
-        if (!collection.getNucleusType().equals(NucleusType.ROUND)
-                && !collection.getNucleusType().equals(NucleusType.NEUTROPHIL)) {
-
-            ProfileSegmenter segmenter = new ProfileSegmenter(median, map);
-            segments = segmenter.segment();
-
-        } else {
-
-            segments = new ArrayList<>(2);
-            IBorderSegment seg1 = IBorderSegment.newSegment(0, opIndex, median.size());
-            IBorderSegment seg2 = IBorderSegment.newSegment(opIndex, median.size() - 1, median.size());
-            segments.add(seg1);
-            segments.add(seg2);
-        }
-
-        pc.addSegments(Tag.REFERENCE_POINT, segments);
-
-    }
-
-    /**
-     * Update segment assignments in individual nuclei by stretching each
-     * segment to the best possible fit along the median profile
-     * 
-     * @param collection
-     * @param pointType
-     */
-    private void reviseSegments(ICellCollection collection, Tag pointType) throws Exception {
-
-        IProfileCollection pc = collection.getProfileCollection();
-
-        List<IBorderSegment> segments = pc.getSegments(pointType);
-
-        /*
-         * At this point, the FrankenCollection is identical to the
-         * ProfileCollection, but has no ProfileAggregate. We need to add the
-         * individual recombined frankenProfiles to the internal profile list,
-         * and build a ProfileAggregate
-         */
-
-        // Get the median profile for the population
-        ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
-
-        /*
-         * Split the recombining task into chunks for multithreading
-         */
-
-        SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc,
-                collection.getNuclei().toArray(new Nucleus[0]));
-        task.addProgressListener(this);
-
-        try {
-            task.invoke();
-        } catch (RejectedExecutionException e) {
-            error("Fork task rejected: " + e.getMessage(), e);
-        }
-
-        /*
-         * Build a profile aggregate in the new frankencollection by taking the
-         * stored frankenprofiles from each nucleus in the collection
-         */
-        pc.createProfileAggregate(collection, pc.length());
-
-        if (!checkRPmatchesSegments(collection))
-            warn("Segments do not all start on reference point after recombining");
-
-    }
-
-    @Override
-    public void progressEventReceived(ProgressEvent event) {
-        fireProgressEvent();
-    }
+	private ICellCollection sourceCollection = null;
+	
+	private final ICellCollection collection;
+
+	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
+
+	public enum MorphologyAnalysisMode {
+		
+		/** Segment the median and update nuclei to match */
+		NEW, 
+		
+		/** Copy the segments from another dataset and update nuclei to match */
+		COPY,
+		
+		/** Keep the median segmentation, and update nuclei to match */
+		REFRESH
+	}
+
+	/**
+	 * Segment a dataset with the given mode
+	 * 
+	 * @param dataset the dataset to be segmented
+	 * @param mode the analysis mode to run
+	 */
+	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull MorphologyAnalysisMode mode) {
+		super(dataset);
+		collection = dataset.getCollection();
+		this.mode = mode;
+	}
+
+	/**
+	 * Copy the segmentation pattern from the source collection onto the given
+	 * dataset
+	 * 
+	 * @param dataset the dataset to be segmented
+	 * @param source the collection to copy segment patterns from
+	 */
+	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull ICellCollection source) {
+		this(dataset, MorphologyAnalysisMode.COPY);
+		this.sourceCollection = source;
+	}
+
+	@Override
+	public IAnalysisResult call() throws Exception {
+		fine("-----------------------------");
+    	fine("Beginning segmentation method");
+    	fine("-----------------------------");
+		try {
+
+			switch (mode) {
+			case COPY:
+				result = runCopyAnalysis();
+				break;
+			case NEW:
+				result = runNewAnalysis();
+				break;
+			case REFRESH:
+				result = runRefreshAnalysis();
+				break;
+			default:
+				result = null;
+				break;
+			}
+
+			// Ensure segments are copied appropriately to verticals
+			// Ensure hook statistics are generated appropriately
+			for (Nucleus n : dataset.getCollection().getNuclei()) {
+				n.updateVerticallyRotatedNucleus();
+				n.updateDependentStats();
+			}
+			fine("Updated verticals and stats");
+			
+			
+			DatasetValidator dv = new DatasetValidator();
+			if(!dv.validate(dataset)) {
+				warn("Segmentation failed; resulting dataset did not validate");
+//				for(String s : dv.getErrors())
+//					warn(s);
+			}
+		} catch (Exception e) {
+			result = null;
+			System.out.println("Error in segmentation: "+e.getMessage());
+			e.printStackTrace();
+			stack("Error in segmentation analysis", e);
+		}
+
+		return result;
+
+	}
+
+	/**
+	 * The main analysis method. Segment the median, apply the segments to
+	 * nuclei, generate the franken-median, and adjust the nuclear segments based
+	 * on comparison of franken-profiles.
+	 * 
+	 * @return an analysis result with the segmented dataset
+	 * @throws Exception
+	 */
+	private IAnalysisResult runNewAnalysis() throws Exception {
+		if(!dataset.isRoot()) {
+			fine("Dataset is not root, not segmenting");
+			return new DefaultAnalysisResult(dataset);
+		}
+		
+		dataset.getCollection().setConsensus(null); // clear if present
+		fine("Before segmentation median length: "+collection.getMedianArrayLength());
+		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
+		
+		if(median.getSegmentCount()<=0) {
+			warn("Error finding segments in median profile");
+			return new DefaultAnalysisResult(dataset);
+		}
+		
+		if(median.getSegmentCount()==1)
+			warn("Unable to segment the median profile");
+		
+		// Make a new collection and aggregate to invalidate previous cached data, possibly
+		// with different profile lengths
+		dataset.getCollection().createProfileCollection();
+		
+		dataset.getCollection().getProfileCollection().addSegments(median.getSegments());
+		
+		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei 
+		
+		// The best segmentation pattern has been found
+		// Copy segmentation to child datasets and invalidate  any consensus nuclei
+		if(dataset.hasChildren()){
+			for(IAnalysisDataset child: dataset.getAllChildDatasets()){
+				child.getCollection().setConsensus(null);
+				dataset.getCollection().getProfileManager().copyCollectionOffsets(child.getCollection());				
+			}
+		}
+		return new DefaultAnalysisResult(dataset);
+	}
+	
+	private IAnalysisResult runCopyAnalysis() throws Exception {
+		if (sourceCollection == null) {
+			warn("Cannot copy: source collection is null");
+			return null;
+		}
+
+		if(!sourceCollection.getProfileCollection().hasSegments()) {
+			fine("Cannot copy segments: source collection has no segments");
+			dataset.getCollection().createProfileCollection(); // ensure profiles are set
+			return new DefaultAnalysisResult(dataset);
+		}
+
+		fine("Copying segmentation pattern");
+		reapplyProfiles();
+		fine("Copying complete");
+		return new DefaultAnalysisResult(dataset);
+	}
+
+	
+	/**
+	 * Refresh the nucleus segmentation. Assumes that the segmentation in the
+	 * median profile is correct, and updates all nuclei to match.
+	 * 
+	 * @param collection
+	 * @return
+	 */
+	private IAnalysisResult runRefreshAnalysis() throws Exception {
+		ISegmentedProfile median = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		assignSegmentsToNuclei(median);
+		return new DefaultAnalysisResult(dataset);
+	}
+
+
+	/**
+	 * When a population needs to be reanalysed do not offset nuclei or
+	 * recalculate best fits; just get the new median profile
+	 * 
+	 * @param collection the collection of nuclei
+	 * @param sourceCollection the collection with segments to copy
+	 */
+	private void reapplyProfiles() throws Exception {
+
+		fine("Applying existing segmentation profile to population");
+
+		sourceCollection.getProfileManager().copyCollectionOffsets(collection);
+
+		// At this point the collection has only a regular profile collections.
+		// No Frankenprofile has been copied.
+		fine("Re-profiling complete");
+	}
+	
+	/**
+	 * Use a segmenter to segment the median profile of the
+	 * collection starting from the reference point
+	 * 
+	 * @param collection
+	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderTagException 
+	 */
+	private ISegmentedProfile createSegmentsInMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		
+		// choose the best subset of nuclei and make a median profile from them
+		fine("Collection median length "+collection.getMedianArrayLength());
+		fine("Profile collection length "+collection.getProfileCollection().length());
+
+		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
+		
+		IProfile median = finder.findMedian();
+		fine("Representative median length "+median.size());
+
+		ProfileSegmenter segmenter = new ProfileSegmenter(median);
+		List<IBorderSegment> segments = segmenter.segment();
+		return new SegmentedFloatProfile(median, segments);
+	}
+	
+	/**
+	 * Assign the segments in the given profile to the nuclei within the
+	 * collection. The template profile is assumed to be indexed at the reference
+	 * point.
+	 * @throws UnavailableComponentException 
+	 * @throws SegmentUpdateException 
+	 * @throws ProfileException 
+	 */
+	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template) throws ProfileException, SegmentUpdateException, UnavailableComponentException {
+		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
+		for(Nucleus n : collection.getNuclei()) {
+			if (n.isLocked())
+				continue;
+			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
+			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, segProfile);
+			if(segProfile.getSegmentCount()!=template.getSegmentCount())
+				throw new ProfileException("Segments could not be fitted to nucleus");
+			if(template.getSegmentCount()==1) {
+				ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				IBorderSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+				if(seg.getStartIndex()!=0) {
+					throw new ProfileException("Single segment does not start at RP in nucleus");
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void progressEventReceived(ProgressEvent event) {
+		fireProgressEvent();
+	}
 
 }

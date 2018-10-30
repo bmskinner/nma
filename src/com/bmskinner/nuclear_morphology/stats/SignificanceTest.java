@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.stats;
 
+/**
+ * This interface holds values for significance testing, but no methods
+ * @author bms41
+ *
+ */
 public interface SignificanceTest {
 
+	public static final double ONE  = 1;
     public static final double TEN_PERCENT_SIGNIFICANCE_LEVEL  = 0.1;
     public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
     public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL  = 0.01;

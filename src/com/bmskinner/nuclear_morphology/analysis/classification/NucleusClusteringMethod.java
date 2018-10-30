@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
 import java.util.ArrayList;
@@ -23,13 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import weka.clusterers.Clusterer;
-import weka.clusterers.EM;
-import weka.clusterers.HierarchicalClusterer;
-import weka.core.EuclideanDistance;
-import weka.core.Instance;
-import weka.core.Instances;
 
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -39,8 +30,15 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+
+import weka.clusterers.Clusterer;
+import weka.clusterers.EM;
+import weka.clusterers.HierarchicalClusterer;
+import weka.core.EuclideanDistance;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Run clustering of nuclei in a dataset based on a given set of options
@@ -53,7 +51,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     public static final int EM           = 0; // expectation maximisation
     public static final int HIERARCHICAL = 1;
 
-    private Map<Integer, ICellCollection> clusterMap = new HashMap<Integer, ICellCollection>();
+    private Map<Integer, ICellCollection> clusterMap = new HashMap<>();
 
     /**
      * Construct from a dataset and options

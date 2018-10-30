@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
@@ -27,15 +25,14 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.LobeDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.HoughSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * The setup for lobe detection in neutrophils
@@ -58,10 +55,8 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
      * @param mw
      * @param dataset
      */
-    public LobeDetectionSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
-
-        // modal dialog
-        super(mw, dataset, DIALOG_TITLE);
+    public LobeDetectionSetupDialog(final IAnalysisDataset dataset) {
+        super(dataset, DIALOG_TITLE);
         createUI();
         packAndDisplay();
 
@@ -70,9 +65,9 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
     @Override
     public IAnalysisMethod getMethod() {
 
-    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
     	if(op.isPresent()){
-    		Optional<IMutableDetectionOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+    		Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
     		
     		if(nOp.isPresent())
     			nOp.get().setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);

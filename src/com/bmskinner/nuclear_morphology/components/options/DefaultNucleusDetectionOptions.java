@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,26 +12,28 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
 /**
  * The default detection options for a nucleus
  * 
  * @author bms41
  * @since 1.13.3
+ * @deprecated since 1.14.0
  *
  */
+@Deprecated
 public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 
     public static final int     DEFAULT_MIN_NUCLEUS_SIZE  = 2000;
@@ -65,7 +67,7 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
         super(template);
 
     }
-
+    
     @Override
     public DefaultNucleusDetectionOptions setSize(double min, double max) {
         super.setSize(min, max);
@@ -82,20 +84,19 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
     public boolean isValid(CellularComponent c) {
         if (c instanceof Nucleus) {
             return super.isValid(c);
-        } else {
-            return false;
         }
+		return false;
     }
 
     @Override
-    public IMutableDetectionOptions duplicate() {
-        return new DefaultNucleusDetectionOptions(this);
+    public IDetectionOptions duplicate() {
+        return new DefaultNucleusHashDetectionOptions(this);
     }
 
-    @Override
-    public IDetectionOptions lock() {
-        return this;
-    }
+//    @Override
+//    public IDetectionOptions lock() {
+//        return this;
+//    }
 
     @Override
     public void setHoughOptions(IHoughDetectionOptions hough) {
@@ -103,10 +104,10 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
         warn("Unimplemented method in " + this.getClass().getName());
     }
 
-    @Override
-    public IMutableDetectionOptions unlock() {
-        return this;
-    }
+//    @Override
+//    public IDetectionOptions unlock() {
+//        return this;
+//    }
 
     @Override
     public boolean isUseHoughTransform() {
@@ -205,32 +206,61 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 
 	@Override
 	public Object getValue(String key) {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getBooleanKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getIntegerKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getDoubleKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getFloatKeys() {
-		// TODO Auto-generated method stub
+		 warn("Unimplemented method in " + this.getClass().getName());
 		return null;
+	}
+
+	@Override
+	public Set<String> getSubOptionKeys() {
+		 warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public String getString(String s) {
+		 warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void setString(String k, String v) {
+		 warn("Unimplemented method in " + this.getClass().getName());
+	}
+
+	@Override
+	public List<String> getStringKeys() {
+		 warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void set(HashOptions o) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

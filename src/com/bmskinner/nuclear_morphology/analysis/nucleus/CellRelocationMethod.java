@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.io.File;
@@ -38,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * Find cells from a .cell file and assign them to child datasets.
@@ -88,7 +86,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         Set<UUID> newDatasets;
         try {
             newDatasets = parsePathList();
-        } catch (CellRelocationException e) {
+        } catch (CellRelocationException | ProfileException e) {
             stack("Error relocating cells", e);
             return;
         }
@@ -100,7 +98,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                 for (UUID id : newDatasets) {
 
-                    if (!id.equals(dataset.getUUID())) {
+                    if (!id.equals(dataset.getId())) {
                         dataset.getCollection().getProfileManager()
                                 .copyCollectionOffsets(dataset.getChildDataset(id).getCollection());
 
@@ -115,7 +113,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
     }
 
-    private Set<UUID> parsePathList() throws CellRelocationException {
+    private Set<UUID> parsePathList() throws CellRelocationException, ProfileException {
         Scanner scanner;
         try {
             scanner = new Scanner(inputFile);
@@ -145,7 +143,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                  */
                 activeID = UUID.fromString(line.split(TAB)[1]);
 
-                if (dataset.getUUID().equals(activeID) || dataset.hasChild(activeID)) {
+                if (dataset.getId().equals(activeID) || dataset.hasChild(activeID)) {
                     // the dataset already exists with this id - we must fail
                     scanner.close();
                     warn("Dataset in cell file already exists");
@@ -163,12 +161,14 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                 activeName = line.split(TAB)[1];
 
+                if(activeID==null)
+                	continue;
                 ICellCollection c = new VirtualCellCollection(dataset, activeName, activeID);
 
                 IAnalysisDataset d = new ChildAnalysisDataset(dataset, c);
 
 
-                Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+                Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
                 if(op.isPresent())
                 	d.setAnalysisOptions(op.get());
 

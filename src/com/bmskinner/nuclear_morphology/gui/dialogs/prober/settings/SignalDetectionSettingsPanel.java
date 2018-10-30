@@ -1,28 +1,28 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
 /**
@@ -37,14 +37,14 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 @SuppressWarnings("serial")
 public class SignalDetectionSettingsPanel extends SettingsPanel {
 
-    private IMutableNuclearSignalOptions options;
+    private INuclearSignalOptions options;
 
     private static final String OBJECT_FINDING_LBL = "Object finding";
     private static final String SIZE_SETTINGS_LBL  = "Filtering";
     private static final String THRESHOLD_LBL      = "Thresholding";
     private static final String CHANNEL_LBL        = "Image";
 
-    public SignalDetectionSettingsPanel(IMutableNuclearSignalOptions options) {
+    public SignalDetectionSettingsPanel(INuclearSignalOptions options) {
 
         try {
             this.options = options;
@@ -88,13 +88,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 
         if (this.hasSubPanel((SettingsPanel) e.getSource())) {
             update();
-
-            // if(e.getSource() instanceof ThresholdSettingsPanel
-            // || e.getSource() instanceof SignalSizeSettingsPanel
-            // || e.getSource() instanceof ImageChannelSettingsPanel){
-            fireProberReloadEvent(); // don't fire an update for values that
-                                     // have no effect on a prober
-            // }
+            fireProberReloadEvent();
         }
     }
 }

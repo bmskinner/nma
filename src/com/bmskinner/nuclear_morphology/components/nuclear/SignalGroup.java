@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.awt.Color;
@@ -40,19 +38,20 @@ public class SignalGroup implements ISignalGroup {
     private String            groupName        = "";
     private boolean           isVisible        = true;
     private Color             groupColour      = null;
+    
+    @Deprecated
     private int               channel          = 0;
+    
+    @Deprecated
     private File              folder           = null;
-
-    /**
-     * Default constructor
-     */
-    public SignalGroup() {
-    }
+    
+    // Space to store warped signals from this signal group against a template consensus
+    private IWarpedSignal	 warpedSignals     = null;
     
     /**
      * Default constructor
      */
-    public SignalGroup(String name) {
+    public SignalGroup(@NonNull String name) {
         groupName = name;
     }
 
@@ -63,172 +62,133 @@ public class SignalGroup implements ISignalGroup {
      * @param s
      */
     public SignalGroup(@NonNull ISignalGroup s) {
-        if (!s.hasShellResult()) {
-            shellResult = null;
-        } else {
-            shellResult = new DefaultShellResult(s.getShellResult().get());
-        }
+
+    	shellResult = null;
         groupName = s.getGroupName();
         isVisible = s.isVisible();
         groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
-        channel = s.getChannel();
-        folder = new File(s.getFolder().getAbsolutePath());
+        warpedSignals = s.getWarpedSignals().orElse(null);
     }
+    
+	@Override
+	public ISignalGroup duplicate() {
+		return new SignalGroup(this);
+	}
+	
+	@Override
+	public boolean hasWarpedSignals() {
+		return warpedSignals!=null;
+	}
+    
+	@Override
+	public Optional<IWarpedSignal> getWarpedSignals() {
+		return Optional.ofNullable(warpedSignals);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#getShellResult()
-     */
+	@Override
+	public void setWarpedSignals(@NonNull IWarpedSignal result) {
+		warpedSignals = result;
+	}
+
     @Override
     public Optional<IShellResult> getShellResult() {
         return Optional.ofNullable(shellResult);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#setShellResult(components.nuclear.
-     * ShellResult)
-     */
     @Override
     public void setShellResult(@NonNull IShellResult shellResult) {
         this.shellResult = shellResult;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#hasShellResult()
-     */
     @Override
     public boolean hasShellResult() {
         return(shellResult != null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#getGroupName()
-     */
     @Override
     public String getGroupName() {
         return groupName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#setGroupName(java.lang.String)
-     */
     @Override
     public void setGroupName(@NonNull String groupName) {
         this.groupName = groupName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#isVisible()
-     */
     @Override
     public boolean isVisible() {
         return isVisible;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#setVisible(boolean)
-     */
     @Override
     public void setVisible(boolean isVisible) {
         this.isVisible = isVisible;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#hasColour()
-     */
     @Override
     public boolean hasColour() {
         return groupColour != null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#getGroupColour()
-     */
     @Override
     public Optional<Color> getGroupColour() {
         return Optional.ofNullable(groupColour);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#setGroupColour(java.awt.Color)
-     */
     @Override
     public void setGroupColour(@NonNull Color groupColour) {
         this.groupColour = groupColour;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#getChannel()
-     */
-    @Override
-    public int getChannel() {
-        return channel;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#setChannel(int)
-     */
-    @Override
-    public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#getFolder()
-     */
-    @Override
-    public File getFolder() {
-        return folder;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#setFolder(java.io.File)
-     */
-    @Override
-    public void setFolder(@NonNull File folder) {
-        this.folder = folder;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalGroup#toString()
-     */
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder();
-
-        String colour = this.groupColour == null ? "No colour" : this.groupColour.toString();
-
-        b.append(groupName + " | " + this.channel + " | " + this.isVisible + " | " + colour + " | "
-                + this.folder.getAbsolutePath());
-        return b.toString();
+        return groupName;
     }
+    
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((groupColour == null) ? 0 : groupColour.hashCode());
+		result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
+		result = prime * result + (isVisible ? 1231 : 1237);
+		result = prime * result + ((shellResult == null) ? 0 : shellResult.hashCode());
+		result = prime * result + ((warpedSignals == null) ? 0 : warpedSignals.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SignalGroup other = (SignalGroup) obj;
+		if (groupColour == null) {
+			if (other.groupColour != null)
+				return false;
+		} else if (!groupColour.equals(other.groupColour))
+			return false;
+		if (groupName == null) {
+			if (other.groupName != null)
+				return false;
+		} else if (!groupName.equals(other.groupName))
+			return false;
+		if (isVisible != other.isVisible)
+			return false;
+		if (shellResult == null) {
+			if (other.shellResult != null)
+				return false;
+		} else if (!shellResult.equals(other.shellResult))
+			return false;
+		if (warpedSignals == null) {
+			if (other.warpedSignals != null)
+				return false;
+		} else if (!warpedSignals.equals(other.warpedSignals))
+			return false;
+		return true;
+	}   
+    
 }

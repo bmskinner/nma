@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.awt.Color;
@@ -66,7 +64,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     }
 
     @Override
-    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException, ComponentCreationException {
+    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
         List<ICell> list = new ArrayList<>();
 
         try {
@@ -94,20 +92,21 @@ public class FluorescentNucleusFinder extends CellFinder {
 
             for (Nucleus n : nuclei) {
                 if (nuclOptions.isValid(n)) {
-                    list.add(CellFactory.buildInstance(n));
+                	ICell c = CellFactory.buildInstance(n);
+                	if(c!=null)
+                		list.add(c);
                 }
             }
-        } catch (Exception e) {
-            warn("Error searching in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
-        }
-
-        fireProgressEvent();
+        } catch (MissingOptionException e) {
+        	warn("No options for nucleus creation in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
+        } finally {
+        	fireProgressEvent();
+        }        
         return list;
-
     }
 
-    private List<Nucleus> detectNucleus(@NonNull File imageFile)
-            throws ImageImportException, ComponentCreationException, MissingOptionException {
+    private List<Nucleus> detectNucleus(@NonNull final File imageFile)
+            throws ImageImportException, MissingOptionException {
 
         List<Nucleus> list = new ArrayList<>();
 
@@ -127,33 +126,43 @@ public class FluorescentNucleusFinder extends CellFinder {
         ImageFilterer filt = new ImageFilterer(ip.duplicate());
         if (cannyOptions.isUseKuwahara()) {
             filt.runKuwaharaFiltering(cannyOptions.getKuwaharaKernel());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
+            }
         }
 
         if (cannyOptions.isUseFlattenImage()) {
             filt.squashChromocentres(cannyOptions.getFlattenThreshold());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
+            }
         }
 
         if (cannyOptions.isUseCanny()) {
             filt.runEdgeDetector(cannyOptions);
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Edge detection");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Edge detection");
+            }
 
             filt.morphologyClose(cannyOptions.getClosingObjectRadius());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Gap closing");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Gap closing");
+            }
         } else {
             filt.threshold(nuclOptions.getThreshold());
-            ip = filt.toProcessor().duplicate();
-            ip.invert();
-            fireDetectionEvent(ip.duplicate(), "Thresholded");
+            if (hasDetectionListeners()) {
+            	ip = filt.toProcessor().duplicate();
+            	ip.invert();
+            	fireDetectionEvent(ip.duplicate(), "Thresholded");
+            }
         }
 
         GenericDetector gd = new GenericDetector();
@@ -168,21 +177,26 @@ public class FluorescentNucleusFinder extends CellFinder {
         int i=0;
         for (Roi r: rois.keySet()) {
             StatsMap s = rois.get(r);
-            Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, s);
-            list.add(n);
-            i++;
+
+            try {
+            	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, s);
+            	list.add(n);
+            } catch(ComponentCreationException e) {
+            	stack("Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
+            } finally {
+            	i++;
+            }
+            
+            
         }
         return list;
 
     }
 
-    private Nucleus makeNucleus(final Roi roi, final File f, final IDetectionOptions nuclOptions, int objectNumber,
+    private synchronized Nucleus makeNucleus(@NonNull final Roi roi, @NonNull final File f, @NonNull final IDetectionOptions nuclOptions, int objectNumber,
             final StatsMap values) throws ComponentCreationException {
-
-        // measure the area, density etc within the nucleus
-//        StatsMap values = gd.measure(roi, ip);
         
-        fine("Roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
+        fine("Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
 
         // save the position of the roi, for later use
         int xbase = (int) roi.getXBase();

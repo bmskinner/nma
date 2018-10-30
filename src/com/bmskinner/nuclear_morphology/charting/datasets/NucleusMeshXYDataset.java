@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.HashMap;
@@ -40,7 +38,8 @@ public class NucleusMeshXYDataset extends DefaultXYDataset {
         this.ratioMap.put(seriesKey, ratio);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
 
         StringBuilder b = new StringBuilder();
         for (int series = 0; series < this.getSeriesCount(); series++) {
@@ -51,9 +50,7 @@ public class NucleusMeshXYDataset extends DefaultXYDataset {
                 double y = this.getYValue(series, item);
 
                 b.append("Series " + series + " - Item " + item + ": " + x + "   " + y + "\n");
-
             }
-
         }
         return b.toString();
     }

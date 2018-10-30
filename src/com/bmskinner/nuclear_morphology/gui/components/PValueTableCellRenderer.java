@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,16 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
@@ -29,34 +29,33 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 @SuppressWarnings("serial")
 public class PValueTableCellRenderer extends DefaultTableCellRenderer {
 
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+	@Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
         // Cells are by default rendered as a JLabel.
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        Color colour = Color.WHITE;
+        Color bg = c.getBackground();
 
         NumberFormat nf = NumberFormat.getInstance();
-        double pvalue = 1;
 
         try {
-            pvalue = nf.parse(value.toString()).doubleValue();
+        	double pvalue = nf.parse(value.toString()).doubleValue();
 
-            if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL) {
-                colour = Color.YELLOW;
-            }
+            if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL)
+            	bg = Color.YELLOW;
 
-            if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL) {
-                colour = Color.GREEN;
-            }
+            if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL)
+            	bg = Color.GREEN;
         } catch (ParseException e) {
-            colour = Color.WHITE;
+        	bg = Color.WHITE;
+        	e.printStackTrace();
         }
 
-        setBackground(colour);
+        c.setBackground(bg);
 
-        return this;
+        return c;
     }
 
 }

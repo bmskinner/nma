@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
 import java.awt.BorderLayout;
@@ -34,20 +32,23 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 /**
@@ -64,30 +65,21 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
     protected ExportableChartPanel chartPanel;
     private JSpinner               pvalueSpinner;
 
-    // private BorderTagOptionsPanel borderTagOptionsPanel = new
-    // BorderTagOptionsPanel();
     private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
 
-    // private ProfileCollectionTypeSettingsPanel
-    // profileCollectionTypeSettingsPanel = new
-    // ProfileCollectionTypeSettingsPanel();
     private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
-    public VariabilityDisplayPanel() {
-        super();
+    public VariabilityDisplayPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();
 
-        JFreeChart chart = new MorphologyChartFactory(options).makeVariabilityChart();
+        JFreeChart chart = new ProfileChartFactory(options).makeVariabilityChart();
 
         chartPanel = new ExportableChartPanel(chart);
         chartPanel.getChartRenderingInfo().setEntityCollection(null);
         this.add(chartPanel, BorderLayout.CENTER);
-
-        // buttonPanel.add(borderTagOptionsPanel);
-        // borderTagOptionsPanel.addActionListener(this);
-        // borderTagOptionsPanel.setEnabled(false);
 
         pvalueSpinner = new JSpinner(
                 new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL, 0d, 1d, 0.001d));
@@ -117,47 +109,28 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
         return PANEL_TITLE_LBL;
     }
     
-    public void setEnabled(boolean b) {
+    @Override
+	public void setEnabled(boolean b) {
         // borderTagOptionsPanel.setEnabled(b);
         profileCollectionTypeSettingsPanel.setEnabled(b);
         profileMarkersOptionsPanel.setEnabled(b);
         pvalueSpinner.setEnabled(b);
     }
 
-    // public void update(List<AnalysisDataset> list){
-    //
-    //
-    // }
-
     /**
-     * Update the profile panel with data from the given datasets
-     * 
-     * @param list
-     *            the datasets
-     * @param normalised
-     *            flag for raw or normalised lengths
-     * @param rightAlign
-     *            flag for left or right alignment (no effect if normalised is
-     *            true)
+     * Update the profile panel with data from the given options
      */
     private void updateProfiles(ChartOptions options) {
-
         try {
-
             setChart(options);
-            // JFreeChart chart = getChart(options);
-            // chartPanel.setChart(chart);
-
         } catch (Exception e) {
-            log(Level.SEVERE, "Error in plotting variability chart", e);
+           stack("Error in plotting variability chart", e);
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         update(getDatasets());
-
     }
 
     @Override
@@ -214,7 +187,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new MorphologyChartFactory(options).makeVariabilityChart();
+        return new ProfileChartFactory(options).makeVariabilityChart();
     }
 
 }

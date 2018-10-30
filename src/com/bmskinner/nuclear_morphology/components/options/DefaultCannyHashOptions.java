@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 /**
@@ -25,7 +23,7 @@ package com.bmskinner.nuclear_morphology.components.options;
  * @since 1.13.4
  *
  */
-public class DefaultCannyHashOptions extends AbstractHashOptions implements IMutableCannyOptions {
+public class DefaultCannyHashOptions extends AbstractHashOptions implements ICannyOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,14 +64,6 @@ public class DefaultCannyHashOptions extends AbstractHashOptions implements IMut
         this.setKernelWidth(o.getKernelWidth());
         this.setClosingObjectRadius(o.getClosingObjectRadius());
         this.setAddBorder(o.isAddBorder());
-    }
-
-    public IMutableCannyOptions unlock() {
-        return this;
-    }
-
-    public ICannyOptions lock() {
-        return this;
     }
 
     @Override
@@ -137,10 +127,8 @@ public class DefaultCannyHashOptions extends AbstractHashOptions implements IMut
     }
 
     @Override
-    public IMutableCannyOptions duplicate() {
-
-        DefaultCannyHashOptions result = new DefaultCannyHashOptions(this);
-        return result;
+    public ICannyOptions duplicate() {
+        return new DefaultCannyHashOptions(this);
     }
 
     @Override
@@ -215,58 +203,5 @@ public class DefaultCannyHashOptions extends AbstractHashOptions implements IMut
     @Override
     public void set(ICannyOptions options) {
         warn("Setting Canny options not yet implemented");
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-
-        if (o == null)
-            return false;
-
-        if (!(o instanceof ICannyOptions))
-            return false;
-
-        ICannyOptions other = (ICannyOptions) o;
-
-        if (isUseCanny() != other.isUseCanny())
-            return false;
-
-        if (isUseFlattenImage() != other.isUseFlattenImage())
-            return false;
-        
-        if(getFlattenThreshold()!=other.getFlattenThreshold())
-            return false;
-        
-        if (isCannyAutoThreshold() != other.isCannyAutoThreshold())
-            return false;
-        
-        if (isUseKuwahara() != other.isUseKuwahara())
-            return false;
-        
-        if(getKuwaharaKernel()!=other.getKuwaharaKernel())
-            return false;
-        
-        if(getClosingObjectRadius()!=other.getClosingObjectRadius())
-            return false;
-        
-        if(Double.doubleToLongBits(getLowThreshold())!=Double.doubleToLongBits(other.getLowThreshold()))
-            return false;
-        
-        if(Double.doubleToLongBits(getHighThreshold())!=Double.doubleToLongBits(other.getHighThreshold()))
-            return false;
-        
-        if(Double.doubleToLongBits(getKernelRadius())!=Double.doubleToLongBits(other.getKernelRadius()))
-            return false;
-                
-        if(getKernelWidth()!=other.getKernelWidth())
-            return false;
-        
-        if(isAddBorder()!=other.isAddBorder())
-            return false;
-
-        return true;
-
     }
 }

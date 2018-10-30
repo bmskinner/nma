@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,16 +56,15 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -75,14 +76,11 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
-    private static final String NA_MERGE = "N/A - merge";
-    private static final String NA       = "N/A";
-
     private static final Object[] ANALYSIS_PARAMETERS_ROWS = { "Profile window", "Nucleus detection method",
             "Nucleus threshold", "Kuwahara filter radius", "Chromocentre flattening threshold", "Canny auto threshold",
             "Canny low threshold", "Canny high threshold", "Canny kernel radius", "Canny kernel width",
             "Closing radius", "Nucleus min size", "Nucleus max size", "Nucleus min circ", "Nucleus max circ",
-            "Consensus folded", "Refold mode", "Run date", "Run time", "Collection source", "Log file", "Type",
+            "Run date", "Run time", Labels.AnalysisParameters.COLLECTION_SOURCE, "Type",
             "Created in" };
 
     /**
@@ -117,10 +115,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             Vector<Object> names = new Vector<Object>();
             Vector<Object> nuclei = new Vector<Object>();
 
-            names.add("No merge sources");
+            names.add(Labels.Merges.NO_MERGE_SOURCES);
             nuclei.add(EMPTY_STRING);
 
-            model.addColumn("Merge source", names);
+            model.addColumn(Labels.Merges.MERGE_SOURCE, names);
             model.addColumn("Nuclei", nuclei);
             return model;
         }
@@ -323,7 +321,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             return createBlankTable();
         }
 
-        TableOptions op = (TableOptions) options;
+        TableOptions op = options;
 
         if (op.getType().equals(TableType.ANALYSIS_PARAMETERS)) {
             return createAnalysisParametersTable();
@@ -397,13 +395,13 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
 
-                Optional<IMutableAnalysisOptions> o = l.get(0).getAnalysisOptions();
+                Optional<IAnalysisOptions> o = l.get(0).getAnalysisOptions();
                 if(o.isPresent())
                 	data = createAnalysisParametersColumn(dataset, o.get());
                 	
             } else {
                 // Merge sources have different options
-                Arrays.fill(data, NA_MERGE);
+                Arrays.fill(data, Labels.NA_MERGE);
             }
         } else {
         	// if this is a child of merged datasets, get the root.
@@ -415,7 +413,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         		}
         		
         	} else {
-        		Arrays.fill(data, NA); // there are no options to use; fill blank
+        		Arrays.fill(data, Labels.NA); // there are no options to use; fill blank
         	}
         }
         return data;
@@ -431,53 +429,53 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      */
     private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         
-    	int rowCount = 23;
-    	Optional<IMutableAnalysisOptions> o = dataset.getAnalysisOptions();
+    	int rowCount = 20;
+    	Object[] collectionData = new Object[rowCount];
+    	
+    	Optional<IAnalysisOptions> o = dataset.getAnalysisOptions();
     	if(options == null && !o.isPresent())
     		return makeErrorArray(rowCount);
     	
     	options = options == null ? o.get() : options;
     	
-        String refoldMode = "Fast";
-
         String date;
         String time;
         String folder;
-        String logFile;
 
-        Optional<IMutableDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         
         if(!nO.isPresent())
         	fine("No nucleus options in dataset "+dataset.getName());
         
         if (dataset.hasMergeSources()) {
-            date = NA_MERGE;
-            time = NA_MERGE;
-            folder = NA_MERGE;
-            logFile = NA_MERGE;
+            date = Labels.NA_MERGE;
+            time = Labels.NA_MERGE;
+            folder = Labels.NA_MERGE;
 
         } else {
-            if (dataset.getCollection().getOutputFolderName() == null) {
-                date = NA;
-                time = NA;
-            } else {
-                String[] times = dataset.getCollection().getOutputFolderName().split("_");
-                date = times[0];
-                time = times[1];
-            }
-
-            folder = nO.isPresent() ? nO.get().getFolder().getAbsolutePath() : "Missing data";
-
-            logFile = dataset.getDebugFile().getAbsolutePath();
+        	long analysisTime = dataset.getAnalysisOptions().get().getAnalysisTime();
+        	if(analysisTime>0) { // stored from 1.14.0
+        		Instant inst = Instant.ofEpochMilli(analysisTime);
+        		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+        		date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM YYYY"));
+        		time = anTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        	} else { // fall back to folder name method
+        		if (dataset.getCollection().getOutputFolderName() == null) {
+        			date = Labels.NA;
+        			time = Labels.NA;
+        		} else {
+        			String[] times = dataset.getCollection().getOutputFolderName().split("_");
+        			date = times[0];
+        			time = times[1];
+        		}
+        	}
+        	folder = nO.isPresent() ? nO.get().getFolder().getAbsolutePath() : "Missing data";
         }
 
         
         if(!nO.isPresent())
             return makeErrorArray(rowCount);
-        
-        if(!nO.isPresent())
-        	fine("No nucleus options in dataset "+dataset.getName());
-        	
+                	
         ICannyOptions nucleusCannyOptions;
 		try {
 			nucleusCannyOptions = nO.get().getCannyOptions();
@@ -489,34 +487,53 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
 
-        String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? NA : String.valueOf(nO.get().getThreshold());
+        String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? Labels.NA : String.valueOf(nO.get().getThreshold());
 
         String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara()
-                ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : Labels.NA;
 
         String chromocentreThreshold = nucleusCannyOptions.isUseFlattenImage()
-                ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : Labels.NA;
+                
+        if(nucleusCannyOptions.isUseCanny()) {
+        	
+        }
 
         String cannyAutoThreshold = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : NA;
+                ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : Labels.NA;
         String cannyLowThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold()
                 ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : Labels.NA;
         String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold()
                 ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : Labels.NA;
         String cannyKernelRadius = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : Labels.NA;
         String cannyKernelWidth = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : Labels.NA;
         String cannyClosingRadius = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : Labels.NA;
 
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        Object[] collectionData = { options.getProfileWindowProportion(), detectionMethod, nucleusThreshold,
-                kuwaharaRadius, chromocentreThreshold, cannyAutoThreshold, cannyLowThreshold, cannyHighThreshold,
-                cannyKernelRadius, cannyKernelWidth, cannyClosingRadius, nO.get().getMinSize(),
-                nO.get().getMaxSize(), df.format(nO.get().getMinCirc()),
-                df.format(nO.get().getMaxCirc()), options.refoldNucleus(), refoldMode, date,
-                time, folder, logFile, options.getNucleusType().toString(), dataset.getVersion().toString() };
+        collectionData = new Object[] { 
+        		options.getProfileWindowProportion(), 
+                detectionMethod, 
+                nucleusThreshold,
+                kuwaharaRadius, 
+                chromocentreThreshold, 
+                cannyAutoThreshold, 
+                cannyLowThreshold, 
+                cannyHighThreshold,
+                cannyKernelRadius, 
+                cannyKernelWidth, 
+                cannyClosingRadius, 
+                nO.get().getMinSize(),
+                nO.get().getMaxSize(), 
+                df.format(nO.get().getMinCirc()),
+                df.format(nO.get().getMaxCirc()), 
+                date,
+                time, 
+                folder, 
+                options.getNucleusType().toString(), 
+                dataset.getVersion().toString() };
         return collectionData;
     }
     
@@ -634,7 +651,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         synchronized (this) {
             for (IAnalysisDataset dataset : list) {
                 for (IAnalysisDataset dataset2 : list) {
-                    if (!dataset2.getUUID().equals(dataset.getUUID())) {
+                    if (!dataset2.getId().equals(dataset.getId())) {
                         dataset.getCollection().countShared(dataset2);
                     }
                 }
@@ -652,7 +669,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 String valueString = "";
 
-                if (!dataset2.getUUID().equals(dataset.getUUID())) {
+                if (!dataset2.getId().equals(dataset.getId())) {
 
                     int shared = dataset.getCollection().countShared(dataset2);
 
@@ -704,17 +721,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         for (IAnalysisDataset dataset1 : list) {
 
             ArrayList<UUID> set1List = new ArrayList<UUID>();
-            existingMatches.put(dataset1.getUUID(), set1List);
+            existingMatches.put(dataset1.getId(), set1List);
 
             for (IAnalysisDataset dataset2 : list) {
 
                 // Ignore self-self matches
-                if (!dataset2.getUUID().equals(dataset1.getUUID())) {
+                if (!dataset2.getId().equals(dataset1.getId())) {
 
-                    set1List.add(dataset2.getUUID());
+                    set1List.add(dataset2.getId());
 
-                    if (existingMatches.get(dataset2.getUUID()) != null) {
-                        if (existingMatches.get(dataset2.getUUID()).contains(dataset1.getUUID())) {
+                    if (existingMatches.get(dataset2.getId()) != null) {
+                        if (existingMatches.get(dataset2.getId()).contains(dataset1.getId())) {
                             continue;
                         }
                     }
@@ -829,8 +846,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
+        int nComparisons = (options.datasetCount()*(options.datasetCount()-1))/2;
+        nComparisons *= PlottableStatistic.getNucleusStats().size(); // correct for each set of analyses also
         // add columns
-        DecimalFormat df = new DecimalFormat("#0.0000");
+        DecimalFormat df = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
             double[] d1Values = dataset.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
@@ -842,7 +861,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             boolean isGetPVal = false;
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
                     popData[i] = "";
                     isGetPVal = true;
                 } else {
@@ -850,7 +869,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     double[] d2Values = dataset2.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
                     		scale);
 
-                    double pValue = Stats.runWilcoxonTest(d1Values, d2Values, isGetPVal);
+                    double pValue = Stats.runWilcoxonTest(d1Values, d2Values, isGetPVal, nComparisons );
 
                     popData[i] = df.format(pValue);
                 }
@@ -881,7 +900,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 
         // add columns
-        DecimalFormat df = new DecimalFormat("#0.0000");
+        DecimalFormat df = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
+        int nComparisons = (options.datasetCount()*(options.datasetCount()-1))/2;
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
             Object[] popData = new Object[options.datasetCount()];
@@ -899,9 +919,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             int i = 0;
             boolean getPValue = false;
+            
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
                     popData[i] = "";
                     getPValue = true;
                 } else {
@@ -925,7 +946,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                                     CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS,
                                     medianSeg2.getID()),
 
-                            getPValue));
+                            getPValue, nComparisons));
                 }
                 i++;
             }
@@ -998,7 +1019,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
 
                     popData[i] = "";
 
@@ -1073,7 +1094,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
                     popData[i] = "";
 
                 } else {

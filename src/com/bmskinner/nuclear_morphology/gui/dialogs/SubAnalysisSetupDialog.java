@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,17 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * A base class for the sub analyses setup options. It contains a reference to
@@ -53,6 +51,19 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
         this.dataset = dataset;
         this.setTitle(title);
         this.setModal(true);
+    }
+    
+    /**
+     * Construct with a main program window to listen for actions, and a dataset
+     * to operate on
+     * 
+     * @param mw
+     * @param dataset
+     */
+    public SubAnalysisSetupDialog(final IAnalysisDataset dataset, final String title) {
+        super(true);
+        this.dataset = dataset;
+        this.setTitle(title);
     }
 
     protected void packAndDisplay() {

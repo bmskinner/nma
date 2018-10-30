@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
@@ -23,17 +21,22 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 public class SplitCollectionAction extends SingleDatasetResultAction {
+	
+	private static final String PROGRESS_BAR_LABEL = "Splitting collection";
 
-    public SplitCollectionAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Splitting collection", mw);
+    public SplitCollectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
@@ -72,7 +75,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
                         int flag = 0;
                         IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
                         final CountDownLatch latch = new CountDownLatch(1);
-                        new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
+                        new RunSegmentationAction(newDataset, dataset, flag, progressAcceptors.get(0), eh, latch);
                     }
                 } else {
                     fine("User cancelled split");

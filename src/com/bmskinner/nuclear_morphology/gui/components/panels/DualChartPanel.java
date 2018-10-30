@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,33 +12,31 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.PositionSelectionChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable
@@ -49,7 +47,7 @@ import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
  * @author bms41
  *
  */
-public abstract class DualChartPanel implements SignalChangeListener, SegmentEventListener, ChartSetEventListener {
+public abstract class DualChartPanel implements EventListener, SegmentEventListener, ChartSetEventListener {
 
     protected ExportableChartPanel chartPanel;
 
@@ -57,13 +55,14 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
 
     protected List<Object> listeners = new ArrayList<Object>();
 
-    public DualChartPanel() {
+    public DualChartPanel(boolean isFixedAspect) {
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();
 
-        JFreeChart profileChart = new MorphologyChartFactory(options).makeEmptyChart();
+        JFreeChart profileChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         chartPanel = new ExportableChartPanel(profileChart);
+        chartPanel.setFixedAspectRatio(isFixedAspect);
 
         chartPanel.setMinimumDrawWidth(0);
         chartPanel.setMinimumDrawHeight(0);
@@ -76,8 +75,9 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
          * A second chart panel at the south with a domain overlay crosshair to
          * define the centre of the zoomed range on the centre chart panel
          */
-        JFreeChart rangeChart = new MorphologyChartFactory(options).makeEmptyChart();
+        JFreeChart rangeChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         rangePanel = new PositionSelectionChartPanel(rangeChart);
+        rangePanel.setFixedAspectRatio(isFixedAspect);
         rangePanel.addSignalChangeListener(this);
         rangePanel.addChartSetEventListener(this);
         rangePanel.setDomainZoomable(false); // zoom is controlled only by the
@@ -106,12 +106,12 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
         return rangePanel;
     }
 
-    public void restoreAutoBounds() {
+    public synchronized void restoreAutoBounds() {
         chartPanel.restoreAutoBounds();
         rangePanel.restoreAutoBounds();
     }
 
-    public void setCharts(JFreeChart chart, JFreeChart rangeChart) {
+    public synchronized void setCharts(@NonNull final JFreeChart chart, @NonNull final JFreeChart rangeChart) {
 
         if (chart == rangeChart)
             throw new IllegalArgumentException("Charts cannot be the same object");
@@ -133,7 +133,13 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
      * Set the main chart panel domain range to centre on the position in the
      * range panel
      */
-    protected void updateChartPanelRange() {
+    protected synchronized void updateChartPanelRange() {
+    	if(chartPanel==null)
+    		return;
+    	if(chartPanel.getChart()==null)
+    		return;
+    	if(chartPanel.getChart().getXYPlot()==null)
+    		return;
 
         RectangleOverlayObject ob = rangePanel.getOverlayRectangle();
 
@@ -177,7 +183,7 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
         // Change the range of the main chart based on the lower chart
         if (event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)) {

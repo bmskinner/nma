@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +112,7 @@ public class NeutrophilFinder extends CellFinder {
      */
 
     @Override
-    public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
+    public Collection<ICell> findInImage(File imageFile) throws ImageImportException {
         List<ICell> list = new ArrayList<>();
 
         List<ICytoplasm> cyto = detectCytoplasm(imageFile);
@@ -173,7 +172,7 @@ public class NeutrophilFinder extends CellFinder {
      * @throws ComponentCreationException
      * @throws ImageImportException
      */
-    private List<ICytoplasm> detectCytoplasm(File imageFile) throws ComponentCreationException, ImageImportException {
+    private List<ICytoplasm> detectCytoplasm(File imageFile) throws ImageImportException {
         List<ICytoplasm> result = new ArrayList<>();
 
         ImageProcessor ip;
@@ -193,15 +192,20 @@ public class NeutrophilFinder extends CellFinder {
 
         Map<Roi, StatsMap> rois = gd.getRois(ip.duplicate());
 
-        //            List<Roi> rois = gd.getRois(ip.duplicate());
-
         List<ICytoplasm> list = new ArrayList<>();
         int i = 0;
         for (Roi r : rois.keySet()) {
         	StatsMap m = rois.get(r);
-        	ICytoplasm cyto = makeCytoplasm(r, imageFile, cytoOptions, i, m);
-        	list.add(cyto);
-        	i++;
+			try {
+				ICytoplasm cyto = makeCytoplasm(r, imageFile, cytoOptions, i, m);
+				list.add(cyto);
+			} catch (ComponentCreationException e) {
+				stack("Error creating cytoplasm", e);
+			} finally {
+				i++;
+			}
+        	
+        	
 
         }
 
@@ -231,7 +235,7 @@ public class NeutrophilFinder extends CellFinder {
     }
 
     private ImageProcessor detectCytoplasmByWatershed(File imageFile)
-            throws ComponentCreationException, ImageImportException {
+            throws ImageImportException {
 
         ImageProcessor ip = new ImageImporter(imageFile).toConverter().convertToGreyscale(1).toProcessor();
         // fireDetectionEvent(ip.duplicate(), "Input");
@@ -298,7 +302,7 @@ public class NeutrophilFinder extends CellFinder {
     }
 
     private ImageProcessor detectCytoplasmByThreshold(File imageFile)
-            throws ComponentCreationException, ImageImportException {
+            throws ImageImportException {
 
         ImageProcessor ip = new ImageImporter(imageFile).importToColorProcessor();
         // fireDetectionEvent(ip.duplicate(), "Imported image");
@@ -367,7 +371,7 @@ public class NeutrophilFinder extends CellFinder {
     }
 
     private List<Nucleus> detectNucleus(File imageFile, List<ICytoplasm> mask)
-            throws ComponentCreationException, ImageImportException {
+            throws ImageImportException {
         List<Nucleus> result = new ArrayList<>();
         ImageProcessor ip = new ImageImporter(imageFile).importToColorProcessor();
         ImageProcessor ann = ip.duplicate();
@@ -403,8 +407,8 @@ public class NeutrophilFinder extends CellFinder {
         int i=0;
         for (Roi r : rois.keySet()) {
         	StatsMap m = rois.get(r);
-        	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, m);
-        	list.add(n);
+//        	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, m);
+//        	list.add(n);
         	i++;
 
         }
@@ -427,7 +431,7 @@ public class NeutrophilFinder extends CellFinder {
         }
 
         if (options.getNucleusType().equals(NucleusType.NEUTROPHIL)) {
-        	detectLobesViaWatershed(ip, result);
+//        	detectLobesViaWatershed(ip, result);
 
         	ImageAnnotator an = new ImageAnnotator(ann.duplicate());
         	for (Nucleus c : list) {

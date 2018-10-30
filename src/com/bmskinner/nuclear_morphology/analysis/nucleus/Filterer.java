@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,11 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
+
+import java.util.function.Predicate;
 
 import com.bmskinner.nuclear_morphology.components.Filterable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @param <E>
  *            the collection to be filtered
  */
-public abstract class Filterer<E extends Filterable> implements Loggable {
+public abstract class Filterer<E extends Filterable, K> implements Loggable {
 
     public static final int FAILURE_THRESHOLD = 1;
     public static final int FAILURE_FERET     = 2;
@@ -51,20 +51,6 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
                                                          // irregular borders
                                                          // more stringently
 
-    // public boolean run(E collection, E failCollection){
-    //
-    // try{
-    //
-    // fine("Filtering collection...");
-    // removeOutliers(collection, failCollection, maxDifferenceFromMedian);
-    // fine("Filtering complete");
-    // } catch(Exception e){
-    // stack("Error filtering collection", e);
-    // return false;
-    // }
-    // return true;
-    // }
-
     /**
      * Create a collection without elements more than <i>delta</i> proportion
      * away from the median of the element filtering statistics. Formally,
@@ -72,34 +58,51 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
      * (median_statistic * delta) && <i>statistic</i> >= (median_statistic /
      * delta)
      * 
-     * @param collection
-     *            the collection to be filtered
-     * @param failCollection
-     *            the collection to store failed nuclei. Can be null.
-     * @param delta
-     *            the variability from the median allowed
+     * @param collection the collection to be filtered
+     * @param failCollection  the collection to store failed nuclei. Can be null.
+     * @param delta the variability from the median allowed
      * @return
      */
     public abstract void removeOutliers(E collection, E failCollection, double delta)
             throws CollectionFilteringException;
 
     /**
-     * Filter the given collection to retain elements in which the given
+     * Filter the given collection to retain nuclei in which the given
      * statistic is within the lower and upper bounds inclusive.
      * 
-     * @param collection
-     *            the collection to filter
-     * @param stat
-     *            the statistic to filter on
-     * @param lower
-     *            the lower bound
-     * @param upper
-     *            the upper bound
+     * @param collection the collection to filter
+     * @param stat the statistic to filter on
+     * @param lower the lower bound
+     * @param upper the upper bound
      * @return a new cell collection with copies of the original cells
      * @throws CollectionFilteringException
      */
     public abstract E filter(E collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException;
+    
+    /**
+     * Filter the given collection to retain nuclei in which the given
+     * statistic is within the lower and upper bounds inclusive.
+     * 
+     * @param collection the collection to filter
+     * @param component the cellular component to be filtered
+     * @param stat the statistic to filter on
+     * @param lower the lower bound
+     * @param upper the upper bound
+     * @return a new cell collection with copies of the original cells
+     * @throws CollectionFilteringException
+     */
+    public abstract E filter(E collection, String component, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
+            throws CollectionFilteringException;
+    
+    /**
+     * Filter the collection with the given predicate
+     * @param collection
+     * @param pred
+     * @return
+     * @throws CollectionFilteringException 
+     */
+    public abstract E filter(E collection, Predicate<K> pred) throws CollectionFilteringException;
 
     /**
      * Thrown when a cell collection cannot be filtered

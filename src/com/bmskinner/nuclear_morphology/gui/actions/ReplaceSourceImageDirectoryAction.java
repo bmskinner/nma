@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,66 +12,61 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 import ij.io.DirectoryChooser;
 
 public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction {
+	
+	private static final String PROGRESS_BAR_LABEL = "Replacing images";
 
-    public ReplaceSourceImageDirectoryAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Replacing images", mw);
+    public ReplaceSourceImageDirectoryAction(@NonNull final IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
         this.setProgressBarIndeterminate();
-
     }
 
     @Override
     public void run() {
-        try {
 
-            if (!dataset.hasMergeSources()) {
+    	if (!dataset.hasMergeSources()) {
 
-                DirectoryChooser localOpenDialog = new DirectoryChooser("Select new directory of images...");
-                String folderName = localOpenDialog.getDirectory();
+    		try {
+    			File folder = eh.getInputSupplier().requestFolder("Select new directory of images...");
+    			log("Updating folder to " + folder.getAbsolutePath());
 
-                if (folderName != null) {
+    			dataset.updateSourceImageDirectory(folder);
 
-                    File newFolder = new File(folderName);
+    			finished();
 
-                    log("Updating folder to " + folderName);
+    		} catch (RequestCancelledException e) {
+    			cancel();
+    		}
+    	} else {
+    		warn("Dataset is a merge; cancelling");
+    		cancel();
+    	}
 
-                    dataset.updateSourceImageDirectory(newFolder);
-
-                    finished();
-
-                } else {
-                    log("Update cancelled");
-                    cancel();
-                }
-            } else {
-                warn("Dataset is a merge; cancelling");
-                cancel();
-            }
-
-        } catch (Exception e) {
-            error("Error in folder update: " + e.getMessage(), e);
-        }
     }
 
     @Override
     public void finished() {
         // Do not use super.finished(), or it will trigger another save action
-        fine("Folder update complete");
         cancel();
-        getInterfaceEventHandler().removeInterfaceEventListener(mw.getEventHandler());
-        getDatasetEventHandler().removeDatasetEventListener(mw.getEventHandler());
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+        getInterfaceEventHandler().removeListener(eh);
+        getDatasetEventHandler().removeListener(eh);
     }
 }

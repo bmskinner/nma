@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.gui.Labels;
 
 /**
- * The options that must be available for detecting nuclear signals
+ * The options that must be available for detecting nuclear signals.
+ * Rather than specifying maximum areas, this enables setting a maximum proportion 
+ * of the nucleus continaing the signal to be covered by the signal.
  * 
  * @author bms41
  * @since 1.13.3
@@ -29,7 +31,8 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
  */
 public interface INuclearSignalOptions extends IDetectionOptions {
 
-    static final String MAX_FRACTION = "Max fraction";
+    static final String MAX_FRACTION       = "Max fraction";
+    static final String DETECTION_MODE_KEY = "DETECTION_MODE";
 
     static final int                 DEFAULT_SIGNAL_THRESHOLD    = 70;
     static final int                 DEFAULT_MIN_SIGNAL_SIZE     = 5;
@@ -48,9 +51,9 @@ public interface INuclearSignalOptions extends IDetectionOptions {
      *
      */
     public enum SignalDetectionMode {
-        FORWARD("Forward", Labels.Signals.FORWARD_THRESHOLDING_RADIO_LABEL), REVERSE("Reverse",
-                Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL), ADAPTIVE("Adaptive",
-                        Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
+        FORWARD("Forward", Labels.Signals.FORWARD_THRESHOLDING_RADIO_LABEL), 
+        REVERSE("Reverse", Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL), 
+        ADAPTIVE("Adaptive", Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
 
         private String name;
         private String desc;
@@ -60,7 +63,8 @@ public interface INuclearSignalOptions extends IDetectionOptions {
             this.desc = desc;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return name;
         }
 
@@ -84,5 +88,26 @@ public interface INuclearSignalOptions extends IDetectionOptions {
      * @return
      */
     SignalDetectionMode getDetectionMode();
+    
+    /**
+     * Set the maximum fraction of the parent component (e.g. nucleus) that the
+     * signal can occupy
+     * 
+     * @param maxFraction
+     */
+    void setMaxFraction(double maxFraction);
+
+    /**
+     * Set the detection mode for signals
+     * 
+     * @param detectionMode
+     */
+    void setDetectionMode(SignalDetectionMode detectionMode);
+    
+    void setShellOptions(@NonNull IShellOptions o);
+    
+    boolean hasShellOptions();
+    
+    IShellOptions getShellOptions();
 
 }

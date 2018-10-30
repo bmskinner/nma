@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.List;
@@ -37,17 +35,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.Segmen
 public interface ISegmentedProfile extends IProfile {
 
     /**
-     * Create a new profile of the default type
-     * 
-     * @param profile
-     * @return
-     * @throws ProfileException
-     */
-    static ISegmentedProfile makeNew(@NonNull ISegmentedProfile profile) throws ProfileException {
-        return new SegmentedFloatProfile(profile);
-    }
-
-    /**
      * Check if this profile contains segments
      * 
      * @return
@@ -61,7 +48,7 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @return
      */
-    List<IBorderSegment> getSegments();
+    @NonNull List<IBorderSegment> getSegments();
 
     /**
      * Fetch the segment with the given id, or null if not present. Fetches the
@@ -72,10 +59,11 @@ public interface ISegmentedProfile extends IProfile {
      * @throws UnavailableComponentException if there is no segment with the given id
      * @throws IllegalArgumentException if the id is null
      */
-    IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException;
+    @NonNull IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException;
 
     /**
-     * Test if a segment with the given id is present
+     * Test if a segment with the given id is present within the profile, or
+     * as a merge source of one of the segments in the profile
      * @param id the id
      * @return true if a segment is present with the id, false otherwise
      * @throws IllegalArgumentException if the id is null
@@ -84,12 +72,12 @@ public interface ISegmentedProfile extends IProfile {
 
     /**
      * Make this profile the length specified. Segments will be adjusted to the
-     * closest proportional index
+     * closest proportional index that preserves minimum segment lengths. If segments
+     * cannot be properly interpolated, a profile exception will be thrown.
      * 
-     * @param newLength
-     *            the new array length
-     * @return an interpolated profile
-     * @throws ProfileException
+     * @param newLength the new profile length
+     * @return the interpolated profile
+     * @throws ProfileException if the interpolation fails
      */
     @Override
     ISegmentedProfile interpolate(int newLength) throws ProfileException;
@@ -98,26 +86,29 @@ public interface ISegmentedProfile extends IProfile {
      * Fetch the segment list ordered to start from the segment with the given
      * id
      * 
-     * @param id
+     * @param id the segment id
      * @return
      * @throws Exception
      */
-    List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws Exception;
+    List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws UnavailableComponentException, ProfileException;
 
     /**
      * Get a copy of the segments in this profile, ordered from the zero index
-     * of the profile
+     * of the profile. The first segment is the segment that starts with index zero or 
+     * contains index zero at any index other than the end index.
      * 
      * @return
      */
     List<IBorderSegment> getOrderedSegments();
 
     /**
-     * Get the segment with the given name.     * 
+     * Get the segment with the given name.
      * @param name the segment name to find
      * @return the segment
      * @throws UnavailableComponentException if there is no segment with the given name
+     * @deprecated since 1.14.0. Start replacing calls with indexes or UUIDs
      */
+    @Deprecated
     IBorderSegment getSegment(@NonNull String name) throws UnavailableComponentException;
 
     /**
@@ -163,6 +154,7 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @return
      */
+    @Deprecated
     List<String> getSegmentNames();
 
     /**
@@ -191,7 +183,7 @@ public interface ISegmentedProfile extends IProfile {
 
     /**
      * Test if the profile contains the given segment. Copies are ok, it checks
-     * position, length and name
+     * position, length and name.
      * 
      * @param segment
      * @return
@@ -203,40 +195,12 @@ public interface ISegmentedProfile extends IProfile {
      * positions. Checks the validity of the operation, and returns false if it
      * is not possible to perform the update
      * 
-     * @param segment
-     *            the segment to update
-     * @param startIndex
-     *            the new start
-     * @param endIndex
-     *            the new end
-     * @return did the update succeed
-     * @throws SegmentUpdateException
+     * @param segment the segment to update
+     * @param startIndex the new start
+     * @param endIndex the new end
+     * @throws SegmentUpdateException the update failed
      */
     boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException;
-
-    /**
-     * Adjust the start position of the given segment by the given amount.
-     * 
-     * @param segment
-     *            the segment to apply the change to
-     * @param amount
-     *            the number of indexes to move
-     * @return did the update succeed
-     * @throws SegmentUpdateException
-     */
-    boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException;
-
-    /**
-     * Adjust the end position of the given segment by the given amount.
-     * 
-     * @param segment
-     *            the segment to apply the change to
-     * @param amount
-     *            the number of indexes to move
-     * @return did the update succeed
-     * @throws SegmentUpdateException
-     */
-    boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException;
 
     /**
      * Move the positions of all segments by the given amount
@@ -245,35 +209,64 @@ public interface ISegmentedProfile extends IProfile {
      */
     void nudgeSegments(int amount) throws ProfileException;
 
+
     /*
-     * (non-Javadoc)
+     * The segmented profile starts like this:
      * 
-     * @see no.components.Profile#offset(int) Offset the segment by the given
-     * amount. Returns a copy of the profile.
+     * 0 5 15 35 |-----|----------|--------------------|
+     * 
+     * After applying offset=5, the profile looks like this:
+     * 
+     * 0 10 30 35 |----------|--------------------|-----|
+     * 
+     * The new profile starts at index 'offset' in the original profile This
+     * means that we must subtract 'offset' from the segment positions to
+     * make them line up.
+     * 
+     * The nudge function in IBorderSegment moves endpoints by a specified
+     * amount
+     * 
+     * @param newStartIndex the index from which the profile should start
+     * @see no.components.Profile#offset(int)
+     * 
      */
-    ISegmentedProfile offset(int newStartIndex) throws ProfileException;
+    @Override
+	ISegmentedProfile offset(int newStartIndex) throws ProfileException;
 
     /**
-     * Interpolate the segments of this profile to the proportional lengths of
+     * Interpolate the segments of this profile to the lengths of
      * the segments in the template. The template must have the same number of
      * segments. Both this and the template must be already offset to start at
-     * equivalent positions. The two profiles must have the same segment ids
+     * equivalent positions. The two profiles must have the same segment ids.
+     * The resulting profile will have the same length as the template, and the 
+     * segment boundaries will be at the same indexes.
      * 
-     * @param template
-     *            the profile with segments to copy.
-     * @return a new profile with normalised segments
-     * @throws Exception
+     * @param template the profile with segment proportions to copy.
+     * @return a profile with the values in this profile interpolated segment by segment
+     * @throws ProfileException if the normalisation failed
      */
     ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException;
 
+    
+    /**
+     * Attempt to merge the given segments into one segment. The segments must
+     * belong to the profile, and be adjacent
+     * 
+     * @param segment1 the id of the first segment to be merged
+     * @param segment2 the id of the first segment to be merged
+     * @param mergedId the new id to give the segment
+     * @return
+     */
+    void mergeSegments(@NonNull UUID segment1, @NonNull UUID segment2, @NonNull UUID mergedId) throws ProfileException;
+
+    
     /**
      * Attempt to merge the given segments into one segment. The segments must
      * belong to the profile, and be adjacent
      * 
      * @param segment1
      * @param segment2
-     * @param id
-     *            the new id to give the segment
+     * @param id the new id to give the segment
      * @return
      */
     void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException;
@@ -284,16 +277,25 @@ public interface ISegmentedProfile extends IProfile {
      * @param segment
      */
     void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException;
+    
+    /**
+     * Reverse a merge operation on a segment
+     * 
+     * @param segment
+     */
+    void unmergeSegment(@NonNull UUID segId) throws ProfileException;
 
     /**
-     * Split a segment at the given index into two new segments. Splits the
-     * segments, adds the split as merge sources to the old segment, then
-     * unmerges
+     * Split the segment containing at the given index into two new segments.
+     *  The new segments will have the split index as their end and start indexes
+     * respectively.
      * 
-     * @param segment the segment to split
+     * @param segment the segment to be split
      * @param splitIndex the index to split at
      * @param id1 the id for the first new segment
      * @param id2 the id for the second new segment
+     * @throws ProfileException if the split would cause a segment to become too short
+     * @throws IllegalArgumentException if the segment does not contain the splitting index or the segment is not part of the profile
      */
     void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException;
 
@@ -319,5 +321,5 @@ public interface ISegmentedProfile extends IProfile {
      * @return
      */
     @Override
-    ISegmentedProfile copy();
+    ISegmentedProfile copy() throws ProfileException;
 }

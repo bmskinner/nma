@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.editing;
 
 import java.util.ArrayList;
@@ -30,23 +28,26 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener.CellUpdatedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel
-        implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {
+        implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {  
     
-    
-    public AbstractEditingPanel(String title){
-        super(title);
+    public AbstractEditingPanel(@NonNull InputSupplier context, String title){
+        super(context, title);
     }
 
     /**
@@ -54,22 +55,24 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * editing. If so, ask the user whether to unlock all cells, or leave cells
      * locked.
      */
-    public void checkCellLock() {
+    @Override
+	public void checkCellLock() {
+    	if(activeDataset()==null)
+    		return;
         ICellCollection collection = activeDataset().getCollection();
 
-        if (collection.isVirtual()) {
+        if (collection.isVirtual())
             return;
-        }
 
         if (collection.hasLockedCells()) {
-            Object[] options = { "Keep manual values", "Overwrite manual values" };
-            int result = JOptionPane.showOptionDialog(null,
-                    "Some cells have been manually segmented. Keep manual values?",
-                    "Overwrite manually segmented cells?", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                    null, options, options[0]);
+            String[] options = { "Keep manual values", "Overwrite manual values" };
 
-            if (result != 0) {
-                collection.setCellsLocked(false);
+            try {
+            	int result = getInputSupplier().requestOption(options, 0, "Some cells have been manually segmented. Keep manual values?");
+            	if (result != 0)
+            		collection.setCellsLocked(false);
+            } catch(RequestCancelledException e) {
+            	// no action
             }
         }
     }
@@ -81,9 +84,11 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * @param tag
      * @param newTagIndex
      */
-    public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
-
-        if (activeDataset().getCollection().isVirtual()) {
+    @Override
+	public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
+    	if(activeDataset()==null)
+    		return;
+        if (activeDataset().getCollection().isVirtual() && tag.equals(Tag.REFERENCE_POINT)) {
             warn("Cannot update core border tag for a child dataset");
             return;
         }
@@ -97,11 +102,10 @@ public abstract class AbstractEditingPanel extends DetailPanel
         SegmentationHandler sh = new SegmentationHandler(activeDataset());
         sh.setBorderTag(tag, newTagIndex);
 
-        refreshChartCache();
+        refreshChartCache(); // immediate visualisation of result
 
         if (tag.type().equals(BorderTagType.CORE)) {
-
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
         } else {
             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
         }
@@ -118,12 +122,12 @@ public abstract class AbstractEditingPanel extends DetailPanel
     protected void refreshEditingPanelCharts() {
         this.refreshChartCache();
 
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
 
         list.addAll(getDatasets());
         list.addAll(activeDataset().getAllChildDatasets());
 
-        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
+        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, list);
     }
 
     /**
@@ -134,7 +138,8 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * @param index
      * @throws Exception
      */
-    public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
+    @Override
+	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
 
         checkCellLock();
 
@@ -146,7 +151,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
         this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 
     }
-
+    
     @Override
     public void borderTagEventReceived(BorderTagEvent event) {
     }
@@ -154,5 +159,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
     @Override
     public void segmentEventReceived(SegmentEvent event) {
     }
+    
+    
 
 }

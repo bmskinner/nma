@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 /*
   -----------------------
   ASYMMETRIC NUCLEUS CLASS
@@ -29,8 +27,6 @@
 */
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import ij.gui.Roi;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +34,8 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+
+import ij.gui.Roi;
 
 @Deprecated
 public class AsymmetricNucleus extends RoundNucleus {

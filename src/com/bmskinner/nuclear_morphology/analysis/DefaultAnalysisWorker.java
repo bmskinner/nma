@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.List;
@@ -41,8 +39,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
      * Construct with a method. The progress bar total will be set to -1 - i.e.
      * the bar will remain indeterminate until the method completes
      * 
-     * @param m
-     *            the method to run
+     * @param m the method to run
      */
     public DefaultAnalysisWorker(IAnalysisMethod m) {
         this(m, -1);
@@ -51,10 +48,8 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     /**
      * Construct with a method and a total for the progress bar.
      * 
-     * @param m
-     *            the method to run
-     * @param progress
-     *            the length of the progress bar
+     * @param m the method to run
+     * @param progress the length of the progress bar
      */
     public DefaultAnalysisWorker(IAnalysisMethod m, long progress) {
         method = m;
@@ -69,18 +64,16 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
         fireIndeterminate();
 
         // do the analysis and wait for the result
-        IAnalysisResult r = method.call();
-
-        fireIndeterminate();
+        IAnalysisResult r=  method.call();
+//        fine("Method completed, returning");
         return r;
     }
 
     @Override
     public void progressEventReceived(ProgressEvent event) {
 
-        if(this.isCancelled()){
+        if(this.isCancelled())
             method.cancel();
-        }
         
         if (event.getMessage() == ProgressEvent.SET_TOTAL_PROGRESS) {
         	progressTotal = event.getValue();
@@ -92,17 +85,13 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
         	return;
         }
 
-        if(event.getMessage()==ProgressEvent.INCREASE_BY_VALUE){
+        if(event.getMessage()==ProgressEvent.INCREASE_BY_VALUE)
         	progressCount=event.getValue();
-        } else {
+        else
         	progressCount++;
-        }
 
-        if (progressTotal >= 0) {
+        if (progressTotal >= 0)
         	publish(progressCount);
-        }
-
-
     }
 
     @Override
@@ -115,14 +104,13 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     }
 
     private void fireIndeterminate() {
+//    	fine("Firing indeterminate");
         firePropertyChange(IAnalysisWorker.INDETERMINATE_MSG, getProgress(), IAnalysisWorker.INDETERMINATE);
     }
 
     @Override
     public void done() {
-
-//        fine("Worker completed task");
-
+//    	fine("Task is done");
         try {
 
             if (this.get() != null) {
@@ -130,7 +118,6 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
                 firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
 
             } else {
-//                fine("Firing trigger for failed task");
                 firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
             }
 

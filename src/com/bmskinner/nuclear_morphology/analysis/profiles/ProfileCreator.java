@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.awt.Shape;
@@ -23,6 +21,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -46,9 +48,9 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
  */
 public class ProfileCreator implements Loggable {
 
-    Taggable target;
+    private Taggable target;
 
-    public ProfileCreator(Taggable target) {
+    public ProfileCreator(@NonNull Taggable target) {
         this.target = target;
     }
 
@@ -59,41 +61,46 @@ public class ProfileCreator implements Loggable {
      * @return a segmented profile of the requested type.
      * @throws ProfileException
      */
-    public ISegmentedProfile createProfile(ProfileType type) throws ProfileException {
+    public ISegmentedProfile createProfile(@NonNull ProfileType type) throws ProfileException {
         try {
             switch (type) {
 	            case ANGLE:        return calculateAngleProfile();
 	            case DIAMETER:     return calculateDiameterProfile();
 	            case RADIUS:       return calculateRadiusProfile();
 	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile();
+	            case FRANKEN:      finest("Frankenprofile");
 	            default:           return calculateAngleProfile();
             }
         } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
-            stack("Cannot create profile", e);
-            throw new ProfileException("Cannot make profile " + type, e);
+            throw new ProfileException("Cannot create profile " + type, e);
+        } catch(Exception e) {
+        	throw new ProfileException("Unexpected exception creating profile " + type+" due to "+e.getMessage(), e);
         }
     }
 
     /**
-     * Get the existing segments from the template angle profile
+     * Get the existing segments from the template angle profile. 
+     * Returns an empty list if the profile is not present
      * 
      * @return
      */
     private List<IBorderSegment> getExistingSegments() {
-        List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
+        List<IBorderSegment> segments = new ArrayList<>();
+        finest("Getting existing segments from angle profile");
+        if(!target.hasProfile(ProfileType.ANGLE))
+        	return segments;
 
-        ISegmentedProfile templateProfile = null;
         try {
-            if (target.hasProfile(ProfileType.ANGLE)) {
 
-                if (target.getProfile(ProfileType.ANGLE).hasSegments()) {
-                    templateProfile = target.getProfile(ProfileType.ANGLE);
-                    segments = templateProfile.getSegments();
+        	ISegmentedProfile templateProfile = target.getProfile(ProfileType.ANGLE);
+        	finest("Fetched angle profile");
+        	if (templateProfile.hasSegments()) {
+        		finest("Angle profile has "+templateProfile.getSegmentCount()+" segments");
+        		segments = templateProfile.getSegments();
+        	}
 
-                }
-            }
         } catch (UnavailableProfileTypeException e) {
-            stack("Profile type angle not found", e);
+        	fine("No profile angle type: "+e.getMessage(), e);
         }
 
         return segments;
@@ -107,7 +114,6 @@ public class ProfileCreator implements Loggable {
 
         Shape s = target.toShape();
 
-        int index = 0;
         List<IBorderPoint> borderList = target.getBorderList();
 
         if (borderList == null)
@@ -118,40 +124,31 @@ public class ProfileCreator implements Loggable {
         if (pointOffset == 0)
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
 
-        Iterator<IBorderPoint> it = borderList.iterator();
+        for(int index=0; index<borderList.size(); index++) {
 
-        while (it.hasNext()) {
-
-            IBorderPoint point = it.next();
-
+        	IBorderPoint point       = borderList.get(index);
             IBorderPoint pointBefore = point.prevPoint(pointOffset);
+            IBorderPoint pointAfter  = point.nextPoint(pointOffset);
 
-            IBorderPoint pointAfter = point.nextPoint(pointOffset);
-
-            // Get the smallest angle between the points
-            float angle = (float) point.findAngle(pointBefore, pointAfter);
-
-            // Now discover if this measured angle is inside or outside the
-            // object
-
-            // find the halfway point between the first and last points.
-            // is this within the roi?
-            // if yes, keep min angle as interior angle
-            // if no, 360-min is interior
+            // Find the smallest angle between the points
+            float angle = (float) point.findSmallestAngle(pointBefore, pointAfter);
+            
+            // Is the measured angle is inside or outside the object?
+            // Take the midpoint between the before and after points.
+            // If it is within the ROI, the angle is the interior angle
+            // if no, 360-min is the interior angle
             float midX = (float) ((pointBefore.getX() + pointAfter.getX()) / 2);
             float midY = (float) ((pointBefore.getY() + pointAfter.getY()) / 2);
-
-            // Check if the polygon contains the point
-            if (s.contains(midX, midY)) {
-                angles[index] = angle;
-            } else {
-                angles[index] = 360 - angle;
-            }
-            index++;
+            angles[index] = s.contains(midX, midY) ? angle : 360 - angle;
         }
 
-        // Make a new profile. This will have two segments by default
-        ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
+        // Make a new profile. If possible, use the internal segmentation type of the component
+        ISegmentedProfile newProfile;
+        if(target instanceof SegmentedCellularComponent) {
+        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(angles);
+        } else {
+        	newProfile = new SegmentedFloatProfile(angles);
+        }
 
         // Reapply any segments that were present in the original profile
         if (!segments.isEmpty()) 
@@ -160,10 +157,10 @@ public class ProfileCreator implements Loggable {
     }
 
     private void reapplySegments(List<IBorderSegment> segments, ISegmentedProfile profile) {
+
         // If the border list has changed, the profile lengths will be different
         // In this case, add and normalise the segment lengths
-        if (segments.get(0).getTotalLength() != target.getBorderLength()) {
-
+        if (segments.get(0).getProfileLength() != target.getBorderLength()) {
             try {
                 segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());
             } catch (ProfileException e) {
@@ -230,8 +227,16 @@ public class ProfileCreator implements Loggable {
                 profile[i] = 0 - profile[i];
             }
         }
-
-        return new SegmentedFloatProfile(profile);
+        
+        // Make a new profile. If possible, use the internal segmentation type of the component
+        ISegmentedProfile newProfile;
+        if(target instanceof SegmentedCellularComponent) {
+        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
+        } else {
+        	newProfile = new SegmentedFloatProfile(profile);
+        }
+        return newProfile;
+//        return new SegmentedFloatProfile(profile);
     }
 
     private ISegmentedProfile calculateDiameterProfile() throws UnavailableBorderPointException {
@@ -249,7 +254,15 @@ public class ProfileCreator implements Loggable {
 
         }
 
-        return new SegmentedFloatProfile(profile);
+     // Make a new profile. If possible, use the internal segmentation type of the component
+        ISegmentedProfile newProfile;
+        if(target instanceof SegmentedCellularComponent) {
+        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
+        } else {
+        	newProfile = new SegmentedFloatProfile(profile);
+        }
+        return newProfile;
+//        return new SegmentedFloatProfile(profile);
     }
 
     private ISegmentedProfile calculateRadiusProfile() throws UnavailableBorderPointException {
@@ -265,7 +278,15 @@ public class ProfileCreator implements Loggable {
 
         }
 
-        return new SegmentedFloatProfile(profile);
+     // Make a new profile. If possible, use the internal segmentation type of the component
+        ISegmentedProfile newProfile;
+        if(target instanceof SegmentedCellularComponent) {
+        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
+        } else {
+        	newProfile = new SegmentedFloatProfile(profile);
+        }
+        return newProfile;
+//        return new SegmentedFloatProfile(profile);
     }
 
     /**
@@ -302,11 +323,20 @@ public class ProfileCreator implements Loggable {
 
             index++;
         }
+
+        // Make a new profile. If possible, use the internal segmentation type of the component
+        ISegmentedProfile newProfile;
+        if(target instanceof SegmentedCellularComponent) {
+        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
+        } else {
+        	newProfile = new SegmentedFloatProfile(profile);
+        }
+        return newProfile;
         // finer("Making new profile");
         // Make a new profile. This will have two segments by default
-        ISegmentedProfile newProfile = new SegmentedFloatProfile(profile);
+        //        ISegmentedProfile newProfile = new SegmentedFloatProfile(profile);
 
-        return newProfile;
+        //        return newProfile;
 
     }
 

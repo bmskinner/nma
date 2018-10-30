@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
@@ -40,8 +38,8 @@ public class Version implements Serializable {
      * version increments.
      */
     public static final int VERSION_MAJOR    = 1;
-    public static final int VERSION_MINOR    = 13;
-    public static final int VERSION_REVISION = 8;
+    public static final int VERSION_MINOR    = 14;
+    public static final int VERSION_REVISION = 0;
 
     private final int major;
     private final int minor;
@@ -50,12 +48,16 @@ public class Version implements Serializable {
     private static final String SEPARATOR = ".";
 
     // Some versions to compare features against
+    public static final Version v_1_13_0 = new Version(1, 13, 0);
+    public static final Version v_1_13_1 = new Version(1, 13, 1);
     public static final Version v_1_13_2 = new Version(1, 13, 2);
     public static final Version v_1_13_3 = new Version(1, 13, 3);
     public static final Version v_1_13_4 = new Version(1, 13, 4);
     public static final Version v_1_13_5 = new Version(1, 13, 5);
+    public static final Version v_1_13_6 = new Version(1, 13, 6);
     public static final Version v_1_13_7 = new Version(1, 13, 7);
     public static final Version v_1_13_8 = new Version(1, 13, 8);
+    public static final Version v_1_14_0 = new Version(1, 14, 0);
 
     public Version(final int major, final int minor, final int revision) {
         this.major = major;
@@ -83,9 +85,8 @@ public class Version implements Serializable {
         String[] parts = s.split("\\" + SEPARATOR);
         if (parts.length == 3) {
             return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), Integer.valueOf(parts[2]));
-        } else {
-            throw new IllegalArgumentException("Input string is not a version format");
         }
+		throw new IllegalArgumentException("Input string is not a version format");
     }
 
     /**
@@ -159,27 +160,25 @@ public class Version implements Serializable {
     
     /**
      * Check a version string to see if the program will be able to open a
-     * dataset. The major and minor version must be the same. Bugfixing revision
+     * dataset. The major version must be the same. Minor and bugfixing revision
      * versions are not checked.
      * 
      * @param version
-     * @return a pass or fail
+     * @return true if the version is supported, false otherwise
      */
     public static boolean versionIsSupported(@NonNull Version version) {
 
-        if (version == null) {
+        if (version == null)
             return false;
-        }
 
         // major version MUST be the same
-        if (version.getMajor() != VERSION_MAJOR) {
+        if (version.getMajor() != VERSION_MAJOR)
             return false;
-        }
         
-        if (version.getMinor() != VERSION_MINOR) {
+        // Minor versions are compatible from version 1.13.6 onwards
+        if(version.isOlderThan(v_1_13_0))
             return false;
-        }
-
+        
         return true;
     }
     
@@ -188,7 +187,7 @@ public class Version implements Serializable {
         in.defaultReadObject();
 
         if(!versionIsSupported(this)){
-        	throw new UnsupportedVersionException(this.toString());
+        	throw new UnsupportedVersionException(this);
         }
     }
         
@@ -197,13 +196,20 @@ public class Version implements Serializable {
      * @author ben
      *
      */
-    public class UnsupportedVersionException extends IOException {
+    public static class UnsupportedVersionException extends IOException {
     	
         private static final long serialVersionUID = 1L;
+        
+        private Version detectedVersion = null;
 
-        public UnsupportedVersionException(String s){
-    		super(s);
+        public UnsupportedVersionException(Version v){
+    		super(v.toString());
+    		detectedVersion = v;
     	}
+        
+        public Version getDetectedVersion() {
+        	return detectedVersion;
+        }
     }
 
 }

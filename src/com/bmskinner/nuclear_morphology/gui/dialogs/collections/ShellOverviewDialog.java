@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 
 import java.awt.BorderLayout;
@@ -52,12 +68,14 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         super(dataset);
     }
 
+	@Override
 	protected void createWorker(){
 		worker = new ShellAnnotationWorker(dataset, table.getModel(), false);
         worker.addPropertyChangeListener(this);
         worker.execute();
 	}
 	
+	@Override
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
 		header.add(new JLabel(HEADER_LBL + dataset.getCollection().getOutputFolder().getAbsolutePath()));
@@ -65,6 +83,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 		
 	}
 
+	@Override
 	protected void createUI() {
 
         this.setLayout(new BorderLayout());
@@ -90,7 +109,8 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         table = new JTable(model) {
             // Returning the Class of each column will allow different
             // renderers to be used based on Class
-            public Class<?> getColumnClass(int column) {
+            @Override
+			public Class<?> getColumnClass(int column) {
                 return JLabel.class;
             }
         };
@@ -160,7 +180,14 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
             return null;
         }
         
+        if(!dataset.getCollection().getSignalManager().hasShellResult())
+            return ip;
+
+        
         int shellCount = dataset.getCollection().getSignalManager().getShellCount();
+        if(shellCount==0) 
+            fine("No shells present, cannot draw");
+
         ShrinkType t = dataset.getCollection().getSignalManager().getShrinkType().get();
 
         ImageAnnotator an = new ImageAnnotator(ip);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.rules;
 
 import java.io.Serializable;
@@ -74,11 +72,7 @@ public class Rule implements Serializable {
     }
 
     public boolean getBooleanValue(int index) {
-        if (values.get(index) == 1d) {
-            return true;
-        } else {
-            return false;
-        }
+        return(values.get(index) == 1d);
     }
 
     public RuleType getType() {
@@ -101,6 +95,8 @@ public class Rule implements Serializable {
      *
      */
     public enum RuleType {
+    	
+    	IS_ZERO_INDEX,
 
         IS_MINIMUM, IS_MAXIMUM,
 
@@ -117,6 +113,7 @@ public class Rule implements Serializable {
         INDEX_IS_WITHIN_FRACTION_OF, INDEX_IS_OUTSIDE_FRACTION_OF,
 
         INVERT;
+    	
 
     }
 }

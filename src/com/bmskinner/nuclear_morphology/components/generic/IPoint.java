@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
@@ -33,10 +31,8 @@ public interface IPoint {
     /**
      * Create a new point of the default type
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final float x, final float y) {
@@ -46,10 +42,8 @@ public interface IPoint {
     /**
      * Create a new point of the default type
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final double x, final double y) {
@@ -59,23 +53,19 @@ public interface IPoint {
     /**
      * Create a new point of the default type based on the given point
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final IPoint a) {
-        return makeNew(a.getX(), a.getY());
+        return new FloatPoint(a);
     }
 
     /**
      * Create a new point of the default type based on the given point
      * 
-     * @param x
-     *            the x position
-     * @param y
-     *            the y position
+     * @param x the x position
+     * @param y the y position
      * @return a point at the specified position
      */
     static IPoint makeNew(final Point2D a) {
@@ -113,8 +103,7 @@ public interface IPoint {
     /**
      * Find the distance between this point and a given point
      *
-     * @param a
-     *            the point to measure to
+     * @param a the point to measure to
      * @return the distance between the points
      */
     double getLengthTo(@NonNull IPoint a);
@@ -156,13 +145,32 @@ public interface IPoint {
      * Measure the smallest angle between the two lines a-this and this-b
      * connecting the three points
      * 
-     * @param a
-     *            the first line endpoint
-     * @param b
-     *            the second line endpoint
+     * @param a the first line endpoint
+     * @param b the second line endpoint
+     * @see findAbsoluteAngle
      * @return
      */
-    double findAngle(final @NonNull IPoint a, final @NonNull IPoint b);
+    double findSmallestAngle(final @NonNull IPoint a, final @NonNull IPoint b);
+    
+    /**
+     * Measure the absolute angle between the two lines a-this and this-b
+     * connecting the three points. The measurement is made clockwise from the
+     * start point to the end point.
+     * <p>
+     * Contrast with {@link findSmallestAngle}:
+     * 
+     * <pre>    a<br>    |<br>    o  135<br> 225 \<br>       b<br></pre>
+     * 
+     * findAbsoluteAngle(b, a) will return 225<br>
+     * findAbsoluteAngle(a, b) will return 135<br>
+     * findSmallestAngle(b, a) will return 135<br>
+     * findSmallestAngle(a, b) will return 135<br>
+     * 
+     * @param start the first line endpoint
+     * @param end the second line endpoint
+     * @return
+     */
+    double findAbsoluteAngle(final @NonNull IPoint start, final @NonNull IPoint end);
 
     /**
      * Get the midpoint of the two points
@@ -247,5 +255,12 @@ public interface IPoint {
      *            the y offset
      */
     void offset(double x, double y);
+    
+    /**
+     * Test strict equality
+     * @param obj
+     * @return
+     */
+    boolean equals(Object obj);
 
 }

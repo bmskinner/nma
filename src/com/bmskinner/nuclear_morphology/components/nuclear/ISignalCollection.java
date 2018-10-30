@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import ij.process.ImageProcessor;
@@ -43,6 +41,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public interface ISignalCollection extends Serializable, Loggable {
+	
+	/**
+	 * Create a copy of this collection
+	 * @return
+	 */
+	ISignalCollection duplicate();
 
     /**
      * Add a list of nuclear signals to the collection
@@ -69,7 +73,8 @@ public interface ISignalCollection extends Serializable, Loggable {
     void updateSignalGroupId(@NonNull UUID oldID, @NonNull UUID newID);
 
     /**
-     * Add a single signal to the given signal group
+     * Add a single signal to the given signal group. If the signal group does
+     * not yet exist in the collection, it is created.
      * 
      * @param n the signal
      * @param signalGroup the signal group
@@ -93,9 +98,7 @@ public interface ISignalCollection extends Serializable, Loggable {
     List<List<INuclearSignal>> getSignals();
 
     /**
-     * Get the signals in the given group. Fetches the actual signals, not a
-     * copy
-     * 
+     * Get the signals in the given group.
      * @param signalGroup the signal group
      * @return a list of signals
      */
@@ -199,7 +202,7 @@ public interface ISignalCollection extends Serializable, Loggable {
      * 
      * @param signalGroup the signal group ID
      * @return an image processor
-     * @throws UnloadableImageException if the image cannot be loaded from file
+     * @throws UnloadableImageException if the image cannot be loaded from file, or there is no signal with the given id in the collection
      */
     ImageProcessor getImage(@NonNull UUID signalGroup) throws UnloadableImageException;
 

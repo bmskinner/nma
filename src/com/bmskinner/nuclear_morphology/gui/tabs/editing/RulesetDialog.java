@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.editing;
 
 import java.awt.BorderLayout;
@@ -51,6 +49,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
@@ -65,9 +64,9 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
@@ -434,7 +433,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     private JPanel createChartPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        chartPanel = new ExportableChartPanel(MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE));
+        chartPanel = new ExportableChartPanel(ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
 
         panel.add(chartPanel, BorderLayout.CENTER);
 
@@ -449,7 +448,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
         ProfileIndexFinder finder = new ProfileIndexFinder();
 
-        JFreeChart chart = MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE);
+        JFreeChart chart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
 
         ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
         MorphologyChartFactory chf = new MorphologyChartFactory(options);

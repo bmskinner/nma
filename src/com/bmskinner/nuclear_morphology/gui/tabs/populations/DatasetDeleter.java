@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.util.ArrayDeque;
@@ -28,8 +26,10 @@ import java.util.UUID;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 /**
  * Handle the deletion of selected datasets in the populations panel
@@ -45,6 +45,12 @@ public class DatasetDeleter implements Loggable {
 
     private static final String TITLE_LBL   = "Close dataset?";
     private static final String WARNING_LBL = "Dataset not saved. Close without saving?";
+    
+    private InputSupplier is;
+    
+    public DatasetDeleter(InputSupplier is) {
+    	this.is = is;
+    }
 
     /**
      * Delete or close the given datasets
@@ -63,27 +69,20 @@ public class DatasetDeleter implements Loggable {
             // Ask before closing, if any root datasets have changed since last save
             if (rootHasChanged(list)) {
                 warn("A root dataset has changed since last save");
-
-                Object[] buttonLabels = { KEEP_LBL, DELETE_LBL };
-
-                int selectedValue = JOptionPane.showOptionDialog(null, WARNING_LBL, TITLE_LBL,
-                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, buttonLabels, KEEP_LBL); // default
-
-                if (selectedValue!=1)
-                    return;
+                String[] buttonLabels = { KEEP_LBL, DELETE_LBL };
+                int option = is.requestOption(buttonLabels, 0, WARNING_LBL, TITLE_LBL);
+                if(option==0)
+                	return;
             }
 
             deleteDatasetsInList(list);
-            DatasetListManager.getInstance().refreshClusters(); // remove
-                                                                // unneeded
-                                                                // cluster
-                                                                // groups from
-                                                                // datasets
+            DatasetListManager.getInstance().refreshClusters();
+        } catch (RequestCancelledException e) {
+            return;
         } catch (Exception e) {
             warn("Error deleting dataset");
             stack("Error deleting dataset", e);
         }
-        System.gc();
     }
 
     private boolean rootHasChanged(Deque<UUID> list) {
@@ -100,29 +99,12 @@ public class DatasetDeleter implements Loggable {
         return false;
     }
 
-    private void deleteDataset(IAnalysisDataset d) {
-
-        UUID id = d.getUUID();
-
-        // remove the dataset from its parents
-        for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) { // analysisDatasets.keySet()){
-            if (parent.hasChild(id))
-                parent.deleteChild(id);
-        }
-
-        if (d.isRoot())
-            DatasetListManager.getInstance().removeDataset(d);
-
-        d = null;
-
-    }
-
+    
     /**
      * Recursively delete datasets. Remove all datasets with no children from
-     * the list, then call this method again on all the remaining ids
+     * the list. Recurse until all dataset have been deleted.
      * 
-     * @param ids
-     *            the dataset IDs to delete
+     * @param ids the dataset IDs to delete
      */
     private void deleteDatasetsInList(Deque<UUID> ids) {
 
@@ -133,14 +115,36 @@ public class DatasetDeleter implements Loggable {
 
         IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
 
-        if (!d.hasChildren()) {
-            deleteDataset(d);
+        if (d.hasChildren()) {
+        	 ids.addLast(id); // put at the end of the deque to be handled last
         } else {
-            ids.addLast(id); // put at the end of the deque to be handled last
+        	deleteDataset(d);
         }
 
         deleteDatasetsInList(ids);
     }
+    
+    /**
+     * Delete a single dataset
+     * @param d
+     */
+    private void deleteDataset(IAnalysisDataset d) {
+
+        UUID id = d.getId();
+        fine("Removing dataset "+d.getName());
+        // remove the dataset from its parents
+        for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) {
+            if(parent.hasChild(id)) {
+                parent.deleteChild(id);
+                fine("Successfully removed child: "+!parent.hasChild(id));
+            }
+        }
+
+        if (d.isRoot())
+            DatasetListManager.getInstance().removeDataset(d);
+    }
+
+
 
     /**
      * Get the list of unique datasets that must be removed
@@ -151,7 +155,7 @@ public class DatasetDeleter implements Loggable {
     private Deque<UUID> unique(List<IAnalysisDataset> list) {
         Set<UUID> set = new HashSet<UUID>();
         for (IAnalysisDataset d : list) {
-            set.add(d.getUUID());
+            set.add(d.getId());
 
             if (d.hasChildren()) {
                 // add all the children of a dataset

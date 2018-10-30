@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
@@ -33,6 +31,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCr
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.components.AnalysisTableCellRenderer;
@@ -49,9 +48,8 @@ public class AnalysisDetailPanel extends DetailPanel {
     private static final String HEADER_LBL      = "Green rows have the same value in all columns";
     private ExportableTable tableAnalysisParameters;
 
-    public AnalysisDetailPanel() {
-
-        super(PANEL_TITLE_LBL);
+    public AnalysisDetailPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 
@@ -84,7 +82,6 @@ public class AnalysisDetailPanel extends DetailPanel {
     @Override
     protected void updateMultiple() {
         updateAnalysisParametersPanel();
-        finest("Updated analysis parameter panel");
     }
 
     @Override
@@ -95,15 +92,15 @@ public class AnalysisDetailPanel extends DetailPanel {
     /**
      * Update the analysis panel with data from the given datasets
      * 
-     * @param list
-     *            the datasets
-     * @throws Exception
      */
     private void updateAnalysisParametersPanel() {
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setType(TableType.ANALYSIS_PARAMETERS).setTarget(tableAnalysisParameters)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer()).build();
+        TableOptions options = new TableOptionsBuilder()
+        		.setDatasets(getDatasets())
+                .setType(TableType.ANALYSIS_PARAMETERS)
+                .setTarget(tableAnalysisParameters)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
+                .build();
 
         setTable(options);
 

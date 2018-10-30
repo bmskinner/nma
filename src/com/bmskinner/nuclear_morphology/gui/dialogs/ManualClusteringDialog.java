@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
@@ -17,11 +33,11 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 /**
  * This dialog allows for manual clustering of nuclei
@@ -128,7 +144,7 @@ public class ManualClusteringDialog extends LoadingIconDialog {
     	// Save the clusters to the dataset
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
         
-        IMutableClusteringOptions op = OptionsFactory.makeClusteringOptions();
+        IClusteringOptions op = OptionsFactory.makeClusteringOptions();
         op.setType(ClusteringMethod.MANUAL);
         
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);

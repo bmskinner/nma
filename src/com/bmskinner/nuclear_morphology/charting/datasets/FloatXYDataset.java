@@ -1,27 +1,27 @@
 /*******************************************************************************
- *      Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jfree.data.DomainOrder;
 import org.jfree.data.general.DatasetChangeEvent;
@@ -29,6 +29,11 @@ import org.jfree.data.xy.AbstractXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.util.PublicCloneable;
 
+/**
+ * A dataset for charting that stores values as floats rather than doubles.
+ * Modified from the JFreeChart DefaultXYDataset
+ *
+ */
 public class FloatXYDataset extends AbstractXYDataset 
     implements XYDataset, PublicCloneable {
 
@@ -37,7 +42,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * seriesList.
          */
         private List seriesKeys;
-
+        private List<Integer> datasetIndexes;
+        
         /** 
          * Storage for the series in the dataset.  We use a list because the
          * order of the series is significant.  This list must be kept in sync 
@@ -46,12 +52,13 @@ public class FloatXYDataset extends AbstractXYDataset
         private List seriesList;
 
         /**
-         * Creates a new <code>DefaultXYDataset</code> instance, initially 
+         * Creates a new <code>FloatXYDataset</code> instance, initially 
          * containing no data.
          */
         public FloatXYDataset() {
-            this.seriesKeys = new java.util.ArrayList();
-            this.seriesList = new java.util.ArrayList();    
+        	seriesKeys     = new ArrayList(); 
+        	datasetIndexes = new ArrayList<>(); 
+            seriesList     = new ArrayList();    
         }
 
         /**
@@ -59,7 +66,8 @@ public class FloatXYDataset extends AbstractXYDataset
          *
          * @return The series count.
          */
-        public int getSeriesCount() {
+        @Override
+		public int getSeriesCount() {
             return this.seriesList.size();
         }
 
@@ -74,11 +82,15 @@ public class FloatXYDataset extends AbstractXYDataset
          * @throws IllegalArgumentException if <code>series</code> is not in the 
          *     specified range.
          */
-        public Comparable getSeriesKey(int series) {
-            if ((series < 0) || (series >= getSeriesCount())) {
+        @Override
+		public Comparable<?> getSeriesKey(int series) {
+            if ((series < 0) || (series >= getSeriesCount()))
                 throw new IllegalArgumentException("Series index out of bounds");
-            }
-            return (Comparable) this.seriesKeys.get(series);
+            return (Comparable<?>) this.seriesKeys.get(series);
+        }
+        
+        public int getDatasetIndex(Comparable<?> seriesKey) {
+            return datasetIndexes.get(indexOf(seriesKey));
         }
 
         /**
@@ -89,7 +101,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * 
          * @return The index, or -1.
          */
-        public int indexOf(Comparable seriesKey) {
+        @Override
+		public int indexOf(Comparable seriesKey) {
             return this.seriesKeys.indexOf(seriesKey);
         }
 
@@ -100,7 +113,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * 
          * @return <code>DomainOrder.NONE</code>.
          */
-        public DomainOrder getDomainOrder() {
+        @Override
+		public DomainOrder getDomainOrder() {
             return DomainOrder.NONE;
         }
 
@@ -115,10 +129,10 @@ public class FloatXYDataset extends AbstractXYDataset
          * @throws IllegalArgumentException if <code>series</code> is not in the 
          *     specified range.
          */
-        public int getItemCount(int series) {
-            if ((series < 0) || (series >= getSeriesCount())) {
+        @Override
+		public int getItemCount(int series) {
+            if ((series < 0) || (series >= getSeriesCount()))
                 throw new IllegalArgumentException("Series index out of bounds");
-            }
             float[][] seriesArray = (float[][]) this.seriesList.get(series);
             return seriesArray[0].length;
         }
@@ -140,7 +154,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * 
          * @see #getX(int, int)
          */
-        public double getXValue(int series, int item) {
+        @Override
+		public double getXValue(int series, int item) {
             float[][] seriesData = (float[][]) this.seriesList.get(series);
             return seriesData[0][item];
         }
@@ -162,7 +177,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * 
          * @see #getXValue(int, int)
          */
-        public Number getX(int series, int item) {
+        @Override
+		public Number getX(int series, int item) {
             return new Double(getXValue(series, item));
         }
 
@@ -183,7 +199,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * 
          * @see #getY(int, int)
          */
-        public double getYValue(int series, int item) {
+        @Override
+		public double getYValue(int series, int item) {
             float[][] seriesData = (float[][]) this.seriesList.get(series);
             return seriesData[1][item];
         }
@@ -205,7 +222,8 @@ public class FloatXYDataset extends AbstractXYDataset
          *     
          * @see #getX(int, int)
          */
-        public Number getY(int series, int item) {
+        @Override
+		public Number getY(int series, int item) {
             return new Double(getYValue(series, item));
         }
 
@@ -219,26 +237,20 @@ public class FloatXYDataset extends AbstractXYDataset
          *     arrays of equal length, the first containing the x-values and the
          *     second containing the y-values). 
          */
-        public void addSeries(Comparable seriesKey, float[][] data) {
-            if (seriesKey == null) {
-                throw new IllegalArgumentException(
-                        "The 'seriesKey' cannot be null.");
-            }
-            if (data == null) {
+        public void addSeries(Comparable<?> seriesKey, float[][] data, int datasetIndex) {
+            if (seriesKey == null)
+                throw new IllegalArgumentException("The 'seriesKey' cannot be null.");
+            if (data == null)
                 throw new IllegalArgumentException("The 'data' is null.");
-            }
-            if (data.length != 2) {
-                throw new IllegalArgumentException(
-                        "The 'data' array must have length == 2.");
-            }
-            if (data[0].length != data[1].length) {
-                throw new IllegalArgumentException(
-                        "The 'data' array must contain two arrays with equal length.");
-            }
+            if (data.length != 2)
+                throw new IllegalArgumentException("The 'data' array must have length == 2.");
+            if (data[0].length != data[1].length)
+                throw new IllegalArgumentException("The 'data' array must contain two arrays with equal length.");
             int seriesIndex = indexOf(seriesKey);
             if (seriesIndex == -1) {  // add a new series
                 this.seriesKeys.add(seriesKey);
                 this.seriesList.add(data);
+                this.datasetIndexes.add(datasetIndex);
             }
             else {  // replace an existing series
                 this.seriesList.remove(seriesIndex);
@@ -278,17 +290,16 @@ public class FloatXYDataset extends AbstractXYDataset
          * 
          * @return A boolean.
          */
-        public boolean equals(Object obj) {
-            if (obj == this) {
+        @Override
+		public boolean equals(Object obj) {
+            if (obj == this)
                 return true;
-            }
-            if (!(obj instanceof FloatXYDataset)) {
+            if (!(obj instanceof FloatXYDataset))
                 return false;
-            }
+
             FloatXYDataset that = (FloatXYDataset) obj;
-            if (!this.seriesKeys.equals(that.seriesKeys)) {
+            if (!this.seriesKeys.equals(that.seriesKeys))
                 return false;
-            }
             for (int i = 0; i < this.seriesList.size(); i++) {
                 float[][] d1 = (float[][]) this.seriesList.get(i);
                 float[][] d2 = (float[][]) that.seriesList.get(i);
@@ -311,7 +322,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * 
          * @return A hash code.
          */
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             int result;
             result = this.seriesKeys.hashCode();
             result = 29 * result + this.seriesList.hashCode();
@@ -327,10 +339,12 @@ public class FloatXYDataset extends AbstractXYDataset
          *     dataset (for instance, if a non-cloneable object is used for a
          *     series key).
          */
-        public Object clone() throws CloneNotSupportedException {
+        @Override
+		public Object clone() throws CloneNotSupportedException {
             FloatXYDataset clone = (FloatXYDataset) super.clone();
-            clone.seriesKeys = new java.util.ArrayList(this.seriesKeys);
+            clone.seriesKeys = new ArrayList(this.seriesKeys);
             clone.seriesList = new ArrayList(this.seriesList.size());
+            clone.datasetIndexes = new ArrayList(seriesList);
             for (int i = 0; i < this.seriesList.size(); i++) {
                 float[][] data = (float[][]) this.seriesList.get(i);
                 float[] x = data[0];

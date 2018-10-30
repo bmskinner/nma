@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
@@ -26,12 +24,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * The base action for exporting stats from datasets
@@ -42,8 +41,8 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  */
 public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
-    public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String label, @NonNull final MainWindow mw) {
-        super(datasets, label, mw);
+    public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String label, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, label, acceptor, eh);
     }
     
     /**
@@ -57,14 +56,14 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
         private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
 
-        public ExportNuclearStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
-            super(datasets, PROGRESS_LBL, mw);
+        public ExportNuclearStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
         }
 
         @Override
         public void run() {
 
-            File file = FileSelector.chooseStatsExportFile(datasets);
+            File file = FileSelector.chooseStatsExportFile(datasets, "stats");
 
             if (file == null) {
                 cancel();
@@ -92,14 +91,14 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
         private static final String PROGRESS_LBL = "Exporting shells";
 
-        public ExportShellsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
-            super(datasets, PROGRESS_LBL, mw);
+        public ExportShellsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
         }
 
         @Override
         public void run() {
 
-            File file = FileSelector.chooseStatsExportFile(datasets);
+            File file = FileSelector.chooseStatsExportFile(datasets, "shells");
 
             if (file == null) {
                 cancel();
@@ -127,14 +126,14 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
         private static final String PROGRESS_LBL = "Exporting signals";
 
-        public ExportSignalsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
-            super(datasets, PROGRESS_LBL, mw);
+        public ExportSignalsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
         }
 
         @Override
         public void run() {
 
-            File file = FileSelector.chooseStatsExportFile(datasets);
+            File file = FileSelector.chooseStatsExportFile(datasets, "signals");
 
             if (file == null) {
                 cancel();

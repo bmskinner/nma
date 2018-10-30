@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,18 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -49,9 +49,10 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.stats.ShellDistributionTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class NuclearSignalTableCreator extends AbstractTableCreator {
@@ -73,28 +74,27 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      */
     public TableModel createSignalDetectionParametersTable() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return createBlankTable();
-        }
 
         List<IAnalysisDataset> list = options.getDatasets();
         DefaultTableModel model = new DefaultTableModel();
 
-        List<Object> fieldNames = new ArrayList<Object>(0);
+        
 
         // find the collection with the most channels
         // this defines the number of rows
         int maxChannels = list.stream().mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount()).max()
                 .orElse(0);
 
-        if (maxChannels == 0) {
+        if (maxChannels == 0)
             return createBlankTable();
-        }
 
-        Object[] rowNameBlock = { "", Labels.Signals.SIGNAL_GROUP_LABEL, "Channel", "Source", "Threshold", "Min size",
+        Object[] rowNameBlock = { "", Labels.Signals.SIGNAL_GROUP_LABEL, Labels.Signals.SIGNAL_CHANNEL_LABEL, Labels.Signals.SIGNAL_SOURCE_LABEL, "Threshold", "Min size",
                 "Max fraction", "Min circ", "Max circ", "Detection mode" };
 
         // create the row names
+        List<Object> fieldNames = new ArrayList<Object>(0);
         fieldNames.add(Labels.Signals.NUMBER_OF_SIGNAL_GROUPS);
 
         for (int i = 0; i < maxChannels; i++) {
@@ -427,17 +427,9 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
             List<Object> temp = new ArrayList<Object>(0);
             try {
 
-                if (collection.getSignalManager().getSignalCount(signalGroup) == 0) { // Signal
-                                                                                      // group
-                                                                                      // has
-                                                                                      // no
-                                                                                      // signals
-                    for (int j = 0; j < numberOfRowsPerSignalGroup; j++) { // Make
-                                                                           // a
-                                                                           // blank
-                                                                           // block
-                                                                           // of
-                                                                           // cells
+            	// No signals, make a blank block of cells
+                if (collection.getSignalManager().getSignalCount(signalGroup) == 0) {
+                    for (int j = 0; j < numberOfRowsPerSignalGroup; j++) {
                         temp.add(EMPTY_STRING);
                     }
                     continue;
@@ -494,6 +486,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         DefaultTableModel model = new DefaultTableModel();
 
+        DecimalFormat lowFormat = new DecimalFormat("0.00E00");
         DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
         Object[] columnNames = { Labels.DATASET, 
@@ -502,7 +495,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         		Labels.Stats.PROBABILITY };
 
         model.setColumnIdentifiers(columnNames);
-
+        int nComparisons = 0;
+        
+        Map<String, Object[]> valuesToAdd = new HashMap<>();
+        
         for (IAnalysisDataset d : options.getDatasets()) {
             
             Optional<ISignalGroup> randomGroup = d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
@@ -520,17 +516,122 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				    
 				    double mean = r.get().getOverallShell(options.getAggregation(), options.getNormalisation());
 				    double pval = 1;
-				    if(random.isPresent())
-	                    pval = r.get().getPValue(options.getAggregation(), options.getNormalisation(), random.get());
-				    
+				    if(random.isPresent()) {
+				    	ShellDistributionTester tester = new ShellDistributionTester(r.get(), random.get());
+				    	pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
+				    }
+
+				    String key = d.getId().toString()+groupName.toString();
 				    Object[] rowData = {
 				            d.getName(), 
 				            groupName, 
 				            pFormat.format(mean),
-				            pFormat.format(pval) };
-				    model.addRow(rowData);
+				            pval };
+				    valuesToAdd.put(key, rowData);
+				    nComparisons++;
 				}
             }
+        }
+        
+        for(String key : valuesToAdd.keySet()) {
+        	Object[] values = valuesToAdd.get(key);
+        	double d = (double) values[3];
+        	d*=nComparisons; //Bonferroni correction
+        	d=Math.min(d, 1);
+        	values[3]= d < 0.001 ? lowFormat.format(d) : pFormat.format(d);  // Choose the most readable format
+        	model.addRow(values);
+        }
+        return model;
+    }
+    
+    /**
+     * Create a table with columns for dataset, signal group, and the p value of
+     * a chi-square test for all selected pairwise dataset and signal group combinations
+     * 
+     * @param options
+     * @return
+     */
+    public TableModel createPairwiseShellChiSquareTable() {
+
+        if (!options.hasDatasets())
+            return createBlankTable();
+
+        DefaultTableModel model = new DefaultTableModel();
+
+        DecimalFormat lowFormat = new DecimalFormat("0.00E00");
+        DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
+
+        Object[] columnNames = { Labels.DATASET, 
+        		Labels.Signals.SIGNAL_GROUP_LABEL, 
+        		Labels.DATASET, 
+        		Labels.Signals.SIGNAL_GROUP_LABEL,
+        		Labels.Stats.PROBABILITY };
+
+        model.setColumnIdentifiers(columnNames);
+        
+        int nComparisons = 0;
+        
+        Map<String, Object[]> valuesAdded = new HashMap<>();
+
+        for (IAnalysisDataset d1 : options.getDatasets()) {
+
+        	for (UUID signalGroup1 : d1.getCollection().getSignalManager().getSignalGroupIDs()) {
+
+        		ISignalGroup group1 = d1.getCollection().getSignalGroup(signalGroup1).get();
+        		Optional<IShellResult> r1 = group1.getShellResult();
+        		if (!r1.isPresent()) 
+        			continue;
+
+        		String groupName1 = group1.getGroupName();
+
+        		for (IAnalysisDataset d2 : options.getDatasets()) {
+
+        			for (UUID signalGroup2 : d2.getCollection().getSignalManager().getSignalGroupIDs()) {
+        				if(d1==d2 && signalGroup1==signalGroup2)
+        					continue;
+
+        				ISignalGroup group2 = d2.getCollection().getSignalGroup(signalGroup2).get();
+        				Optional<IShellResult> r2 = group2.getShellResult();
+        				if (!r2.isPresent()) 
+        					continue;
+
+        				String groupName2 = group2.getGroupName();
+
+        				ShellDistributionTester tester = new ShellDistributionTester(r1.get(), r2.get());
+        				double pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
+        				
+        				String k1 = d1.getId().toString()+signalGroup1.toString()+d2.getId().toString()+signalGroup2.toString();
+        				String k2 = d2.getId().toString()+signalGroup2.toString()+d1.getId().toString()+signalGroup1.toString();
+        				
+        				Object[] rowData = { 
+			        			d1.getName(), 
+			        			groupName1, 
+			        			d2.getName(), 
+			        			groupName2, 
+			        			pval };
+        				
+        				
+        				if(valuesAdded.containsKey(k2)) {
+        					double prevPValue = (double) valuesAdded.get(k2)[4];
+        					if(prevPValue<pval)
+        						valuesAdded.put(k2, rowData); 
+        				} else {
+        					valuesAdded.put(k1, rowData); 
+        					nComparisons++;
+        				}
+        			}
+        		}
+
+        	}
+        }
+
+        for(String key : valuesAdded.keySet()) {
+        	Object[] values = valuesAdded.get(key);
+        	double d = (double) values[4];
+        	d*=nComparisons; //Bonferroni correction
+        	d=Math.min(d, 1);
+        	values[4]= d < 0.001 ? lowFormat.format(d) : pFormat.format(d);
+        	model.addRow(values);
         }
         return model;
     }

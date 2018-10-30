@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.util.ArrayList;
@@ -39,10 +37,10 @@ import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpe
  *
  */
 public enum NucleusType {
-    ROUND("Round nucleus", "Head", "Tail", DefaultNucleus.class), RODENT_SPERM("Rodent sperm nucleus", "Tip", "Tail",
-            DefaultRodentSpermNucleus.class), PIG_SPERM("Pig sperm nucleus", "Tail", "Tail",
-                    DefaultPigSpermNucleus.class), NEUTROPHIL("Lobed nucleus", "Head", "Tail",
-                            DefaultLobedNucleus.class);
+    ROUND("Round nucleus", "Head", "Tail", DefaultNucleus.class), 
+    RODENT_SPERM("Rodent sperm nucleus", "Tip", "Tail", DefaultRodentSpermNucleus.class), 
+    PIG_SPERM("Pig sperm nucleus", "Tail", "Tail", DefaultPigSpermNucleus.class), 
+    NEUTROPHIL("Lobed nucleus", "Head", "Tail", DefaultLobedNucleus.class);
 
     private final String   name;
     private final Class<?> nucleusClass;

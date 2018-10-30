@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.ArrayList;
@@ -24,18 +22,25 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Checks the state of a dataset to report on abnormalities in, for example,
@@ -45,193 +50,367 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.6
  *
  */
-public class DatasetValidator implements Loggable {
+public class DatasetValidator {
 
-    public static final List<String> errorList = new ArrayList<>();
-    public static final Set<ICell> errorCells  = new HashSet<>();
+	public static final List<String> errorList = new ArrayList<>();
+	public static final Set<ICell> errorCells  = new HashSet<>();
 
-    public DatasetValidator() {
+	public DatasetValidator() {
 
-    }
+	}
 
-    public List<String> getErrors() {
-        return errorList;
-    }
-    
-    public Set<ICell> getErrorCells(){
-        return errorCells;
-    }
+	public List<String> getErrors() {
+		return errorList;
+	}
 
-    /**
-     * Run validation on the given dataset
-     * 
-     * @param d
-     */
-    public boolean validate(final IAnalysisDataset d) {
+	public Set<ICell> getErrorCells(){
+		return errorCells;
+	}
 
-        errorList.clear();
-        errorCells.clear();
+	/**
+	 * Run validation on the given dataset
+	 * 
+	 * @param d
+	 */
+	public boolean validate(final @NonNull IAnalysisDataset d) {
 
-        if (!d.isRoot()) {
-            errorList.add(d.getName() + ": Dataset not checked - not root");
-            return false;
-        }
+		errorList.clear();
+		errorCells.clear();
+		
+		int errors = 0;
 
-        int errors = 0;
+		if (!checkAllNucleiHaveProfiles(d)) {
+			errorList.add("Error in nucleus profiling");
+			errors++;
+		}
+		
+		if (!checkChildDatasetsHaveProfileCollections(d)) {
+			errorList.add("Error in child dataset profiling");
+			errors++;
+		}
+		
+		
+		if (!checkSegmentsAreConsistentInProfileCollections(d)) {
+			errorList.add("Error in segmentation between datasets");
+			errors++;
+		}
+		
+		if (!checkChildDatasetsHaveBorderTagsPresentInRoot(d)) {
+			errorList.add("Error in segmentation between datasets");
+			errors++;
+		}
 
-        if (!checkSegmentsAreConsistentInProfileCollections(d)) {
-            errorList.add("Error in segmentation between datasets");
-            errors++;
-        }
+		if (!checkSegmentsAreConsistentInAllCells(d)) {
+			errorList.add("Error in segmentation between cells");
+			errors++;
+		}
+		
+		if (!checkNucleiHaveRPOnASegmentBoundary(d)) {
+			errorList.add("Error in RP placement between cells");
+			errors++;
+		}
 
-        if (!checkSegmentsAreConsistentInAllCells(d)) {
-            errorList.add("Error in segmentation between cells");
-            errors++;
-        }
-        
-        if (errors == 0) {
-            errorList.add("Dataset OK");
-            return true;
-        } else {
-            errorList.add("Dataset failed validation");
-            return false;
-        }
+		if (errors == 0) {
+			errorList.add("Dataset OK");
+			return true;
+		}
+		errorList.add(String.format("Dataset failed validation: %s out of %s cells have errors", errorCells.size(), d.getCollection().getCells().size()));
+		return false;
 
-    }
+	}
+	
+	
+	private boolean checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
+		List<IAnalysisDataset> children = d.getAllChildDatasets();
+		boolean isOk = true;
 
-    /**
-     * Test if all child collections have the same segmentation pattern applied
-     * as the parent collection
-     * 
-     * @param d
-     *            the root dataset to check
-     * @return
-     */
-    private boolean checkSegmentsAreConsistentInProfileCollections(IAnalysisDataset d) {
+		for (ProfileType type : ProfileType.values()) {
+			for(ICell c : d.getCollection()) {
+				for (Nucleus n : c.getNuclei()) {
 
-        List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
+					try {
+						IProfile profile = n.getProfile(type);
+					} catch (UnavailableProfileTypeException e) {
+						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
+						errorCells.add(c);
+						isOk = false;
+					}
+				}
+			}
+		}
+		return isOk;	
+	}
+	
+	private boolean checkChildDatasetsHaveProfileCollections(@NonNull IAnalysisDataset d) {
+		List<IAnalysisDataset> children = d.getAllChildDatasets();
+		boolean isOk = true;
+		
+		IProfileCollection pc = d.getCollection().getProfileCollection();
+		for (ProfileType type : ProfileType.values()) {
+			try {
+				pc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+				errorList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
+				isOk = false;
+			}
+			
+			try {
+				pc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
+				errorList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
+				isOk = false;
+			}
+			
 
-        List<IAnalysisDataset> children = d.getAllChildDatasets();
+			
+			for (IAnalysisDataset child : children) {
+				IProfileCollection childPc = child.getCollection().getProfileCollection();
+				try {
+					childPc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+					errorList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
+					isOk = false;
+				}
+				
+				try {
+					childPc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
+					errorList.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
+					isOk = false;
+				}
+			}
+			
+		}
+		return isOk;	
+	}
 
-        for (IAnalysisDataset child : children) {
+	/**
+	 * Check that all the tags assigned in the root profile collection are present
+	 * in all nuclei, and in all child collections
+	 * @param d
+	 * @return
+	 */
+	private boolean checkChildDatasetsHaveBorderTagsPresentInRoot(@NonNull IAnalysisDataset d) {
+		List<IAnalysisDataset> children = d.getAllChildDatasets();
+		boolean isOk = true;
 
-            List<UUID> childList = child.getCollection().getProfileCollection().getSegmentIDs();
+		List<Tag> rootTags = d.getCollection().getProfileCollection().getBorderTags();
+		for(ICell c : d.getCollection()) {
+			for(Nucleus n : c.getNuclei()) {
+				for(Tag t : rootTags) {
+					if(!n.hasBorderTag(t)) {
+						isOk = false;
+						errorList.add(String.format("Nucleus %s does not have root collection tag", n.getNameAndNumber(), t));
+						errorCells.add(c);
+					}
+				}
+			}
+		}
+		
+		if(d.getCollection().hasConsensus()) {
+			for(Tag t : rootTags) {
+				if(!d.getCollection().getConsensus().hasBorderTag(t)) {
+					isOk = false;
+					errorList.add(String.format("Consensus nucleus does not have root collection tag", t));
+				}
+			}
+		}
+			
 
-            // check all parent segments are in child
-            for (UUID id : idList) {
-                if (!childList.contains(id)) {
-                    errorList.add("Segment " + id + " not found in child " + child.getName());
-                    return false;
-                }
-            }
+		for (IAnalysisDataset child : children) {
+			for(Tag t : rootTags) {
+				if(!child.getCollection().getProfileCollection().getBorderTags().contains(t)) {
+					isOk = false;
+					errorList.add(String.format("Child dataset %s does not have root collection tag", child.getName(), t));
+				}
+			}
+			
+			if(child.getCollection().hasConsensus()) {
+				for(Tag t : rootTags) {
+					if(!child.getCollection().getConsensus().hasBorderTag(t)) {
+						isOk = false;
+						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag", child.getName(), t));
+					}
+				}
+			}
+		}
 
-            // Check all child segments are in parent
-            for (UUID id : childList) {
-                if (!idList.contains(id)) {
-                    errorList.add(child.getName() + " segment " + id + " not found in parent");
-                    return false;
-                }
-            }
+		return isOk;	
+	}
+	
+	/**
+	 * Check if the RP is at a segment boundary in all cells
+	 * @param d
+	 * @return
+	 */
+	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull IAnalysisDataset d) {
+		boolean allOk = true;
+		for(ICell c : d.getCollection()) {
+			for(Nucleus n : c.getNuclei()) {
+				boolean isOk = false;
+				
+				try {
+					int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
+					for(IBorderSegment s : profile.getSegments()){
+						if(s.getStartIndex()==rpIndex)
+							isOk = true;
+					}
+				} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
+					// allow isOk to fall through
+				}
 
-        }
+				if(!isOk) {
+					errorList.add(String.format("Nucleus %s does not have RP at a segment boundary", n.getNameAndNumber()));
+					errorCells.add(c);
+					allOk = false;
+				}
+			}
+		}
+		return allOk;
+	}
 
-        return true;
-    }
+		
 
-    /**
-     * Check if all cells in the dataset have the same segmentation pattern
-     * 
-     * @param d
-     * @return
-     */
-    private boolean checkSegmentsAreConsistentInAllCells(IAnalysisDataset d) {
+	/**
+	 * Test if all child collections have the same segmentation pattern applied
+	 * as the parent collection
+	 * 
+	 * @param d the root dataset to check
+	 * @return
+	 */
+	private boolean checkSegmentsAreConsistentInProfileCollections(@NonNull IAnalysisDataset d) {
 
-        List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
+		List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
 
-        int errorCount = 0;
-        
-        for(ICell c : d.getCollection().getCells()){
-            int cellErrors = 0;
-            for (Nucleus n :c.getNuclei()) {
+		List<IAnalysisDataset> children = d.getAllChildDatasets();
 
-                ISegmentedProfile p;
-                try {
-                    p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-                    List<UUID> childList = p.getSegmentIDs();
+		for (IAnalysisDataset child : children) {
 
-                    // Check all nucleus segments are in root dataset
-                    for (UUID id : childList) {
-                        if (!idList.contains(id)) {
-                            errorList.add("Nucleus " + n.getNameAndNumber() + " has segment " + id + " not found in parent");
-                            cellErrors++;
-                        }
-                    }
+			List<UUID> childList = child.getCollection().getProfileCollection().getSegmentIDs();
 
-                    // Check all root dataset segments are in nucleus
-                    for (UUID id : idList) {
-                        if (!childList.contains(id)) {
-                            errorList.add("Segment " + id + " not found in child " + n.getNameAndNumber());
-                            cellErrors++;
-                        }
-                    }
+			if(idList.size()!=childList.size()) {
+				errorList.add(String.format("Root dataset %s segments; child dataset has %s", idList.size(), childList.size()));
+				return false;
+			}
 
-                    // Check each profile index in only covered once by a segment
-                    for (UUID id1 : idList) {
-                        IBorderSegment s1 = p.getSegment(id1);
-                        for (UUID id2 : idList) {
-                            if(id1==id2)
-                                continue;
+			// check all parent segments are in child
+			for (UUID id : idList) {
+				if (!childList.contains(id)) {
+					errorList.add("Segment " + id + " not found in child " + child.getName());
+					return false;
+				}
+			}
 
-                            IBorderSegment s2 = p.getSegment(id2);
-                            if(s1.overlaps(s2)){
-                                errorList.add("Segment " + id1 + " overlaps segment " + id2 + " in "+n.getNameAndNumber());
-                                cellErrors++;
-                            }
+			// Check all child segments are in parent
+			for (UUID id : childList) {
+				if (!idList.contains(id)) {
+					errorList.add(child.getName() + " segment " + id + " not found in parent");
+					return false;
+				}
+			}
+		}
 
-                        }
-                    }
+		return true;
+	}
 
-                } catch (ProfileException | UnavailableComponentException e) {
-                    errorList.add("Error getting segments");
-                    stack(e);
-                    cellErrors++;
-                }
+	/**
+	 * Check if all cells in the dataset have the same segmentation pattern, 
+	 * including the consensus nucleus
+	 * 
+	 * @param d
+	 * @return
+	 */
+	private boolean checkSegmentsAreConsistentInAllCells(@NonNull IAnalysisDataset d) {
 
-            }
-            if(cellErrors>0)
-                errorCells.add(c);
-            errorCount+=cellErrors;
-        }
-        
-        if(d.getCollection().hasConsensus()){
-            try {
-                ISegmentedProfile p = d.getCollection().getConsensus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-                
-                if(idList.size()!=p.getSegmentCount())
-                    errorList.add("Consensus does not have the same number of segments as the root dataset");
-                
-                for (UUID id : idList) {
-                    if (!p.hasSegment(id)) {
-                        errorList.add("Segment " + id + " not found in consensus");
-                        errorCount++;
-                    }
-                }
-                
-                for(UUID id : p.getSegmentIDs()){
-                    if (!idList.contains(id)) {
-                        errorList.add("Segment " + id + " in consensus not found in root");
-                        errorCount++;
-                    }
-                }
-                
-            } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-                errorList.add("Error getting segments");
-                stack(e);
-                errorCount++;
-            }
-        }
+		List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
 
-        return errorCount==0;
-    }
+		int errorCount = 0;
+
+		for(ICell c : d.getCollection().getCells()){
+			int cellErrors = 0;
+			for (Nucleus n :c.getNuclei()) {
+				cellErrors += checkSegmentation(n, idList);
+			}
+			
+			if(cellErrors>0)
+				errorCells.add(c);
+			errorCount+=cellErrors;
+		}
+
+		if(d.getCollection().hasConsensus())
+			errorCount += checkSegmentation(d.getCollection().getConsensus(), idList);
+
+		return errorCount==0;
+	}
+	
+	/**
+	 * Check a nucleus segmentation matches the expected list of segments,
+	 * and that segmentation patterns are internally consistent
+	 * @param n the object to check
+	 * @param expectedSegments the expected segment ids
+	 * @return the number of errors found
+	 */
+	private int checkSegmentation(Taggable n, List<UUID> expectedSegments) {
+		
+		int errorCount = 0;
+		boolean hasSegments = expectedSegments.size()>0;
+		ISegmentedProfile p;
+		try {
+			p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			if(p.hasSegments()!=hasSegments) {
+				errorList.add(String.format("Profile collection segments is %s; nucleus is %s", hasSegments, p.hasSegments()));
+				errorCount++;
+			}
+
+			List<UUID> childList = p.getSegmentIDs();
+
+			if(expectedSegments.size()!=childList.size()) {
+				errorList.add(String.format("Profile collection has %s segments; nucleus has %s", expectedSegments.size(), childList.size()));
+				errorCount++;
+			}
+
+			// Check all nucleus segments are in root dataset
+			for (UUID id : childList) {
+				if (!expectedSegments.contains(id) && !id.equals(n.getID())) {
+					errorList.add(String.format("Nucleus %s has segment %s not found in parent", n.getID(), id));
+					errorCount++;
+				}
+			}
+
+
+			// Check all root dataset segments are in nucleus
+
+			for (UUID id : expectedSegments) {
+				if (!childList.contains(id)) {
+					errorList.add(String.format("Profile collection segment %s not found in object %s", id, n.getID()));
+					errorCount++;
+				}
+			}
+
+
+
+			// Check each profile index in only covered once by a segment
+			for (UUID id1 : expectedSegments) {
+				IBorderSegment s1 = p.getSegment(id1);
+				for (UUID id2 : expectedSegments) {
+					if(id1==id2)
+						continue;
+					IBorderSegment s2 = p.getSegment(id2);
+					if(s1.overlapsBeyondEndpoints(s2)){
+						errorList.add(String.format("%s overlaps %s in object %s", s1.getDetail(), s2.getDetail(), n.getID()));
+						errorCount++;
+					}
+
+				}
+			}
+
+
+		} catch (ProfileException | UnavailableComponentException e) {
+			errorList.add(String.format("Error getting segments for object %s: %s", n.getID(), e.getMessage()));
+			errorCount++;
+		}
+		return errorCount;
+	}
 
 }

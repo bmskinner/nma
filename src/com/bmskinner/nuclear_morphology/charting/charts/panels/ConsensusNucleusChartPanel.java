@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
 import java.awt.Color;
@@ -34,10 +32,10 @@ import com.bmskinner.nuclear_morphology.charting.charts.overlays.ShapeOverlayObj
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {
@@ -84,7 +82,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
     }
 
     @Override
-    public void setChart(JFreeChart chart) {
+    public synchronized void setChart(JFreeChart chart) {
 
         super.setChart(chart);
 
@@ -202,11 +200,11 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
     }
 
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
+    public synchronized void addSignalChangeListener(EventListener l) {
         listeners.add(l);
     }
 
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
+    public synchronized void removeSignalChangeListener(EventListener l) {
         listeners.remove(l);
     }
 
@@ -214,7 +212,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
         SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
+            ((EventListener) iterator.next()).eventReceived(event);
         }
     }
 

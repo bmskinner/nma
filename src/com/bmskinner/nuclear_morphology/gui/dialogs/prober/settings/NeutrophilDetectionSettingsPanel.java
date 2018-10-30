@@ -1,24 +1,22 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -26,9 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEventListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
@@ -43,7 +39,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 @SuppressWarnings("serial")
 public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements PanelUpdatingEventListener {
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
 
     private static final String CYTO_SETTINGS_LBL = "Cytoplasm";
     private static final String NUCL_SETTINGS_LBL = "Nucleus";
@@ -51,7 +47,7 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 
     private JButton reloadBtn;
 
-    public NeutrophilDetectionSettingsPanel(IMutableAnalysisOptions options) {
+    public NeutrophilDetectionSettingsPanel(IAnalysisOptions options) {
         this.options = options;
 
         this.setLayout(new BorderLayout());

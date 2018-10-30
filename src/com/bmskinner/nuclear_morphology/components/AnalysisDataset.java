@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.IJ;
-
+import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
@@ -32,17 +29,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-//import com.bmskinner.nuclear_morphology.io.Importer;
-import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
-import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 
 /**
  * This holds a CellCollection, the analyses that have been run on it and the
@@ -72,7 +65,7 @@ public class AnalysisDataset implements IAnalysisDataset {
     private CellCollection thisCollection;
     private File           savePath;      // the file to save the analysis to
 
-    private IMutableAnalysisOptions analysisOptions;
+    private IAnalysisOptions analysisOptions;
 
     private Paint datasetColour = null; // use for colouring the dataset in
                                         // comparison with other datasets
@@ -144,18 +137,18 @@ public class AnalysisDataset implements IAnalysisDataset {
      * 
      * @see analysis.IAnalysisDataset#getLogHandler()
      */
-    @Override
-    public Handler getLogHandler() throws Exception {
-
-        if (debugFile == null || !debugFile.exists()) {
-            return null;
-        }
-
-        Handler fileHandler = new DebugFileHandler(this.getDebugFile());
-        fileHandler.setFormatter(new DebugFileFormatter());
-
-        return fileHandler;
-    }
+//    @Override
+//    public Handler getLogHandler() throws Exception {
+//
+//        if (debugFile == null || !debugFile.exists()) {
+//            return null;
+//        }
+//
+////        Handler fileHandler = new DebugFileHandler(this.getDebugFile());
+//        fileHandler.setFormatter(new DebugFileFormatter());
+//
+//        return fileHandler;
+//    }
 
     /*
      * (non-Javadoc)
@@ -198,7 +191,7 @@ public class AnalysisDataset implements IAnalysisDataset {
             throw new IllegalArgumentException("Nucleus collection is null");
         }
         dataset.setRoot(false);
-        UUID id = dataset.getUUID();
+        UUID id = dataset.getId();
         this.childCollections.put(id, (AnalysisDataset) dataset);
     }
 
@@ -228,7 +221,7 @@ public class AnalysisDataset implements IAnalysisDataset {
         if (dataset == null) {
             throw new IllegalArgumentException("Dataset is null");
         }
-        UUID id = dataset.getUUID();
+        UUID id = dataset.getId();
         this.otherCollections.put(id, (AnalysisDataset) dataset);
     }
 
@@ -263,7 +256,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getUUID()
      */
     @Override
-    public UUID getUUID() {
+    public UUID getId() {
         return this.thisCollection.getID();
     }
 
@@ -310,35 +303,6 @@ public class AnalysisDataset implements IAnalysisDataset {
     /*
      * (non-Javadoc)
      * 
-     * @see analysis.IAnalysisDataset#getDebugFile()
-     */
-    @Override
-    public File getDebugFile() {
-        return this.debugFile;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#setDebugFile(java.io.File)
-     */
-    @Override
-    public void setDebugFile(File f) {
-        try {
-            if (!f.exists()) {
-                f.createNewFile();
-            }
-            if (f.canWrite()) {
-                this.debugFile = f;
-            }
-        } catch (IOException e) {
-            IJ.log("Unable to update debug file location");
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see analysis.IAnalysisDataset#getChildUUIDs()
      */
     @Override
@@ -380,7 +344,7 @@ public class AnalysisDataset implements IAnalysisDataset {
             return this.childCollections.get(id);
         } else {
             for (IAnalysisDataset child : this.getAllChildDatasets()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return child;
                 }
             }
@@ -431,7 +395,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      */
     @Override
     public void addMergeSource(IAnalysisDataset dataset) {
-        this.mergeSources.add(dataset.getUUID());
+        this.mergeSources.add(dataset.getId());
         this.addAssociatedDataset(dataset);
     }
 
@@ -502,7 +466,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      */
     @Override
     public boolean hasMergeSource(IAnalysisDataset dataset) {
-        return this.hasMergeSource(dataset.getUUID());
+        return this.hasMergeSource(dataset.getId());
     }
 
     /*
@@ -597,7 +561,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getAnalysisOptions()
      */
     @Override
-    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
         return Optional.ofNullable(analysisOptions);
     }
 
@@ -622,7 +586,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
      */
     @Override
-    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
     }
 
@@ -837,7 +801,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      */
     @Override
     public boolean hasChild(IAnalysisDataset child) {
-        return this.childCollections.containsKey(child.getUUID());
+        return this.childCollections.containsKey(child.getId());
     }
 
     /*
@@ -876,7 +840,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#setDatasetColour(java.awt.Color)
      */
     @Override
-    public void setDatasetColour(Paint colour) {
+    public void setDatasetColour(Color colour) {
         this.datasetColour = colour;
     }
 
@@ -886,8 +850,8 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getDatasetColour()
      */
     @Override
-    public Optional<Paint> getDatasetColour() {
-        return Optional.ofNullable(this.datasetColour);
+    public Optional<Color> getDatasetColour() {
+        return Optional.ofNullable( (Color)this.datasetColour);
     }
 
     /*
@@ -956,17 +920,11 @@ public class AnalysisDataset implements IAnalysisDataset {
         fine("Target folder contains at least one image");
 
         fine("Updating dataset image paths");
-        boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
-        if (!ok) {
-            warn("Error updating dataset image paths; update cancelled");
-        }
+        this.getCollection().setSourceFolder(expectedImageDirectory);
 
         fine("Updating child dataset image paths");
         for (IAnalysisDataset child : this.getAllChildDatasets()) {
-            ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
-            if (!ok) {
-                warn("Error updating child dataset image paths; update cancelled");
-            }
+             child.getCollection().setSourceFolder(expectedImageDirectory);
         }
 
         log("Updated image paths to new folder location");

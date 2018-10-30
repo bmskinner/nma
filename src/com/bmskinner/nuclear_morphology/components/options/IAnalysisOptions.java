@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
@@ -23,9 +21,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * This stores details of an analysis setup for an IAnalysisDataset.
@@ -37,15 +37,19 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 public interface IAnalysisOptions extends Serializable, Loggable {
 
     // Standard detection keys
-    static final String NUCLEUS    = "Nucleus";
-    static final String CYTOPLASM  = "Cytoplasm";
-    static final String SPERM_TAIL = "SpermTail";
+    static final String NUCLEUS        = "Nucleus";
+    static final String CYTOPLASM      = "Cytoplasm";
+    static final String SPERM_TAIL     = "SpermTail";
+    static final String SIGNAL_GROUP   = "SignalGroup_";
+    static final String NUCLEAR_SIGNAL = "NuclearSignal";
 
     static final boolean     DEFAULT_REFOLD            = true;
     static final boolean     DEFAULT_KEEP_FAILED       = false;
     static final double      DEFAULT_WINDOW_PROPORTION = 0.05;
     static final NucleusType DEFAULT_TYPE              = GlobalOptions.getInstance().getDefaultType();
 
+    IAnalysisOptions duplicate();
+    
     /**
      * Get the detection options for the given component
      * 
@@ -53,7 +57,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      *            the component to detect
      * @return the detection options for the component
      */
-    Optional<IMutableDetectionOptions> getDetectionOptions(String key);
+    Optional<IDetectionOptions> getDetectionOptions(String key);
 
     /**
      * Get the type of detection options stored
@@ -90,28 +94,27 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * 
      * @return the refold option: true to refold, false to not refold
      */
+    @Deprecated
     boolean refoldNucleus();
 
     Set<UUID> getNuclearSignalGroups();
 
     /**
      * Get the nuclear signal options associated with the given signal group id.
-     * If not present, the group is created
      * 
-     * @param type
-     *            the name to check
-     * @return nuclear detection options
+     * @param signalGroup the group id
+     * @return nuclear detection options for the group
      */
-    INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup);
+    INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup);
+    
 
     /**
      * Check if the given type name is already present
      * 
-     * @param type
-     *            the name to check
+     * @param type the name to check
      * @return present or not
      */
-    boolean hasSignalDetectionOptions(UUID signalGroup);
+    boolean hasSignalDetectionOptions(@NonNull UUID signalGroup);
 
     /**
      * Check if nuclei that do not meet the detection parameters should be kept
@@ -119,6 +122,58 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * 
      * @return
      */
+    @Deprecated
     boolean isKeepFailedCollections();
+    
+    /**
+     * Get the time the analysis was conducted
+     * @return the UNIX time
+     */
+    long getAnalysisTime();
+    
+    /**
+     * Set the detection options for the given component
+     * 
+     * @param key
+     * @param options
+     */
+    void setDetectionOptions(String key, IDetectionOptions options);
+
+    /**
+     * Set the proportion of the perimeter to use when profiling nuclei
+     * 
+     * @param proportion
+     */
+    void setAngleWindowProportion(double proportion);
+
+    /**
+     * Set the type of nucleus / cell being analysed
+     * 
+     * @param nucleusType
+     */
+    void setNucleusType(NucleusType nucleusType);
+
+    /**
+     * Set whether the consensus nucleus should be refolded during the analysis
+     * 
+     * @param refoldNucleus
+     */
+    @Deprecated
+    void setRefoldNucleus(boolean refoldNucleus);
+
+    /**
+     * Set whether nuclei that cannot be detected should be retained as a
+     * separate collection
+     * 
+     * @param keepFailedCollections
+     */
+    @Deprecated
+    void setKeepFailedCollections(boolean keepFailedCollections);
+    
+    /**
+     * Set the values in this options to match the given options
+     * @param o
+     */
+    void set(@NonNull IAnalysisOptions o);
 
 }

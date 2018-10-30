@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
@@ -44,11 +42,10 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 @SuppressWarnings("serial")
 public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener {
@@ -74,9 +71,9 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
     // private final IMutableClusteringOptions options;
 
-    public ClusteringSetupDialog(MainWindow mw, IAnalysisDataset dataset) {
+    public ClusteringSetupDialog(IAnalysisDataset dataset) {
 
-        super(mw, dataset, DIALOG_TITLE);
+        super(dataset, DIALOG_TITLE);
         setDefaults();
         createUI();
         packAndDisplay();

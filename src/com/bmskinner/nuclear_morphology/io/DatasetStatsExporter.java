@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
@@ -24,10 +22,10 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -47,11 +45,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.4
  *
  */
-public class DatasetStatsExporter extends StatsExporter implements Exporter, Loggable {
-
-    private static final String EXPORT_MESSAGE          = "Exporting stats...";
-    private File                exportFile;
-    private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
+public class DatasetStatsExporter extends StatsExporter implements Loggable {
 
     private boolean includeProfiles = true;
     private boolean includeSegments = false;
@@ -62,7 +56,7 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
      * 
      * @param folder
      */
-    public DatasetStatsExporter(File file, List<IAnalysisDataset> list) {
+    public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
         super(file, list);
         segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         if(list.size()==1){
@@ -88,7 +82,8 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
      * 
      * @param outLine
      */
-    protected void appendHeader(@NonNull StringBuilder outLine) {
+    @Override
+	protected void appendHeader(@NonNull StringBuilder outLine) {
 
         outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
@@ -167,7 +162,8 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
+    @Override
+	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
 
         for (ICell cell : d.getCollection().getCells()) {
 
@@ -260,7 +256,7 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
             double perimeterLength = 0;
             if (segment != null) {
                 int indexLength = segment.length();
-                double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+                double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
                 varP = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
                 varM = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.MICRONS);
                 outLine.append(varP + TAB);

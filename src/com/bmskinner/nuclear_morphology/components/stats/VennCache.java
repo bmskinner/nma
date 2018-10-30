@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.util.HashMap;
@@ -101,7 +99,7 @@ public class VennCache {
      *            the number of shared nuclei
      */
     public void addCount(@NonNull IAnalysisDataset d, int i) {
-        Key k = new Key(d.getUUID());
+        Key k = new Key(d.getId());
         map.put(k, i);
     }
 
@@ -126,7 +124,7 @@ public class VennCache {
      * @return the shared count
      */
     public int getCount(@NonNull IAnalysisDataset d) {
-        Key k = new Key(d.getUUID());
+        Key k = new Key(d.getId());
         return map.get(k);
     }
 
@@ -149,7 +147,7 @@ public class VennCache {
      *            the dataset
      */
     public boolean hasCount(@NonNull IAnalysisDataset d) {
-        Key k = new Key(d.getUUID());
+        Key k = new Key(d.getId());
         return map.containsKey(k);
     }
 

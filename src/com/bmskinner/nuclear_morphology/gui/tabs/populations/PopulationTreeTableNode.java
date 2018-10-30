@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.util.Iterator;
@@ -27,7 +25,7 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 
 public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 
@@ -42,7 +40,7 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
     }
     
     public PopulationTreeTableNode(IAnalysisDataset dataset) {
-        super(dataset.getUUID().toString());
+        super(dataset.getId().toString());
         this.dataset = dataset;
         columnData[0] = dataset;
         columnData[1] = dataset.getCollection().size();

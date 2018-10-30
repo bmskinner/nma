@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,29 +12,26 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -52,7 +49,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.CircleTools;
 
 /**
  * This method refolds the consensus nucleus based on averaging the positions of
@@ -65,29 +61,26 @@ import com.bmskinner.nuclear_morphology.utility.CircleTools;
  */
 public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
-    private static final double PROFILE_LENGTH = 200d;
+	/** This length was chosen to avoid issues copying segments */
+    private static final double PROFILE_LENGTH = 1000d;
 
-    public ConsensusAveragingMethod(final IAnalysisDataset dataset) {
+    public ConsensusAveragingMethod(@NonNull final IAnalysisDataset dataset) {
         super(dataset);
     }
 
     @Override
     public IAnalysisResult call() throws Exception {
-
         run();
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
-        return r;
+        return new DefaultAnalysisResult(dataset);
     }
 
     private void run() {
-
         try {
             List<IPoint> border = getPointAverage();
             Nucleus refoldNucleus = makeConsensus(border);
             dataset.getCollection().setConsensus(refoldNucleus);
-
         } catch (Exception e) {
-            error("Error getting points", e);
+            error("Error getting points for consensus nucleus", e);
         }
     }
 
@@ -96,49 +89,53 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         IPoint com = IPoint.makeNew(0, 0);
-
         NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
         Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
 
         // Calculate the stats for the new consensus
         // Required for angle window size calculation
         double perim = ComponentMeasurer.calculatePerimeter(n);
+        fine("Consensus perimeter is "+perim);
         n.setStatistic(PlottableStatistic.PERIMETER, perim);
         n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
-        DefaultConsensusNucleus cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
+        // Build a consensus nucleus from the template points
+        Nucleus cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
 
         for (Tag tag : BorderTagObject.values()) {
-
             if (Tag.INTERSECTION_POINT.equals(tag)) // not relevant here
                 continue;
-
             if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {
+            	
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
                         Stats.MEDIAN);
-                int newIndex = cons.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
+                int newIndex = cons.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
+                fine(String.format("Setting %s in consensus to %s ", tag, newIndex));
                 cons.setBorderTag(tag, newIndex);
+                n.setBorderTag(tag, newIndex);
             }
-
         }
-
-        // Check the profile generated
-
-        IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Stats.MEDIAN);
-        IProfile nucProfile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        double diff = median.absoluteSquareDifference(nucProfile);
-
-        // // Adjust segments to fit size
-        ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
-        List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
-        profile.setSegments(newSegs);
-        cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        n.alignVertically();
+        cons.alignVertically();
         
-        // Do not use DefaultNucleus::roateVertically; it will not align properly
+        // Add segments to the new nucleus profile
+        if(dataset.getCollection().getProfileCollection().hasSegments()) {
+        	ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+        	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
+        	fine(profile.toString());
+        	for(IBorderSegment s : segs)
+        		fine(s.toString());
+        	for(IBorderSegment s : newSegs)
+        		fine(s.toString());
+        	profile.setSegments(newSegs);
+        	cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        }
+        
+        // Do not use DefaultNucleus::rotateVertically; it will not align properly
         if (cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-            cons.alignPointsOnVertical(cons.getBorderTag(Tag.TOP_VERTICAL), cons.getBorderTag(Tag.BOTTOM_VERTICAL));
+            cons.alignPointsOnVertical(cons.getBorderPoint(Tag.TOP_VERTICAL), cons.getBorderPoint(Tag.BOTTOM_VERTICAL));
 
             if (cons.getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.getCentreOfMass().getX())
                 cons.flipXAroundPoint(cons.getCentreOfMass());
@@ -150,54 +147,60 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     private List<IPoint> getPointAverage() throws UnavailableBorderTagException, UnavailableProfileTypeException,
             ProfileException, UnavailableBorderPointException, MissingOptionException {
 
-        List<IPoint> result = new ArrayList<>();
+        final Map<Double, List<IPoint>> perimeterPoints = new HashMap<>();
 
-        final Map<Double, List<IPoint>> map = new HashMap<Double, List<IPoint>>();
-
-        IPoint com = IPoint.makeNew(0, 0);
-        dataset.getCollection().getNuclei().stream().forEach(n -> {
+        IPoint zeroCoM = IPoint.makeNew(0, 0);
+        dataset.getCollection().getNuclei().forEach(n -> {
             try {
                 
                 Nucleus v = n.getVerticallyRotatedNucleus();
-
-                v.moveCentreOfMass(com);
+                v.moveCentreOfMass(zeroCoM);
                 IProfile p = v.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
                 for (int i = 0; i < PROFILE_LENGTH; i++) {
 
-                    double d = ((double) i) / PROFILE_LENGTH;
+                    double fractionOfPerimeter = i/ PROFILE_LENGTH;
 
-                    if (map.get(d) == null) {
-                        map.put(d, new ArrayList<IPoint>());
-                    }
-                    List<IPoint> list = map.get(d);
+                    if (perimeterPoints.get(fractionOfPerimeter) == null)
+                    	perimeterPoints.put(fractionOfPerimeter, new ArrayList<>());
+                    List<IPoint> list = perimeterPoints.get(fractionOfPerimeter);
 
-                    int index = p.getIndexOfFraction(d);
-
-                    int offset = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
-
-                    IPoint point;
-                    point = v.getBorderPoint(offset);
+                    int indexInProfile = p.getIndexOfFraction(fractionOfPerimeter);
+                    int borderIndex    = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, indexInProfile);
+                    IPoint point = v.getBorderPoint(borderIndex);
                     list.add(point);
                 }
             } catch (Exception e1) {
-                error("Error on nucleus " + n.getNameAndNumber(), e1);
+                stack("Error on nucleus " + n.getNameAndNumber(), e1);
             }
 
         });
 
+        
+        // Avoid errors in border calculation due to identical points by
+        // checking each average point in the list is different to the 
+        // previous. Needed since we have a large profile length.
+        List<IPoint> averagedPoints = new ArrayList<>();
         for (int i = 0; i < PROFILE_LENGTH; i++) {
+            double d = i/ PROFILE_LENGTH;
+            List<IPoint> list = perimeterPoints.get(d);
+            IPoint avg = calculateMedianPoint(list);
 
-            double d = ((double) i) / PROFILE_LENGTH;
-            List<IPoint> list = map.get(d);
-            result.add(calculateMedianPoint(list));
+            if(averagedPoints.isEmpty() || !averagedPoints.get(averagedPoints.size()-1).equals(avg)) {
+//            	fine(avg.getX()+"\t"+avg.getY());
+            	averagedPoints.add(avg);
+            }
             fireProgressEvent();
         }
-
-        return result;
+        return averagedPoints;
     }
 
-    private synchronized IPoint calculateMedianPoint(List<IPoint> list) {
+    /**
+     * Find the point with the median x and y coordinate of the given points
+     * @param list
+     * @return
+     */
+    private IPoint calculateMedianPoint(List<IPoint> list) {
         double[] xpoints = new double[list.size()];
         double[] ypoints = new double[list.size()];
 
@@ -211,89 +214,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         double xMed = Stats.quartile(xpoints, Stats.MEDIAN);
         double yMed = Stats.quartile(ypoints, Stats.MEDIAN);
 
-        IPoint avgRP = IPoint.makeNew(xMed, yMed);
-        return avgRP;
+        return IPoint.makeNew(xMed, yMed);
     }
-
-    private static boolean intersects(Path2D path, Line2D line) {
-        double x1 = -1, y1 = -1, x2 = -1, y2 = -1;
-        for (PathIterator pi = path.getPathIterator(null); !pi.isDone(); pi.next()) {
-            double[] coordinates = new double[6];
-            switch (pi.currentSegment(coordinates)) {
-            case PathIterator.SEG_MOVETO:
-            case PathIterator.SEG_LINETO: {
-                if (x1 == -1 && y1 == -1) {
-                    x1 = coordinates[0];
-                    y1 = coordinates[1];
-                    break;
-                }
-                if (x2 == -1 && y2 == -1) {
-                    x2 = coordinates[0];
-                    y2 = coordinates[1];
-                    break;
-                }
-                break;
-            }
-            }
-            if (x1 != -1 && y1 != -1 && x2 != -1 && y2 != -1) {
-                Line2D segment = new Line2D.Double(x1, y1, x2, y2);
-                if (segment.intersectsLine(line)) {
-                    return true;
-                }
-                x1 = -1;
-                y1 = -1;
-                x2 = -1;
-                y2 = -1;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Find the points at the intersection of two circles, and return one of
-     * them
-     * 
-     * @param first
-     * @param r1
-     * @param com
-     * @param r2
-     * @return
-     */
-    private IPoint calculateSecondPoint(IPoint first, double r1, IPoint com, double r2) {
-
-        // IPoint lastPoint; // needed to get the position of second point
-        // correct
-
-        /*
-         * Looking for the intersection of the circles with radii described
-         */
-        IPoint[] inters = CircleTools.findIntersections(first, r1, com, r2);
-
-        IPoint i0 = inters[0];
-        IPoint i1 = inters[1];
-
-        // Check the angle with the last point in the object
-
-        // IPoint[] interesctions = null;
-        // boolean loop = true;
-        // while( loop && r1 > 1 && r1 < 1000){
-        // try {
-        // interesctions = CircleTools.findIntersections(first, r1, com, r2 );
-        // loop=false;
-        // } catch(IllegalArgumentException e){
-        // log(e.getMessage());
-        // r1++;
-        // log("Increasing distance to "+r1);
-        //
-        // }
-        // }
-
-        return i0.getX() < 0 ? i0 : i1;
-
-        // log("Second point possible values:");
-        // log(i0.toString());
-        // log(i1.toString());
-        // return i0;
-    }
-
 }

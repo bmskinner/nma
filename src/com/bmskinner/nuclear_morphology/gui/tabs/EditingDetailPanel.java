@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,40 +12,39 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 
 @SuppressWarnings("serial")
-public class EditingDetailPanel extends DetailPanel
-        implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
+public class EditingDetailPanel extends DetailPanel {
     
     private static final String PANEL_TITLE_LBL = "Editing";
+    
+    private JTabbedPane tabPane;
 
-    public EditingDetailPanel() {
-
-        super();
+    public EditingDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
-        JTabbedPane tabPane = new JTabbedPane();
+        tabPane = new JTabbedPane();
         this.add(tabPane, BorderLayout.CENTER);
 
-        DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
-        DetailPanel segmentsEditingPanel = new SegmentsEditingPanel();
-        DetailPanel borderTagEditingPanel = new BorderTagEditingPanel();
+        DetailPanel cellDetailPanel = new IndividualCellDetailPanel(context);
+        DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
+        DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
 
         this.addSubPanel(cellDetailPanel);
         this.addSubPanel(segmentsEditingPanel);
@@ -75,9 +74,9 @@ public class EditingDetailPanel extends DetailPanel
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
-        super.signalChangeReceived(event);
+        super.eventReceived(event);
         finer("Editing panel heard signal: " + event.type());
 
         // Pass downwards if the signal was not generated internally

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.awt.Color;
@@ -37,6 +35,10 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class BorderTagDualChartPanel extends DualChartPanel {
 
@@ -45,11 +47,12 @@ public class BorderTagDualChartPanel extends DualChartPanel {
     private JPopupMenu popupMenu = new JPopupMenu("Popup");
 
     public BorderTagDualChartPanel() {
-        super();
+        super(false);
 
         chartPanel.addChartMouseListener(new ChartMouseListener() {
 
-            public void chartMouseClicked(ChartMouseEvent e) {
+            @Override
+			public void chartMouseClicked(ChartMouseEvent e) {
 
                 if (e.getEntity() instanceof XYItemEntity) {
                     XYItemEntity ent = (XYItemEntity) e.getEntity();
@@ -64,7 +67,8 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
             }
 
-            public void chartMouseMoved(ChartMouseEvent e) {
+            @Override
+			public void chartMouseMoved(ChartMouseEvent e) {
             }
 
         });
@@ -80,11 +84,11 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
     }
 
-    public void createBorderTagPopup(IAnalysisDataset dataset) {
-
+    public synchronized void createBorderTagPopup(IAnalysisDataset dataset) {
+    	if(dataset==null)
+    		return;
         List<Tag> list = dataset.getCollection().getProfileCollection().getBorderTags();
         makePopup(list);
-
     }
 
     private void makePopup(List<Tag> list) {
@@ -140,5 +144,29 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
         }
     }
+
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(InterfaceEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

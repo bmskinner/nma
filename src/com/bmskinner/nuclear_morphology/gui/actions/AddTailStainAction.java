@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,29 +12,24 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import java.io.File;
+import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.tail.TailDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.dialogs.TailDetectionSettingsDialog;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
-
-import ij.io.DirectoryChooser;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 @Deprecated
 public class AddTailStainAction extends SingleDatasetResultAction {
+	
+	private static final String PROGRESS_BAR_LABEL = "Tail detection";
 
-    public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Tail detection", mw);
+    public AddTailStainAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
 
     }
 

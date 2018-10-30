@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.awt.Color;
@@ -36,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -70,45 +69,38 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
     protected Boolean doInBackground() throws Exception {
 
         for (ICell c : dataset.getCollection().getCells()) {
-
+        	if(isCancelled())
+        		return false;
             try {
-
                 ImageIcon ic = importCellImage(c);
-
                 LabelInfo inf = new LabelInfo(ic, c);
-
                 publish(inf);
             } catch (Exception e) {
-                error("Error opening cell image", e);
+                stack("Error importing cell image", e);
             }
-
         }
-
         return true;
     }
 
     @Override
     public void done() {
 
-        finest("Worker completed task");
-
+        if(isCancelled()) {
+    		firePropertyChange(IAnalysisWorker.CANCELLED_MSG, getProgress(), IAnalysisWorker.CANCELLED);
+    		return;
+    	}
         try {
-            if (this.get()) {
-                finest("Firing trigger for sucessful task");
-                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);
-
-            } else {
-                finest("Firing trigger for failed task");
-                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-            }
+            if (this.get())
+                firePropertyChange(IAnalysisWorker.FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+            else
+                firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
-            error("Interruption error in worker", e);
-            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+            stack("Interruption error in worker", e);
+            firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-            error("Execution error in worker", e);
-            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+        	stack("Execution error in worker", e);
+            firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         }
-
     }
 
     protected ImageIcon importCellImage(ICell c) {
@@ -120,9 +112,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
             } else {
                 ip = c.getNucleus().getComponentImage();
             }
-
-            // Nucleus n = c.getNucleus();
-            // ip = n.getComponentImage();
 
         } catch (UnloadableImageException e) {
             stack("Cannot load image for component", e);
@@ -143,7 +132,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
                         an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
                     }
                 }
-                // an = an.annotateSegments(n, n);
             }
 
         } else {
@@ -154,8 +142,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         }
 
         ip = an.toProcessor();
-
-        // drawNucleus(c, ip);
 
         if (rotate) {
             try {
@@ -215,7 +201,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
          * However, the image coordinates have a reversed Y axis
          */
 
-        double angleFromVertical = lowerPoint.findAngle(upperPoint, comp);
+        double angleFromVertical = lowerPoint.findSmallestAngle(upperPoint, comp);
 
         double angle = 0;
         if (topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)) {

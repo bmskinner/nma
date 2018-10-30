@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
@@ -25,17 +23,21 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-//import com.bmskinner.nuclear_morphology.io.Importer;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 import ij.io.SaveDialog;
 
@@ -47,12 +49,12 @@ import ij.io.SaveDialog;
  */
 public class MergeCollectionAction extends MultiDatasetResultAction {
 
-    private static final String PROGRESS_LBL         = "Merging";
+    private static final String PROGRESS_BAR_LABEL         = "Merging";
     private final String        SAVE_DIALOG_TITLE    = "Save merged dataset as...";
     private final String        DEFAULT_DATASET_NAME = "Merge_of_datasets";
 
-    public MergeCollectionAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
-        super(datasets, PROGRESS_LBL, mw);
+    public MergeCollectionAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
@@ -160,22 +162,9 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
         }
         List<IAnalysisDataset> datasets = r.getDatasets();
 
-        if (datasets == null) {
-            this.cancel();
-            return;
-        }
+        if (datasets != null && datasets.size() > 0)
+        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets);
 
-        if (datasets.size() == 0) {
-            this.cancel();
-            return;
-        }
-
-        int flag = SingleDatasetResultAction.ADD_POPULATION;
-        flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-        flag |= SingleDatasetResultAction.SAVE_DATASET;
-        RunProfilingAction pr = new RunProfilingAction(datasets, flag, mw);
-        ThreadManager.getInstance().execute(pr);
-
-        this.cancel();
+        super.finished();
     }
 }

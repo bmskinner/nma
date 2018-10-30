@@ -15,11 +15,13 @@ import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.CommandParser;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.main.MainView;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.io.PropertiesReader;
-import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
-import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
+import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
+import com.bmskinner.nuclear_morphology.logging.LogFileFormatter;
+import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
@@ -49,7 +51,7 @@ public class Nuclear_Morphology_Analysis
 	// Store which plugins have been found
 	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
 	
-	private MainWindow mw;
+	private MainView mw;
 	
 	
 	// The plugins that are needed for the program to start
@@ -120,8 +122,8 @@ public class Nuclear_Morphology_Analysis
 			File errorFile = new File(dir, "error.log");
 			System.out.println(errorFile.getAbsolutePath());
 
-			DebugFileHandler errorHandler = new DebugFileHandler(errorFile);
-			errorHandler.setFormatter(new DebugFileFormatter());
+			LogFileHandler errorHandler = new LogFileHandler(errorFile);
+			errorHandler.setFormatter(new LogFileFormatter());
 			errorLogger.addHandler(errorHandler);
 			errorLogger.setLevel(Loggable.TRACE);
 			
@@ -167,7 +169,7 @@ public class Nuclear_Morphology_Analysis
 			
 			if(checkPlugins()){ 
 				// load the config file properties
-				new PropertiesReader();
+				new ConfigFileReader();
 				
 				// Check the ImageJ background colour settings
 				// This must be made consistent on all platforms

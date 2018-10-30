@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,20 +12,34 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.jfree.data.Range;
+
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer.CollectionFilteringException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
 
 @SuppressWarnings("serial")
 public class NuclearScatterChartPanel extends AbstractScatterChartPanel {
 
-    public NuclearScatterChartPanel() {
-        super(CellularComponent.NUCLEUS);
+    public NuclearScatterChartPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEUS);
     }
-
+    
 }

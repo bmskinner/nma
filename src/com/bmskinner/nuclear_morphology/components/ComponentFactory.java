@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,18 +12,20 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.gui.Roi;
-
 import java.io.File;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.gui.Roi;
 
 /**
  * The interface for component factories
@@ -39,24 +41,34 @@ public interface ComponentFactory<E extends CellularComponent> extends Loggable 
     /**
      * Create a component of the appropriate class for the factory
      * 
-     * @param roi
-     *            the roi to create a nucleus from
-     * @param file
-     *            the image file the component is found in
-     * @param channel
-     *            the RGB image channel
-     * @param originalPosition
-     *            the position of the roi in the source image in the format of
+     * @param roi the roi to create a nucleus from
+     * @param file the image file the component is found in
+     * @param channel the RGB image channel
+     * @param originalPosition the position of the roi in the source image in the format of
      *            {@link CellularComponent#getPosition()}
-     * @param centreOfMass
-     *            the centre of mass of the roi
+     * @param centreOfMass the centre of mass of the roi
      * @return a component of the type for this factory
-     * @throws ComponentCreationException
-     *             if creation fails
+     * @throws ComponentCreationException if creation fails
      */
-    E buildInstance(Roi roi, File file, int channel, int[] originalPosition, IPoint centreOfMass)
+    E buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
             throws ComponentCreationException;
-
+    
+    /**
+     * Create a component of the appropriate class for the factory
+     * 
+     * @param roi the roi to create a nucleus from
+     * @param file the image file the component is found in
+     * @param channel the RGB image channel
+     * @param originalPosition the position of the roi in the source image in the format of
+     *            {@link CellularComponent#getPosition()}
+     * @param centreOfMass the centre of mass of the roi
+     * @param id the id for the object.
+     * @return a component of the type for this factory
+     * @throws ComponentCreationException if creation fails
+     */
+    E buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, @NonNull UUID id)
+            throws ComponentCreationException;
+    
     /**
      * Thrown when a component cannot be created or initialised (includes when
      * profile collection or segmented profile has no assigned segments)

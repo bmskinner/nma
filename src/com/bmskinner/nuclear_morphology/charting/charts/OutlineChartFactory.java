@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.BasicStroke;
@@ -29,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
@@ -45,8 +44,9 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.BooleanAligner;
-import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
@@ -54,8 +54,6 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
@@ -72,9 +70,7 @@ import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
@@ -128,10 +124,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
             if (options.isShowWarp()) {
                 finer("Warp chart for signal outline chart");
                 return makeSignalWarpChart();
-            } else {
-                finer("Signal CoM for signal outline chart");
-                return new NuclearSignalChartFactory(options).makeSignalCoMNucleusOutlineChart();
             }
+			finer("Signal CoM for signal outline chart");
+			return new NuclearSignalChartFactory(options).makeSignalCoMNucleusOutlineChart();
         } catch (Exception e) {
             warn("Error making signal chart");
             stack("Error making signal chart", e);
@@ -143,33 +138,27 @@ public class OutlineChartFactory extends AbstractChartFactory {
     /**
      * Draw the given images onto a consensus outline nucleus.
      * 
-     * @param image
-     *            the image processor to be drawn
+     * @param image the image processor to be drawn
      * @return
      */
     public JFreeChart makeSignalWarpChart(ImageProcessor image) {
 
-        IAnalysisDataset dataset = options.firstDataset();
         JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
         XYPlot plot = chart.getXYPlot();
 
         Mesh<Nucleus> meshConsensus;
         try {
-            meshConsensus = new NucleusMesh(dataset.getCollection().getConsensus());
+            meshConsensus = new DefaultMesh((com.bmskinner.nuclear_morphology.components.Taggable) options.getComponent());
         } catch (MeshCreationException e1) {
             fine("Cannot make consensus mesh");
             stack("Error creating mesh", e1);
             return makeErrorChart();
         }
 
-        if (options.isStraightenMesh()) {
-            meshConsensus = meshConsensus.straighten();
-        }
-
         XYDataset ds;
         try {
-            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
+            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getComponent());
         } catch (ChartDatasetCreationException e) {
             stack("Error creating outline", e);
             return makeErrorChart();
@@ -213,9 +202,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         XYPlot plot = chart.getXYPlot();
 
         // Get consensus mesh.
-        NucleusMesh meshConsensus;
+        DefaultMesh meshConsensus;
         try {
-            meshConsensus = new NucleusMesh(dataset.getCollection().getConsensus());
+            meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
         } catch (MeshCreationException e) {
             stack("Error creating consensus mesh", e);
             return makeErrorChart();
@@ -233,8 +222,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                                                                                             // set
                                                                                             // (fixed
                                                                                             // 1.12.2)
-        int w = (int) ((double) r.getWidth() * 1.2);
-        int h = (int) ((double) r.getHeight() * 1.2);
+        int w = (int) (r.getWidth() * 1.2);
+        int h = (int) (r.getHeight() * 1.2);
 
         int xOffset = w >> 1;
         int yOffset = h >> 1;
@@ -245,9 +234,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         for (ICell cell : cells) {
             fine("Drawing signals for cell " + cell.getNucleus().getNameAndNumber());
             // Get each nucleus. Make a mesh.
-            NucleusMesh cellMesh;
+            DefaultMesh cellMesh;
             try {
-                cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
+                cellMesh = new DefaultMesh(cell.getNucleus(), meshConsensus);
             } catch (MeshCreationException e1) {
                 fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
                 stack("Error creating mesh", e1);
@@ -262,7 +251,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
 
                     // Create NucleusMeshImage from nucleus.
-                    MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh, ip);
+                    MeshImage<Nucleus> im = new DefaultMeshImage(cellMesh, ip);
 
                     // Draw NucleusMeshImage onto consensus mesh.
 
@@ -313,9 +302,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         try {
 
-            if (!options.isShowAnnotations()) {
+            if (!options.isShowAnnotations())
                 return makeBareCellOutlineChart();
-            }
 
             if (options.isShowMesh()) {
                 if (options.firstDataset().getCollection().hasConsensus()) {
@@ -323,10 +311,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     try {
 
                         Mesh<Nucleus> mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
-                                ? new NucleusMesh(options.getCell().getNucleus())
-                                : new NucleusMesh(options.getCell().getNucleus().getVerticallyRotatedNucleus());
+                                ? new DefaultMesh(options.getCell().getNucleus())
+                                : new DefaultMesh(options.getCell().getNucleus().getVerticallyRotatedNucleus());
 
-                        Mesh<Nucleus> mesh2 = new NucleusMesh(options.firstDataset().getCollection().getConsensus(),
+                        Mesh<Nucleus> mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         Mesh<Nucleus> result = mesh1.comparison(mesh2);
@@ -337,10 +325,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return makeErrorChart();
                     }
 
-                } else {
-                    return makeEmptyChart();
-
                 }
+				return makeEmptyChart();
 
             }
 
@@ -349,15 +335,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        Mesh<Nucleus> mesh1 = new NucleusMesh(options.getCell().getNucleus());
-                        Mesh<Nucleus> mesh2 = new NucleusMesh(options.firstDataset().getCollection().getConsensus(),
+                        Mesh<Nucleus> mesh1 = new DefaultMesh(options.getCell().getNucleus());
+                        Mesh<Nucleus> mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         //
                         ImageProcessor nucleusIP = options.getCell().getNucleus().getImage();
 
                         // Create a mesh image from the nucleus
-                        MeshImage<Nucleus> im = new NucleusMeshImage(mesh1, nucleusIP);
+                        MeshImage<Nucleus> im = new DefaultMeshImage(mesh1, nucleusIP);
 
                         // Draw the image onto the shape described by the
                         // consensus nucleus
@@ -383,9 +369,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return makeErrorChart();
                     }
 
-                } else {
-                    return makeEmptyChart();
                 }
+				return makeEmptyChart();
             }
             return makeStandardCellOutlineChart();
         } catch (ChartCreationException e) {
@@ -462,26 +447,19 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * Get a chart contaning the details of the given cell from the given
      * dataset
      * 
-     * @param cell
-     *            the cell to draw
-     * @param dataset
-     *            the dataset the cell came from
-     * @param rotateMode
-     *            the orientation of the image
+     * @param cell the cell to draw
+     * @param dataset the dataset the cell came from
+     * @param rotateMode the orientation of the image
      * @return
      * @throws Exception
      */
     private JFreeChart makeStandardCellOutlineChart() throws ChartCreationException {
 
-        if (!options.hasCell()) {
-            finest("No cell to draw");
+        if (!options.hasCell())
             return ConsensusNucleusChartFactory.makeEmptyChart();
-        }
 
-        if (!options.hasDatasets()) {
-            finest("No dataset to draw");
+        if (!options.hasDatasets())
             return ConsensusNucleusChartFactory.makeEmptyChart();
-        }
 
         ICell cell = options.getCell();
         IAnalysisDataset dataset = options.firstDataset();
@@ -587,8 +565,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
         }
 
         // set the rendering options for each dataset type
-        finest("Rendering chart");
-
         int i = 0;
         for (String key : cellDataset.getKeys()) {
 
@@ -828,15 +804,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * @param imageFile
      * @param channel
      */
-    private static void drawImageAsAnnotation(XYPlot plot, ICell cell, CellularComponent component, boolean isRGB) {
+    private static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell, @NonNull CellularComponent component, boolean isRGB) {
 
-        if (component == null || cell == null || plot == null) {
+        if (component == null || cell == null || plot == null)
             return;
-        }
 
         ImageProcessor openProcessor;
         try {
-            openProcessor = isRGB ? component.getRGBImage() : component.getImage();
+//        	ImageProcessor ip = isRGB ? component.getRGBImage() : component.getImage();
+        	ImageConverter ic = new ImageConverter(component.getGreyscaleImage()).invert();
+        	openProcessor = ic.convertToRGBGreyscale().toProcessor();
+//            openProcessor = isRGB ? component.getRGBImage() : component.getGreyscaleImage();
         } catch (UnloadableImageException e) {
             return;
         }
@@ -850,10 +828,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
         int yBase = positions[CellularComponent.Y_BASE];
 
         int padding = 10; // a border of pixels beyond the cell boundary
-        int wideW = (int) (positions[CellularComponent.WIDTH] + (padding * 2));
-        int wideH = (int) (positions[CellularComponent.HEIGHT] + (padding * 2));
-        int wideX = (int) (xBase - padding);
-        int wideY = (int) (yBase - padding);
+        int wideW = positions[CellularComponent.WIDTH] + (padding * 2);
+        int wideH = positions[CellularComponent.HEIGHT] + (padding * 2);
+        int wideX = xBase - padding;
+        int wideY = yBase - padding;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -883,129 +861,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * Create a chart with the outlines of all the nuclei within a dataset. The
      * options should only contain a single dataset
      * 
-     * @param options
      * @return
-     * @throws Exception
      */
     public JFreeChart createVerticalNucleiChart() {
 
-        if (!options.hasDatasets()) {
-            finest("No datasets - returning empty chart");
+        if (!options.hasDatasets())
             return makeEmptyChart();
-        }
-
-        if (options.isMultipleDatasets()) {
-            finest("Multiple datasets - creating vertical nuclei chart");
+        if (options.isMultipleDatasets())
             return createMultipleDatasetVerticalNucleiChart();
-        }
-
-        finest("Single dataset - creating vertical nuclei chart");
-        return createSingleDatasetVerticalNucleiChart();
-
-    }
-
-    /**
-     * Create the chart with the outlines of all the nuclei within a single
-     * dataset.
-     * 
-     * @param options
-     * @return
-     * @throws Exception
-     */
-    private JFreeChart createSingleDatasetVerticalNucleiChart() {
-
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
-
-        plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
-        plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
-
-        XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
-        r.setBaseSeriesVisibleInLegend(false);
-        r.setBaseStroke(ChartComponents.PROFILE_STROKE);
-        r.setSeriesPaint(0, Color.LIGHT_GRAY);
-        r.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
-
-        boolean hasConsensus = options.firstDataset().getCollection().hasConsensus();
-        Mask reference = null;
-        BooleanAligner aligner = null;
-        
-        int i = 0;
-        
-        if (options.isNormalised()) {
-            if (hasConsensus) {
-
-                reference = options.firstDataset().getCollection().getConsensus().getBooleanMask(200, 200);
-                aligner = new BooleanAligner(reference);
-            }
-
-            if (hasConsensus) {
-
-                finest("Creating consensus nucleus dataset");
-
-                Nucleus consensus = options.firstDataset().getCollection().getConsensus();
-
-                OutlineDatasetCreator dc = new OutlineDatasetCreator(options, consensus);
-
-                try {
-
-                    XYDataset consensusDataset = dc.createOutline(false);
-                    XYLineAndShapeRenderer c = new XYLineAndShapeRenderer(true, false);
-                    c.setBaseSeriesVisibleInLegend(false);
-                    c.setBaseStroke(ChartComponents.PROFILE_STROKE);
-                    c.setSeriesPaint(0, Color.BLACK);
-
-                    plot.setDataset(i, consensusDataset);
-                    plot.setRenderer(i, c);
-
-                } catch (ChartDatasetCreationException e) {
-                    warn("Cannot create data for dataset " + options.firstDataset().getName());
-                    fine("Error getting chart data", e);
-                }
-
-            }
-            i++;
-        }
-
-        finest("Creating charting datasets for vertically rotated nuclei");
-
-        for (Nucleus n : options.firstDataset().getCollection().getNuclei()) {
-
-            Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
-
-            /*
-             * Find the best offset for the CoM to fit the consensus nucleus if
-             * present
-             */
-            if (options.isNormalised() && aligner!=null){
-                if (hasConsensus) {
-                    Mask test = verticalNucleus.getBooleanMask(200, 200);
-                    int[] offsets = aligner.align(test);
-                    verticalNucleus.moveCentreOfMass(IPoint.makeNew(offsets[1], offsets[0]));
-                }
-            } else {
-                verticalNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
-            }
-
-            OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
-
-            try {
-
-                XYDataset nucleusDataset = dc.createOutline(false);
-                plot.setDataset(i, nucleusDataset);
-                plot.setRenderer(i, r);
-
-            } catch (ChartDatasetCreationException e) {
-                warn("Cannot create data for dataset " + options.firstDataset().getName());
-                stack("Error getting chart data", e);
-            } finally {
-                i++;
-            }
-
-        }
-        finest("Created vertical nuclei chart");
-        applyAxisOptions(chart);
-        return chart;
+        return makeEmptyChart();
     }
 
     /**

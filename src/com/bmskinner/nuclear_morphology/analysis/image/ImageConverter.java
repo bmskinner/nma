@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,11 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.image;
+
+import java.awt.Color;
+
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -25,11 +29,6 @@ import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-
-import java.awt.Color;
-import java.util.List;
-
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 /**
  * This class handles the flattening of the image stacks used internally by a
@@ -40,46 +39,42 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  */
 public class ImageConverter extends AbstractImageFilterer {
 
-    public ImageConverter(ImageProcessor ip) {
+    public ImageConverter(@NonNull ImageProcessor ip) {
         super(ip);
     }
 
-    public ImageConverter(ImageStack st) {
+    public ImageConverter(@NonNull ImageStack st) {
         super(st);
     }
 
     /**
      * Create a blank byte processor image of the specified dimensions
      * 
-     * @param w
-     *            the width
-     * @param h
-     *            the height
+     * @param w the width
+     * @param h the height
      * @return an image processor
      */
     public static ImageProcessor createBlankImage(int w, int h) {
         ImageProcessor ip = new ByteProcessor(w, h);
         ip.invert();
-        return new ImageConverter(ip).convertTORGBGreyscale().toProcessor();
+        return new ImageConverter(ip).convertToRGBGreyscale(ip).toProcessor();
     }
 
     /**
      * Create a blank byte processor image of the specified dimensions
      * 
-     * @param w
-     *            the width
-     * @param h
-     *            the height
+     * @param w the width
+     * @param h the height
      * @return an image processor
      */
     public static ImageConverter createBlankImageConverter(int w, int h) {
         ImageProcessor ip = new ByteProcessor(w, h);
         ip.invert();
-        return new ImageConverter(ip).convertTORGBGreyscale();
+        return new ImageConverter(ip).convertToRGBGreyscale(ip);
     }
 
     /**
-     * Convert an ImageStack to RGB images suitable for export or display
+     * Convert to RGB images suitable for export or display
      * 
      * @return an ImageConverter containing the converted image
      */
@@ -87,18 +82,14 @@ public class ImageConverter extends AbstractImageFilterer {
 
         // Handle stacks first
         if (st != null) {
-            if (st.getSize() == 1) {
-                return makeGreyScaleIamge();
-            }
-            if (st.getSize() > 1) {
+            if (st.getSize() == 1)
+                return makeGreyScaleImage();
+            if (st.getSize() > 1)
                 return mergeStack();
-            }
         }
 
-        if (ip != null) {
-            return convertTORGBGreyscale();
-        }
-
+        if (ip != null)
+            return convertToRGBGreyscale(ip);
         return this;
     }
 
@@ -107,39 +98,34 @@ public class ImageConverter extends AbstractImageFilterer {
      * 
      * @return
      */
-    public ImageConverter convertToGreyscale() {
+    public ImageConverter convertToRGBGreyscale() {
         // Handle stacks first
         if (st != null) {
-            if (st.getSize() == 1) {
-                return makeGreyScaleIamge();
-            }
-            if (st.getSize() > 1) {
-                return makeGreyRGBImage(ImageImporter.COUNTERSTAIN); // default
-                                                                     // is
-                                                                     // counterstain
-            }
+            if (st.getSize() == 1)
+                return makeGreyScaleImage();
+            if (st.getSize() > 1) 
+                return makeGreyRGBImage(ImageImporter.COUNTERSTAIN); 
         }
 
         if (ip != null) {
-            return convertTORGBGreyscale();
+        	
+        	if(ip instanceof ColorProcessor)
+        		return new ImageConverter(ip.convertToByteProcessor());
+        	
+            return convertToRGBGreyscale(ip);
         }
-
         return this;
     }
 
     /**
      * Create a greyscale RGB image from a single processor in a stack
      * 
-     * @param stackNumber
-     *            the stack of the image to convert
+     * @param stackNumber the stack of the image to convert
      * @return
      */
     public ImageConverter convertToGreyscale(int stackNumber) {
-        // Handle stacks first
-        if (st != null) {
+        if (st != null)
             return makeGreyRGBImage(stackNumber);
-        }
-
         return this;
     }
 
@@ -149,7 +135,8 @@ public class ImageConverter extends AbstractImageFilterer {
      * @param stack
      * @return
      */
-    public ImageConverter invert() {
+    @Override
+	public ImageConverter invert() {
         // Handle stacks first
         if (st != null) {
             ip = st.getProcessor(ImageImporter.COUNTERSTAIN);
@@ -237,31 +224,17 @@ public class ImageConverter extends AbstractImageFilterer {
         return newIp;
     }
 
-    // /**
-    // * Given a stack, invert slice 1 to white on black.
-    // * @param stack
-    // * @return
-    // */
-    // public ImageConverter invertCounterstain(){
-    //
-    // if(st==null){
-    // throw new IllegalArgumentException("Stack is null");
-    // }
-    // st.getProcessor(Constants.COUNTERSTAIN).invert();
-    // return new ImageConverter(st);
-    // }
-
     /**
      * Given a greyscale image processor, make a grey RGB processor
      * 
      * @param ip
      * @return
      */
-    private ImageConverter convertTORGBGreyscale() {
+    private ImageConverter convertToRGBGreyscale(ImageProcessor greyImage) {
         ImagePlus[] images = new ImagePlus[3];
-        images[ImageImporter.RGB_RED] = new ImagePlus("red", ip);
-        images[ImageImporter.RGB_GREEN] = new ImagePlus("green", ip);
-        images[ImageImporter.RGB_BLUE] = new ImagePlus("blue", ip);
+        images[ImageImporter.RGB_RED]   = new ImagePlus("red",   greyImage);
+        images[ImageImporter.RGB_GREEN] = new ImagePlus("green", greyImage);
+        images[ImageImporter.RGB_BLUE]  = new ImagePlus("blue",  greyImage);
 
         ImagePlus result = RGBStackMerge.mergeChannels(images, false);
 
@@ -277,20 +250,9 @@ public class ImageConverter extends AbstractImageFilterer {
      * @return a new ImagePlus, or null if the stack was null
      */
     private ImageConverter makeGreyRGBImage(int stackNumber) {
-
-        if (st != null) {
-            ImagePlus[] images = new ImagePlus[3];
-            images[ImageImporter.RGB_RED] = new ImagePlus("red", st.getProcessor(stackNumber));
-            images[ImageImporter.RGB_GREEN] = new ImagePlus("green", st.getProcessor(stackNumber));
-            images[ImageImporter.RGB_BLUE] = new ImagePlus("blue", st.getProcessor(stackNumber));
-
-            ImagePlus result = RGBStackMerge.mergeChannels(images, false);
-            result = result.flatten();
-
-            return new ImageConverter(result.getProcessor());
-        } else {
-            return this;
-        }
+        if (st != null)
+        	return convertToRGBGreyscale(st.getProcessor(stackNumber));
+		return this;
     }
 
     /**
@@ -299,7 +261,7 @@ public class ImageConverter extends AbstractImageFilterer {
      * @param stack
      * @return the image
      */
-    private ImageConverter makeGreyScaleIamge() {
+    private ImageConverter makeGreyScaleImage() {
         return makeGreyRGBImage(ImageImporter.COUNTERSTAIN);
     }
 
@@ -307,8 +269,7 @@ public class ImageConverter extends AbstractImageFilterer {
      * Convert a multi-plane stack to RGB. Only the first two signal channels
      * are used.
      * 
-     * @param stack
-     *            the stack
+     * @param stack the stack
      * @return an RGB image
      */
     private ImageConverter mergeStack() {

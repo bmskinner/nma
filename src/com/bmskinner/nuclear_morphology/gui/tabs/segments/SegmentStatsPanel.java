@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 
 import java.awt.BorderLayout;
@@ -28,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
@@ -36,10 +35,11 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 public class SegmentStatsPanel extends DetailPanel {
@@ -51,8 +51,8 @@ public class SegmentStatsPanel extends DetailPanel {
 
     private JScrollPane scrollPane;
 
-    public SegmentStatsPanel() {
-        super();
+    public SegmentStatsPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
 
@@ -80,13 +80,13 @@ public class SegmentStatsPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         TableOptions options = makeOptions();
         setTable(options);
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         TableOptions options = makeOptions();
         setTable(options);
 
@@ -99,14 +99,14 @@ public class SegmentStatsPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         table.setModel(AbstractTableCreator.createBlankTable());
         table.setToolTipText(null);
 
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
 
         table.setModel(AbstractTableCreator.createLoadingTable());
 

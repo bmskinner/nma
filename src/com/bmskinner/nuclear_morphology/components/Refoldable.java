@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -52,19 +50,4 @@ public interface Refoldable<E extends CellularComponent> {
      * @return the consensus, or null if not present
      */
     E getConsensus();
-
-    /**
-     * Set the refolding state
-     * 
-     * @param b
-     */
-    void setRefolding(boolean b);
-
-    /**
-     * Test if the consensus is being refolded
-     * 
-     * @return
-     */
-    boolean isRefolding();
-
 }

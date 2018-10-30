@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,15 +12,14 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
@@ -34,17 +33,17 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 @SuppressWarnings("serial")
-public class NuclearHistogramsPanel extends HistogramsTabPanel implements SignalChangeListener {
+public class NuclearHistogramsPanel extends HistogramsTabPanel  {
 
-    public NuclearHistogramsPanel() {
-        super(CellularComponent.NUCLEUS);
+    public NuclearHistogramsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEUS);
 
         try {
 
@@ -108,7 +107,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
     }
 
     @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
+    public void eventReceived(SignalChangeEvent event) {
 
         if (event.type().equals("MarkerPositionUpdated")) {
 

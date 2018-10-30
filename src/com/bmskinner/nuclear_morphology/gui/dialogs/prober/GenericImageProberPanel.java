@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
@@ -51,9 +49,10 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * An basic implementation of the image prober panel
@@ -136,9 +135,9 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
      * @param imageFile the image to search
      */
     protected void importAndDisplayImage(File imageFile) {
-        if (imageFile == null) {
+        if (imageFile == null)
             throw new IllegalArgumentException(NULL_FILE_ERROR);
-        }
+        
         try {
             finer("Firing panel updating event");
             int imageNumber = fileIndex+1;
@@ -150,8 +149,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
             finder.findInImage(imageFile);
 
-        } catch (Exception e) { // end try
-            warn(e.getMessage());
+        } catch (ImageImportException e) { // end try
             stack(e.getMessage(), e);
             setImageLabel("Error probing " + imageFile.getAbsolutePath());
 
@@ -199,7 +197,8 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
             try {
                 importAndDisplayImage(openImage);
             } catch (Exception e) {
-                error("Error in prober", e);
+            	warn("Error in prober");
+                stack("Error in prober", e);
             }
         };
         ThreadManager.getInstance().submit(r);
@@ -364,7 +363,12 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
     protected JTable createTable(TableModel model) {
         JTable table = new JTable(model);
-        table.setRowHeight(200);
+        
+        int maxDimension = 200;
+        if(model instanceof ProberTableModel)
+        	maxDimension = ((ProberTableModel) model).getMaxDimension();
+        
+        table.setRowHeight(maxDimension);
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(new IconCellRenderer());
         }
@@ -614,6 +618,11 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
         }
     }
 
+    /**
+     * Used to alert settings panels that images are being updated
+     * @author ben
+     *
+     */
     public interface PanelUpdatingEventListener {
         void panelUpdatingEventReceived(PanelUpdatingEvent e);
     }

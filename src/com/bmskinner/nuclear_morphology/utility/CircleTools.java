@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.utility;
 
 import java.awt.geom.Line2D;
@@ -38,14 +36,10 @@ public class CircleTools {
     /**
      * Find if the given circles overlap
      * 
-     * @param com1
-     *            the centre of the first circle
-     * @param r1
-     *            the radius of the first circle
-     * @param com2
-     *            the centre of the second circle
-     * @param r2
-     *            the radius of the second circle
+     * @param com1 the centre of the first circle
+     * @param r1 the radius of the first circle
+     * @param com2 the centre of the second circle
+     * @param r2 the radius of the second circle
      * @return
      */
     public static boolean circlesOverlap(IPoint com1, double r1, IPoint com2, double r2) {
@@ -57,14 +51,10 @@ public class CircleTools {
     /**
      * Test if either circle is entirely contained within the other
      * 
-     * @param com1
-     *            the centre of the first circle
-     * @param r1
-     *            the radius of the first circle
-     * @param com2
-     *            the centre of the second circle
-     * @param r2
-     *            the radius of the second circle
+     * @param com1 the centre of the first circle
+     * @param r1 the radius of the first circle
+     * @param com2 the centre of the second circle
+     * @param r2 the radius of the second circle
      * @return true if either circle is contained within the other
      */
     public static boolean circleIsEnclosed(IPoint com1, double r1, IPoint com2, double r2) {
@@ -75,12 +65,9 @@ public class CircleTools {
     /**
      * Get the intersections of a circle with the given line segment
      * 
-     * @param line
-     *            the line segment
-     * @param center
-     *            the centre of the circle
-     * @param radius
-     *            the radius of the circle
+     * @param line the line segment
+     * @param center the centre of the circle
+     * @param radius the radius of the circle
      * @return
      */
     public static List<IPoint> getCircleLineIntersectionPoint(Line2D line, IPoint center, double radius) {
@@ -121,12 +108,9 @@ public class CircleTools {
      * Test if the given line segment intersects the border of the circle
      * defined by the given radius and cenre point
      * 
-     * @param com
-     *            the centre of the circle
-     * @param r
-     *            the radius of the circle
-     * @param line
-     *            the line segment to test
+     * @param com the centre of the circle
+     * @param r the radius of the circle
+     * @param line the line segment to test
      * @return true if the line crosses the border of the circle
      */
     public static boolean intersects(IPoint com, double r, Line2D line) {
@@ -138,14 +122,10 @@ public class CircleTools {
      * Find the intersection points of two circles. Based on:
      * http://paulbourke.net/geometry/circlesphere/
      * 
-     * @param com1
-     *            the centre of the first circle
-     * @param r1
-     *            the radius of the first circle
-     * @param com2
-     *            the centre of the second circle
-     * @param r2
-     *            the radius of the second circle
+     * @param com1 the centre of the first circle
+     * @param r1 the radius of the first circle
+     * @param com2 the centre of the second circle
+     * @param r2 the radius of the second circle
      * @return
      */
     public static IPoint[] findIntersections(IPoint com0, double r0, IPoint com1, double r1) {
@@ -229,59 +209,6 @@ public class CircleTools {
 
         IPoint[] result = { first, second };
         return result;
-
-        // // Considering the two triangles P0P2P3 and P1P2P3 we can write
-        //
-        // // a2 + h2 = r02 and b2 + h2 = r12
-        //
-        //
-        //
-        // // Using d = a + b we can solve for a,
-        //
-        // // a = (r02 - r12 + d2 ) / (2 d)
-        //
-        // double a = ((r1*r1) - (r2*r2) + (d*d)) / (2*d);
-        //
-        // double x1 = com1.getX();
-        // double x2 = com2.getX();
-        // double y1 = com1.getY();
-        // double y2 = com2.getY();
-        //
-        // double dx = x1-x2;
-        // double dy = y1-y2;
-        //
-        // // It can be readily shown that this reduces to r0 when the two
-        // circles touch at one point, ie: d = r0 + r1
-        //
-        // // Solve for h by substituting a into the first equation, h2 = r02 -
-        // a2
-        //
-        // // So:
-        //
-        // //P2 = P0 + a ( P1 - P0 ) / d
-        //
-        //
-        // //And finally, P3 = (x3,y3) in terms of P0 = (x0,y0), P1 = (x1,y1)
-        // and P2 = (x2,y2), is
-        //
-        // //x3 = x2 +- h ( y1 - y0 ) / d
-        //
-        // //y3 = y2 -+ h ( x1 - x0 ) / d
-        //
-        //
-        // double h = Math.sqrt( r1*r1 - a*a);
-        // double xm = x1 + (a*dx)/d;
-        // double ym = y1 + (a*dy)/d;
-        // double xs1 = xm + (h*dy)/d;
-        // double xs2 = xm - (h*dy)/d;
-        // double ys1 = ym - (h*dx)/d;
-        // double ys2 = ym + (h*dx)/d;
-        //
-        // IPoint first = IPoint.makeNew(xs1, ys1);
-        // IPoint second = IPoint.makeNew(xs2,ys2);
-        //
-        // IPoint[] result = { first, second };
-        // return result;
     }
 
 }

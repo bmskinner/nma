@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.stats;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -67,12 +69,14 @@ public class DipTester implements Loggable, SignificanceTest {
             int offset = collection.getProfileCollection().getIndex(tag);
 
             // ensure the postions are starting from the right place
-            List<Double> keys = collection.getProfileCollection().getXKeyset(type);
+            int length = collection.getProfileCollection().length();
 
-            pvals = new float[keys.size()];
+            double[] keys = IntStream.range(0, length).mapToDouble(i-> (double)i/(double)length).toArray();
 
-            for (int i = 0; i < keys.size(); i++) {
-                double position = keys.get(i).doubleValue();
+            pvals = new float[keys.length];
+
+            for (int i = 0; i < keys.length; i++) {
+                double position = keys[i];
                 double[] values = collection.getProfileCollection().getValuesAtPosition(type, position);
                 pvals[i] = (float) getDipTestPValue(values);
             }
@@ -155,13 +159,10 @@ public class DipTester implements Loggable, SignificanceTest {
      * @return
      */
     public static double getDipTestPValue(double[] values) {
-
-        if (values.length < 10) {
+        if (values.length < 10)
             return 1;
-        } else {
-            double[] result = DistributionTest.diptest(values);
-            return result[1];
-        }
+		double[] result = DistributionTest.diptest(values);
+		return result[1];
     }
 
     /**
@@ -172,12 +173,10 @@ public class DipTester implements Loggable, SignificanceTest {
      * @return
      */
     public static double getDipTestTestStatistic(double[] values) {
-        if (values.length < 10) {
+        if (values.length < 10)
             return 1;
-        } else {
-            double[] result = DistributionTest.diptest(values);
-            return result[0];
-        }
+		double[] result = DistributionTest.diptest(values);
+		return result[0];
 
     }
 

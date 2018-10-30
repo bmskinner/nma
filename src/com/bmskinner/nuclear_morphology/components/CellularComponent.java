@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,17 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
-
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 import java.awt.Shape;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +30,9 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 /**
  * This interface provides the basic methods for a component of a cell - an
@@ -61,14 +60,6 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return
      */
     @NonNull UUID getID();
-
-    /**
-     * An equality check that relies solely on the component ids.
-     * 
-     * @param c
-     * @return true if the components have the same ID
-     */
-    boolean equals(CellularComponent c);
 
     /**
      * Create a defensive copy of this object
@@ -147,7 +138,7 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @param p
      * @return
      */
-    int getBorderIndex(IBorderPoint p);
+    int getBorderIndex(@NonNull IBorderPoint p);
 
     // public double getDistance(int index);
 
@@ -163,15 +154,14 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     /**
      * Update the border point at the given index to the given x y coordinates
      * 
-     * @param i
-     *            the index
-     * @param p
-     *            the new postion
+     * @param i  the index
+     * @param p the new postion
      */
-    void updateBorderPoint(int i, IPoint p);
+    void updateBorderPoint(int i, @NonNull IPoint p);
 
     /**
-     * Get the length of the angle profile in index units
+     * Get the length of the object border - equivalent to the length
+     * of the angle profile - in index units
      * 
      * @return
      */
@@ -198,6 +188,12 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return
      */
     List<IBorderPoint> getOriginalBorderList() throws UnavailableBorderPointException;
+    
+    /**
+     * Get the integer roi positions used to create the object before smoothing and interpolation
+     * @return an array with two elements:  the x coordinate array, and the y coordinate array
+     */
+    int[][] getUnsmoothedBorderCoordinates();
 
     /**
      * Test if the given point is within the offset nucleus
@@ -255,10 +251,9 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     /**
      * Flip the nucleus on the x-axis (horizontally) about the given point
      * 
-     * @param p
-     *            the point with the x coordinate to flip on
+     * @param p the point with the x coordinate to flip on
      */
-    void flipXAroundPoint(IPoint p);
+    void flipXAroundPoint(@NonNull IPoint p);
 
     /**
      * Get the median distance between each pair of border points
@@ -271,31 +266,36 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Translate the XY coordinates of each border point so that the nuclear
      * centre of mass is at the given point
      * 
-     * @param point
-     *            the new centre of mass
+     * @param point the new centre of mass
      */
-    void moveCentreOfMass(IPoint point);
+    void moveCentreOfMass(@NonNull IPoint point);
 
     /**
      * Translate the XY coordinates of each border point and the centre of mass
      * by the given amount in the x and y axes
      * 
-     * @param xOffset
-     *            the amount to move the border in the x-dimension
-     * @param yOffset
-     *            the amount to move the border in the y-dimension
+     * @param xOffset the amount to move the border in the x-dimension
+     * @param yOffset the amount to move the border in the y-dimension
      */
     void offset(double xOffset, double yOffset);
 
     /**
-     * Wrap arrays. If an index falls of the end, it is returned to the start
+     * Wrap border indexes. If an index falls of the end, it is returned to the start
      * and vice versa
      * 
-     * @param i
-     *            the index
+     * @param i the index
      * @return the index within the border list
      */
     int wrapIndex(int i);
+    
+    /**
+     * Wrap border indexes. If an index falls of the end, it is returned to the start
+     * and vice versa
+     * 
+     * @param i the index
+     * @return the index within the border list
+     */
+    double wrapIndex(double d);
 
     /**
      * Turn a list of border points into a polygon. These have the
@@ -328,8 +328,7 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Create a shape (in this case a Path2D encompassing the border points of
      * the component) at the given scale
      * 
-     * @param scale
-     *            the measurement scale for the component
+     * @param scale the measurement scale for the component
      * @return
      */
     Shape toShape(MeasurementScale scale);
@@ -362,10 +361,8 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * outside the component, for an image centred on the nuclear centre of
      * mass, of the given size
      * 
-     * @param height
-     *            the height of the mask
-     * @param width
-     *            the width of the mask
+     * @param height the height of the mask
+     * @param width the width of the mask
      * @return a mask of size width * height
      */
     Mask getBooleanMask(int height, int width);
@@ -379,11 +376,11 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     Mask getSourceBooleanMask();
 
     /*
-     * For two NucleusBorderPoints in a Nucleus, find the point that lies
-     * halfway between them Used for obtaining a consensus between potential
+     * For two points in the object border, find the point that lies
+     * halfway between them. Used for obtaining a consensus between potential
      * tail positions
      */
-    int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB);
+    int getPositionBetween(@NonNull IBorderPoint pointA, @NonNull IBorderPoint pointB);
 
     /**
      * For a position in the roi, draw a line through the CoM and get the
@@ -393,17 +390,16 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return
      * @throws UnavailableBorderPointException
      */
-    IBorderPoint findOppositeBorder(IBorderPoint p) throws UnavailableBorderPointException;
+    IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) throws UnavailableBorderPointException;
 
     /**
-     * @param a
-     *            the point to draw to the centre of mass
+     * @param a the point to draw to the centre of mass
      * @return the orthogonal border point or input point if no other point was
      *         found
      * @throws UnavailableBorderPointException
      *             if the input point is not found in the component border
      */
-    IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) throws UnavailableBorderPointException;
+    IBorderPoint findOrthogonalBorderPoint(@NonNull IBorderPoint a) throws UnavailableBorderPointException;
 
     /**
      * Find the border point in this object that is closest to the given XYPoint
@@ -411,7 +407,18 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @param p
      * @return
      */
-    IBorderPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException;
+    IBorderPoint findClosestBorderPoint(@NonNull IPoint p) throws UnavailableBorderPointException;
+    
+    /**
+     * Create the border list from the stored int[] points. Mimics the internal
+     * makeBorderList, but allows spline fitting to be disabled. This is used
+     * in converting datasets from pre-1.14.0. Splines are fit by default in 
+     * 1.14.0 onwards, which causes issues deserialising 1.13.8 and earlier datasets.
+     * Disable spline fitting to display these earlier formats properly.
+     * 
+     * @param useSplineFitting should spline fitting be used
+     */
+    public void refreshBorderList(boolean useSplineFitting);
 
     /**
      * Reverse the border outline of this object, including the roi points used
@@ -424,24 +431,15 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Wrap arrays. If an index falls of the end, it is returned to the start
      * and vice versa
      * 
-     * @param i
-     *            the index
-     * @param length
-     *            the array length
+     * @param i  the index
+     * @param length the array length
      * @return the index within the array
      */
     static int wrapIndex(int i, int length) {
-        if (i < 0) {
-            // if the inputs are (-336, 330), this will return -6. Recurse until
-            // positive
-            i = length + i;
-            return wrapIndex(i, length);
-        }
-
-        if (i < length) { // if not wrapping
+        if (i < 0) // Recurse until positive
+            return wrapIndex(length + i, length);
+        if (i < length) // if not wrapping
             return i;
-        }
-
         return i % length;
     }
 
@@ -449,27 +447,108 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * Wrap arrays for doubles. This is used in interpolation. If an index falls
      * of the end, it is returned to the start and vice versa
      * 
-     * @param i
-     *            the index
-     * @param length
-     *            the array length
+     * @param i the index
+     * @param length the array length
      * @return the index within the array
      */
     static double wrapIndex(double i, int length) {
-        if (i < 0) {
-            i = length + i;
-            return wrapIndex(i, length); // correct for values multiple profile
-                                         // lengths below zero
-        }
-
-        if (i < length) { // if not wrapping
+    	if (i < 0) // Recurse until positive
+            return wrapIndex(length + i, length);
+        if (i < length) // if not wrapping
             return i;
-        }
-
-        // i is greater than array length
-
         return i % length;
-
     }
+    
+    /**
+	 * Offset an array to start from the 
+	 * given index
+	 * 
+	 * @param arr the array
+	 * @param j the offset to apply; the new start index
+	 * @return the offset array
+	 */
+	static float[] offset(float[] arr, int j) {
+		float[] newArray = new float[arr.length];
+		
+		int newStartIndex = CellularComponent.wrapIndex(j, arr.length);
+		int nElements = arr.length-newStartIndex;
+		
+		// Copy from the new start index to the end of the array 
+		System.arraycopy(arr, newStartIndex, newArray, 0, nElements);
+		// copy from the start of the array to the new start index
+		System.arraycopy(arr, 0, newArray, nElements, newStartIndex);
+		return newArray;
+	}
+	
+	/**
+	 * Get the sliding window offset of array 1 that best matches array 2. The
+	 * arrays must be the same length
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 */
+	static int getBestFitOffset(float[] arr1, float[] arr2) {
+		return getBestFitOffset(arr1, arr2, 0, arr1.length);
+	}
+	
+	/**
+	 * Get the sliding window offset of array 1 that best matches array 2. The
+	 * arrays must be the same length. The best offset within the specified range
+	 * of indexes will be returned.
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @minOffset the minimum offset to apply
+	 * @maxOffset the maximum offset to apply
+	 * @return
+	 */
+	static int getBestFitOffset(float[] arr1, float[] arr2, int minOffset, int maxOffset) {
+		if(arr1.length!=arr2.length)
+			throw new IllegalArgumentException("Arrays must be equal length");
+		double bestScore = Double.MAX_VALUE;
+		int bestIndex = 0;
 
+		for (int i=minOffset; i<maxOffset; i++) {
+			double score = squareDifference(CellularComponent.offset(arr1, i), arr2);
+			if (score < bestScore) {
+				bestScore = score;
+				bestIndex = i;
+				
+			}
+		}
+		return bestIndex;
+	}
+	
+	/**
+	 * Calculate the absolute square difference between two arrays of equal
+	 * length. Note - array lengths are not checked.
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 */
+	static double squareDifference(float[] arr1, float[] arr2) {
+		double difference = 0;
+		for (int j = 0; j < arr1.length; j++) {
+			difference += Math.pow(arr1[j] - arr2[j], 2);
+		}
+		return difference;
+	}
+	
+	/**
+	 * Calculate the absolute square difference between two arrays of equal
+	 * length. Note - array lengths are not checked.
+	 * 
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 */
+	static double squareDifference(double[] arr1, double[] arr2) {
+		double difference = 0;
+		for (int j = 0; j < arr1.length; j++) {
+			difference += Math.pow(arr1[j] - arr2[j], 2);
+		}
+		return difference;
+	}
 }

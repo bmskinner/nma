@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,12 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,11 +26,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * This is the virtual child dataset, which retains only the pointer to its
@@ -43,7 +41,8 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptio
 public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
     private static final long serialVersionUID = 1L;
-
+    
+    /**The parent dataset to which this child belongs */
     private IAnalysisDataset parent;
 
     /**
@@ -60,23 +59,32 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
     @Override
     public IAnalysisDataset duplicate() throws Exception {
+    	ChildAnalysisDataset cd = new ChildAnalysisDataset(parent, new VirtualCellCollection(parent, parent.getCollection()));
+    	for(ICell c: this.getCollection())
+    		cd.getCollection().addCell(c);
+    	
+        // copy the signals
+        for(UUID id : cellCollection.getSignalGroupIDs())
+        	cd.getCollection().addSignalGroup(id, cellCollection.getSignalGroup(id).get().duplicate());
 
-        throw new Exception("Not yet implemented");
-    }
 
-    @Override
-    public Handler getLogHandler() throws Exception {
-        return parent.getLogHandler();
+        // copy child datasets
+        for(IAnalysisDataset child : this.getAllChildDatasets())
+        	cd.addChildDataset(child.duplicate());
+        
+        // copy merge sources
+        for(IAnalysisDataset mge : this.getMergeSources())
+        	cd.addMergeSource(mge.duplicate());
+        
+        cd.setDatasetColour((Color) datasetColour);
+
+    	return cd;
     }
 
     @Override
     public void addChildCollection(@NonNull ICellCollection collection) {
-        if (collection == null)
-            throw new IllegalArgumentException("Nucleus collection is null");
-
         IAnalysisDataset childDataset = new ChildAnalysisDataset(this, collection);
-        this.childDatasets.add(childDataset);
-
+        childDatasets.add(childDataset);
     }
 
     @Override
@@ -91,23 +99,13 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void setSavePath(File file) {
-    }
-
-    @Override
-    public File getDebugFile() {
-        return parent.getDebugFile();
-    }
-
-    @Override
-    public void setDebugFile(File f) {
-    }
+    public void setSavePath(@NonNull File file) {}
 
     @Override
     public Set<UUID> getChildUUIDs() {
         Set<UUID> result = new HashSet<UUID>(childDatasets.size());
         for (IAnalysisDataset c : childDatasets) {
-            result.add(c.getUUID());
+            result.add(c.getId());
         }
 
         return result;
@@ -129,18 +127,18 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public IAnalysisDataset getChildDataset(UUID id) {
+    public IAnalysisDataset getChildDataset(@NonNull UUID id) {
         if (this.hasChild(id)) {
 
             for (IAnalysisDataset c : childDatasets) {
-                if (c.getUUID().equals(id)) {
+                if (c.getId().equals(id)) {
                     return c;
                 }
             }
 
         } else {
             for (IAnalysisDataset child : this.getAllChildDatasets()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return child;
                 }
             }
@@ -149,7 +147,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public IAnalysisDataset getMergeSource(UUID id) {
+    public IAnalysisDataset getMergeSource(@NonNull UUID id) {
         return null;
     }
 
@@ -159,7 +157,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void addMergeSource(IAnalysisDataset dataset) {
+    public void addMergeSource(@NonNull IAnalysisDataset dataset) {
     }
 
     @Override
@@ -226,7 +224,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
         return parent.getAnalysisOptions();
     }
 
@@ -236,7 +234,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
     }
 
     @Override
@@ -276,13 +274,13 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void deleteChild(UUID id) {
+    public void deleteChild(@NonNull UUID id) {
         Iterator<IAnalysisDataset> it = childDatasets.iterator();
 
         while (it.hasNext()) {
             IAnalysisDataset child = it.next();
 
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 for (IClusterGroup g : clusterGroups) {
                     if (g.hasDataset(id)) {
                         g.removeDataset(id);
@@ -308,14 +306,14 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void deleteMergeSource(UUID id) {
+    public void deleteMergeSource(@NonNull UUID id) {
     }
 
     @Override
     public boolean hasChild(UUID id) {
 
         for (IAnalysisDataset child : childDatasets) {
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 return true;
             }
         }
@@ -323,13 +321,38 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void updateSourceImageDirectory(File expectedImageDirectory) {
+    public void updateSourceImageDirectory(@NonNull File expectedImageDirectory) {
         parent.updateSourceImageDirectory(expectedImageDirectory);
 
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return this.cellCollection.getName();
     }
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ChildAnalysisDataset other = (ChildAnalysisDataset) obj;
+		if (parent == null) {
+			if (other.parent != null)
+				return false;
+		} else if (!parent.equals(other.parent))
+			return false;
+		return true;
+	}
 }

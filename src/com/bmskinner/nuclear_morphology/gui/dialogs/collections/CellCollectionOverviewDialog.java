@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 
 import java.awt.BorderLayout;
@@ -23,6 +21,8 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 
@@ -62,12 +62,22 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         super(dataset);
     }
 
+	@Override
 	protected void createWorker(){
 		worker = new ImageImportWorker(dataset, table.getModel(), true);
         worker.addPropertyChangeListener(this);
         worker.execute();
+        
+        this.addWindowListener(new WindowAdapter() {
+        	
+        	 @Override
+        	    public void windowClosing(WindowEvent e) {
+        	        worker.cancel(true);
+        	 }
+        });
 	}
-	
+		
+	@Override
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
 
@@ -111,6 +121,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 		
 	}
 
+	@Override
 	protected void createUI() {
 
         this.setLayout(new BorderLayout());
@@ -136,7 +147,8 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         table = new JTable(model) {
             // Returning the Class of each column will allow different
             // renderers to be used based on Class
-            public Class<?> getColumnClass(int column) {
+            @Override
+			public Class<?> getColumnClass(int column) {
                 return JLabel.class;
             }
         };

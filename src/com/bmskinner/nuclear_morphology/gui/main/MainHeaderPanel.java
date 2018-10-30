@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.Dimension;
@@ -30,18 +28,18 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
@@ -59,11 +57,12 @@ public class MainHeaderPanel extends JPanel implements Loggable {
     private static final String TASK_QUEUE_LBL    = "Task queue:";
     private static final String MEMORY_LBL        = "Memory:";
 
-    private MainWindow mw;
+    private MainView mw;
 
-    public MainHeaderPanel(MainWindow mw) {
+    public MainHeaderPanel(MainView mw) {
+    	
         this.mw = mw;
-
+        
         setLayout(new GridBagLayout());
         
         GridBagConstraints c = new GridBagConstraints();
@@ -117,13 +116,13 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
             popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
                 public void actionPerformed(ActionEvent e) {
-                    Runnable r = new NewAnalysisAction(mw);
+                    Runnable r = new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
                     r.run();
                 }
             }));
             popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
                 public void actionPerformed(ActionEvent e) {
-                    Runnable r = new NeutrophilAnalysisAction(mw);
+                    Runnable r = new NeutrophilAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
                     r.run();
                 }
             }));
@@ -136,7 +135,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
             });
         } else {
             btnNewAnalysis.addActionListener(e -> {
-                Runnable r = new NewAnalysisAction(mw);
+                Runnable r = new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
                 r.run();
             });
         }
@@ -150,8 +149,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
         JButton btnLoadSavedDataset = new JButton(LOAD_DATASET_LBL);
 
         btnLoadSavedDataset.addActionListener(e -> {
-            finest("Creating import action");
-            Runnable r = new PopulationImportAction(mw);
+            Runnable r = new ImportDatasetAction(mw.getProgressAcceptor(), mw.getEventHandler());
             r.run();
         });
 
@@ -175,17 +173,14 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
         JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
         btnSaveWorkspace.addActionListener(e -> {
-            mw.getEventHandler().signalChangeReceived(
+            mw.getEventHandler().eventReceived(
                     new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
         });
 
         panel.add(btnSaveWorkspace);
 
         JButton optionsButton = new JButton(OPTIONS_LBL);
-        optionsButton.addActionListener(
-
-                e -> {
-
+        optionsButton.addActionListener( e -> {
                     MainOptionsDialog dialog = new MainOptionsDialog(mw);
                     dialog.addInterfaceEventListener(mw.getEventHandler());
                 });

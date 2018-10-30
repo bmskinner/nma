@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
@@ -23,8 +21,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
@@ -34,54 +30,90 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  * @author bms41
  *
  */
-public interface IClusteringOptions extends Serializable {
+public interface IClusteringOptions extends Serializable, HashOptions {
+	
+	static final String USE_SIMILARITY_MATRIX_KEY = "USE_SIMILARITY_MATRIX";
+	static final String MANUAL_CLUSTER_NUMBER_KEY = "MANUAL_CLUSTER_NUMBER";
+	static final String CLUSTER_METHOD_KEY        = "CLUSTER_METHOD";
+	static final String HIERARCHICAL_METHOD_KEY   = "HIERARCHICAL_METHOD";
+	static final String EM_ITERATIONS_KEY         = "EM_ITERATIONS";
+	static final String MODALITY_REGIONS_KEY      = "MODALITY_REGIONS";
+	static final String USE_MODALITY_KEY          = "USE_MODALITY";
+	static final String INCLUDE_PROFILE_KEY       = "INCLUDE_PROFILE";
+	static final String INCLUDE_MESH_KEY          = "INCLUDE_MESH";
+	static final String PROFILE_TYPE_KEY          = "PROFILE_TYPE";
 
     static final int                       DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
     static final ClusteringMethod          DEFAULT_CLUSTER_METHOD        = ClusteringMethod.HIERARCHICAL;
     static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD   = HierarchicalClusterMethod.WARD;
+    static final ProfileType               DEFAULT_PROFILE_TYPE          = ProfileType.ANGLE;
     static final int                       DEFAULT_EM_ITERATIONS         = 100;
     static final int                       DEFAULT_MODALITY_REGIONS      = 2;
     static final boolean                   DEFAULT_USE_MODALITY          = true;
     static final boolean                   DEFAULT_USE_SIMILARITY_MATRIX = false;
-    static final boolean                   DEFAULT_INCLUDE_AREA          = false;
-    static final boolean                   DEFAULT_INCLUDE_ASPECT        = false;
     static final boolean                   DEFAULT_INCLUDE_PROFILE       = true;
     static final boolean                   DEFAULT_INCLUDE_MESH          = false;
 
     /**
-     * The mutable options with setters
-     * 
-     * @author bms41
-     *
+     * The available types of hierarchical clustering for the Weka clusterer
      */
-    public interface IMutableClusteringOptions extends IClusteringOptions {
+    public enum HierarchicalClusterMethod {
+        WARD("Ward", "WARD"), 
+        SINGLE("Single", "SINGLE"), 
+        COMPLETE("Complete", "COMPLETE"), 
+        AVERAGE("Average", "AVERAGE"), 
+        MEAN("Mean", "MEAN"), 
+        CENTROID("Centroid", "CENTROID"), 
+        ADJCOMPLETE("Adjusted complete", "ADJCOMPLETE"), 
+        NEIGHBOR_JOINING("Neighbour joining", "NEIGHBOR_JOINING");
 
-        void setClusterNumber(int defaultManualClusterNumber);
+        private final String name;
+        private final String code;
 
-        void setHierarchicalMethod(HierarchicalClusterMethod defaultHierarchicalMethod);
+        HierarchicalClusterMethod(String name, String code) {
+            this.name = name;
+            this.code = code;
+        }
 
-        void setIterations(int defaultEmIterations);
+        @Override
+		public String toString() {
+            return this.name;
+        }
 
-        void setUseSimilarityMatrix(boolean defaultUseSimilarityMatrix);
-
-        void setIncludeProfile(boolean defaultIncludeProfile);
-
-        void setProfileType(ProfileType defaultProfileType);
-
-        void setIncludeMesh(boolean defaultIncludeMesh);
-
-        void setIncludeStatistic(PlottableStatistic stat, boolean selected);
-
-        void setIncludeSegment(UUID id, boolean selected);
-
-        IClusteringOptions lock();
-
-        void setType(ClusteringMethod hierarchical);
+        public String code() {
+            return this.code;
+        }
 
     }
 
-    IMutableClusteringOptions unlock();
+    /**
+     * The available types of clustering for the Weka clusterer
+     */
+    public enum ClusteringMethod {
+        EM("Expectation maximisation", 0),
+        HIERARCHICAL("Hierarchical", 1),
+        MANUAL("Manual", 2);
 
+        private final String name;
+        private final int    code;
+
+        ClusteringMethod(String name, int code) {
+            this.name = name;
+            this.code = code;
+        }
+
+        @Override
+		public String toString() {
+            return this.name;
+        }
+
+        public int code() {
+            return this.code;
+        }
+    }
+    
+    IClusteringOptions duplicate();
+    
     /**
      * Check if the given segment is to be included in the clustering
      * 
@@ -90,7 +122,7 @@ public interface IClusteringOptions extends Serializable {
      */
     boolean isIncludeSegment(UUID i);
 
-    boolean useSegments();
+//    boolean useSegments();
 
     /**
      * Get all the segments that are saved in this options object
@@ -112,7 +144,7 @@ public interface IClusteringOptions extends Serializable {
      * 
      * @return
      */
-    Set<PlottableStatistic> getSavedStatistics();
+//    Set<PlottableStatistic> getSavedStatistics();
 
     boolean isIncludeProfile();
 
@@ -147,5 +179,25 @@ public interface IClusteringOptions extends Serializable {
      * @return
      */
     String[] getOptions();
+    
+    void setClusterNumber(int defaultManualClusterNumber);
+
+    void setHierarchicalMethod(HierarchicalClusterMethod defaultHierarchicalMethod);
+
+    void setIterations(int defaultEmIterations);
+
+    void setUseSimilarityMatrix(boolean defaultUseSimilarityMatrix);
+
+    void setIncludeProfile(boolean defaultIncludeProfile);
+
+    void setProfileType(ProfileType defaultProfileType);
+
+    void setIncludeMesh(boolean defaultIncludeMesh);
+
+    void setIncludeStatistic(PlottableStatistic stat, boolean selected);
+
+    void setIncludeSegment(UUID id, boolean selected);
+
+    void setType(ClusteringMethod hierarchical);
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
@@ -41,11 +39,10 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEvent;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
@@ -55,6 +52,8 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Profileable;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -63,12 +62,12 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.AbstractCellEditingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * This dialog permits complete resegmentation of a cell via a coupled profile
@@ -121,6 +120,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
         taggableList.revalidate();
         taggableList.repaint();
         updateCharts(cell);
+        pack();
         setVisible(true);
     }
 
@@ -141,7 +141,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             JFreeChart outlineChart = ConsensusNucleusChartFactory.makeEmptyChart();
 
             ExportableChartPanel profile = new ExportableChartPanel(
-                    MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE));
+                    ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
             ExportableChartPanel outline = new ExportableChartPanel(outlineChart);
             outline.setFixedAspectRatio(true);
 
@@ -210,7 +210,12 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             table.setModel(createTableModel("Not set"));
             table.getColumnModel().getColumn(COLUMN_STATE).setCellRenderer(new SegmentStateRenderer());
             segCount = 0;
-            segStart = obj.getBorderIndex(Tag.REFERENCE_POINT);
+            try {
+				segStart = obj.getBorderIndex(Tag.REFERENCE_POINT);
+			} catch (UnavailableBorderTagException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
             log("Select endpoint for segment 0");
             drawCurrentSegments(obj); // clear the segment chart
             setEnabled(false);
@@ -297,26 +302,28 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
     private void resegmentationComplete() {
 
-        isRunning = false;
-        setEnabled(true);
-        table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
+    	isRunning = false;
+    	setEnabled(true);
+    	table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
 
-        Nucleus n = workingCell.getNucleus();
-        UUID id;
-        try {
-            id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            warn("Cannot get segmented profile");
-            fine("Error getting profile", e);
-            return;
-        }
+    	Nucleus n = workingCell.getNucleus();
+    	UUID id;
+    	try {
+    		id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
 
-        IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
-                n.getBorderLength(), id);
-        newSegments.add(last);
-        finer("Added " + last.toString());
 
-        log("Resegmenting complete");
+    		IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
+    				n.getBorderLength(), id);
+    		newSegments.add(last);
+    		finer("Added " + last.toString());
+
+    		log("Resegmenting complete");
+
+    	} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+    		warn("Cannot get segmented profile");
+    		fine("Error getting profile", e);
+    		return;
+    	}
     }
 
     private void moveRPComplete() {
@@ -364,7 +371,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                     .setShowPoints(false).setCellularComponent(cell.getNucleus()).build();
 
             finer("Making charts");
-            JFreeChart profileChart = new MorphologyChartFactory(profileOptions).makeIndividualNucleusProfileChart();
+            JFreeChart profileChart = new ProfileChartFactory(profileOptions).createProfileChart();
             JFreeChart outlineChart = new OutlineChartFactory(outlineOptions).makeCellOutlineChart();
             finer("Updating charts");
             panel.setObject(cell.getNucleus());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
@@ -26,6 +24,7 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -41,8 +40,8 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * This test class demostrates using the DetectionEventListener interface to
@@ -54,7 +53,7 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  */
 public class DemoProber extends SettingsDialog {
 
-    private Finder<List<ICell>> test;
+    private Finder<Collection<ICell>> test;
     JButton                     runButton;
 
     public DemoProber(File folder) {
@@ -89,7 +88,7 @@ public class DemoProber extends SettingsDialog {
         Runnable r = () -> {
             try {
                 runButton.setEnabled(false);
-                List<ICell> cells = test.find();
+                Collection<ICell> cells = test.find();
                 runButton.setEnabled(true);
             } catch (Exception e) {
                 error("Error in prober", e);

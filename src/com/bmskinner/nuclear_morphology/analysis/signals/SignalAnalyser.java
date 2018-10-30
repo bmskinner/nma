@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -41,17 +41,13 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class SignalAnalyser implements Loggable {
 
-    public SignalAnalyser() {
-    };
-
     /*
      * For each signal within the nucleus, calculate the distance to the nCoM
      * and update the signal
      */
-    public void calculateSignalDistancesFromCoM(Nucleus n) {
+    public void calculateSignalDistancesFromCoM(@NonNull Nucleus n) {
 
         for (List<INuclearSignal> signals : n.getSignalCollection().getSignals()) {
-
             if (!signals.isEmpty()) {
                 for (INuclearSignal s : signals) {
                     double distance = n.getCentreOfMass().getLengthTo(s.getCentreOfMass());
@@ -66,7 +62,7 @@ public class SignalAnalyser implements Loggable {
      * the distance from the nuclear CoM, through the signal CoM, to the nuclear
      * border
      */
-    public void calculateFractionalSignalDistancesFromCoM(Nucleus n) throws UnavailableBorderPointException {
+    public void calculateFractionalSignalDistancesFromCoM(@NonNull Nucleus n) throws UnavailableBorderPointException {
 
         ISignalCollection signalCollection = n.getSignalCollection();
         this.calculateClosestBorderToSignals(n);
@@ -106,7 +102,7 @@ public class SignalAnalyser implements Loggable {
                     IBorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
                     double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
                     double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
-                    double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
+                    double fractionalDistance = Math.min(signalCoMToNucleusCoM / nucleusCoMToBorder, 1);
                     signal.setStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
                 }
             }
@@ -117,7 +113,7 @@ public class SignalAnalyser implements Loggable {
      * Go through the signals in the nucleus, and find the point on the nuclear
      * ROI that is closest to the signal centre of mass.
      */
-    private void calculateClosestBorderToSignals(Nucleus n) throws UnavailableBorderPointException {
+    private void calculateClosestBorderToSignals(@NonNull Nucleus n) throws UnavailableBorderPointException {
         ISignalCollection signalCollection = n.getSignalCollection();
         for (List<INuclearSignal> signals : signalCollection.getSignals()) {
 
@@ -126,7 +122,7 @@ public class SignalAnalyser implements Loggable {
                 for (INuclearSignal s : signals) {
 
                     int minIndex = 0;
-                    double minDistance = n.getStatistic(PlottableStatistic.MAX_FERET, MeasurementScale.PIXELS);
+                    double minDistance = Double.MAX_VALUE;
 
                     for (int j = 0; j < n.getBorderLength(); j++) {
                         IPoint p = n.getBorderPoint(j);

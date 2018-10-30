@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BasicStroke;
@@ -63,12 +61,12 @@ import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.DraggableTreeViewer;
 import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
@@ -237,27 +235,11 @@ public class ClusterTreeDialog extends LoadingIconDialog {
             }
         }
 
-        if (isUUID) {
+        if (isUUID && id!=null)
             return Optional.of(dataset.getCollection().getCell(id));
-
-        } else {
-            
-            return dataset.getCollection().streamCells()
-                .filter(c->hasMatchingNucleusName(t.getName(), c))
-                .findFirst();
-
-
-                
-//            for (ICell c : dataset.getCollection().getCells()) {
-//
-//                if (taxonNamesMatch(t.getName(), c.getNucleus())) {
-//                    return c;
-//                }
-//            }
-        }
-
-//        return Optional.empty();
-
+		return dataset.getCollection().streamCells()
+		    .filter(c->hasMatchingNucleusName(t.getName(), c))
+		    .findFirst();
     }
     
     private boolean hasMatchingNucleusName(String name, ICell c){
@@ -418,20 +400,6 @@ public class ClusterTreeDialog extends LoadingIconDialog {
     }
 
     /**
-     * Assign colours to external nodes in the tree, based on their membership
-     * of a cluster
-     * 
-     * @param completedNuclei
-     * @param cluster
-     * @param clusterNumber
-     * @return
-     */
-//    private void setNodeColour(ICellCollection cluster, Color colour) {
-//
-//        setNodeColour(cluster, colour);
-//    }
-
-    /**
      * Check that a taxon name matches a nucleus name
      * 
      * @param name
@@ -447,39 +415,24 @@ public class ClusterTreeDialog extends LoadingIconDialog {
          */
         String nucleusName = nucleus.getSourceFile() + "-" + nucleus.getNameAndNumber();
 
-        // log(Level.FINEST, "\tTesting name: "+name);
-
-        // log(Level.FINEST, "\t\tTesting "+nucleusName);
-
         // the ideal is full file path
-        if (name.equals(nucleusName)) { // 'C:\bla\image.tiff-image.tiff-1'
+        if (name.equals(nucleusName)) // 'C:\bla\image.tiff-image.tiff-1'
             return true;
-        } else {
-            // otherwise look for the folder and name
 
-            nucleusName = nucleus.getSourceFolder().getAbsolutePath() + "-" + nucleus.getNameAndNumber();
+		nucleusName = nucleus.getSourceFolder().getAbsolutePath() + "-" + nucleus.getNameAndNumber();
 
-            if (name.equals(nucleusName)) {
-                return true;
-            } else {
-                // // Can't get just names from merge sources
-                if (dataset.hasMergeSources()) {
-                    // log(Level.FINEST, "Cannot test further in a merge
-                    // source");
-                    return false;
-                } else {
-                    // otherwise look for just the name from an old dataset
-                    nucleusName = nucleus.getNameAndNumber();
-                    // log(Level.FINEST, "\t\tTesting "+nucleusName);
-                    if (name.equals(nucleusName)) {
-                        return true;
-                    } else {
-                        // log(Level.FINEST, "Name not found");s
-                        return false;
-                    }
-                }
-            }
-        }
+		if (name.equals(nucleusName)) 
+		    return true;
+		
+		// Can't get just names from merge sources
+		if (dataset.hasMergeSources())
+		    return false;
+
+		// otherwise look for just the name from an old dataset
+		nucleusName = nucleus.getNameAndNumber();
+		if (name.equals(nucleusName))
+		    return true;
+		return false;
     }
 
     private String checkName(int offset) {

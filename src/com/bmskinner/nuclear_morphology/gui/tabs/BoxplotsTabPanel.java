@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -34,17 +34,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 
 /**
- * This class is extended for making a panel with multiple stats histograms
- * arranged vertically
- * 
+ * Base class for multiple violin plots arranged horizontally
+ *
  * @author bms41
  *
  */
@@ -52,7 +50,7 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 
     private static final String PANEL_TITLE_LBL = "Violin plots";
-    protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>(8);
+    protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
 
     protected JPanel mainPanel;   // hold the charts
     protected JPanel headerPanel; // hold buttons
@@ -61,8 +59,8 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 
     protected String component;
 
-    public BoxplotsTabPanel(String component) {
-        super(PANEL_TITLE_LBL);
+    public BoxplotsTabPanel(@NonNull InputSupplier context, String component) {
+        super(context, PANEL_TITLE_LBL);
         this.component = component;
         this.setLayout(new BorderLayout());
 
@@ -76,6 +74,11 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 
             // add the scroll pane to the tab
             scrollPane = new JScrollPane(mainPanel);
+            
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            Dimension preferredFloatingDimension = new Dimension( (int) (screenSize.getWidth()*0.25), (int) (screenSize.getHeight()*0.25) );
+            scrollPane.setPreferredSize(preferredFloatingDimension);
+            
             this.add(scrollPane, BorderLayout.CENTER);
 
             this.setEnabled(false);

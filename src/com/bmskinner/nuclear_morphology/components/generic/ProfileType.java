@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,10 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.io.IOException;
-import java.util.HashMap;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 
 /**
@@ -35,7 +31,7 @@ public enum ProfileType {
     DIAMETER("Diameter profile", "Distance across CoM", StatisticDimension.LENGTH), 
     RADIUS("Radius profile", "Distance from CoM", StatisticDimension.LENGTH),
     ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", StatisticDimension.DIMENSIONLESS),
-    ZAHN_ROSKIE("Zahn-Roskies legacy profile", "Angle delta", StatisticDimension.DIMENSIONLESS); // type, only kept for 1.13.5 compat. 
+    ZAHN_ROSKIE("Zahn-Roskies legacy profile", "Angle delta", StatisticDimension.DIMENSIONLESS); // typo, only kept for 1.13.5 compat. 
 
     private String             name;
     private String             label;
@@ -44,12 +40,9 @@ public enum ProfileType {
     /**
      * Constructor
      * 
-     * @param name
-     *            the name of the profile for display
-     * @param label
-     *            the label to use on chart axes with this profile
-     * @param dimension
-     *            the statistical dimension the profile covers
+     * @param name the name of the profile for display
+     * @param label the label to use on chart axes with this profile
+     * @param dimension the statistical dimension the profile covers
      */
     ProfileType(String name, String label, StatisticDimension dimension) {
         this.name = name;
@@ -57,7 +50,8 @@ public enum ProfileType {
         this.dimension = dimension;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return this.name;
     }
 
@@ -94,7 +88,7 @@ public enum ProfileType {
      * @return
      */
     public static ProfileType[] displayValues() {
-        ProfileType[] array = { ANGLE, DIAMETER, RADIUS, ZAHN_ROSKIES };
+        ProfileType[] array = { ANGLE, DIAMETER, RADIUS };
         return array;
     }
 }

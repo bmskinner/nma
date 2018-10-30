@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
-
-import ij.gui.Roi;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,13 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
-import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -56,6 +53,8 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
+import ij.gui.Roi;
+
 /**
  * The standard round nucleus, implementing {@link Nucleus}. All non-round
  * nuclei extend this.
@@ -64,19 +63,38 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
  * @since 1.13.3
  *
  */
-public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus {
+public class DefaultNucleus extends SegmentedCellularComponent implements Nucleus {
 
     private static final long serialVersionUID = 1L;
 
-    protected int nucleusNumber; // the number of the nucleus in the current
-                                 // image
+    /** The number of the nucleus in its image, for display */
+    protected int nucleusNumber;
 
+    /** FISH signals in the nucleus */
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
-    protected transient Nucleus verticalNucleus = null; // cache the vertically
-                                                        // rotated nucleus
+    /** cache the vertically rotated nucleus */
+    protected transient Nucleus verticalNucleus = null;
 
     protected transient boolean canReverse = true;
+    
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image. It sets the immutable original centre of
+     * mass, and the mutable current centre of mass. It also assigns a random ID
+     * to the component.
+     * 
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
+     * @param id the id of the component. Only use when deserialising!
+     */
+    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, int number, @NonNull UUID id) {
+        super(roi, centreOfMass, source, channel, position, id);
+        this.nucleusNumber = number;
+    }
 
     /**
      * Construct with an ROI, a source image and channel, and the original
@@ -88,7 +106,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * @param position
      * @param centreOfMass
      */
-    public DefaultNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number) {
+    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position, int number) {
         super(roi, centreOfMass, f, channel, position);
         this.nucleusNumber = number;
     }
@@ -96,15 +114,13 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     /**
      * Construct from a template Nucleus
      * 
-     * @param n
-     *            the template
+     * @param n the template
      * @throws UnprofilableObjectException
      */
     protected DefaultNucleus(Nucleus n) throws UnprofilableObjectException {
         super(n);
         nucleusNumber = n.getNucleusNumber();
         signalCollection = new DefaultSignalCollection(n.getSignalCollection());
-        finest("Created new nucleus");
     }
 
     @Override
@@ -129,6 +145,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
         try {
 
+        	// estimate the RP using the round rules
             RuleSet rpSet = RuleSet.roundRPRuleSet();
             IProfile p = this.getProfile(rpSet.getType());
             ProfileIndexFinder f = new ProfileIndexFinder();
@@ -136,14 +153,18 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
             setBorderTag(Tag.REFERENCE_POINT, rpIndex);
             setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
+            
+//            int prevBorderLength = getBorderLength();
 
             if (!this.isProfileOrientationOK() && canReverse) {
                 reverse();
-
+//                if(getBorderLength()!=prevBorderLength)
+//                	System.out.println(String.format("Border length changed from %s to %s", prevBorderLength, getBorderLength()));
                 // the number of border points can change when reversing
                 // due to float interpolation from different starting positions
-                // so do the whole thing again
-                initialise(this.getWindowProportion(ProfileType.ANGLE));
+                // so initialise from scratch
+                profileMap.clear();
+                initialise(angleWindowProportion);
                 canReverse = false;
                 findPointsAroundBorder();
             }
@@ -203,7 +224,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
         // Note - variability will remain zero here
         // These stats are specific to nuclei
-        
+                
         if (PlottableStatistic.ASPECT.equals(stat))
             return getAspectRatio();
 
@@ -215,11 +236,11 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
         if (PlottableStatistic.OP_RP_ANGLE.equals(stat)) {
             try {
-                result = getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT),
-                        this.getBorderTag(Tag.ORIENTATION_POINT));
+                result = getCentreOfMass().findSmallestAngle(this.getBorderPoint(Tag.REFERENCE_POINT),
+                        this.getBorderPoint(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
                 stack("Cannot get border tag", e);
-                result = 0;
+                result = ERROR_CALCULATING_STAT;
             }
         }
 
@@ -242,7 +263,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         return false;
     }
 
-    public ISignalCollection getSignalCollection() {
+    @Override
+	public ISignalCollection getSignalCollection() {
         return signalCollection;
     }
 
@@ -252,8 +274,11 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
     // do not move this into SignalCollection - it is overridden in
     // RodentSpermNucleus
-    public void calculateSignalAnglesFromPoint(IBorderPoint p) {
+    @Override
+	public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
 
+    	//TODO - there is an issue with pigs. The smallest angle wrt the OP is not the correct angle to choose
+    	
         for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
             if (signalCollection.hasSignal(signalGroup)) {
@@ -262,7 +287,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
                 for (INuclearSignal s : signals) {
 
-                    double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
+                    double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
                     s.setStatistic(PlottableStatistic.ANGLE, angle);
 
                 }
@@ -273,7 +298,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     /*
      * Get a readout of the state of the nucleus Used only for debugging
      */
-    public String dumpInfo(int type) {
+    @Override
+	public String dumpInfo(int type) {
         String result = "";
         result += "Dumping nucleus info: " + this.getNameAndNumber() + "\n";
         result += "    Border length: " + this.getBorderLength() + "\n";
@@ -342,6 +368,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
             return verticalNucleus;
 
         // Make an exact copy of the nucleus
+        finer("Creating vertical nucleus");
         verticalNucleus = this.duplicate();
 
         // At this point the new nucleus was created at the original image
@@ -396,38 +423,37 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     @Override
     public void alignVertically() {
 
-        boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
-        int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
-        int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
+    	boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
 
-        // check if the point was set but not found
-        useTVandBV &= topPoint!=BORDER_INDEX_NOT_FOUND;
-        useTVandBV &= bottomPoint!=BORDER_INDEX_NOT_FOUND;
-        useTVandBV &= topPoint != bottomPoint; // Situation when something went very wrong
-        
-        if (useTVandBV) {
+    	if (useTVandBV) {
+    		try {
+    			int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
+    			int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
+    			if(topPoint == bottomPoint) {
+    				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    				return;
+    			}
 
-            try {
-            	IBorderPoint[] points = getBorderPointsForVerticalAlignment();
-                alignPointsOnVertical(points[0], points[1]);
+    			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
+    			alignPointsOnVertical(points[0], points[1]);
 
-            } catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
-                stack("Cannot get border tag or profile", e);
-                try {
-                    rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
-                } catch (UnavailableBorderTagException e1) {
-                    stack("Cannot get border tag", e1);
-                }
-            }
-        } else {
+    		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
+    			stack("Cannot get border tag or profile", e);
+    			try {
+    				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    			} catch (UnavailableBorderTagException e1) {
+    				stack("Cannot get border tag", e1);
+    			}
+    		}
+    	} else {
 
-            // Default if top and bottom vertical points have not been specified
-            try {
-                rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
-            } catch (UnavailableBorderTagException e) {
-                stack("Cannot get border tag", e);
-            }
-        }
+    		// Default if top and bottom vertical points have not been specified
+    		try {
+    			rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    		} catch (UnavailableBorderTagException e) {
+    			stack("Cannot get border tag", e);
+    		}
+    	}
 
     }
 
@@ -449,8 +475,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         IBorderPoint topPoint;
         IBorderPoint bottomPoint;
 
-        topPoint = this.getBorderTag(Tag.TOP_VERTICAL);
-        bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
+        topPoint = this.getBorderPoint(Tag.TOP_VERTICAL);
+        bottomPoint = this.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
         // Find the border points between the top and bottom verticals
         List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();
@@ -539,9 +565,10 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * 
      * @return
      */
-    public String toString() {
+    @Override
+	public String toString() {
         String newLine = System.getProperty("line.separator");
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new StringBuilder(super.toString()+newLine);
 
         b.append(this.getNameAndNumber());
         b.append(newLine);
@@ -571,12 +598,11 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
                 return 0;
             }
 
-        } else {
-            return byName;
         }
+		return byName;
 
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;

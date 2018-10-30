@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
@@ -24,7 +22,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -35,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
@@ -44,10 +42,11 @@ import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.Tab
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.AnalysisTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 /**
  * This panel shows any merge sources for a merged dataset, and the analysis
@@ -71,8 +70,8 @@ public class MergesDetailPanel extends DetailPanel {
 
     private JPanel mainPanel;
 
-    public MergesDetailPanel() {
-        super();
+    public MergesDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         try {
             createUI();
@@ -174,7 +173,7 @@ public class MergesDetailPanel extends DetailPanel {
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         sourceParametersTable.setModel(AbstractTableCreator.createLoadingTable());
     }
@@ -212,7 +211,7 @@ public class MergesDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
 
         headerLabel.setText(
                 Labels.SINGLE_DATASET + " with " + activeDataset().getAllMergeSources().size() + " merge sources");
@@ -221,41 +220,43 @@ public class MergesDetailPanel extends DetailPanel {
         List<IAnalysisDataset> mergeSources = new ArrayList<IAnalysisDataset>(activeDataset().getAllMergeSources());
 
         TableOptions options = new TableOptionsBuilder().setDatasets(mergeSources)
-                .setType(TableType.ANALYSIS_PARAMETERS).setTarget(sourceParametersTable)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer()).build();
+                .setType(TableType.ANALYSIS_PARAMETERS)
+                .setTarget(sourceParametersTable)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
+                .build();
 
         setTable(options);
 
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         updateNull();
         headerLabel.setText(Labels.MULTIPLE_DATASETS);
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         headerLabel.setText(Labels.NULL_DATASETS);
         sourceButtonPanel.setVisible(false);
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(null).setType(TableType.ANALYSIS_PARAMETERS)
+        TableOptions options = new TableOptionsBuilder()
+        		.setDatasets(null)
+        		.setType(TableType.ANALYSIS_PARAMETERS)
                 .setTarget(sourceParametersTable).build();
 
         setTable(options);
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return null;
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        if (options.getType().equals(TableType.MERGE_SOURCES)) {
+    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
+        if (options.getType().equals(TableType.MERGE_SOURCES))
             return new AnalysisDatasetTableCreator(options).createMergeSourcesTable();
-        } else {
-            return new AnalysisDatasetTableCreator(options).createAnalysisTable();
-        }
+		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
     }
 }

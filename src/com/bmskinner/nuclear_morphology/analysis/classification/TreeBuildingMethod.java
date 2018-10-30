@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,32 +12,26 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -46,8 +40,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 import weka.clusterers.HierarchicalClusterer;
@@ -58,14 +52,9 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 
-public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
-
-    protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
+public class TreeBuildingMethod extends CellClusteringMethod {
 
     protected String newickTree = null;
-
-    protected ICellCollection    collection;
-    protected IClusteringOptions options;
 
     /**
      * Construct from a dataset with a set of clustering options
@@ -74,27 +63,19 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
      * @param options
      */
     public TreeBuildingMethod(@NonNull IAnalysisDataset dataset, @NonNull IClusteringOptions options) {
-        super(dataset);
-        this.options = options;
-        this.collection = dataset.getCollection();
-
+        super(dataset, options);
     }
 
     @Override
     public IAnalysisResult call() throws Exception {
 
-        run();
+    	makeTree();
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
                 newickTree);
         IAnalysisResult r = new ClusterAnalysisResult(dataset, group);
         return r;
     }
-
-    private void run() {
-        boolean ok = makeTree(collection);
-    }
-
 
     /**
      * If a tree is present (i.e clustering was hierarchical), return the string
@@ -106,9 +87,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
         return newickTree;
     }
 
-    protected Instances makeInstances() throws Exception {
-        return makeProfileInstances(collection);
-    }
+
 
     /**
      * Run the clustering on a collection
@@ -116,7 +95,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
      * @param collection
      * @return success or fail
      */
-    protected boolean makeTree(ICellCollection collection) {
+    protected boolean makeTree() {
 
         try {
 
@@ -161,10 +140,10 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
         return true;
     }
 
-    private FastVector makeAttributes(@NonNull ICellCollection collection, int windowSize) throws Exception {
+    @Override
+	protected FastVector makeAttributes() throws ClusteringMethodException{
 
         // Determine the number of attributes required
-
         int attributeCount = 0;
         int profileAttributeCount = 0;
 
@@ -172,31 +151,30 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
 
         if (options.isIncludeProfile()) { // An attribute for each angle in the
                                           // median profile, spaced <windowSize>
-                                          // apart
-            finest("Including profile");
-            
-            
-
-            if (dataset.hasAnalysisOptions()) {
+                                          // apart          
+            if (dataset.hasAnalysisOptions()) 
                 profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
-            }
 
             profileAttributeCount = (int) Math.floor(1d / profileWindow);
             attributeCount += profileAttributeCount;
         }
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
-            if (options.isIncludeStatistic(stat)) {
-                finest("Including " + stat.toString());
+            if (options.isIncludeStatistic(stat))
                 attributeCount++;
-            }
         }
 
         Mesh<Nucleus> mesh = null;
 
         if(options.isIncludeMesh() && collection.hasConsensus()){
-            mesh = new NucleusMesh(collection.getConsensus());
-            attributeCount += mesh.getFaces().size();
+            try {
+				mesh = new DefaultMesh(collection.getConsensus());
+				attributeCount += mesh.getFaces().size();
+			} catch (MeshCreationException e) {
+				e.printStackTrace();
+				throw new ClusteringMethodException(e);
+			}
+            
         }
 
         if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
@@ -250,38 +228,30 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
 
     /**
      * Create Instances using the interpolated profiles of nuclei
-     * 
-     * @param collection
      * @return
+     * @throws ClusteringMethodException 
      */
-    private Instances makeProfileInstances(ICellCollection collection) throws Exception {
+    @Override
+	protected Instances makeInstances() throws ClusteringMethodException {
 
         double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
-        if (dataset.hasAnalysisOptions()) { // Merged datasets may not have
-                                            // options of their own
+        if (dataset.hasAnalysisOptions())// Merged datasets may not have options
             windowProportion = dataset.getAnalysisOptions().get().getProfileWindowProportion();
-        }
 
-        // // Get the size of the median profile. All profiles will be
-        // interpolated to this length
-        // int profileSize = collection.getProfileCollection()
-        // .getProfile(options.getProfileType(), Tag.REFERENCE_POINT,
-        // Quartile.MEDIAN).size();
-
-        int windowSize = collection.getProfileManager().getProfileWindowSize(ProfileType.ANGLE);
-
-        // Weka clustering uses a table in which columns are attributes and rows
-        // are instances
-
-        FastVector attributes = makeAttributes(collection, windowSize);
+        // Weka clustering uses a table in which columns are attributes and rows are instances
+        FastVector attributes = makeAttributes();
 
         Instances instances = new Instances(collection.getName(), attributes, collection.size());
 
-        // int profilePointsToCount = profileSize/windowSize;
-
         Mesh<Nucleus> template = null;
         if (options.isIncludeMesh() && collection.hasConsensus()) {
-            template = new NucleusMesh(collection.getConsensus());
+            try {
+				template = new DefaultMesh(collection.getConsensus());
+			} catch (MeshCreationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ClusteringMethodException(e);
+			}
         }
 
         final Mesh<Nucleus> t = template;
@@ -299,18 +269,6 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
                             e.printStackTrace();
                         }
                 }));
-
-
-//            for (ICell c : collection.getCells()) {
-//
-//                for (Nucleus n : c.getNuclei()) {
-//                    addNucleus(c, n, attributes, instances, template, windowProportion);
-//                }
-//            }
-
-//        } catch (Exception e) {
-//            error("Error making instances", e);
-//        }
         return instances;
 
     }
@@ -361,7 +319,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
 
         if (options.isIncludeMesh() && collection.hasConsensus()) {
 
-            Mesh<Nucleus> mesh = new NucleusMesh(n, template);
+            Mesh<Nucleus> mesh = new DefaultMesh(n, template);
             for (MeshFace face : mesh.getFaces()) {
                 Attribute att = (Attribute) attributes.elementAt(attNumber++);
                 inst.setValue(att, face.getArea());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.plugin.RoiScaler;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
@@ -27,16 +26,20 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
 import java.text.DecimalFormat;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
@@ -60,9 +63,37 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  *
  */
 public class ImageAnnotator extends AbstractImageFilterer {
+    
+    protected double scale = 1;
 
     public ImageAnnotator(ImageProcessor ip) {
         super(ip);
+    }
+    
+    /**
+     * Create using the given image, and rescale all annotations
+     * such that the image fits the given dimensions preserving
+     * aspect ratio
+     * @param ip
+     * @param maxWidth
+     * @param maxHeight
+     */
+    public ImageAnnotator(ImageProcessor ip, int maxWidth, int maxHeight) {
+        super(ip);
+        int originalWidth = ip.getWidth();
+        int originalHeight = ip.getHeight();
+
+        // keep the image aspect ratio
+        double ratio = (double) originalWidth / (double) originalHeight;
+
+        double finalWidth = maxHeight * ratio; // fix height
+        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
+                                                                    // constrain
+                                                                    // width too
+        
+        scale = finalWidth / originalWidth;
+        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+        this.ip = result;
     }
 
     /**
@@ -88,6 +119,92 @@ public class ImageAnnotator extends AbstractImageFilterer {
             }
         }
 
+        return this;
+    }
+    
+    /**
+     * Draw the outline of the given nucleus and any signals marked.
+     * The image is assumed to be cropped to the nuclear border.
+     * 
+     * @param n the nucleus to draw
+     * @return this annotator
+     */
+    public ImageAnnotator annotateTagsOnCroppedNucleus(Nucleus n) {
+        
+        try {
+            for(IBorderPoint p : n.getBorderList()) {
+            	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
+            }
+            
+            annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), Color.ORANGE, 9);
+            annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER), Color.BLUE, 7);
+            
+            
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
+                    n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), 
+                    Color.ORANGE, 3);
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                    , n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER)
+                    , Color.BLUE, 3);
+            
+            if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
+                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                        , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                        , Color.GREEN, 3);
+                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                        , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                        , Color.GREEN, 3);
+                
+                annotatePoint(n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, 7);
+                annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, 7);
+            }
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);
+            annotateSignals(n);
+
+        } catch (Exception e) {
+            error("Error annotating nucleus", e);
+        }
+        return this;
+    }
+    
+    /**
+     * Draw the outline of the given nucleus and any signals marked.
+     * The image is assumed to be cropped to the nuclear border.
+     * 
+     * @param n the nucleus to draw
+     * @return this annotator
+     */
+    public ImageAnnotator annotateSegmentsOnCroppedNucleus(@NonNull Nucleus n) {
+        
+        try {
+            for(IBorderPoint p : n.getBorderList()) {
+            	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
+            }
+            
+            // Colour the border points for segments    
+            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            if (profile.hasSegments()) { 
+
+            	for(IBorderSegment seg : profile.getOrderedSegments()) {
+            		Paint color = ColourSelecter.getColor(seg.getPosition());
+            		Iterator<Integer> it = seg.iterator();
+            		int lastIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getEndIndex());
+            		while(it.hasNext()) {
+            			int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, it.next());
+            			IPoint p = n.getBorderPoint(index).plus(Imageable.COMPONENT_BUFFER);
+            			// since segments overlap, draw the last index larger so the next segment can overlay
+            			annotatePoint(p, (Color) color, lastIndex==index ? 5 : 3);
+            		}
+            	}
+            	
+            	// Draw the RP again because it will be drawn over by the final segment
+            	IPoint rp = n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER);
+            	annotatePoint(rp, ColourSelecter.getColor(0), 3);
+            }
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);
+        } catch (Exception e) {
+            error("Error annotating nucleus", e);
+        }
         return this;
     }
 
@@ -142,40 +259,47 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
 
     /**
-     * Draw a point on the image processor
+     * Draw a point on the image processor with the default size
      * 
-     * @param p
-     *            the point to draw
-     * @param c
-     *            the colour to draw
+     * @param p the point to draw
+     * @param c the colour to draw
      * @return the annotator
      */
     public ImageAnnotator annotatePoint(IPoint p, Color c) {
+    	return annotatePoint(p, c, 3);
+    }
+    
+    /**
+     * Draw a point on the image processor
+     * 
+     * @param p the point to draw
+     * @param c the colour to draw
+     * @param size the point size
+     * @return the annotator
+     */
+    public ImageAnnotator annotatePoint(IPoint p, Color c, int size) {
 
-        if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth()) {
-            throw new IllegalArgumentException("Point x is out of image bounds");
-        }
+        if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth())
+            throw new IllegalArgumentException("Point x "+p.getXAsInt()+" is out of image bounds "+ip.getWidth());
 
-        if (p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight()) {
-            throw new IllegalArgumentException("Point y is out of image bounds");
-        }
+        if (p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight())
+            throw new IllegalArgumentException("Point y "+p.getYAsInt()+" is out of image bounds"+ip.getHeight());
 
         ip.setColor(c);
-        ip.setLineWidth(3);
-        ip.drawDot(p.getXAsInt(), p.getYAsInt());
+        ip.setLineWidth(size);
+        ip.drawDot( (int) (p.getX()*scale), (int) (p.getY()*scale));
         return this;
     }
+    
+    
 
     /**
      * Draw the border of the given component on the component image of the
      * template. These can be the same object.
      * 
-     * @param p
-     *            the points to draw
-     * @param template
-     *            the component to get the component image from
-     * @param c
-     *            the colour to draw the border
+     * @param p the points to draw
+     * @param template the component to get the component image from
+     * @param c the colour to draw the border
      * @return this annotator
      */
     public ImageAnnotator annotatePoint(IPoint p, Imageable template, Color c) {
@@ -184,20 +308,33 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
 
     /**
-     * Draw a line on the image processor
+     * Draw a line on the image processor with the default width
      * 
-     * @param p1
-     *            the first endpoint
-     * @param p1
-     *            the second endpoint
-     * @param c
-     *            the colour to draw
+     * @param p1 the first endpoint
+     * @param p1 the second endpoint
+     * @param c the colour to draw
      * @return the annotator
      */
     private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c) {
+        return annotateLine(p1, p2, c, 1);
+    }
+    
+    /**
+     * Draw a line on the image processor
+     * 
+     * @param p1 the first endpoint
+     * @param p1 the second endpoint
+     * @param c the colour to draw
+     * @param width the line width
+     * @return the annotator
+     */
+    private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c, int width) {
         ip.setColor(c);
-        ip.setLineWidth(1);
-        ip.drawLine(p1.getXAsInt(), p1.getYAsInt(), p2.getXAsInt(), p2.getYAsInt());
+        ip.setLineWidth(width);
+        ip.drawLine( (int) (p1.getXAsInt()*scale), 
+                (int) (p1.getYAsInt()*scale), 
+                (int) (p2.getXAsInt()*scale), 
+                (int) (p2.getYAsInt()*scale));
         return this;
     }
 
@@ -406,10 +543,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
     /**
      * Draw the size and shape values over the CoM of the component
      * 
-     * @param n
-     *            the component to draw
-     * @param c
-     *            the color of the text
+     * @param n the component to draw
+     * @param c the color of the text
      * @return
      */
     public ImageAnnotator annotateSignalStats(CellularComponent parent, CellularComponent signal, Color text,
@@ -478,13 +613,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotateSegments(Profileable n) {
 
         try {
-
-            if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { // only
-                                                                            // draw
-                                                                            // if
-                                                                            // there
-                                                                            // are
-                                                                            // segments
+        	// only draw if there are segments
+            if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { 
                 for (int i = 0; i < n.getProfile(ProfileType.ANGLE).getSegments().size(); i++) {
 
                     IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
@@ -493,17 +623,12 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     float[] ypoints = new float[seg.length() + 1];
                     for (int j = 0; j <= seg.length(); j++) {
                         int k = n.wrapIndex(seg.getStartIndex() + j);
-                        IBorderPoint p = n.getOriginalBorderPoint(k); // get the
-                                                                      // border
-                                                                      // points
-                                                                      // in the
-                                                                      // segment
-                        xpoints[j] = (float) p.getX();
-                        ypoints[j] = (float) p.getY();
+                        IPoint p = n.getBorderPoint(k).plus(Imageable.COMPONENT_BUFFER);
+                        xpoints[j] = (float) (p.getX()*scale);
+                        ypoints[j] = (float) (p.getY()*scale);
                     }
 
                     PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-
                     Paint color = ColourSelecter.getColor(i);
 
                     annotatePolygon(segRoi, color);
@@ -547,8 +672,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
                                                                       // points
                                                                       // in the
                                                                       // segment
-                        xpoints[j] = (float) p.getX();
-                        ypoints[j] = (float) p.getY();
+                        xpoints[j] = (float) (p.getX()*scale);
+                        ypoints[j] = (float) (p.getY()*scale);
                     }
 
                     PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
@@ -561,7 +686,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     segRoi.setLocation(offset.getX(), offset.getY());
 
                     Paint color = ColourSelecter.getColor(i);
-
                     annotatePolygon(segRoi, color);
                 }
             }
@@ -575,20 +699,18 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * Draw the signals within a nucleus on the current image. This assumes that the current image
      * is a nucleus component image.
      * 
-     * @param n
-     *            the nucleus
+     * @param n the nucleus
      * @return the annotator
      */
-    public ImageAnnotator annotateSignals(Nucleus n) {
+    public ImageAnnotator annotateSignals(@NonNull Nucleus n) {
 
         ISignalCollection signalCollection = n.getSignalCollection();
-        int i = 0;
+ 
         for (UUID id : signalCollection.getSignalGroupIds()) {
         	        	            
             if(signalCollection.hasSignal(id)){
-            	
-            	Color colour = i == ImageImporter.FIRST_SIGNAL_CHANNEL ? Color.RED
-            			: i == ImageImporter.FIRST_SIGNAL_CHANNEL + 1 ? Color.GREEN : Color.WHITE;
+
+            	Color colour = ColourSelecter.getSignalColour(signalCollection.getSourceChannel(id));
 
             	List<INuclearSignal> signals = signalCollection.getSignals(id);
 
@@ -599,13 +721,22 @@ public class ImageAnnotator extends AbstractImageFilterer {
                 	IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
 
                     FloatPolygon p = s.toPolygon();
-                    PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
-
-                    roi.setLocation(base.getX(), base.getY());
+                    
+                    float[] x = p.xpoints;
+                    float[] y = p.ypoints;
+                    
+                    if(scale!=1d){
+                        for(int j=0; j<p.npoints; j++){
+                            x[j]*=scale;
+                            y[j]*=scale;
+                        }
+                    }
+                    
+                    PolygonRoi roi = new PolygonRoi(x, y, PolygonRoi.POLYGON);
+                    roi.setLocation(base.getX()*scale, base.getY()*scale);
                     annotatePolygon(roi, colour);
                 }
             }
-            i++;
         }
         return this;
     }

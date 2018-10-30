@@ -1,32 +1,25 @@
 /*******************************************************************************
- *      Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.util.Map;
 
 import ij.IJ;
 
@@ -41,13 +34,16 @@ public interface Io {
     
     static final String TAB_FILE_EXTENSION = ".txt";
     static final String SVG_FILE_EXTENSION = ".svg";
+    static final String PNG_FILE_EXTENSION = ".png";
 
     static final String NEWLINE = System.getProperty("line.separator");
     
     static final String TAB = "\t";
     
     static final String SAVE_FILE_EXTENSION_NODOT = "nmd";
+    static final String BACKUP_FILE_EXTENSION_NODOT = "bak";
     static final String SAVE_FILE_EXTENSION       = "." + SAVE_FILE_EXTENSION_NODOT;
+    static final String BACKUP_FILE_EXTENSION = "." + BACKUP_FILE_EXTENSION_NODOT;
     static final String LOG_FILE_EXTENSION        = ".log";
     
     
@@ -64,7 +60,11 @@ public interface Io {
     /**
      * Workspace file extension
      */
-    static final String WRK_FILE_EXTENSION        = ".wrk";
+    static final String WRK_FILE_EXTENSION_NODOT  = "wrk";
+    static final String WRK_FILE_EXTENSION        = "."+WRK_FILE_EXTENSION_NODOT;
+    
+    static final String XML_FILE_EXTENSION_NODOT  = "xml";
+    static final String XML_FILE_EXTENSION        = "."+XML_FILE_EXTENSION_NODOT;
 
     static final String INVALID_FILE_ERROR       = "File is not valid for importing";
     static final String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
@@ -95,7 +95,7 @@ public interface Io {
     }
     
     public interface Importer extends Io {
-
+        
         /**
          * Replace the old file extension in the given file and return a new file
          * 

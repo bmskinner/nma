@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.Component;
@@ -36,9 +34,9 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -48,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public abstract class SettingsDialog extends JDialog implements Loggable {
 
     protected boolean          readyToRun         = false;
-    private final List<Object> interfaceListeners = new ArrayList<Object>();
+    private final List<EventListener> interfaceListeners = new ArrayList<>();
 
     protected static final String EMPTY_STRING = "";
     protected static final String OK_LBL       = "OK";
@@ -64,16 +62,21 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
     public SettingsDialog() {
         this.setLocationRelativeTo(null);
     }
+    
+    /**
+     * Create a modal dialog with no parent frame
+     * @param modal
+     */
+    public SettingsDialog(boolean modal) {
+    	this();
+    	this.setModal(modal);
+    }
 
     /**
      * Constructor for dialogs attached to a frame
      * 
-     * @param programLogger
-     *            the logger
-     * @param owner
-     *            the frame (will be a MainWindow)
-     * @param modal
-     *            is the dialog modal
+     * @param owner the frame
+     * @param modal is the dialog modal
      */
     public SettingsDialog(Frame owner, boolean modal) {
         super(owner, modal);
@@ -183,20 +186,20 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
         return this.readyToRun;
     }
 
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
+    public synchronized void addInterfaceEventListener(EventListener l) {
         interfaceListeners.add(l);
     }
 
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
+    public synchronized void removeInterfaceEventListener(EventListener l) {
         interfaceListeners.remove(l);
     }
 
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
 
         InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
+        Iterator<EventListener> iterator = interfaceListeners.iterator();
         while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
+            iterator.next().eventReceived(event);
         }
     }
 }

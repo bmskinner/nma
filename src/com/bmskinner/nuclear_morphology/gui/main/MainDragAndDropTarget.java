@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.datatransfer.DataFlavor;
@@ -29,23 +27,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
-    private MainWindow mw;
+	SignalChangeEventHandler sh = new SignalChangeEventHandler(this);
 
-    public MainDragAndDropTarget(MainWindow target) {
+    public MainDragAndDropTarget(EventHandler eh) {
         super();
-        mw = target;
+        sh.addListener(eh);
     }
 
     @Override
@@ -63,29 +63,26 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
                 // Check that what is in the list is files
                 List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
                 for (Object o : tempList) {
-
-                    if (o instanceof File) {
+                    if (o instanceof File)
                         fileList.add((File) o);
-                    }
                 }
 
-                // Open the files - we process only *.nmd and *.wrk files
-
+                // Open the files - we process *.nmd, *.bak,  *.wrk,and *.xml files
+                
                 for (File f : fileList) {
-                    if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)) {
-                        fine("File is nmd");
-                        receiveDatasetFile(f);
-                    }
+                    fine("Checking dropped file");
+                    if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
+                            || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
+                        sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
+                    
+                    if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION))
+                    	sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX+f.getAbsolutePath());
+                    
+                    if (f.getName().endsWith(Importer.XML_FILE_EXTENSION))
+                    	sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX+f.getAbsolutePath());
 
-                    if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
-                        fine("File is wrk");
-                        receiveWorkspaceFile(f);
-                    }
-
-                    if (f.isDirectory()) {
-                        receiveFolder(f);
-                    }
-
+                    if (f.isDirectory())
+                    	sh.fireSignalChangeEvent(SignalChangeEvent.NEW_ANALYSIS_PREFIX+f.getAbsolutePath());
                 }
             }
 
@@ -94,31 +91,5 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
         } catch (IOException e) {
             error("IO error in DnD", e);
         }
-
-    }
-
-    private void receiveFolder(final File f) {
-        // Pass to new analysis
-        Runnable task = new NewAnalysisAction(mw, f);
-        task.run();
-    }
-
-    private void receiveWorkspaceFile(final File f) {
-        finer("Opening workgroup file " + f.getAbsolutePath());
-
-        IWorkspace w = new WorkspaceImporter(f).importWorkspace();
-        DatasetListManager.getInstance().addWorkspace(w);
-
-        for (File dataFile : w.getFiles()) {
-            receiveDatasetFile(dataFile);
-        }
-
-    }
-
-    private void receiveDatasetFile(final File f) {
-        fine("Opening file " + f.getAbsolutePath());
-
-        Runnable task = new PopulationImportAction(mw, f);
-        task.run();
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,11 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -45,62 +45,49 @@ public abstract class AbstractProfile implements IProfile {
         BooleanProfile b = new BooleanProfile(this, true);
         return getIndexOfMin(b);
     }
-
-    /*
-     * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return this
-     * offset. Returns the positive offset to this profile
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfile#getSlidingWindowOffset(components.generic.
-     * IProfile)
-     */
+    
     @Override
-    public int getSlidingWindowOffset(IProfile testProfile) throws ProfileException {
+	public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
+		return findBestFitOffset(testProfile, 0, size());
+	}
+	
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
+		double lowestScore = Double.MAX_VALUE;
+      int index = 0;
+      for (int i=minOffset; i <maxOffset; i++) {
 
-        double lowestScore = this.absoluteSquareDifference(testProfile);
-        int index = 0;
-        for (int i = 0; i < this.size(); i++) {
+          IProfile offsetProfile = this.offset(i);
 
-            IProfile offsetProfile = this.offset(i);
+          double score = offsetProfile.absoluteSquareDifference(testProfile);
+          if (score < lowestScore) {
+              lowestScore = score;
+              index = i;
+          }
 
-            double score = offsetProfile.absoluteSquareDifference(testProfile);
-            if (score < lowestScore) {
-                lowestScore = score;
-                index = i;
-            }
-
-        }
-        return index;
-    }
+      }
+      return index;
+	}
 
     /**
      * Check the lengths of the two profiles. Return the first profile
      * interpolated to the length of the longer.
      * 
-     * @param profile1
-     *            the profile to return interpolated
-     * @param profile2
-     *            the profile to compare
+     * @param profile1 the profile to be interpolated
+     * @param profile2 the second profile
      * @return a new profile with the length of the longest input profile
      * @throws ProfileException
      *             if the interpolation fails
      */
     protected IProfile equaliseLengths(IProfile profile1, IProfile profile2) throws ProfileException {
-        if (profile1 == null || profile2 == null) {
+        if (profile1 == null || profile2 == null)
             throw new IllegalArgumentException("Input profile is null when equilising lengths");
-        }
-        // profile 2 is smaller
-        // return profile 1 unchanged
-        if (profile2.size() < profile1.size()) {
+
+        if (profile2.size() < profile1.size())
             return profile1;
-        } else {
-            // profile 1 is smaller; interpolate to profile 2 length
-            profile1 = profile1.interpolate(profile2.size());
-        }
+        
+		// profile 1 is smaller; interpolate to profile 2 length
+		profile1 = profile1.interpolate(profile2.size());
 
         return profile1;
     }
@@ -112,8 +99,8 @@ public abstract class AbstractProfile implements IProfile {
             throw new IllegalArgumentException("Segment is null");
         }
 
-        if (segment.getTotalLength() != this.size()) {
-            throw new ProfileException("Segment comes from a different length profile");
+        if (segment.getProfileLength() != this.size()) {
+            throw new IllegalArgumentException("Segment comes from a different length profile");
         }
         return getSubregion(segment.getStartIndex(), segment.getEndIndex());
     }

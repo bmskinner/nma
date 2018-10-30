@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,19 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * An action class that allows multiple datasets to be operated on
@@ -33,15 +36,14 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
  */
 public abstract class MultiDatasetResultAction extends VoidResultAction {
 
-    protected final List<IAnalysisDataset> datasets;
+    protected final List<IAnalysisDataset> datasets = new ArrayList<>();
 
-    public MultiDatasetResultAction(final List<IAnalysisDataset> datasets, final String barMessage,
-            final MainWindow mw) {
-        super(barMessage, mw);
-        if (datasets == null) {
+    public MultiDatasetResultAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String barMessage,
+    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(barMessage, acceptor, eh);
+        if (datasets == null)
             throw new IllegalArgumentException("Cannot have null dataset list");
-        }
-        this.datasets = datasets;
+        this.datasets.addAll(datasets);
     }
 
 }

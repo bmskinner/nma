@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.util.Arrays;
@@ -33,8 +31,10 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  * 
  * @author bms41
  * @since 1.13.3
+ * @deprecated since 1.14.0
  *
  */
+@Deprecated
 public class DefaultShellResult implements IShellResult {
 
     private static final long serialVersionUID = 1L;
@@ -345,23 +345,23 @@ public class DefaultShellResult implements IShellResult {
         long[] random = new long[s.getNumberOfShells()];
         Arrays.fill(random, 100);
         
-        RandomShellResult r = new RandomShellResult(s.getNumberOfShells(), s.getType(), random);
-        this.setRawMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.NONE))
-                .setRawMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE))
-                .setNormalisedMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.DAPI))
-                .setNormalisedMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.DAPI))
-                .setRawChiResult(CountType.SIGNAL, 
-                		s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.NONE, r), 
-                		s.getPValue(Aggregation.BY_SIGNAL, Normalisation.NONE, r))
-                .setRawChiResult(CountType.COUNTERSTAIN, 
-                		s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, r), 
-                		s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, r))
-                .setNormalisedChiResult(CountType.SIGNAL, 
-                		s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, r), 
-                		s.getPValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, r))
-                .setNormalisedChiResult(CountType.COUNTERSTAIN, 
-                		s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, r), 
-                		s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, r));
+//        RandomShellResult r = new RandomShellResult(s.getNumberOfShells(), s.getType(), random);
+//        this.setRawMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.NONE))
+//                .setRawMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE))
+//                .setNormalisedMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.DAPI))
+//                .setNormalisedMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.DAPI))
+//                .setRawChiResult(CountType.SIGNAL, 
+//                		s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.NONE, r), 
+//                		s.getPValue(Aggregation.BY_SIGNAL, Normalisation.NONE, r))
+//                .setRawChiResult(CountType.COUNTERSTAIN, 
+//                		s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, r), 
+//                		s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, r))
+//                .setNormalisedChiResult(CountType.SIGNAL, 
+//                		s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, r), 
+//                		s.getPValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, r))
+//                .setNormalisedChiResult(CountType.COUNTERSTAIN, 
+//                		s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, r), 
+//                		s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, r));
 
     }
     
@@ -398,23 +398,23 @@ public class DefaultShellResult implements IShellResult {
 	    }
 	}
 
-	@Override
-	public double getChiSquareValue(Aggregation agg, Normalisation norm, @NonNull IShellResult expected) {
-		switch (norm) {
-	        case NONE: return getRawChiSquare(agg);
-	        case DAPI: return getNormalisedChiSquare(agg);
-	        default:   return getRawChiSquare(agg);
-	    }
-	}
-
-	@Override
-	public double getPValue(Aggregation agg, Normalisation norm, @NonNull IShellResult expected) {
-		switch (norm) {
-	        case NONE: return getRawPValues(agg);
-	        case DAPI: return getNormalisedPValues(agg);
-	        default:   return getRawPValues(agg);
-	    }
-	}
+//	@Override
+//	public double getChiSquareValue(Aggregation agg, Normalisation norm, @NonNull IShellResult expected) {
+//		switch (norm) {
+//	        case NONE: return getRawChiSquare(agg);
+//	        case DAPI: return getNormalisedChiSquare(agg);
+//	        default:   return getRawChiSquare(agg);
+//	    }
+//	}
+//
+//	@Override
+//	public double getPValue(Aggregation agg, Normalisation norm, @NonNull IShellResult expected) {
+//		switch (norm) {
+//	        case NONE: return getRawPValues(agg);
+//	        case DAPI: return getNormalisedPValues(agg);
+//	        default:   return getRawPValues(agg);
+//	    }
+//	}
 
 	@Override
 	public double getOverallShell(Aggregation agg, Normalisation norm) {
@@ -565,4 +565,29 @@ public class DefaultShellResult implements IShellResult {
         Arrays.fill(result, 0);
         return result;
     }
+
+	@Override
+	public IShellResult duplicate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
+			@Nullable INuclearSignal signal) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getNumberOfSignals(@NonNull Aggregation agg) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

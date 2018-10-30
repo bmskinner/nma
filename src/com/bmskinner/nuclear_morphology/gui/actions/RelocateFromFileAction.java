@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,23 +12,25 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocationMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Creates child datasets from a .cell mapping file
@@ -40,11 +42,10 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
 
     private static final String PROGRESS_LBL = "Relocating cells";
 
-    public RelocateFromFileAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
-        super(dataset, PROGRESS_LBL, mw);
+    public RelocateFromFileAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+        super(dataset, PROGRESS_LBL, acceptor, eh);
         this.setLatch(latch);
         setProgressBarIndeterminate();
-
     }
 
     @Override
@@ -56,26 +57,20 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
         File file = FileSelector.chooseRemappingFile(dataset);
         if (file != null) {
 
-            /*
-             * Make the worker
-             */
             IAnalysisMethod m = new CellRelocationMethod(dataset, file);
             worker = new DefaultAnalysisWorker(m);
 
-            // worker = new CellRelocator(dataset, file);
             worker.addPropertyChangeListener(this);
 
             this.setProgressMessage("Locating cells...");
             ThreadManager.getInstance().submit(worker);
         } else {
-            fine("Cancelled");
             cancel();
         }
     }
 
     @Override
     public void finished() {
-        fine("Firing refresh of populations");
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         this.countdownLatch();
         super.finished();

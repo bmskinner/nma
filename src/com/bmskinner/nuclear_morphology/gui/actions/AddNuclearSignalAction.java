@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +12,30 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.Optional;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Show the setup screen to detect nuclear signals, and run a detection analysis
@@ -43,19 +49,28 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
     
     private static final String PROGRESS_BAR_LABEL = "Signal detection";
 
-    public AddNuclearSignalAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, PROGRESS_BAR_LABEL, mw);
+    public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
     public void run() {
         try {
+        	File defaultDir = null;
+        	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+        	if(op.isPresent()) {
+        		Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        		if(im.isPresent())
+        			defaultDir = im.get().getFolder();
+        	}
+        	
+        	try {
+        		folder = eh.getInputSupplier().requestFolder("Choose FISH signal image folder", defaultDir);
+        	} catch(RequestCancelledException e) {
+        		cancel();
+        		return;
+        	}
 
-            folder = FileSelector.chooseFISHDirectory(dataset);
-            if (folder==null) {
-                cancel();
-                return;
-            }
             // add dialog for non-default detection options
             SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
 
@@ -87,13 +102,10 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
     @Override
     public void finished() {
         finer("Finished signal detection");
-        this.cleanup(); // remove the property change listener
-//        fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-        
+        cleanup(); // remove the property change listener
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
         cancel();
-
     }
 
 }

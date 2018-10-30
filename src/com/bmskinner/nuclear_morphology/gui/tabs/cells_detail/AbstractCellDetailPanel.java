@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,39 +12,44 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.AbstractEditingPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractCellDetailPanel extends AbstractEditingPanel implements CellEditingTabPanel {
 
     private CellViewModel model;
-
-    public AbstractCellDetailPanel(final CellViewModel model, String title) {
-        super(title);
+    
+    public AbstractCellDetailPanel(@NonNull InputSupplier context, final CellViewModel model, String title) {
+        super(context, title);
         this.model = model;
     }
 
     /**
      * Update the charts and tables for the current cell and component
      */
-    public abstract void update();
+    @Override
+	public abstract void update();
 
     /**
      * Get the current cell view
      * 
      * @return
      */
-    public synchronized CellViewModel getCellModel() {
+    @Override
+	public synchronized CellViewModel getCellModel() {
         return model;
     }
 
-    public synchronized void setCellModel(CellViewModel model) {
+    @Override
+	public synchronized void setCellModel(CellViewModel model) {
         this.model = model;
     }
 
@@ -52,7 +57,8 @@ public abstract class AbstractCellDetailPanel extends AbstractEditingPanel imple
      * Remove any charts that contain the current active cell, causing them to
      * redraw on the next refresh
      */
-    public synchronized void clearCellCharts() {
+    @Override
+	public synchronized void clearCellCharts() {
         this.getChartCache().clear(model.getCell());
     }
 

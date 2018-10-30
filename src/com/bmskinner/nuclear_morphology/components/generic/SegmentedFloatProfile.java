@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,20 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -50,10 +45,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     /**
      * Construct using a regular profile and a list of border segments
      * 
-     * @param p
-     *            the profile
-     * @param segments
-     *            the list of segments to use
+     * @param p the profile
+     * @param segments the list of segments to use
      * @throws ProfileException
      */
     public SegmentedFloatProfile(@NonNull final IProfile p, @NonNull final List<IBorderSegment> segments) throws ProfileException {
@@ -61,11 +54,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         if (segments == null || segments.isEmpty())
             throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
 
-        if (p.size() != segments.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + segments.get(0).getTotalLength()
-                    + ") does not fit profile (" + +p.size() + ")");
-        }
+        if (p.size() != segments.get(0).getProfileLength())
+            throw new IllegalArgumentException(String.format("Cannot construct new profile; segment profile length (%d) does not fit this profile (%d)", segments.get(0).getProfileLength(), p.size()));
 
+        // Link and add the segments into this profile
+        
+        
+        
         IBorderSegment.linkSegments(segments);
 
         this.segments = new IBorderSegment[segments.size()];
@@ -77,8 +72,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     /**
      * Construct using an existing profile. Copies the data and segments
      * 
-     * @param profile
-     *            the segmented profile to copy
+     * @param profile the segmented profile to copy
      * @throws ProfileException
      * @throws IndexOutOfBoundsException
      */
@@ -94,29 +88,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     public SegmentedFloatProfile(@NonNull final IProfile profile) {
         super(profile);
-
-        int midpoint = profile.size() / 2;
-        IBorderSegment segment1 = IBorderSegment.newSegment(0, midpoint, profile.size());
-
-        segment1.setPosition(0);
-        IBorderSegment segment2 = IBorderSegment.newSegment(midpoint, 0, profile.size());
-
-        segment2.setPosition(1);
-        List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
-        segments.add(segment1);
-        segments.add(segment2);
-
-        try {
-            IBorderSegment.linkSegments(segments);
-        } catch (ProfileException e) {
-            warn("Error linking segments");
-        }
-
-        this.segments = new IBorderSegment[segments.size()];
-        for (int i = 0; i < segments.size(); i++) {
-            this.segments[i] = segments.get(i);
-        }
-        // this.segments = segments;
+        segments = new IBorderSegment[1];
+        segments[0] = IBorderSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
     }
 
     /**
@@ -129,48 +102,32 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         this(new FloatProfile(values));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#hasSegments()
-     */
     @Override
     public boolean hasSegments() {
         return segments!=null && segments.length>0;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegments()
-     */
     @Override
-    public List<IBorderSegment> getSegments() {
-        List<IBorderSegment> result = null;
-        List<IBorderSegment> temp = new ArrayList<IBorderSegment>();
+    public @NonNull List<IBorderSegment> getSegments() {
+    	
+        List<IBorderSegment> temp = new ArrayList<>();
+        if(segments.length==0)
+        	return temp;
+        
         for (IBorderSegment seg : segments) {
             temp.add(seg);
         }
 
         try {
-            result = IBorderSegment.copy(temp);
+           return IBorderSegment.copy(temp);
         } catch (ProfileException | IllegalArgumentException e) {
             error("Error copying segments", e);
-            return new ArrayList<IBorderSegment>();
+            return new ArrayList<>();
         }
-        return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegment(java.util.UUID)
-     */
     @Override
-    public IBorderSegment getSegment(UUID id) throws UnavailableComponentException {
-        if (id == null) {
-            throw new IllegalArgumentException("Id is null");
-        }
+    public @NonNull IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException {
         for (IBorderSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return seg;
@@ -180,13 +137,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#hasSegment(java.util.UUID)
-     */
     @Override
-    public boolean hasSegment(UUID id) {
+    public boolean hasSegment(@NonNull UUID id) {
         for (IBorderSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return true;
@@ -195,13 +147,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentsFrom(java.util.UUID)
-     */
     @Override
-    public List<IBorderSegment> getSegmentsFrom(UUID id) throws Exception {
+    public List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws UnavailableComponentException, ProfileException {
         return getSegmentsFrom(getSegment(id));
     }
 
@@ -210,75 +157,40 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * 
      * @param firstSeg
      * @return
+     * @throws ProfileException 
      * @throws Exception
      */
-    private List<IBorderSegment> getSegmentsFrom(IBorderSegment firstSeg) throws ProfileException {
+    private List<IBorderSegment> getSegmentsFrom(@NonNull IBorderSegment firstSeg) throws UnavailableComponentException, ProfileException {
 
-        if (firstSeg == null) {
+        if (firstSeg == null)
             throw new IllegalArgumentException("Requested first segment is null");
-        }
 
-        List<IBorderSegment> result = new ArrayList<IBorderSegment>();
-        int i = segments.length - 1; // the number of segments
+        List<IBorderSegment> result = new ArrayList<>();
+        
         result.add(firstSeg);
-        while (i > 0) {
-
-            if (firstSeg.hasNextSegment()) {
-                firstSeg = firstSeg.nextSegment();
-                result.add(firstSeg);
-                i--;
-            } else {
-                throw new ProfileException(i + ": No next segment in " + firstSeg.toString());
-            }
+        
+        IBorderSegment nextSeg = firstSeg.nextSegment();
+        while(nextSeg!=firstSeg){
+        	result.add(nextSeg);
+        	nextSeg = nextSeg.nextSegment();
         }
         return IBorderSegment.copy(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getOrderedSegments()
-     */
     @Override
     public List<IBorderSegment> getOrderedSegments() {
-
-        IBorderSegment firstSeg = null; // default to the first segment in the
-                                        // profile
-
-        /*
-         * Choose the first segment of the profile to be the segment starting at
-         * the zero index
-         */
-        for (IBorderSegment seg : segments) {
-
-            if (seg.getStartIndex() == ZERO_INDEX) {
-                firstSeg = seg;
-            }
-        }
-
-        if (firstSeg == null) {
-
-            /*
-             * A subset of nuclei do not produce segment boundaries
-             */
-//            fine("Cannot get ordered segments");
-//            fine("Profile is " + this.toString());
-//            fine("Using the first segment in the profile");
-            firstSeg = this.getSegments().get(0); // default to the first
-                                                  // segment in the profile
-        }
-
-        List<IBorderSegment> result;
-        try {
-            result = getSegmentsFrom(firstSeg);
-        } catch (ProfileException e) {
-            warn("Profile error getting segments");
-            fine("Profile error getting segments", e);
-            result = new ArrayList<IBorderSegment>();
-        }
-
-        return result;
-
+    	try {
+			for (IBorderSegment seg : getSegments()) {
+				if (seg.contains(ZERO_INDEX) && (getSegmentCount()==1 || seg.getEndIndex()!=ZERO_INDEX))
+					return getSegmentsFrom(seg);
+			}
+		} catch (UnavailableComponentException | ProfileException e) {
+			warn("Profile error getting segments");
+			stack("Profile error getting segments", e);
+			return new ArrayList<>();
+		}
+    	System.out.println("Found segment count is "+getSegmentCount());
+		return new ArrayList<>();
     }
 
     /*
@@ -287,7 +199,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#getSegment(java.lang.String)
      */
     @Override
-    public IBorderSegment getSegment(String name) throws UnavailableComponentException {
+    public IBorderSegment getSegment(@NonNull String name) throws UnavailableComponentException {
         if (name == null) {
             throw new IllegalArgumentException("Requested segment name is null");
         }
@@ -300,14 +212,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         throw new UnavailableComponentException("Requested segment name is not present");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegment(components.nuclear.
-     * IBorderSegment)
-     */
     @Override
-    public IBorderSegment getSegment(IBorderSegment segment) {
+    public IBorderSegment getSegment(@NonNull IBorderSegment segment) {
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Requested segment name is not present");
         }
@@ -321,11 +227,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentAt(int)
-     */
     @Override
     public IBorderSegment getSegmentAt(int position) {
 
@@ -341,11 +242,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentContaining(int)
-     */
     @Override
     public IBorderSegment getSegmentContaining(int index) {
 
@@ -361,20 +257,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         throw new IllegalArgumentException("Index not in profile");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#setSegments(java.util.List)
-     */
     @Override
     public void setSegments(@NonNull List<IBorderSegment> segments) {
-        if (segments == null || segments.isEmpty()) {
+        if (segments == null || segments.isEmpty())
             throw new IllegalArgumentException("Segment list is null or empty");
-        }
 
-        if (segments.get(0).getTotalLength() != this.size()) {
-            throw new IllegalArgumentException("Segment list is from a different total length");
-        }
+        if (segments.get(0).getProfileLength() != this.size())
+            throw new IllegalArgumentException("Segment list is from a different length profile");
 
         try {
             segments = IBorderSegment.copy(segments);
@@ -389,64 +278,37 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#clearSegments()
-     */
     @Override
     public void clearSegments() {
-        segments = new IBorderSegment[0];
-
+        segments = new IBorderSegment[1];
+        segments[0] = IBorderSegment.newSegment(0, 0, size(), IProfileCollection.DEFAULT_SEGMENT_ID);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentNames()
-     */
     @Override
     public List<String> getSegmentNames() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (IBorderSegment seg : segments) {
             result.add(seg.getName());
         }
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentIDs()
-     */
     @Override
     public List<UUID> getSegmentIDs() {
-        List<UUID> result = new ArrayList<UUID>();
+        List<UUID> result = new ArrayList<>();
         for (IBorderSegment seg : this.segments) {
             result.add(seg.getID());
         }
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegmentCount()
-     */
     @Override
     public int getSegmentCount() {
         return this.segments.length;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#getDisplacement(components.nuclear.
-     * IBorderSegment)
-     */
     @Override
-    public double getDisplacement(IBorderSegment segment) {
+    public double getDisplacement(@NonNull IBorderSegment segment) {
         
         if (!contains(segment)) {
             throw new IllegalArgumentException("Segment is not in profile");
@@ -460,14 +322,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return max - min;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#contains(components.nuclear.
-     * IBorderSegment)
-     */
     @Override
-    public boolean contains(IBorderSegment segment) {
+    public boolean contains(@NonNull IBorderSegment segment) {
         if (segment == null) {
             return false;
         }
@@ -480,18 +336,11 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#update(components.nuclear.
-     * IBorderSegment, int, int)
-     */
     @Override
-    public boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
+    public boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
 
-        if (!this.contains(segment)) {
+        if (!this.contains(segment))
             throw new IllegalArgumentException("Segment is not part of this profile");
-        }
 
         // test effect on all segments in list: the update should
         // not allow the endpoints to move within a segment other than
@@ -507,8 +356,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
                 if (!testSeg.getName().equals(segment.getName()) && !testSeg.getName().equals(nextSegment.getName())
                         && !testSeg.getName().equals(prevSegment.getName())) {
-                    // segment.setLastFailReason("Index out of bounds of next
-                    // and prev");
                     return false;
                 }
             }
@@ -520,75 +367,19 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return segment.update(startIndex, endIndex);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#adjustSegmentStart(java.util.UUID,
-     * int)
-     */
-    @Override
-    public boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException {
-        if (!hasSegment(id)) {
-            throw new IllegalArgumentException("Segment is not part of this profile");
-        }
-
-        // get the segment within this profile, not a copy
-        IBorderSegment segmentToUpdate;
-        try {
-            segmentToUpdate = this.getSegment(id);
-        } catch (UnavailableComponentException e) {
-            stack(e);
-            throw new SegmentUpdateException("Error getting segment", e);
-        }
-
-        int newValue = CellularComponent.wrapIndex(segmentToUpdate.getStartIndex() + amount,
-                segmentToUpdate.getTotalLength());
-        return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#adjustSegmentEnd(java.util.UUID,
-     * int)
-     */
-    @Override
-    public boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException {
-        if (!hasSegment(id)) {
-            throw new IllegalArgumentException("Segment is not part of this profile");
-        }
-
-        // get the segment within this profile, not a copy
-        IBorderSegment segmentToUpdate;
-        try {
-            segmentToUpdate = this.getSegment(id);
-        } catch (UnavailableComponentException e) {
-            stack(e);
-            throw new SegmentUpdateException("Error getting segment");
-        }
-
-        int newValue = CellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
-                segmentToUpdate.getTotalLength());
-        return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#nudgeSegments(int)
-     */
     @Override
     public void nudgeSegments(int amount) {
 
-        List<IBorderSegment> result;
-        try {
-            result = IBorderSegment.nudge(getSegments(), amount);
-        } catch (ProfileException e) {
-            fine("Error offsetting segments", e);
-            return;
+        List<IBorderSegment> result = getSegments();
+        for(IBorderSegment s: result) {
+        	s.offset(amount);
         }
+//        try {
+//            result = IBorderSegment.nudge(getSegments(), amount);
+//        } catch (ProfileException e) {
+//            fine("Error offsetting segments", e);
+//            return;
+//        }
         this.segments = new IBorderSegment[segments.length];
         for (int i = 0; i < segments.length; i++) {
             this.segments[i] = result.get(i);
@@ -596,11 +387,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#offset(int)
-     */
     @Override
     public ISegmentedProfile offset(int offset) throws ProfileException {
 
@@ -624,23 +410,32 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
          * amount
          * 
          */
-        // fine("Offsetting segments in profile by "+offset );
-
-        // fine("Profile length: "+size()+"; segment total:
-        // "+segments[0].getTotalLength());
-
-        List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -offset);
-
-        /*
-         * Ensure that the first segment in the list is at index zero
-         */
-
+        
+        List<IBorderSegment> segments = getSegments();
+        for(IBorderSegment s: segments) {
+        	s.offset(-offset);
+        }
+                
+//        List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -offset);
         return new SegmentedFloatProfile(offsetProfile, segments);
     }
+    
+    
 
     @Override
     public ISegmentedProfile interpolate(int length) throws ProfileException {
+    	if(length<1)
+    		throw new IllegalArgumentException("Cannot interpolate to a zero or negative length");
+        // interpolate the IProfile
+        IProfile newProfile = super.interpolate(length);
+        List<IBorderSegment> newSegs = new ArrayList<>();
         
+        // No segments in profile or single default segment
+        if(segments.length<=1) {
+        	newSegs.add(new DefaultBorderSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID));
+        	return new SegmentedFloatProfile(newProfile, newSegs);
+        }
+        	
 
         // get the proportions of the existing segments
         double[] props = new double[segments.length];
@@ -658,7 +453,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         }
 
         // Make the new segments
-        List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>(segments.length);
+        
         for (int i = 0; i < segments.length - 1; i++) {
 
             int testStart = newStarts[i];
@@ -716,25 +511,11 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             throw new ProfileException("Error interpolating segments");
         }
 
-        // interpolate the IProfile
-
-        IProfile newProfile = super.interpolate(length);
-
         // assign new segments
         IBorderSegment.linkSegments(newSegs);
-
-        // log("Segment interpolation complete "+newSegs.size());
-
         return new SegmentedFloatProfile(newProfile, newSegs);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#frankenNormaliseToProfile(components
-     * .generic.ISegmentedProfile)
-     */
     @Override
     public ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException {
         
@@ -751,34 +532,40 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
         /*
          * The final frankenprofile is made of stitched together profiles from
-         * each segment
+         * each segment. The resulting profile should have the same length as this profile.
+         * The segment boundaries should have the same proportional indexes as the template profile
          */
+                
         List<IProfile> finalSegmentProfiles = new ArrayList<>(segments.length);
 
         try {
 
+        	int counter = 0;
             for (UUID segID : template.getSegmentIDs()) {
-                // Get the corresponding segment in this profile, by segment
-                // position
-                IBorderSegment testSeg = this.getSegment(segID);
+                IBorderSegment thisSeg = this.getSegment(segID);
                 IBorderSegment templateSeg = template.getSegment(segID);
-
+                
+                // For each segment, 1 must be subtracted from the length because the
+                // segment lengths include the overlapping end and start indexes.
+                int newLength = templateSeg.length()-1;
 
                 // Interpolate the segment region to the new length
-                IProfile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
+                IProfile revisedProfile = interpolateSegment(thisSeg, newLength);
                 finalSegmentProfiles.add(revisedProfile);
+                counter++;
             }
 
         } catch (UnavailableComponentException e) {
-            stack(e);
-            throw new ProfileException("Error getting segment for normalising");
+            throw new ProfileException("Unable to get segment for interpolation: "+e.getMessage(), e);
         }
-
+        
         // Recombine the segment profiles
         IProfile mergedProfile = IProfile.merge(finalSegmentProfiles);
 
-        ISegmentedProfile result = new SegmentedFloatProfile(mergedProfile, template.getSegments());
-        return result;
+        if(mergedProfile.size()!=template.size())
+        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), template.size()));
+        
+        return new SegmentedFloatProfile(mergedProfile, template.getSegments());
     }
 
     /**
@@ -786,10 +573,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * profile, with the same name as the template segment is interpolated to
      * the length of the template, and returned as a new Profile.
      * 
-     * @param templateSegment
-     *            the segment to interpolate
-     * @param newLength
-     *            the new length of the segment profile
+     * @param templateSegment the segment to interpolate
+     * @param newLength the new length of the segment profile
      * @return the interpolated profile
      * @throws Exception
      */
@@ -799,7 +584,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         // Exclude the last index of each segment to avoid duplication
         // the first index is kept, because the first index is used for border
         // tags
-        int lastIndex = CellularComponent.wrapIndex(testSeg.getEndIndex() - 1, testSeg.getTotalLength());
+        int lastIndex = CellularComponent.wrapIndex(testSeg.getEndIndex() - 1, testSeg.getProfileLength());
 
         IProfile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
 
@@ -808,31 +593,20 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return revisedProfile;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#reverse()
-     */
+
     @Override
     public void reverse() {
         super.reverse();
 
         // reverse the segments
-        // in a profile of 100
-        // if a segment began at 10 and ended at 20, it should begin at 80 and
-        // end at 90
-
-        // if is begins at 90 and ends at 10, it should begin at 10 and end at
-        // 90
         List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
         for (IBorderSegment seg : this.getSegments()) {
 
             // invert the segment by swapping start and end
-            int newStart = (this.size() - 1) - seg.getEndIndex();
-            int newEnd = CellularComponent.wrapIndex(newStart + seg.length(), this.size());
-            IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, this.size(), seg.getID());
-            // newSeg.setName(seg.getName());
-            // since the order is reversed, add them to the top of the new list
+            int newStart = size() - 1 - seg.getEndIndex();
+            int newEnd   = size() - 1 - seg.getStartIndex();
+            
+            IBorderSegment newSeg = new DefaultBorderSegment(newStart, newEnd, size(), seg.getID());
             segments.add(0, newSeg);
         }
         try {
@@ -842,28 +616,27 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             stack("Cannot link segments in reversed profile", e);
         }
         this.setSegments(segments);
-
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#mergeSegments(components.nuclear.
-     * IBorderSegment, components.nuclear.IBorderSegment, java.util.UUID)
-     */
+    
     @Override
-    public void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException {
+    public void mergeSegments(@NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID id) throws ProfileException {
 
-        if (segment1 == null)
+        if (seg1 == null)
             throw new IllegalArgumentException("Segment 1 cannot be null");
-
-        if (segment2 == null)
+        if (seg2 == null)
             throw new IllegalArgumentException("Segment 2 cannot be null");
-
         if (id == null)
             throw new IllegalArgumentException("New segment UUID cannot be null");
-
+        
+        IBorderSegment segment1;
+        IBorderSegment segment2;
+		try {
+			segment1 = getSegment(seg1);
+			segment2 = getSegment(seg2);
+		} catch (UnavailableComponentException e) {
+			throw new IllegalArgumentException("An input segment is not part of this profile");
+		}
+		
         // Check the segments belong to the profile
         if (!this.contains(segment1) || !this.contains(segment2))
             throw new IllegalArgumentException("An input segment is not part of this profile");
@@ -872,12 +645,12 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             throw new IllegalArgumentException("Input segments are not linked");
         
         // Check the segments are linked
-        if (!segment1.nextSegment().equals(segment2) && !segment1.prevSegment().equals(segment2))
+        if (!segment1.nextSegment().getID().equals(segment2.getID()) && !segment1.prevSegment().getID().equals(segment2.getID()))
             throw new IllegalArgumentException("Input segments are not linked");
 
         // Ensure we have the segments in the correct order
-        IBorderSegment firstSegment = segment1.nextSegment().equals(segment2) ? segment1 : segment2;
-        IBorderSegment secondSegment = segment2.nextSegment().equals(segment1) ? segment1 : segment2;
+        IBorderSegment firstSegment =  segment1.nextSegment().getID().equals(segment2.getID()) ? segment1 : segment2;
+        IBorderSegment secondSegment = segment2.nextSegment().getID().equals(segment1.getID()) ? segment1 : segment2;
 
         // Create the new segment
         int startIndex = firstSegment.getStartIndex();
@@ -887,50 +660,54 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         mergedSegment.addMergeSource(firstSegment);
         mergedSegment.addMergeSource(secondSegment);
 
+        fine("Merged segment has source 1: "+mergedSegment.hasMergeSource(seg1));
+        fine("Merged segment has source 2: "+mergedSegment.hasMergeSource(seg2));
         // Replace the two segments in this profile
         List<IBorderSegment> oldSegs = this.getSegments();
-        List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>();
+        List<IBorderSegment> newSegs = new ArrayList<>();
 
-        int position = 0;
+
         for (IBorderSegment oldSegment : oldSegs) {
-
-            if (oldSegment.equals(firstSegment)) {
+            if (oldSegment.getID().equals(firstSegment.getID())) {
                 // add the merge instead
-                mergedSegment.setPosition(position);
                 newSegs.add(mergedSegment);
-            } else if (oldSegment.equals(secondSegment)) {
+            } else if (oldSegment.getID().equals(secondSegment.getID())) {
                 // do nothing
             } else {
                 // add the original segments
-                oldSegment.setPosition(position);
                 newSegs.add(oldSegment);
             }
-            position++;
         }
 
+        // This will remove merge sources of segment 0 if the start index is not already in the correct place 
         IBorderSegment.linkSegments(newSegs);
-
+        
         this.setSegments(newSegs);
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#unmergeSegment(components.nuclear.
-     * IBorderSegment)
-     */
+    
     @Override
-    public void unmergeSegment(IBorderSegment segment) throws ProfileException {
+	public void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException {
+		mergeSegments(segment1.getID(), segment2.getID(), id);
+	}
+
+    @Override
+	public void unmergeSegment(@NonNull UUID segId) throws ProfileException {
+		try {
+			unmergeSegment(getSegment(segId));
+		} catch(UnavailableComponentException e) {
+			throw new ProfileException(e);
+		}
+	}
+
+    @Override
+    public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
         // Check the segments belong to the profile
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Input segment is not part of this profile");
         }
 
-        if (!segment.hasMergeSources()) {
+        if (!segment.hasMergeSources())
             return;
-//            throw new IllegalArgumentException("Segment does not have merge sources");
-        }
 
         // Replace the two segments in this profile
         List<IBorderSegment> oldSegs = this.getSegments();
@@ -962,36 +739,27 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
 
     @Override
-    public boolean isSplittable(UUID id, int splitIndex) {
-        if (!this.hasSegment(id)) {
-            throw new IllegalArgumentException("No segment with the given id");
-        }
+    public boolean isSplittable(@NonNull UUID id, int splitIndex) {
+        if (!this.hasSegment(id))
+            return false;
 
-        IBorderSegment segment;
         try {
-            segment = getSegment(id);
+        	IBorderSegment segment = getSegment(id);
+        	
+        	if (!segment.contains(splitIndex))
+                return false;
+
+            return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getProfileLength())
+                    && IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getProfileLength());
         } catch (UnavailableComponentException e) {
             stack(e);
             return false;
         }
 
-        if (!segment.contains(splitIndex)) {
-            throw new IllegalArgumentException("Splitting index is not within the segment");
-        }
-
-        return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getTotalLength())
-                && IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getTotalLength());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#splitSegment(components.nuclear.
-     * IBorderSegment, int, java.util.UUID, java.util.UUID)
-     */
     @Override
-    public void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws ProfileException {
+    public void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException {
         // Check the segments belong to the profile
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -1017,8 +785,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         // Add the new segments to a list
         List<IBorderSegment> splitSegments = new ArrayList<IBorderSegment>();
         splitSegments
-                .add(IBorderSegment.newSegment(segment.getStartIndex(), splitIndex, segment.getTotalLength(), id1));
-        splitSegments.add(IBorderSegment.newSegment(splitIndex, segment.getEndIndex(), segment.getTotalLength(), id2));
+                .add(IBorderSegment.newSegment(segment.getStartIndex(), splitIndex, segment.getProfileLength(), id1));
+        splitSegments.add(IBorderSegment.newSegment(splitIndex, segment.getEndIndex(), segment.getProfileLength(), id2));
 
         segment.addMergeSource(splitSegments.get(0));
         segment.addMergeSource(splitSegments.get(1));
@@ -1049,45 +817,27 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#toString()
-     */
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder("Profile");
         for (IBorderSegment seg : this.segments) {
-            builder.append(seg.toString() + System.getProperty("line.separator"));
+            builder.append(" | "+seg.toString());
         }
         return builder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#valueString()
-     */
+
     @Override
     public String valueString() {
         return super.toString();
     }
     
     @Override
-    public ISegmentedProfile copy() {
-        try {
-            return new SegmentedFloatProfile(this);
-        } catch (IndexOutOfBoundsException | ProfileException e) {
-            stack(e);
-        }
-        return null;
+    public ISegmentedProfile copy() throws ProfileException {
+    	return new SegmentedFloatProfile(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#hashCode()
-     */
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -1096,11 +846,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -1126,8 +871,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         // finest("\tReading segmented profile");
         in.defaultReadObject();
         // finest("\tRead segmented profile");
-        if (size() != segments[0].getTotalLength()) {
-            log("Error reading segments: " + " segment length " + segments[0].getTotalLength()
+        if (size() != segments[0].getProfileLength()) {
+            log("Error reading segments: " + " segment length " + segments[0].getProfileLength()
                     + " different to profile " + size());
         }
     }

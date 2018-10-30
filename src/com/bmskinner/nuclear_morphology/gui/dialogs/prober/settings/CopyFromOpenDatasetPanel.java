@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -29,9 +28,10 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * A copy button that allows nuclear detection options to be copied from an open
@@ -44,15 +44,31 @@ import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 @SuppressWarnings("serial")
 public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
-    private static final String COPY_FROM_OPEN_LBL     = "Copy from open dataset";
+    private static final String COPY_FROM_OPEN_LBL     = "From dataset";
     private static final String COPY_FROM_OPEN_TOOLTIP = "Copy from existing open dataset";
+    
+    private static final String OPEN_SETTINGS_LBL     = "From file";
+    private static final String OPEN_SETTINGS_TOOLTIP = "Choose a saved options file";
+
     private static final String CHOOSE_DATASET_MSG_LBL = "Choose source dataset";
     private static final String CHOOSE_DATASET_TTL_LBL = "Source dataset";
 
-    private JButton copyBtn;
+    private JButton copyBtn = new JButton(COPY_FROM_OPEN_LBL);
+    
+    private JButton openBtn = new JButton(OPEN_SETTINGS_LBL);
+    
+    private IAnalysisOptions parent;
 
-    public CopyFromOpenDatasetPanel(IMutableDetectionOptions op) {
+
+    /**
+     * Create with an analysis options and the detection options to copy to
+     * @param parent
+     * @param op
+     */
+    public CopyFromOpenDatasetPanel(IAnalysisOptions parent, IDetectionOptions op) {
+
         super(op);
+        this.parent = parent;
         this.add(createPanel(), BorderLayout.CENTER);
     }
 
@@ -62,9 +78,9 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
     private void createSpinners() {
 
         // Button to copy existing dataset options
-        copyBtn = new JButton(COPY_FROM_OPEN_LBL);
         copyBtn.addActionListener(e -> {
-            IAnalysisDataset[] nameArray = DatasetListManager.getInstance().getAllDatasets()
+            IAnalysisDataset[] nameArray = DatasetListManager.getInstance()
+            		.getRootDatasets()
                     .toArray(new IAnalysisDataset[0]);
 
             IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null,
@@ -77,11 +93,12 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
             	// Ensure the folder is not overwritten by the new options
             	File folder = options.getFolder();
-            	Optional<IMutableAnalysisOptions> op = sourceDataset.getAnalysisOptions();
+            	Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
             	if(op.isPresent()){
-            		Optional<IMutableDetectionOptions> srcOptions = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            		Optional<IDetectionOptions> srcOptions = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
             		options.set(srcOptions.get());
             		options.setFolder(folder);
+                    parent.setNucleusType(op.get().getNucleusType());
             	}
 
                 fireOptionsChangeEvent();
@@ -89,8 +106,28 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         });
 
         copyBtn.setEnabled(DatasetListManager.getInstance().hasDatasets());
-
         copyBtn.setToolTipText(COPY_FROM_OPEN_TOOLTIP);
+        
+        openBtn.addActionListener(e ->{
+        	File folder = options.getFolder();
+        	File f = FileSelector.chooseOptionsImportFile(folder);
+        	if(f==null)
+        		return;
+        	
+			try {
+				IAnalysisOptions o = new OptionsXMLReader(f).read();
+				options.set(o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
+	        	parent.setNucleusType(o.getNucleusType());
+	        	parent.setAngleWindowProportion(o.getProfileWindowProportion());
+	        	options.setFolder(folder);
+	        	fireOptionsChangeEvent();
+				
+			} catch (XMLReadingException e1) {
+				stack(e1);
+			}
+        	
+        });
+        openBtn.setToolTipText(OPEN_SETTINGS_TOOLTIP);
 
     }
 
@@ -103,6 +140,7 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         panel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         panel.add(copyBtn);
+        panel.add(openBtn);
 
         return panel;
     }
@@ -118,9 +156,4 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
         }
 
     }
-
-    @Override
-    public void set(IDetectionOptions options) {
-    }
-
 }

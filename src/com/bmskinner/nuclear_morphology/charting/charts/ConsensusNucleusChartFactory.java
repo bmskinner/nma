@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -30,24 +29,25 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * Methods to make charts with a consensus nucleus.
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
-    public ConsensusNucleusChartFactory(ChartOptions o) {
+    public ConsensusNucleusChartFactory(@NonNull ChartOptions o) {
         super(o);
     }
 
@@ -112,46 +112,27 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             return makeEmptyChart();
 
         if (options.isMultipleDatasets()) {
-
-            boolean oneHasConsensus = false;
-            for (IAnalysisDataset d : options.getDatasets()) {
-                if (d.getCollection().hasConsensus()) {
-                    oneHasConsensus = true;
-                }
-            }
-
-            if (oneHasConsensus) {
+            boolean oneHasConsensus = options.getDatasets().stream().anyMatch(d->d.getCollection().hasConsensus());
+            if (oneHasConsensus) 
                 return makeMultipleConsensusChart();
-            } else {
-                return makeEmptyChart();
-            }
+			return makeEmptyChart();
         }
-
-        if (options.isSingleDataset()) {
-            if (options.isShowMesh()) {
-                try {
-                    Mesh<Nucleus> mesh = new NucleusMesh(options.firstDataset().getCollection().getConsensus(),
-                            options.getMeshSize());
-
-                    if (options.isStraightenMesh()) {
-                        mesh = mesh.straighten();
-                    }
-
-                    return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
-                } catch (ChartCreationException e) {
-                    stack("Error making mesh chart", e);
-                    return makeErrorChart();
-                } catch (MeshCreationException e) {
-                    stack("Error creating mesh", e);
-                    return makeErrorChart();
-                }
-
-            } else {
-                return makeSegmentedConsensusChart(options.firstDataset());
-            }
-
+        
+        // Single dataset
+        
+        fine("Single dataset, making consenusus chart");
+        
+        if (options.isShowMesh()) {
+        	try {
+        		Mesh<Nucleus> mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
+        				options.getMeshSize());
+        		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
+        	} catch (ChartCreationException | MeshCreationException e) {
+        		stack("Error making mesh chart", e);
+        		return makeErrorChart();
+        	}
         }
-        return makeEmptyChart();
+        return makeSegmentedConsensusChart(options.firstDataset());
     }
 
     /**
@@ -180,22 +161,27 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeNucleusOutlineChart() {
 
-        IAnalysisDataset dataset = options.firstDataset();
+    	CellularComponent component = options.hasComponent() ? options.getComponent() : null;
+    	
+    	if(component==null) {
+    		IAnalysisDataset dataset = options.firstDataset();
 
-        if (!dataset.getCollection().hasConsensus()) {
-            return makeEmptyChart();
-        }
+    		if (!dataset.getCollection().hasConsensus()) {
+    			return makeEmptyChart();
+    		}
+    		component = dataset.getCollection().getConsensus();
+    	}
 
         XYDataset ds;
         try {
-            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
+            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
         } catch (ChartDatasetCreationException e) {
             fine("Error creating boxplot", e);
             return makeErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);
 
-        double max = getconsensusChartRange(dataset);
+        double max = getConsensusChartRange(component);
 
         XYPlot plot = chart.getXYPlot();
 
@@ -212,6 +198,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         return chart;
     }
 
+    
     /**
      * Get the maximum absolute range of the axes of the chart for
      * the given dataset.
@@ -219,12 +206,11 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * @param dataset the dataset to range test
      * @return the maximum range value
      */
-    private double getconsensusChartRange(IAnalysisDataset dataset) {
-        ICellCollection collection = dataset.getCollection();
-        double maxX = Math.max(Math.abs(collection.getConsensus().getMinX()),
-                Math.abs(collection.getConsensus().getMaxX()));
-        double maxY = Math.max(Math.abs(collection.getConsensus().getMinY()),
-                Math.abs(collection.getConsensus().getMaxY()));
+    private double getConsensusChartRange(CellularComponent component) {
+        double maxX = Math.max(Math.abs(component.getMinX()),
+                Math.abs(component.getMaxX()));
+        double maxY = Math.max(Math.abs(component.getMinY()),
+                Math.abs(component.getMaxY()));
 
         // ensure that the scales for each axis are the same
         double max = Math.max(maxX, maxY);
@@ -233,7 +219,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         max *= 1.25;
         return max;
     }
-
+    
     /**
      * Get the maximum absolute range of the axes of the chart. The minimum
      * returned value will be 1.
@@ -245,7 +231,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         double max = 1;
         for (IAnalysisDataset dataset : options.getDatasets()) {
             if (dataset.getCollection().hasConsensus()) {
-                double datasetMax = getconsensusChartRange(dataset);
+                double datasetMax = getConsensusChartRange(dataset.getCollection().getConsensus());
                 max = datasetMax > max ? datasetMax : max;
             }
         }
@@ -255,28 +241,27 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     /**
      * Create a consensus nucleus chart with IQR and segments drawn on it.
      * 
-     * @param dataset
-     *            the dataset to draw
+     * @param dataset the dataset to draw
      * @return a chart
      */
-    private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) {
+    private JFreeChart makeSegmentedConsensusChart(@NonNull IAnalysisDataset dataset) {
 
-        if (!dataset.getCollection().hasConsensus()) {
+        if (!dataset.getCollection().hasConsensus())
             return makeEmptyChart();
-        }
+        
+        fine("Making segmented consenusus chart");
         XYDataset ds = null;
 
         ICellCollection collection = dataset.getCollection();
         try {
             ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
         } catch (ChartDatasetCreationException e) {
-            stack("Error making segmented outline", e);
-//            fine("Error making segmented outline", e);
+            fine("Unable to make segmented outline, creating base outline instead: "+e.getMessage());
             return makeNucleusOutlineChart();
         }
 
         JFreeChart chart = makeConsensusChart(ds);
-        double max = getconsensusChartRange(dataset);
+        double max = getConsensusChartRange(dataset.getCollection().getConsensus());
 
         XYPlot plot = chart.getXYPlot();
         plot.setDataset(0, ds);
@@ -307,14 +292,14 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             String name = (String) ds.getSeriesKey(i);
 
             // colour the segments
-            if (name.startsWith("Seg_")) {
+            if (name.startsWith(NucleusDatasetCreator.SEGMENT_SERIES_PREFIX)) {
 
                 plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
                 plot.getRenderer().setSeriesPaint(i, Color.BLACK);
             }
 
             // colour the quartiles
-            if (name.startsWith("Q")) {
+            if (name.startsWith(NucleusDatasetCreator.QUARTILE_SERIES_PREFIX)) {
 
                 // get the segment component
                 // The dataset series name is Q25_Seg_1 etc
@@ -376,8 +361,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
             // get the group id from the name, and make colour
             plot.getRenderer().setSeriesPaint(i, colour);
-            if (name.startsWith("Q")) {
-
+            if (name.startsWith(NucleusDatasetCreator.QUARTILE_SERIES_PREFIX)) {
                 // make the IQR distinct from the median
                 plot.getRenderer().setSeriesPaint(i, ((Color) colour).darker());
             }

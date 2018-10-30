@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
 /**
  * The default implementation of the IHoughDetectionOptions interface.
@@ -27,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOption
  * @since 1.13.4
  *
  */
-public class DefaultHoughOptions extends AbstractHashOptions implements IMutableHoughDetectionOptions {
+public class DefaultHoughOptions extends AbstractHashOptions implements IHoughDetectionOptions {
 
     private static final long serialVersionUID        = 1L;
     public static final int   DEFAULT_MIN_RADIUS      = 5;
@@ -51,18 +49,21 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
      * @param template
      */
     public DefaultHoughOptions(IHoughDetectionOptions template) {
-        this.setMinRadius(template.getMinRadius());
-        this.setMaxRadius(template.getMaxRadius());
-        this.setNumberOfCircles(template.getNumberOfCircles());
-        this.setHoughThreshold(template.getHoughThreshold());
+    	set(template);
     }
+    
+	@Override
+	public IDetectionSubOptions duplicate() {
+		return new DefaultHoughOptions(this);
+	}
 
     @Override
     public int getMinRadius() {
         return getInt(MIN_RADIUS);
     }
 
-    public void setMinRadius(int i) {
+    @Override
+	public void setMinRadius(int i) {
         setInt(MIN_RADIUS, i);
     }
 
@@ -71,7 +72,8 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
         return getInt(MAX_RADIUS);
     }
 
-    public void setMaxRadius(int i) {
+    @Override
+	public void setMaxRadius(int i) {
         setInt(MAX_RADIUS, i);
     }
 
@@ -80,13 +82,9 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
         return getInt(NUM_CIRCLES);
     }
 
-    public void setNumberOfCircles(int i) {
-        setInt(NUM_CIRCLES, i);
-    }
-
     @Override
-    public IHoughDetectionOptions lock() {
-        return this;
+	public void setNumberOfCircles(int i) {
+        setInt(NUM_CIRCLES, i);
     }
 
     @Override
@@ -102,13 +100,10 @@ public class DefaultHoughOptions extends AbstractHashOptions implements IMutable
     }
 
     @Override
-    public IMutableHoughDetectionOptions unlock() {
-        return this;
-    }
-
-    public String toString() {
-
+	public String toString() {
         return "Hough options:" + IDetectionOptions.NEWLINE + super.toString();
     }
+
+
 
 }

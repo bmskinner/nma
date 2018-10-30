@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +12,19 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.tail;
 
 import java.io.File;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.IMutableCell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
@@ -58,11 +53,9 @@ public class TailDetectionMethod extends SingleDatasetAnalysisMethod {
 
         try {
 
-            for (ICell c : dataset.getCollection().getCells()) {
+            for (ICell cell : dataset.getCollection().getCells()) {
 
-                IMutableCell cell = (IMutableCell) c;
-
-                Nucleus n = c.getNucleus();
+                Nucleus n = cell.getNucleus();
                 log("Looking for tails associated with nucleus " + n.getSourceFileName() + "-" + n.getNucleusNumber());
 
                 // get the image in the folder with the same name as the

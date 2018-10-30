@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,12 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
@@ -38,6 +37,7 @@ import java.util.stream.Collectors;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.event.TreeSelectionEvent;
@@ -48,16 +48,23 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 import ij.process.ImageProcessor;
 
@@ -73,40 +80,20 @@ public class ImagesTabPanel extends DetailPanel {
 
     private JTree  tree;      // hold the image list
     private JPanel imagePanel;
-
     private JLabel label;
+    
+    private CosmeticHandler ch = new CosmeticHandler(this);
 
     private static final String IMAGES_LBL = "Images in dataset";
     private static final String PANEL_TITLE_LBL = "Images";
     private static final String HEADER_LBL = "Double click a folder to update image paths";
 
-    private class ImageNode {
-        private String name;
-        private File   f;
-
-        public ImageNode(String name, File f) {
-            this.name = name;
-            this.f = f;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public File getFile() {
-            return f;
-        }
-
-        public String toString() {
-            return name;
-        }
-    }
-    
+      
     /**
      * Create the panel. 
      */
-    public ImagesTabPanel() {
-        super();
+    public ImagesTabPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
 
@@ -120,7 +107,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     private void createUI() {
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
+    	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
         TreeModel treeModel = new DefaultTreeModel(root);
 
         tree = new JTree(treeModel);
@@ -147,10 +134,12 @@ public class ImagesTabPanel extends DetailPanel {
         Dimension size = new Dimension(200, 200);
         scrollPane.setMinimumSize(size);
         scrollPane.setPreferredSize(size);
-
-        this.add(imagePanel, BorderLayout.CENTER);
-        this.add(scrollPane, BorderLayout.WEST);
-
+        
+        JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        sp.setLeftComponent(scrollPane);
+        sp.setRightComponent(imagePanel);
+        
+        this.add(sp, BorderLayout.CENTER);
     }
 
     /**
@@ -164,8 +153,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     @Override
     protected synchronized void updateMultiple() {
-
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
+    	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
 
         for(IAnalysisDataset d : getDatasets()){
             createNodes(root, d);
@@ -186,12 +174,10 @@ public class ImagesTabPanel extends DetailPanel {
 
     @Override
     protected synchronized void updateNull() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
-
+    	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
+    	TreeModel model = new DefaultTreeModel(root);
+    	tree.setModel(model);
         tree.setEnabled(false);
-
-        TreeModel model = new DefaultTreeModel(root);
-        tree.setModel(model);
         label.setText(Labels.NULL_DATASETS);
         label.setIcon(null);
     }
@@ -212,8 +198,7 @@ public class ImagesTabPanel extends DetailPanel {
     			.distinct()
     			.collect(Collectors.toList());
     	
-    	ImageNode r = new ImageNode(dataset.getName()+" ("+files.size()+")", null);
-        DefaultMutableTreeNode datasetRoot = new DefaultMutableTreeNode(r);
+    	ImageTreeNode datasetRoot = new ImageTreeNode(dataset.getName()+" ("+files.size()+")");
                 
         // The only pattern to recognise for now is eg. "s12.tiff"
         Pattern p = Pattern.compile("^.?(\\d+)\\.tiff?$");
@@ -257,12 +242,11 @@ public class ImagesTabPanel extends DetailPanel {
         	} catch(IllegalArgumentException e){
         		inParent.sort(defaultComp);
         	}
-        	DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(new ImageNode(parent.getAbsolutePath(), parent));
+        	ImageTreeNode parentNode = new ImageTreeNode(parent);
         	
         	for (File f : inParent) {
-
                 String name = f.getName();
-                parentNode.add(new DefaultMutableTreeNode(new ImageNode(name, f)));
+                parentNode.add(new ImageTreeNode(f));
             }
             datasetRoot.add(parentNode);
         }
@@ -277,56 +261,49 @@ public class ImagesTabPanel extends DetailPanel {
      * @param node
      * @return
      */
-    private Optional<IAnalysisDataset> getDataset(DefaultMutableTreeNode node){
-    	
-    	DefaultMutableTreeNode n = (DefaultMutableTreeNode) node.getPath()[1];
-
-    	if(n.getUserObject() instanceof ImageNode){
-    		ImageNode im = (ImageNode) n.getUserObject();
-    		for(IAnalysisDataset d : getDatasets()){
-    			if(im.getName().equals(d.getName()+" ("+d.getCollection().getImageFiles().size()+")")){
-    				return Optional.of(d);
-    			}
-    		}
-
+    private Optional<IAnalysisDataset> getDataset(ImageTreeNode node){
+    	for(IAnalysisDataset d : getDatasets()){
+    		if(node.toString().equals(d.getName()+" ("+d.getCollection().getImageFiles().size()+")"))
+    			return Optional.of(d);
     	}
-    	return Optional.empty();
+    	if(node.isRoot())
+    		return Optional.empty();
+    	return getDataset((ImageTreeNode) node.getParent());
+
     }
 
     private TreeSelectionListener makeListener() {
 
     	TreeSelectionListener l = (TreeSelectionEvent e) -> {
-    		DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+    		ImageTreeNode data = (ImageTreeNode) e.getPath().getLastPathComponent();
 
-    		ImageNode data = (ImageNode) node.getUserObject();
-    		
-
-    		if (data.getFile() == null || data.getFile().isDirectory()) {
+    		File f = data.getFile();
+    		if (f==null || f.isDirectory()) {
     			label.setIcon(null);
     			return;
     		}
 
-    		Runnable r = () -> {
+    		InterfaceUpdater r = () -> {
     			try {
-
-    				ImageProcessor ip = new ImageImporter(data.getFile()).importToColorProcessor();
-
+    				ImageProcessor ip = f.exists() ? new ImageImporter(f).importToColorProcessor()
+    						: ImageAnnotator.createBlankColorProcessor(1500, 1500); //TODO - check space needed by cells
+    				
+    				// If an 8bit image was read in, make it colour greyscale
     				ImageConverter cn = new ImageConverter(ip);
-    				if (cn.isByteProcessor()) {
+    				if (cn.isByteProcessor()) 
     					cn.convertToColorProcessor();
-    				}
     				ImageAnnotator an = cn.toAnnotator();
 
-    				Optional<IAnalysisDataset> dataset = getDataset(node);
-    				dataset.ifPresent( d -> d.getCollection().getCells(data.getFile()).stream().forEach( c-> an.annotateCellBorders(c)) );
+    				Optional<IAnalysisDataset> dataset = getDataset(data);
+    				dataset.ifPresent( d -> d.getCollection().getCells(f).stream().forEach( c-> an.annotateCellBorders(c)) );
 
     				ImageFilterer ic = new ImageFilterer(an.toProcessor());
     				ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
     				label.setIcon(ic.toImageIcon());
 
     			} catch (Exception e1) {
-    				warn("Error fetching image");
-    				stack("Error fetching image", e1);
+    				label.setIcon(null);
+    				fine("Error fetching image "+f.getAbsolutePath(), e1);
     			}
     		};
 
@@ -345,57 +322,100 @@ public class ImagesTabPanel extends DetailPanel {
     		@Override
     		public void mouseClicked(MouseEvent e) {
 
-    			if(e.getClickCount()!=2){
+    			if(e.getClickCount()!=2)
     				return;
-    			}
+    			
     			int row = tree.getRowForLocation(e.getX(), e.getY());
-    	        if(row==-1){
+    	        if(row==-1)
     	        	return;
-    	        }
 
     	        TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-    	        DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
-    	        if(node==null){
-    	        	return;
-    	        }
+    	        ImageTreeNode node = (ImageTreeNode) selPath.getLastPathComponent();
 
-    	        ImageNode data = (ImageNode) node.getUserObject();
-
-    	        if(data==null){
+    	        if(node==null)
     	        	return;
-    	        }
     	        
-    	        File oldFolder = data.getFile();
+    	        if(node.isLeaf())
+    	        	return; // folders only can be double clicked
     	        
-    	        if(oldFolder==null || oldFolder.getName().endsWith(".tiff"))
+    	        File oldFolder = node.getFile();
+    	        
+    	        if(oldFolder==null)
     	        	return;
 
-    	        File newFolder = FileSelector.chooseFolder(oldFolder);
-    	        if(newFolder==null || !newFolder.exists())
-    	        	return;
 
-    	        Enumeration<DefaultMutableTreeNode> children = node.children();
-    	        while(children.hasMoreElements()){
-    	        	DefaultMutableTreeNode imageNode = children.nextElement(); 	        
-    	        	ImageNode imageData = (ImageNode) imageNode.getUserObject();
-    	        	File imageFile = imageData.getFile();
-    	        	for(IAnalysisDataset d : getDatasets()){
-    	        		Set<ICell> cells = d.getCollection().getCells(imageFile);
-    	        		cells.parallelStream().forEach(c->{
-    	        			c.getNuclei().stream().forEach(n->{
-    	        				n.setSourceFolder(newFolder);
-    	        			});
-    	        		});
+    	        try {
+    	        	File newFolder = getInputSupplier().requestFolder(oldFolder);
+    	        	node.setFile(newFolder); // update node
+
+    	        	Enumeration<ImageTreeNode> children = node.children();
+    	        	while(children.hasMoreElements()){
+    	        		ImageTreeNode imageData = children.nextElement(); 	        
+    	        		File imageFile = imageData.getFile();
+    	        		if(imageFile==null)
+    	        			continue;
+
+    	        		// Replace the source folder for all nuclei in the current image
+    	        		getDatasets().stream()
+	    	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
+	    	        		.flatMap(c->c.getNuclei().stream())
+	    	        		.forEach(n->n.setSourceFile(newFolder));
+    	        		imageData.setFile( new File(newFolder, imageFile.getName()));
     	        	}
+    	        } catch (RequestCancelledException e1) {
+    	        	return;
     	        }
-    	        
-    	        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-    	        
-    			
+    	        tree.repaint();
+    	        getInterfaceEventHandler().fire(InterfaceEvent.of(this, InterfaceMethod.RECACHE_CHARTS));
     		}
 
     	};
     	return l;
+    }
+        
+    private class ImageTreeNode extends DefaultMutableTreeNode {
+    	
+    	 private String name;
+    	 boolean isFile = false;
+    	 
+    	 public ImageTreeNode(String s) {
+     		super();
+     		name = s;
+     		isFile = false;
+     	}
+    	
+    	public ImageTreeNode(@Nullable File f) {
+    		super();
+    		setFile(f);
+    	}
+    	
+    	public boolean isFile() {
+    		return isFile;
+    	}
+    	
+    	/**
+    	 * Get the file in this node, if present. Otherwise return null.
+    	 * @return
+    	 */
+    	public @Nullable File getFile() {
+    		if(isFile)
+    			return new File(name);
+    		return null;
+        }
+    	
+    	public void setFile(File f) {
+    		isFile = true;
+    		name = f.getAbsolutePath();
+    		
+        }
+    	
+    	@Override
+		public String toString() {
+    		File f = new File(name);
+    		if(f.isDirectory())
+    			return f.getAbsolutePath();
+    		return f.getName();
+        }
     }
     
     /**
@@ -405,13 +425,24 @@ public class ImagesTabPanel extends DetailPanel {
      *
      */
     private static class ImageNodeRenderer extends DefaultTreeCellRenderer {
-        @Override
+    	
+    	@Override
         public Component getTreeCellRendererComponent(JTree tree, Object value,
-                boolean sel, boolean expanded, boolean leaf, int row,
-                boolean hasFocus) {
-            setToolTipText(value.toString());
-            return super.getTreeCellRendererComponent(tree, value, sel,
+                boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+        	
+    		Component c = super.getTreeCellRendererComponent(tree, value, sel,
                     expanded, leaf, row, hasFocus);
+            setToolTipText(value.toString());
+            
+            Color fg = Color.BLACK;
+            ImageTreeNode n = (ImageTreeNode) value;
+            if(n.isFile()) {
+            	File f = n.getFile();
+            	if(f==null || !f.exists())
+            		fg = Color.RED;
+            }
+            c.setForeground(fg);
+            return c;
         }
     }
 }

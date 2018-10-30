@@ -1,22 +1,19 @@
 /*******************************************************************************
- *      Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
@@ -30,20 +27,17 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
-import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This shell result is designed to allow raw data to be
  * exported from shell analyses. Averages and normalisations are computed when data are requested,
- * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}. It also prompted
- * the refactoring of the {@link IShellResult} interface.
+ * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}.
  * @author bms41
  * @since 1.13.8
  *
@@ -72,13 +66,30 @@ public class KeyedShellResult implements IShellResult {
     }
     
     /**
+     * Create with the given number of shells
+     * @param nShells
+     */
+    private KeyedShellResult(KeyedShellResult r){
+    	this(r.getNumberOfShells(), r.getType());
+        
+        for(CountType t : CountType.values()) {
+        	map.put(t, r.map.get(t).duplicate());
+        }
+    }
+    
+    @Override
+    public IShellResult duplicate() {
+    	return new KeyedShellResult(this);
+    }
+    
+    /**
      * Add shell data for the given nucleus in the given cell.
      * @param cell the cell
-     * @param nucleus the nucleus
+     * @param component the nucleus
      * @param shellData the pixel intensity counts per shell
      */
-    public void addShellData(@NonNull CountType type, @NonNull ICell c, @NonNull Nucleus n, long @NonNull [] shellData){
-        addShellData(type, c, n, null, shellData);
+    public void addShellData(@NonNull CountType countType, @NonNull ICell c, @NonNull Nucleus n, long @NonNull [] shellData){
+        addShellData(countType, c, n, null, shellData);
     }
     
     /**
@@ -88,7 +99,7 @@ public class KeyedShellResult implements IShellResult {
      * @param signal the signal
      * @param shellData the pixel intensity counts per shell
      */
-    public void addShellData(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal, long @NonNull [] shellData){
+    public void addShellData(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal, long @NonNull [] shellData){
         if (shellData.length != nShells) 
             throw new IllegalArgumentException("Shell count must be "+nShells);
         
@@ -103,24 +114,38 @@ public class KeyedShellResult implements IShellResult {
         		? new Key(cell.getId(), nucleus.getID()) 
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
 
-        map.get(type).addValues(k, shellData);
+        map.get(countType).putValues(k, shellData);
     }
     
-    /**
-     * Get the pixel count data for a signal in the given nucleus in the given cell.
-     * @param type the type of pixel to fetch
-     * @param cell the cell
-     * @param nucleus the nucleus
-     * @param signal the signal
-     * @return the pixel counts in that object per shell
-     */
-    public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
+    @Override
+	public long[] getPixelValues(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
     	Key k = signal==null 
         		? new Key(cell.getId(), nucleus.getID()) 
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
-    	return map.get(type).getPixelIntensities(k);
+    	return map.get(countType).getPixelIntensities(k);
+    }  
+    
+    @Override
+	public double[] getProportions(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
+    	Key k = signal==null 
+        		? new Key(cell.getId(), nucleus.getID()) 
+        		: new Key(cell.getId(), nucleus.getID(), signal.getID());
+        		
+        long[] intensities = map.get(countType).getPixelIntensities(k);
+        if(intensities==null)
+        	return makeEmptyArray();
+        long total = LongStream.of(intensities).sum();
+        if(total==0)
+        	return makeEmptyArray();
+
+        return LongStream.of(intensities).mapToDouble(l-> (double)l/(double)total).toArray();
+    } 
+    
+    private double[] makeEmptyArray() {
+    	double[] result = new double[nShells];
+    	Arrays.fill(result, 0);
+    	return result;
     }
-       
     
     @Override
     public double[] getProportions(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -151,70 +176,26 @@ public class KeyedShellResult implements IShellResult {
     }
     
     @Override
-    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-    	long[] observed   = getObserved(agg, norm);
-    	
-    	double[] other = expected.getProportions(agg, norm);
-    	double[] exp = getExpected(agg, norm, other);
-    	
-    	for(double d : exp){
-            if(d<=0) // we can't do a chi square test if one of the values is zero
-                return 1;
-        }
-
-    	ChiSquareTest test = new ChiSquareTest();
-    	return test.chiSquare(exp, observed);
-    }
-    
-    @Override
-    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-    	 long[] observed   = getObserved(agg, norm);
-//    	 System.out.println("Obs vals: "+Arrays.toString(observed));
-    	 
-    	 double[] other = expected.getProportions(agg, norm);
-//    	 System.out.println("Exp prop: "+Arrays.toString(other));
-    	 
-         double[] exp = getExpected(agg, norm, other);
-//         System.out.println("Exp vals: "+Arrays.toString(exp));
-         for(double d : exp){
-             if(d<=0) // we can't do a chi square test if one of the values is zero
-                 return 1;
-         }
-
-    	 ChiSquareTest test = new ChiSquareTest();
-    	 return test.chiSquareTest(exp, observed);
+   	public int getNumberOfSignals(@NonNull Aggregation agg) {
+    	return map.get(CountType.SIGNAL).size(agg);
     }
     
     /**
      * Get the observed values as a long array.
      * @return the observed shell values
      */
-    private long[] getObserved(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    @Override
+	public long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm) {
         long[] observed = new long[nShells];
-        int count = map.get(CountType.SIGNAL).size(agg);
+        int nCells = map.get(CountType.SIGNAL).size(agg);
         double[] means = getProportions(agg, norm);
         for (int i = 0; i < nShells; i++) {
-            double mean = means[i];
-            observed[i] = (long) (mean * count);
+            double meanSignalProportion = means[i]; 
+            observed[i] = (long) (meanSignalProportion * nCells); 
         }
         return observed;
     }
-    
-    /**
-     * Get the expected values for chi-sqare test, assuming an equal proportion
-     * of signal per shell
-     * 
-     * @return the expected values
-     */
-    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm, double[] other) {
-        double[] expected = new double[nShells];
-        int count = map.get(CountType.SIGNAL).size(agg);
-        for (int i=0; i<nShells; i++) {
-            expected[i] = other[i] * count;
-        }
-        return expected;
-    }
-    
+
 	@Override
 	public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
 		double[] props = getProportions(agg, norm);
@@ -253,7 +234,7 @@ public class KeyedShellResult implements IShellResult {
 	    			
 	    			double sig = sigs[shell];
 	    			double cnt = cnts[shell];
-	    			double nor = cnt==0d?0d:(double)sig/(double)cnt;
+	    			double nor = cnt==0d?0d:sig/cnt;
 	    			        			
 	    			double totalNor = 0;
 	    			for(int i=0; i<nShells; i++) {	
@@ -274,7 +255,6 @@ public class KeyedShellResult implements IShellResult {
      * @return the mean signal proportion (the mean of the values returned by {@link getProportions()}
      */
     private double getAverageProportion(Normalisation norm, Aggregation agg, int shell){
-//    	fine(norm+" - "+agg+" - shell "+shell+"\n"+Arrays.toString(getProportions(agg, norm, shell)));
         return DoubleStream.of(getProportions(agg, norm, shell)).average().orElse(-1);
     }
     
@@ -299,31 +279,44 @@ public class KeyedShellResult implements IShellResult {
     private class ShellCount implements Serializable {
 
 		private static final long serialVersionUID = 1L;
-        final Map<Key, long[]> results;
+		private final Map<Key, long[]> results;
         
         public ShellCount(){
             results = new HashMap<>();
         }
         
-        void addValues(@NonNull Key k, long[] values){
+        public ShellCount duplicate() {
+        	ShellCount result = new ShellCount();
+        	for(Key k: results.keySet()) {
+        		result.results.put(k.duplicate(), results.get(k));
+        	}
+        	return result;
+        }
+        
+        /**
+         * Add the given values to the key. Existing values
+         * are overwitten. 
+         * @param k
+         * @param values
+         */
+        public void putValues(@NonNull Key k, long[] values){
             results.put(k, values);
         }
-        
-        void addValue(@NonNull Key k, int shell, long value){
-            if(!results.containsKey(k))
-                results.put(k, new long[nShells]);
-            results.get(k)[shell] = value;
-        }
-        
+                
         /**
          * Get the number of objects in the counter
          * @return
          */
-        int size(){
+        public int size(){
             return results.size();
         }
         
-        int size(Aggregation agg){
+        /**
+         * Get the number of keys in the counter with the given
+         * aggregation level
+         * @return
+         */
+        public int size(Aggregation agg){
             return keys(agg).size();
         }
         
@@ -332,7 +325,7 @@ public class KeyedShellResult implements IShellResult {
          * @param shell
          * @return
          */
-        long sum(int shell){
+        public long sum(int shell){
             if(shell<0||shell>=nShells)
                 throw new IllegalArgumentException("Shell is out of bounds");
             return results.values().stream().mapToLong(a->a[shell]).sum();
@@ -343,7 +336,7 @@ public class KeyedShellResult implements IShellResult {
          * @param k the key of the object
          * @return
          */
-        long sum(Key k){
+        public long sum(Key k){
             if(results.containsKey(k))
                 return LongStream.of(results.get(k)).sum();
             return 0;
@@ -353,7 +346,7 @@ public class KeyedShellResult implements IShellResult {
          * Fetch all the object keys
          * @return
          */
-        Set<Key> keys(){
+        public Set<Key> keys(){
             return results.keySet();
         }
         
@@ -364,39 +357,39 @@ public class KeyedShellResult implements IShellResult {
          * @param agg the aggregation level
          * @return the object keys matching the aggregation level
          */
-        Set<Key> keys(Aggregation agg){
+        public Set<Key> keys(Aggregation agg){
         	switch(agg){
         		case BY_NUCLEUS: return results.keySet().stream().filter(k->!k.hasSignal()).collect(Collectors.toSet());
         		case BY_SIGNAL:  return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
-        		default: return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
+        		default:         return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
         	}
         }
                 
-        long getPixelIntensity(Key k, int shell){
+        public long getPixelIntensity(Key k, int shell){
             if(results.containsKey(k))
                 return results.get(k)[shell];
             return 0;
         }
         
-        long[] getPixelIntensities(Key k){
+        public long[] getPixelIntensities(Key k){
             return results.get(k);
         }
         
-        List<long[]> getCellPixelIntensities(@NonNull UUID cellId){
+        public List<long[]> getCellPixelIntensities(@NonNull UUID cellId){
             return results.keySet().stream()
                     .filter(k->k.hasCell(cellId))
                     .map(k->results.get(k))
                     .collect(Collectors.toList());
         }
         
-        List<long[]> getComponentPixelIntensities(@NonNull UUID componentId){
+        public List<long[]> getComponentPixelIntensities(@NonNull UUID componentId){
             return results.keySet().stream()
                     .filter(k->k.hasComponent(componentId))
                     .map(k->results.get(k))
                     .collect(Collectors.toList());
         }
         
-        List<long[]> getSignalPixelIntensities(@NonNull UUID signalId){
+        public List<long[]> getSignalPixelIntensities(@NonNull UUID signalId){
             return results.keySet().stream()
                     .filter(k->k.hasSignal(signalId))
                     .map(k->results.get(k))
@@ -439,6 +432,12 @@ public class KeyedShellResult implements IShellResult {
             this.cellId = cellId;
             this.componentId = componentId;
             this.signalId = signalId;
+        }
+        
+        public Key duplicate() {
+        	if(signalId==null)
+        		return new Key(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), null);
+        	return new Key(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), UUID.fromString(signalId.toString()));
         }
         
         /**

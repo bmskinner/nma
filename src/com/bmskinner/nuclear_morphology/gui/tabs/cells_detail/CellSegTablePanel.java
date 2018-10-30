@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
@@ -24,11 +22,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 
 @SuppressWarnings("serial")
 public class CellSegTablePanel extends AbstractCellDetailPanel {
@@ -37,8 +38,8 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
     
     private JTable table;
 
-    public CellSegTablePanel(final CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellSegTablePanel(@NonNull InputSupplier context, final CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
         this.setBorder(null);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
@@ -30,6 +28,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -39,8 +38,8 @@ import com.bmskinner.nuclear_morphology.components.IAcrosome;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 
 @SuppressWarnings("serial")
 public class ComponentListPanel extends AbstractCellDetailPanel implements ListSelectionListener {
@@ -50,8 +49,8 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
     private JScrollPane              scrollPane;
     private String                   prevComponent = "";
 
-    public ComponentListPanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public ComponentListPanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 

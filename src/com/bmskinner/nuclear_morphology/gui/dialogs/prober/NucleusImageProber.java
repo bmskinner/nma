@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -28,7 +27,6 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
 //import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusDetectionSettingsPanel;
 
@@ -50,21 +48,21 @@ public class NucleusImageProber extends IntegratedImageProber {
      * @param folder
      * @param o
      */
-    public NucleusImageProber(final File folder, final IMutableAnalysisOptions o) {
+    public NucleusImageProber(final File folder, final IAnalysisOptions o) {
 
         try {
             this.options = o;
 
-            // make the panel
-
             optionsSettingsPanel = new ConstructableSettingsPanel(options)
-                    .addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS).addImageChannelPanel(IAnalysisOptions.NUCLEUS)
+                    .addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS)
+                    .addImageChannelPanel(IAnalysisOptions.NUCLEUS)
                     .addImageProcessingPanel(IAnalysisOptions.NUCLEUS)
-                    .addEdgeThresholdSwitchPanel(IAnalysisOptions.NUCLEUS).addSizePanel(IAnalysisOptions.NUCLEUS)
-                    .addMiscNucleusSettingsPanel(IAnalysisOptions.NUCLEUS)
-                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS).build();
+                    .addEdgeThresholdSwitchPanel(IAnalysisOptions.NUCLEUS)
+                    .addSizePanel(IAnalysisOptions.NUCLEUS)
+                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
+                    .build();
 
-            Finder<List<ICell>> finder = new FluorescentNucleusFinder(options);
+            Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options);
             imageProberPanel = new GenericImageProberPanel(folder, finder, this);
 
             JPanel footerPanel = createFooter();
@@ -75,13 +73,8 @@ public class NucleusImageProber extends IntegratedImageProber {
 
             this.setTitle(DIALOG_TITLE_BAR_LBL);
 
-            optionsSettingsPanel.addProberReloadEventListener(imageProberPanel); // inform
-                                                                                 // update
-                                                                                 // needed
-            imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable
-                                                                                  // settings
-                                                                                  // while
-                                                                                  // working
+            optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
+            imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
 
         } catch (Exception e) {
             warn("Error launching analysis window");
@@ -95,7 +88,7 @@ public class NucleusImageProber extends IntegratedImageProber {
         this.setVisible(true);
     }
 
-    public IMutableAnalysisOptions getOptions() {
+    public IAnalysisOptions getOptions() {
         return options;
     }
 

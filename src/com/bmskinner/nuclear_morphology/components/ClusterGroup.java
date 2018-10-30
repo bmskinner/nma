@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.IOException;
@@ -26,7 +24,6 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 
@@ -108,6 +105,11 @@ public class ClusterGroup implements IClusterGroup {
     public String getName() {
         return this.name;
     }
+    
+    @Override
+    public void setName(String s) {
+        name = s;
+    }
 
     /*
      * (non-Javadoc)
@@ -146,7 +148,7 @@ public class ClusterGroup implements IClusterGroup {
      */
     @Override
     public void addDataset(IAnalysisDataset dataset) {
-        this.ids.add(dataset.getUUID());
+        this.ids.add(dataset.getId());
     }
 
     /*
@@ -166,7 +168,7 @@ public class ClusterGroup implements IClusterGroup {
      */
     @Override
     public void removeDataset(IAnalysisDataset dataset) {
-        removeDataset(dataset.getUUID());
+        removeDataset(dataset.getId());
     }
 
     /*

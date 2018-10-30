@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.comparisons;
 
 import java.awt.BorderLayout;
@@ -25,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -35,6 +34,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.dialogs.KruskalTestDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -49,8 +49,8 @@ public class KruskalDetailPanel extends DetailPanel {
     private ExportableChartPanel chartPanel;
     JButton                      frankenButton = new JButton(COMPARE_FRANKENPROFILE_LBL);
 
-    public KruskalDetailPanel() {
-        super(PANEL_TITLE_LBL);
+    public KruskalDetailPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
 
         createUI();
 

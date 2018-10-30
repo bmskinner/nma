@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 
 import java.awt.Dimension;
@@ -28,6 +26,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
@@ -44,19 +43,19 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener {
 
     private Dimension preferredSize = new Dimension(200, 300);
 
-    public SegmentBoxplotsPanel() {
-        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+    public SegmentBoxplotsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
         JFreeChart boxplot = BoxplotChartFactory.makeEmptyChart();
 
@@ -75,22 +74,20 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateMultiple();
 
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
         finest("Dataset list is not empty");
 
         // Check that all the datasets have the same number of segments
-        if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a
-                                                                // boxplot for
-                                                                // each segment
+        if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a boxplot for each segment
 
             ICellCollection collection = activeDataset().getCollection();
             List<IBorderSegment> segments;
@@ -104,7 +101,6 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
             // Get each segment as a boxplot
             for (IBorderSegment seg : segments) {
-
                 JFreeChart chart = AbstractChartFactory.createLoadingChart();
                 ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
                 chartPanel.addChartSetEventListener(this);
@@ -112,10 +108,14 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
                 chartPanels.put(seg.getName(), chartPanel);
                 mainPanel.add(chartPanel);
 
-                ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-                        .addStatistic(PlottableStatistic.LENGTH).setScale(GlobalOptions.getInstance().getScale())
-                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setSegPosition(seg.getPosition())
-                        .setTarget(chartPanel).build();
+                ChartOptions options = new ChartOptionsBuilder()
+                		.setDatasets(getDatasets())
+                        .addStatistic(PlottableStatistic.LENGTH)
+                        .setScale(GlobalOptions.getInstance().getScale())
+                        .setSwatch(GlobalOptions.getInstance().getSwatch())
+                        .setSegPosition(seg.getPosition())
+                        .setTarget(chartPanel)
+                        .build();
 
                 setChart(options);
             }
@@ -131,7 +131,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 

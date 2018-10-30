@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +12,26 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.ExecutionException;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Setup a clustering of the given dataset.
@@ -41,14 +43,14 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
     private static final String PROGRESS_BAR_LABEL = "Clustering cells";
 
-    public ClusterAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, PROGRESS_BAR_LABEL, mw);
+    public ClusterAnalysisAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
     public void run() {
 
-        SubAnalysisSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
+        SubAnalysisSetupDialog clusterSetup = new ClusteringSetupDialog(dataset);
 
         if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
 

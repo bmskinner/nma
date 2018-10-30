@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,21 +12,21 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
 
 @SuppressWarnings("serial")
 public class SignalScatterChartPanel extends AbstractScatterChartPanel {
 
-    public SignalScatterChartPanel() {
-        super(CellularComponent.NUCLEAR_SIGNAL);
-        gateButton.setVisible(false); // filtering not enabled
+    public SignalScatterChartPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_SIGNAL);
     }
 
 }

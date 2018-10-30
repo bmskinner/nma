@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,17 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.gui.Roi;
-
 import java.io.File;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
+import ij.gui.Roi;
 
 /**
  * The default implementation of ICytoplasm.
@@ -35,6 +36,11 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
 
     private static final long serialVersionUID = 1L;
 
+    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int[] position, @NonNull UUID id) {
+        super(roi, centreOfMass, f, channel, position, id);
+    }
+
+    
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image
@@ -45,7 +51,7 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
      * @param position
      * @param centreOfMass
      */
-    public DefaultCytoplasm(Roi roi, IPoint centreOfMass, File f, int channel, int[] position) {
+    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int[] position) {
         super(roi, centreOfMass, f, channel, position);
     }
 

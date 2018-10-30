@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.Serializable;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 
@@ -32,13 +32,27 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagTy
  */
 public interface Tag extends Comparable<Tag>, Serializable {
 
-    public static final BorderTagObject REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
-    public static final BorderTagObject ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
-    public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
-    public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
-    public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
-    public static final BorderTagObject CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
+    @NonNull public static final BorderTagObject REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
+    @NonNull public static final BorderTagObject ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
+    @NonNull public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
+    @NonNull public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
+    @NonNull public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
+    @NonNull public static final BorderTagObject CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
 
+    
+    /**
+     * Create a tag with the given name
+     * @param name the name of the tag. Must be one of {@link BorderTag#values()}
+     * @return
+     */
+    static Tag of(String name) {
+    	for(BorderTag t : BorderTag.values()) {
+    		if(t.toString().equals(name))
+    			return new BorderTagObject(t);
+    	}
+    	return null;
+    }
+    
     /**
      * Get the name of the tag
      * 

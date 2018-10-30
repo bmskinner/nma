@@ -19,31 +19,37 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 
 public class ShellAnalysisMethodTest {
     
-    private ShellAnalysisMethod m;
+	private static final long SEED = 1234;
     private IAnalysisDataset d;
-    private static final int DEFAULT_SHELL_COUNT = 5;
     
     @Before
     public void setUp() throws Exception{
-        d = SampleDatasetReader.openTestRodentDataset();  
+        d = new TestDatasetBuilder(SEED).cellCount(10)
+        		.withMaxSizeVariation(20)
+        		.maxRotation(90)
+        		.xBase(50).yBase(50)
+        		.baseWidth(50).baseHeight(50)
+        		.ofType(NucleusType.ROUND)
+        		.withNucleusShape(TestComponentShape.SQUARE)
+        		.addSignalsInChannel(0)
+        		.addSignalsInChannel(1)
+        		.build();
     }
 
     @Test
-    public void testAreaMethodOnRodentDatasetWithNoSignals() throws Exception {
-        m = new ShellAnalysisMethod(d, DEFAULT_SHELL_COUNT, ShrinkType.AREA);
-        m.call();
+    public void test() throws Exception {
+    	new ShellAnalysisMethod(d, new DefaultShellOptions()).call();
     }
 
 }

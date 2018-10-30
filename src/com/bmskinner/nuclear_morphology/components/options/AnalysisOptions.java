@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
@@ -27,6 +25,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 @Deprecated
-public class AnalysisOptions implements IMutableAnalysisOptions {
+public class AnalysisOptions implements IAnalysisOptions {
 
     private static final long serialVersionUID = 1L;
     private int               nucleusThreshold;
@@ -102,7 +102,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
      */
     public AnalysisOptions(IAnalysisOptions template) {
         try {
-        	Optional<IMutableDetectionOptions> op = template.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IDetectionOptions> op = template.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         	if(!op.isPresent())
         		throw new IllegalArgumentException("No nucleus options");
         	
@@ -141,6 +141,11 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
             e.printStackTrace();
         }
     }
+    
+    @Override
+	public IAnalysisOptions duplicate() {
+		return new AnalysisOptions(this);
+	}
 
     /*
      * ----------------------- Getters -----------------------
@@ -214,7 +219,8 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
      * 
      * @see analysis.IAnalysisOptions#getAngleWindowProportion()
      */
-    public double getProfileWindowProportion() {
+    @Override
+	public double getProfileWindowProportion() {
         return this.angleWindowProportion;
     }
 
@@ -224,7 +230,8 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
      * @see analysis.IAnalysisOptions#getNucleusType()
      */
 
-    public NucleusType getNucleusType() {
+    @Override
+	public NucleusType getNucleusType() {
         return this.nucleusType;
     }
 
@@ -408,7 +415,8 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
      * 
      * @see analysis.IAnalysisOptions#setRefoldNucleus(boolean)
      */
-    public void setRefoldNucleus(boolean refoldNucleus) {
+    @Override
+	public void setRefoldNucleus(boolean refoldNucleus) {
         this.refoldNucleus = refoldNucleus;
     }
 
@@ -725,7 +733,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Deprecated
-    public class CannyOptions implements IMutableCannyOptions {
+    public class CannyOptions implements ICannyOptions {
 
         private static final long serialVersionUID = 1L;
 
@@ -1081,40 +1089,136 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
         }
 
         @Override
-        public IMutableCannyOptions duplicate() {
+        public ICannyOptions duplicate() {
             return new CannyOptions(this);
         }
 
         @Override
         public void set(ICannyOptions options) {
-            // TODO Auto-generated method stub
+            warn("Unimplemented method in " + this.getClass().getName());
 
-        }
-
-        @Override
-        public IMutableCannyOptions unlock() {
-            // TODO Auto-generated method stub
-            return this;
         }
 
         @Override
         public List<String> getKeys() {
-            // TODO Auto-generated method stub
+            warn("Unimplemented method in " + this.getClass().getName());
             return null;
         }
 
         @Override
         public Object getValue(String key) {
-            // TODO Auto-generated method stub
+            warn("Unimplemented method in " + this.getClass().getName());
             return null;
         }
+
+		@Override
+		public double getDouble(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return 0;
+		}
+
+		@Override
+		public int getInt(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return 0;
+		}
+
+		@Override
+		public boolean getBoolean(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return false;
+		}
+
+		@Override
+		public void setDouble(String s, double d) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public void setInt(String s, int i) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public void setBoolean(String s, boolean b) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public float getFloat(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return 0;
+		}
+
+		@Override
+		public void setFloat(String s, float f) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public List<String> getBooleanKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public List<String> getIntegerKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public List<String> getDoubleKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public List<String> getFloatKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public Map<String, Object> getEntries() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public String getString(String s) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public void setString(String k, String v) {
+			warn("Unimplemented method in " + this.getClass().getName());
+			
+		}
+
+		@Override
+		public List<String> getStringKeys() {
+			warn("Unimplemented method in " + this.getClass().getName());
+			return null;
+		}
+
+		@Override
+		public void set(HashOptions o) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     @Override
-    public Optional<IMutableDetectionOptions> getDetectionOptions(String key) {
+    public Optional<IDetectionOptions> getDetectionOptions(String key) {
         if (key.equals(IAnalysisOptions.NUCLEUS)) {
 
-            IMutableDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
+        	IDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
 
             op.setCannyOptions(OptionsFactory.makeCannyOptions(this.getCannyOptions("nucleus")));
             op.setChannel(channel);
@@ -1144,7 +1248,19 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public void setDetectionOptions(String key, IMutableDetectionOptions options) {
+    public void setDetectionOptions(String key, IDetectionOptions options) {
 
     }
+
+	@Override
+	public long getAnalysisTime() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void set(@NonNull IAnalysisOptions o) {
+		// TODO Auto-generated method stub
+		
+	}
 }

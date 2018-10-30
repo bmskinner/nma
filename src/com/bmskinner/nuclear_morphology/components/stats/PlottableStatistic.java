@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -27,85 +28,156 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**
- * This interface is implemented by the enums describing statistical measures
+ * This interface describes statistical measures
  * that can be plotted in charts.
  * 
  * @author ben
  *
  */
 public interface PlottableStatistic extends Serializable {
+	
+	/**
+	 * The names of the measured statistics
+	 * @author bms41
+	 *
+	 */
+	interface Names {
 
-    // Old nucleus statistics
-    static final PlottableStatistic AREA            = new GenericStatistic("Area", StatisticDimension.AREA);
-    static final PlottableStatistic PERIMETER       = new GenericStatistic("Perimeter", StatisticDimension.LENGTH);
-    static final PlottableStatistic MAX_FERET       = new GenericStatistic("Max feret", StatisticDimension.LENGTH);
-    static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic("Min diameter", StatisticDimension.LENGTH);
-    static final PlottableStatistic ASPECT          = new GenericStatistic("Aspect", StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic CIRCULARITY     = new GenericStatistic("Circularity",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic VARIABILITY     = new GenericStatistic("Similarity to median",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic("Bounding height",
-            StatisticDimension.LENGTH);
-    static final PlottableStatistic BOUNDING_WIDTH  = new GenericStatistic("Bounding width", StatisticDimension.LENGTH);
-    static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic("Angle between reference points",
-            StatisticDimension.ANGLE);
-    static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic("Length of hook", StatisticDimension.LENGTH);
-    static final PlottableStatistic BODY_WIDTH      = new GenericStatistic("Width of body", StatisticDimension.LENGTH);
-    static final PlottableStatistic LOBE_COUNT      = new GenericStatistic("Number of lobes",
-            StatisticDimension.DIMENSIONLESS);
+		static final String AREA             = "Area";
+		static final String PERIMETER        = "Perimeter";
+		static final String MAX_FERET        = "Max feret";
+		static final String MIN_DIAMETER     = "Min diameter";
+		static final String ASPECT           = "Aspect";
+		static final String CIRCULARITY      = "Circularity";
+		static final String VARIABILITY      = "Difference from median";
+		static final String BOUNDING_HEIGHT  = "Bounding height";
+		static final String BOUNDING_WIDTH   = "Bounding width";
+		static final String OP_RP_ANGLE      = "Angle between reference points";
+		static final String HOOK_LENGTH      = "Length of hook";
+		static final String BODY_WIDTH       = "Width of body";
+		static final String LOBE_COUNT       = "Number of lobes";
+		static final String PATH_LENGTH      = "Path length";
+		static final String CELL_NUCLEUS_COUNT   = "Nuclei per cell";
+		static final String CELL_NUCLEAR_AREA    = "Nuclear area";
+		static final String CELL_NUCLEAR_RATIO   = "Nucleus : Cytoplasm area ratio";
+		static final String NUCLEUS_SIGNAL_COUNT = "Signals per nucleus";
+		static final String ANGLE                = "Angle";
+		static final String DISTANCE_FROM_COM        = "Distance from CoM";
+		static final String FRACT_DISTANCE_FROM_COM  = "Fractional distance from CoM";
+		static final String RADIUS                   = "Radius";
+		static final String LENGTH                   = "Length";
+		static final String DISPLACEMENT             = "Displacement";
+		
+	}
 
-    static final PlottableStatistic PATH_LENGTH = new GenericStatistic("Path length", StatisticDimension.DIMENSIONLESS);
+    // General component statistics
+    static final PlottableStatistic AREA            = new GenericStatistic(Names.AREA,            StatisticDimension.AREA);
+    static final PlottableStatistic PERIMETER       = new GenericStatistic(Names.PERIMETER,       StatisticDimension.LENGTH);
+    static final PlottableStatistic MAX_FERET       = new GenericStatistic(Names.MAX_FERET,       StatisticDimension.LENGTH);
+    static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic(Names.MIN_DIAMETER,    StatisticDimension.LENGTH);
+    static final PlottableStatistic ASPECT          = new GenericStatistic(Names.ASPECT,          StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic CIRCULARITY     = new GenericStatistic(Names.CIRCULARITY,     StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic VARIABILITY     = new GenericStatistic(Names.VARIABILITY,     StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic(Names.BOUNDING_HEIGHT, StatisticDimension.LENGTH);
+    static final PlottableStatistic BOUNDING_WIDTH  = new GenericStatistic(Names.BOUNDING_WIDTH,  StatisticDimension.LENGTH);
+    static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic(Names.OP_RP_ANGLE,     StatisticDimension.ANGLE);
+    static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic(Names.HOOK_LENGTH,     StatisticDimension.LENGTH);
+    static final PlottableStatistic BODY_WIDTH      = new GenericStatistic(Names.BODY_WIDTH,      StatisticDimension.LENGTH);
+    static final PlottableStatistic LOBE_COUNT      = new GenericStatistic(Names.LOBE_COUNT,      StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic PATH_LENGTH     = new GenericStatistic(Names.PATH_LENGTH,     StatisticDimension.DIMENSIONLESS);
 
     // Stats for the whole cell, aggregated across sub-components
-    static final PlottableStatistic CELL_NUCLEUS_COUNT = new GenericStatistic("Nuclei per cell",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic CELL_NUCLEAR_AREA  = new GenericStatistic("Nuclear area", StatisticDimension.AREA);
-    static final PlottableStatistic CELL_NUCLEAR_RATIO = new GenericStatistic("Nucleus : Cytoplasm area ratio",
-            StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic CELL_NUCLEUS_COUNT = new GenericStatistic(Names.CELL_NUCLEUS_COUNT, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic CELL_NUCLEAR_AREA  = new GenericStatistic(Names.CELL_NUCLEAR_AREA, StatisticDimension.AREA);
+    static final PlottableStatistic CELL_NUCLEAR_RATIO = new GenericStatistic(Names.CELL_NUCLEAR_RATIO, StatisticDimension.DIMENSIONLESS);
+    
+    // Signal count in nuclei
+    static final PlottableStatistic NUCLEUS_SIGNAL_COUNT = new GenericStatistic(Names.NUCLEUS_SIGNAL_COUNT, StatisticDimension.DIMENSIONLESS);
 
-    // Old signal statistics minus overlaps with nucleus stats
-    static final PlottableStatistic ANGLE                   = new GenericStatistic("Angle", StatisticDimension.ANGLE);
-    static final PlottableStatistic DISTANCE_FROM_COM       = new GenericStatistic("Distance from CoM",
-            StatisticDimension.LENGTH);
-    static final PlottableStatistic FRACT_DISTANCE_FROM_COM = new GenericStatistic("Fractional distance from CoM",
-            StatisticDimension.DIMENSIONLESS);
-    static final PlottableStatistic RADIUS                  = new GenericStatistic("Radius", StatisticDimension.LENGTH);
-
-    // Old segment statistics
-    static final PlottableStatistic LENGTH       = new GenericStatistic("Length", StatisticDimension.LENGTH);
-    static final PlottableStatistic DISPLACEMENT = new GenericStatistic("Displacement", StatisticDimension.ANGLE);
+    // Signal statistics
+    static final PlottableStatistic ANGLE                   = new GenericStatistic(Names.ANGLE,                   StatisticDimension.ANGLE);
+    static final PlottableStatistic DISTANCE_FROM_COM       = new GenericStatistic(Names.DISTANCE_FROM_COM,       StatisticDimension.LENGTH);
+    static final PlottableStatistic FRACT_DISTANCE_FROM_COM = new GenericStatistic(Names.FRACT_DISTANCE_FROM_COM, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic RADIUS                  = new GenericStatistic(Names.RADIUS,                  StatisticDimension.LENGTH);
+    static final PlottableStatistic LENGTH                  = new GenericStatistic(Names.LENGTH,                  StatisticDimension.LENGTH);
+    static final PlottableStatistic DISPLACEMENT            = new GenericStatistic(Names.DISPLACEMENT,            StatisticDimension.ANGLE);    
+    
 
     /**
      * Get stats for the given component. Use the keys in
      * {@link CellularComponent}
      * 
-     * @param component
-     *            the component to get stats for
+     * @param component the component to get stats for
      * @return applicable stats, or null if the component was not recognised
      */
     static PlottableStatistic[] getStats(String component) {
-        if (CellularComponent.NUCLEUS.equals(component)) {
+        if (CellularComponent.NUCLEUS.equals(component))
             return getNucleusStats().toArray(new PlottableStatistic[0]);
-        }
-
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
             return getSignalStats().toArray(new PlottableStatistic[0]);
-        }
-
-        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
             return getSegmentStats().toArray(new PlottableStatistic[0]);
-        }
         return null;
+    }
+    
+    /**
+     * All available stats
+     * 
+     * @return
+     */
+    static List<PlottableStatistic> getAllStatsTypes() {
+    	List<PlottableStatistic> list = new ArrayList<>();
+    	list.add(AREA);
+    	list.add(PERIMETER);
+    	list.add(MAX_FERET);
+    	list.add(MIN_DIAMETER);
+    	list.add(ASPECT);
+    	list.add(CIRCULARITY);
+    	list.add(VARIABILITY);
+    	list.add(BOUNDING_HEIGHT);
+    	list.add(BOUNDING_WIDTH);
+    	list.add(OP_RP_ANGLE);
+    	list.add(HOOK_LENGTH);
+    	list.add(BODY_WIDTH);
+    	list.add(LOBE_COUNT);
+    	list.add(PATH_LENGTH);
+    	list.add(CELL_NUCLEUS_COUNT);
+    	list.add(CELL_NUCLEAR_AREA);
+    	list.add(CELL_NUCLEAR_RATIO);
+    	list.add(NUCLEUS_SIGNAL_COUNT);
+    	list.add(ANGLE);
+    	list.add(DISTANCE_FROM_COM);
+    	list.add(FRACT_DISTANCE_FROM_COM);
+    	list.add(RADIUS);
+    	list.add(LENGTH);
+    	list.add(DISPLACEMENT);
+    	
+    	 return list;
     }
 
     /**
-     * ~Get stats for generic cellular components.
+     * Fetch the stat with the given name, if available.
+     * @param name the name of the stat
+     * @return the stat, or null if none is present
+     */
+    static PlottableStatistic of(String name) {
+    	
+    	List<PlottableStatistic> all = getAllStatsTypes();
+    	
+    	for(PlottableStatistic stat : all) {
+    		if(stat.name().equals(name))
+    			return stat;
+    	}
+    	return null;
+    }
+
+    /**
+     * Get stats for generic cellular components.
      * 
      * @return
      */
     static List<PlottableStatistic> getComponentStats() {
-        List<PlottableStatistic> list = new ArrayList<PlottableStatistic>(12);
+        List<PlottableStatistic> list = new ArrayList<>();
         list.add(AREA);
         list.add(PERIMETER);
         list.add(MAX_FERET);
@@ -114,7 +186,7 @@ public interface PlottableStatistic extends Serializable {
     }
 
     static List<PlottableStatistic> getCellStats() {
-        List<PlottableStatistic> list = new ArrayList<PlottableStatistic>();
+        List<PlottableStatistic> list = new ArrayList<>();
         list.add(CELL_NUCLEUS_COUNT);
         list.add(CELL_NUCLEAR_AREA);
         list.add(CELL_NUCLEAR_RATIO);
@@ -123,7 +195,7 @@ public interface PlottableStatistic extends Serializable {
     }
 
     /**
-     * Get stats for round nuclei
+     * Get default type of nucleus stats; these are for mouse sperm nuclei
      * 
      * @return
      */
@@ -221,7 +293,14 @@ public interface PlottableStatistic extends Serializable {
      * 
      * @return
      */
-    String toString();
+    @Override
+	String toString();
+    
+    /**
+     * Get the name of the stat
+     * @return
+     */
+    String name();
 
     /**
      * Test if the statistic has units
@@ -308,44 +387,28 @@ public interface PlottableStatistic extends Serializable {
      * Convert the input value (assumed to be pixels) using the given factor (
      * CellularComponent.getScale() ) into the appropriate scale
      * 
-     * @param value
-     *            the pixel measure
-     * @param factor
-     *            the conversion factor to microns
-     * @param scale
-     *            the desired scale
-     * @param dim
-     *            the dimension of the statistic
+     * @param value the pixel measure
+     * @param factor the conversion factor to microns
+     * @param scale the desired scale
+     * @param dim the dimension of the statistic
      * @return the converted value
      */
     static double convert(double value, double factor, MeasurementScale scale, StatisticDimension dim) {
-        double result = value;
-
         switch (scale) {
-        case MICRONS: {
-            switch (dim) {
-            case AREA:
-                result = PlottableStatistic.micronArea(value, factor);
-                break;
-            case DIMENSIONLESS:
-                break;
-            case LENGTH:
-                result = PlottableStatistic.micronLength(value, factor);
-                break;
-            case ANGLE:
-                break;
-            default:
-                break;
+	        case MICRONS: {
+	            switch (dim) {
+		            case AREA:   return PlottableStatistic.micronArea(value, factor);
+		            case LENGTH: return PlottableStatistic.micronLength(value, factor);
+		            case DIMENSIONLESS:
+		            case ANGLE:
+		            default: return value;
+	            }
+	        }
+	
+	        case PIXELS: return value;
+	        default: return value;
+        }
 
-            }
-        }
-            break;
-        case PIXELS:
-            break;
-        default:
-            break;
-        }
-        return result;
     }
 
     /**
@@ -356,25 +419,14 @@ public interface PlottableStatistic extends Serializable {
      * @return
      */
     static String units(MeasurementScale scale, StatisticDimension dim) {
-        String result = "";
         switch (dim) {
-
-        case AREA:
-            result = "square " + scale.toString().toLowerCase();
-            break;
-        case DIMENSIONLESS:
-            break;
-        case LENGTH:
-            result = scale.toString().toLowerCase();
-            break;
-        case ANGLE:
-            result = "degrees";
-            break;
-        default:
-            break;
-
-        }
-        return result;
+	
+	        case AREA:   return "square " + scale.toString().toLowerCase();
+	        case LENGTH: return scale.toString().toLowerCase();
+	        case ANGLE:  return "degrees";
+	        case DIMENSIONLESS:
+	        default: return "";
+	    }
     }
 
 }

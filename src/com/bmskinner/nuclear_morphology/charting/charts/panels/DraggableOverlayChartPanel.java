@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
 import java.awt.Color;
@@ -40,13 +38,14 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
+import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This chart panel provides a list of draggable markers as crosshair overlays,
@@ -61,11 +60,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
     private volatile ISegmentedProfile profile = null;
 
-    private volatile List<SegmentCrosshair> crosses = new ArrayList<SegmentCrosshair>(); // drawing
-                                                                                         // lines
-                                                                                         // on
-                                                                                         // the
-                                                                                         // chart
+    private volatile List<SegmentCrosshair> crosses = new ArrayList<>(); // drawing lines on the chart
 
     protected volatile Crosshair xCrosshair;
 
@@ -112,7 +107,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
     }
     
     private static double getRescaledIndex(IBorderSegment seg, int newLength) {
-        return (float) seg.getStartIndex() / (float) (seg.getTotalLength()) * (float) newLength;
+        return (float) seg.getStartIndex() / (float) (seg.getProfileLength()) * (float) newLength;
     }
 
     private synchronized void updateOverlays() {
@@ -124,28 +119,27 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
         if (profile != null) {
             try {
-
                 overlay = new CrosshairOverlay();
-                int i = 0;
-                for (IBorderSegment seg : profile.getOrderedSegments()) {
+                List<IBorderSegment> segments = profile.getOrderedSegments();
+                for(int i=0; i<profile.getSegmentCount(); i++) {
+                	// don't draw the first segment marker (the RP)
+                	if(i==0)
+                		continue;
+                	
+                	IBorderSegment seg = segments.get(i);
 
-                    Paint colour = ColourSelecter.getColor(i++);
-                    if (seg.isLocked()) {
-                        colour = Color.DARK_GRAY;
-                    }
+                    Paint colour = seg.isLocked()? Color.DARK_GRAY : ColourSelecter.getColor(i);
 
                     SegmentCrosshair xCrosshair = new SegmentCrosshair(Double.NaN, colour,
                             ChartComponents.MARKER_STROKE, seg);
                     xCrosshair.setLabelVisible(false);
 
-                    double value = isChartNormalised ? getRescaledIndex(seg, 100)
+                    double value = isChartNormalised ? getRescaledIndex(seg, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH)
                             : seg.getStartIndex();
 
                     xCrosshair.setValue(value);
                     crosses.add(xCrosshair);
-
                     ((CrosshairOverlay) overlay).addDomainCrosshair(xCrosshair);
-
                 }
 
                 this.addOverlay(overlay);
@@ -171,7 +165,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         clearOverlays();
         this.profile = profile;
         this.isChartNormalised = normalised;
-        crosses = new ArrayList<SegmentCrosshair>();
+        crosses = new ArrayList<>();
         overlay = null;
         updateOverlays();
         finer("Profile has been set");
@@ -187,7 +181,6 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         if (e.getButton() == MouseEvent.BUTTON1) {
 
             if (xCrosshair != null && !((SegmentCrosshair) xCrosshair).getSegment().isLocked()) {
-                // IJ.log("Mouse down : Running :"+checkRunning());
                 mouseIsDown = true;
                 initThread();
             }
@@ -199,8 +192,6 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
         if (e.getButton() == MouseEvent.BUTTON1) {
             mouseIsDown = false;
-            // IJ.log("Mouse up : Running :"+checkRunning());
-            // isRunning = false;
             /*
              * Get the location on the chart, and send a signal to update the
              * profile
@@ -216,15 +207,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                 // Correct for normalisation
                 if (isChartNormalised) {
 
-                    if (xValue < 0) {
-                        xValue += 100; // Wrap values below 0
-                    }
+                    if (xValue < 0)
+                        xValue += ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH; // Wrap values below
 
-                    if (xValue >= 100) { // Wrap values above 100
-                        xValue -= 100;
-                    }
+                    if (xValue >= ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH) // Wrap values above
+                        xValue -= ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
 
-                    xValue = profile.size() * (xValue / 100);
+                    xValue = profile.size() * (xValue / ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
 
                     fine("Profile position of domain value is " + xValue);
                 }
@@ -289,24 +278,16 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
     protected void initThread() {
         if (checkAndMark()) {
-            new Thread() {
-                public void run() {
-                    // IJ.log("Thread start : Running :"+checkRunning());
-                    do {
-
-                        /*
-                         * Make the overlay under the mouse follow the mouse
-                         */
-
-                        int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
-                        int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
-                        updateActiveCrosshairLocation(x, y);
-
-                    } while (mouseIsDown);
-                    isRunning = false;
-
-                }
-            }.start();
+        	Runnable r = () ->{
+        		do {
+                     // Make the overlay under the mouse follow the mouse
+                    int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
+                    int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
+                    updateActiveCrosshairLocation(x, y);
+                } while (mouseIsDown);
+                isRunning = false;
+        	};
+            new Thread(r).start();
         }
     }
 
@@ -396,15 +377,15 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         SignalChangeEvent event = new SignalChangeEvent(this, message, this.getClass().getSimpleName());
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
+            ((EventListener) iterator.next()).eventReceived(event);
         }
     }
 
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
+    public synchronized void addSignalChangeListener(EventListener l) {
         listeners.add(l);
     }
 
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
+    public synchronized void removeSignalChangeListener(EventListener l) {
         listeners.remove(l);
     }
 

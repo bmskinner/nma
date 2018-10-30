@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,61 +12,67 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.jfree.chart.JFreeChart;
+import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.RotationMode;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 @SuppressWarnings("serial")
-public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener {
+public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, CellUpdatedEventListener {
 
     private static final String PANEL_TITLE_LBL = "Outline";
             
     private RotationSelectionSettingsPanel rotationPanel;
+    
+    private InteractiveBorderTagCellPanel imagePanel;
 
-    private ExportableChartPanel panel;
-
-    private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
-    private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
-
-    private JButton redrawBorderBtn = new JButton("Redraw outline");
-
-    private CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
-
-    public CellOutlinePanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus mesh");
+    private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
+    
+    private final CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
+    
+    public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
         // make the chart for each nucleus
         this.setLayout(new BorderLayout());
-        JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();
 
-        JPanel settingsPanel = new JPanel(new FlowLayout());
+        
+        JPanel header = makeHeader();
+        add(header, BorderLayout.NORTH);
+
+        imagePanel = new InteractiveBorderTagCellPanel(this);
+
+        add(imagePanel, BorderLayout.CENTER);
+        
+        cellBorderAdjustmentDialog = new CellBorderAdjustmentDialog(model);
+    }
+    
+    private JPanel makeHeader() {
+    	JPanel panel = new JPanel(new FlowLayout());
 
         rotationPanel = new RotationSelectionSettingsPanel();
         rotationPanel.setEnabled(false);
@@ -77,28 +83,20 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         warpMeshPanel.addActionListener(this);
         warpMeshPanel.setEnabled(false);
+        
+        WrappedLabel lbl1 = new WrappedLabel("Click a border point to reassign tags");
+        
+        JButton adjustBtn = new JButton("Adjust border");
+        adjustBtn.addActionListener(e-> cellBorderAdjustmentDialog.load(getCellModel().getCell(), activeDataset()));
 
-        settingsPanel.add(rotationPanel);
-        settingsPanel.add(makeMeshPanel);
-        settingsPanel.add(warpMeshPanel);
 
-        cellBorderAdjustmentDialog = new CellBorderAdjustmentDialog(model);
-
-        redrawBorderBtn.addActionListener(e -> {
-            cellBorderAdjustmentDialog.load(model.getCell(), activeDataset());
-        });
-        redrawBorderBtn.setEnabled(false);
-        settingsPanel.add(redrawBorderBtn);
-
-        this.add(settingsPanel, BorderLayout.NORTH);
-
-        panel = new ExportableChartPanel(chart);
-        panel.setFixedAspectRatio(true);
-
-        panel.addChartSetEventListener(this);
-
-        this.add(panel, BorderLayout.CENTER);
-
+        panel.add(makeMeshPanel);
+        panel.add(warpMeshPanel);
+        panel.add(Box.createHorizontalGlue());
+        panel.add(lbl1);
+//        panel.add(adjustBtn);
+        
+        return panel;
     }
     
     private synchronized void updateSettingsPanels() {
@@ -107,7 +105,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
             rotationPanel.setEnabled(false);
             makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
-            redrawBorderBtn.setEnabled(false);
             return;
         }
 
@@ -115,11 +112,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
             rotationPanel.setEnabled(false);
             makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
-            redrawBorderBtn.setEnabled(false);
         } else {
-
-            redrawBorderBtn.setEnabled(true);
-
             // Only allow one mesh activity to be active
             rotationPanel.setEnabled(!warpMeshPanel.isSelected());
             makeMeshPanel.setEnabled(!warpMeshPanel.isSelected());
@@ -132,89 +125,63 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         }
     }
 
-    public synchronized void update() {
+    @Override
+	public synchronized void update() {
 
         if (this.isMultipleDatasets() || !this.hasDatasets()) {
-            panel.setChart(MorphologyChartFactory.createEmptyChart());
+            imagePanel.setNull();
             return;
         }
-
-        CellularComponent component = this.getCellModel().getComponent();
+        
+        final ICell cell = getCellModel().getCell();
+        final CellularComponent component = getCellModel().getComponent();
+        
+        boolean isShowMesh  = makeMeshPanel.isSelected();
+        boolean isWarpImage = warpMeshPanel.isSelected();        
+        imagePanel.setCell(activeDataset(), cell, component, isShowMesh, isWarpImage);
 
         updateSettingsPanels();
-
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-                .setCell(this.getCellModel().getCell()).setRotationMode(rotationPanel.getSelected())
-                .setShowAnnotations(true).setShowSignals(true).setShowMesh(makeMeshPanel.isSelected())
-                .setShowWarp(warpMeshPanel.isSelected()).setShowMeshEdges(false).setShowMeshFaces(true)
-                .setInvertYAxis(rotationPanel.getSelected().equals(RotationMode.ACTUAL)) // only
-                                                                                         // invert
-                                                                                         // for
-                                                                                         // actual
-                .setCellularComponent(component).setTarget(panel).build();
-
-        setChart(options);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         update();
-
     }
 
     @Override
     protected void updateSingle() {
         update();
-
     }
 
     @Override
     protected void updateMultiple() {
         updateNull();
-
     }
 
     @Override
     protected void updateNull() {
-        panel.setChart(MorphologyChartFactory.createEmptyChart());
+    	imagePanel.setNull();
         updateSettingsPanels();
 
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-
-        panel.setChart(MorphologyChartFactory.createLoadingChart());
-    }
-
-    @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new OutlineChartFactory(options).makeCellOutlineChart();
-    }
-
-    @Override
-    public void datasetEventReceived(DatasetEvent event) {
-        super.datasetEventReceived(event);
+    public void eventReceived(DatasetEvent event) {
+        super.eventReceived(event);
         // Pass messages upwards
-        if (event.getSource() instanceof CellCollectionOverviewDialog) {
+        if (event.getSource() instanceof CellCollectionOverviewDialog)
             this.getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
+        
+        if(event.getSource()==imagePanel) {
+        	 refreshChartCache();
+        	 getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
         }
+       
     }
 
     @Override
-    public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
-
+    public void eventReceived(ChartOptionsRenderedEvent e) {
         update();
-    }
-
-    @Override
-    public void chartSetEventReceived(ChartSetEvent e) {
-        if (this.getCellModel().hasCell()) {
-            panel.restoreAutoBounds();
-        }
-
     }
 
 }

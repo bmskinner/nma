@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,17 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
@@ -33,17 +34,20 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  * @since 1.13.3
  *
  */
-public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
+public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, IMutableDetectionOptions> detectionOptions = new HashMap<String, IMutableDetectionOptions>(0);
+    private Map<String, IDetectionOptions> detectionOptions = new HashMap<>();
 
     private double profileWindowProportion;
 
     private NucleusType type;
 
+    @Deprecated
     private boolean isRefoldNucleus, isKeepFailed;
+    
+    private final long analysisTime; 
 
     /**
      * The default constructor, which sets default options specified in
@@ -54,42 +58,30 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
         type = DEFAULT_TYPE;
         isRefoldNucleus = DEFAULT_REFOLD;
         isKeepFailed = DEFAULT_KEEP_FAILED;
-
+        analysisTime = System.currentTimeMillis();
     }
 
     /**
      * Construct from a template options
      * 
-     * @param template
-     *            the options to use as a template
+     * @param template the options to use as a template
      */
-    public DefaultAnalysisOptions(IAnalysisOptions template) {
-
-        if (template == null) {
-            throw new IllegalArgumentException("Template options is null");
-        }
-
-        for (String key : template.getDetectionOptionTypes()) {
-
-            Optional<IMutableDetectionOptions> op  = template.getDetectionOptions(key);
-            if(op.isPresent())
-	            setDetectionOptions(key, op.get().duplicate());
-        }
-
-        this.profileWindowProportion = template.getProfileWindowProportion();
-        type = template.getNucleusType();
-        isRefoldNucleus = template.refoldNucleus();
-        isKeepFailed = template.isKeepFailedCollections();
-
+    public DefaultAnalysisOptions(@NonNull IAnalysisOptions template) {
+        set(template);
+        analysisTime = System.currentTimeMillis();
     }
+    
+    @Override
+	public IAnalysisOptions duplicate() {
+		return new DefaultAnalysisOptions(this);
+	}
 
     @Override
-    public Optional<IMutableDetectionOptions> getDetectionOptions(String key){
+    public Optional<IDetectionOptions> getDetectionOptions(String key){
         if (detectionOptions.containsKey(key)) {
             return Optional.of(detectionOptions.get(key));
-        } else {
-        	return Optional.empty();
         }
+		return Optional.empty();
 
     }
 
@@ -120,13 +112,27 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
     @Override
     public Set<UUID> getNuclearSignalGroups() {
-        // TODO Auto-generated method stub
-        return null;
+    	Set<UUID> result = new HashSet<>();
+    	for(String s : detectionOptions.keySet()) {
+    		if(s.equals(NUCLEUS) || s.equals(CYTOPLASM) || s.equalsIgnoreCase(SPERM_TAIL))
+    			continue;
+    		
+    		
+    		try {
+    			if(s.startsWith(SIGNAL_GROUP)) {
+    				UUID id = UUID.fromString(s.replace(SIGNAL_GROUP, ""));
+    				result.add(id);
+    			}
+    		} catch(IllegalArgumentException e) {
+    			// not a UUID
+    		}
+    	}
+        return result;
     }
 
     @Override
-    public boolean hasSignalDetectionOptions(UUID signalGroup) {
-        String key = signalGroup.toString();
+    public boolean hasSignalDetectionOptions(@NonNull UUID signalGroup) {
+        String key = SIGNAL_GROUP+signalGroup.toString();
         return hasDetectionOptions(key);
     }
 
@@ -134,9 +140,14 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     public boolean isKeepFailedCollections() {
         return isKeepFailed;
     }
+    
+    @Override
+    public long getAnalysisTime() {
+    	return analysisTime;
+    }
 
     @Override
-    public void setDetectionOptions(String key, IMutableDetectionOptions options) {
+    public void setDetectionOptions(String key, IDetectionOptions options) {
         detectionOptions.put(key, options);
 
     }
@@ -166,14 +177,31 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup) {
+    public INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup) {
 
-    	Optional<IMutableDetectionOptions> op = getDetectionOptions(signalGroup.toString());
+    	Optional<IDetectionOptions> op = getDetectionOptions(SIGNAL_GROUP+signalGroup.toString());
     	
+    	if(op.isPresent())
+    		return (INuclearSignalOptions) op.get();
+    	
+    	// If is is the old format
+    	op = getDetectionOptions(signalGroup.toString());
     	if(op.isPresent())
     		return (INuclearSignalOptions) op.get();
 
         return null;
+    }
+    
+    @Override
+    public void set(@NonNull IAnalysisOptions template) {
+    	for (String key : template.getDetectionOptionTypes()) {
+            Optional<IDetectionOptions> op  = template.getDetectionOptions(key);
+            if(op.isPresent())
+	            setDetectionOptions(key, op.get().duplicate());
+        }
+
+        profileWindowProportion = template.getProfileWindowProportion();
+        type = template.getNucleusType();
     }
 
     @Override
@@ -198,31 +226,28 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-
         if (o == null)
             return false;
-
         if (!(o instanceof IAnalysisOptions))
             return false;
-
         IAnalysisOptions other = (IAnalysisOptions) o;
+        
+        Set<String> thisKeys  =  detectionOptions.keySet();
+        Set<String> otherKeys =  other.getDetectionOptionTypes();
+        
+        if(!thisKeys.equals(otherKeys))
+        	return false;
 
-        for (String s : detectionOptions.keySet()) {
-            IDetectionOptions d = detectionOptions.get(s);
-            Optional<IMutableDetectionOptions> otherSub = other.getDetectionOptions(s);
-            if((d!=null && !otherSub.isPresent()) || d==null && otherSub.isPresent())
+        for (String key : thisKeys) {
+            IDetectionOptions subOptions = detectionOptions.get(key);
+            if(!other.hasDetectionOptions(key))
             	return false;
-            
-            if(d==null)
-            	continue;
-            
-            if (!d.equals(otherSub.get())){
-
-            	System.out.println("Inequality in suboptions:");
-            	System.out.println(d.getClass().getName());
-            	System.out.println(other.getDetectionOptions(s).getClass().getName());
+            Optional<IDetectionOptions> otherSubOp = other.getDetectionOptions(key);
+            if(!otherSubOp.isPresent())
             	return false;
-            }
+            IDetectionOptions otherSub = otherSubOp.get();
+            if (!subOptions.equals(otherSub))
+            	return false;
         }
 
         if (Double.doubleToLongBits(profileWindowProportion) != Double
@@ -231,13 +256,6 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
         if (type != other.getNucleusType())
             return false;
-
-        if (isRefoldNucleus != other.refoldNucleus())
-            return false;
-
-        if (isKeepFailed != other.isKeepFailedCollections())
-            return false;
-
         return true;
     }
     
@@ -245,6 +263,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder("Analysis options"+IDetectionOptions.NEWLINE);
+        b.append("Run at: "+analysisTime+IDetectionOptions.NEWLINE);
         for (String s : detectionOptions.keySet()) {
             b.append(s+IDetectionOptions.NEWLINE);
             IDetectionOptions d = detectionOptions.get(s);
@@ -252,9 +271,10 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
         }
         b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
         b.append(IDetectionOptions.NEWLINE+type);
-        b.append(IDetectionOptions.NEWLINE+isRefoldNucleus);
-        b.append(IDetectionOptions.NEWLINE+isKeepFailed);
         return b.toString();
     }
+
+	
+    
 
 }

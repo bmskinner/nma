@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.IOException;
@@ -192,15 +190,15 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
 		return stderrs.stream().mapToDouble(d->d.doubleValue()).toArray();			
 	}
 
-	@Override
-	public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-		return chisquare;
-	}
-
-	@Override
-	public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-		return pvalue;
-	}
+//	@Override
+//	public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
+//		return chisquare;
+//	}
+//
+//	@Override
+//	public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
+//		return pvalue;
+//	}
 
 	@Override
 	public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -214,4 +212,29 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
         Arrays.fill(result, 0);
         return result;
     }
+
+	@Override
+	public long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getNumberOfSignals(@NonNull Aggregation agg) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public IShellResult duplicate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
+			@Nullable INuclearSignal signal) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

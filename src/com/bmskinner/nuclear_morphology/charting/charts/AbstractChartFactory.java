@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.Color;
@@ -23,6 +21,7 @@ import java.awt.Paint;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -39,24 +38,20 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 public abstract class AbstractChartFactory implements Loggable {
-    // extends ChartFactoryWorker
-
-    protected static final ForkJoinPool mainPool = new ForkJoinPool();
 
     protected static final int DEFAULT_EMPTY_RANGE         = 10;
     protected static final int DEFAULT_PROFILE_START_INDEX = -1;
 
     protected final ChartOptions options;
 
-    public AbstractChartFactory(ChartOptions o) {
-        if (o == null) {
+    public AbstractChartFactory(@NonNull final ChartOptions o) {
+        if (o == null)
             throw new IllegalArgumentException("Options cannot be null");
-        }
         options = o;
 
     }

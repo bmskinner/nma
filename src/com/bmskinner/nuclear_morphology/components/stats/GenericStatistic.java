@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.stats;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -36,6 +34,11 @@ public class GenericStatistic implements PlottableStatistic {
     public GenericStatistic(String s, StatisticDimension d) {
         name = s;
         dim = d;
+    }
+    
+    @Override
+    public String name() {
+    	return name;
     }
 
     @Override
@@ -79,7 +82,8 @@ public class GenericStatistic implements PlottableStatistic {
         return PlottableStatistic.units(scale, dim);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return name;
     }
 

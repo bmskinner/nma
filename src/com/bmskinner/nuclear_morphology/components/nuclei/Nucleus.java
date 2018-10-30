@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,15 +12,14 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 
@@ -31,10 +30,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
  * @author bms41
  *
  */
-public interface Nucleus extends CellularComponent, Profileable, Taggable, Comparable<Nucleus> {
-    // Note that we use Rotatable here although it is provided to objects
-    // already through the AbstractCellularComponent
-    // so that it can be accessed by the Nucleus interface itself.
+public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus> {
 
     // for debugging - use in calling dumpInfo()
     static final int ALL_POINTS    = 0;
@@ -74,7 +70,7 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
      * @param p the border point to orient from (the zero angle)
      * @throws Exception
      */
-    void calculateSignalAnglesFromPoint(IBorderPoint p);
+    void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p);
 
     String dumpInfo(int type);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,15 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -28,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -38,46 +42,42 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  * @since 1.13.5
  *
  */
-public abstract class CellFinder extends AbstractFinder<List<ICell>> {
+public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 
     /**
      * Construct the finder using an options
      * 
      * @param op
      */
-    public CellFinder(final IAnalysisOptions op) {
+    public CellFinder(@NonNull final IAnalysisOptions op) {
         super(op);
 
     }
 
     @Override
-    public List<ICell> findInFolder(@NonNull final File folder) throws ImageImportException, ComponentCreationException {
+    public Collection<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
 
-        List<ICell> list = new ArrayList<>();
-        File[] arr = folder.listFiles();
-        if (arr == null) {
-            return null;
-        }
-        
-        Stream.of(arr).parallel().forEach(f -> {
-            
-            if(Thread.interrupted()){
-                return;
-            }
-            
-            if (!f.isDirectory()) {
+    	final Queue<ICell> list = new ConcurrentLinkedQueue<>();
+    	File[] arr = folder.listFiles();
+    	if (arr == null)
+    		return list;
 
-                if (ImageImporter.fileIsImportable(f)) {
-                    try {
-                        list.addAll(findInImage(f));
-                    } catch (ImageImportException | ComponentCreationException e) {
-                        stack("Error searching image", e);
-                    }
-                }
-            }
-        });
+    	// Submitted to the FJP::commonPool, which is thread limited by the ThreadManger
+    	Stream.of(arr).parallel().forEach(f -> {
 
-        return list;
+    		if(Thread.interrupted())
+    			return;
+    		if(f.isDirectory())
+    			return;
+    		if (!ImageImporter.fileIsImportable(f))
+    			return;
+    		try {
+    			list.addAll(findInImage(f));
+    		} catch (ImageImportException e) {
+    			stack("Error searching image", e);
+    		}
+    	});
+    	return list;
     }
 
 }

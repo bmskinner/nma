@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -27,7 +26,10 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 
@@ -40,13 +42,13 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
     private static final String REVERSE_DESC_LABEL  = Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL;
     private static final String ADAPTIVE_DESC_LABEL = Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL;
 
-    private IMutableNuclearSignalOptions options;
+    private INuclearSignalOptions options;
 
     private JComboBox<SignalDetectionMode> box;
 
     private JPanel cardPanel;
 
-    public SignalMethodSettingsPanel(IMutableNuclearSignalOptions op) {
+    public SignalMethodSettingsPanel(INuclearSignalOptions op) {
         options = op;
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -111,6 +113,16 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
         super.setEnabled(b);
         box.setEnabled(b);
 
+    }
+    
+    /**
+     * Set the options values and update the spinners to match
+     * 
+     * @param options
+     */
+    public void set(@NonNull INuclearSignalOptions options) {
+    	this.options.set(options);
+    	update();
     }
 
 }

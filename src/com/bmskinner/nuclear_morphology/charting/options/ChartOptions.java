@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.options;
 
 import java.util.UUID;
@@ -96,7 +94,7 @@ public interface ChartOptions extends DisplayOptions {
      * 
      * @return
      */
-    boolean isHideProfiles();
+    boolean isShowProfiles();
 
     /**
      * Check if individual points in an XY chart should be displayed
@@ -104,6 +102,12 @@ public interface ChartOptions extends DisplayOptions {
      * @return
      */
     boolean isShowPoints();
+    
+    /**
+     * Should the interquartile range be displayed in a profile chart?
+     * @return
+     */
+    boolean isShowIQR();
 
     /**
      * Check if lines in an XY chart should be displayed

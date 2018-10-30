@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -25,8 +24,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 @SuppressWarnings("serial")
 public class ThresholdSettingsPanel extends DetectionSettingsPanel {
@@ -39,7 +38,7 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
 
     private JSpinner thresholdSpinner;
 
-    public ThresholdSettingsPanel(final IMutableDetectionOptions options) {
+    public ThresholdSettingsPanel(final IDetectionOptions options) {
         super(options);
 
         this.add(createPanel(), BorderLayout.CENTER);
@@ -83,13 +82,6 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
     public void setEnabled(boolean b) {
         super.setEnabled(b);
         thresholdSpinner.setEnabled(b);
-
-    }
-
-    @Override
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
 
     }
 }

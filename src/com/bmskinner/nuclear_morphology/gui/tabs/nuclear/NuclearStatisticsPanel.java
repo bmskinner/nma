@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,60 +12,53 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class NuclearStatisticsPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Nuclear charts";
-//    private static final String OVERVIEW_TAB_LBL  = "Average stats";
-//    private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
-//    private static final String HISTOGRAM_TAB_LBL = "Histograms";
-//    private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
-//    private static final String MAGNITUDE_TAB_LBL = "Magnitude";
-//    private static final String OVERLAYS_TAB_LBL  = "Overlays";
-//    private static final String SCATTER_TAB_LBL   = "Scatter";
-//    private static final String LOBES_TAB_LBL     = "Lobes";
 
     private JTabbedPane tabPane;
 
-    public NuclearStatisticsPanel() {
-        super();
+    public NuclearStatisticsPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
         tabPane = new JTabbedPane(JTabbedPane.TOP);
 
-        DetailPanel nuclearStatsPanel = new NuclearStatsPanel();
-        DetailPanel boxplotPanel = new NuclearBoxplotsPanel();
-        DetailPanel histogramsPanel = new NuclearHistogramsPanel();
-        DetailPanel wilcoxonPanel = new WilcoxonDetailPanel();
-        DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel();
-        // DetailPanel nuclearOverlaysPanel = new NuclearOverlaysPanel();
-        DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel();
-        DetailPanel nuclearLobesPanel = new NuclearLobesPanel();
+        DetailPanel nuclearStatsPanel = new NuclearStatsPanel(context);
+        DetailPanel boxplotPanel = new NuclearBoxplotsPanel(context);
+//        DetailPanel histogramsPanel = new NuclearHistogramsPanel(context);
+        DetailPanel wilcoxonPanel = new WilcoxonDetailPanel(context);
+        DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel(context);
+
+        DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel(context);
+        DetailPanel nuclearLobesPanel = new NuclearLobesPanel(context);
 
         this.addSubPanel(nuclearStatsPanel);
         this.addSubPanel(boxplotPanel);
-        this.addSubPanel(histogramsPanel);
+//        this.addSubPanel(histogramsPanel);
         this.addSubPanel(wilcoxonPanel);
         this.addSubPanel(nucleusMagnitudePanel);
-        // this.addSubPanel(nuclearOverlaysPanel);
+
         this.addSubPanel(nuclearScatterChartPanel);
         this.addSubPanel(nuclearLobesPanel);
 
         tabPane.addTab(nuclearStatsPanel.getPanelTitle(), nuclearStatsPanel);
         tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
-        tabPane.addTab(histogramsPanel.getPanelTitle(), histogramsPanel);
+//        tabPane.addTab(histogramsPanel.getPanelTitle(), histogramsPanel);
         tabPane.addTab(wilcoxonPanel.getPanelTitle(), wilcoxonPanel);
         tabPane.addTab(nucleusMagnitudePanel.getPanelTitle(), null, nucleusMagnitudePanel, "Pop, pop");
         tabPane.addTab(nuclearScatterChartPanel.getPanelTitle(), nuclearScatterChartPanel);

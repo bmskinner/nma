@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells;
 
 import java.awt.BorderLayout;
@@ -25,6 +23,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JScrollPane;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
@@ -35,8 +34,9 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * Display boxplots for whole cell data
@@ -48,8 +48,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
 
-    public CellsBoxplotsPanel() {
-        super(CellularComponent.WHOLE_CELL);
+    public CellsBoxplotsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.WHOLE_CELL);
 
         Dimension preferredSize = new Dimension(200, 300);
 

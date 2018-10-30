@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
@@ -32,15 +30,13 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
@@ -50,14 +46,15 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ManualClusteringDialog;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 /**
  * This panel shows any cluster groups that have been created, and the
@@ -68,7 +65,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ManualClusteringDialog;
  *
  */
 @SuppressWarnings("serial")
-public class ClusterDetailPanel extends DetailPanel implements DatasetEventListener {
+public class ClusterDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Clusters";
     private static final String NEW_CLUSTER_LBL = "Cluster cells";
@@ -77,11 +74,13 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     private static final String SHOW_TREE_LBL   = "Show tree";
     private static final String NO_CLUSTERS_LBL = "No clusters present";
     private static final String MAN_CLUSTER_LBL = "Manual cluster";
+    private static final String FILE_CLUSTER_LBL = "Add cluster from file";
 
     private JButton clusterButton        = new JButton(NEW_CLUSTER_LBL);
     private JButton buildTreeButton      = new JButton(NEW_TREE_LBL);
     private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
     private JButton manualClusterBtn     = new JButton(MAN_CLUSTER_LBL);
+    private JButton fileClusterBtn       = new JButton(FILE_CLUSTER_LBL);
 
     private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
     private JPanel statusPanel = new JPanel(new BorderLayout());
@@ -93,8 +92,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
     // private ClustersPanel clusterPanel;
 
-    public ClusterDetailPanel() {
-        super();
+    public ClusterDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
 
@@ -172,51 +171,39 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
         });
         
         manualClusterBtn.addActionListener(e -> {
-        	
         	try {
-        		final String chooseLbl  = "Number of groups";
+        		int maxGroups = activeDataset().getCollection().getCells().size()-1; // more would be silly, fewer restrictive
+        		int groups = getInputSupplier().requestInt("Number of groups", 2,2,maxGroups,1);
 
-    			SpinnerNumberModel sModel = new SpinnerNumberModel(2,2,5,1);
+        		List<String> groupNames = new ArrayList<>();
 
-    			JSpinner spinner = new JSpinner(sModel);
+        		for(int i=1; i<=groups; i++){
+        			String name = getInputSupplier().requestString("Name for group "+i);
+        			groupNames.add(name); 
+        		}
 
-    			int option = JOptionPane.showOptionDialog(null, spinner, chooseLbl, 
-    					JOptionPane.OK_CANCEL_OPTION,
-    					JOptionPane.QUESTION_MESSAGE, null, null, null);
+        		ManualClusteringDialog mc = new ManualClusteringDialog(activeDataset(), groupNames);
+        		mc.addInterfaceEventListener(this);
+        		mc.run();
+        		getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 
-    			if (option == JOptionPane.OK_OPTION) {
-
-    				int groups = (int) spinner.getModel().getValue();
-    				
-    				List<String> groupNames = new ArrayList<>();
-    				
-    				for(int i=0; i<groups; i++){
-    					groupNames.add(JOptionPane.showInputDialog("Name for group "+i)); 
-    				}
-
-    				if (groups > 1) {
-    					ManualClusteringDialog mc = new ManualClusteringDialog(getDatasets().get(0), groupNames);
-    					mc.addInterfaceEventListener(this);
-    					mc.run();
-    					getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-    				} else {
-    					warn("Must have at least two groups");
-    				}
-    			}
-    		}catch(Exception ex){
-    			warn("Error getting manual cluster count");
-    			stack("Error getting manual cluster count", ex);
-    		}
-        	
-            
+        	} catch (RequestCancelledException e1) {
+        		return;
+        	}
+        });
+        
+        fileClusterBtn.addActionListener(e -> {
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER_FROM_FILE, getDatasets());
         });
 
         saveClassifierButton.setEnabled(false);
         buildTreeButton.setEnabled(true);
         manualClusterBtn.setEnabled(true);
+        fileClusterBtn.setEnabled(true);
         buttonPanel.add(manualClusterBtn);
         buttonPanel.add(buildTreeButton);
         buttonPanel.add(clusterButton);
+        buttonPanel.add(fileClusterBtn);
         
         // buttonPanel.add(saveClassifierButton);
 
@@ -269,9 +256,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
      */
     private List<JComponent> createShowTreeButtons() {
 
-        if (!hasDatasets()) {
+        if (!hasDatasets())
             return null;
-        }
 
         List<JComponent> result = new ArrayList<JComponent>();
         Dimension fillerSize = new Dimension(10, 5);
@@ -309,6 +295,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
         clusterButton.setEnabled(b);
         buildTreeButton.setEnabled(b);
         manualClusterBtn.setEnabled(b);
+        fileClusterBtn.setEnabled(b);
         // saveClassifierButton.setEnabled(b); // not yet enabled
     }
 
@@ -358,15 +345,15 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
                     statusLabel.setText(NO_CLUSTERS_LBL);
 
                 } else {
-                    statusLabel.setText("Dataset has " + activeDataset().getClusterGroups().size() + " cluster groups");
+                	int nGroups = activeDataset().getClusterGroups().size();
+                	String plural = nGroups==1 ? "" : "s"; 
+                    statusLabel.setText("Dataset has " + activeDataset().getClusterGroups().size() + " cluster group"+plural);
                 }
             } else { // more than one dataset selected
                 statusLabel.setText(Labels.MULTIPLE_DATASETS);
                 setEnabled(false);
             }
         }
-        finest("Updated cluster panel");
-
     }
 
     @Override
@@ -386,8 +373,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     }
 
     @Override
-    public void datasetEventReceived(DatasetEvent event) {
-        super.datasetEventReceived(event);
+    public void eventReceived(DatasetEvent event) {
+        super.eventReceived(event);
 
         if (event.getSource() instanceof ClusterTreeDialog) {
             this.getDatasetEventHandler().fireDatasetEvent(event);
@@ -395,9 +382,9 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     }
 
     public void interfaceEventReceived(InterfaceEvent event) {
-        super.interfaceEventReceived(event);
+    	 super.eventReceived(event);
         if (event.getSource() instanceof ClusterTreeDialog || event.getSource() instanceof ManualClusteringDialog) {
-            getInterfaceEventHandler().fireInterfaceEvent(event);
+            getInterfaceEventHandler().fire(event);
         }
     }
 

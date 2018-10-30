@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
@@ -28,53 +26,53 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NeutrophilDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public class NeutrophilAnalysisAction extends VoidResultAction {
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
     private Date                    startTime;
     private String                  outputFolderName;
 
     private File folder = null;
 
     public static final int NEW_ANALYSIS = 0;
+    private static final String PROGRESS_BAR_LABEL = "Neutrophil detection";
 
     /**
      * Create a new analysis. The folder of images to analyse will be requested
      * by a dialog.
      * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
+     * @param mw the main window to which a progress bar will be attached
      */
-    public NeutrophilAnalysisAction(MainWindow mw) {
-        this(mw, null);
+    public NeutrophilAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        this(acceptor, eh, null);
     }
 
     /**
      * Create a new analysis, specifying the initial directory of images
      * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
-     * @param folder
-     *            the folder of images to analyse
+     * @param mw the main window to which a progress bar will be attached
+     * @param folder the folder of images to analyse
      */
-    public NeutrophilAnalysisAction(MainWindow mw, final File folder) {
-        super("Neutrophil detection", mw);
+    public NeutrophilAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, final File folder) {
+        super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.folder = folder;
     }
 
@@ -84,14 +82,11 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
         this.setProgressBarIndeterminate();
 
         if (folder == null) {
-            fine("No folder, getting directory");
             if (!getImageDirectory()) {
                 this.cancel();
                 return;
             }
         }
-
-        fine("Making analysis options");
 
         NeutrophilImageProber analysisSetup = new NeutrophilImageProber(folder);
 
@@ -99,7 +94,7 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
 
             options = analysisSetup.getOptions();
             
-            Optional<IMutableDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            Optional<IDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
             if(!op.isPresent()){
             	cancel();
             	return;
@@ -119,14 +114,14 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
 
             // craete the analysis folder early. Did not before in case folder
             // had no images
-            File analysisFolder = new File(directory, outputFolderName);
-            if (!analysisFolder.exists()) {
-                analysisFolder.mkdir();
-            }
+//            File analysisFolder = new File(directory, outputFolderName);
+//            if (!analysisFolder.exists()) {
+//                analysisFolder.mkdir();
+//            }
             //
-            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
+//            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
 
-            IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, logFile, options);
+            IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, options);
 
             worker = new DefaultAnalysisWorker(m);
             worker.addPropertyChangeListener(this);

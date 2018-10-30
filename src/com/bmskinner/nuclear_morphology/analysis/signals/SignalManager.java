@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.io.File;
@@ -47,20 +45,17 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
+
+import ij.process.ImageProcessor;
 
 /**
  * This class is designed to simplify operations on CellCollections
  * involving signals. It should be accessed via CellCollection.getSignalManager()
- * @author bms41
- *
- */
-/**
- * @author bms41
- *
- */
-/**
  * @author bms41
  *
  */
@@ -81,7 +76,7 @@ public class SignalManager implements Loggable {
      */
     public Set<ICell> getCellsWithNuclearSignals(@NonNull final UUID signalGroupId, boolean hasSignal) {
         return collection.streamCells()
-                .filter( c->c.hasNuclearSignals(signalGroupId))
+                .filter( c->c.hasNuclearSignals(signalGroupId)==hasSignal)
                 .collect(Collectors.toSet());
     }
     
@@ -159,23 +154,20 @@ public class SignalManager implements Loggable {
     	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
         return g.isPresent() ? g.get().getGroupName() : "";
     }
-
-    public int getSignalChannel(@NonNull final UUID signalGroupId) {
-    	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
-        return g.isPresent() ? g.get().getChannel() : -1;
-    }
-
+    
     /**
-     * Get the name of the folder containing the images for the given signal
-     * group
-     * 
-     * @param signalGroupId the signal group
-     * @return
-     * @throws UnavailableSignalGroupException
+     * Get the source image for the given signal group and cell. This will return the appropriate
+     * image even if no signals were detected in the cell. 
+     * @param signalGroupId the signal group id
+     * @param cell the cell whose signal image to fetch
+     * @return the image processor for the image
+     * @throws UnloadableImageException if the image cannot be found or opened
      */
-    public String getSignalSourceFolder(@NonNull final UUID signalGroupId) {
-    	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
-        return g.isPresent() ? g.get().getFolder().getAbsolutePath() : "";
+    public ImageProcessor getSignalSourceImage(@NonNull final UUID signalGroupId, @NonNull final ICell cell) throws UnloadableImageException {
+    	Nucleus n = cell.getNucleus();
+    	if(n.getSignalCollection().hasSignal(signalGroupId))
+    		return n.getSignalCollection().getImage(signalGroupId);
+    	throw new UnloadableImageException( String.format("No signal image file %s for nucleus %s", n.getSignalCollection().getSourceFile(signalGroupId), n.getNameAndNumber()));   	
     }
 
     /**
@@ -199,15 +191,10 @@ public class SignalManager implements Loggable {
                 n.getSignalCollection().updateSourceFile(signalGroupId, newFile);
             }
         });
-
-
-        collection.getSignalGroup(signalGroupId).get().setFolder(folder);
-
-
     }
 
     /**
-     * Update the signal group id
+     * Update a signal group id
      * 
      * @param oldID the id to replace
      * @param newID the new id
@@ -217,30 +204,21 @@ public class SignalManager implements Loggable {
         if (!collection.hasSignalGroup(oldID))
             return;
 
-        for (Nucleus n : collection.getNuclei()) {
+        for (Nucleus n : collection.getNuclei())
             n.getSignalCollection().updateSignalGroupId(oldID, newID);
-        }
 
         // the group the signals are currently in
 		ISignalGroup oldGroup = collection.getSignalGroup(oldID).get();
 
 		// Merge and rename signal groups
 
-		if (collection.hasSignalGroup(newID)) { // check if the group
-		                                        // already exists
+		if (collection.hasSignalGroup(newID)) { // check if the group already exists
 
 		    ISignalGroup existingGroup = collection.getSignalGroup(newID).get();
 
 		    if (!oldGroup.getGroupName().equals(existingGroup.getGroupName())) {
-		        existingGroup
-		                .setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
+		        existingGroup.setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
 		    }
-
-		    if (oldGroup.getChannel() != existingGroup.getChannel()) {
-		        existingGroup.setChannel(-1);
-		    }
-
-		    // Shells and colours?
 
 		} else { // the signal group does not exist, just copy the old group
 
@@ -303,7 +281,7 @@ public class SignalManager implements Loggable {
      * 
      * @return
      */
-    public boolean hasSignals() {
+    public synchronized boolean hasSignals() {
         for (UUID i : getSignalGroupIDs()) {
             if (this.hasSignals(i)) {
                 return true;
@@ -318,12 +296,7 @@ public class SignalManager implements Loggable {
      * @return
      */
     public boolean hasSignals(@NonNull final UUID signalGroupId) {
-        if (this.getSignalCount(signalGroupId) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return this.getSignalCount(signalGroupId) > 0;
     }
 
     /**
@@ -331,7 +304,7 @@ public class SignalManager implements Loggable {
      * 
      * @return
      */
-    public boolean hasShellResult() {
+    public synchronized boolean hasShellResult() {
         for (UUID id : collection.getSignalGroupIDs()) {
             if (collection.getSignalGroup(id).get().hasShellResult()) {
 			    return true;
@@ -380,6 +353,7 @@ public class SignalManager implements Loggable {
 
             median = Stats.quartile(values, Stats.MEDIAN);
             median += getMeanSignalAngle(signalGroupId);
+            median = (median+360)%360; // ensure range
         } else {
             values = this.getSignalStatistics(stat, scale, signalGroupId);
 
@@ -407,32 +381,19 @@ public class SignalManager implements Loggable {
 
         if (!this.hasSignals(signalGroupId))
             return new double[0];
-
-        Set<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);
-//        List<Double> a = new ArrayList<Double>(0);
         
+        if(PlottableStatistic.NUCLEUS_SIGNAL_COUNT.equals(stat)) {
+        	return collection.getCells().stream().flatMap(c->c.getNuclei().stream())
+                    .mapToDouble(n->n.getSignalCollection().numberOfSignals(signalGroupId))
+                    .toArray();
+        }
+
+        Set<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);        
         return cells.stream().flatMap(  c->c.getNuclei().stream()  )
             .flatMap(  n->n.getSignalCollection()
                     .getStatistics(stat, scale, signalGroupId)
                     .stream()  )
             .mapToDouble(d->d.doubleValue()).toArray();
-        
-//        for (ICell c : cells) {
-//            for (Nucleus n : c.getNuclei()) {
-//                a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroupId));
-//            }
-//
-//        }
-//
-//        double[] values;
-//
-//        try {
-//            values = new ArrayConverter(a).toDoubleArray();
-//
-//        } catch (ArrayConversionException e) {
-//            values = new double[0];
-//        }
-//        return values;
     }
 
     /**
@@ -570,8 +531,9 @@ public class SignalManager implements Loggable {
      */
     public int getShellCount() {
 
-        for (ISignalGroup group : this.getSignalGroups()) {
-        	Optional<IShellResult> r = group.getShellResult();
+        for(UUID id : getSignalGroupIDs()) {
+            ISignalGroup group = collection.getSignalGroup(id).get();
+            Optional<IShellResult> r = group.getShellResult();
         	if(r.isPresent())
                 return r.get().getNumberOfShells();
         }
@@ -628,5 +590,4 @@ public class SignalManager implements Loggable {
         }
         return result;
     }
-
 }

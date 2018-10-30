@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
@@ -28,15 +26,18 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -50,14 +51,12 @@ public class SignalsAnalysisPanel extends DetailPanel {
     private JScrollPane     scrollPane;
     private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
-    public SignalsAnalysisPanel() {
-        super(PANEL_TITLE_LBL);
+    public SignalsAnalysisPanel(@NonNull InputSupplier context) {
+        super(context ,PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         table = new ExportableTable(new DefaultTableModel());
-
         table.setEnabled(false);
-
         table.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -73,10 +72,15 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
                     String rowName = table.getModel().getValueAt(row, 0).toString();
 
-                    if (rowName.equals("Source")) {
+                    if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
 
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2, column);
-                        updateSignalSource(signalGroup);
+                        cosmeticHandler.updateSignalSource(d, signalGroup.getID());
+                        SignalTableCell newValue = new SignalTableCell(signalGroup.getID(), 
+                        		d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).getFolder().getAbsolutePath(),
+                        		signalGroup.getColor());
+                        table.getModel().setValueAt(newValue, row, column);
+                        table.repaint();
                     }
 
                     if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
@@ -87,7 +91,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
                     if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+                        cosmeticHandler.changeSignalColour(d, signalGroup.getID());
                         update(getDatasets());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
@@ -103,36 +107,6 @@ public class SignalsAnalysisPanel extends DetailPanel {
     
     private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
         return (SignalTableCell) table.getModel().getValueAt(row, column);
-    }
-
-    private void updateSignalSource(SignalTableCell signalGroup) {
-        if (isSingleDataset()) {
-            finest("Updating signal source for signal group " + signalGroup);
-
-            DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
-            String folderName = openDialog.getDirectory();
-
-            if (folderName == null) {
-                finest("Folder name null");
-                return;
-            }
-
-            File folder = new File(folderName);
-
-            if (!folder.isDirectory()) {
-                finest("Folder is not directory");
-                return;
-            }
-            if (!folder.exists()) {
-                finest("Folder does not exist");
-                return;
-            }
-
-            activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup.getID(), folder);
-            // SignalsDetailPanel.this.update(getDatasets());
-            refreshTableCache();
-            finest("Updated signal source for signal group " + signalGroup + " to " + folder.getAbsolutePath());
-        }
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.EventObject;
@@ -52,12 +50,9 @@ public class ProgressEvent extends EventObject {
      * for example - the total progress bar length to be altered based on a
      * computation in an IAnalysisMethod
      * 
-     * @param source
-     *            the source firing the event
-     * @param m
-     *            the messsage type
-     * @param v
-     *            the value in the message
+     * @param source the source firing the event
+     * @param m the messsage type
+     * @param v the value in the message
      */
     public ProgressEvent(Object source, int m, long v) {
         super(source);
@@ -65,10 +60,18 @@ public class ProgressEvent extends EventObject {
         value = v;
     }
 
+    /**
+     * Get the message in this event
+     * @return
+     */
     public int getMessage() {
         return message;
     }
 
+    /**
+     * Get the value in this event
+     * @return
+     */
     public long getValue() {
         return value;
     }

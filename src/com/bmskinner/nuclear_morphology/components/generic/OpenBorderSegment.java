@@ -1,22 +1,19 @@
 /*******************************************************************************
- *      Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
@@ -28,11 +25,13 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
  * A border segment without the length restrictions of the DefaultBorderSegment.
- * This allows 
+ * This allows segments smaller than the minimum to be created if needed. This class should
+ * not be generally used.
  * @author bms41
  * @since 1.13.8
  *
@@ -41,8 +40,7 @@ public class OpenBorderSegment implements IBorderSegment {
 
     private static final long serialVersionUID = 1L;
 
-    private UUID uuid; // allows keeping a consistent track of segment IDs with
-                       // a profile
+    private UUID uuid;
 
     private int startIndex, endIndex, totalLength;
 
@@ -54,29 +52,25 @@ public class OpenBorderSegment implements IBorderSegment {
      * TRANSIENT FIELDS
      */
 
-    private transient IBorderSegment prevSegment = null;  // track the previous
-                                                          // segment in the
-                                                          // profile
-    private transient IBorderSegment nextSegment = null;  // track the next
-                                                          // segment in the
-                                                          // profile
-    private transient boolean        isLocked    = false; // allow the start
-                                                          // index to be fixed
+    private transient IBorderSegment prevSegment = null;
+    private transient IBorderSegment nextSegment = null;
+    private transient boolean        isLocked    = false;
+                                                         
 
     /**
      * Construct with an existing UUID. This allows nucleus segments to directly
      * track median profile segments
      * 
-     * @param startIndex
-     * @param endIndex
-     * @param total
-     * @param id
+     * @param startIndex the start index of the segment
+     * @param endIndex the end index of the segment (inclusive)
+     * @param total the length of the profile that generated the segment
+     * @param id the id of the segment
      */
     public OpenBorderSegment(int startIndex, int endIndex, int total, UUID id) {
-
-        if (id == null) {
+    	if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && startIndex!=endIndex)
+			throw new IllegalArgumentException(String.format("Cannot make default segment %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
+        if (id == null)
             throw new IllegalArgumentException("Segment ID cannot be null");
-        }
 
         this.startIndex = startIndex;
         this.endIndex = endIndex;
@@ -105,7 +99,7 @@ public class OpenBorderSegment implements IBorderSegment {
         this.uuid = n.getID();
         this.startIndex = n.getStartIndex();
         this.endIndex = n.getEndIndex();
-        this.totalLength = n.getTotalLength();
+        this.totalLength = n.getProfileLength();
         this.nextSegment = n.nextSegment();
         this.prevSegment = n.prevSegment();
 
@@ -123,6 +117,11 @@ public class OpenBorderSegment implements IBorderSegment {
 
         this.isLocked = n.isLocked();
     }
+    
+    @Override
+	public IBorderSegment copy() {
+		return new OpenBorderSegment(this);
+	}
 
     /*
      * ---------------- Getters ----------------
@@ -134,7 +133,7 @@ public class OpenBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getID()
      */
     @Override
-    public UUID getID() {
+    public @NonNull UUID getID() {
         return this.uuid;
     }
 
@@ -161,95 +160,76 @@ public class OpenBorderSegment implements IBorderSegment {
     @Override
     public void addMergeSource(IBorderSegment seg) {
 
-        if (seg == null) {
+        if (seg == null)
             throw new IllegalArgumentException("Merge source segment is null");
-        }
-
-        if (seg.getTotalLength() != totalLength) {
+        if(seg.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID)) // never replace or chain the default segment
+			return;
+		if(seg.getID().equals(getID()))
+			throw new IllegalArgumentException(String.format("Cannot add merge source with same id as parent: %s", seg.getID()));
+		if(getMergeSources().stream().anyMatch(s->s.getID().equals(seg.getID())))
+			throw new IllegalArgumentException(String.format("Segment with id %s is already a merge source", seg.getID()));
+        if (seg.getProfileLength() != totalLength)
             throw new IllegalArgumentException("Merge source length does not match");
-        }
 
-        if (!this.contains(seg.getStartIndex())) {
+        if (!this.contains(seg.getStartIndex()))
             throw new IllegalArgumentException("Start index of source is not in this segment");
-        }
 
-        if (!this.contains(seg.getEndIndex())) {
+        if (!this.contains(seg.getEndIndex()))
             throw new IllegalArgumentException("End index of source is not in this segment");
-        }
 
         mergeSources = Arrays.copyOf(mergeSources, mergeSources.length + 1);
         mergeSources[mergeSources.length - 1] = seg;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasMergeSources()
-     */
     @Override
     public boolean hasMergeSources() {
         return mergeSources.length > 0;
     }
+    
+	@Override
+	public boolean hasMergeSource(@NonNull UUID id) {
+		for(IBorderSegment s : mergeSources) {
+			if(s.getID().equals(id) || s.hasMergeSource(id))
+				return true;
+		}
+		return false;
+	}
+
+	@Override
+	public IBorderSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException {
+		for(IBorderSegment s : mergeSources) {
+			if(s.getID().equals(id))
+				return s;
+			if(s.hasMergeSource(id)) {
+				return s.getMergeSource(id);
+			}
+		}
+		throw new UnavailableComponentException(String.format("Segment %s is not present", id));
+	}
 
     @Override
     public void clearMergeSources() {
         mergeSources = new IBorderSegment[0];
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getStartIndex()
-     */
     @Override
     public int getStartIndex() {
         return this.startIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getEndIndex()
-     */
     @Override
     public int getEndIndex() {
         return this.endIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getProportionalIndex(double)
-     */
     @Override
     public int getProportionalIndex(double d) {
-        if (d < 0 || d > 1) {
-            throw new IllegalArgumentException("Value must be between 0 and 1");
-        }
-
-        double desiredDistanceFromStart = (double) this.length() * d;
-
-        int target = (int) desiredDistanceFromStart;
-
-        int counter = 0;
-        Iterator<Integer> it = this.iterator();
-        while (it.hasNext()) {
-            int index = it.next();
-
-            if (counter == target) {
-                return index;
-            }
-            counter++;
-        }
-        return -1;
-
+    	if (d < 0 || d > 1)
+			throw new IllegalArgumentException("Proportion must be between 0-1: " + d);
+		double targetLength = length() * d;
+		return (int) Math.round(CellularComponent.wrapIndex(startIndex+targetLength, getProfileLength()));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getIndexProportion(int)
-     */
     @Override
     public double getIndexProportion(int index) {
         if (!this.contains(index)) {
@@ -262,7 +242,7 @@ public class OpenBorderSegment implements IBorderSegment {
             int test = it.next();
 
             if (index == test) {
-                return (double) ((double) counter / (double) this.length());
+                return (double) counter / (double) this.length();
             }
             counter++;
         }
@@ -270,22 +250,11 @@ public class OpenBorderSegment implements IBorderSegment {
         throw new IllegalArgumentException("Cannot get proportion for " + index);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getName()
-     */
     @Override
     public String getName() {
         return "Seg_" + this.positionInProfile;
     }
 
-    // when using this, use wrapIndex()!
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getMidpointIndex()
-     */
     @Override
     public int getMidpointIndex() {
         if (this.wraps()) {
@@ -293,22 +262,15 @@ public class OpenBorderSegment implements IBorderSegment {
             int midLength = this.length() >> 1;
             if (midLength + startIndex < totalLength) {
                 return midLength + startIndex;
-            } else {
-                return endIndex - midLength;
             }
+			return endIndex - midLength;
 
-        } else {
-            return ((endIndex - startIndex) / 2) + startIndex;
         }
+		return ((endIndex - startIndex) / 2) + startIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getDistanceToStart(int)
-     */
     @Override
-    public int getDistanceToStart(int index) {
+    public int getShortestDistanceToStart(int index) {
         if (index < 0 || index >= totalLength) {
             throw new IllegalArgumentException("Index is not in profile: " + index + "; total " + totalLength);
         }
@@ -321,13 +283,9 @@ public class OpenBorderSegment implements IBorderSegment {
         return Math.min(abs, alt);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getDistanceToEnd(int)
-     */
+
     @Override
-    public int getDistanceToEnd(int index) {
+    public int getShortestDistanceToEnd(int index) {
         if (index < 0 || index >= totalLength) {
             throw new IllegalArgumentException("Index is not in profile: " + index + "; total " + totalLength);
         }
@@ -337,87 +295,63 @@ public class OpenBorderSegment implements IBorderSegment {
 
         return Math.min(abs, alt);
     }
+    
+    @Override
+	public int getInternalDistanceToStart(int index) {
+		if(wraps() && startIndex>index)
+			return index + (getProfileLength()-startIndex);
+		return index-startIndex;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#isStartPositionLocked()
-     */
+	@Override
+	public int getInternalDistanceToEnd(int index) {
+		if(wraps() && getEndIndex()<index)
+			return getEndIndex() + (getProfileLength()-index);
+		return index-getEndIndex();
+	}
+
     @Override
     public boolean isLocked() {
         return isLocked;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setStartPositionLocked(boolean)
-     */
     @Override
     public void setLocked(boolean startPositionLocked) {
         this.isLocked = startPositionLocked;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getTotalLength()
-     */
     @Override
-    public int getTotalLength() {
+    public int getProfileLength() {
         return this.totalLength;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#nextSegment()
-     */
     @Override
     public IBorderSegment nextSegment() {
         return this.nextSegment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#prevSegment()
-     */
     @Override
     public IBorderSegment prevSegment() {
         return this.prevSegment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#length()
-     */
     @Override
     public int length() {
         return testLength(this.getStartIndex(), this.getEndIndex());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + uuid.hashCode();
         result = prime * result + endIndex;
         result = prime * result + startIndex;
         result = prime * result + totalLength;
+        result = prime * result + mergeSources.hashCode();
         return result;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#equals(java.lang.Object)
-     */
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -427,6 +361,8 @@ public class OpenBorderSegment implements IBorderSegment {
         if (getClass() != obj.getClass())
             return false;
         OpenBorderSegment other = (OpenBorderSegment) obj;
+        if(!uuid.equals(other.uuid))
+        	return false;
         if (endIndex != other.endIndex)
             return false;
         if (startIndex != other.startIndex)
@@ -435,26 +371,23 @@ public class OpenBorderSegment implements IBorderSegment {
             return false;
         return true;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#testLength(int, int)
-     */
+    
     @Override
-    public int testLength(int start, int end) {
-        if (wraps(start, end)) { // the segment wraps
-            return end + (totalLength - start);
-        } else {
-            return end - start;
-        }
+    public void offset(int offset) {
+    	startIndex = CellularComponent.wrapIndex(startIndex+offset, totalLength);
+    	endIndex  = CellularComponent.wrapIndex(endIndex+offset, totalLength);
+    	for(IBorderSegment s : mergeSources) {
+    		s.offset(offset);
+    	}
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#wraps(int, int)
-     */
+    @Override
+    public int testLength(int start, int end) {
+    	if(wraps(start, end))
+			return end+totalLength+1-start; // add total of 2; one for index 0 and one for segment end
+		return end-start+1; // add one for segment end
+    }
+
     @Override
     public boolean wraps(int start, int end) {
         if ((start < 0 || start > totalLength) || (end < 0 || end > totalLength)) {
@@ -463,44 +396,16 @@ public class OpenBorderSegment implements IBorderSegment {
         return (end <= start);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#wraps()
-     */
     @Override
     public boolean wraps() {
         return wraps(this.getStartIndex(), this.getEndIndex());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#contains(int)
-     */
     @Override
     public boolean contains(int index) {
         return IBorderSegment.contains(startIndex, endIndex, index, totalLength);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#testContains(int, int, int)
-     */
-//    @Override
-//    public boolean testContains(int start, int end, int index) {
-//        if (index < 0 || index > totalLength) {
-//            return false;
-//        }
-//
-//        if (wraps(start, end)) { // wrapped
-//            return (index <= end || index >= start);
-//        } else { // regular
-//            return (index >= start && index <= end);
-//        }
-//
-//    }
 
     /**
      * Test if a proposed update affects this segment
@@ -513,7 +418,7 @@ public class OpenBorderSegment implements IBorderSegment {
         return (startIndex != this.startIndex || endIndex != this.endIndex);
     }
 
-    private boolean canUpdateSegment(int startIndex, int endIndex) {
+    private boolean canUpdateSegment(int startIndex, int endIndex) throws SegmentUpdateException {
         if (this.isLocked) { // don't allow locked segments to update
             return false;
         }
@@ -564,6 +469,10 @@ public class OpenBorderSegment implements IBorderSegment {
 
         // also test the effect on the next and previous segments
         if (this.hasPrevSegment()) {
+        	
+        	if( !contains(startIndex) && !prevSegment().contains(startIndex))
+				throw new SegmentUpdateException(String.format("Neither this nor previous segment %s contain the new start index %d", prevSegment().getDetail(), startIndex));
+	        
             if (this.prevSegment().getStartIndex() > startIndex) {
 
                 if (!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex)) {
@@ -579,7 +488,12 @@ public class OpenBorderSegment implements IBorderSegment {
         }
 
         if (this.hasNextSegment()) {
+        	
+        	if( !contains(endIndex) && !nextSegment().contains(endIndex))
+	        	throw new SegmentUpdateException(String.format("Neither this nor next segment %s contain the new end index %d", nextSegment().getDetail(), endIndex));
+
             if (endIndex > nextSegment.getEndIndex()) {
+            	
 
                 // if the next segment goes from not wrapping to wrapping when
                 // this segment is altered,
@@ -599,24 +513,16 @@ public class OpenBorderSegment implements IBorderSegment {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#update(int, int)
-     */
     @Override
     public boolean update(int startIndex, int endIndex) throws SegmentUpdateException {
         // Check the incoming data
-        if (startIndex < 0 || startIndex > totalLength) {
-            throw new IllegalArgumentException("Start index is outside the profile range: " + startIndex);
-        }
-        if (endIndex < 0 || endIndex > totalLength) {
-            throw new IllegalArgumentException("End index is outside the profile range: " + endIndex);
-        }
+        if (startIndex < 0 || startIndex > totalLength)
+            throw new SegmentUpdateException("Start index is outside the profile range: " + startIndex);
+        if (endIndex < 0 || endIndex > totalLength)
+            throw new SegmentUpdateException("End index is outside the profile range: " + endIndex);
 
-        if (!canUpdateSegment(startIndex, endIndex)) {
-            return false;
-        }
+        if (!canUpdateSegment(startIndex, endIndex))
+        	throw new SegmentUpdateException("Unable to update segment");
 
         // All checks have been passed; the update can proceed
 
@@ -646,19 +552,13 @@ public class OpenBorderSegment implements IBorderSegment {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setNextSegment(components.nuclear.
-     * NucleusBorderSegment)
-     */
     @Override
     public void setNextSegment(IBorderSegment s) {
         if (s == null) {
             throw new IllegalArgumentException("Segment cannot be null");
         }
 
-        if (s.getTotalLength() != this.getTotalLength()) {
+        if (s.getProfileLength() != this.getProfileLength()) {
             throw new IllegalArgumentException("Segment has a different total length");
         }
         if (s.getStartIndex() != this.getEndIndex()) {
@@ -669,12 +569,6 @@ public class OpenBorderSegment implements IBorderSegment {
         this.nextSegment = s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setPrevSegment(components.nuclear.
-     * IBorderSegment)
-     */
     @Override
     public void setPrevSegment(IBorderSegment s) {
 
@@ -682,7 +576,7 @@ public class OpenBorderSegment implements IBorderSegment {
             throw new IllegalArgumentException("Segment cannot be null");
         }
 
-        if (s.getTotalLength() != this.getTotalLength()) {
+        if (s.getProfileLength() != this.getProfileLength()) {
             throw new IllegalArgumentException("Segment has a different total length");
         }
         if (s.getEndIndex() != this.getStartIndex()) {
@@ -693,43 +587,20 @@ public class OpenBorderSegment implements IBorderSegment {
         this.prevSegment = s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasNextSegment()
-     */
     @Override
     public boolean hasNextSegment() {
-        if (this.nextSegment() != null) {
+        if (this.nextSegment() != null)
             return true;
-        } else {
-            return false;
-        }
+		return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasPrevSegment()
-     */
     @Override
     public boolean hasPrevSegment() {
-        if (this.prevSegment() != null) {
+        if (this.prevSegment() != null)
             return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
-    // public void setName(String s){
-    // this.name = s;
-    // }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setPosition(int)
-     */
     @Override
     public void setPosition(int i) {
         if (i < 0) {
@@ -738,28 +609,18 @@ public class OpenBorderSegment implements IBorderSegment {
         this.positionInProfile = (short) i;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getPosition()
-     */
     @Override
     public int getPosition() {
         return this.positionInProfile;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#toString()
-     */
     @Override
     public String toString() {
-
         return this.getName();
     }
 
-    public String getDetail() {
+    @Override
+	public String getDetail() {
 
         StringBuilder builder = new StringBuilder();
 
@@ -776,18 +637,13 @@ public class OpenBorderSegment implements IBorderSegment {
         builder.append(" | ");
         builder.append(this.length());
         builder.append(" of ");
-        builder.append(this.getTotalLength() - 1);
+        builder.append(this.getProfileLength() - 1);
         builder.append(" | ");
         builder.append(this.wraps());
 
         return builder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#iterator()
-     */
     @Override
     public Iterator<Integer> iterator() {
 
@@ -795,10 +651,10 @@ public class OpenBorderSegment implements IBorderSegment {
 
         if (this.wraps()) {
 
-            for (int i = this.getStartIndex(); i < this.getTotalLength(); i++) {
+            for (int i = this.getStartIndex(); i < this.getProfileLength(); i++) {
                 indexes.add(i);
             }
-            for (int i = 0; i < this.getEndIndex(); i++) {
+            for (int i = 0; i <= this.getEndIndex(); i++) {
                 indexes.add(i);
             }
 
@@ -814,44 +670,41 @@ public class OpenBorderSegment implements IBorderSegment {
     }
     
     @Override
+    public boolean overlapsBeyondEndpoints(@NonNull IBorderSegment seg){
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+    	
+    	Iterator<Integer> it = this.iterator();
+    	while(it.hasNext()) {
+    		int index = it.next();
+    		if(index==getStartIndex() || index==getEndIndex())
+    			continue;
+    		if(seg.contains(index))
+    			return true;
+    	}
+    	return false;
+    }
+    
+    @Override
     public boolean overlaps(@NonNull IBorderSegment seg){
-        if(seg==null)
-            throw new IllegalArgumentException("Segment is null");
-        
-        if(startIndex==seg.getStartIndex())
-            return true;
-        
-        if(endIndex==seg.getEndIndex())
-            return true;
-        
-        if(startIndex==seg.getEndIndex())
-            return false;
-        
-        if(endIndex==seg.getStartIndex())
-            return false;
-        
-        Iterator<Integer> it = seg.iterator();
-        while(it.hasNext()){
-            Integer i = it.next();
-            if(i==seg.getStartIndex() || i==seg.getEndIndex())
-                continue;
-            
-            if(seg.contains(i))
-                return true;
-        }
-        return false;
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+		return seg.contains(startIndex) 
+				|| seg.contains(getEndIndex()) 
+				|| contains(seg.getStartIndex()) 
+				|| contains(seg.getEndIndex());
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\t\tReading nucleus border segment");
         in.defaultReadObject();
-        // finest("\t\tRead nucleus border segment");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\t\tWriting nucleus border segment");
         out.defaultWriteObject();
-        // finest("\t\tWrote nucleus border segment");
     }
 
 }

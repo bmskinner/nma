@@ -1,0 +1,159 @@
+package com.bmskinner.nuclear_morphology.components;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.UUID;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+
+import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+
+/**
+ * Tests for implementations of the Taggable interface
+ * @author ben
+ * @since 1.14.0
+ *
+ */
+@RunWith(Parameterized.class)
+public class TaggableTest extends ComponentTester {
+	
+	private Taggable taggable;
+
+	@Parameter(0)
+	public Class<? extends Taggable> source;
+
+	@Override
+	@Before
+	public void setUp() throws Exception{
+		super.setUp();
+		taggable = createInstance(source);
+	}
+
+	/**
+	 * Create an instance of the class under test
+	 * @param source the class to create
+	 * @return
+	 * @throws Exception 
+	 */
+	public static Taggable createInstance(Class<? extends Taggable> source) throws Exception {
+
+		if(source==DefaultNucleus.class){
+			IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
+					.ofType(NucleusType.ROUND)
+					.randomOffsetProfiles(true)
+					.segmented().build();
+			return d.getCollection().getCells().stream().findFirst().get().getNucleus();
+		}
+
+		throw new Exception("Unable to create instance of "+source);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Parameters
+	public static Iterable<Class<? extends Nucleus>> arguments() {
+		return Arrays.asList(DefaultNucleus.class);
+	}
+
+	@Test
+	public void testGetProfileTypeTag() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		ISegmentedProfile rawProfile = taggable.getProfile(ProfileType.ANGLE);
+		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		assertEquals(rawProfile.offset(taggable.getBorderIndex(Tag.REFERENCE_POINT)).toString(), tagProfile.toString());
+	}
+
+	
+	@Test
+	public void testUpdatingSegmentsInProfile() throws Exception {
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		
+		IBorderSegment seg0 = oldProfile.getSegmentAt(0);
+		UUID segId = seg0.getID();
+		
+		int oldStart = seg0.getStartIndex();
+		int newStart = oldStart+10;
+		
+		int oldEnd = seg0.getEndIndex();
+		int newEnd = oldEnd+10;
+		System.out.println("Old profile: "+oldProfile);
+		assertTrue(oldProfile.update(seg0, newStart, newEnd));
+		System.out.println("Updated profile: "+oldProfile);
+		
+		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, oldProfile);
+		
+		// Confirm everything was saved properly
+		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		assertEquals(oldProfile.toString(), newProfile.toString());
+	}
+	
+	@Test
+	public void testSettingMultiSegmentProfileIsReversible() throws Exception {
+		// Fetch the profile zeroed on the RP
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile);
+		
+		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, templateProfile);
+		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		
+		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
+		assertEquals("Segment count", 1, oldProfile.getSegmentCount(), testProfile.getSegmentCount());
+		
+		// Test multi segments
+		IBorderSegment oldSeg = oldProfile.getSegmentAt(0);	
+		IBorderSegment testSeg = testProfile.getSegmentAt(0);	
+		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
+		
+		// Test default segments
+		IBorderSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IBorderSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
+		
+		
+	}
+	
+	@Test
+	public void testSettingSingleSegmentProfileIsReversible() throws Exception {
+		// Fetch the profile zeroed on the RP
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
+		
+		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, templateProfile);
+		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		
+		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
+		assertEquals("Segment count", 1, templateProfile.getSegmentCount(), testProfile.getSegmentCount());
+		
+		// Test multi segments
+		IBorderSegment oldSeg = oldProfile.getSegmentAt(0);	
+		IBorderSegment testSeg = testProfile.getSegmentAt(0);	
+		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
+		
+		// Test default segments
+		IBorderSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IBorderSegment templateDefaultSeg = templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IBorderSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		assertEquals("Default segment start", templateDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
+		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
+	}
+
+}

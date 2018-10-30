@@ -338,18 +338,8 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void updateSourceFolder(File newFolder) {
-	    component.updateSourceFolder(newFolder);
-	}
-
-	@Override
 	public void alignVertically() {
 		component.alignVertically();
-	}
-
-	@Override
-	public boolean equals(CellularComponent c) {
-		return component.equals(c);
 	}
 
 	@Override
@@ -381,6 +371,23 @@ public class DummyCellularComponent implements CellularComponent {
 	
 	public String toString(){
 	    return component.toString();
+	}
+
+	@Override
+	public double wrapIndex(double d) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void refreshBorderList(boolean useSplineFitting) {
+		component.refreshBorderList(useSplineFitting);
+	}
+
+	@Override
+	public int[][] getUnsmoothedBorderCoordinates() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

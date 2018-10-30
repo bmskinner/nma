@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.Component;
@@ -31,7 +30,6 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEventListener;
-
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEvent;
@@ -52,9 +50,9 @@ public abstract class SettingsPanel extends JPanel
     protected static final int BOX_WIDTH  = 80;
     protected static final int BOX_HEIGHT = 20;
 
-    private List<SettingsPanel>     subPanels        = new ArrayList<SettingsPanel>();
-    List<OptionsChangeListener>     optionsListeners = new ArrayList<OptionsChangeListener>();
-    List<ProberReloadEventListener> proberListeners  = new ArrayList<ProberReloadEventListener>();
+    private List<SettingsPanel> subPanels = new ArrayList<>();
+    private List<OptionsChangeListener>     optionsListeners = new ArrayList<>();
+    private List<ProberReloadEventListener> proberListeners  = new ArrayList<>();
 
     protected String[] channelOptionStrings = { "Greyscale", "Red", "Green", "Blue" };
 
@@ -100,13 +98,11 @@ public abstract class SettingsPanel extends JPanel
      */
     protected boolean hasSubPanel(SettingsPanel panel) {
 
-        if (subPanels.contains(panel)) {
+        if (subPanels.contains(panel))
             return true;
-        }
         for (SettingsPanel p : subPanels) {
-            if (p.hasSubPanel(panel)) {
+            if (p.hasSubPanel(panel))
                 return true;
-            }
         }
         return false;
     }
@@ -132,14 +128,10 @@ public abstract class SettingsPanel extends JPanel
     /**
      * Add components to a container via a list
      * 
-     * @param labels
-     *            the list of labels
-     * @param fields
-     *            the list of components
-     * @param gridbag
-     *            the layout
-     * @param container
-     *            the container to add the labels and fields to
+     * @param labels the list of labels
+     * @param fields  the list of components
+     * @param gridbag the layout
+     * @param container the container to add the labels and fields to
      */
     protected void addLabelTextRows(List<JLabel> labels, List<? extends Component> fields, Container container) {
 
@@ -153,14 +145,10 @@ public abstract class SettingsPanel extends JPanel
     /**
      * Add components to a container via arrays
      * 
-     * @param labels
-     *            the list of labels
-     * @param fields
-     *            the list of components
-     * @param gridbag
-     *            the layout
-     * @param container
-     *            the container to add the labels and fields to
+     * @param labels the list of labels
+     * @param fields the list of components
+     * @param gridbag the layout
+     * @param container the container to add the labels and fields to
      */
     protected void addLabelTextRows(JLabel[] labels, Component[] fields,
 
@@ -198,6 +186,10 @@ public abstract class SettingsPanel extends JPanel
         optionsListeners.remove(l);
     }
 
+    /**
+     * Fire an event to all listeners that the options in this panel have been
+     * changed via the GUI
+     */
     protected void fireOptionsChangeEvent() {
         if (!isUpdating) {
             OptionsChangeEvent e = new OptionsChangeEvent(this);
@@ -244,7 +236,7 @@ public abstract class SettingsPanel extends JPanel
 
     @Override
     public void setEnabled(boolean b) {
-        finer(this.getClass().getSimpleName() + ": Setting updating " + b);
+        finest(this.getClass().getSimpleName() + ": Setting updating " + b);
         for (Component c : this.getComponents()) {
             c.setEnabled(b);
         }
@@ -255,19 +247,15 @@ public abstract class SettingsPanel extends JPanel
 
     @Override
     public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
-        finer("Panel updating event heard");
-        if (e.getType() == PanelUpdatingEvent.UPDATING) {
+        if (e.getType() == PanelUpdatingEvent.UPDATING)
             this.setEnabled(false);
-        }
 
-        if (e.getType() == PanelUpdatingEvent.COMPLETE) {
+        if (e.getType() == PanelUpdatingEvent.COMPLETE)
             this.setEnabled(true);
-        }
 
         for (SettingsPanel s : this.getSubPanels()) {
             s.panelUpdatingEventReceived(e);
         }
-
     }
 
 }

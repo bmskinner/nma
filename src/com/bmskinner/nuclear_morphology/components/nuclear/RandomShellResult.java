@@ -1,22 +1,19 @@
 /*******************************************************************************
- *      Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.util.Arrays;
@@ -26,6 +23,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
@@ -59,6 +59,12 @@ public class RandomShellResult implements IShellResult{
     public ShrinkType getType() {
         return type;
     }
+    
+    @Override
+    public IShellResult duplicate() {
+    	RandomShellResult r = new RandomShellResult(nShells, type, counts);
+    	return r;
+    }
 
     @Override
     public double[] getProportions(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -88,6 +94,20 @@ public class RandomShellResult implements IShellResult{
         }
 
     }
+    
+	@Override
+	public double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
+			@Nullable INuclearSignal signal) {
+		long total = LongStream.of(counts).sum();
+        if(total==0){
+            double[] result = new double[nShells];
+            for(int i=0; i<nShells; i++){
+                result[i] = 0;
+            }
+            return result;
+        }
+        return LongStream.of(counts).mapToDouble(l-> (double)l/(double)total).toArray();
+	}
 
     @Override
     public double[] getStdErrs(@NonNull Aggregation agg, @NonNull Normalisation norm) {
@@ -99,16 +119,6 @@ public class RandomShellResult implements IShellResult{
     }
 
     @Override
-    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-        return 1;
-    }
-
-    @Override
-    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
-        return 1;
-    }
-
-    @Override
     public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
         return (nShells-1)/2;
     }
@@ -117,6 +127,20 @@ public class RandomShellResult implements IShellResult{
     public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
             @Nullable INuclearSignal signal) {
         return counts;
+    }
+    
+    /**
+     * Get the observed values as a long array.
+     * @return the observed shell values
+     */
+    @Override
+	public long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    	return counts;
+    }
+    
+    @Override
+   	public int getNumberOfSignals(@NonNull Aggregation agg) {
+    	return 1;
     }
 
     @Override
@@ -133,5 +157,4 @@ public class RandomShellResult implements IShellResult{
            return b.toString();
         
     }
-
 }

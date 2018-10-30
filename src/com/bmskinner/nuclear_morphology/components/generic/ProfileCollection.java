@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
@@ -26,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -69,6 +69,32 @@ public class ProfileCollection implements IProfileCollection {
      */
     public ProfileCollection() {
         indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
+    }
+    
+	@Override
+	public IProfileCollection duplicate() {
+//		DefaultProfileCollection pc = new DefaultProfileCollection();
+//		
+//		pc.length = length;
+//		for(Tag t : indexes.keySet())
+//			pc.indexes.put(t, indexes.get(t));
+//		
+//		pc.segments = new IBorderSegment[segments.length];
+//		for(int i=0; i<segments.length; i++)
+//			pc.segments[i] = segments[i].copy();
+//		
+//		return pc;
+		return null;
+	}
+    
+    @Override
+    public int segmentCount() {
+    	return segments.size();
+    }
+    
+    @Override
+    public boolean hasSegments() {
+    	return segmentCount()>0;
     }
 
     /*
@@ -205,13 +231,7 @@ public class ProfileCollection implements IProfileCollection {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#getSegments(components.generic.
-     * BorderTagObject)
-     */
+
     @Override
     public List<IBorderSegment> getSegments(Tag tag) throws ProfileException {
         if (tag == null) {
@@ -222,8 +242,13 @@ public class ProfileCollection implements IProfileCollection {
         // since we are moving the pointIndex back to the beginning
         // of the array
         int offset = -getIndex(tag);
+        
+        List<IBorderSegment> result = IBorderSegment.copy(segments);
+        for(IBorderSegment s : result) {
+        	s.offset(offset);
+        }
 
-        List<IBorderSegment> result = IBorderSegment.nudge(segments, offset);
+//        List<IBorderSegment> result = IBorderSegment.nudge(segments, offset);
 
         return result;
     }
@@ -405,8 +430,8 @@ public class ProfileCollection implements IProfileCollection {
             throw new NullPointerException("String or segment list is null or empty");
         }
 
-        if (this.length() != n.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+        if (this.length() != n.get(0).getProfileLength()) {
+            throw new IllegalArgumentException("Segments total length (" + n.get(0).getProfileLength()
                     + ") does not fit aggregate (" + +this.length() + ")");
         }
 
@@ -430,8 +455,8 @@ public class ProfileCollection implements IProfileCollection {
             throw new UnavailableBorderTagException("Tag " + tag + " not present");
         }
 
-        if (this.length() != n.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+        if (this.length() != n.get(0).getProfileLength()) {
+            throw new IllegalArgumentException("Segments total length (" + n.get(0).getProfileLength()
                     + ") does not fit aggregate (" + +this.length() + ")");
         }
 
@@ -442,8 +467,11 @@ public class ProfileCollection implements IProfileCollection {
          */
         int offset = getIndex(tag);
 
-        List<IBorderSegment> result = IBorderSegment.nudge(n, offset);
-
+//        List<IBorderSegment> result = IBorderSegment.nudge(n, offset);
+        List<IBorderSegment> result = IBorderSegment.copy(segments);
+        for(IBorderSegment s : result) {
+        	s.offset(offset);
+        }
         this.segments = result;
     }
 
@@ -884,7 +912,7 @@ public class ProfileCollection implements IProfileCollection {
         if (segments == null) {
             createProfileAggregate(collection, collection.getMedianArrayLength());
         } else {
-            int length = segments.get(0).getTotalLength();
+            int length = segments.get(0).getProfileLength();
             createProfileAggregate(collection, length);
         }
     }
@@ -919,12 +947,30 @@ public class ProfileCollection implements IProfileCollection {
 
         return result;
     }
+    
+	@Override
+	public double getProportionOfIndex(int index) {
+		if (index < 0 || index >= aggregate.length())
+            throw new IllegalArgumentException("Index out of bounds: " + index);
+        return (double) index / (double) aggregate.length();
+	}
 
-    @Override
-    public List<Double> getXKeyset(ProfileType type) {
-        if (this.type == null) {
-            this.type = type;
-        }
-        return this.getAggregate().getXKeyset();
-    }
+	@Override
+	public double getProportionOfIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
+		return getProportionOfIndex(getIndex(tag));
+	}
+
+	@Override
+	public int getIndexOfProportion(double proportion) {
+		if (proportion < 0 || proportion > 1)
+			throw new IllegalArgumentException("Proportion must be between 0-1: " + proportion);
+		if(proportion==0)
+			return 0;
+		if(proportion==1)
+			return aggregate.length()-1;
+		
+		double desiredDistanceFromStart = (double) aggregate.length() * proportion;
+		int target = (int) desiredDistanceFromStart;
+		return target;
+	}
 }

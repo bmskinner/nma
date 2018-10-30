@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 /**
@@ -24,10 +22,17 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
  * @since 1.13.4
  */
 public enum DetectionImageType implements ImageType {
-    ORIGINAL("Input image"), KUWAHARA("Kuwahara filtering"), FLATTENED("Chromocentre flattening"), EDGE_DETECTION(
-            "Edge detection"), MORPHOLOGY_CLOSED("Gap closing"), FISH_IMAGE("FISH image"), DETECTED_OBJECTS(
-                    "Detected objects"), ANNOTAED_OBJECTS("Annotated objects"), CYTOPLASM("Cytoplasm"), NUCLEUS(
-                            "Nucleus"), CYTO_FLATTENED("Cytoplasm flattened"), NUCLEUS_FLATTENED("Nucleus flattened"),;
+    ORIGINAL("Input image"),
+    KUWAHARA("Kuwahara filtering"), 
+    FLATTENED("Chromocentre flattening"), 
+    EDGE_DETECTION( "Edge detection"), 
+    MORPHOLOGY_CLOSED("Gap closing"), 
+    FISH_IMAGE("FISH image"), 
+    DETECTED_OBJECTS( "Detected objects"), 
+    ANNOTAED_OBJECTS("Annotated objects"), 
+    CYTOPLASM("Cytoplasm"), NUCLEUS( "Nucleus"), 
+    CYTO_FLATTENED("Cytoplasm flattened"), 
+    NUCLEUS_FLATTENED("Nucleus flattened");
 
     private String name;
 
@@ -35,11 +40,13 @@ public enum DetectionImageType implements ImageType {
         this.name = name;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return this.name;
     }
 
-    public ImageType[] getValues() {
+    @Override
+	public ImageType[] getValues() {
         return DetectionImageType.values();
     }
 

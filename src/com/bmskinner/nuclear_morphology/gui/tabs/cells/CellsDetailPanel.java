@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,17 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 /**
@@ -38,13 +39,13 @@ public class CellsDetailPanel extends DetailPanel {
 
     private JTabbedPane tabPane;
 
-    public CellsDetailPanel() {
-        super(PANEL_TITLE_LBL);
+    public CellsDetailPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
         tabPane = new JTabbedPane(JTabbedPane.TOP);
 
-        DetailPanel boxplotPanel = new CellsBoxplotsPanel();
+        DetailPanel boxplotPanel = new CellsBoxplotsPanel(context);
 
 
         this.addSubPanel(boxplotPanel);

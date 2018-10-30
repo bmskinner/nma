@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.ArrayList;
@@ -30,10 +28,12 @@ import java.util.List;
  */
 public enum BorderTag {
 
-    REFERENCE_POINT("Reference point", BorderTagType.CORE), ORIENTATION_POINT("Orientation point",
-            BorderTagType.EXTENDED), INTERSECTION_POINT("Intersection point", BorderTagType.EXTENDED), TOP_VERTICAL(
-                    "Top vertical point", BorderTagType.EXTENDED), BOTTOM_VERTICAL("Bottom vertical point",
-                            BorderTagType.EXTENDED), CUSTOM("Custom point", BorderTagType.EXTENDED);
+    REFERENCE_POINT("Reference point", BorderTagType.CORE), 
+    ORIENTATION_POINT("Orientation point", BorderTagType.EXTENDED), 
+    INTERSECTION_POINT("Intersection point", BorderTagType.EXTENDED), 
+    TOP_VERTICAL("Top vertical point", BorderTagType.EXTENDED), 
+    BOTTOM_VERTICAL("Bottom vertical point", BorderTagType.EXTENDED), 
+    CUSTOM("Custom point", BorderTagType.EXTENDED);
 
     private final String                  name;
     private final BorderTag.BorderTagType type;
@@ -43,6 +43,7 @@ public enum BorderTag {
         this.type = type;
     }
 
+    @Override
     public String toString() {
         return this.name;
     }
@@ -62,8 +63,17 @@ public enum BorderTag {
         return list.toArray(new BorderTag[0]);
     }
 
-    // core tags are used in gui; extended are for internal mappings
+
+    /**
+     * The types of border tag that can be present
+     * @author bms41
+     *
+     */
     public enum BorderTagType {
-        CORE, EXTENDED
+    	
+    	/** Core border tags are essential for the software to display or calculate profiles */
+        CORE, 
+        /** Extended border tags are optional, and can be added as needed */
+        EXTENDED
     };
 }

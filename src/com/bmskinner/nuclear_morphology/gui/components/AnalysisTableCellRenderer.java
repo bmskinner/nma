@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,17 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.io.File;
+
+import javax.swing.JTable;
+
+import com.bmskinner.nuclear_morphology.gui.Labels;
 
 /**
  * Colour analysis parameter table cell background. If all the datasets selected
@@ -27,23 +31,30 @@ import java.awt.Color;
 @SuppressWarnings("serial")
 public class AnalysisTableCellRenderer extends ConsistentRowTableCellRenderer {
 
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+    @Override
+	public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
-        // Cells are by default rendered as a JLabel.
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        if (isRowConsistentAcrossColumns(table, row)) {
-
-            Color colour = new Color(178, 255, 102);
-            setBackground(colour);
-
-        } else {
-            setBackground(Color.WHITE);
+        Color bg = Color.WHITE;
+        Color fg = Color.BLACK;
+        
+        if (isRowConsistentAcrossColumns(table, row))
+        	bg = CONSISTENT_CELL_COLOUR;
+        
+        String header = getFirstColumnText(row, table);
+        if(header.equals(Labels.AnalysisParameters.COLLECTION_SOURCE) && column>0) {
+        	if(!header.equals(Labels.NA_MERGE)) {
+        		File f = new File(value.toString());
+        		if(!f.exists())
+        			fg = Color.RED;
+        	}
         }
 
-        // Return the JLabel which renders the cell.
-        return this;
+        c.setBackground(bg);
+        c.setForeground(fg);
+        return c;
     }
 
 }

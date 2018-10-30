@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
 import java.awt.BasicStroke;
@@ -44,8 +42,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
 
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This extension of the ChartPanel provides a new MouseAdapter to mark selected
@@ -53,7 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
  *
  */
 @SuppressWarnings("serial")
-public class SelectableChartPanel extends ExportableChartPanel implements SignalChangeListener, ChartMouseListener {
+public class SelectableChartPanel extends ExportableChartPanel implements ChartMouseListener {
 
     private String             name             = null;
     MouseMarker                mouseMarker      = null;
@@ -73,7 +71,7 @@ public class SelectableChartPanel extends ExportableChartPanel implements Signal
         this.setRangeZoomable(false);
         this.setDomainZoomable(false);
         mouseMarker = new MouseMarker(this);
-        this.addSignalChangeListener(mouseMarker);
+//        this.addSignalChangeListener(mouseMarker);
         this.addMouseListener(mouseMarker);
         this.addChartMouseListener(this);
 
@@ -110,7 +108,7 @@ public class SelectableChartPanel extends ExportableChartPanel implements Signal
         this.removeMouseListener(mouseMarker);
         mouseMarker = new MouseMarker(this);
         this.addMouseListener(mouseMarker);
-        mouseMarker.addSignalChangeListener(this);
+//        mouseMarker.addSignalChangeListener(this);
     }
 
     public void addLine(Line2D.Double line) {
@@ -135,7 +133,7 @@ public class SelectableChartPanel extends ExportableChartPanel implements Signal
         }
     }
 
-    private final static class MouseMarker extends MouseAdapter implements SignalChangeListener {
+    private final class MouseMarker extends MouseAdapter {
         private Marker           marker;
         private Double           markerStart = Double.NaN;
         private Double           markerEnd   = Double.NaN;
@@ -174,7 +172,7 @@ public class SelectableChartPanel extends ExportableChartPanel implements Signal
                     plot.addDomainMarker(marker, Layer.BACKGROUND);
 
                     if (!markerEnd.isNaN()) {
-                        fireSignalChangeEvent("MarkerPositionUpdated");
+                    	fireSignalChangeEvent("MarkerPositionUpdated");
                     }
                 }
 
@@ -215,45 +213,45 @@ public class SelectableChartPanel extends ExportableChartPanel implements Signal
         public void mousePressed(MouseEvent e) {
             markerStart = getPosition(e);
         }
+//
+//        private synchronized void fireSignalChangeEvent(String message) {
+//            // IJ.log("Mouse marker has fired a change");
+//            SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
+//            Iterator<Object> iterator = listeners.iterator();
+//            while (iterator.hasNext()) {
+//                ((EventListener) iterator.next()).eventReceived(event);
+//            }
+//        }
 
-        private synchronized void fireSignalChangeEvent(String message) {
-            // IJ.log("Mouse marker has fired a change");
-            SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
-            Iterator<Object> iterator = listeners.iterator();
-            while (iterator.hasNext()) {
-                ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
-            }
-        }
+//        @Override
+//        public void eventReceived(SignalChangeEvent event) {
+//            // TODO Auto-generated method stub
+//
+//        }
 
-        @Override
-        public void signalChangeReceived(SignalChangeEvent event) {
-            // TODO Auto-generated method stub
-
-        }
-
-        public synchronized void addSignalChangeListener(SignalChangeListener l) {
-            listeners.add(l);
-        }
-
-        public synchronized void removeSignalChangeListener(SignalChangeListener l) {
-            listeners.remove(l);
-        }
+//        public synchronized void addSignalChangeListener(EventListener l) {
+//            listeners.add(l);
+//        }
+//
+//        public synchronized void removeSignalChangeListener(EventListener l) {
+//            listeners.remove(l);
+//        }
     }
 
-    @Override
-    public void signalChangeReceived(SignalChangeEvent event) {
-        // pass messages up
-        if (event.type().equals("MarkerPositionUpdated")) {
-            fireSignalChangeEvent("MarkerPositionUpdated");
-        }
+//    @Override
+//    public void eventReceived(SignalChangeEvent event) {
+//        // pass messages up
+//        if (event.type().equals("MarkerPositionUpdated")) {
+//            fireSignalChangeEvent("MarkerPositionUpdated");
+//        }
+//
+//    }
 
-    }
-
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
+    public synchronized void addSignalChangeListener(EventListener l) {
         listeners.add(l);
     }
 
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
+    public synchronized void removeSignalChangeListener(EventListener l) {
         listeners.remove(l);
     }
 
@@ -261,7 +259,7 @@ public class SelectableChartPanel extends ExportableChartPanel implements Signal
         SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
+            ((EventListener) iterator.next()).eventReceived(event);
         }
     }
 

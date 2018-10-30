@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
-
-import ij.process.FloatPolygon;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -34,6 +30,8 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+
+import ij.process.FloatPolygon;
 
 /**
  * This describes a consensus shape for a population of cells.
@@ -87,7 +85,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
             moveCentreOfMass(IPoint.makeNew(0, 0));
         }
     }
-
+    
     public NucleusType getType() {
         return type;
     }
@@ -116,7 +114,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 
         ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
 
-        profileMap.put(ProfileType.ANGLE, profile);
+        assignProfile(ProfileType.ANGLE, profile);
 
     }
 
@@ -131,15 +129,34 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
         // There is no original position for a consensus
         return toShape();
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if(!super.equals(obj))
+    		return false;
+    	if(!(obj instanceof DefaultConsensusNucleus))
+    		return false;
+    	DefaultConsensusNucleus other = (DefaultConsensusNucleus)obj;
+    	if(!type.equals(other.type))
+    		return false;
+    	return true;
+    }
+    
+    @Override
+    public int hashCode() {
+    	final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
         try {
-        	if (hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL))
-        		alignPointsOnVertical(getBorderTag(Tag.TOP_VERTICAL), getBorderTag(Tag.BOTTOM_VERTICAL));
-
-        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderTag(Tag.REFERENCE_POINT).getX() > 0)
+        	alignVertically();
+        	this.getVerticallyRotatedNucleus().alignVertically();
+        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderPoint(Tag.REFERENCE_POINT).getX() > 0)
         			flipXAroundPoint(getCentreOfMass());
         } catch (UnavailableBorderTagException e1) {
         	fine("Cannot get border tag", e1);

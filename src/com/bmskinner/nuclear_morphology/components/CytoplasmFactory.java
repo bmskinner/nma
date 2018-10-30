@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,17 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.gui.Roi;
-
 import java.io.File;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
+import ij.gui.Roi;
 
 /**
  * A factory to create cytoplasms
@@ -33,22 +34,14 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public class CytoplasmFactory implements ComponentFactory<ICytoplasm> {
 
-    // private final File file;
-
-    // /**
-    // * Create a factory for nuclei of the given type
-    // * @param imageFile
-    // * @param nucleusType
-    // */
-    // public CytoplasmFactory(File imageFile){
-    //
-    //
-    // file = imageFile;
-    //
-    // }
-
     @Override
-    public ICytoplasm buildInstance(Roi roi, File imageFile, int channel, int[] originalPosition, IPoint centreOfMass)
+    public ICytoplasm buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, @NonNull UUID id)
+            throws ComponentCreationException {
+        return new DefaultCytoplasm(roi, centreOfMass, file, channel, originalPosition, id);
+    }
+	
+    @Override
+    public ICytoplasm buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
             throws ComponentCreationException {
 
         if (imageFile == null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.File;
@@ -27,11 +25,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * This provides a virtual dataset view for merge sources.
@@ -47,7 +43,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     private IAnalysisDataset parent; // the 'parent to this dataset; the merged
                                      // dataset with the real cells
 
-    private IMutableAnalysisOptions analysisOptions; // the analysis options for
+    private IAnalysisOptions analysisOptions; // the analysis options for
                                                      // the merge source
 
     /**
@@ -61,7 +57,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
      *            the original dataset which was merged
      */
     public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource) {
-        super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getUUID(),
+        super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getId(),
                 mergeSource.getCollection())
         );
 
@@ -72,8 +68,9 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
         this.datasetColour = mergeSource.getDatasetColour().orElse(null);
 
-        this.getCollection().createProfileCollection();
+        
         try {
+        	getCollection().createProfileCollection();
             mergeSource.getCollection().getProfileManager().copyCollectionOffsets(this.getCollection());
         } catch (ProfileException e) {
             warn("Unable to create merge source dataset");
@@ -103,10 +100,10 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         throw new Exception("Not yet implemented");
     }
 
-    @Override
-    public Handler getLogHandler() throws Exception {
-        return parent.getLogHandler();
-    }
+//    @Override
+//    public Handler getLogHandler() throws Exception {
+//        return parent.getLogHandler();
+//    }
 
     @Override
     public void addChildCollection(ICellCollection collection) {
@@ -126,15 +123,6 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public File getDebugFile() {
-        return parent.getDebugFile();
-    }
-
-    @Override
-    public void setDebugFile(File f) {
-    }
-
-    @Override
     public Set<UUID> getAllChildUUIDs() {
         return new HashSet<UUID>(0);
     }
@@ -149,14 +137,14 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         if (this.hasMergeSource(id)) {
 
             for (IAnalysisDataset c : childDatasets) {
-                if (c.getUUID().equals(id)) {
+                if (c.getId().equals(id)) {
                     return c;
                 }
             }
 
         } else {
             for (IAnalysisDataset child : this.getAllMergeSources()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return child;
                 }
             }
@@ -192,7 +180,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     public Set<UUID> getMergeSourceIDs() {
         Set<UUID> result = new HashSet<UUID>(childDatasets.size());
         for (IAnalysisDataset c : childDatasets) {
-            result.add(c.getUUID());
+            result.add(c.getId());
         }
 
         return result;
@@ -216,7 +204,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     @Override
     public boolean hasMergeSource(UUID id) {
         for (IAnalysisDataset child : childDatasets) {
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 return true;
             }
         }
@@ -259,7 +247,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
         return Optional.ofNullable(analysisOptions);
     }
 
@@ -269,7 +257,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
 
     }
@@ -298,7 +286,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
         while (it.hasNext()) {
             IAnalysisDataset child = it.next();
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 it.remove();
             }
         }
@@ -316,5 +304,32 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     @Override
     public void deleteClusterGroup(IClusterGroup group) {
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((analysisOptions == null) ? 0 : analysisOptions.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MergeSourceAnalysisDataset other = (MergeSourceAnalysisDataset) obj;
+		if (analysisOptions == null) {
+			if (other.analysisOptions != null)
+				return false;
+		} else if (!analysisOptions.equals(other.analysisOptions))
+			return false;
+		return true;
+	}
+    
+    
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -26,6 +24,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {
 
     protected final E options;
+    
+	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
+	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
+	public static final String QUARTILE_SERIES_PREFIX = "Q";
+	public static final String PROFILE_SERIES_PREFIX  = "Profile_";
+	public static final String MEDIAN_SERIES_PREFIX   = "Median_";
 
     protected static final String EMPTY_STRING = "";
     protected static final int MAX_SCATTER_CHART_ITEMS = 2000;
@@ -37,7 +41,7 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
      */
     public static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
     
-    public static final String DEFAULT_PROBABILITY_FORMAT = "#.###";
+    public static final String DEFAULT_PROBABILITY_FORMAT = "#0.0000";
 
     public AbstractDatasetCreator(@NonNull final E options) {
         this.options = options;

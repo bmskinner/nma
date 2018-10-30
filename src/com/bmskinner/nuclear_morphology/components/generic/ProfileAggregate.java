@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
@@ -23,9 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,6 +63,13 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
             x += profileIncrement;
         }
     }
+    
+    @Override
+	public IProfileAggregate duplicate() {
+    	ProfileAggregate result = new ProfileAggregate(length);
+    	//TODO
+		return result;
+	}
 
     /*
      * We need to calculate the median angle profile. This requires binning the
@@ -134,10 +137,10 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
      * 
      * @see components.generic.IProfileAggregate#getBinSize()
      */
-    @Override
-    public double getBinSize() {
-        return this.profileIncrement;
-    }
+//    @Override
+//    public double getBinSize() {
+//        return this.profileIncrement;
+//    }
 
     /*
      * (non-Javadoc)
@@ -399,28 +402,13 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
     /*
      * (non-Javadoc)
      * 
-     * @see components.generic.IProfileAggregate#getXKeyset()
-     */
-    @Override
-    public List<Double> getXKeyset() {
-        List<Double> result = new ArrayList<Double>();
-        for (Double d : aggregate.keySet()) {
-            result.add(d);
-        }
-        Collections.sort(result);
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see components.generic.IProfileAggregate#toString()
      */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("Profile aggregate with " + aggregate.size() + " bins of size " + getBinSize() + "\n");
+        builder.append("Profile aggregate with " + aggregate.size() + " bins of size " + profileIncrement + "\n");
 
         try {
             builder.append("First bin at " + xPositions[0] + ":\n");

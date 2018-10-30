@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
@@ -20,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
-public class DatasetSignalsExporter extends StatsExporter implements Exporter {
+public class DatasetSignalsExporter extends StatsExporter {
 
     /**
      * Create specifying the folder stats will be exported into
@@ -99,7 +115,7 @@ public class DatasetSignalsExporter extends StatsExporter implements Exporter {
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
             ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
             String groupName   = signalGroup.getGroupName();
-            String groupFolder = signalGroup.getFolder().getAbsolutePath();            
+            String groupFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).getFolder().getAbsolutePath();            
             
             for (ICell cell : d.getCollection().getCells()) {
                 

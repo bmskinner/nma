@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
@@ -29,10 +27,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
@@ -40,8 +41,8 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
     protected JPanel      tablePanel;
     protected JScrollPane scrollPane = new JScrollPane();
 
-    public AbstractPairwiseDetailPanel() {
-        super();
+    public AbstractPairwiseDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
 
@@ -76,11 +77,13 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
     protected JPanel createInfoPanel() {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test"));
-        infoPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
-        infoPanel.add(new JLabel("Below the diagonal: p-values"));
-        infoPanel.add(new JLabel(
-                "Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
+        
+        String infoString = "Pairwise comparisons between populations using Mann-Whitney U test\n"
+        		+"Above the diagonal: Mann-Whitney U statistics\n"
+        		+"Below the diagonal: p-values\n"
+        		+"Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green";
+        
+        infoPanel.add(new WrappedLabel(infoString));
         return infoPanel;
     }
 
@@ -103,14 +106,10 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
     /**
      * Prepare a wilcoxon table
      * 
-     * @param panel
-     *            the JPanel to add the table to
-     * @param table
-     *            the table to add
-     * @param model
-     *            the model to provide
-     * @param label
-     *            the label for the table
+     * @param panel the JPanel to add the table to
+     * @param table the table to add
+     * @param model the model to provide
+     * @param label the label for the table
      */
     protected void addWilconxonTable(JPanel panel, JTable table, String label) {
         Dimension minSize = new Dimension(10, 10);

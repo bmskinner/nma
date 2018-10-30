@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A default implementation of the ICannyOptions interface
@@ -29,7 +28,7 @@ import java.util.List;
  * 
  */
 @Deprecated
-public class DefaultCannyOptions implements IMutableCannyOptions {
+public class DefaultCannyOptions implements ICannyOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -98,14 +97,6 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
         kernelWidth = template.getKernelWidth();
         closingObjectRadius = template.getClosingObjectRadius();
         isAddBorder = template.isAddBorder();
-    }
-
-    public IMutableCannyOptions unlock() {
-        return this;
-    }
-
-    public ICannyOptions lock() {
-        return this;
     }
 
     /*
@@ -412,7 +403,7 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
     }
 
     @Override
-    public IMutableCannyOptions duplicate() {
+    public ICannyOptions duplicate() {
         return new DefaultCannyOptions(this);
     }
 
@@ -438,14 +429,114 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
 
     @Override
     public List<String> getKeys() {
-        // TODO Auto-generated method stub
+    	warn("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 
     @Override
     public Object getValue(String key) {
-        // TODO Auto-generated method stub
+    	warn("Unimplemented method in " + this.getClass().getName());
         return null;
     }
+
+	@Override
+	public double getDouble(String s) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return 0;
+	}
+
+	@Override
+	public int getInt(String s) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return 0;
+	}
+
+	@Override
+	public boolean getBoolean(String s) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return false;
+	}
+
+	@Override
+	public void setDouble(String s, double d) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		
+	}
+
+	@Override
+	public void setInt(String s, int i) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		
+	}
+
+	@Override
+	public void setBoolean(String s, boolean b) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		
+	}
+
+	@Override
+	public float getFloat(String s) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return 0;
+	}
+
+	@Override
+	public void setFloat(String s, float f) {
+		warn("Unimplemented method in " + this.getClass().getName());
+	}
+
+	@Override
+	public List<String> getBooleanKeys() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public List<String> getIntegerKeys() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public List<String> getDoubleKeys() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public List<String> getFloatKeys() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> getEntries() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public String getString(String s) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void setString(String k, String v) {
+		warn("Unimplemented method in " + this.getClass().getName());
+	}
+
+	@Override
+	public List<String> getStringKeys() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public void set(HashOptions o) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,29 +12,30 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
-    public ProfileDisplayPanel(ProfileType type) {
-        super(type);
+    public ProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
+        super(context, type);
 
-        JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
+        JFreeChart chart = ProfileChartFactory.makeEmptyChart(type);
         chartPanel.setChart(chart);
 
         if (this.type == ProfileType.FRANKEN) {
@@ -58,14 +59,14 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
     @Override
     protected void updateNull() {
         super.updateNull();
-        JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
+        JFreeChart chart = ProfileChartFactory.makeEmptyChart(type);
         chartPanel.setChart(chart);
 
     }
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new MorphologyChartFactory(options).createProfileChart();
+        return new ProfileChartFactory(options).createProfileChart();
     }
 
     private void updateChart() {
@@ -79,14 +80,20 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
         ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
         // BorderTagObject tag = borderTagOptionsPanel.getSelected();
         boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-        boolean hideProfiles = profileMarkersOptionsPanel.isHideProfiles();
+        boolean hideProfiles = profileMarkersOptionsPanel.isShowNuclei();
 
         // log("Creating options: normalised: "+normalised);
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normalised)
-                .setAlignment(alignment).setTag(Tag.REFERENCE_POINT).setShowMarkers(showMarkers)
-                .setHideProfiles(hideProfiles).setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
-                .setTarget(chartPanel).build();
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+        		.setNormalised(normalised)
+                .setAlignment(alignment)
+                .setTag(Tag.REFERENCE_POINT)
+                .setShowMarkers(showMarkers)
+                .setShowProfiles(hideProfiles)
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setProfileType(type)
+                .setTarget(chartPanel)
+                .build();
         return options;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
@@ -24,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -33,8 +32,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * Show the minimum distances between signals within a dataset
@@ -46,16 +46,13 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class SignalsColocalisationPanel extends DetailPanel {
 
-    private static final String PANEL_TITLE_LBL = "Colocalistion";
+    private static final String PANEL_TITLE_LBL = "Colocalisation";
     private static final String HEADER_LBL    = "Pairwise distances between the closest signal pairs";
-//    private static final String TABLE_TOOLTIP = "Median distance between closest signal pairs";
-
-    // private ExportableTable table; // table for analysis parameters
 
     private ExportableChartPanel violinChart;
 
-    public SignalsColocalisationPanel() {
-        super();
+    public SignalsColocalisationPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();
@@ -91,15 +88,6 @@ public class SignalsColocalisationPanel extends DetailPanel {
      */
     private JPanel createMainPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-
-        // table = new
-        // ExportableTable(AbstractDatasetCreator.createBlankTable());
-        // table.setToolTipText(TABLE_TOOLTIP);
-        //
-        // table.setEnabled(false);
-        // JScrollPane scrollPane = new JScrollPane(table);
-        // panel.add(scrollPane, BorderLayout.WEST);
-
         violinChart = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
         panel.add(violinChart, BorderLayout.CENTER);
 
@@ -107,16 +95,7 @@ public class SignalsColocalisationPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
-
-        // TableOptions options = new TableOptionsBuilder()
-        // .setDatasets(getDatasets())
-        // .setScale(GlobalOptions.getInstance().getScale())
-        // .setTarget(table)
-        // .build();
-        //
-        // setTable(options);
-
+    protected synchronized void updateSingle() {
         ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
                 .setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
 
@@ -125,9 +104,7 @@ public class SignalsColocalisationPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateMultiple() {
-        // table.setModel(AbstractDatasetCreator.createBlankTable());
-
+    protected synchronized void updateMultiple() {
         ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
                 .setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
 
@@ -135,26 +112,24 @@ public class SignalsColocalisationPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateNull() {
-        // table.setModel(AbstractDatasetCreator.createBlankTable());
+    protected synchronized void updateNull() {
         violinChart.setChart(AbstractChartFactory.createEmptyChart());
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
-        // table.setModel(AbstractDatasetCreator.createLoadingTable());
         violinChart.setChart(AbstractChartFactory.createLoadingChart());
 
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
         return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,15 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -30,20 +30,58 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public interface IProfileCollection extends Serializable, Loggable {
 
     static final int ZERO_INDEX = 0;
+    
+    /**
+     * If a profile is created without segments, this is the ID of the default segment spanning the entire profile.
+     */
+    static final UUID DEFAULT_SEGMENT_ID = UUID.fromString("11111111-2222-3333-4444-555566667777");
+    
 
     static IProfileCollection makeNew() {
         return new DefaultProfileCollection();
     }
-
+    
+    
     /**
-     * Get the offset needed to transform a profile to start from the given
-     * point type. Returns -1 if the border tag is not found
-     * 
-     * @param pointType
-     * @return the offset or -1
+     * Craete a copy of the collection
+     * @return
      */
-    int getIndex(Tag pointType) throws UnavailableBorderTagException;
-
+    IProfileCollection duplicate();
+    
+    /**
+     * Get the index of the tag in the profile, zeroed on the reference point
+     * 
+     * @param tag the tag to find
+     * @return the index of the tag
+     * @throws UnavailableBorderTagException if the tag is not present
+     */
+    int getIndex(@NonNull Tag tag) throws UnavailableBorderTagException;
+    
+    /**
+     * Get the proportion of the index along the profile, zeroed on the reference point
+     * 
+     * @param index the index to find
+     * @return the proportion of the index along the profile, from 0-1
+     */
+    double getProportionOfIndex(int index);
+    
+    /**
+     * Get the proportion of the tag along the profile, zeroed on the reference point
+     * 
+     * @param tag the tag to find
+     * @return the proportion of the tag along the profile, from 0-1
+     * @throws UnavailableBorderTagException if the tag is not present
+     */
+    double getProportionOfIndex(@NonNull Tag tag) throws UnavailableBorderTagException;
+    
+    
+    /**
+     * Get the index closest to the given proportion along the profile
+     * @param proportion the proportion along the profile from 0-1
+     * @return the closest index
+     */
+    int getIndexOfProportion(double proportion);
+    
     /**
      * Get all the offset keys attached to this profile collection
      * 
@@ -57,81 +95,75 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @param tag
      * @return
      */
-    boolean hasBorderTag(Tag tag);
+    boolean hasBorderTag(@NonNull Tag tag);
 
     /**
      * Get the requested profile from the cached profiles, or generate it from
      * the ProfileAggregate if it is not cached.
      * 
-     * @param type
-     *            the type of profile to fetch
-     * @param tag
-     *            the Tag to use as index zero
-     * @param quartile
-     *            the collection quartile to return (0-100)
+     * @param type the type of profile to fetch
+     * @param tag the Tag to use as index zero
+     * @param quartile the collection quartile to return (0-100)
      * @return the quartile profile from the given tag
-     * @throws UnavailableBorderTagException
-     *             when the tag is not present
+     * @throws UnavailableBorderTagException when the tag is not present
      * @throws ProfileException
-     * @throws UnavailableProfileTypeException
-     *             when the profile type does not have an associated aggregate
+     * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
      */
-    IProfile getProfile(ProfileType type, Tag tag, double quartile)
+    IProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
 
     /**
-     * Get the requested segmented profile. Generates it dynamically from the
-     * appropriate ProfileAggregate.
+     * Get a segmented profile offset to start from the given tag. 
      * 
-     * @param s
-     *            the pointType of the profile to find
+     * @param  type the profile type to fetch
+     * @param tag the starting index of the profile
+     * @param quartile the quartile to fetch
      * @return the profile
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
-     *             when the tag is not present as an offset
-     * @throws UnavailableProfileTypeException
-     *             when the profile type does not have an associated aggregate
-     * @throws UnsegmentedProfileException
-     *             when no segments are available for the profile
+     * @throws UnavailableBorderTagException when the tag is not present as an offset
+     * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
+     * @throws UnsegmentedProfileException when no segments are available for the profile
      */
-    ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile)
+    ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
             UnsegmentedProfileException;
 
     /**
-     * Get the profile aggregate for this collection
-     * 
-     * @return the aggregate
-     */
-    // IProfileAggregate getAggregate();
-
-    /**
-     * Test if the profile aggregate has been created
-     * 
-     * @return
-     */
-    // boolean hasAggregate();
-
-    /**
      * Get the length of the profile aggregate (this is the integer value of the
-     * median CellCollection array length)
+     * median ICellCollection array length)
      * 
      * @return Length, or zero if the aggregate is not yet created
      */
     int length();
+    
+    
+    /**
+     * The number of segments in the profile
+     * @return
+     */
+    int segmentCount();
+    
+    /**
+     * Is the number of segments greater than zero?
+     * @return
+     */
+    boolean hasSegments();
 
     /**
-     * Create a list of segments based on an offset of existing segments.
+     * Get a copy of the segments in the collection ordered from the given tag. The first 
+     * segment in the list will contain the tag at any index except the end index. The
+     * segments will have their positions offset such that the tag is at the zero index
+     * of the underlying profile. 
      * 
-     * @param s
-     *            the name of the tag
+     * @param tag the tag to offset by
      * @return a copy of the segments in the profile, offset to start at the tag
      * @throws ProfileException
      */
-    List<IBorderSegment> getSegments(Tag tag) throws UnavailableBorderTagException, ProfileException;
+    List<IBorderSegment> getSegments(@NonNull Tag tag) throws UnavailableBorderTagException, ProfileException;
 
     /**
-     * Get the ids of the segments in this collection
+     * Get the IDs of the segments in this collection. The IDs are ordered by position within
+     * the profile collection.
      * 
      * @return
      */
@@ -144,7 +176,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @return
      * @throws ProfileException
      */
-    IBorderSegment getSegmentAt(Tag tag, int position) throws UnavailableBorderTagException, ProfileException;
+    IBorderSegment getSegmentAt(@NonNull Tag tag, int position) throws UnavailableBorderTagException, ProfileException;
 
     /**
      * Test if the collection contains a segment beginning at the given tag
@@ -154,7 +186,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @throws UnsegmentedProfileException
      * @throws UnavailableBorderTagException
      */
-    boolean hasSegmentStartingWith(Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    boolean hasSegmentStartingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile beginning at the given tag; i.e. the
@@ -166,7 +198,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @return a copy of the segment with the tag at its start index, or null
      * @throws UnsegmentedProfileException
      */
-    IBorderSegment getSegmentStartingWith(Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    IBorderSegment getSegmentStartingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Test if the collection contains a segment beginning at the given tag
@@ -175,7 +207,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @return
      * @throws Exception
      */
-    boolean hasSegmentEndingWith(Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    boolean hasSegmentEndingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile beginning at the given tag; i.e. the
@@ -186,7 +218,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      *            the border tag
      * @return a copy of the segment with the tag at its start index, or null
      */
-    IBorderSegment getSegmentEndingWith(Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    IBorderSegment getSegmentEndingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile containing the given index. The zero
@@ -204,72 +236,60 @@ public interface IProfileCollection extends Serializable, Loggable {
      *            the border tag
      * @return a copy of the segment with the tag index inside, or null
      */
-    IBorderSegment getSegmentContaining(Tag tag) throws ProfileException, UnsegmentedProfileException;
+    IBorderSegment getSegmentContaining(@NonNull Tag tag) throws ProfileException, UnsegmentedProfileException;
 
     /**
-     * Add an offset for the given point type. The offset is used to fetch
-     * profiles the begin at the point of interest.
+     * Add an index for the given tag. Note that setting the index of the RP
+     * will have no effect; the RP is always index zero.
      * 
-     * @param pointType
-     *            the point
-     * @param offset
-     *            the position of the point in the profile
+     * @param tag the tag
+     * @param index the index of the point in the profile
      */
-    void addIndex(Tag tag, int offset);
+    void addIndex(@NonNull Tag tag, int index);
 
     /**
-     * Add a list of segments for the profile. The segments must have the
-     * correct offset to be added directly
+     * Set the segments in the profile collection to the given list,
+     * where the segments are zeroed to the reference point. Any
+     * existing segments are replaced.
      * 
-     * @param n
-     *            the segment list
+     * @param segments the segments to add
      */
-    void addSegments(List<IBorderSegment> n);
+    void addSegments(@NonNull List<IBorderSegment> segments);
 
     /**
-     * Add a list of segments for the profile, where the segments are zeroed to
-     * the given point type. The indexes will be corrected for storage. I
-     * previously disabled this - unknown why.
+     * Set the segments in the profile collection to the given list,
+     * where the segments are zeroed to the given point type. Any
+     * existing segments are replaced.
      * 
-     * @param pointType
-     *            the point with the zero index in the segments
-     * @param n
-     *            the segment list
+     * @param tag the tag with the zero index in the collection
+     * @param segments the segments to add
      * @throws ProfileException
      * @throws UnavailableBorderTagException
      */
-    void addSegments(Tag tag, List<IBorderSegment> n) throws ProfileException, UnavailableBorderTagException;
+    void addSegments(@NonNull Tag tag, @NonNull List<IBorderSegment> segments) throws ProfileException, UnavailableBorderTagException;
 
     /**
      * Create profile aggregates from the given collection, with a set length.
-     * By default, the profiles are zeroed on the reference point
+     * By default, the profiles are zeroed on the reference point. If the profile
+     * collection already has segments assigned, these will be retained following 
+     * aggregate creation.
      * 
-     * @param collection
-     *            the CellCollection
-     * @param length
-     *            the length of the aggregate
+     * @param collection the CellCollection
+     * @param length the length of the aggregates
+     * @throws ProfileException 
      */
-    void createProfileAggregate(ICellCollection collection, int length);
+    void createProfileAggregate(@NonNull ICellCollection collection, int length) throws ProfileException;
 
     /**
      * Create profile aggregates from the given collection, with a length set by
      * any segments the collection contains. By default, the profiles are zeroed
      * on the reference point
      * 
-     * @param collection
-     *            the CellCollection
+     * @param collection the CellCollection
+     * @throws ProfileException if the profile aggregate cannot be restored
      */
-    void createAndRestoreProfileAggregate(ICellCollection collection);
+    void createAndRestoreProfileAggregate(@NonNull ICellCollection collection) throws ProfileException;
 
-    /**
-     * Create the profile aggregate from the given collection, using the
-     * collection median length to determine bin sizes
-     * 
-     * @param collection
-     *            the Cellcollection
-     * @throws Exception
-     */
-    // void createProfileAggregate(ICellCollection collection);
 
     /**
      * Get the points associated with offsets currently present
@@ -278,8 +298,6 @@ public interface IProfileCollection extends Serializable, Loggable {
      */
     String tagString();
 
-    String toString();
-
     /**
      * Turn the IQR (difference between Q25, Q75) of the median into a
      * profile. @param pointType the profile type to use @return the
@@ -287,27 +305,22 @@ public interface IProfileCollection extends Serializable, Loggable {
      * UnavailableBorderTagException @throws
      * UnavailableProfileTypeException @throws
      */
-    IProfile getIQRProfile(ProfileType type, Tag tag)
+    IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Tag tag)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
 
     /**
      * Find the points in the profile that are most variable
      */
-    List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws UnavailableBorderTagException;
+    List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Tag tag) throws UnavailableBorderTagException;
 
     /**
      * Get the values within the profile aggregate for the given position
      * 
-     * @param type
-     *            the profile type to search
-     * @param position
-     *            the position between zero and one
+     * @param type the profile type to search
+     * @param position the position between zero and one
      * @return the values at that position
      * @throws UnavailableProfileTypeException
      *             if the profile type is not present
      */
-    double[] getValuesAtPosition(ProfileType type, double position) throws UnavailableProfileTypeException;
-
-    List<Double> getXKeyset(ProfileType type);
-
+    double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws UnavailableProfileTypeException;
 }

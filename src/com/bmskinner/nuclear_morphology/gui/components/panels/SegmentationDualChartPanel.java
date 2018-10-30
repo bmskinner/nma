@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,30 +12,38 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components.panels;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.DraggableOverlayChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class SegmentationDualChartPanel extends DualChartPanel {
+	
+	protected List<Object> listeners = new ArrayList<>();
 
     public SegmentationDualChartPanel() {
-        super();
+        super(false);
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();
 
-        JFreeChart profileChart = new MorphologyChartFactory(options).makeEmptyChart();
+        JFreeChart profileChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
         ((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
     }
@@ -52,5 +60,29 @@ public class SegmentationDualChartPanel extends DualChartPanel {
         rangePanel.setChart(rangeChart);
         this.updateChartPanelRange();
     }
+
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(InterfaceEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

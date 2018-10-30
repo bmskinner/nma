@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,12 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
 import java.io.Serializable;
@@ -29,15 +28,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -51,6 +47,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public interface IAnalysisDataset extends Serializable, Loggable {
 
     /**
+     * Get the ID of the dataset
+     * @return
+     */
+    UUID getId();
+	
+    /**
      * Make a copy of the cells in this dataset. Does not yet include child
      * datasets, clusters or signal groups
      * 
@@ -58,13 +60,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @throws Exception
      */
     IAnalysisDataset duplicate() throws Exception;
-
-    /**
-     * Get the file handler for this dataset. Create a handler if needed.
-     * 
-     * @return
-     */
-    Handler getLogHandler() throws Exception;
 
     /**
      * Get the software version used to create the dataset
@@ -89,8 +84,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      */
     void addChildDataset(@NonNull IAnalysisDataset dataset);
 
-    UUID getUUID();
-
     /**
      * Get the name of the dataset. Passes through to CellCollection
      * 
@@ -105,7 +98,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param s
      * @see CellCollection
      */
-    void setName(String s);
+    void setName(@NonNull String s);
 
     /**
      * Get the save file location
@@ -119,23 +112,8 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param file
      */
-    void setSavePath(File file);
+    void setSavePath(@NonNull File file);
 
-    /**
-     * Get the log file for the dataset.
-     * 
-     * @return
-     * @see CellCollection
-     */
-    File getDebugFile();
-
-    /**
-     * Allow the collection to update the debug file location
-     * 
-     * @param f
-     *            the new file
-     */
-    void setDebugFile(File f);
 
     /**
      * Get all the direct children of this dataset
@@ -159,7 +137,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the child UUID
      * @return
      */
-    IAnalysisDataset getChildDataset(UUID id);
+    IAnalysisDataset getChildDataset(@NonNull UUID id);
 
     /**
      * Get the AnalysisDataset with the given id that is a merge source to this
@@ -169,7 +147,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the UUID of the dataset
      * @return the dataset or null
      */
-    IAnalysisDataset getMergeSource(UUID id);
+    IAnalysisDataset getMergeSource(@NonNull UUID id);
 
     /**
      * Recursively fetch all the merge sources for this dataset. Only includes
@@ -184,7 +162,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param dataset
      */
-    void addMergeSource(IAnalysisDataset dataset);
+    void addMergeSource(@NonNull IAnalysisDataset dataset);
 
     /**
      * Get all datasets considered direct merge sources to this dataset
@@ -216,7 +194,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the UUID to test
      * @return
      */
-    boolean hasMergeSource(UUID id);
+    boolean hasMergeSource(@NonNull UUID id);
 
     /**
      * Test if a dataset is present as a merge source
@@ -225,7 +203,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the dataset to test
      * @return
      */
-    boolean hasMergeSource(IAnalysisDataset dataset);
+    boolean hasMergeSource(@NonNull IAnalysisDataset dataset);
 
     /**
      * Test if the dataset has merge sources
@@ -275,7 +253,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @return
      */
-    Optional<IMutableAnalysisOptions> getAnalysisOptions();
+    Optional<IAnalysisOptions> getAnalysisOptions();
 
     /**
      * Test if the dataset has analysis options set. This is not the case for
@@ -290,7 +268,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param analysisOptions
      */
-    void setAnalysisOptions(IMutableAnalysisOptions analysisOptions);
+    void setAnalysisOptions(IAnalysisOptions analysisOptions);
 
     /**
      * Add the given dataset as a cluster result. This is a form of child
@@ -298,7 +276,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param dataset
      */
-    void addClusterGroup(IClusterGroup group);
+    void addClusterGroup(@NonNull IClusterGroup group);
 
     /**
      * Check the list of cluster groups, and return the highest cluster group
@@ -314,7 +292,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param id
      * @return
      */
-    boolean hasCluster(UUID id);
+    boolean hasCluster(@NonNull UUID id);
 
     List<IClusterGroup> getClusterGroups();
 
@@ -338,7 +316,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param group
      * @return
      */
-    boolean hasClusterGroup(IClusterGroup group);
+    boolean hasClusterGroup(@NonNull IClusterGroup group);
 
     /**
      * Check that all cluster groups have child members present; if cluster
@@ -367,21 +345,21 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param id
      *            the UUID of the child to delete
      */
-    void deleteChild(UUID id);
+    void deleteChild(@NonNull UUID id);
 
     /**
      * Delete the cluster with the given id
      * 
      * @param id
      */
-    void deleteClusterGroup(IClusterGroup group);
+    void deleteClusterGroup(@NonNull IClusterGroup group);
 
     /**
      * Delete an associated dataset
      * 
      * @param id
      */
-    void deleteMergeSource(UUID id);
+    void deleteMergeSource(@NonNull UUID id);
 
     /**
      * Check if the given dataset is a child dataset of this
@@ -390,7 +368,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *            the dataset to test
      * @return
      */
-    boolean hasChild(IAnalysisDataset child);
+    boolean hasChild(@NonNull IAnalysisDataset child);
 
     /**
      * Test if the given dataset is a child of this dataset or of one of its
@@ -399,7 +377,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param child
      * @return
      */
-    boolean hasRecursiveChild(IAnalysisDataset child);
+    boolean hasRecursiveChild(@NonNull IAnalysisDataset child);
 
     /**
      * Check if the given dataset is a child dataset of this
@@ -407,7 +385,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param child
      * @return
      */
-    boolean hasChild(UUID child);
+    boolean hasChild(@NonNull UUID child);
 
     /**
      * Set the dataset colour (used in comparisons between datasets)
@@ -415,14 +393,14 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param colour
      *            the new colour
      */
-    void setDatasetColour(Paint colour);
+    void setDatasetColour(Color colour);
 
     /**
      * Get the currently set dataset colour, or null if not set
      * 
      * @return colour or null
      */
-    Optional<Paint> getDatasetColour();
+    Optional<Color> getDatasetColour();
 
     /**
      * Test if the dataset colour is set or null
@@ -431,14 +409,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      */
     boolean hasDatasetColour();
 
-    /**
-     * Get the swatch, or null if the swatch is not set. Transient, not saved to
-     * nmd
-     * 
-     * @return
-     */
-
-    String toString();
 
     /**
      * Update the source image paths in the dataset and its children to use the
@@ -448,7 +418,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param dataset
      * @throws Exception
      */
-    void updateSourceImageDirectory(File expectedImageDirectory);
+    void updateSourceImageDirectory(@NonNull File expectedImageDirectory);
 
     /**
      * Test if all the datasets in the list have a consensus nucleus
@@ -456,7 +426,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param list
      * @return
      */
-    static boolean haveConsensusNuclei(List<IAnalysisDataset> list) {
+    static boolean haveConsensusNuclei(@NonNull List<IAnalysisDataset> list) {
         for (IAnalysisDataset d : list) {
             if (!d.getCollection().hasConsensus()) {
                 return false;
@@ -471,7 +441,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param list
      * @return
      */
-    static boolean areSameNucleusType(List<IAnalysisDataset> list) {
+    static boolean areSameNucleusType(@NonNull List<IAnalysisDataset> list) {
 
         NucleusType type = list.get(0).getCollection().getNucleusType();
 
@@ -491,7 +461,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param dataset
      * @return the common options, or null if an options is different
      */
-    static boolean mergedSourceOptionsAreSame(IAnalysisDataset dataset) {
+    static boolean mergedSourceOptionsAreSame(@NonNull IAnalysisDataset dataset) {
 
         Set<IAnalysisDataset> list = dataset.getMergeSources();
 
@@ -545,7 +515,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param list
      * @return
      */
-    static NucleusType getBroadestNucleusType(List<IAnalysisDataset> list) {
+    static NucleusType getBroadestNucleusType(@NonNull List<IAnalysisDataset> list) {
 
         NucleusType type = list.get(0).getCollection().getNucleusType();
         if (areSameNucleusType(list)) {
@@ -554,23 +524,9 @@ public interface IAnalysisDataset extends Serializable, Loggable {
 
         return NucleusType.ROUND;
     }
-
-    /**
-     * Get the most recent common ancestor of the dataset save file paths
-     * 
-     * @param datasets
-     *            the list of datasets.
-     * @return a file for the common directory. Check that the path exists and
-     *         is a directory before using this.
-     */
-    static File commonPathOfFiles(List<IAnalysisDataset> datasets) {
-
-        List<File> files = new ArrayList<File>(datasets.size());
-        for (IAnalysisDataset d : datasets) {
-            files.add(d.getSavePath());
-        }
-
-        String[][] folders = new String[files.size()][];
+    
+    static File commonPathOfFiles(@NonNull Collection<File> files) {
+    	String[][] folders = new String[files.size()][];
 
         int k = 0;
 
@@ -626,6 +582,23 @@ public interface IAnalysisDataset extends Serializable, Loggable {
         }
 
         return new File(commonPath);
+    }
+
+    /**
+     * Get the most recent common ancestor of the dataset save file paths
+     * 
+     * @param datasets the list of datasets.
+     * @return a file for the common directory. Check that the path exists and
+     *         is a directory before using this.
+     */
+    static File commonPathOfFiles(@NonNull List<IAnalysisDataset> datasets) {
+
+        List<File> files = new ArrayList<>(datasets.size());
+        for (IAnalysisDataset d : datasets) {
+            files.add(d.getSavePath());
+        }
+        return commonPathOfFiles(files);
+        
     }
 
 }

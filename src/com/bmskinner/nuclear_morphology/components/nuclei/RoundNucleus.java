@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 /*
 	-----------------------
 	NUCLEUS CLASS
@@ -25,9 +23,6 @@
 	within a nucleus
 */
 package com.bmskinner.nuclear_morphology.components.nuclei;
-
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -45,10 +40,11 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
@@ -74,7 +70,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 /**
  * @author bms41
@@ -379,7 +377,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
             break;
         case OP_RP_ANGLE:
-            result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT),
+            result = this.getCentreOfMass().findSmallestAngle(this.getBorderTag(Tag.REFERENCE_POINT),
                     this.getBorderTag(Tag.ORIENTATION_POINT));
             break;
         default:
@@ -489,7 +487,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 
                 for (INuclearSignal s : signals) {
 
-                    double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
+                    double angle = this.getCentreOfMass().findSmallestAngle(p, s.getCentreOfMass());
                     s.setStatistic(PlottableStatistic.ANGLE, angle);
 
                 }
@@ -1206,29 +1204,6 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
     }
 
     @Override
-    public boolean equals(CellularComponent c) {
-
-        if (this == c) {
-            return true;
-        }
-
-        if (c == null) {
-            return false;
-        }
-
-        if (this.getClass() != c.getClass()) {
-            return false;
-        }
-
-        if (!this.getID().equals(c.getID())) {
-            return false;
-        }
-
-        return true;
-
-    }
-
-    @Override
     public int compareTo(Nucleus n) {
 
         int number = this.getNucleusNumber();
@@ -1335,15 +1310,13 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         return true;
     }
 
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting nucleus");
-        out.defaultWriteObject();
-        // finest("\tWrote nucleus");
-    }
+//    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+//        // finest("\tWriting nucleus");
+//        out.defaultWriteObject();
+//        // finest("\tWrote nucleus");
+//    }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading nucleus");
-
         in.defaultReadObject();
 
         Map<Tag, Integer> newCache = new HashMap<Tag, Integer>(0);
@@ -1352,18 +1325,12 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 
         while (it.hasNext()) {
             Object tag = it.next();
-            if (tag instanceof BorderTag) {
-                fine("Deserialization has no BorderTagObject for " + tag.toString() + ", creating");
-
+            if (tag instanceof BorderTag)
                 newCache.put(new BorderTagObject((BorderTag) tag), borderTags.get(tag));
-            }
-
         }
 
-        if (!newCache.isEmpty()) {
+        if (!newCache.isEmpty())
             borderTags = newCache;
-        }
-
         this.verticalNucleus = null;
     }
 
@@ -1376,6 +1343,11 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 	public IPoint getBase() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, getBorderLength());
 	}
 
 }

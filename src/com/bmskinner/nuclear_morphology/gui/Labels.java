@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui;
 
 /**
@@ -28,6 +26,7 @@ public class Labels {
 	
     public static final String DATASET     = "Dataset";
     public static final String NA          = "N/A";
+    public static final String NA_MERGE = "N/A - merge";
     public static final String NUCLEI      = "nuclei";
 
     public static final String REQUIRES_CONSENSUS_LBL = "Requires consensus nucleus";
@@ -42,22 +41,77 @@ public class Labels {
     public static final String MULTIPLE_DATASETS           = "Multiple datasets selected";
     public static final String NULL_DATASETS               = "No datasets selected";
     
-
-    public static class Populations {
-    	public static final String SAVE_AS_LBL = "Save nmd as...";
+    
+    public static class Consensus {
     	
-    	public static final String ADD = "Add...";
+    	public static final String RESET_LBL = "!";
+    	public static final String RESET_ROTATION_TOOLTIP  = "Reset rotation to orientation point";
+    	public static final String RESET_COM_TOOLTIP       = "Reset centre of mass to 0,0";
+    	
+    	public static final String INCREASE_X_LBL  = "+x";
+    	public static final String DECREASE_X_LBL  = "-x";
+    	public static final String INCREASE_Y_LBL  = "+y";
+    	public static final String DECREASE_Y_LBL  = "-y";
+    	
+    	public static final String INCREASE_X_TOOLTIP       = "Move centre of mass x+1";
+    	public static final String DECREASE_X_TOOLTIP       = "Move centre of mass x-1";
+    	public static final String INCREASE_Y_TOOLTIP       = "Move centre of mass y+1";
+    	public static final String DECREASE_Y_TOOLTIP       = "Move centre of mass y-1";
+    	
+    	public static final String INCREASE_ROTATION_LBL = "+r";
+    	public static final String DECREASE_ROTATION_LBL = "-r";
+    	
+    	public static final String INCREASE_ROTATION_TOOLTIP = "Rotate anti-clockwise 1 degree";
+    	public static final String DECREASE_ROTATION_TOOLTIP = "Rotate clockwise 1 degree";
+    	
+    	public static final String REFOLD_BTN_LBL = "Make consensus";
+    	public static final String RE_REFOLD_LBL  = "Remake consensus";
+    }
+
+    /**
+     * Labels from the populations panel and popup menus
+     * @author ben
+     *
+     */
+    public static class Populations {
+    	
+    	public static final String MOVE_UP_LBL            = "Move up";
+    	public static final String MOVE_DOWN_LBL          = "Move down";
+    	
+    	public static final String SAVE_AS_LBL            = "Save nmd as...";
+    	
+    	public static final String MERGE_LBL              = "Merge";
+    	
+    	public static final String ARITHMETIC_LBL         = "Boolean";
+    	public static final String DELETE_LBL             = "Delete";
+    	public static final String CLOSE_LBL              = "Close";
+    	public static final String CURATE_LBL             = "Curate";
+    	
+    	public static final String CHANGE_FOLDER_LBL      = "Change folder";
+    	
+    	public static final String EXTRACT_CELLS_LBL      = "Extract cells";
+    	
+    	public static final String ADD_TO_WORKSPACE_LBL   = "Workspace...";
+    	public static final String ADD_TO_BIOSAMPLE_LBL   = "Biosample...";
+    	public static final String ADD_TO_NEW_LBL         = "Add to new";
+    	public static final String ADD_TO_LBL_PREFIX      = "Add to ";
+    	public static final String REMOVE_FROM_LBL_PREFIX = "Remove from ";
+    	
+    	public static final String ADD                    = "Add...";
         public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
         public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
-        public static final String POST_FISH_MAPPING_LBL = "Post-FISH mapping";
+        public static final String POST_FISH_MAPPING_LBL  = "Post-FISH mapping";
         
-        public static final String CHANGE_SCALE_LBL = "Set scale";
+        public static final String CHANGE_SCALE_LBL       = "Set scale";
+        public static final String RELOCATE_CELLS_LBL     = "Relocate cells";
         
-        public static final String EXPORT = "Export...";
-        public static final String EXPORT_STATS = "Export nuclear stats";
-        public static final String EXPORT_SIGNALS = "Export nuclear signals";
-        public static final String EXPORT_SHELLS = "Export shells";
-        public static final String EXPORT_CELL_LOCS = "Export cell locations";
+        public static final String EXPORT                 = "Export...";
+        public static final String EXPORT_STATS           = "Nuclear statistics";
+        public static final String EXPORT_SIGNALS         = "Nuclear signal statistics";
+        public static final String EXPORT_SHELLS          = "Nuclear signal shells";
+        public static final String EXPORT_CELL_LOCS       = "Cell locations within images";
+        public static final String EXPORT_OPTIONS         = "Dataset analysis options";
+        public static final String EXPORT_XML_DATASET     = "Dataset to XML";
     }
     
     /**
@@ -72,8 +126,13 @@ public class Labels {
     	public static final String SIGNAL_LABEL_SINGULAR   = "Signal";
     	public static final String SIGNALS_PER_NUCLEUS     = "Signals per nucleus";
     	public static final String AVERAGE_POSITION        = "Average shell";
+        public static final String SIGNAL_ID_LABEL         = "ID";
     	public static final String NO_SIGNAL_GROUPS        = "No signal groups in datasets";
     	public static final String CHOOSE_SIGNAL_COLOUR    = "Choose signal color";
+    	public static final String SIGNAL_SOURCE_LABEL     = "Source (double click to change)";
+    	public static final String SIGNAL_CHANNEL_LABEL    = "Channel";
+    	public static final String WARP_BTN_LBL            = "Warp signals";
+    	public static final String WARP_BTN_TOOLTIP        = "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments";
     	
         /*
          * signal detection
@@ -111,6 +170,20 @@ public class Labels {
 
         public static final String MINIMUM_SIGNAL_AREA     = "The smallest number of pixels a signal can contain";
         public static final String MAXIMUM_SIGNAL_FRACTION = "The largest size of a signal, as a fraction of the nuclear area (0-1)";
+        
+        /**
+         * Labels for the signal warping dialog
+         * @author ben
+         *
+         */
+        public class Warper {
+        	public static final String TABLE_HEADER_SOURCE_DATASET = "Source dataset";
+        	public static final String TABLE_HEADER_SOURCE_SIGNALS = "Source signals";
+        	public static final String TABLE_HEADER_SIGNALS_ONLY   = "Only cells with signals?";
+        	public static final String TABLE_HEADER_TARGET_SHAPE   = "Target shape";
+        	public static final String TABLE_HEADER_KEY_COLUMN     = "Keys";
+        	
+        }
 
     }
     
@@ -142,18 +215,41 @@ public class Labels {
         public static final String USE_SIMILARITY_MATRIX       = "<html>If selected, use the difference between each nucleus profile<br>"
                 + "and every other nucleus for clustering.<br>Otherwise, use area, circularity and aspect ratio</html>";
     	
-    	public static final String CLUSTER_GROUP = "Cluster group";
-    	public static final String CLUSTER_FOUND = "Clusters found";
-    	public static final String CLUSTER_METHOD = "Method";
-    	public static final String HC_ITERATIONS = "Iterations";
-    	public static final String HC_METHOD = "Hierarchical method";
-    	public static final String TARGET_CLUSTERS = "Target cluster number";
-    	public static final String INCLUDE_PROFILE = "Include profile";
-    	public static final String PROFILE_TYPE = "Profile type";
-    	public static final String INCLUDE_MESH = "Include mesh";
+    	public static final String CLUSTER_GROUP    = "Cluster group";
+    	public static final String CLUSTER_FOUND    = "Clusters found";
+    	public static final String CLUSTER_METHOD   = "Method";
+    	public static final String HC_ITERATIONS    = "Iterations";
+    	public static final String HC_METHOD        = "Hierarchical method";
+    	public static final String TARGET_CLUSTERS  = "Target cluster number";
+    	public static final String INCLUDE_PROFILE  = "Include profile";
+    	public static final String PROFILE_TYPE     = "Profile type";
+    	public static final String INCLUDE_MESH     = "Include mesh";
     	public static final String INCLUDE_SEGMENTS = "Include segments";
-    	public static final String TREE = "Tree";
+    	public static final String TREE             = "Tree";
     }
     
 
+    public static class Cells {
+    	public static final String SOURCE_FILE_LABEL = "Source image file";
+    	public static final String SOURCE_FILE_NAME_LABEL = "Source image name";
+    	public static final String SOURCE_CHANNEL_LABEL = "Source channel";
+    	public static final String ANGLE_WINDOW_PROP_LABEL = "Angle window prop.";
+    	public static final String ANGLE_WINDOW_SIZE_LABEL = "Angle window size";
+    	public static final String SCALE_LABEL = "Scale (pixels/um)";
+    	
+    	public static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
+    	
+    }
+    
+    public static class AnalysisParameters {
+    	public static final String COLLECTION_SOURCE = "Collection source";
+    	
+    }
+    
+    public static class Merges {
+    	public static final String NO_MERGE_SOURCES = "No merge sources";
+    	public static final String MERGE_SOURCE = "Merge sources";
+    	
+    	
+    }
 }

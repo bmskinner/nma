@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,15 +12,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
-
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +24,10 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 /**
  * The sperm tail is a specialised type of flagellum. It is anchored at the tail
@@ -122,15 +120,6 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
         return this.length;
     }
 
-    @Override
-    public boolean equals(CellularComponent c) {
-        if (c.getClass() == SpermTail.class) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         finest("\tWriting sperm tail");
         out.defaultWriteObject();
@@ -178,16 +167,15 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
         return null;
     }
 
-    @Override
-    public void updateSourceFolder(File newFolder) {
-        // TODO Auto-generated method stub
-
-    }
-
 	@Override
 	public IPoint getBase() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, getBorderLength());
 	}
 
 }

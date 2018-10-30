@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
 import java.awt.Color;
@@ -26,6 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -39,21 +39,24 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.KeyedShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.RandomShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 /**
  * Detect signal proportions within concentric shells of a nucleus
@@ -64,58 +67,61 @@ import ij.ImageStack;
  */
 public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
-	public static final int MINIMUM_AREA_PER_SHELL = 100;
-	public static final double MINIMUM_CIRCULARITY = 0.3;
+	public static final int MINIMUM_AREA_PER_SHELL = 50;
+	public static final double MINIMUM_CIRCULARITY = 0.07;
 	
-    private final int shells;
-    private final ShrinkType type;
+	private final IShellOptions options;
+	
+	private ICellCollection collection;
 
-    private final Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
+    private final Map<UUID, KeyedShellResult> counters = new HashMap<>();
 
-    public ShellAnalysisMethod(IAnalysisDataset dataset, int shells, ShrinkType t) {
+    public ShellAnalysisMethod(@NonNull final IAnalysisDataset dataset, @NonNull final IShellOptions o) {
         super(dataset);
-        this.shells = shells;
-        type = t;
+        options = o;
     }
 
     @Override
     public IAnalysisResult call() throws Exception {
-
-        // Set the progress total
-        ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, dataset.getCollection().size() - 1);
-        fireProgressEvent(e);
-        run();
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
-        return r;
+    	fireUpdateProgressTotalLength(dataset.getCollection().getNucleusCount()-1);
+        run();  
+        return new DefaultAnalysisResult(dataset);
     }
 
     protected void run() {
-
-        ICellCollection collection = dataset.getCollection();
-
-        if (!collection.getSignalManager().hasSignals()) 
-            return;
-
-        log("Performing "+type+" shell analysis with " + shells + " shells...");
+    	collection = dataset.getCollection();
+    	if (!collection.getSignalManager().hasSignals()) 
+             return;
+    	 
+        log(String.format("Performing %s shell analysis with %s shells on dataset %s...", 
+        		options.getErosionMethod(), options.getShellNumber(), collection.getName()));
+        
+        
+        // If this is a child, and the parent already has the data, just copy it
+        if(collection instanceof VirtualCellCollection) {
+        	ICellCollection parent = ((VirtualCellCollection)collection).getParent().getCollection();
+        	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
+        		if(parent.getSignalGroup(signalGroupId).get().hasShellResult())
+					copyShellResults(signalGroupId, parent, collection);	
+        	}
+        	
+        	Optional<ISignalGroup> randomGroup = parent.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
+        	if(!randomGroup.isPresent()) {
+        		warn("Parent dataset does not have shell results to copy");
+        		return;
+        	}
+        	if(randomGroup.get().hasShellResult())
+        		copyShellResults(IShellResult.RANDOM_SIGNAL_ID, parent, collection);	        	
+        	return;
+        }
 
         try {
-
-            for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
-
-                if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
-                    continue;
-                counters.put(signalGroup, new KeyedShellResult(shells, type));
-            }
+        	createShellCounters();
 
             // make the shells and measure the values
-            for (ICell c : collection.getCells()) {
-                new CellAnalysis(c).analyse();
-            }
-
-            ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0);
-            fireProgressEvent(e);
-
-            // get stats
+            collection.getCells().parallelStream().forEach(c->new CellAnalysis(c).analyse());
+            
+            fireIndeterminateState();
             createResults();
 
             log("Shell analysis complete");
@@ -124,7 +130,115 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             stack("Error in shell analysis", e);
             return;
         }
-        return;
+    }
+    
+    /**
+     * Create the shell results for each signal group
+     */
+    private void createShellCounters() {
+    	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
+            if (IShellResult.RANDOM_SIGNAL_ID.equals(signalGroupId))
+                continue;
+            counters.put(signalGroupId, new KeyedShellResult( options.getShellNumber(), options.getErosionMethod()));
+            
+            // Assign the options to each signal group
+            fine("Creating signal counter for group "+signalGroupId);
+            Optional<IAnalysisOptions> datasetOptions = dataset.getAnalysisOptions();
+            if(!datasetOptions.isPresent()) {
+            	warn("No analysis options in dataset; unable to set shell options");
+            	return;
+            }
+            datasetOptions.get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
+        }
+    	
+    	// Ensure a random distribution exists
+    	if(!collection.getSignalManager().getSignalGroupIDs().contains(IShellResult.RANDOM_SIGNAL_ID))
+    		counters.put(IShellResult.RANDOM_SIGNAL_ID, new KeyedShellResult(options.getShellNumber(), options.getErosionMethod()));
+    }
+    
+    private synchronized void createResults() {
+        // get stats and export
+        boolean addRandom = false;
+
+        for (UUID group : counters.keySet()) {
+            addRandom |= collection.getSignalManager().hasSignals(group);
+            if (collection.getSignalManager().hasSignals(group)) {
+                KeyedShellResult channelCounter = counters.get(group);
+                collection.getSignalGroup(group).get().setShellResult(channelCounter);
+                copyShellResultsToChildDatasets(group);
+            }
+        }
+
+
+        if (addRandom)
+            addRandomSignal();
+    }
+    
+    /**
+     * Copy shell values from the source to the destination collection. If is assumed
+     * that the destination is a child of the source
+     * @param group
+     * @param src
+     * @param dest
+     */
+    private void copyShellResults(@NonNull UUID group, @NonNull ICellCollection src, @NonNull ICellCollection dest) {
+    	IShellResult channelCounter = src.getSignalGroup(group).get().getShellResult().get();
+    	if (dest.getSignalManager().hasSignals(group) || IShellResult.RANDOM_SIGNAL_ID.equals(group)) {
+    		KeyedShellResult childCounter = new KeyedShellResult(options.getShellNumber(), options.getErosionMethod());
+    		for(ICell c : dest.getCells()) {
+    			for(Nucleus n : c.getNuclei()) {
+
+    				long[] counterstain = channelCounter.getPixelValues(CountType.COUNTERSTAIN, c, n, null);
+    				long[] signals      = channelCounter.getPixelValues(CountType.SIGNAL, c, n, null);
+    				
+    				if(counterstain==null) {
+    					fine("No counterstain for "+n.getNameAndNumber());
+    					continue;
+    				}
+    				if(signals==null)
+    					continue;
+
+    				childCounter.addShellData(CountType.COUNTERSTAIN, c, n, counterstain);
+    				childCounter.addShellData(CountType.SIGNAL, c, n, signals);
+
+    				for(INuclearSignal s : n.getSignalCollection().getSignals(group)) {
+    					long[] signalValue = channelCounter.getPixelValues(CountType.SIGNAL, c, n, s);
+    					childCounter.addShellData(CountType.SIGNAL, c, n, s, signalValue);
+    				}
+    				
+    				// We can't select signals by group in the random set
+    				if(IShellResult.RANDOM_SIGNAL_ID.equals(group)) {
+    					n.getSignalCollection().getSignals().stream().flatMap(l->l.stream()).forEach(s->{
+    						long[] signalValue = channelCounter.getPixelValues(CountType.SIGNAL, c, n, s);
+        					childCounter.addShellData(CountType.SIGNAL, c, n, s, signalValue);
+    					});
+    				}
+    			}
+    		}
+
+    		dest.getSignalGroup(group).get().setShellResult(childCounter);
+    	}
+    }
+    
+    
+    /**
+     * Duplicate cell values to new shell results for child collections 
+     * @param group
+     */
+    private void copyShellResultsToChildDatasets(UUID group) {
+        for(IAnalysisDataset childDataset : dataset.getAllChildDatasets()) {
+        	ICellCollection child = childDataset.getCollection();
+        	copyShellResults(group, collection, child);
+        }
+    }
+
+    private synchronized void addRandomSignal() {
+    	ISignalGroup random = new SignalGroup("Random distribution");
+    	random.setGroupColour(Color.LIGHT_GRAY);
+    	KeyedShellResult channelCounter = counters.get(IShellResult.RANDOM_SIGNAL_ID);
+    	random.setShellResult(channelCounter);
+    	collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
+    	copyShellResultsToChildDatasets(IShellResult.RANDOM_SIGNAL_ID);
     }
 
     
@@ -138,22 +252,25 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         private ShellDetector shellDetector;
         final ICell c;
         
-        public CellAnalysis(ICell c){
+        public CellAnalysis(@NonNull ICell c){
             this.c = c;
         }
         
-        public void analyse(){
+        public synchronized void analyse(){
+        	try {
             for(Nucleus n : c.getNuclei()){
                 analyseNucleus(n);
                 fireProgressEvent();
             }
+        	} catch(Exception e) {
+        		stack(e);
+        	}
         }
 
-
-        private void analyseNucleus(Nucleus n) {
+        private synchronized void analyseNucleus(@NonNull final Nucleus n) {
 
             try {
-                shellDetector = new ShellDetector(n, shells, type, true);
+                shellDetector = new ShellDetector(n,  options.getShellNumber(), options.getErosionMethod(), true);
             } catch (ShellAnalysisException e1) {
                 warn("Unable to make shells for " + n.getNameAndNumber());
                 stack("Error in shell detector", e1);
@@ -161,16 +278,13 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             }
 
             try {
-
-                ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importToStack();
-
                 for (UUID signalGroup : n.getSignalCollection().getSignalGroupIds()) {
 
                     if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                         continue;
                     analyseSignalGroup(n, signalGroup);  
                 }
-            } catch (ImageImportException e) {
+            } catch (ImageImportException | UnloadableImageException e) {
 
                 warn("Cannot import image source file");
                 stack("Error importing file", e);
@@ -178,8 +292,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
         }
 
-        private void analyseSignalGroup(Nucleus n, UUID signalGroup) throws ImageImportException {
-            ICellCollection collection = dataset.getCollection();
+        private synchronized void analyseSignalGroup(@NonNull final Nucleus n, @NonNull final UUID signalGroup) throws ImageImportException, UnloadableImageException {
             if (!collection.getSignalManager().hasSignals(signalGroup))
                 return;
 
@@ -191,12 +304,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             
             if (sourceFile == null) 
                 return;
-
-            ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importToStack();
-            ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
-
+            
             KeyedShellResult counter = counters.get(signalGroup);
-
+            
+            ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
             int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
 
             long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalStack, signalChannel);
@@ -205,94 +316,57 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
             
+            long[] random = new RandomDistribution(n, shellDetector, RandomDistribution.DEFAULT_ITERATIONS).getCounts();
+
+            counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.SIGNAL, c, n, random); // random pixels in the nucleus
+            counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // counterstain for random signal
+            
             for (INuclearSignal s : signals) {
                 long[] countsInSignals = shellDetector.findPixelIntensities(s);
                 counter.addShellData(CountType.SIGNAL, c, n, s, countsInSignals); // the pixels within the signal
+                counters.get(IShellResult.RANDOM_SIGNAL_ID).addShellData(CountType.SIGNAL, c, n, s, random); // same random pixels in the nucleus keyed to the signal
             }
         }
-    }
-
-    private void createResults() {
-        // get stats and export
-        ICellCollection collection = dataset.getCollection();
-
-        boolean addRandom = false;
-
-        for (UUID group : counters.keySet()) {
-            addRandom |= collection.getSignalManager().hasSignals(group);
-            if (collection.getSignalManager().hasSignals(group)) {
-                KeyedShellResult channelCounter = counters.get(group);
-                dataset.getCollection().getSignalGroup(group).get().setShellResult(channelCounter);
-            }
-        }
-
-        if (addRandom)
-            addRandomSignal();
-    }
-
-    private void addRandomSignal() {
-
-        ICellCollection collection = dataset.getCollection();
-
-        // Create a random sample distribution
-        if (collection.hasConsensus()) {
-
-            ISignalGroup random = new SignalGroup("Random distribution");
-            random.setFolder(new File(""));
-            random.setGroupColour(Color.LIGHT_GRAY);
-
-            dataset.getCollection().addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
-
-            // Calculate random positions of pixels
-            RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
-
-            long[] c = sr.getCounts();
-            
-			RandomShellResult randomResult = new RandomShellResult(shells, type, c);
-			
-			dataset.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
-			        .setShellResult(randomResult);
-        } else {
-            warn("Cannot create simulated dataset, no consensus");
-        }
-
     }
     
     private class RandomDistribution {
         
+    	private static final long DEFAULT_SEED = 1234;
+    	
         private long[] counts;
-
+        private ShellDetector shellDetector;
+        private Random rng;
+        
         public static final int DEFAULT_ITERATIONS = 10000;
 
-        public RandomDistribution(@NonNull CellularComponent template, int iterations) {
-                        
+        public RandomDistribution(@NonNull CellularComponent template, ShellDetector detector, int iterations) {
+        	rng = new Random(DEFAULT_SEED);
             if(iterations<=0)
                 throw new IllegalArgumentException("Must have at least one iteration");
-            
-            counts = new long[shells];
-            for(int i=0; i<shells; i++){
+            shellDetector = detector;
+            counts = new long[ options.getShellNumber()];
+            for(int i=0; i< options.getShellNumber(); i++){
                 counts[i] = 0;
             }
 
-            List<IPoint> list = new ArrayList<IPoint>();
+            List<IPoint> list = new ArrayList<>();
             for (int i = 0; i < iterations; i++) {
-                list.add(createRandomPoint(template));
+            	IPoint p = createRandomPoint(template);
+            	while(!template.containsOriginalPoint(p))
+            		p = createRandomPoint(template);            	 
+                list.add(p);
             }
-            
 
-            // Find the shell for these points in the template
-            try {
-                ShellDetector detector = new ShellDetector(template, shells, type, true);
-                for (IPoint p : list) {
-                    int shell = detector.findShell(p);
-                    if(shell>=0) // -1 for point not found
-                        counts[shell]++;
-                }
-
-            } catch (ShellAnalysisException e) {
-                System.err.println(e.getMessage());
-                e.printStackTrace();
-            }
+            int unMappedPoints = 0;
+			for (IPoint p : list) {
+			    int shell = shellDetector.findShell(p);
+			    if(shell>=0) // -1 for point not found
+			        counts[shell]++;
+			    else {
+			    	unMappedPoints++;
+			    }
+			}
+			finer("Random signal: "+unMappedPoints+" points were not in a shell");
 
         }
 
@@ -308,22 +382,19 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
          */
         private IPoint createRandomPoint(@NonNull CellularComponent template) {
 
-            Rectangle2D r = template.getBounds();
+            IPoint base = template.getOriginalBase();
+            double w = template.getBounds().getWidth();
+            double h = template.getBounds().getHeight();
 
-            // Make a random position in the rectangle
-            // nextDouble is exclusive of the top value,
-            // so add 1 to make it inclusive
-            double rx = ThreadLocalRandom.current().nextDouble(r.getX(), r.getWidth() + 1);
-            double ry = ThreadLocalRandom.current().nextDouble(r.getY(), r.getHeight() + 1);
+            // Make a pseudo-random position in the rectangle
+            double rx = rng.nextDouble();
+            double ry = rng.nextDouble();
+            
+            double xrange = w*rx;
+            double yrange = h*ry;
 
-            IPoint p = IPoint.makeNew(rx, ry);
-
-            if (template.containsPoint(p)) {
-                return p;
-            } else {
-                return createRandomPoint(template);
-            }
-
+            IPoint p = IPoint.makeNew(base.getX()+xrange, base.getY()+yrange);
+            return p;
         }
     }
     

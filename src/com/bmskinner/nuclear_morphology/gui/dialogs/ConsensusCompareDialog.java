@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
@@ -40,7 +38,7 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -245,8 +243,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
                 Nucleus n1 = one.getCollection().getConsensus();
                 Nucleus n2 = two.getCollection().getConsensus();
 
-                NucleusMesh mesh1 = new NucleusMesh(n1, meshSize);
-                NucleusMesh mesh2 = new NucleusMesh(n2, mesh1);
+                DefaultMesh mesh1 = new DefaultMesh(n1, meshSize);
+                DefaultMesh mesh2 = new DefaultMesh(n2, mesh1);
 
                 Mesh<Nucleus> comparison1 = mesh1.comparison(mesh2);
                 Mesh<Nucleus> comparison2 = mesh2.comparison(mesh1);

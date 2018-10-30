@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
@@ -23,8 +21,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
@@ -362,6 +363,75 @@ public class Profile implements IProfile {
         }
         return difference;
     }
+    
+    @Override
+	public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException {
+		float[] arr1 = interpolate(array, interpolationLength);
+		float[] arr2 = interpolate(testProfile.toDoubleArray(), interpolationLength);
+		return CellularComponent.squareDifference(arr1, arr2);
+	}
+    
+	/**
+	 * Interpolate the array to the given length, and return as a new array
+	 * 
+	 * @param array2 the array to interpolate
+	 * @param length the new length
+	 * @return
+	 */
+	private float[] interpolate(double[] array2, int length) {
+
+		float[] result = new float[length];
+
+		// where in the old curve index is the new curve index?
+		for (int i = 0; i < length; i++) {
+			// we have a point in the new array.
+			// we want to know which points it lies between in the old profile
+			float fraction = ((float) i / (float) length); // get the fractional
+			// index position
+			// needed
+
+			// get the value in the old profile at the given fractional index
+			// position
+			result[i] = getInterpolatedValue(array2, fraction);
+		}
+		return result;
+
+	}
+	
+	/**
+	 * Get the interpolated value at the given fraction along the given array
+	 * 
+	 * @param array2
+	 * @param fraction the fraction, from 0-1
+	 * @return
+	 */
+	private float getInterpolatedValue(double[] array2, float fraction) {
+		// Get the equivalent index of the fraction in the array
+		double index = fraction * array2.length;
+		double indexFloor = Math.floor(index);
+
+		// Get the integer portion and find the bounding indices
+		int indexLower = (int) indexFloor;
+		if (indexLower == array2.length) { // only wrap possible if fraction is
+			// range 0-1
+			indexLower = 0;
+		}
+
+		int indexHigher = indexLower + 1;
+		if (indexHigher == array2.length) { // only wrap possible if fraction is
+			// range 0-1
+			indexHigher = 0;
+		}
+
+		// Find the fraction between the indices
+		double diffFraction = index - indexFloor;
+
+		// Calculate the linear interpolation
+		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
+
+		return (float) interpolate;
+
+	}
 
     /*
      * -------------------- Profile manipulation --------------------
@@ -555,26 +625,18 @@ public class Profile implements IProfile {
         return linearInterpolatedValue;
     }
 
-    /*
-     * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return this
-     * offset. Returns the positive offset to this profile
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfile#getSlidingWindowOffset(components.generic.
-     * IProfile)
-     */
-    @Override
-    public int getSlidingWindowOffset(IProfile testProfile) {
-
-        int index = 0;
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
+		return findBestFitOffset(testProfile, 0, array.length);
+	}
+	
+	@Override
+	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
+		int index = 0;
         try {
             double lowestScore = this.absoluteSquareDifference(testProfile);
 
-            for (int i = 0; i < this.size(); i++) {
+            for (int i = minOffset; i < maxOffset; i++) {
 
                 IProfile offsetProfile;
 
@@ -593,7 +655,7 @@ public class Profile implements IProfile {
         }
 
         return index;
-    }
+	}
 
 
     /*
@@ -850,7 +912,7 @@ public class Profile implements IProfile {
             throw new IllegalArgumentException("Segment is null");
         }
 
-        if (segment.getTotalLength() != this.size()) {
+        if (segment.getProfileLength() != this.size()) {
             throw new IllegalArgumentException("Segment comes from a different length profile");
         }
         return getSubregion(segment.getStartIndex(), segment.getEndIndex());
@@ -1070,12 +1132,26 @@ public class Profile implements IProfile {
         }
         return new DoubleProfile(result);
     }
+    
+	@Override
+	public IProfile normaliseAmplitude(double min, double max) {
+		if(Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max))
+			throw new IllegalArgumentException("New range cannot be NaN or infinite");
+		if(min>=max)
+			throw new IllegalArgumentException("Min must be less than max in new amplitude");
+		
+		double oldMin = getMin();
+		double oldMax = getMax();
+		double newRange = max-min;
+		double[] result = new double[array.length];
+		
+		for (int i = 0; i < array.length; i++) {
+			result[i] = (((array[i]/(oldMax-oldMin))*newRange)+min);
+		}
+		return new Profile(result);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#toString()
-     */
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -1142,5 +1218,14 @@ public class Profile implements IProfile {
     public double[] toDoubleArray() {
         return array;
     }
+
+	@Override
+	public int wrap(int index) {
+		if (index < 0)
+            return wrap(size() + index);
+        if (index < size())
+            return index;
+        return index % size();
+	}
 
 }

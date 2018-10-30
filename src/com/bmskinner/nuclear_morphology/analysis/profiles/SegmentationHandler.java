@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,16 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -52,26 +52,27 @@ public class SegmentationHandler implements Loggable {
     }
 
     /**
-     * Unmerge segments with the given ID in this collection and its children,
+     * Merge segments with the given IDs in this collection and its children,
      * as long as the collection is real.
      * 
-     * @param segID
-     *            the segment ID to be unmerged
+     * @param segID1 the segment ID to be merged
+     * @param segID2 the segment ID to be merged
      */
     public void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) {
 
         if (segID1 == null || segID2 == null)
             throw new IllegalArgumentException("Segment IDs cannot be null");
 
-        if (dataset.getCollection().isVirtual())
+        if(!dataset.isRoot())
             return;
 
         // Give the new merged segment a new ID
-        UUID newID = java.util.UUID.randomUUID();
+        final UUID newID = UUID.randomUUID();
+        
         ISegmentedProfile medianProfile = null;
         try {
-
-            medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+        	fine("Merging segments in root dataset "+dataset.getName());
+        	medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                     Tag.REFERENCE_POINT, Stats.MEDIAN);
 
             IBorderSegment seg1 = medianProfile.getSegment(segID1);
@@ -96,6 +97,13 @@ public class SegmentationHandler implements Loggable {
             } else {
                 warn("Segments are not mergable");
             }
+            
+            DatasetValidator dv = new DatasetValidator();
+			if(!dv.validate(dataset)) {
+				warn("Merging failed; resulting dataset did not validate");
+				for(String s : dv.getErrors())
+					warn(s);
+			}
 
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
             warn("Error merging segments");
@@ -113,8 +121,7 @@ public class SegmentationHandler implements Loggable {
      * Unmerge segments with the given ID in this collection and its children,
      * as long as the collection is real. Restore the original state on error.
      * 
-     * @param segID
-     *            the segment ID to be unmerged
+     * @param segID the segment ID to be unmerged
      */
     public void unmergeSegments(@NonNull final UUID segID) {
 
@@ -134,7 +141,7 @@ public class SegmentationHandler implements Loggable {
             }
 
             // Unmerge in the dataset
-            dataset.getCollection().getProfileManager().unmergeSegments(seg);
+            dataset.getCollection().getProfileManager().unmergeSegments(segID);
 
             // Unmerge children
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
@@ -142,9 +149,9 @@ public class SegmentationHandler implements Loggable {
                 ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-                IBorderSegment childSeg = childProfile.getSegment(segID);
+//                IBorderSegment childSeg = childProfile.getSegment(segID);
 
-                child.getCollection().getProfileManager().unmergeSegments(childSeg);
+                child.getCollection().getProfileManager().unmergeSegments(segID);
             }
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
             stack("Error unmerging segments", e);
@@ -212,12 +219,7 @@ public class SegmentationHandler implements Loggable {
                     .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
 
             // Update the median profile
-            dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel
-                                                                                                          // always
-                                                                                                          // uses
-                                                                                                          // seg
-                                                                                                          // start
-                                                                                                          // index
+            dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index);
 
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
@@ -250,15 +252,31 @@ public class SegmentationHandler implements Loggable {
      */
     public void setBorderTag(Tag tag, int index) {
 
-        if (tag == null) {
+        if (tag == null)
             throw new IllegalArgumentException("Tag is null");
-        }
-
-        if (dataset.getCollection().isVirtual()) {
+        if (dataset.getCollection().isVirtual())
             return;
-        }
-
         try {
+
+        	// If a tag is to be updated to an index with an existing tag, don't perform alignments; 
+        	// Just set the tag to the same index directly
+        	// The user is expecting the tags to become the same
+
+        	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+        	for(Tag existingTag : tags) {
+        		if(existingTag.equals(tags))
+        			continue;
+        		int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
+        		if(index==existingTagIndex) {
+        			dataset.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+        			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+        				child.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+        			}
+        			return;
+        		}
+        	}
+
+        	// Otherwise, find the best fit for each child dataset
 
             double prop = dataset.getCollection().getProfileCollection()
                     .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
@@ -267,9 +285,7 @@ public class SegmentationHandler implements Loggable {
 
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
-                // Update each child median profile to the same proportional
-                // index
-
+                // Update each child median profile to the same proportional index
                 int childIndex = child.getCollection().getProfileCollection()
                         .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
 

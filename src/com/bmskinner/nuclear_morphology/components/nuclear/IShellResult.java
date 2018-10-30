@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
@@ -53,7 +51,12 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum ShrinkType {
-        RADIUS, AREA;
+    	
+    	/** Shells have an equal radius, and different areas */
+        RADIUS, 
+        
+        /** Shells have an equal area, and different radii */
+        AREA;
     }
     
     
@@ -64,7 +67,12 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum CountType {
-        SIGNAL, COUNTERSTAIN;
+    	
+        /** Pixels in signal channels */
+        SIGNAL,
+        
+        /** Pixels in counterstain channel */
+        COUNTERSTAIN;
     }
     
     /**
@@ -74,7 +82,11 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum Normalisation {
-        NONE, DAPI;
+    	/** No normalisation is applied */
+        NONE, 
+        
+        /** Signal intensities are normalised by counterstain intensity */
+        DAPI;
     }
     
     /**
@@ -85,7 +97,14 @@ public interface IShellResult extends Serializable, Loggable {
      *
      */
     public enum Aggregation {
-        BY_SIGNAL, BY_NUCLEUS;
+    	/** Only pixels within defined signals are considered */
+        BY_SIGNAL,
+        
+        /** All pixels within the nucleus are considered */
+        BY_NUCLEUS,
+    	
+    	/** Only the position of a defined signal centre of mass is considered */
+        SIGNAL_COM;
     }
     
     /**
@@ -94,8 +113,11 @@ public interface IShellResult extends Serializable, Loggable {
      */
     ShrinkType getType();
     
+    IShellResult duplicate();
+    
     /**
-     * Get the pixel proportions in each shell
+     * Get the mean pixel proportion in each shell averaged
+     * across all cells
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
@@ -111,27 +133,7 @@ public interface IShellResult extends Serializable, Loggable {
      * @return the pixel proportions of signal
      */
 	double[] getStdErrs(@NonNull Aggregation agg, @NonNull Normalisation norm);
-    
-    /**
-     * Get the chi square test value for the pixels against a random distribution
-     * 
-     * @param agg the aggregation of signal
-     * @param norm the normalisation method
-     * @param expected a shell distribution to compare against
-     * @return the result of a chi square test against the given distribution
-     */
-    double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
-    
-    /**
-     * Get the chi square p-value for the the pixels against a random distribution
-     * 
-     * @param agg the aggregation of signal
-     * @param norm the normalisation method
-     * @param expected a shell distribution to compare against
-     * @return the result of a chi square test against the given distribution
-     */
-    double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
-    
+        
     /**
      * Get the overall shell position for the pixels 
      * 
@@ -140,16 +142,36 @@ public interface IShellResult extends Serializable, Loggable {
      * @return the overall shell position
      */
     double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm);
+    
+    
+    /**
+     * Get the observed aggregate values as a long array. This is the mean signal proportion per shell
+     * multipled by the number of cells
+     * @return the shell values
+     */
+    long[] getAggregateCounts(@NonNull Aggregation agg, @NonNull Normalisation norm);
 
     /**
      * Get the pixel count data for a signal in the given nucleus in the given cell.
+     * The signal parameter can be left null to fetch pixels for the entire nucleus
      * @param type the type of pixel to fetch
      * @param cell the cell
      * @param nucleus the nucleus
-     * @param signal the signal
+     * @param signal the signal, or null to fetch all pixels in the nucleus
      * @return the pixel counts in that object per shell
      */
-    public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
+    long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
+    
+    /**
+     * Get the proportion of signal in each shell for a signal in the given nucleus in the given cell.
+     * The signal parameter can be left null to fetch pixels for the entire nucleus
+     * @param type the type of pixel to fetch
+     * @param cell the cell
+     * @param nucleus the nucleus
+     * @param signal the signal, or null to fetch all pixels in the nucleus
+     * @return the pixel counts in that object per shell
+     */
+    double[] getProportions(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
     
     /**
      * Get the number of shells in the shell result
@@ -157,5 +179,11 @@ public interface IShellResult extends Serializable, Loggable {
      * @return the shell count
      */
     int getNumberOfShells();    
+    
+    /**
+     * Get the number of signals stored in this result under the given aggregation type
+     * @return
+     */
+    int getNumberOfSignals(@NonNull Aggregation agg);
 
 }

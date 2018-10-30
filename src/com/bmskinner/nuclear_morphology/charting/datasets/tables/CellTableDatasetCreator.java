@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
 import java.awt.Color;
@@ -51,11 +49,13 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * Generate the stats tables for a single cell
@@ -261,22 +261,22 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
     private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d) {
 
-        fieldNames.add("Source image file");
-        rowData.add(n.getPathAndNumber());
+        fieldNames.add(Labels.Cells.SOURCE_FILE_LABEL);
+        rowData.add(n.getSourceFile());
 
-        fieldNames.add("Source image name");
+        fieldNames.add(Labels.Cells.SOURCE_FILE_NAME_LABEL);
         rowData.add(n.getSourceFileName());
 
-        fieldNames.add("Source channel");
+        fieldNames.add(Labels.Cells.SOURCE_CHANNEL_LABEL);
         rowData.add(n.getChannel());
 
-        fieldNames.add("Angle window prop.");
+        fieldNames.add(Labels.Cells.ANGLE_WINDOW_PROP_LABEL);
         rowData.add(n.getWindowProportion(ProfileType.ANGLE));
 
-        fieldNames.add("Angle window size");
+        fieldNames.add(Labels.Cells.ANGLE_WINDOW_SIZE_LABEL);
         rowData.add(n.getWindowSize(ProfileType.ANGLE));
 
-        fieldNames.add("Scale (pixels/um)");
+        fieldNames.add(Labels.Cells.SCALE_LABEL);
         rowData.add(n.getScale());
 
         addNuclearStatisticsToTable(fieldNames, rowData, n);
@@ -367,15 +367,17 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         for (UUID signalGroup : d.getCollection().getSignalGroupIDs()) {
 
-            if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID)) {
+            if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                 continue;
-            }
 
             try {
-
                 Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
                 if(!g.isPresent())
                 	continue;
+                Optional<IAnalysisOptions> datasetOptionsOptional = d.getAnalysisOptions();
+                if(!datasetOptionsOptional.isPresent())
+                	continue;
+                INuclearSignalOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup);
 
                 fieldNames.add("");
                 rowData.add("");
@@ -391,7 +393,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
 
                 fieldNames.add("Source channel");
-                rowData.add(g.get().getChannel());
+                rowData.add(signalOptions.getChannel());
 
                 fieldNames.add("Number of signals");
                 rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));

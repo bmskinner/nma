@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 /* 
   -----------------------
   STATS FUNCTIONS
@@ -35,6 +33,10 @@ import java.util.stream.DoubleStream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
@@ -47,6 +49,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
+/**
+ * Provides quick implementations of basic stats methods
+ * @author bms41
+ *
+ */
 public class Stats implements Loggable {
 
     public static final double LOG2                      = Math.log(2);
@@ -54,15 +61,26 @@ public class Stats implements Loggable {
     
     public static final int LOWER_QUARTILE = 25;
     public static final int UPPER_QUARTILE = 75;
+    
+    /**
+     * The median value (q50)
+     */
     public static final int MEDIAN         = 50;
     public static final int ONE_HUNDRED_PERCENT = 100;
 
-    static double max(double[] array) {
+    public static double max(double[] array) {
         return DoubleStream.of(array).max().orElse(0);
     }
 
-    static double min(double[] array) {
+    public static double min(double[] array) {
         return DoubleStream.of(array).min().orElse(0);
+    }
+    
+    public static float max(float[] array) {
+    	float max = -Float.MAX_VALUE;
+    	for(float f : array)
+    		max = Math.max(max, f);
+        return max;
     }
 
     /**
@@ -72,17 +90,27 @@ public class Stats implements Loggable {
      * @return
      */
     public static double stderr(double[] m) {
-        if (m == null || m.length == 0) {
+        if (m == null || m.length == 0)
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-        }
-
-        if (m.length < 2) {
+        if (m.length < 2)
             return 0;
-        }
-
         return stdev(m) / Math.sqrt(m.length);
     }
 
+    /**
+     * Calculate the standard deviation of an array of values
+     * 
+     * @param m
+     * @return
+     */
+    public static double stdev(float[] m) {
+        if (m == null || m.length == 0)
+            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+        if (m.length < 2)
+            return 0;
+        return Math.sqrt(variance(m));
+    }
+    
     /**
      * Calculate the standard deviation of an array of values
      * 
@@ -107,14 +135,34 @@ public class Stats implements Loggable {
      * @return the variance
      */
     public static double variance(double[] m) {
-        if (m == null || m.length == 0) {
+        if (m == null || m.length == 0)
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-        }
-
-        if (m.length < 2) {
+        if (m.length < 2)
             return 0;
-        }
         double mean = DoubleStream.of(m).average().orElse(0);
+        double temp = 0;
+        for (double d : m){
+            temp += Math.pow(mean - d, 2);
+        }
+        return temp / m.length;
+    }
+    
+    /**
+     * Calculate the variance of an array of values.
+     * 
+     * @param m the array
+     * @return the variance
+     */
+    public static double variance(float[] m) {
+        if (m == null || m.length == 0)
+            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+        if (m.length < 2)
+            return 0;
+        double total = 0;
+        for(float f : m) {
+        	total+=f;
+        }
+        double mean = total/m.length;
         double temp = 0;
         for (double d : m){
             temp += Math.pow(mean - d, 2);
@@ -221,14 +269,15 @@ public class Stats implements Loggable {
 
 
     /**
-     * Run a Wilcoxon test on the given arrays.
+     * Run a Wilcoxon test on the given arrays and return a Bonnferroni corrected p-value based on the total number of comparisons.
      * 
-     * @param values0
-     * @param values1
-     * @param isGetPValue
+     * @param values0 the first array of values
+     * @param values1 the second array of values
+     * @param isGetPValue if true, return the p-value; if false, return the U statistic
+     * @param nComparisons the number of simultaneous comparisons being made; the number of invokations to this method
      * @return
      */
-    public static double runWilcoxonTest(double[] values0, double[] values1, boolean isGetPValue) {
+    public static double runWilcoxonTest(double[] values0, double[] values1, boolean isGetPValue, int nComparisons) {
 
         double result = 0;
         MannWhitneyUTest test = new MannWhitneyUTest(); // default, NaN's are
@@ -238,13 +287,15 @@ public class Stats implements Loggable {
 
         if (isGetPValue) { // above diagonal, p-value
             result = test.mannWhitneyUTest(values0, values1);
+            result *= nComparisons; // Bonferroni correction
+            result = result>SignificanceTest.ONE?SignificanceTest.ONE:result; // limit p to 1
 
         } else { // below diagonal, U statistic
             result = test.mannWhitneyU(values0, values1);
         }
         return result;
     }
-    
+        
     /**
      * Get the quartile for a float array
      * 
@@ -259,15 +310,14 @@ public class Stats implements Loggable {
 
         if (values.length == 1)
             return values[0];
-
-        if (values.length == 2)
-            return quartile < MEDIAN ? values[0] : values[1];
-
+        
         // Rank order the values
         float[] v = new float[values.length];
         System.arraycopy(values, 0, v, 0, values.length);
         Arrays.sort(v);
 
+        if (values.length == 2)
+        	return quartile < MEDIAN ? v[0] : v[1];
         int n = Math.round(((float) v.length * quartile) / ONE_HUNDRED_PERCENT);
         return v[n];
     }
@@ -286,14 +336,14 @@ public class Stats implements Loggable {
 
         if (values.length == 1)
             return values[0];
-
-        if (values.length == 2)
-            return quartile < MEDIAN ? values[0] : values[1];
-
+        
         // Rank order the values
         int[] v = new int[values.length];
         System.arraycopy(values, 0, v, 0, values.length);
         Arrays.sort(v);
+        
+        if (values.length == 2)
+            return quartile < MEDIAN ? v[0] : v[1];
 
         int n = Math.round(((float) v.length * quartile) / 100);
 
@@ -303,10 +353,8 @@ public class Stats implements Loggable {
     /**
      * Get the quartile for a double array
      * 
-     * @param values
-     *            the values
-     * @param quartile
-     *            the quartile to find
+     * @param values the values
+     * @param quartile the quartile to find
      * @return the quartile value
      */
     public static double quartile(double[] values, int quartile) {
@@ -317,14 +365,13 @@ public class Stats implements Loggable {
         if (values.length == 1)
             return values[0];
 
-        if (values.length == 2)
-            return quartile < MEDIAN ? values[0] : values[1];
-
         // Rank order the values
         double[] v = new double[values.length];
         System.arraycopy(values, 0, v, 0, values.length);
         Arrays.sort(v);
-
+        
+        if (values.length == 2)
+            return quartile < MEDIAN ? v[0] : v[1];
         int n = Math.round(((float) v.length * quartile) / 100);
 
         return v[n];
@@ -380,15 +427,14 @@ public class Stats implements Loggable {
         return count;
 
     }
-
+    
     private static double calculatePolygonArea(@NonNull Roi r) {
 
-        FloatPolygon f = r.getFloatPolygon();
+        FloatPolygon f = r.getInterpolatedPolygon();
         double sum = 0;
         for (int i = 0; i < f.npoints - 1; i++) {
             sum = sum + f.xpoints[i] * f.ypoints[i + 1] - f.ypoints[i] * f.xpoints[i + 1];
         }
-
         return Math.abs(sum / 2);
     }
 

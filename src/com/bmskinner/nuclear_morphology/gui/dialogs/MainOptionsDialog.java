@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,29 +36,29 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.main.MainView;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class MainOptionsDialog extends SettingsDialog implements ActionListener {
 
     private static final String DIALOG_TITLE = "Options";
 
-    private JComboBox<Level>        levelBox;
-    private JComboBox<ColourSwatch> colourBox;
-//    private JCheckBox               violinBox;
-    private JCheckBox               fillConsensusBox;
+    private JComboBox<Level>        programLevelBox;
+    private JComboBox<Level>        consoleLevelBox;
+
     private JCheckBox               refoldOverrideBox;
     private JCheckBox               antiAliasBox;
     private JCheckBox               convertDatasetsBox; // should opened
                                                         // datasets be converted
                                                         // to the latest version
 
-    public MainOptionsDialog(final MainWindow mw) {
-        super(mw, false);
+    public MainOptionsDialog(final MainView mw) {
+        super((Frame) mw, false);
 
         // this.mw = mw;
         this.setLayout(new BorderLayout());
@@ -107,36 +106,26 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         List<JLabel> labels = new ArrayList<JLabel>();
         List<Component> fields = new ArrayList<Component>();
 
-        JLabel logLabel = new JLabel("Logging level");
+        JLabel logLabel = new JLabel("Program log level");
         Level[] levelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
-        levelBox = new JComboBox<Level>(levelArray);
-        levelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
-        levelBox.addActionListener(this);
+        programLevelBox = new JComboBox<Level>(levelArray);
+        programLevelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
+        programLevelBox.addActionListener(this);
 
         labels.add(logLabel);
-        fields.add(levelBox);
+        fields.add(programLevelBox);
+        
+        
+        JLabel consoleLogLabel = new JLabel("Console log level");
+        Level[] consoleLevelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
+        consoleLevelBox = new JComboBox<Level>(consoleLevelArray);
+        consoleLevelBox.setSelectedItem(Logger.getLogger(CONSOLE_LOGGER).getLevel());
+        consoleLevelBox.addActionListener(this);
+        if(System.console()!=null) { // if the gui is launched with not console, don't make the option
+        	labels.add(consoleLogLabel);
+        	fields.add(consoleLevelBox);
+        }
 
-        JLabel swatchLabel = new JLabel("Colour swatch");
-        colourBox = new JComboBox<ColourSwatch>(ColourSwatch.values());
-        colourBox.setSelectedItem(GlobalOptions.getInstance().getSwatch());
-        colourBox.addActionListener(this);
-
-        labels.add(swatchLabel);
-        fields.add(colourBox);
-
-//        JLabel violinLabel = new JLabel("Violin plots");
-//        violinBox = new JCheckBox((String) null, GlobalOptions.getInstance().isViolinPlots());
-//        violinBox.addActionListener(this);
-//
-//        labels.add(violinLabel);
-//        fields.add(violinBox);
-
-        JLabel fillConsensusLabel = new JLabel("Fill consensus");
-        fillConsensusBox = new JCheckBox((String) null, GlobalOptions.getInstance().isFillConsensus());
-        fillConsensusBox.addActionListener(this);
-
-        labels.add(fillConsensusLabel);
-        fields.add(fillConsensusBox);
         
         JLabel overrideRefoldLabel = new JLabel("Refold override");
         refoldOverrideBox = new JCheckBox((String) null, GlobalOptions.getInstance().isOverrideRefold());
@@ -166,30 +155,14 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
     @Override
     public void actionPerformed(ActionEvent arg0) {
 
-        Level level = (Level) levelBox.getSelectedItem();
-        if (!level.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())) {
-            Logger.getLogger(PROGRAM_LOGGER).setLevel(level);
-            GlobalOptions.getInstance().setLogLevel(level);
+        Level programLevel = (Level) programLevelBox.getSelectedItem();
+        if (!programLevel.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())) {
+            Logger.getLogger(PROGRAM_LOGGER).setLevel(programLevel);
         }
-
-        ColourSwatch swatch = (ColourSwatch) colourBox.getSelectedItem();
-
-        if (!swatch.equals(GlobalOptions.getInstance().getSwatch())) {
-
-            GlobalOptions.getInstance().setSwatch(swatch);
-            fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-        }
-
-//        boolean useViolins = violinBox.isSelected();
-//        if (GlobalOptions.getInstance().isViolinPlots() != useViolins) {
-//            GlobalOptions.getInstance().setViolinPlots(useViolins);
-//            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//        }
-
-        boolean fillConsensus = fillConsensusBox.isSelected();
-        if (GlobalOptions.getInstance().isFillConsensus() != fillConsensus) {
-            GlobalOptions.getInstance().setFillConsensus(fillConsensus);
-            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+        
+        Level consoleLevel = (Level) consoleLevelBox.getSelectedItem();
+        if (!consoleLevel.equals(Logger.getLogger(CONSOLE_LOGGER).getLevel())) {
+            Logger.getLogger(CONSOLE_LOGGER).setLevel(consoleLevel);
         }
 
         boolean antiAlias = antiAliasBox.isSelected();

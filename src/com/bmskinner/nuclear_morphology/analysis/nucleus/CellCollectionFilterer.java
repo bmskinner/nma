@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,12 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,17 +28,21 @@ import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * A filterer that filters cell collections to remove obvious outliers
+ * A filterer that filters cell collections on measured values
  * 
  * @author bms41
  * @since 1.13.5
  *
  */
-public class CellCollectionFilterer extends Filterer<ICellCollection> {
+public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
+	
+	private DecimalFormat df = new DecimalFormat("#.##");
 
     @Override
     public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta)
@@ -53,94 +56,125 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
 
         // Make the predicate for the stats
         // Fails if outside the given range
-        Predicate<ICell> pred = new Predicate<ICell>() {
-            @Override
-            public boolean test(ICell t) {
+        Predicate<ICell> pred = (t) -> {
+        	for (Nucleus n : t.getNuclei()) {
+        		for (PlottableStatistic stat : stats) {
+        			double med;
+        			try {
+        				med = collection.getMedian(stat, CellularComponent.NUCLEUS,
+        						MeasurementScale.PIXELS);
+        			} catch (Exception e) {
+        				stack("Cannot get median stat", e);
+        				return false;
+        			}
+        			double max = med * delta;
+        			double min = med / delta;
 
-                for (Nucleus n : t.getNuclei()) {
+        			double value = n.getStatistic(stat);
 
-                    for (PlottableStatistic stat : stats) {
-                        double med;
-                        try {
-                            med = collection.getMedian(stat, CellularComponent.NUCLEUS,
-                                    MeasurementScale.PIXELS);
-                        } catch (Exception e) {
-                            stack("Cannot get median stat", e);
-                            return false;
-                        }
-
-                        double max = med * delta;
-                        double min = med / delta;
-
-                        double value = n.getStatistic(stat);
-
-                        if (value > max || value < min) {
-                            return false;
-                        }
-                    }
-
-                }
-                return true;
-            }
-
+        			if (value > max || value < min)
+        				return false;
+        		}
+        	}
+        	return true;
         };
 
         // Test each cell for the predicate
         Iterator<ICell> it = collection.getCells().iterator();
-
         while (it.hasNext()) {
             ICell c = it.next();
-
             if (!pred.test(c)) {
-
                 if (failCollection != null)
                     failCollection.addCell(new DefaultCell(c));
                 it.remove();
-
             }
-
         }
-
         fine("Remaining: " + collection.size() + " nuclei");
-
     }
 
-    /**
-     * Filter the given collection to retain cells in which the given statistic
-     * is within the lower and upper bounds inclusive.
-     * 
-     * @param collection the collection to filter
-     * @param stat the statistic to filter on
-     * @param lower the lower bound
-     * @param upper the upper bound
-     * @return a new cell collection with copies of the original cells
-     * @throws CollectionFilteringException
-     */
+    @Override
+    public ICellCollection filter(ICellCollection collection, Predicate<ICell> pred) throws CollectionFilteringException {
+    	 ICellCollection filtered = collection.filter(pred);
+
+         if (filtered == null || !filtered.hasCells())
+             throw new CollectionFilteringException("No collection returned");
+         try {
+             collection.getProfileManager().copyCollectionOffsets(filtered);
+             collection.getSignalManager().copySignalGroups(filtered);
+
+         } catch (ProfileException e) {
+             warn("Error copying collection offsets");
+             stack("Error in offsetting", e);
+         }
+         return filtered;
+    }
+
     @Override
     public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException {
-
-        ICellCollection filtered = collection.filterCollection(stat, scale, lower, upper);
-
-        if (filtered == null)
-            throw new CollectionFilteringException("No collection returned");
-
-        if (!filtered.hasCells())
-            throw new CollectionFilteringException("No cells returned for " + stat);
-
-        try {
-
-            // TODO - this fails on converted collections from (at least) 1.13.0
-            // with no profiles in aggregate
-            collection.getProfileManager().copyCollectionOffsets(filtered);
-            collection.getSignalManager().copySignalGroups(filtered);
-
-        } catch (ProfileException e) {
-            warn("Error copying collection offsets");
-            stack("Error in offsetting", e);
-        }
-
-        return filtered;
+    	return filter(collection, CellularComponent.NUCLEUS, stat, lower, upper, scale);
     }
+    
+    @Override
+    public ICellCollection filter(ICellCollection collection, String component, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
+            throws CollectionFilteringException {
+    	
+    	FilteringOptions op = new DefaultFilteringOptions();
+    	op.addMinimumThreshold(stat, component, scale, lower);
+    	op.addMaximumThreshold(stat, component, scale, upper);
+    	
+    	Predicate<ICell> pred = op.getPredicate(collection);
+//    	 Predicate<ICell> pred = new Predicate<ICell>() {
+//    		 @Override
+//    		 public boolean test(ICell t) {
+//    			
+//    			 
+//    			 if(CellularComponent.NUCLEUS.equals(component))
+//    				 return t.getNuclei().stream().anyMatch(createNucleusFilter(collection, stat, lower, upper, scale));
+//    			 
+//    			 if(CellularComponent.NUCLEAR_SIGNAL.equals(component))
+//    				 return t.getNuclei().stream().anyMatch(createNuclearSignalFilter(stat, lower, upper, scale));
+//    			 return false;
+//    		 }
+//
+//             @Override
+//             public String toString() {
+//                 return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
+//             }
+//
+//         };
+         
+        return filter(collection, pred);
+    }
+    
+//    private Predicate<Nucleus> createNuclearSignalFilter(PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
+//    	return (n) ->{
+//    			return n.getSignalCollection().getAllSignals().stream().anyMatch(s->{
+//    				 double value = s.getStatistic(stat, scale);
+//					 if (value < lower)
+//						 return false;
+//					 if (value > upper)
+//						 return false;
+//					 return true;
+//    			});
+//    	};
+//    }
+//    
+//    private Predicate<Nucleus> createNucleusFilter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
+//    	
+//    	return (n) ->{
+//    		try {
+//				 double value = stat.equals(PlottableStatistic.VARIABILITY)
+//						 ? collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+//						 if (value < lower)
+//							 return false;
+//						 if (value > upper)
+//							 return false;
+//			 } catch (UnavailableBorderTagException e) {
+//				 return false;
+//			 }
+//			 return true;
+//    	};
+//    }
 
 }

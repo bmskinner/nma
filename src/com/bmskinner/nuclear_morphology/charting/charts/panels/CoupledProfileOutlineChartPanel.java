@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
 import java.awt.BasicStroke;
@@ -36,7 +34,7 @@ import org.jfree.chart.plot.Crosshair;
 import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
@@ -139,7 +137,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable {
                     p = getPointFromProfileIndex(xValue);
                     xCrosshairOutline.setValue(p.getX());
                     yCrosshairOutline.setValue(p.getY());
-                } catch (UnavailableBorderPointException e1) {
+                } catch (UnavailableBorderPointException | UnavailableBorderTagException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
@@ -162,7 +160,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable {
                     try {
                         p = getPointFromProfileIndex(xValue);
                         fireBorderPointEvent(p);
-                    } catch (UnavailableBorderPointException e1) {
+                    } catch (UnavailableBorderPointException | UnavailableBorderTagException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
@@ -181,15 +179,14 @@ public class CoupledProfileOutlineChartPanel implements Loggable {
         return xValue;
     }
 
-    private IBorderPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException{
+    private IBorderPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException, UnavailableBorderTagException{
         // Find the index of the border point with the current profile chart x
         // value
-//        Nucleus n = cell.getNucleus();
         int rpIndex = obj.getBorderIndex(Tag.REFERENCE_POINT);
         int xIndex = obj.wrapIndex(index + rpIndex);
 
         // Get that border point
-        IBorderPoint p = obj.getOriginalBorderPoint(xIndex);//.getBorderPoint(xIndex);
+        IBorderPoint p = obj.getOriginalBorderPoint(xIndex);
         return p;
     }
 

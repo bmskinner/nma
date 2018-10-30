@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
@@ -30,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.8
  *
  */
-public class DatasetShellsExporter extends StatsExporter implements Exporter, Loggable {
+public class DatasetShellsExporter extends StatsExporter implements Loggable {
 
 //    private static final String EXPORT_MESSAGE          = "Exporting shells...";
 //    private static final String DEFAULT_MULTI_FILE_NAME = "Shell_stats_export" + Exporter.TAB_FILE_EXTENSION;
@@ -69,6 +85,7 @@ public class DatasetShellsExporter extends StatsExporter implements Exporter, Lo
             "ComponentImageFolder",
             "ComponentImage",
             "SignalType",
+            "SignalGroupId",
             "SignalGroup",
             "SignalFolder",
             "SignalImage",
@@ -111,7 +128,7 @@ public class DatasetShellsExporter extends StatsExporter implements Exporter, Lo
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
             ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
             String groupName   = signalGroup.getGroupName();
-            String groupFolder = signalGroup.getFolder().getAbsolutePath();            
+            String groupFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).getFolder().getAbsolutePath();            
             Optional<IShellResult> oShellResult = signalGroup.getShellResult();
             if(!oShellResult.isPresent())
                 continue;
@@ -127,6 +144,38 @@ public class DatasetShellsExporter extends StatsExporter implements Exporter, Lo
 
                     if(!n.getSignalCollection().hasSignal(signalGroupId))
                         continue;
+                    
+                    // Append random signal
+                    outLine.append(d.getName() + TAB)
+                    .append(cell.getId() + TAB)
+                    .append(n.getID() + TAB)
+                    .append(CellularComponent.NUCLEUS + TAB)
+                    .append(n.getSourceFolder() + TAB)
+                    .append(n.getSourceFileName() + TAB)
+                    .append(CellularComponent.NUCLEUS + TAB)
+                    .append(IShellResult.RANDOM_SIGNAL_ID.toString() + TAB)
+                    .append("Random" + TAB)
+                    .append("Null" + TAB)
+                    .append("Null" + TAB)
+                    .append("Null"+TAB)
+                    .append(Aggregation.BY_NUCLEUS + TAB);
+
+                    long[] randomByNucleus =  d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().getShellResult().get().getPixelValues(CountType.SIGNAL, cell, n, null);
+                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
+
+                    for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                        outLine.append(randomByNucleus[i]+TAB);
+                    }
+                    for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                        outLine.append(counterstain[i]+TAB);
+                    }
+
+                    if (outLine.length() > 0)
+                        outLine.setLength(outLine.length() - 1);
+                    outLine.append(NEWLINE);
+                    
+                    
+                    // Append real signals
 
                     outLine.append(d.getName() + TAB)
                     .append(cell.getId() + TAB)
@@ -135,6 +184,7 @@ public class DatasetShellsExporter extends StatsExporter implements Exporter, Lo
                     .append(n.getSourceFolder() + TAB)
                     .append(n.getSourceFileName() + TAB)
                     .append(CellularComponent.NUCLEUS + TAB)
+                    .append(signalGroupId.toString() + TAB)
                     .append(groupName + TAB)
                     .append(groupFolder + TAB)
                     .append(n.getSignalCollection().getSourceFile(signalGroupId).getName() + TAB)
@@ -142,7 +192,7 @@ public class DatasetShellsExporter extends StatsExporter implements Exporter, Lo
                     .append(Aggregation.BY_NUCLEUS + TAB);
 
                     long[] signalByNucleus = shellResult.getPixelValues(CountType.SIGNAL, cell, n, null);
-                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
+//                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
 
                     for(int i=0; i<shellResult.getNumberOfShells(); i++){
                         outLine.append(signalByNucleus[i]+TAB);
@@ -164,6 +214,7 @@ public class DatasetShellsExporter extends StatsExporter implements Exporter, Lo
                         .append(n.getSourceFolder() + TAB)
                         .append(n.getSourceFileName() + TAB)
                         .append(CellularComponent.NUCLEAR_SIGNAL + TAB)
+                        .append(signalGroupId.toString() + TAB)
                         .append(groupName + TAB)
                         .append(groupFolder + TAB)
                         .append(s.getSourceFile().getName() + TAB)

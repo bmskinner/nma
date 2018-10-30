@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
@@ -40,10 +38,8 @@ public class DoubleEquation implements LineEquation {
     /**
      * Constructor using gradient and intercept.
      *
-     * @param m
-     *            the gradient of the line
-     * @param c
-     *            the y-intercept of the line
+     * @param m the gradient of the line
+     * @param c the y-intercept of the line
      * @return An Equation describing the line
      */
     public DoubleEquation(final double m, final double c) {
@@ -71,10 +67,8 @@ public class DoubleEquation implements LineEquation {
     /**
      * Constructor using two XYPoints.
      *
-     * @param a
-     *            the first XYPoint
-     * @param b
-     *            the second XYPoint
+     * @param a the first XYPoint
+     * @param b the second XYPoint
      */
     public DoubleEquation(IPoint a, IPoint b) {
 

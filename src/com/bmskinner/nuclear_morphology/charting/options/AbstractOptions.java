@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.options;
 
 import java.util.ArrayList;
@@ -42,32 +40,19 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  */
 public abstract class AbstractOptions implements DisplayOptions {
 
-    private List<IAnalysisDataset>   list        = new ArrayList<IAnalysisDataset>(10);
-    private List<PlottableStatistic> stats       = new ArrayList<PlottableStatistic>();
-    private UUID                     segID       = null;                               // the
-                                                                                       // id
-                                                                                       // of
-                                                                                       // the
-                                                                                       // segment
-                                                                                       // (not
-                                                                                       // consistent
-                                                                                       // between
-                                                                                       // datasets)
-    private int                      segPosition = 0;                                  // the
-                                                                                       // position
-                                                                                       // of
-                                                                                       // the
-                                                                                       // segment
-                                                                                       // in
-                                                                                       // the
-                                                                                       // profile
-                                                                                       // (consistent
-                                                                                       // between
-                                                                                       // datasets)
+    private final List<IAnalysisDataset>   list        = new ArrayList<>();
+    private final List<PlottableStatistic> stats       = new ArrayList<>();
+    
+    /** A segment id */
+    private UUID segID = null;
+   
+    /** A segment position */
+    private int segPosition = 0;
+    
     private MeasurementScale         scale       = MeasurementScale.PIXELS;
     private ColourSwatch             swatch      = ColourSwatch.REGULAR_SWATCH;
     private ICell                    cell        = null;
-//    private CountType                type        = CountType.SIGNAL;
+
     private Aggregation agg = Aggregation.BY_NUCLEUS;
     private Normalisation norm = Normalisation.NONE;
     private ShrinkType shrinkType = ShrinkType.AREA;
@@ -76,8 +61,7 @@ public abstract class AbstractOptions implements DisplayOptions {
     /**
      * Create with a list of datasets.
      * 
-     * @param list
-     *            the datasets to display
+     * @param list the datasets to display
      */
     public AbstractOptions(List<IAnalysisDataset> list) {
         if (list == null) {
@@ -93,9 +77,8 @@ public abstract class AbstractOptions implements DisplayOptions {
      *            the datasets to display
      */
     protected void setDatasets(List<IAnalysisDataset> list) {
-        if (list == null) {
+        if (list == null)
             return;
-        }
         this.list.clear();
         this.list.addAll(list);
     }
@@ -105,16 +88,17 @@ public abstract class AbstractOptions implements DisplayOptions {
      * 
      * @return the stored datasets
      */
-    public List<IAnalysisDataset> getDatasets() {
-        return list;
-        // return new ArrayList<IAnalysisDataset>(list);
+    @Override
+	public List<IAnalysisDataset> getDatasets() {
+    	List<IAnalysisDataset> result = new ArrayList<>();
+    	result.addAll(list);
+        return result;
     }
 
     /**
      * Set the colour swatch to use in the chart or table
      * 
-     * @param swatch
-     *            the colour swatch
+     * @param swatch the colour swatch
      */
     public void setSwatch(ColourSwatch swatch) {
         this.swatch = swatch;
@@ -125,21 +109,14 @@ public abstract class AbstractOptions implements DisplayOptions {
      * 
      * @return a swatch
      */
-    public ColourSwatch getSwatch() {
+    @Override
+	public ColourSwatch getSwatch() {
         return this.swatch;
     }
 
-    /**
-     * Check if the dataset list contains datasets
-     * 
-     * @return
-     */
-    public boolean hasDatasets() {
-        if (list == null || list.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
+    @Override
+	public boolean hasDatasets() {
+        return (list != null && !list.isEmpty());
     }
 
     @Override
@@ -147,41 +124,23 @@ public abstract class AbstractOptions implements DisplayOptions {
         return list.size();
     }
 
-    /**
-     * Check if the dataset list has one or many datasets
-     * 
-     * @return
-     */
     @Override
     public boolean isSingleDataset() {
         return (list.size() == 1);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.DisplayOptions#isMultipleDatasets()
-     */
     @Override
     public boolean isMultipleDatasets() {
         return (list.size() > 1);
     }
 
-    /**
-     * Fetch the first dataset in the list
-     * 
-     * @return
-     */
     @Override
     public IAnalysisDataset firstDataset() {
+    	if(list.isEmpty())
+    		return null;
         return this.list.get(0);
     }
 
-    /**
-     * Get the first statistic in the list
-     * 
-     * @return
-     */
     @Override
     public PlottableStatistic getStat() {
         return stats.get(0);
@@ -202,7 +161,7 @@ public abstract class AbstractOptions implements DisplayOptions {
      * @param stats
      */
     public void setStats(List<PlottableStatistic> stats) {
-        this.stats = stats;
+        this.stats.addAll(stats);
     }
 
     /**
@@ -304,7 +263,8 @@ public abstract class AbstractOptions implements DisplayOptions {
         return this.cell != null;
     }
 
-    public Aggregation getAggregation() {
+    @Override
+	public Aggregation getAggregation() {
         return agg;
     }
 
@@ -312,7 +272,8 @@ public abstract class AbstractOptions implements DisplayOptions {
     	agg = t;
     }
     
-    public Normalisation getNormalisation() {
+    @Override
+	public Normalisation getNormalisation() {
         return norm;
     }
 
@@ -341,7 +302,11 @@ public abstract class AbstractOptions implements DisplayOptions {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((list == null) ? 0 : list.hashCode());
+        
+        if(list!=null) // calculating the hashcode for the entire dataset is pointless and unnecessary
+        	for(IAnalysisDataset d : list)
+        		result = prime * result + ((d == null) ? 0 : d.getId().hashCode());
+
         result = prime * result + ((scale == null) ? 0 : scale.hashCode());
         result = prime * result + ((segID == null) ? 0 : segID.hashCode());
         result = prime * result + segPosition;

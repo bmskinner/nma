@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
@@ -26,11 +24,8 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NeutrophilDetectionSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 
 @SuppressWarnings("serial")
 public class NeutrophilImageProber extends IntegratedImageProber {
@@ -86,7 +81,7 @@ public class NeutrophilImageProber extends IntegratedImageProber {
         this.setVisible(true);
     }
 
-    public IMutableAnalysisOptions getOptions() {
+    public IAnalysisOptions getOptions() {
         return options;
     }
 

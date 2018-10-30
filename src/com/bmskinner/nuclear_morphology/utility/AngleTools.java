@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.utility;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -31,10 +29,8 @@ public class AngleTools {
     /**
      * Find the length on the x-axis of a line at a given angle
      * 
-     * @param length
-     *            the line length
-     * @param angle
-     *            the angle from 0 relative to positive x axis in degrees
+     * @param length the line length
+     * @param angle the angle from 0 relative to positive x axis in degrees
      * @return the x distance
      */
     public static double getXComponentOfAngle(double length, double angle) {
@@ -47,10 +43,8 @@ public class AngleTools {
     /**
      * Find the length on the y-axis of a line at a given angle
      * 
-     * @param length
-     *            the line length
-     * @param angle
-     *            the angle from 0 relative to positive x axis in degrees
+     * @param length the line length
+     * @param angle the angle from 0 relative to positive x axis in degrees
      * @return the y distance
      */
     public static double getYComponentOfAngle(double length, double angle) {
@@ -61,12 +55,9 @@ public class AngleTools {
     /**
      * Rotate the given point about a centre
      * 
-     * @param p
-     *            the point to be moved
-     * @param centre
-     *            the centre of rotation
-     * @param angle
-     *            the angle to rotate in degrees
+     * @param p the point to be moved
+     * @param centre the centre of rotation
+     * @param angle the angle to rotate in degrees
      * @return
      */
     public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double angle) {
@@ -80,7 +71,7 @@ public class AngleTools {
          * C |\ V P
          * 
          */
-        double oldAngle = centre.findAngle(p, IPoint.makeNew(centre.getX(), -10));
+        double oldAngle = centre.findSmallestAngle(p, IPoint.makeNew(centre.getX(), -10));
 
         if (p.getX() < centre.getX()) {
             oldAngle = 360 - oldAngle;

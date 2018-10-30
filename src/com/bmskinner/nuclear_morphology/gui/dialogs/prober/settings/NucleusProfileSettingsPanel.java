@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -33,8 +32,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 
 /**
  * Holds other nucleus detection options. E.g. profile window
@@ -53,13 +51,13 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     private static final String TYPE_LBL           = "Nucleus type";
     private static final String PROFILE_WINDOW_LBL = "Profile window";
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
 
     private JSpinner profileWindow;
 
     private JComboBox<NucleusType> typeBox;
 
-    public NucleusProfileSettingsPanel(final IMutableAnalysisOptions op) {
+    public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
         super();
         options = op;
         this.add(createPanel(), BorderLayout.CENTER);
@@ -75,31 +73,13 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
         typeBox.addActionListener(e -> {
 
-        	Optional<IMutableDetectionOptions> nOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IDetectionOptions> nOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         	if(!nOptions.isPresent())
         		return;
-        	IMutableDetectionOptions nucleusOptions = nOptions.get();
+        	IDetectionOptions nucleusOptions = nOptions.get();
 
         	NucleusType type = (NucleusType) typeBox.getSelectedItem();
         	options.setNucleusType(type);
-
-        	if (type.equals(NucleusType.ROUND)) {
-        		nucleusOptions.setMinCirc(0.0);
-        		nucleusOptions.setMaxCirc(1.0);
-        	}
-
-        	if (type.equals(NucleusType.RODENT_SPERM)) {
-        		nucleusOptions.setMinCirc(0.2);
-        		nucleusOptions.setMaxCirc(0.8);
-        	}
-
-        	if (type.equals(NucleusType.PIG_SPERM)) {
-        		nucleusOptions.setMinCirc(0.1);
-        		nucleusOptions.setMaxCirc(0.9);
-        	}
-
-        	fireOptionsChangeEvent();
-
         });
 
         profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
@@ -147,6 +127,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     @Override
     protected void update() {
         super.update();
+        typeBox.setSelectedItem(options.getNucleusType());
         profileWindow.setValue(options.getProfileWindowProportion());
     }
 

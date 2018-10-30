@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.awt.BorderLayout;
@@ -33,19 +31,23 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 /**
  * Prepare and run a shell analysis on the provided dataset.
@@ -57,28 +59,30 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 	private static final String CIRC_ERROR_MESSAGE = "Min nucleus circularity is too low to make shells";
 	private static final String AREA_ERROR_MESSAGE = "Min nucleus area is too small to break into shells";
 	
+	private static final String PROGRESS_BAR_LABEL = "Shell analysis";
+	
     /**
      * Construct with a dataset and main event window
      * @param dataset
      * @param mw
      */
-    public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Shell analysis", mw);
+    public ShellAnalysisAction(@NonNull final IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
 
     }
 
     @Override
     public void run() {
     	
-    	ShellAnalysisSetupDialog sd = new ShellAnalysisSetupDialog(mw, dataset);
+    	ShellAnalysisSetupDialog sd = new ShellAnalysisSetupDialog(dataset);
     	if(sd.isReadyToRun()) {
     		
-    		int shellCount = sd.getShellCount();
-    		if(! datasetParametersOk(shellCount)){
+    		IShellOptions op = sd.getOptions();
+    		if(! datasetParametersOk(op.getShellNumber())){
             	this.cancel();
             	return;
             }
-    		    		
+    		    		    		
     		IAnalysisMethod m = sd.getMethod();
     		worker = new DefaultAnalysisWorker(m);
     		worker.addPropertyChangeListener(this);
@@ -124,7 +128,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
     @Override
     public void finished() {
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
         super.finished();
     }
     
@@ -134,30 +138,29 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
         private static final String DIALOG_TITLE = "Shell analysis options";
         
-        private int nShells = ShellDetector.DEFAULT_SHELL_COUNT;
-        private ShrinkType type = ShrinkType.AREA;
+        IShellOptions o = new DefaultShellOptions();
 
 
         protected JPanel headingPanel;
         protected JPanel optionsPanel;
         protected JPanel footerPanel;
 
-        public ShellAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
-            this(mw, dataset, DIALOG_TITLE);
+        public ShellAnalysisSetupDialog(final IAnalysisDataset dataset) {
+            this(dataset, DIALOG_TITLE);
         }
         
-        public int getShellCount() {
-        	return nShells;
+        public IShellOptions getOptions() {
+        	return o;
         }
-
+        
         /**
          * Constructor that does not make panel visible
          * 
          * @param mw
          * @param title
          */
-        protected ShellAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
-            super(mw, dataset, title);
+        protected ShellAnalysisSetupDialog(final IAnalysisDataset dataset, final String title) {
+            super(dataset, title);
             setDefaults();
             createUI();
             packAndDisplay();
@@ -171,7 +174,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
         @Override
         public IAnalysisMethod getMethod() {
-        	return new ShellAnalysisMethod(dataset, nShells, type);
+        	return new ShellAnalysisMethod(dataset, o);
         }
 
         @Override
@@ -197,16 +200,16 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             List<Component> fields = new ArrayList<>();
             
             JComboBox<ShrinkType> typeBox = new JComboBox<>(ShrinkType.values());
-            typeBox.setSelectedItem(ShrinkType.AREA);
-            typeBox.addActionListener(e -> type = (ShrinkType) typeBox.getSelectedItem());
+            typeBox.setSelectedItem(IShellOptions.DEFAULT_EROSION_METHOD);
+            typeBox.addActionListener(e -> o.setErosionMethod( (ShrinkType) typeBox.getSelectedItem()));
             
             labels.add(new JLabel("Erosion method"));
             fields.add(typeBox);
             
             
-            SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
+            SpinnerNumberModel sModel = new SpinnerNumberModel(IShellOptions.DEFAULT_SHELL_COUNT, 2, 10, 1);
             JSpinner spinner = new JSpinner(sModel);
-            spinner.addChangeListener(e-> nShells = (int) sModel.getValue());
+            spinner.addChangeListener(e-> o.setShellNumber( (int)sModel.getValue()));
             
             labels.add(new JLabel("Number of shells"));
             fields.add(spinner);

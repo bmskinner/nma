@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.awt.Color;
@@ -35,6 +33,32 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public interface ISignalGroup extends Serializable {
+	
+	/**
+	 * Create a copy of this signal group
+	 * @return
+	 */
+	ISignalGroup duplicate();
+	
+	/**
+	 * Test if the group has warp results
+	 * @return true if warped signals are present, false otherwise
+	 */
+	boolean hasWarpedSignals();
+	
+	/**
+     * Get the warped signals for the group, if present
+     * 
+     * @return
+     */
+    Optional<IWarpedSignal> getWarpedSignals();
+
+    /**
+     * Set the group warped signals
+     * 
+     * @param result
+     */
+    void setWarpedSignals(@NonNull IWarpedSignal result);
 
     /**
      * Get the shell result for the group, if present
@@ -105,35 +129,5 @@ public interface ISignalGroup extends Serializable {
      * @param groupColour
      */
     void setGroupColour(@NonNull Color groupColour);
-
-    /**
-     * Get the RGB channel this signal was detected in
-     * 
-     * @return
-     */
-    int getChannel();
-
-    /**
-     * Set the RGB channel the signal was detected in
-     * 
-     * @param channel
-     */
-    void setChannel(int channel);
-
-    /**
-     * Get the folder the signals were found in
-     * 
-     * @return
-     */
-    File getFolder();
-
-    /**
-     * Set the folder of images the signals were found in
-     * 
-     * @param folder
-     */
-    void setFolder(@NonNull File folder);
-
-    String toString();
 
 }

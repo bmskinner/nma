@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,18 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.OptionalDataException;
+import java.nio.file.spi.FileTypeDetector;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -43,11 +43,15 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * Method to read a dataset from file
@@ -61,16 +65,9 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 public class DatasetImportMethod extends AbstractAnalysisMethod implements Importer {
 
     private final File       file;
-    private IAnalysisDataset dataset      = null; // the active dataset of an
-                                                  // AnalysisWorker is private
-                                                  // and immutable, so have a
-                                                  // new field here
+    private IAnalysisDataset dataset      = null;
     private boolean          wasConverted = false;
-
-    public static final int WAS_CONVERTED_BOOL = 0; // the IAnalysisResult
-                                                    // boolean index for
-                                                    // conversion state
-    
+    public static final int WAS_CONVERTED_BOOL = 0;
     
     /**
      * Store a map of signal image locations if necessary 
@@ -85,19 +82,17 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     public DatasetImportMethod(final File f) {
         super();
 
-        if (!Importer.isSuitableImportFile(f)) {
+        if (!Importer.isSuitableImportFile(f))
             throw new IllegalArgumentException(INVALID_FILE_ERROR);
-        }
 
-        if (!f.getName().endsWith(SAVE_FILE_EXTENSION)) {
-            throw new IllegalArgumentException("File is not nmd format or has been renamed");
-        }
-
+        if (! (f.getName().endsWith(SAVE_FILE_EXTENSION) || f.getName().endsWith(BACKUP_FILE_EXTENSION)) )
+            throw new IllegalArgumentException("File is not nmd or bak format or has been renamed: "+f.getAbsolutePath());
+        
         this.file = f;
     }
         
     /**
-     * Call with an existing map of signal ids to directories of images. Designed for unit
+     * Call with an existing map of signal ids to dairectories of images. Designed for unit
      * testing.
      * @param f
      * @param signalFiles a map of signal group to folder of signals
@@ -111,15 +106,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     public IAnalysisResult call() throws Exception {
 
     	try{ 
-    		run();
-        
+    		run(); 
     	} catch (UnsupportedVersionException e) {
     		throw(e);
-    	}
+    	}  
 
-        if (dataset == null) {
-            throw new UnloadableDatasetException("Could not load file '" + file.getAbsolutePath() + "'");
-        }
+        if (dataset == null)
+            throw new UnloadableDatasetException(String.format("Could not load file '%s'", file.getAbsolutePath()));
 
         DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
         r.setBoolean(WAS_CONVERTED_BOOL, wasConverted);
@@ -129,111 +122,143 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     private void run() throws Exception {
 
         try {
-
-            // Clean up old log lock files
-        	// Legacy.
+            // Clean up old log lock files. Legacy.
             cleanLockFilesInDir(file.getParentFile());
 
             try {
-                dataset = readDataset(file);
+            	// Deserialise whatever is in the file
+            	try {
+            		dataset = readXMLDataset(file);
+            	}  catch (UnloadableDatasetException e) {  // not xml format, try to deserialise directly
+            		fine("Dataset is not a readable XML format; deserialising directly");
+            		dataset = readDataset(file);
+            	}
+            	fireIndeterminateState();
             } catch (UnsupportedVersionException e) {
             	warn("Version "+e.getMessage()+" not supported");
-            	warn("Dataset is too old");
+            	if(e.getDetectedVersion().isNewerThan(Version.currentVersion()))
+            		warn(String.format("Dataset version %s is from a newer software version; upgrade to view", e.getDetectedVersion()));
+            	if(e.getDetectedVersion().isOlderThan(Version.currentVersion()))
+            		warn(String.format("Dataset version %s is too old to read in this software", e.getDetectedVersion()));
             	throw(e);
-                
+
             } catch (UnloadableDatasetException e) {
-                warn(e.getMessage());
-                stack("Error reading dataset", e);
+            	warn(e.getMessage());
+            	stack("Error reading dataset", e);
             }
 
-            fine("Read dataset");
-
-            Version v = dataset.getVersion();
-
-            if (checkVersion(v)) {
-
-                fine("Version check OK");
-                dataset.setRoot(true);
-
-                File exportFolder = dataset.getCollection().getOutputFolder();
-                if (!exportFolder.exists()) {
-                    // the nmd has probably been copied from another computer
-                    // update to the current file path
-                    exportFolder = file.getParentFile();
-                    dataset.getCollection().setOutputFolder(exportFolder);
-                    log("Updated output folder to " + exportFolder);
-                }
-
-                File logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
-
-                dataset.setDebugFile(logFile);
-                fine("Updated log file location");
-
-                // If rodent sperm, check if the TOP_VERTICAL and
-                // BOTTOM_VERTICAL
-                // points have been set, and if not, add them
-                if (dataset.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)) {
-
-                    if (!dataset.getCollection().getProfileCollection().hasBorderTag(Tag.TOP_VERTICAL)) {
-
-                        fine("TOP_ and BOTTOM_VERTICAL not assigned; calculating");
-                        dataset.getCollection().getProfileManager().calculateTopAndBottomVerticals();
-                        fine("Calculating TOP and BOTTOM for child datasets");
-                        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-                            child.getCollection().getProfileManager().calculateTopAndBottomVerticals();
-                        }
-
-                    }
-                    fine("Finished calculating verticals");
-                }
-
-                // Correct signal border locations from older versions for all
-                // imported datasets
-                if (v.isOlderThan(Version.v_1_13_2)) {
-                    fine("Updating signal locations for pre-1.13.2 dataset");
-                    updateSignals();
-                }
-
-                // Generate vertically rotated nuclei for all imported datasets
-
-                try {
-                    fine("Updating vertical nuclei");
-                    dataset.getCollection().updateVerticalNuclei();
-                    for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-                        child.getCollection().updateVerticalNuclei();
-                    }
-
-                } catch (Exception e) {
-                    warn("Error updating vertical nuclei");
-                    stack("Error updating vertical nuclei", e);
-                }
-
-                // Check the validity of the loaded dataset
-                DatasetValidator dv = new DatasetValidator();
-                if (!dv.validate(dataset)) {
-                    for (String s : dv.getErrors()) {
-                        warn(s);
-                    }
-                    warn("Dataset is corrupted");
-                    warn("Saving child dataset info");
-                    new CellFileExporter().exportCellLocations(dataset);
-
-                    warn("Curated cells saved");
-                    warn("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
-
-//                    JOptionPane.showMessageDialog(null,
-//                            "Corruption in dataset " + dataset.getName() + ".\n"
-//                                    + "Curated and remapped cell locations have been saved.\n"
-//                                    + "Please redetect nuclei and apply the saved .cell file.");
-                }
-
-            } else {
-                warn("Unable to open dataset version: " + dataset.getVersion());
-            }
+            if(dataset==null)
+                return; // Exception will be thrown in call() method
+            
+            updateDataset();
+            
+            validateDataset();
 
         } catch (IllegalArgumentException e) {
             warn("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
             stack("Error opening file", e);
+        }
+    }
+    
+    /**
+     * Handle any upgrades or conversions needed
+     */
+    private void updateDataset(){
+        // Replace existing save file path with the path to the file that has
+        // been opened
+        if (!dataset.getSavePath().equals(file)) {
+            fine("Old save path: " + dataset.getSavePath().getAbsolutePath());
+            fine("Input file: " + file.getAbsolutePath());
+            updateSavePath(file, dataset);
+        }
+
+        DatasetConverter conv = new DatasetConverter(dataset);
+
+        // convert old files if needed
+        if (GlobalOptions.getInstance().isConvertDatasets()) {        	
+             try {
+            	 dataset = conv.convert();
+            	 wasConverted = conv.shouldSave();
+             } catch (DatasetConversionException e) {
+                 warn("Unable to convert to new format.");
+                 warn("Displaying as old format.");
+                 stack("Error in converter", e);
+             }
+        }
+
+        Version v = dataset.getVersion();
+
+        if (Version.versionIsSupported(v)) {
+            dataset.setRoot(true);
+
+            File exportFolder = dataset.getCollection().getOutputFolder();
+            if (!exportFolder.exists()) {
+                // the nmd has probably been copied from another computer
+                // update to the current file path
+                exportFolder = file.getParentFile();
+                dataset.getCollection().setOutputFolder(exportFolder);
+                fine("Updated output folder to " + exportFolder);
+            }
+
+//            File logFile = null;
+//            if(file.getName().endsWith(SAVE_FILE_EXTENSION))
+//                logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
+            
+            if(file.getName().endsWith(BACKUP_FILE_EXTENSION)){
+//                logFile = Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, LOG_FILE_EXTENSION);
+                dataset.setSavePath(Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, SAVE_FILE_EXTENSION));
+            }
+
+            // If rodent sperm, check if the TOP_VERTICAL and
+            // BOTTOM_VERTICAL
+            // points have been set, and if not, add them
+            if (dataset.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)) {
+
+                if (!dataset.getCollection().getProfileCollection().hasBorderTag(Tag.TOP_VERTICAL)) {
+                    dataset.getCollection().getProfileManager().calculateTopAndBottomVerticals();
+                    for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+                        child.getCollection().getProfileManager().calculateTopAndBottomVerticals();
+                    }
+                }
+            }
+
+            // Generate vertically rotated nuclei for all imported datasets
+            try {
+                dataset.getCollection().updateVerticalNuclei();
+                for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+                    child.getCollection().updateVerticalNuclei();
+                }
+
+            } catch (Exception e) {
+                warn("Error updating vertical nuclei");
+                stack("Error updating vertical nuclei", e);
+            }
+
+        } else {
+            warn("Unable to open dataset version: " + dataset.getVersion());
+        }
+    }
+    
+    /**
+     * Check the dataset has valid segments and profiles
+     */
+    private void validateDataset() {
+    	 // Check the validity of the loaded dataset
+        DatasetValidator dv = new DatasetValidator();
+        if (!dv.validate(dataset)) {
+            for (String s : dv.getErrors()) {
+                stack(s);
+            }
+            warn("The dataset is not properly segmented");
+            warn("Curated datasets and groups have been saved");
+            warn("Either resegment (Editing>Segmentation>Segment profile) or redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
+            try {
+				new CellFileExporter(dataset).call();
+			} catch (Exception e) {
+				warn("Unable to save cell locations");
+				warn("Redetect these nuclei");
+			}
+           
         }
     }
 
@@ -241,8 +266,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      * Older version of the program did not always close log handlers properly,
      * so lck files may have proliferated. Kill them with fire.
      * 
-     * @param dir
-     *            the directory to clean
+     * @param dir the directory to clean
      */
     private void cleanLockFilesInDir(File dir) {
 
@@ -255,99 +279,29 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
         File[] files = dir.listFiles(filter);
 
-        if (files == null) {
+        if (files == null)
             return;
-        }
 
-        for (File lockFile : files) {
-
+        for (File lockFile : files){
             lockFile.delete();
-
-        }
-
-    }
-
-    private void updateSignals() {
-        log("Updating signal positions for old dataset");
-        updateSignalPositions(dataset);
-        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-            updateSignalPositions(child);
-        }
-
-        if (dataset.hasMergeSources()) {
-            for (IAnalysisDataset source : dataset.getAllMergeSources()) {
-                updateSignalPositions(source);
-            }
         }
     }
 
-    /**
-     * In older versions of the program, signal border positions were stored
-     * differently to the CoM. This needs correcting, as it causes errors in
-     * rotating signals. The CoM is relative to the nucleus, but the border list
-     * is relative to the image. Adjust the border to bring it back in line with
-     * the CoM.
-     * 
-     * @param dataset
-     */
-    private void updateSignalPositions(IAnalysisDataset dataset) {
-        dataset.getCollection().getNuclei().parallelStream().forEach(n -> {
+    
+    private IAnalysisDataset readXMLDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
 
-            if (n.getSignalCollection().hasSignal()) {
+    	DatasetXMLReader dxr = new DatasetXMLReader(inputFile);
 
-                for (UUID id : n.getSignalCollection().getSignalGroupIds()) {
-
-                    n.getSignalCollection().getSignals(id).parallelStream().forEach(s -> {
-
-                        if (!s.containsPoint(s.getCentreOfMass())) {
-
-                            for (int i = 0; i < s.getBorderLength(); i++) {
-                                try {
-                                    s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
-                                } catch (UnavailableBorderPointException e) {
-                                    stack("Could not offset border point", e);
-                                }
-                            }
-                        }
-
-                    });
-                }
-
-            }
-
-        });
+    	try {
+    		IAnalysisDataset d =  dxr.read();
+    		if(!Version.versionIsSupported(d.getVersion()))
+    			throw new UnsupportedVersionException(d.getVersion());
+    		return d;
+    	} catch(XMLReadingException e) {
+    		throw new UnloadableDatasetException("Cannot read as XML dataset", e);
+    	}
     }
-
-    /**
-     * Check a version string to see if the program will be able to open a
-     * dataset. The major version must be the same, while the revision of the
-     * dataset must be equal to or greater than the program revision. Bugfixing
-     * versions are not checked for.
-     * 
-     * @param version
-     * @return a pass or fail
-     */
-    private boolean checkVersion(Version version) {
-
-        if (version == null) { // allow for debugging, but warn
-            warn("No version info found: functions may not work as expected");
-            return true;
-        }
-
-        // major version MUST be the same
-        if (version.getMajor() != Version.VERSION_MAJOR) {
-            warn("Major version difference");
-            return false;
-        }
-
-        // dataset revision should be equal or greater to program
-        if (version.getMinor() < Version.VERSION_MINOR) {
-            warn("Dataset was created with an older version of the program");
-            warn("Some functionality may not work as expected");
-        }
-        return true;
-    }
-
+    
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
         IAnalysisDataset dataset = null;
         FileInputStream fis = null;
@@ -372,6 +326,10 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 
         	throw(e1);
 
+        } catch (ClassNotFoundException e1) {
+        	warn("Missing class: "+e1.getMessage());
+        	stack("Class not found reading '" + file.getAbsolutePath() + "': ", e1);
+        	throw new UnloadableDatasetException("Missing class "+e1.getMessage());
         } catch (NullPointerException e1) {
             // holdover from deserialisation woes when migrating packages
             stack("NPE Error reading '" + file.getAbsolutePath() + "': ", e1);
@@ -390,7 +348,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                  * by a class-defined readObject or readExternal method. In this
                  * case, the OptionalDataException's eof field is set to true
                  */
-
                 stack("Unexpected end of data '" + file.getAbsolutePath() + "'", e1);
             } else {
 
@@ -430,45 +387,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                         "Cannot load '" + file.getAbsolutePath() + "' due to " + e.getClass().getSimpleName(), e);
             }
         }
-
-        fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0));
-        // Replace existing save file path with the path to the file that has
-        // been opened
-        if (!dataset.getSavePath().equals(inputFile)) {
-            log("Old save path: " + dataset.getSavePath().getAbsolutePath());
-            log("Input file: " + inputFile.getAbsolutePath());
-            updateSavePath(inputFile, dataset);
-        }
-
-        // convert old files if needed
-        if (GlobalOptions.getInstance().isConvertDatasets()) {
-            if (dataset instanceof AnalysisDataset) {
-                dataset = upgradeDatasetVersion(dataset);
-            }
-        }
         return dataset;
     }
 
-    private IAnalysisDataset upgradeDatasetVersion(IAnalysisDataset dataset) {
-        log("Old format detected");
-
-        try {
-
-            DatasetConverter conv = new DatasetConverter(dataset);
-
-            IAnalysisDataset converted = conv.convert();
-
-            dataset = converted;
-
-            log("Conversion successful");
-            wasConverted = true;
-        } catch (DatasetConversionException e) {
-            warn("Unable to convert to new format.");
-            warn("Displaying as old format.");
-            stack("Error in converter", e);
-        }
-        return dataset;
-    }
 
     /**
      * Check if the image folders are present in the correct relative
@@ -491,8 +412,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
          * 
          * -- ImageDir/ 
          * | -- DateTimeDir/ 
-         * | | -- dataset.nmd | 
-         * | -- dataset.log
+         * | | -- dataset.nmd
+         * | | -- dataset.log
          * | -- Image1.tiff 
          * | -- ImageN.tiff
          * 
@@ -500,66 +421,75 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
         dataset.setSavePath(inputFile);
 
-        if (!dataset.hasMergeSources()) {
-
-            // This should be /ImageDir/DateTimeDir/
-            File expectedAnalysisDirectory = inputFile.getParentFile();
-
-            // This should be /ImageDir/
-            File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
-
-            try {
-                dataset.updateSourceImageDirectory(expectedImageDirectory);
-            } catch (IllegalArgumentException e) {
-                warn("Cannot update image file paths: " + e.getMessage());
-                warn("Nucleus images will not be displayed");
-            }
-
-            fine("Checking if signal folders need updating");
-            if(!signalFileMap.isPresent()){
-                Map<UUID, File> map = new HashMap<>();
-                for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
-                    map.put(id, FileSelector.getSignalDirectory(dataset, id));
-                }
-                signalFileMap = Optional.of(map);
-            }
-            
-            updateSignalFolders(dataset, signalFileMap.get());
-
-        } else {
-            warn("Dataset is a merge");
+        if (dataset.hasMergeSources()) {
+        	warn("Dataset is a merge");
             warn("Unable to find single source image directory");
+            return;
         }
+
+        // This should be /ImageDir/DateTimeDir/
+        File expectedAnalysisDirectory = inputFile.getParentFile();
+
+        // This should be /ImageDir/
+        File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
+
+        try {
+        	dataset.updateSourceImageDirectory(expectedImageDirectory);
+        } catch (IllegalArgumentException e) {
+        	fine("Cannot update image file paths: " + e.getMessage());
+        	fine("Nucleus images will not be displayed");
+        }
+
+        fine("Checking if signal folders need updating");
+        if(!signalFileMap.isPresent()){
+        	Map<UUID, File> map = new HashMap<>();
+        	for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
+        		Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(id);
+        		INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id);
+        		File signalFolder = signalOptions.getFolder();
+        		if(group.isPresent() && signalFolder!=null && signalFolder.exists()) {
+        			map.put(id, signalOptions.getFolder());
+        		} else {
+        			map.put(id, FileSelector.getSignalDirectory(dataset, id));
+        		}        		
+        	}
+        	signalFileMap = Optional.of(map);
+        }
+
+        updateSignalFolders(dataset, signalFileMap.get());
     }
 
-    private void updateSignalFolders(IAnalysisDataset dataset, Map<UUID, File> newsignalMap) {
-        if (dataset.getCollection().getSignalManager().hasSignals()) {
-            fine("Updating signal locations");
+    /**
+     * Update the source folders for signal groups in a dataset using the given map
+     * @param dataset
+     * @param newSignalMap
+     */
+    private void updateSignalFolders(IAnalysisDataset dataset, Map<UUID, File> newSignalMap) {
+    	if (!dataset.getCollection().getSignalManager().hasSignals())
+    		return;
 
-            Set<UUID> signalGroups = dataset.getCollection().getSignalGroupIDs();
+    	fine("Updating signal locations");
+    	Set<UUID> signalGroups = dataset.getCollection().getSignalGroupIDs();
 
-            for (UUID signalID : signalGroups) {
+    	for (UUID signalID : signalGroups) {
 
-                // Get the new folder of images
-                File newsignalDir = newsignalMap.get(signalID);
+    		// Get the new folder of images
+    		File newsignalDir = newSignalMap.get(signalID);
+    		if(newsignalDir== null) {
+    			warn("Cannot update signal folder for group");
+    			continue;
+    		}
 
-                if (newsignalDir != null) {
+    		fine("Updating signal group to " + newsignalDir);
+    		// Update the folder
+    		dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
+    		dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalID).setFolder(newsignalDir);
 
-                    fine("Updating signal group to " + newsignalDir);
-
-                    // Update the folder
-                    dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
-
-                    for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-                        child.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
-
-                    }
-                } else {
-                    warn("Cannot update signal folder for group");
-                }
-
-            }
-        }
+    		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+    			child.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
+    			child.getAnalysisOptions().get().getNuclearSignalOptions(signalID).setFolder(newsignalDir);
+    		}
+    	}
     }
 
 
@@ -569,15 +499,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         public UnloadableDatasetException() {
             super();
         }
-
         public UnloadableDatasetException(String message) {
             super(message);
         }
-
         public UnloadableDatasetException(String message, Throwable cause) {
             super(message, cause);
         }
-
         public UnloadableDatasetException(Throwable cause) {
             super(cause);
         }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.BufferedOutputStream;
@@ -28,11 +26,17 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Document;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLCreator;
 
 /**
  * Export the dataset to an nmd file
@@ -43,22 +47,39 @@ import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 
     private File saveFile = null;
-    // private boolean useHDF5 = false;
+    private ExportFormat format;
 
+    
+    /**
+     * The formats in which an nmd file can be written.
+     * Used because users should not need to deal with a ton of
+     * different file extensions.
+     * @author bms41
+     * @since 1.14.0
+     *
+     */
+    public enum ExportFormat {
+    	
+    	/** Java serialisation */
+    	JAVA,
+    	
+    	/** XML serialisation */
+    	XML;
+    }
     /**
      * Construct with a dataset to export and the file location
      * 
-     * @param dataset
-     *            the dataset to be exported
-     * @param saveFile
-     *            the file to export to
+     * @param dataset the dataset to be exported
+     * @param saveFile the file to export to
      */
-    public DatasetExportMethod(IAnalysisDataset dataset, File saveFile) {
+    public DatasetExportMethod(@NonNull IAnalysisDataset dataset, @NonNull File saveFile, ExportFormat format) {
         super(dataset);
         this.saveFile = saveFile;
+        this.format = format;
     }
 
-    public IAnalysisResult call() {
+    @Override
+	public IAnalysisResult call() {
         run();
         IAnalysisResult r = new DefaultAnalysisResult(dataset);
         return r;
@@ -66,110 +87,146 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 
     protected void run() {
 
-        try {
+    	try {
+    		
+    		boolean isOk = false;
+    		switch(format) {    		
+	    		case XML: {
+	    			backupExistingSaveFile();
+	    			isOk = saveAnalysisDatasetToXML(dataset, saveFile); 
+	    			break;
+	    		}
+	    		case JAVA: 
+	    		default: isOk = saveAnalysisDataset(dataset, saveFile); break;
+    		}
 
-            if (saveAnalysisDataset(dataset, saveFile)) {
-                finest("Save was sucessful");
+    		if (isOk) 
+    			fine("Save was sucessful");
+    		else
+    			warn("Save was unsucessful");
 
-            } else {
-                warn("Save was unsucessful");
-            }
-
-        } catch (Exception e) {
-            warn("Save was unsucessful");
-            stack("Unable to save dataset", e);
-        }
-
+    	} catch (Exception e) {
+    		warn("Save was unsucessful");
+    		stack("Unable to save dataset", e);
+    	}
     }
 
+    
+    /**
+     * Save the given dataset in XML format
+     * @param dataset the dataset to save
+     * @param saveFile the file to save to
+     * @return
+     */
+    public boolean saveAnalysisDatasetToXML(IAnalysisDataset dataset, File saveFile) {
+    	 boolean ok = true;
+ 		fine("Saving XML dataset to " + saveFile.getAbsolutePath());
+ 		
+ 		File parentFolder = saveFile.getParentFile();
+ 		if(!parentFolder.exists())
+ 			parentFolder.mkdirs();
+
+
+ 		if(saveFile.isDirectory())
+ 			throw new IllegalArgumentException(String.format("File %s is a directory", saveFile.getName()));
+ 		if(saveFile.getParentFile()==null)
+ 			throw new IllegalArgumentException(String.format("Parent directory is null", saveFile.getAbsolutePath()));
+ 		if(!saveFile.getParentFile().canWrite())
+ 			throw new IllegalArgumentException(String.format("Parent directory %s is not writable", saveFile.getParentFile().getName()));
+
+ 		try(
+ 				OutputStream os = new FileOutputStream(saveFile);
+ 				CountedOutputStream cos = new CountedOutputStream(os);
+ 				){
+ 			cos.addCountListener( (l) -> fireProgressEvent(l));
+ 			Document doc = new DatasetXMLCreator(dataset).create();
+ 			XMLOutputter xmlOutput = new XMLOutputter();
+ 			xmlOutput.setFormat(Format.getPrettyFormat());
+ 			xmlOutput.output(doc, cos);
+ 		} catch (IOException e) {
+ 			stack(String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
+ 			ok = false;
+ 		}
+ 		
+
+ 		return ok;
+    }
+    
     /**
      * Save the given dataset to the given file
      * 
-     * @param dataset
-     *            the dataset
-     * @param saveFile
-     *            the file to save as
+     * @param dataset the dataset
+     * @param saveFile the file to save as
      * @return
      */
     public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile) {
 
         boolean ok = true;
-        try {
-            // Since we're creating a save format, go with nmd: Nuclear
-            // Morphology Dataset
-            fine("Saving dataset to " + saveFile.getAbsolutePath());
+        // Since we're creating a save format, go with nmd: Nuclear
+		// Morphology Dataset
+		fine("Saving dataset to " + saveFile.getAbsolutePath());
+		
+		File parentFolder = saveFile.getParentFile();
+		if(!parentFolder.exists())
+			parentFolder.mkdirs();
 
-            // use buffering
-            OutputStream fos = new FileOutputStream(saveFile);
 
-            CountedOutputStream cos = new CountedOutputStream(fos);
-            OutputStream buffer = new BufferedOutputStream(cos);
-            ObjectOutputStream output = new ObjectOutputStream(buffer);
-            
-            cos.addCountListener( (l) ->{
-            	fireProgressEvent(l);
-            });
+		try(OutputStream fos        = new FileOutputStream(saveFile);
+		    CountedOutputStream cos = new CountedOutputStream(fos);
+		    OutputStream buffer     = new BufferedOutputStream(cos);
+		    ObjectOutputStream output = new ObjectOutputStream(buffer);
+		   ) {
+			
+			 cos.addCountListener( (l) -> fireProgressEvent(l));
 
-            try {
+		    output.writeObject(dataset);
 
-                output.writeObject(dataset);
+		} catch (IOException e) {
+		    error("IO error saving dataset", e);
+		    ok = false;
+		} catch (Exception e1) {
+		    error("Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
+		    ok = false;
+		} catch (StackOverflowError e) {
+		    error("StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
+		    ok = false;
+		}
 
-            } catch (IOException e) {
-                error("IO error saving dataset", e);
-                ok = false;
-            } catch (Exception e1) {
-                error("Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
-                ok = false;
-            } catch (StackOverflowError e) {
-                error("StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
-                ok = false;
-            } finally {
-                output.close();
-                buffer.close();
-                fos.close();
-            }
+		if (!ok)
+		    return false;
 
-            // This line is not always reached when saving multiple datasets
-            fine("Save complete");
-
-            if (!ok) {
-                return false;
-            }
-
-            DatasetListManager.getInstance().updateHashCode(dataset); // track
-                                                                      // the
-                                                                      // state
-                                                                      // since
-                                                                      // last
-                                                                      // save
-
-        } catch (FileNotFoundException e) {
-            warn("File not found when saving dataset");
-            return false;
-        } catch (IOException e2) {
-            error("IO error saving dataset", e2);
-            return false;
-        }
+		DatasetListManager.getInstance().updateHashCode(dataset);
         return true;
     }
 
     /**
      * Save the given dataset to it's preferred save path
      * 
-     * @param dataset
-     *            the dataset
+     * @param dataset the dataset
      * @return ok or not
      */
     public boolean saveAnalysisDataset(IAnalysisDataset dataset) {
 
         File saveFile = dataset.getSavePath();
-        if (saveFile.exists()) {
+        if (saveFile.exists())
             saveFile.delete();
-        }
-
         return saveAnalysisDataset(dataset, saveFile);
 
     }
+
+    private void backupExistingSaveFile() {
+    	File saveFile = dataset.getSavePath();
+    	if (!saveFile.exists())
+    		return;
+
+    	File backupFile = new File(saveFile.getParent(), saveFile.getName().replaceAll(Io.SAVE_FILE_EXTENSION, Io.BACKUP_FILE_EXTENSION));
+    	try {
+    		copyFile(saveFile, backupFile);
+    	} catch (IOException e) {
+    		stack(e.getMessage(), e);
+    	}     
+    }
+
 
     /**
      * Directly copy the source file to the destination file

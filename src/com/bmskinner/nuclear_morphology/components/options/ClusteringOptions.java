@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,23 +12,28 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
-public class ClusteringOptions implements IMutableClusteringOptions {
+/**
+ * First development of clustering options
+ * @author ben
+ * @deprecated since 1.14.0
+ *
+ */
+@Deprecated
+public class ClusteringOptions implements IClusteringOptions {
 
     private static final long         serialVersionUID = 1L;
     private ClusteringMethod          type;
@@ -87,6 +92,11 @@ public class ClusteringOptions implements IMutableClusteringOptions {
         this.includeMesh = oldOptions.isIncludeMesh();
 
     }
+    
+    @Override
+	public IClusteringOptions duplicate() {
+		return new DefaultClusteringOptions(this);
+	}
 
     /*
      * (non-Javadoc)
@@ -99,9 +109,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
     public boolean isIncludeSegment(UUID i) {
         if (this.segmentMap.containsKey(i)) {
             return this.segmentMap.get(i);
-        } else {
-            return false;
         }
+		return false;
     }
 
     /*
@@ -111,14 +120,14 @@ public class ClusteringOptions implements IMutableClusteringOptions {
      * com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#
      * useSegments()
      */
-    @Override
-    public boolean useSegments() {
-        if (this.segmentMap.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+//    @Override
+//    public boolean useSegments() {
+//        if (this.segmentMap.isEmpty()) {
+//            return false;
+//        } else {
+//            return true;
+//        }
+//    }
 
     /*
      * (non-Javadoc)
@@ -132,7 +141,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
         return segmentMap.keySet();
     }
 
-    public void setIncludeSegment(UUID id, boolean b) {
+    @Override
+	public void setIncludeSegment(UUID id, boolean b) {
         this.segmentMap.put(id, b);
     }
 
@@ -160,12 +170,13 @@ public class ClusteringOptions implements IMutableClusteringOptions {
      * com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#
      * getSavedStatistics()
      */
-    @Override
-    public Set<PlottableStatistic> getSavedStatistics() {
-        return statMap.keySet();
-    }
+//    @Override
+//    public Set<PlottableStatistic> getSavedStatistics() {
+//        return statMap.keySet();
+//    }
 
-    public void setIncludeStatistic(PlottableStatistic stat, boolean b) {
+    @Override
+	public void setIncludeStatistic(PlottableStatistic stat, boolean b) {
         this.statMap.put(stat, b);
     }
 
@@ -181,7 +192,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
         return this.includeProfile;
     }
 
-    public void setIncludeProfile(boolean b) {
+    @Override
+	public void setIncludeProfile(boolean b) {
         this.includeProfile = b;
     }
 
@@ -197,7 +209,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
         return useSimilarityMatrix;
     }
 
-    public void setUseSimilarityMatrix(boolean useSimilarityMatrix) {
+    @Override
+	public void setUseSimilarityMatrix(boolean useSimilarityMatrix) {
         this.useSimilarityMatrix = useSimilarityMatrix;
     }
 
@@ -206,7 +219,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
      * 
      * @param type
      */
-    public void setType(ClusteringMethod type) {
+    @Override
+	public void setType(ClusteringMethod type) {
         this.type = type;
     }
 
@@ -237,11 +251,13 @@ public class ClusteringOptions implements IMutableClusteringOptions {
      * 
      * @param clusterNumber
      */
-    public void setClusterNumber(int clusterNumber) {
+    @Override
+	public void setClusterNumber(int clusterNumber) {
         this.clusterNumber = clusterNumber;
     }
 
-    public void setHierarchicalMethod(HierarchicalClusterMethod hierarchicalMethod) {
+    @Override
+	public void setHierarchicalMethod(HierarchicalClusterMethod hierarchicalMethod) {
         this.hierarchicalMethod = hierarchicalMethod;
     }
 
@@ -251,7 +267,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
      * 
      * @param iterations
      */
-    public void setIterations(int iterations) {
+    @Override
+	public void setIterations(int iterations) {
         this.iterations = iterations;
     }
 
@@ -303,7 +320,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
         return profileType;
     }
 
-    public void setProfileType(ProfileType profileType) {
+    @Override
+	public void setProfileType(ProfileType profileType) {
         this.profileType = profileType;
     }
 
@@ -319,7 +337,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
         return includeMesh;
     }
 
-    public void setIncludeMesh(boolean includeMesh) {
+    @Override
+	public void setIncludeMesh(boolean includeMesh) {
         this.includeMesh = includeMesh;
     }
 
@@ -376,70 +395,124 @@ public class ClusteringOptions implements IMutableClusteringOptions {
         }
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(profileType);
         return sb.toString();
     }
 
-    /**
-     * The available types of hierarchical clustering for the Weka clusterer
-     */
-    public enum HierarchicalClusterMethod {
-        WARD("Ward", "WARD"), SINGLE("Single", "SINGLE"), COMPLETE("Complete", "COMPLETE"), AVERAGE("Average",
-                "AVERAGE"), MEAN("Mean", "MEAN"), CENTROID("Centroid", "CENTROID"), ADJCOMPLETE("Adjusted complete",
-                        "ADJCOMPLETE"), NEIGHBOR_JOINING("Neighbour joining", "NEIGHBOR_JOINING");
+	@Override
+	public double getDouble(String s) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
-        private final String name;
-        private final String code;
+	@Override
+	public int getInt(String s) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
-        HierarchicalClusterMethod(String name, String code) {
-            this.name = name;
-            this.code = code;
-        }
+	@Override
+	public boolean getBoolean(String s) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
-        public String toString() {
-            return this.name;
-        }
+	@Override
+	public void setDouble(String s, double d) {
+		// TODO Auto-generated method stub
+		
+	}
 
-        public String code() {
-            return this.code;
-        }
+	@Override
+	public void setInt(String s, int i) {
+		// TODO Auto-generated method stub
+		
+	}
 
-    }
+	@Override
+	public void setBoolean(String s, boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
 
-    /**
-     * The available types of clustering for the Weka clusterer
-     */
-    public enum ClusteringMethod {
-        EM("Expectation maximisation", 0),
-        HIERARCHICAL("Hierarchical", 1),
-        MANUAL("Manual", 2);
+	@Override
+	public float getFloat(String s) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
-        private final String name;
-        private final int    code;
+	@Override
+	public void setFloat(String s, float f) {
+		// TODO Auto-generated method stub
+		
+	}
 
-        ClusteringMethod(String name, int code) {
-            this.name = name;
-            this.code = code;
-        }
+	@Override
+	public String getString(String s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-        public String toString() {
-            return this.name;
-        }
+	@Override
+	public void setString(String k, String v) {
+		// TODO Auto-generated method stub
+		
+	}
 
-        public int code() {
-            return this.code;
-        }
-    }
+	@Override
+	public List<String> getBooleanKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public IMutableClusteringOptions unlock() {
-        return this;
-    }
+	@Override
+	public List<String> getIntegerKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public IClusteringOptions lock() {
-        return this;
-    }
+	@Override
+	public List<String> getDoubleKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getFloatKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getStringKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> getEntries() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object getValue(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void set(HashOptions o) {
+		// TODO Auto-generated method stub
+		
+	}
 }

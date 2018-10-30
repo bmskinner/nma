@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import javax.swing.JCheckBox;
@@ -23,8 +21,8 @@ import javax.swing.JCheckBox;
 @SuppressWarnings("serial")
 public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 
-    private JCheckBox checkBox       = new JCheckBox("Show markers");
-    private JCheckBox hideRawProfile = new JCheckBox("Hide profiles");
+    private JCheckBox checkBox       = new JCheckBox("Show tags");
+    private JCheckBox showNucleiBox  = new JCheckBox("Show nuclear profiles");
 
     public ProfileMarkersOptionsPanel() {
         super();
@@ -35,9 +33,9 @@ public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
         this.add(checkBox);
 
         // checkbox to show or hide individual nucleus profiles
-        hideRawProfile.setSelected(false);
-        hideRawProfile.addActionListener(this);
-        this.add(hideRawProfile);
+        showNucleiBox.setSelected(true);
+        showNucleiBox.addActionListener(this);
+        this.add(showNucleiBox);
 
     }
 
@@ -55,14 +53,14 @@ public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
      * 
      * @return
      */
-    public boolean isHideProfiles() {
-        return hideRawProfile.isSelected();
+    public boolean isShowNuclei() {
+        return showNucleiBox.isSelected();
     }
 
     public void setEnabled(boolean b) {
 
         this.checkBox.setEnabled(b);
-        this.hideRawProfile.setEnabled(b);
+        this.showNucleiBox.setEnabled(b);
     }
 
 }

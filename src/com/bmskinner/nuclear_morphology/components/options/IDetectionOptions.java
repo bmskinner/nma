@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,19 +12,20 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * This interface defines the detection options available for detecting an
@@ -72,14 +73,13 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * @since 1.13.4
      *
      */
-    public interface IDetectionSubOptions extends Serializable, Loggable {
-        public static final String CANNY_OPTIONS      = "Canny";
-        public static final String HOUGH_OPTIONS      = "Hough";
-        public static final String BACKGROUND_OPTIONS = "Background";
-
-        List<String> getKeys();
-
-        Object getValue(String key);
+    public interface IDetectionSubOptions extends HashOptions, Serializable, Loggable {
+        static final String CANNY_OPTIONS      = "Canny";
+        static final String HOUGH_OPTIONS      = "Hough";
+        static final String BACKGROUND_OPTIONS = "Background";
+        static final String SHELL_OPTIONS      = "Shell";
+        
+        IDetectionSubOptions duplicate();
 
         /**
          * Interface for image preprocessing, such as colour thresholding and
@@ -115,13 +115,6 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
         }
 
     }
-
-    /**
-     * Unlock the options to allow modification
-     * 
-     * @return
-     */
-    IMutableDetectionOptions unlock();
 
     /**
      * Create a copy of these options
@@ -231,13 +224,20 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * @return
      */
     IDetectionSubOptions getSubOptions(String s) throws MissingOptionException;
+    
+    
+    /**
+     * Get all the sub option types defined in this object
+     * @return
+     */
+    Set<String> getSubOptionKeys();
 
     /**
      * Get the Canny edge detection options for this object.
      * 
      * @return the Canny options, or null if none have been set
      */
-    IMutableCannyOptions getCannyOptions() throws MissingOptionException;
+    ICannyOptions getCannyOptions() throws MissingOptionException;
 
     /**
      * Test if the given component meets the criteria within these options. Note
@@ -249,8 +249,103 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * @return true if the component would be detected with these options, false
      *         otherwise
      */
-    boolean isValid(CellularComponent c);
+    boolean isValid(@NonNull CellularComponent c);
 
     List<String> getKeys();
+    
+    /**
+     * Set the RGB channel to detect the object in
+     * 
+     * @param channel
+     */
+    void setChannel(int channel);
+
+    /**
+     * Set the scale of the object in pixels per micron
+     * 
+     * @param scale
+     */
+    void setScale(double scale);
+
+    /**
+     * Set the detection threshold
+     * 
+     * @param nucleusThreshold
+     */
+    void setThreshold(int nucleusThreshold);
+
+    /*
+     * Set the minimum size of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMinSize(double minNucleusSize);
+
+    /*
+     * Set the maximum size of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMaxSize(double maxNucleusSize);
+
+    /*
+     * Set the minimum circularity of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMinCirc(double minNucleusCirc);
+
+    /*
+     * Set the maximum circularity of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMaxCirc(double maxNucleusCirc);
+
+    /**
+     * Set the folder of images where the objects are to be detected
+     * 
+     * @param folder
+     */
+    void setFolder(File folder);
+
+    /**
+     * Set Canny edge detection options to override thresholds
+     * 
+     * @param canny
+     */
+    void setCannyOptions(@NonNull ICannyOptions canny);
+
+    void setNormaliseContrast(boolean b);
+
+    /**
+     * Set this options to match the parameters in the given option
+     * 
+     * @param options
+     */
+    void set(@NonNull IDetectionOptions options);
+
+    /**
+     * Set the hough options
+     * 
+     * @param hough
+     */
+    void setHoughOptions(@NonNull IHoughDetectionOptions hough);
+
+    /**
+     * Set arbitrary sub options
+     * 
+     * @param s
+     *            the options key
+     * @param sub
+     */
+    void setSubOptions(String s, @NonNull IDetectionSubOptions sub);
+
+    /**
+     * Set if the image is RGB or greyscale
+     * 
+     * @param b
+     */
+    void setRGB(boolean b);
 
 }

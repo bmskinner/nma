@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.editing;
 
 import java.awt.BorderLayout;
@@ -31,20 +29,23 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 @SuppressWarnings("serial")
 public class BorderTagEditingPanel extends AbstractEditingPanel implements ActionListener, BorderTagEventListener {
@@ -59,9 +60,9 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
     private BorderTagDualChartPanel dualPanel;
 
-    public BorderTagEditingPanel() {
+    public BorderTagEditingPanel(@NonNull InputSupplier context) {
 
-        super(PANEL_TITLE_LBL);
+        super(context, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         buttonsPanel = makeButtonPanel();
@@ -121,7 +122,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
 
         setButtonsEnabled(true);
 
@@ -134,6 +135,8 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
                 .setTag(Tag.REFERENCE_POINT)
                 .setShowMarkers(true)
                 .setProfileType(ProfileType.ANGLE)
+                .setShowProfiles(false)
+                .setShowIQR(false)
                 .setShowPoints(true)
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowAnnotations(false)
@@ -150,7 +153,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
         ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
                 .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(true)
-                .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false).setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowPoints(false).setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false)
                 .setTarget(dualPanel.getRangePanel()).build();
 
@@ -180,7 +183,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
+        return new ProfileChartFactory(options).createProfileChart();
     }
 
     @Override
@@ -196,8 +199,8 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     }
 
     @Override
-    public void interfaceEventReceived(InterfaceEvent event) {
-        super.interfaceEventReceived(event);// Pass messages upwards
+    public void eventReceived(InterfaceEvent event) {
+        super.eventReceived(event);// Pass messages upwards
 
         if (event.getSource() instanceof RulesetDialog) {
             fine("Heard interface event");
@@ -207,8 +210,8 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     }
 
     @Override
-    public void datasetEventReceived(DatasetEvent event) {
-        super.datasetEventReceived(event);
+    public void eventReceived(DatasetEvent event) {
+        super.eventReceived(event);
 
         if (event.getSource() instanceof RulesetDialog) {
             fine("Heard dataset event");

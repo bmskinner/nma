@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.Color;
@@ -23,6 +21,7 @@ import java.awt.Paint;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -41,7 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 public class ViolinChartFactory extends AbstractChartFactory {
 
-    public ViolinChartFactory(ChartOptions o) {
+    public ViolinChartFactory(@NonNull final ChartOptions o) {
         super(o);
     }
 
@@ -52,12 +51,11 @@ public class ViolinChartFactory extends AbstractChartFactory {
     /**
      * Create a statistic plot for the given component.
      * 
-     * @param component
-     *            the component. Specified defaults are in
+     * @param component the component. Specified defaults are in
      *            {@link CellularComponent}
      * @return
      */
-    public JFreeChart createStatisticPlot(String component) {
+    public synchronized JFreeChart createStatisticPlot(String component) {
         if (!options.hasDatasets()) 
             return makeEmptyChart();
 
@@ -81,37 +79,32 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @param ds the dataset
      * @return
      */
-    public JFreeChart createSignalColocalisationViolinChart() {
+    public synchronized JFreeChart createSignalColocalisationViolinChart() {
+    	if(!options.hasDatasets())
+    		return makeEmptyChart();
 
-        ViolinCategoryDataset ds = null;
-        if (options.hasDatasets()) {
-            try {
-                ds = new SignalViolinDatasetCreator(options).createSignalColocalisationViolinDataset();
-            } catch (ChartDatasetCreationException e) {
-                stack("Error creating volin dataset", e);
-                return makeErrorChart();
-            }
-        }
+    	try {
+    		ViolinCategoryDataset ds = new SignalViolinDatasetCreator(options).createSignalColocalisationViolinDataset();
+    		String scaleString = options.getScale().toString().toLowerCase();
 
-        String scaleString = options.getScale().toString().toLowerCase();
+    		JFreeChart chart = createViolinChart(null, null, "Distance between signal pairs (" + scaleString + ")", ds,
+    				false);
 
-        JFreeChart chart = createViolinChart(null, null, "Distance between signal pairs (" + scaleString + ")", ds,
-                false);
+    		CategoryPlot plot = chart.getCategoryPlot();
+    		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
 
-        CategoryPlot plot = chart.getCategoryPlot();
-        ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
+    		for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
+    			for (int series=0; series<plot.getDataset(datasetIndex).getRowCount(); series++) {
 
-        for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
-
-            for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
-
-                renderer.setSeriesPaint(series, Color.LIGHT_GRAY);
-                renderer.setSeriesOutlinePaint(series, Color.BLACK);
-            }
-
-        }
-
-        return chart;
+    				renderer.setSeriesPaint(series, Color.LIGHT_GRAY);
+    				renderer.setSeriesOutlinePaint(series, Color.BLACK);
+    			}
+    		}
+    		return chart;
+    	} catch (ChartDatasetCreationException e) {
+    		stack("Error creating volin dataset", e);
+    		return makeErrorChart();
+    	}
     }
 
     /*
@@ -120,7 +113,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * 
      */
 
-    private static JFreeChart createViolinChart(String title, String categoryAxisLabel, String valueAxisLabel,
+    private synchronized static JFreeChart createViolinChart(String title, String categoryAxisLabel, String valueAxisLabel,
             ViolinCategoryDataset dataset, boolean legend) {
 
         CategoryAxis categoryAxis = new CategoryAxis(categoryAxisLabel);
@@ -233,7 +226,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @return
      * @throws Exception
      */
-    private JFreeChart createSignalStatisticPlot() {
+    private synchronized JFreeChart createSignalStatisticPlot() {
 
         ViolinCategoryDataset ds = null;
         if (options.hasDatasets()) {
@@ -290,11 +283,10 @@ public class ViolinChartFactory extends AbstractChartFactory {
     /**
      * Create a segment length boxplot for the given segment name
      * 
-     * @param ds
-     *            the dataset
+     * @param ds the dataset
      * @return
      */
-    private JFreeChart createSegmentPlot() {
+    private synchronized JFreeChart createSegmentPlot() {
 
         ViolinCategoryDataset ds = null;
         if (options.hasDatasets()) {
@@ -302,7 +294,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 ds = new ViolinDatasetCreator(options)
                         .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_BORDER_SEGMENT);
             } catch (ChartDatasetCreationException e) {
-                fine("Error creating volin dataset", e);
+                stack("Error creating volin dataset", e);
                 return makeErrorChart();
             }
         }

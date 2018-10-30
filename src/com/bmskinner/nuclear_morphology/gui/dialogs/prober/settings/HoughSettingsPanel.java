@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.GridBagLayout;
@@ -27,8 +26,9 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
 
 /**
  * Set parameters for Hough circle detection
@@ -66,10 +66,10 @@ public class HoughSettingsPanel extends SettingsPanel {
     private JSpinner numCirclesSpinner;
     private JSpinner thresholdSpinner;
 
-    private IMutableHoughDetectionOptions options;
+    private IHoughDetectionOptions options;
 
-    public HoughSettingsPanel(final IHoughDetectionOptions options) {
-        this.options = options.unlock();
+    public HoughSettingsPanel(@NonNull final IHoughDetectionOptions options) {
+        this.options = options;
         createSpinners();
         createPanel();
     }
@@ -98,10 +98,6 @@ public class HoughSettingsPanel extends SettingsPanel {
                 JSpinner j = (JSpinner) e.getSource();
                 minRadiusSpinner.commitEdit();
 
-                // if( (Double) j.getValue() > (Double)
-                // maxRadiusSpinner.getValue() ){
-                // minRadiusSpinner.setValue( maxRadiusSpinner.getValue() );
-                // }
                 Integer value = (Integer) j.getValue();
                 options.setMinRadius(value.intValue());
                 fireOptionsChangeEvent();
@@ -117,11 +113,6 @@ public class HoughSettingsPanel extends SettingsPanel {
             try {
                 JSpinner j = (JSpinner) e.getSource();
                 j.commitEdit();
-
-                // if( (Double) j.getValue() < (Double)
-                // minRadiusSpinner.getValue() ){
-                // j.setValue( minRadiusSpinner.getValue() );
-                // }
                 Integer value = (Integer) j.getValue();
                 options.setMaxRadius(value.intValue());
                 fireOptionsChangeEvent();
@@ -138,13 +129,7 @@ public class HoughSettingsPanel extends SettingsPanel {
                 j.commitEdit();
                 Integer value = (Integer) j.getValue();
                 options.setNumberOfCircles(value.intValue());
-
-                if (value > 0) {
-                    thresholdSpinner.setEnabled(false);
-                } else {
-                    thresholdSpinner.setEnabled(true);
-                }
-
+                thresholdSpinner.setEnabled(value==0);
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 warn("Parsing exception");
@@ -208,10 +193,10 @@ public class HoughSettingsPanel extends SettingsPanel {
     /**
      * Update the display to the given options
      * 
-     * @param options
-     *            the options values to be used
+     * @param options the options values to be used
      */
-    protected void update() {
+    @Override
+	protected void update() {
         super.update();
 
         minRadiusSpinner.setValue(Double.valueOf(options.getMinRadius()));

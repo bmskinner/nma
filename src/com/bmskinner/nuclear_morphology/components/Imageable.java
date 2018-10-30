@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,21 +12,19 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.process.ImageProcessor;
-
-import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 /**
  * This covers the things than can be found within an image.
@@ -105,8 +103,8 @@ public interface Imageable {
      * Get the image from which the component was detected. Opens the image via
      * the {@link com.bmskinner.nuclear_morphology.io.ImageImporter}, fetches
      * the appropriate channel and inverts it. The complete image is returned;
-     * no cropping is performed. The returned image is a ColorProcessor, so annotations can
-     * be performed.
+     * no cropping is performed. The resulting image is returned as a ColorProcessor, 
+     * even if the image is greyscale, so colour annotations can be added.
      * 
      * @return a color image
      * @throws UnloadableImageException if the image can't be loaded
@@ -203,36 +201,27 @@ public interface Imageable {
      */
     String getSourceFileNameWithoutExtension();
 
-    /**
-     * Update the image source folder to the given new folder
-     * 
-     * @param newFolder
-     */
-    void updateSourceFolder(File newFolder);
 
     /**
      * Set the image file the component was found in
      * 
-     * @param sourceFile
-     *            the file
+     * @param sourceFile the file
      */
-    void setSourceFile(File sourceFile);
+    void setSourceFile(@NonNull File sourceFile);
 
     /**
      * Set the RGB channel the component was detected in
      * 
-     * @param channel
-     *            the channel
+     * @param channel the channel
      */
     void setChannel(int channel);
 
     /**
      * Set the folder the source image file belongs to
      * 
-     * @param sourceFolder
-     *            the folder
+     * @param sourceFolder the folder
      */
-    void setSourceFolder(File sourceFolder);
+    void setSourceFolder(@NonNull File sourceFolder);
 
     /**
      * Translate the given coordinate from the template component image into the

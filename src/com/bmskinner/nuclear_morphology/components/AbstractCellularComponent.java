@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
 import java.awt.Rectangle;
@@ -336,10 +334,9 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
                 return null;
             }
 
-        } else {
-            throw new UnloadableImageException("Source image is not available");
-            // return null;
         }
+		throw new UnloadableImageException("Source image is not available");
+		// return null;
     }
     
     @Override
@@ -416,11 +413,6 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         this.scale = scale;
     }
 
-    @Override
-    public boolean equals(CellularComponent c) {
-        return false;
-    }
-
     public synchronized boolean hasStatistic(PlottableStatistic stat) {
         return this.statistics.containsKey(stat);
     }
@@ -432,14 +424,13 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             double result = statistics.get(stat);
             result = stat.convert(result, this.getScale(), scale);
             return result;
-        } else {
-            // finest("Calculating stat "+stat);
-            double result = calculateStatistic(stat);
-            // finest("Setting stat "+stat+": "+result);
-            setStatistic(stat, result);
-            // finest("Set stat "+stat+"; returning");
-            return result;
         }
+		// finest("Calculating stat "+stat);
+		double result = calculateStatistic(stat);
+		// finest("Setting stat "+stat+": "+result);
+		setStatistic(stat, result);
+		// finest("Set stat "+stat+"; returning");
+		return result;
     }
 
     // For subclasses to override
@@ -624,14 +615,11 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             result.add(IBorderPoint.makeNew(p.getX() + diffX, p.getY() + diffY));
         }
         return result;
-
-        // List<IBorderPoint> result = new
-        // ArrayList<IBorderPoint>(borderList.size());
-        // for(IBorderPoint p : borderList){
-        // result.add(new DefaultBorderPoint( p.getX() + getPosition()[X_BASE],
-        // p.getY() + getPosition()[Y_BASE]));
-        // }
-        // return result;
+    }
+    
+    @Override
+	public int[][] getUnsmoothedBorderCoordinates(){
+    	return null;
     }
 
     public void setBorderList(List<IBorderPoint> list) {
@@ -666,9 +654,8 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         // Check detailed position
         if (this.toPolygon().contains((float) p.getX(), (float) p.getY())) {
             return true;
-        } else {
-            return false;
         }
+		return false;
 
     }
 
@@ -1129,7 +1116,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
 
         for (int i = 0; i < this.getBorderLength(); i++) {
 
-            double angle = this.getCentreOfMass().findAngle(p, this.getBorderPoint(i));
+            double angle = this.getCentreOfMass().findSmallestAngle(p, this.getBorderPoint(i));
 
             if (Math.abs(180 - angle) < minAngle) {
                 minDeltaYIndex = i;
@@ -1156,7 +1143,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         for (int i = 0; i < this.getBorderLength(); i++) {
 
             IBorderPoint p = this.getBorderPoint(i);
-            double angle = this.getCentreOfMass().findAngle(a, p);
+            double angle = this.getCentreOfMass().findSmallestAngle(a, p);
             if (Math.abs(90 - angle) < Math.abs(90 - bestAngle)) {
                 bestAngle = angle;
                 orthgonalPoint = p;
@@ -1366,7 +1353,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         IPoint currentBottom = IPoint.makeNew(getCentreOfMass().getX(), getMinY());
         // String state = "";
 
-        double currentAngle = getCentreOfMass().findAngle(currentBottom, bottomPoint);
+        double currentAngle = getCentreOfMass().findSmallestAngle(currentBottom, bottomPoint);
         // log(this.getNameAndNumber()+": Initial angle - "+currentAngle);
         // log(this.getNameAndNumber()+": Cur - "+currentBottom.toString());
         // log(this.getNameAndNumber()+": CoM - "+getCentreOfMass().toString());
@@ -1444,7 +1431,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
          * C |\ V P
          * 
          */
-        double oldAngle = this.getCentreOfMass().findAngle(p, IPoint.makeNew(this.getCentreOfMass().getX(), -10));
+        double oldAngle = this.getCentreOfMass().findSmallestAngle(p, IPoint.makeNew(this.getCentreOfMass().getX(), -10));
 
         if (p.getX() < this.getCentreOfMass().getX()) {
             oldAngle = 360 - oldAngle;
@@ -1473,7 +1460,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         for (int i = 0; i < getBorderLength(); i++) {
             IPoint p = getBorderPoint(i);
             double distance = p.getLengthTo(getCentreOfMass());
-            double pAngle = getCentreOfMass().findAngle(p, IPoint.makeNew(0, -10));
+            double pAngle = getCentreOfMass().findSmallestAngle(p, IPoint.makeNew(0, -10));
             if (p.getX() < 0) {
                 pAngle = 360 - pAngle;
             }
@@ -1503,6 +1490,17 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
     public Mask getSourceBooleanMask() {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    /**
+     * Create the border list from the stored int[] points. Mimics makeBorderList
+     * but adds a check that the created border list does not affect tags
+     * 
+     * @param roi
+     */
+    @Override
+	public void refreshBorderList(boolean useSplineFitting) {
+    	// does nothing
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
 import java.awt.BorderLayout;
@@ -26,6 +24,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
@@ -36,6 +35,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -56,8 +56,8 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 
     protected ProfileType type;
 
-    public AbstractProfileDisplayPanel(ProfileType type) {
-        super();
+    public AbstractProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
+        super(context);
         this.type = type;
 
         this.setLayout(new BorderLayout());

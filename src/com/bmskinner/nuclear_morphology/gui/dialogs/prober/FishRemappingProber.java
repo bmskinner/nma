@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
@@ -31,16 +29,15 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FishRemappingFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
 
-    private static final String DIALOG_TITLE_BAR_LBL = "FISH remapping";
+    private static final String DIALOG_TITLE_BAR_LBL = "Post-FISH mapping";
     private static final String PROCEED_LBL          = "Finished selection";
 
     final IAnalysisDataset       dataset;
-    final List<IAnalysisDataset> newList = new ArrayList<IAnalysisDataset>();
+    final List<IAnalysisDataset> newList = new ArrayList<>();
 
     /**
      * Create with a dataset (from which nuclei will be drawn) and a folder of
@@ -58,6 +55,8 @@ public class FishRemappingProber extends IntegratedImageProber {
             Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(), fishImageDir);
 
             imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
+            
+            imageProberPanel.setSize(imageProberPanel.getPreferredSize());
 
             JPanel footerPanel = createFooter();
             this.setOkButtonText(PROCEED_LBL);

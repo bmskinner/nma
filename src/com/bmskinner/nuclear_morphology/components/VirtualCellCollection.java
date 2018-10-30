@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
 import java.awt.Color;
@@ -41,14 +39,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -65,7 +62,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -79,35 +76,35 @@ public class VirtualCellCollection implements ICellCollection {
 
     private static final long serialVersionUID = 1L;
 
+    /** the dataset this is a child of */
     private final IAnalysisDataset parent;
 
-    private final Set<UUID> cellIDs = new HashSet<UUID>(0);
+    /** the cells that belong to this collection */
+    private final Set<UUID> cellIDs = new HashSet<>(0);
 
-    private final UUID uuid; // the collection id
+    /** the collection id */
+    private final UUID uuid;
 
-    private String name; // the name of the collection
+    /** the name of the collection */
+    private String name;
 
-    // this holds the mapping of tail indexes etc in the median profile arrays
-    private volatile IProfileCollection profileCollection = new DefaultProfileCollection();
+    /** this holds the mapping of tail indexes etc in the median profile arrays */
+    private IProfileCollection profileCollection = new DefaultProfileCollection();
 
-    private volatile Nucleus consensusNucleus; // the refolded consensus nucleus
+    /** the refolded consensus nucleus */
+    private Nucleus consensusNucleus;
 
-    // We need to store signal groups separately to allow shell results etc to
-    // be kept
-    private volatile Map<UUID, IShellResult> shellResults = new HashMap<UUID, IShellResult>(0);
+    /** Store signal groups separately to allow shell results to be kept */
+    private Map<UUID, IShellResult> shellResults = new HashMap<>(0);
 
     /*
      * TRANSIENT FIELDS
      */
 
-    private transient boolean isRefolding = false;
-
-    protected volatile transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
+    protected volatile transient Map<UUID, Integer> vennCache = new HashMap<>();
 
     private transient ProfileManager profileManager = new ProfileManager(this);
-    private transient SignalManager  signalManager  = new SignalManager(this); // TODO:
-                                                                               // integrate
-
+    private transient SignalManager  signalManager  = new SignalManager(this);
     private volatile transient StatsCache statsCache = new StatsCache();
 
     /**
@@ -116,8 +113,8 @@ public class VirtualCellCollection implements ICellCollection {
      * @param parent
      * @param name
      */
-    public VirtualCellCollection(IAnalysisDataset parent, String name) {
-        this(parent, name, java.util.UUID.randomUUID());
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name) {
+        this(parent, name, UUID.randomUUID());
     }
 
     /**
@@ -127,39 +124,57 @@ public class VirtualCellCollection implements ICellCollection {
      * @param name
      * @param id
      */
-    public VirtualCellCollection(IAnalysisDataset parent, String name, UUID id) {
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name, @NonNull UUID id) {
         this.parent = parent;
         this.name = name == null ? "Undefined dataset name" : name;
         this.uuid = id;
 
+    }
+    
+    /**
+     * Create for a parent dataset, providing a collection of cells 
+     * to populate the new collection. The name and ID are copied from
+     * the cell collection.
+     * 
+     * @param parent the dataset to which this will belong
+     * @param cells the collection of cells to add to this collection
+     */
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull ICellCollection cells) {
+        this(parent, cells.getName(), cells.getID(), cells);
     }
 
     /**
      * Create from a parent dataset, spcifying the collection name and id, and
      * providing a collection of cells to populate the new collection.
      * 
-     * @param parent
-     *            the dataset to which this will belong
-     * @param name
-     *            the name of the collection
-     * @param id
-     *            the id of the collection
-     * @param cells
-     *            the collection of cells to add to this collection
+     * @param parent the dataset to which this will belong
+     * @param name the name of the collection
+     * @param id the id of the collection
+     * @param cells the collection of cells to add to this collection
      */
-    public VirtualCellCollection(IAnalysisDataset parent, String name, UUID id, ICellCollection cells) {
+    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name, @NonNull UUID id, @NonNull ICellCollection cells) {
         this(parent, name, id);
         for (ICell cell : cells.getCells()) {
             this.addCell(cell);
         }
     }
+    
+	@Override
+	public ICellCollection duplicate() {
+		VirtualCellCollection result = new VirtualCellCollection(parent, this);
+		
+		result.consensusNucleus = consensusNucleus.duplicate();
+		result.profileCollection = profileCollection.duplicate();
+		
+		return result;
+	}
 
     public IAnalysisDataset getParent() {
         return parent;
     }
 
     @Override
-    public void setName(String s) {
+    public void setName(@NonNull String s) {
         this.name = s;
 
     }
@@ -174,13 +189,75 @@ public class VirtualCellCollection implements ICellCollection {
         return uuid;
     }
 
-    public boolean isReal() {
+    @Override
+	public boolean isReal() {
         return false;
     }
 
-    public boolean isVirtual() {
+    @Override
+	public boolean isVirtual() {
         return true;
     }
+    
+    @Override
+	public boolean add(ICell e) {
+		return cellIDs.add(e.getId());
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends ICell> c) {
+		return cellIDs.addAll(c.stream().map(cell->cell.getId()).collect(Collectors.toSet()));
+	}
+
+	@Override
+	public void clear() {
+		cellIDs.clear();
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		return getCells().contains(o);
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		return getCells().containsAll(c);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return getCells().isEmpty();
+	}
+
+	@Override
+	public Iterator<ICell> iterator() {
+		return getCells().iterator();
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		return getCells().remove(o);
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		return getCells().removeAll(c);
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		return getCells().retainAll(c);
+	}
+
+	@Override
+	public Object[] toArray() {
+		return getCells().toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] a) {
+		return getCells().toArray(a);
+	}
 
     @Override
     public synchronized Set<ICell> getCells() {
@@ -208,7 +285,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized Set<ICell> getCells(File f) {
+    public synchronized Set<ICell> getCells(@NonNull File f) {
         Set<ICell> result = new HashSet<ICell>(cellIDs.size());
 
         for (ICell cell : parent.getCollection().getCells()) {
@@ -222,12 +299,12 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public boolean hasCells(File imageFile) {
+    public boolean hasCells(@NonNull File imageFile) {
         return getCells(imageFile).size() > 0;
     }
 
     @Override
-    public boolean hasNuclei(File imageFile) {
+    public boolean hasNuclei(@NonNull File imageFile) {
         return getNuclei(imageFile).size() > 0;
     }
 
@@ -258,7 +335,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized Set<Nucleus> getNuclei(File imageFile) {
+    public synchronized Set<Nucleus> getNuclei(@NonNull File imageFile) {
 
         ICellCollection parentCollection = parent.getCollection();
         if (parentCollection == null) {
@@ -273,24 +350,21 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void addCell(ICell c) {
-        if (!parent.getCollection().contains(c.getId())) {
-            throw new IllegalArgumentException("Parent does not contain cell");
-        }
+    public void addCell(@NonNull ICell c) {
+        if (!parent.getCollection().contains(c.getId()))
+            throw new IllegalArgumentException("Cannot add a cell to a virtual collection that is not in the parent");
         cellIDs.add(c.getId());
-
     }
 
     @Override
-    public void replaceCell(ICell c) {
-        warn("Not implemented for virtual collections");
+    public void replaceCell(@NonNull ICell c) {
+        parent.getCollection().replaceCell(c);
     }
 
     @Override
-    public ICell getCell(UUID id) {
-        if (cellIDs.contains(id)) {
+    public ICell getCell(@NonNull UUID id) {
+        if (cellIDs.contains(id))
             return parent.getCollection().getCell(id);
-        }
         return null;
     }
 
@@ -300,7 +374,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void removeCell(ICell c) {
+    public void removeCell(@NonNull ICell c) {
         cellIDs.remove(c.getId());
 
     }
@@ -326,22 +400,14 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setRefolding(boolean b) {
-        isRefolding = b;
-    }
-
-    @Override
-    public boolean isRefolding() {
-        return isRefolding;
-    }
-
-    @Override
     public boolean hasCells() {
         return !cellIDs.isEmpty();
     }
 
     @Override
     public boolean contains(ICell cell) {
+    	if(cell==null)
+			return false;
         return cellIDs.contains(cell.getId());
     }
 
@@ -351,7 +417,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public boolean containsExact(ICell cell) {
+    public boolean containsExact(@NonNull ICell cell) {
         return parent.getCollection().containsExact(cell);
     }
 
@@ -362,6 +428,8 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public void setCellsLocked(boolean b) {
+    	for (Nucleus n : this.getNuclei())
+			n.setLocked(b);
     }
 
     @Override
@@ -376,8 +444,10 @@ public class VirtualCellCollection implements ICellCollection {
      * same length at the parent collection after this update
      * 
      * @return
+     * @throws ProfileException 
      */
-    public void createProfileCollection() {
+    @Override
+	public void createProfileCollection() throws ProfileException {
         profileCollection.createProfileAggregate(this, parent.getCollection().getMedianArrayLength());
     }
 
@@ -397,7 +467,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setOutputFolder(File folder) {
+    public void setOutputFolder(@NonNull File folder) {
         parent.getCollection().setOutputFolder(folder);
     }
 
@@ -418,12 +488,12 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void removeSignalGroup(UUID id) {
-        shellResults.remove(id);
+    public void removeSignalGroup(@NonNull UUID id) {
+    	parent.getCollection().removeSignalGroup(id);
     }
 
     @Override
-    public  Optional<ISignalGroup> getSignalGroup(UUID signalGroup) {
+    public  Optional<ISignalGroup> getSignalGroup(@NonNull UUID signalGroup) {
 
     	if(!parent.getCollection().hasSignalGroup(signalGroup))
     		return Optional.empty();
@@ -465,7 +535,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public boolean hasSignalGroup(UUID signalGroup) {
+    public boolean hasSignalGroup(@NonNull UUID signalGroup) {
         return parent.getCollection().hasSignalGroup(signalGroup);
     }
 
@@ -475,7 +545,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void addSignalGroup(UUID newID, ISignalGroup newGroup) {
+    public void addSignalGroup(@NonNull UUID newID, @NonNull ISignalGroup newGroup) {
         parent.getCollection().addSignalGroup(newID, newGroup);
     }
 
@@ -492,11 +562,13 @@ public class VirtualCellCollection implements ICellCollection {
     @Override
     public void updateVerticalNuclei() {
         parent.getCollection().updateVerticalNuclei();
+        if(this.hasConsensus())
+			consensusNucleus.alignVertically();
     }
 
     @Override
-    public boolean updateSourceFolder(File expectedImageDirectory) {
-        return parent.getCollection().updateSourceFolder(expectedImageDirectory);
+    public void setSourceFolder(@NonNull File expectedImageDirectory) {
+        parent.getCollection().setSourceFolder(expectedImageDirectory);
     }
 
     @Override
@@ -557,7 +629,7 @@ public class VirtualCellCollection implements ICellCollection {
             try {
                 IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
                 result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-            } catch (ProfileException | UnavailableProfileTypeException e) {
+            } catch (ProfileException | UnavailableProfileTypeException | UnavailableBorderTagException e) {
                 fine("Error getting nucleus profile", e);
                 result[i] = Double.MAX_VALUE;
             } finally {
@@ -575,52 +647,34 @@ public class VirtualCellCollection implements ICellCollection {
     public IAnalysisDataset getRootParent() {
         if (parent.isRoot()) {
             return parent;
-        } else {
-
-            if (parent.getCollection() instanceof VirtualCellCollection) {
-                VirtualCellCollection v = (VirtualCellCollection) parent.getCollection();
-
-                return v.getRootParent();
-            } else {
-                return null;
-            }
-
         }
-    }
-
-    private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
-        boolean makeVirtual = false;
-        
-        // Decide if the other collection is also a child of the root parent
-        IAnalysisDataset rootParent = this.getRootParent();
-        IAnalysisDataset rootOther = other.isVirtual() ?
-            ((VirtualCellCollection) other).getRootParent() : getDatasetOfRealCollection(other);
-        
-        log(rootParent.getName());
-        log(rootOther.getName());
-        if (rootParent == rootOther)
-            makeVirtual = true;
-
-        ICellCollection newCollection;
-        if (makeVirtual) {
-            newCollection = new VirtualCellCollection(this.getRootParent(), name);
-        } else {
-            newCollection = new DefaultCellCollection(this, name);
-        }
-        return newCollection;
-    }
-
-	private IAnalysisDataset getDatasetOfRealCollection(ICellCollection other){
-		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
-			if(d.getCollection().equals(other) 
-					|| d.getAllChildDatasets().stream().map(t->t.getCollection()).anyMatch(c->c.getID().equals(other.getID())))
-				return d;
+		if (parent.getCollection() instanceof VirtualCellCollection) {
+		    VirtualCellCollection v = (VirtualCellCollection) parent.getCollection();
+		    return v.getRootParent();
 		}
 		return null;
+    }
+
+	/**
+	 * Choose if the merged collection for this and another collection should be a child of this,
+	 * a child of the other collection, or a new real collection.
+	 * @param other the other collection which will be merged
+	 * @param newName the name of the new collection
+	 * @return the new collection of the correct type
+	 */
+	private ICellCollection chooseNewCollectionType(@NonNull ICellCollection other, String newName) {
+
+		// Decide if the other collection is also a child of the same root parent
+		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootParent(this);
+		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootParent(other);
+		
+		// If the two datasets have different root parents, return a new real collection
+		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
+								   : new DefaultCellCollection(this, newName);
 	}
 
     @Override
-    public ICellCollection and(ICellCollection other) {
+    public ICellCollection and(@NonNull ICellCollection other) {
 
         ICellCollection newCollection = chooseNewCollectionType(other, "AND operation");
 
@@ -635,7 +689,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection not(ICellCollection other) {
+    public ICellCollection not(@NonNull ICellCollection other) {
         ICellCollection newCollection = chooseNewCollectionType(other, "NOT operation");
 
         for (ICell c : getCells()) {
@@ -649,7 +703,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection xor(ICellCollection other) {
+    public ICellCollection xor(@NonNull ICellCollection other) {
         ICellCollection newCollection = chooseNewCollectionType(other, "XOR operation");
 
         for (ICell c : getCells()) {
@@ -670,7 +724,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection or(ICellCollection other) {
+    public ICellCollection or(@NonNull ICellCollection other) {
         ICellCollection newCollection = chooseNewCollectionType(other, "OR operation");
 
         for (ICell c : getCells()) {
@@ -688,40 +742,38 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ICellCollection filter(Predicate<ICell> predicate) {
+    public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
 
         String name = "Filtered_" + predicate.toString();
 
         ICellCollection subCollection = new DefaultCellCollection(this, name);
 
-        List<ICell> list = getCells().parallelStream().filter(predicate).collect(Collectors.toList());
+        List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
 
         finest("Adding cells to new collection");
-        for (ICell cell : list) {
+        for (ICell cell : list)
             subCollection.addCell(new DefaultCell(cell));
-        }
 
         if (subCollection.size() == 0) {
             warn("No cells in collection");
+        } else {
+        	try {
+
+                // TODO - this fails on converted collections from (at least) 1.13.0
+                // with no profiles in aggregate
+                this.getProfileManager().copyCollectionOffsets(subCollection);
+                this.getSignalManager().copySignalGroups(subCollection);
+
+            } catch (ProfileException e) {
+                warn("Error copying collection offsets");
+                stack("Error in offsetting", e);
+            }
         }
-
-        try {
-
-            // TODO - this fails on converted collections from (at least) 1.13.0
-            // with no profiles in aggregate
-            this.getProfileManager().copyCollectionOffsets(subCollection);
-            this.getSignalManager().copySignalGroups(subCollection);
-
-        } catch (ProfileException e) {
-            warn("Error copying collection offsets");
-            stack("Error in offsetting", e);
-        }
-
         return subCollection;
     }
 
     @Override
-    public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
+    public ICellCollection filterCollection(@NonNull PlottableStatistic stat, MeasurementScale scale, double lower,
             double upper) {
         DecimalFormat df = new DecimalFormat("#.##");
 
@@ -757,13 +809,13 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public int countShared(IAnalysisDataset d2) {
+    public int countShared(@NonNull IAnalysisDataset d2) {
         return countShared(d2.getCollection());
 
     }
 
     @Override
-    public int countShared(ICellCollection d2) {
+    public int countShared(@NonNull ICellCollection d2) {
         if (this.vennCache.containsKey(d2.getID())) {
             return vennCache.get(d2.getID());
         }
@@ -774,7 +826,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setSharedCount(ICellCollection d2, int i) {
+    public void setSharedCount(@NonNull ICellCollection d2, int i) {
         vennCache.put(d2.getID(), i);
     }
 
@@ -962,27 +1014,25 @@ public class VirtualCellCollection implements ICellCollection {
     	if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
     		return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 
-    	} else {
-
-    		result = getNuclei().parallelStream().mapToDouble(n -> {
-    			IBorderSegment segment;
-    			try {
-    				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-    			} catch (ProfileException | UnavailableComponentException e) {
-    				return 0;
-    			}
-    			double perimeterLength = 0;
-    			if (segment != null) {
-    				int indexLength = segment.length();
-    				double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
-    				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
-    			}
-    			return perimeterLength;
-
-    		}).toArray();
-    		Arrays.sort(result);
-    		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
     	}
+		result = getNuclei().parallelStream().mapToDouble(n -> {
+			IBorderSegment segment;
+			try {
+				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+			} catch (ProfileException | UnavailableComponentException e) {
+				return 0;
+			}
+			double perimeterLength = 0;
+			if (segment != null) {
+				int indexLength = segment.length();
+				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
+				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+			}
+			return perimeterLength;
+
+		}).toArray();
+		Arrays.sort(result);
+		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
     	return result;
     }
 
@@ -1002,16 +1052,14 @@ public class VirtualCellCollection implements ICellCollection {
         if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
             return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
-        } else {
-
-            if (PlottableStatistic.VARIABILITY.equals(stat)) {
-                result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
-            } else {
-                result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
-            }
-            Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
         }
+		if (PlottableStatistic.VARIABILITY.equals(stat)) {
+		    result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
+		} else {
+		    result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
+		}
+		Arrays.sort(result);
+		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
         return result;
     }
 
@@ -1033,11 +1081,10 @@ public class VirtualCellCollection implements ICellCollection {
         if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
             return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
-        } else {
-            result = getCells().parallelStream().mapToDouble(n -> n.getStatistic(stat)).toArray();
-            Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
         }
+		result = getCells().parallelStream().mapToDouble(n -> n.getStatistic(stat)).toArray();
+		Arrays.sort(result);
+		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
 
         return result;
 
@@ -1048,14 +1095,10 @@ public class VirtualCellCollection implements ICellCollection {
      * the perimeter of the nucleus. This is the sum-of-squares difference,
      * rooted and divided by the nuclear perimeter
      * 
-     * @param pointType
-     *            the point to fetch profiles from
+     * @param pointType the point to fetch profiles from
      * @return an array of normalised differences
      */
-    private double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
-        // List<Double> list = new ArrayList<Double>();
-        int count = this.size();
-        double[] result = new double[count];
+    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
 
         IProfile medianProfile;
         try {
@@ -1063,48 +1106,26 @@ public class VirtualCellCollection implements ICellCollection {
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             warn("Cannot get median profile for collection");
             fine("Error getting median profile", e);
-            for (int j = 0; j < count; j++) {
-                result[j] = Double.MAX_VALUE;
-            }
+            double[] result = new double[size()];
+            Arrays.fill(result, Double.MAX_VALUE);
             return result;
-
         }
-
-        int i = 0;
-        for (Nucleus n : this.getNuclei()) {
-
+        
+        return getNuclei().stream().mapToDouble(n->{
             try {
 
                 IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
                 double diff = angleProfile.absoluteSquareDifference(medianProfile);
-                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise
-                                                                                               // to
-                                                                                               // the
-                                                                                               // number
-                                                                                               // of
-                                                                                               // points
-                                                                                               // in
-                                                                                               // the
-                                                                                               // perimeter
-                                                                                               // (approximately
-                                                                                               // 1
-                                                                                               // point
-                                                                                               // per
-                                                                                               // pixel)
-                double rootDiff = Math.sqrt(diff); // use the differences in
-                                                   // degrees, rather than
-                                                   // square degrees
-                result[i] = rootDiff;
+                
+                // normalise to the number of points in the perimeter
+                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
+                return Math.sqrt(diff); // differences in degrees, rather than square degrees
 
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
                 fine("Error getting nucleus profile", e);
-                result[i] = Double.MAX_VALUE;
-            } finally {
-                i++;
-            }
-
-        }
-        return result;
+                return  Double.MAX_VALUE;
+            } 
+        }).toArray();
     }
 
     private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
@@ -1113,24 +1134,22 @@ public class VirtualCellCollection implements ICellCollection {
         if (this.statsCache.hasMedian(stat, component, scale, id)) {
             return statsCache.getMedian(stat, component, scale,id);
 
-        } else {
-
-        	double median = Statistical.ERROR_CALCULATING_STAT;
-
-            if (this.hasCells()) {
-            	
-            	double[] values = getRawValues(stat, component, scale, id);
-
-                DescriptiveStatistics  s = new DescriptiveStatistics ();
-                for(double v  : values){
-                	s.addValue(v);
-                }
-                median = s.getPercentile(Stats.MEDIAN);
-            }
-
-            statsCache.setMedian(stat, component, scale, id, median);
-            return median;
         }
+		double median = Statistical.ERROR_CALCULATING_STAT;
+
+		if (this.hasCells()) {
+			
+			double[] values = getRawValues(stat, component, scale, id);
+
+		    DescriptiveStatistics  s = new DescriptiveStatistics ();
+		    for(double v  : values){
+		    	s.addValue(v);
+		    }
+		    median = s.getPercentile(Stats.MEDIAN);
+		}
+
+		statsCache.setMedian(stat, component, scale, id, median);
+		return median;
 
     }
     
@@ -1162,20 +1181,7 @@ public class VirtualCellCollection implements ICellCollection {
             angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
             double diff = angleProfile.absoluteSquareDifference(medianProfile);
-            diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise
-                                                                                           // to
-                                                                                           // the
-                                                                                           // number
-                                                                                           // of
-                                                                                           // points
-                                                                                           // in
-                                                                                           // the
-                                                                                           // perimeter
-                                                                                           // (approximately
-                                                                                           // 1
-                                                                                           // point
-                                                                                           // per
-                                                                                           // pixel)
+            diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
             double rootDiff = Math.sqrt(diff); // use the differences in
                                                // degrees, rather than square
                                                // degrees
@@ -1193,25 +1199,98 @@ public class VirtualCellCollection implements ICellCollection {
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-        isRefolding = false;
-        vennCache = new HashMap<UUID, Integer>(); // cache the number of shared
-                                                  // nuclei with other datasets
-
+        vennCache  = new HashMap<>(); // cache the number of shared nuclei with other datasets
         statsCache = new StatsCache();
 
         signalManager = new SignalManager(this);
         profileManager = new ProfileManager(this);
 
-        isRefolding = false;
-        vennCache = new HashMap<UUID, Integer>(); // cache the number of shared
-                                                  // nuclei with other datasets
-
-        // Don't try to restore profile aggregates here - the parent collection
-        // has
-        // not finished loading, and will be null. Do the restore in the
-        // importing class
-        // after reading has finished.
-
+        if(this.hasConsensus()) {
+			this.getConsensus().getVerticallyRotatedNucleus();
+			this.getConsensus().alignVertically();
+		}
+        
+        // Don't try to restore profile aggregates here - the parent collection has
+        // not finished loading, and so calls to parent will be null. Do the restore in the
+        // parent class after reading this object has finished.
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cellIDs == null) ? 0 : cellIDs.hashCode());
+		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
+		result = prime * result + ((shellResults == null) ? 0 : shellResults.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		VirtualCellCollection other = (VirtualCellCollection) obj;
+		if (cellIDs == null) {
+			if (other.cellIDs != null)
+				return false;
+		} else if (!cellIDs.equals(other.cellIDs))
+			return false;
+		if (consensusNucleus == null) {
+			if (other.consensusNucleus != null)
+				return false;
+		} else if (!consensusNucleus.equals(other.consensusNucleus))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (profileCollection == null) {
+			if (other.profileCollection != null)
+				return false;
+		} else if (!profileCollection.equals(other.profileCollection))
+			return false;
+		if (shellResults == null) {
+			if (other.shellResults != null)
+				return false;
+		} else if (!shellResults.equals(other.shellResults))
+			return false;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		return true;
+	}
+    
+	@Override
+	public String toString() {
+
+		String newLine = System.getProperty("line.separator");
+
+		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
+				.append("Nuclei: " + this.getNucleusCount() + newLine)
+				.append("Source folder: " + this.getFolder().getAbsolutePath() + newLine)
+				.append("Profile collections:" + newLine)
+				.append("Parent: "+parent.getName());
+
+		IProfileCollection pc = this.getProfileCollection();
+		b.append(pc.toString() + newLine);
+
+		if(this.hasConsensus()){
+			b.append("Consensus:" + newLine);
+			b.append(getConsensus().toString()+newLine);
+		}
+
+		return b.toString();
+	}
+    
 
 }

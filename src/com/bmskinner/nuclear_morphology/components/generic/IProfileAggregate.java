@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,26 +12,33 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 
+/**
+ * Store aggregated profile data.
+ * @author bms41
+ *
+ */
 public interface IProfileAggregate {
-
-    void addValues(IProfile yvalues) throws ProfileException;
+	
+	/**
+	 * Create a copy of this aggregate
+	 * @return
+	 */
+	IProfileAggregate duplicate();
 
     /**
-     * Get the size of the bins covering the range 0-100
-     * 
-     * @return
+     * Add the values from the given profile to the aggregate via interpolation
+     * @param yvalues
+     * @throws ProfileException
      */
-    double getBinSize();
+    void addValues(@NonNull IProfile yvalues) throws ProfileException;
 
     /**
      * Get the aggregate length
@@ -66,13 +73,10 @@ public interface IProfileAggregate {
      * Get the angle values at the given position in the aggragate from all
      * nuclei
      * 
-     * @param position
-     *            the position to search. Must be between 0 and the length of
+     * @param position the position to search. Must be between 0 and the length of
      *            the aggregate.
      * @return an unsorted array of the values at the given position
      * @throws Exception
      */
     double[] getValuesAtPosition(double position);
-
-    List<Double> getXKeyset();
 }

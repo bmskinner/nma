@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
@@ -32,14 +30,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
 
@@ -56,28 +53,26 @@ public class SignalImageProber extends IntegratedImageProber {
     private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
     private static final String NEW_NAME_LBL         = "Enter a signal group name";
 
-    private final IMutableNuclearSignalOptions options;
-    final IAnalysisDataset                     dataset;
-    private UUID                               id;
+    private final INuclearSignalOptions options;
+    private final IAnalysisDataset dataset;
+    private UUID id;
 
     /**
      * Create with a dataset (from which nuclei will be drawn) and a folder of
      * images to be analysed
      * 
-     * @param dataset
-     *            the analysis dataset
-     * @param folder
-     *            the folder of images
+     * @param dataset the analysis dataset
+     * @param folder the folder of images
      */
     public SignalImageProber(@NonNull final IAnalysisDataset dataset, @NonNull final File folder) {
         this.dataset = dataset;
         options = OptionsFactory.makeNuclearSignalOptions(folder);
         
-        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	throw new IllegalArgumentException("Dataset has no options");
         
-        Optional<IMutableDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         
         if(!nOp.isPresent())
         	throw new IllegalArgumentException("Dataset has no nucles options");
@@ -133,25 +128,19 @@ public class SignalImageProber extends IntegratedImageProber {
 
         String name = getGroupName();
 
-        UUID signalGroup = java.util.UUID.randomUUID();
-        id = signalGroup;
+        id = java.util.UUID.randomUUID();
 
         // get the group name
 
-        SignalGroup group = new SignalGroup();
-
-        group.setChannel(options.getChannel());
-        group.setFolder(options.getFolder());
-        group.setGroupName(name);
-
-        dataset.getCollection().addSignalGroup(signalGroup, group);
+        ISignalGroup group = new SignalGroup(name);
+        dataset.getCollection().addSignalGroup(id, group);
 
         // Set the default colour for the signal group
-        int totalGroups = dataset.getCollection().getSignalGroups().size();
-        Color colour = (Color) ColourSelecter.getColor(totalGroups);
+//        int totalGroups = dataset.getCollection().getSignalGroups().size();
+        Color colour = ColourSelecter.getSignalColour(options.getChannel());
         group.setGroupColour(colour);
 
-        dataset.getAnalysisOptions().get().setDetectionOptions(signalGroup.toString(), options);
+        dataset.getAnalysisOptions().get().setDetectionOptions(id.toString(), options);
     }
 
     /**
@@ -160,7 +149,11 @@ public class SignalImageProber extends IntegratedImageProber {
      * @return a valid name
      */
     private String getGroupName() {
-    	return (String) JOptionPane.showInputDialog(NEW_NAME_LBL);
+		try {
+			return inputSupplier.requestString(NEW_NAME_LBL);
+		} catch (RequestCancelledException e) {
+			return getGroupName(); // no, you will provide a name
+		}
     }
 
 }

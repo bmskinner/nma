@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.util.ArrayList;
@@ -27,32 +25,38 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 
+/**
+ * Allow selection of signal groups within a dataset via a combo-box
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
 public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 
-    JComboBox<SignalIDToGroup> box;
+    final JComboBox<SignalIDToGroup> box;
 
-    public SignalGroupSelectionPanel(IAnalysisDataset d) {
+    public SignalGroupSelectionPanel(@NonNull final IAnalysisDataset d) {
 
         List<SignalIDToGroup> list = getGroups(d);
 
-        box = new JComboBox<SignalIDToGroup>(list.toArray(new SignalIDToGroup[0]));
+        box = new JComboBox<>(list.toArray(new SignalIDToGroup[0]));
 
         SignalManager m = d.getCollection().getSignalManager();
-        if (m.hasSignals()) {
+        if (m.hasSignals())
             box.setSelectedIndex(0);
-        }
 
         box.addActionListener(this);
         this.add(box);
     }
 
-    public void setDataset(IAnalysisDataset d) {
+    public void setDataset(@NonNull final IAnalysisDataset d) {
 
         SignalManager m = d.getCollection().getSignalManager();
         if (!m.hasSignals()) {
@@ -62,7 +66,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 
         List<SignalIDToGroup> list = getGroups(d);
 
-        ComboBoxModel<SignalIDToGroup> model = new DefaultComboBoxModel<SignalIDToGroup>(
+        ComboBoxModel<SignalIDToGroup> model = new DefaultComboBoxModel<>(
                 list.toArray(new SignalIDToGroup[0]));
 
         box.setModel(model);
@@ -133,7 +137,8 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
             return group;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return group.getGroupName();
         }
 

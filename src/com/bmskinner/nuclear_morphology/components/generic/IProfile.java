@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.Serializable;
@@ -86,6 +84,115 @@ public interface IProfile extends Serializable, Loggable {
 
         return new FloatProfile(combinedArray);
     }
+    
+	/**
+	 * Interpolate the array to the given length, and return as a new array
+	 * 
+	 * @param array2 the array to interpolate
+	 * @param length the new length
+	 * @return
+	 */
+    static float[] interpolate(float[] array2, int length) {
+
+		float[] result = new float[length];
+
+		for (int i = 0; i < length; i++) {
+			float fraction = ((float) i / (float) length); // get the fractional index 
+			result[i] = getInterpolatedValue(array2, fraction);
+		}
+		return result;
+	}
+        
+	/**
+	 * Interpolate the array to the given length, and return as a new array
+	 * 
+	 * @param array2 the array to interpolate
+	 * @param length the new length
+	 * @return
+	 */
+    static double[] interpolate(double[] array2, int length) {
+
+		double[] result = new double[length];
+
+		// where in the old curve index is the new curve index?
+		for (int i = 0; i < length; i++) {
+			float fraction = ((float) i / (float) length); // get the fractional index
+			result[i] = getInterpolatedValue(array2, fraction);
+		}
+		return result;
+	}
+	
+	/**
+	 * Get the interpolated value at the given fraction along the given array
+	 * 
+	 * @param array2
+	 * @param fraction the fraction, from 0-1
+	 * @return
+	 */
+    static float getInterpolatedValue(float[] array2, float fraction) {
+    	if(fraction==0)
+    		return array2[0];
+    	if(fraction==1)
+    		return array2[array2.length-1];
+    	
+    	double index = fraction * array2.length;
+		// Get the equivalent index of the fraction in the array
+    	int indexLower = (int)index;
+//
+//		// Get the integer portion and find the bounding indices
+
+		if (indexLower == array2.length) // only wrap possible if fraction is range 0-1
+			indexLower = 0;
+
+		int indexHigher = indexLower + 1;
+		if (indexHigher == array2.length) // only wrap possible if fraction is range 0-1
+			indexHigher = 0;
+
+		
+		// Find the fraction between the indices
+		double diffFraction = index - indexLower;
+
+		// Calculate the linear interpolation
+		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
+
+		return (float) interpolate;
+
+	}
+	
+	/**
+	 * Get the interpolated value at the given fraction along the given array
+	 * 
+	 * @param array2
+	 * @param fraction the fraction, from 0-1
+	 * @return
+	 */
+    static double getInterpolatedValue(double[] array2, float fraction) {
+		// Get the equivalent index of the fraction in the array
+		double index = fraction * array2.length;
+		double indexFloor = Math.floor(index);
+
+		// Get the integer portion and find the bounding indices
+		int indexLower = (int) indexFloor;
+		if (indexLower == array2.length) { // only wrap possible if fraction is
+			// range 0-1
+			indexLower = 0;
+		}
+
+		int indexHigher = indexLower + 1;
+		if (indexHigher == array2.length) { // only wrap possible if fraction is
+			// range 0-1
+			indexHigher = 0;
+		}
+
+		// Find the fraction between the indices
+		double diffFraction = index - indexFloor;
+
+		// Calculate the linear interpolation
+		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
+
+		return interpolate;
+
+	}
 
     /**
      * Get the length of the array in the profile
@@ -180,31 +287,61 @@ public interface IProfile extends Serializable, Loggable {
     int getIndexOfMin() throws ProfileException;
 
     /**
-     * Calculate the square differences between this profile and a given
-     * profile. The shorter profile is interpolated. The testProfile must have
-     * been offset appropriately to avoid spurious differences.
+     * Calculate the sum-of-squares difference between this profile and a given
+     * profile. The shorter profile is interpolated. The testProfile is assumed to
+     * be offset appropriately to avoid spurious differences.
      * 
-     * @param testProfile
-     *            the profile to compare to
+     * For example:
+     * 
+     * <pre>Profile A    compared to    Profile B</pre>
+     * <pre>111222111                   111242110</pre>
+     * <pre>    *   *                       *   *</pre>
+     * 
+     * has a difference at one index of 2, and at another of 1. The sum of squares difference
+     * is 2^2 + 1^2 = 5.
+     * <br>
+     * The order of comparisons does not matter when profiles are different lengths, since the
+     * shorter profile is interpolated. That is, {@code shortProfile.absoluteSquareDifference(longProfile)}
+     * will yield the same result as {@code longProfile.absoluteSquareDifference(shortProfile)}.
+     * <p>
+     * However, when comparing multiple profiles it is advisable to normalise their lengths <b>before</b>
+     * running the square difference calculation. 
+     * 
+     * @param testProfile the profile to compare to this profile
      * @return the sum-of-squares difference
-     * @throws ProfileException
+     * @throws ProfileException if interpolation cannot be performed
      */
     double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException;
+    
+    /**
+     * Calculate the absolute square difference between profiles, but interpolate each 
+     * to a fixed length
+     * @param testProfile the profile to compare to this
+     * @param interpolationLength the length to interplate both profiles to
+     * @return
+     * @throws ProfileException
+     */
+    double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException;
 
     /**
      * Alternative to the constructor from profile
      * 
-     * @return a new profile with the same values as this
+     * @return a new profile of the same class with the same values as this profile
+     * @throws ProfileException if the copy failed
      */
-    IProfile copy();
+    IProfile copy() throws ProfileException;
 
     /**
      * Create a profile offset to start from the given index. For example, a
-     * profile { 1, 2, 3, 4} offset by 1 will become { 2, 3, 4, 1 }
+     * profile {@code 1, 2, 3, 4} offset by 1 will become {@code 2, 3, 4, 1 }.
      * 
-     * @param j
-     *            the index to start from
-     * @return a new offset profile
+     * Offsetting the profile to -1 will produce {@code 4, 1, 2, 3 }.
+     * 
+     * Offsetting is reversible: {@code profile.offset(x).offset(-x)} will return the original
+     * profile position.
+
+     * @param j the index to set as index zero
+     * @return a new profile with the offset applied
      * @throws ProfileException
      */
     IProfile offset(int j) throws ProfileException;
@@ -227,26 +364,40 @@ public interface IProfile extends Serializable, Loggable {
     void reverse();
 
     /**
-     * Make this profile the length specified.
+     * Interpolate this profile to the length specified and return as a new profile.
      * 
-     * @param newLength
-     *            the new array length
-     * @return an interpolated profile
+     * @param newLength the new profile length
+     * @return the profile interpolated to the new length
      * @throws ProfileException
      */
     IProfile interpolate(int newLength) throws ProfileException;
 
     /**
-     * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return this
-     * offset.
+     * Find the offset that best matches this profile to the test profile.
+     * Interpolates the profiles to the length of this profile.
+     * Finds the point of least difference, and return the
+     * offset. It will always return a positive value.
      * 
      * @param testProfile
      * @return the offset to this profile that must be applied to match the test
      *         profile
      * @throws ProfileException
      */
-    int getSlidingWindowOffset(@NonNull IProfile testProfile) throws ProfileException;
+    int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException;
+    
+    /**
+     * Find the offset that best matches this profile to the test profile, within
+     * a defined range.
+     * Interpolates the profiles to the length of this profile.
+     * Finds the point of least difference, and return the
+     * offset. It will always return a positive value.
+     * 
+     * @param testProfile
+     * @return the offset to this profile that must be applied to match the test
+     *         profile
+     * @throws ProfileException
+     */
+    int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException;
 
     /**
      * For each point in the array, test for a local minimum. The values of the
@@ -261,7 +412,7 @@ public interface IProfile extends Serializable, Loggable {
     BooleanProfile getLocalMinima(int windowSize);
 
     /**
-     * Get the local minima that are beloe a threshold value
+     * Get the local minima that are below a threshold value
      * 
      * @param windowSize the minima window size
      * @param threshold the threshold value which minima must be below
@@ -287,12 +438,13 @@ public interface IProfile extends Serializable, Loggable {
     BooleanProfile getLocalMaxima(int windowSize, double threshold);
 
     /**
-     * Get the windowSize points around a point of interest
+     * Get the windowSize points around a point of interest.
      * 
-     * @param index
-     *            the index position to centre on
-     * @param windowSize
-     *            the number of points either side
+     * For example, requesting getWindow(5, 2) would return the 
+     * indexes up to 2 away from 5 : 3, 4, 5, 6, 7
+     * 
+     * @param index the index position to centre on
+     * @param windowSize the number of points either side
      * @return a profile with the window
      */
     IProfile getWindow(int index, int windowSize);
@@ -337,7 +489,7 @@ public interface IProfile extends Serializable, Loggable {
     IProfile power(double exponent);
 
     /**
-     * Get the absolute values from a profile
+     * Get the absolute values from a profile.
      * 
      * @return
      */
@@ -355,8 +507,7 @@ public interface IProfile extends Serializable, Loggable {
      * Multiply all values within the profile by the value within the given
      * Profile
      * 
-     * @param multiplier
-     *            the profile to multiply by. Must be the same length as this
+     * @param multiplier the profile to multiply by. Must be the same length as this
      *            profile
      * @return the new profile
      */
@@ -365,8 +516,7 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Multiply all values within the profile by a given value
      * 
-     * @param multiplier
-     *            the value to multiply by
+     * @param multiplier the value to multiply by
      * @return the new profile
      */
     IProfile multiply(double multiplier);
@@ -392,8 +542,7 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Add all values within the profile by the value within the given Profile
      * 
-     * @param adder
-     *            the profile to add. Must be the same length as this profile
+     * @param adder the profile to add. Must be the same length as this profile
      * @return the new profile
      */
     IProfile add(@NonNull IProfile adder);
@@ -423,6 +572,21 @@ public interface IProfile extends Serializable, Loggable {
      * @return the new profile
      */
     IProfile subtract(double value);
+    
+    /**
+     * Rescale the values in the profile to fit the given scale.
+     * The lowest value in the profile will be adjusted to the given
+     * minimum, and the maximum value will be adjusted to the given 
+     * maximum. All values in between will be scaled appropriately to
+     * preserve the shape of the profile.
+     * 
+     * For example, a profile 0-2-4-6-8-10 with normaliseAmplitude(0, 5)
+     * would result in a profile 0-1-2-3-4-5
+     * @param minValue the minimum value in the profile
+     * @param maxValue the maximum value in the profile
+     * @return a new profile with all values scaled to fit the range.
+     */
+    IProfile normaliseAmplitude(double minValue, double maxValue);
 
     
     /**
@@ -439,5 +603,28 @@ public interface IProfile extends Serializable, Loggable {
      * @return
      */
     double[] toDoubleArray();
-
+    
+    /**
+     * Wrap the given index into the current profile
+     * For example, here is a profile of length 10 (indexes 0-9),
+     * with some indexes to be accessed beyond each end of the profile:
+     * <p>
+     * <pre>     0        9  <br> ----|--------|----<br>-4                13</pre>
+     * <p>
+     * These indexes need to be wrapped to their appropriate index in the profile, preserving the number of
+     * index steps.
+     * <p>
+     * Starting with index -4, the wrapped index is 6:
+     * <p>
+     * <pre> 67890     6789  <br> ----|--------|<br>     |     ----</pre>
+     * For with index 13, the wrapped index is 3:
+     * <p>
+     * <pre>     0123     90123  <br>     |--------|----<br>     ----     |</pre>
+     * 
+     * 
+     * @param index the index to wrap
+     * @return
+     */
+    int wrap(int index);
+    
 }

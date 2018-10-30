@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -41,6 +42,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -68,8 +70,8 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
     protected String component;
 
-    public HistogramsTabPanel(String component) {
-        super();
+    public HistogramsTabPanel(@NonNull InputSupplier context, String component) {
+        super(context);
         this.component = component;
         this.setLayout(new BorderLayout());
 
@@ -87,6 +89,9 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
             // add the scroll pane to the tab
             scrollPane = new JScrollPane(mainPanel);
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            Dimension preferredFloatingDimension = new Dimension( (int) (screenSize.getWidth()*0.25), (int) (screenSize.getHeight()*0.25) );
+            scrollPane.setPreferredSize(preferredFloatingDimension);
             this.add(scrollPane, BorderLayout.CENTER);
 
             this.setEnabled(false);

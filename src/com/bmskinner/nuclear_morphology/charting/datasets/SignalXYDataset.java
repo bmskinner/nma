@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.HashMap;
@@ -29,38 +27,38 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 
 public class SignalXYDataset extends DefaultXYDataset {
 
-    private Map<Comparable, ISignalGroup>     groupNames;
-    private Map<Comparable, UUID>             groupIds;
-    private Map<Comparable, IAnalysisDataset> datasets;
+    private Map<Comparable<?>, ISignalGroup>     groupNames;
+    private Map<Comparable<?>, UUID>             groupIds;
+    private Map<Comparable<?>, IAnalysisDataset> datasets;
 
     public SignalXYDataset() {
         super();
-        datasets = new HashMap<Comparable, IAnalysisDataset>();
-        groupNames = new HashMap<Comparable, ISignalGroup>();
-        groupIds = new HashMap<Comparable, UUID>();
+        datasets = new HashMap<Comparable<?>, IAnalysisDataset>();
+        groupNames = new HashMap<Comparable<?>, ISignalGroup>();
+        groupIds = new HashMap<Comparable<?>, UUID>();
     }
 
-    public void addDataset(IAnalysisDataset group, Comparable seriesKey) {
+    public void addDataset(IAnalysisDataset group, Comparable<?> seriesKey) {
         datasets.put(seriesKey, group);
     }
 
-    public IAnalysisDataset getDataset(Comparable seriesKey) {
+    public IAnalysisDataset getDataset(Comparable<?> seriesKey) {
         return datasets.get(seriesKey);
     }
 
-    public void addSignalGroup(ISignalGroup group, Comparable seriesKey) {
+    public void addSignalGroup(ISignalGroup group, Comparable<?> seriesKey) {
         groupNames.put(seriesKey, group);
     }
 
-    public ISignalGroup getSignalGroup(Comparable seriesKey) {
+    public ISignalGroup getSignalGroup(Comparable<?> seriesKey) {
         return groupNames.get(seriesKey);
     }
 
-    public void addSignalId(UUID group, Comparable seriesKey) {
+    public void addSignalId(UUID group, Comparable<?> seriesKey) {
         groupIds.put(seriesKey, group);
     }
 
-    public UUID getSignalId(Comparable seriesKey) {
+    public UUID getSignalId(Comparable<?> seriesKey) {
         return groupIds.get(seriesKey);
     }
 

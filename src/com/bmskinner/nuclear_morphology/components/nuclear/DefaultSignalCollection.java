@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import ij.process.ImageProcessor;
@@ -50,11 +48,14 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 public class DefaultSignalCollection implements ISignalCollection {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Holds the signals
-     */
-    private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
+    /** Holds the signals */
+    private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<>();
 
+    /**
+     * Create an empty signal collection
+     * 
+     * @param s
+     */
     public DefaultSignalCollection() {
     }
 
@@ -67,23 +68,20 @@ public class DefaultSignalCollection implements ISignalCollection {
 
         for (UUID group : s.getSignalGroupIds()) {
 
-            List<INuclearSignal> list = new ArrayList<INuclearSignal>();
-
-            for (INuclearSignal signal : s.getSignals(group)) {
+            List<INuclearSignal> list = new ArrayList<>();
+            for (INuclearSignal signal : s.getSignals(group))
                 list.add(signal.duplicate());
-            }
 
             collection.put(group, list);
         }
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#addSignalGroup(java.util.List,
-     * java.util.UUID, java.io.File, int)
-     */
+	@Override
+	public ISignalCollection duplicate() {
+		return new DefaultSignalCollection(this);
+	}
+    
     @Override
     public void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID, @NonNull File sourceFile, int sourceChannel) {
         if (list == null || Integer.valueOf(sourceChannel) == null || sourceFile == null || groupID == null) {
@@ -93,23 +91,11 @@ public class DefaultSignalCollection implements ISignalCollection {
         collection.put(groupID, list);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#getSignalGroupIDs()
-     */
     @Override
     public Set<UUID> getSignalGroupIds() {
         return collection.keySet();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#updateSignalGroupID(java.util.UUID,
-     * java.util.UUID)
-     */
     @Override
     public void updateSignalGroupId(@NonNull UUID oldID, @NonNull UUID newID) {
 
@@ -122,19 +108,13 @@ public class DefaultSignalCollection implements ISignalCollection {
         collection.put(newID, list);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#addSignal(components.nuclear.
-     * NuclearSignal, java.util.UUID)
-     */
     @Override
     public void addSignal(@NonNull INuclearSignal n, @NonNull UUID signalGroup) {
         if (signalGroup == null)
             throw new IllegalArgumentException("Group is null");
 
         if (collection.get(signalGroup) == null) {
-            List<INuclearSignal> list = new ArrayList<INuclearSignal>();
+            List<INuclearSignal> list = new ArrayList<>();
             collection.put(signalGroup, list);
         }
         collection.get(signalGroup).add(n);
@@ -185,93 +165,46 @@ public class DefaultSignalCollection implements ISignalCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#getSignals(java.util.UUID)
-     */
     @Override
     public List<INuclearSignal> getSignals(@NonNull UUID signalGroup) {
-        // checkSignalGroup(signalGroup);
-        if (this.hasSignal(signalGroup)) {
+        if (this.hasSignal(signalGroup)) 
             return this.collection.get(signalGroup);
-        } else {
-            return new ArrayList<INuclearSignal>(0);
-        }
+		return new ArrayList<>(0);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#getSourceFile(java.util.UUID)
-     */
     @Override
     public File getSourceFile(@NonNull UUID signalGroup) {
         if (collection.containsKey(signalGroup)) {
-
             List<INuclearSignal> list = collection.get(signalGroup);
-            if (list != null && !list.isEmpty()) {
+            if (list != null && !list.isEmpty())
                 return list.get(0).getSourceFile();
-            } else {
-                return null;
-            }
-        } else {
-            return null;
         }
+		return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#updateSourceFile(java.util.UUID,
-     * java.io.File)
-     */
     @Override
     public void updateSourceFile(@NonNull UUID signalGroup, @NonNull File f) {
-
         for (INuclearSignal s : collection.get(signalGroup)) {
             s.setSourceFile(f);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#getSourceChannel(java.util.UUID)
-     */
     @Override
     public int getSourceChannel(@NonNull UUID signalGroup) {
         if (collection.containsKey(signalGroup)) {
-
             List<INuclearSignal> list = collection.get(signalGroup);
-            if (list != null && !list.isEmpty()) {
+            if (list != null && !list.isEmpty())
                 return list.get(0).getChannel();
-            } else {
-                return -1;
-            }
-        } else {
-            return -1;
         }
-
+		return -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#numberOfSignalGroups()
-     */
     @Override
     public int size() {
         return collection.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#numberOfSignals()
-     */
+
     @Override
     public int numberOfSignals() {
         int count = 0;
@@ -281,11 +214,6 @@ public class DefaultSignalCollection implements ISignalCollection {
         return count;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#hasSignal(java.util.UUID)
-     */
     @Override
     public boolean hasSignal(@NonNull UUID signalGroup) {
         if (signalGroup == null) {
@@ -300,11 +228,7 @@ public class DefaultSignalCollection implements ISignalCollection {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#hasSignal()
-     */
+
     @Override
     public boolean hasSignal() {
         return !collection.isEmpty();
@@ -319,12 +243,9 @@ public class DefaultSignalCollection implements ISignalCollection {
     public int numberOfSignals(@NonNull UUID signalGroup) {
         if (signalGroup == null)
             return 0;
-
-        if (this.hasSignal(signalGroup)) {
+        if (this.hasSignal(signalGroup))
             return collection.get(signalGroup).size();
-        } else {
-            return 0;
-        }
+		return 0;
     }
 
     /*
@@ -372,17 +293,15 @@ public class DefaultSignalCollection implements ISignalCollection {
     @Override
     public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
 
-        if (signalGroup == null) {
+        if (signalGroup == null)
             throw new UnloadableImageException("Signal group is null");
-        }
 
         File f = this.getSourceFile(signalGroup);
 
         // Will be null if no signals were reported for the cell with this
         // collection
-        if (f == null) {
+        if (f == null)
             throw new UnloadableImageException("File for signal group is null");
-        }
 
         int c = this.getSourceChannel(signalGroup);
 
@@ -507,10 +426,8 @@ public class DefaultSignalCollection implements ISignalCollection {
      * groups. Each signal is considered only once. Hence a group with 4 signals
      * compared to a group with 3 signals will produce a list of 3 values.
      * 
-     * @param id1
-     *            the first signal group
-     * @param id2
-     *            the second signal group
+     * @param id1 the first signal group
+     * @param id2  the second signal group
      * @return a list of the pixel distances between paired signals
      */
     public List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2) {
@@ -531,12 +448,9 @@ public class DefaultSignalCollection implements ISignalCollection {
     /**
      * Recursively find signal pairs with the shortest distance between them.
      * 
-     * @param d1
-     *            the nuclear signals in group 1
-     * @param d2
-     *            the nuclear signals in group 2
-     * @param scale
-     *            the measurement scale
+     * @param d1  the nuclear signals in group 1
+     * @param d2 the nuclear signals in group 2
+     * @param scale  the measurement scale
      * @return a list of best colocalising signals
      */
     private List<Colocalisation<INuclearSignal>> findColocalisingSignals(@NonNull Set<INuclearSignal> d1,
@@ -590,11 +504,6 @@ public class DefaultSignalCollection implements ISignalCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#toString()
-     */
     @Override
     public String toString() {
 
@@ -621,4 +530,33 @@ public class DefaultSignalCollection implements ISignalCollection {
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((collection == null) ? 0 : collection.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultSignalCollection other = (DefaultSignalCollection) obj;
+		if (collection == null) {
+			if (other.collection != null)
+				return false;
+		} else if (!collection.equals(other.collection))
+			return false;
+		return true;
+	}
+    
+    
+
+
 }

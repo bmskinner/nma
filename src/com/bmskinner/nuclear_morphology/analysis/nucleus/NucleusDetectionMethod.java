@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,20 +12,18 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -35,21 +33,17 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
  * The method for finding nuclei in fluorescence images
@@ -60,42 +54,49 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  */
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
-    private static final String SPACER                  = "---------";
-    private static final double DEFAULT_FILTERING_DELTA = 1.6;
+    private static final String SPACER = "---------";
 
-    private final String outputFolder;
+    private final File outputFolder;
 
-    private final IMutableAnalysisOptions analysisOptions;
+    private final IAnalysisOptions analysisOptions;
 
-    private Map<File, ICellCollection> collectionGroup = new HashMap<File, ICellCollection>();
+    private Map<File, ICellCollection> collectionGroup = new HashMap<>();
 
-    List<IAnalysisDataset> datasets = new ArrayList<>();
+    private final List<IAnalysisDataset> datasets = new ArrayList<>();
 
+    /**
+     * Construct a detector on the given folder, and output the results to a new
+     * folder in the image directory, with the given name
+     * 
+     * @param outputFolder the name of the folder for results
+     * @param options the options to detect with
+     */
+    public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
+        this.outputFolder = new File(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(),outputFolder);
+        this.analysisOptions = options;
+    }
+    
     /**
      * Construct a detector on the given folder, and output the results to the
      * given output folder
      * 
-     * @param outputFolder the name of the folder for results
-     * @param debugFile the dataset log file
+     * @param outputFolder the folder to save the results into
      * @param options the options to detect with
      */
-    public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IMutableAnalysisOptions options) {
+    public NucleusDetectionMethod(@NonNull File outputFolder, @NonNull IAnalysisOptions options) {
         this.outputFolder = outputFolder;
         this.analysisOptions = options;
     }
 
     @Override
     public IAnalysisResult call() throws Exception {
-
         run();
-        IAnalysisResult r = new DefaultAnalysisResult(datasets);
-        return r;
+        return new DefaultAnalysisResult(datasets);
     }
 
     public void run() {
 
         try {
-
             int i = getTotalImagesToAnalyse();
             if(i==0) return;
 
@@ -112,26 +113,22 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
             fine("Detected nuclei in "+ op.get().getFolder().getAbsolutePath());
             
-            if(Thread.interrupted()){
+            if(Thread.interrupted())
                 return;
-            }
 
             // Get the collections containing nuclei
-            List<ICellCollection> folderCollection = this.getNucleiCollections();
+            List<ICellCollection> folderCollection = collectionGroup.entrySet().stream()
+            		.filter(e->e.getValue().size()>0)
+            		.map(e->e.getValue())
+            		.collect(Collectors.toList());
 
-            // Run the analysis pipeline
-
-            fine("Analysing collections");
-
-            // Filter the datasets
-            datasets = analysePopulations(folderCollection);
+            datasets.addAll(analysePopulations(folderCollection));
 
             fine("Analysis complete; return collections");
 
         } catch (Exception e) {
             stack("Error processing folder", e);
         }
-
     }
 
     private int getTotalImagesToAnalyse() {
@@ -143,8 +140,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         
         File folder = op.get().getFolder();
         int totalImages = countSuitableImages(folder);
-        fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
-        log("Analysing " + totalImages + " images");
+        fireUpdateProgressTotalLength(totalImages);
+        log(String.format("Analysing %d images", totalImages));
         return totalImages;
     }
 
@@ -160,54 +157,26 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         log("Creating cell collections");
 
-        List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> result = new ArrayList<>();
 
         for (final ICellCollection collection : folderCollection) {
 
             IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
             dataset.setAnalysisOptions(analysisOptions);
             dataset.setRoot(true);
+            dataset.setSavePath(new File(outputFolder, dataset.getName()+Io.SAVE_FILE_EXTENSION));
 
             File folder = collection.getFolder();
             log("Analysing: " + folder.getName());
 
             try {
-
-                ICellCollection failedNuclei = new DefaultCellCollection(folder, collection.getOutputFolderName(),
-                        collection.getName() + " - failed", collection.getNucleusType());
-
-                log("Filtering collection...");
-
-                Filterer<ICellCollection> filter = new CellCollectionFilterer();
-                filter.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
-                log("Filtered OK");
-
-                
-                // Ensure medians do not include filtered nuclei
                 collection.clear(MeasurementScale.PIXELS);
                 collection.clear(MeasurementScale.MICRONS);
-                
 
-                /*
-                 * Keep the failed nuclei - they can be manually assessed later
-                 */
-
-                if (analysisOptions.isKeepFailedCollections()) {
-                    log("Keeping failed nuclei as new collection");
-                    IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-                    IMutableAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
-                    failedOptions.setNucleusType(NucleusType.ROUND);
-                    failed.setAnalysisOptions(failedOptions);
-                    failed.setRoot(true);
-                    result.add(failed);
-                }
 
                 log(SPACER);
-
                 log("Population: " + collection.getName());
-                log("Passed: " + collection.size() + " nuclei");
-                // log("Failed: "+failedNuclei.size()+" nuclei");
-
+                log("Found " + collection.size() + " nuclei");
                 log(SPACER);
 
                 result.add(dataset);
@@ -215,88 +184,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             } catch (Exception e) {
                 warn("Cannot create collection: " + e.getMessage());
                 stack("Error in nucleus detection", e);
-            }
-
-            //
-
-        }
-        return result;
-    }
-
-    /**
-     * Get the Map of NucleusCollections to the folder from which they came. Any
-     * folders with no nuclei are removed before returning.
-     *
-     * @return a Map of a folder to its nuclei
-     */
-    private List<ICellCollection> getNucleiCollections() {
-        // remove any empty collections before returning
-
-        fine("Getting all collections");
-
-        List<File> toRemove = new ArrayList<File>(0);
-
-        fine("Testing nucleus counts");
-
-        Set<File> keys = collectionGroup.keySet();
-        for (File key : keys) {
-            ICellCollection collection = collectionGroup.get(key);
-            if (collection.size() == 0) {
-                fine("Removing collection " + key.toString());
-                toRemove.add(key);
-            }
-        }
-
-        fine("Got collections to remove");
-
-        Iterator<File> iter = toRemove.iterator();
-        while (iter.hasNext()) {
-            collectionGroup.remove(iter.next());
-        }
-
-        fine("Removed collections");
-
-        List<ICellCollection> result = new ArrayList<ICellCollection>();
-        for (final ICellCollection c : collectionGroup.values()) {
-            result.add(c);
-        }
-        return result;
-
-    }
-
-    /**
-     * Count the number of images in the given folder that are suitable for
-     * analysis. Rcursive over subfolders.
-     * 
-     * @param folder
-     *            the folder to count
-     * @return the number of analysable image files
-     */
-    private static int countSuitableImages(final File folder) {
-
-        if (folder == null) {
-            throw new IllegalArgumentException("Folder cannot be null");
-        }
-
-        final File[] listOfFiles = folder.listFiles();
-
-        if (listOfFiles == null) {
-            return 0;
-        }
-
-        int result = 0;
-
-        for (File file : listOfFiles) {
-
-            boolean ok = ImageImporter.fileIsImportable(file);
-
-            if (ok) {
-                result++;
-
-            } else {
-                if (file.isDirectory()) { // recurse over any sub folders
-                    result += countSuitableImages(file);
-                }
             }
         }
         return result;
@@ -306,75 +193,98 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * Go through the input folder. Check if each file is suitable for analysis,
      * and if so, call the analyser.
      *
-     * @param folder
-     *            the folder of images to be analysed
+     * @param folder the folder of images to be analysed
      */
     protected void processFolder(@NonNull final File folder) {
-
-        if (folder == null) {
-            throw new IllegalArgumentException("Folder cannot be null");
-        }
         
         File[] arr = folder.listFiles();
-        if (arr == null) {
+        if (arr == null)
             return;
-        }
-        
-        if(Thread.interrupted()){
+        if(Thread.interrupted())
             return;
-        }
 
         // Recurse over all folders in the supplied folder
         for (File f : arr) {
-            if (f.isDirectory()) {
+            if (f.isDirectory())
                 processFolder(f);
-            }
         }
+        
+        if(!containsImageFiles(folder))
+        	return;
 
-        ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder, folder.getName(),
+        ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder.getName(), folder.getName(),
                 analysisOptions.getNucleusType());
 
-        this.collectionGroup.put(folder, folderCollection);
+        collectionGroup.put(folder, folderCollection);
 
-        /*
-         * NEW METHOD - appears to be working
-         */
-
-        final Finder<List<ICell>> finder = new FluorescentNucleusFinder(analysisOptions);
+        final Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(analysisOptions);
         finder.addProgressListener(this);
 
         try {
-            final List<ICell> cells = finder.findInFolder(folder);
-            for (final ICell cell : cells) {
-                folderCollection.addCell(cell);
-            }
-
-            if (!cells.isEmpty()) {
-                makeFolder(folder);
-            }
-        } catch (ImageImportException | ComponentCreationException e) {
+            final Collection<ICell> cells = finder.findInFolder(folder);
+            if (!cells.isEmpty() && !outputFolder.exists()) 
+            	outputFolder.mkdir();
+            folderCollection.addAll(cells);
+            fine("Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath());
+        } catch (ImageImportException e) {
             stack("Error searching folder", e);
         }
 
-    } // end function
+    }
 
+//    /**
+//     * Create the output folder for the analysis if required. If the folder
+//     * cannot be created, returns the input parent folder
+//     *
+//     * @param folder the folder in which to create the analysis folder
+//     * @return a file containing the created folder
+//     */
+//    protected void makeFolder() {
+////        File output = new File(folder, outputFolder);
+//        if (!outputFolder.exists()) 
+//        	if(outputFolder.mkdir());
+//    }
+    
     /**
-     * Create the output folder for the analysis if required
-     *
-     * @param folder
-     *            the folder in which to create the analysis folder
-     * @return a File containing the created folder
+     * Test if the given folder has any image files that can be analysed
+     * @param folder the folder to test
+     * @return
      */
-    protected File makeFolder(File folder) {
-        File output = new File(folder.getAbsolutePath() + File.separator + this.outputFolder);
-        if (!output.exists()) {
-            try {
-                output.mkdir();
-            } catch (Exception e) {
-                error("Failed to create directory", e);
+    protected boolean containsImageFiles(@NonNull final File folder) {
+    	if(!folder.isDirectory())
+    		return false;
+    	File[] arr = folder.listFiles();
+        if (arr == null)
+            return false;
+        for(File f: arr)
+        	if(ImageImporter.fileIsImportable(f))
+        		return true;
+        return false;
+    }
+    
+    /**
+     * Count the number of images in the given folder that are suitable for
+     * analysis. Rcursive over subfolders.
+     * 
+     * @param folder the folder to count
+     * @return the number of analysable image files in this folder or subfolders
+     */
+    private static int countSuitableImages(@NonNull final File folder) {
+        final File[] listOfFiles = folder.listFiles();
+        if (listOfFiles == null)
+            return 0;
+        int result = 0;
+
+        for (File file : listOfFiles) {
+            boolean ok = ImageImporter.fileIsImportable(file);
+            if (ok) {
+                result++;
+            } else {
+                if (file.isDirectory())// recurse over any sub folders
+                    result += countSuitableImages(file);
             }
         }
-        return output;
+        return result;
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
@@ -28,7 +26,7 @@ import java.io.File;
  *
  */
 public class DefaultLobeDetectionOptions extends DefaultNucleusDetectionOptions
-        implements IMutableLobeDetectionOptions {
+        implements ILobeDetectionOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,10 +41,10 @@ public class DefaultLobeDetectionOptions extends DefaultNucleusDetectionOptions
         lobeFraction = template.getLobeDiameter();
     }
 
-    @Override
-    public IMutableDetectionOptions duplicate() {
-        return new DefaultLobeDetectionOptions(this);
-    }
+//    @Override
+//    public IMutableDetectionOptions duplicate() {
+//        return new DefaultLobeDetectionOptions(this);
+//    }
 
     @Override
     public void setLobeDiameter(double d) {

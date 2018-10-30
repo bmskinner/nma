@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
@@ -27,14 +25,16 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * The abstract implementation of IMutableDetectionOptions, which is extended
+ * The abstract implementation of IDetectionOptions, which is extended
  * for all component types
  * 
  * @author bms41
  * @since 1.13.3
+ * @deprecated since 1.14.0
  *
  */
-public abstract class AbstractDetectionOptions implements IMutableDetectionOptions {
+@Deprecated
+public abstract class AbstractDetectionOptions implements IDetectionOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,7 +46,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 
     private boolean isNormaliseContrast;
 
-    private IMutableCannyOptions cannyOptions = null;
+    private ICannyOptions cannyOptions = null;
 
     /**
      * Construct specifying a folder of images to be analysed
@@ -216,7 +216,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
     }
 
     @Override
-    public IMutableCannyOptions getCannyOptions() {
+    public ICannyOptions getCannyOptions() {
         return cannyOptions;
     }
 
@@ -265,7 +265,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
     }
 
     @Override
-    public void setCannyOptions(IMutableCannyOptions canny) {
+    public void setCannyOptions(ICannyOptions canny) {
         this.cannyOptions = canny;
     }
 
@@ -291,6 +291,8 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
         threshold = options.getThreshold();
         scale = options.getScale();
         isNormaliseContrast = options.isNormaliseContrast();
+        
+
 
         folder = new File(options.getFolder().getAbsolutePath());
 

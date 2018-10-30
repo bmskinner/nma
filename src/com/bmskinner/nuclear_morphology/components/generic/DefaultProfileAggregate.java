@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -35,33 +34,48 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
-    private final float[][] aggregate;   // the values samples per profile
-    private final int       length;      // the length of the aggregate (the
-                                         // median array length of a population
-                                         // usually)
-    private final int       profileCount;
+	/** the values samples per profile */
+    private final float[][] aggregate;  
+    
+    /** the length of the aggregate */
+    private final int length; 
+    
+    /** the number of profiles in the aggregate */
+    private final int profileCount;
 
-    private int counter = 0; // track the number of profiles added to the
-                             // aggregate
+    /** track the number of profiles added to the aggregate */
+    private int counter = 0;
 
-    // private AggregateCache cache = new AggregateCache();
-
+    /**
+     * Create specifying the length of the profile, and the number of profiles expected
+     * @param length
+     * @param profileCount
+     */
     public DefaultProfileAggregate(final int length, final int profileCount) {
-        if (profileCount == 0) {
+        if (profileCount <= 0)
             throw new IllegalArgumentException("Cannot have zero profiles in aggregate");
-        }
         this.length = length;
         this.profileCount = profileCount;
 
         aggregate = new float[length][profileCount];
-
     }
+    
+	@Override
+	public IProfileAggregate duplicate() {
+		DefaultProfileAggregate result = new DefaultProfileAggregate(length,profileCount);
+		for(int i=0; i<aggregate.length; i++)
+			for(int j=0; j<aggregate[0].length; j++)
+				result.aggregate[i][j] = aggregate[i][j];
+		return result;
+	}
+    
+    
 
-    public void addValues(final IProfile profile) throws ProfileException {
+    @Override
+	public void addValues(@NonNull final IProfile profile) throws ProfileException {
 
-        if (counter >= profileCount) {
+        if (counter >= profileCount)
             throw new ProfileException("Aggregate is full");
-        }
 
         /*
          * Make the profile the desired length, sample each point and add it to
@@ -79,11 +93,13 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
     }
 
-    public int length() {
+    @Override
+	public int length() {
         return length;
     }
 
-    public IProfile getMedian() {
+    @Override
+	public IProfile getMedian() {
         return calculateQuartile(Stats.MEDIAN);
     }
 
@@ -116,7 +132,8 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      *            the position to search. Must be between 0 and 1.
      * @return an unsorted array of the values at the given position
      */
-    public double[] getValuesAtPosition(double position) {
+    @Override
+	public double[] getValuesAtPosition(double position) {
         if (position < 0 || position > 1)
             throw new IllegalArgumentException("Desired x-position is out of range: " + position);
 
@@ -139,7 +156,8 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      * 
      * @return the Profile of positions
      */
-    public IProfile getXPositions() {
+    @Override
+	public IProfile getXPositions() {
         float[] result = new float[length];
 
         float profileIncrement = 100f / (float) length;
@@ -155,16 +173,6 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
         return new FloatProfile(result);
     }
 
-    public List<Double> getXKeyset() {
-        List<Double> result = new ArrayList<Double>(length);
-        for (int i = 0; i < length; i++) {
-            double profilePosition = (double) i / (double) length;
-            result.add(profilePosition);
-        }
-
-        return result;
-    }
-
     /*
      * 
      * PRIVATE METHODS
@@ -178,13 +186,22 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      * @return
      */
     private float[] getValuesAtIndex(int i) {
-
         float[] values = new float[profileCount];
-
-        for (int n = 0; n < profileCount; n++) {
+        for (int n = 0; n < profileCount; n++)
             values[n] = aggregate[i][n];
-        }
-
+        return values;
+    }
+    
+    /**
+     * Get the values for the given nucleus in the aggregate
+     * 
+     * @param n
+     * @return
+     */
+    private float[] getValuesForNucleus(int n) {
+        float[] values = new float[profileCount];
+        for (int i = 0; i < profileCount; i++)
+            values[i] = aggregate[i][n];
         return values;
     }
 
@@ -199,24 +216,54 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
         float[] medians = new float[length];
 
         for (int i = 0; i < length; i++) {
-
             float[] values = getValuesAtIndex(i);
-
             medians[i] = Stats.quartile(values, quartile);
         }
-
-        IProfile profile = new FloatProfile(medians);
-        return profile;
-
-    }
-
-    @Override
-    public double getBinSize() {
-        return 0;
+        return new FloatProfile(medians);
     }
 
     @Override
     public IProfile getQuartile(double quartile) throws ProfileException {
         return getQuartile((float) quartile);
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.deepHashCode(aggregate);
+		result = prime * result + counter;
+		result = prime * result + length;
+		result = prime * result + profileCount;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultProfileAggregate other = (DefaultProfileAggregate) obj;
+		if (!Arrays.deepEquals(aggregate, other.aggregate))
+			return false;
+		if (counter != other.counter)
+			return false;
+		if (length != other.length)
+			return false;
+		if (profileCount != other.profileCount)
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "DefaultProfileAggregate [aggregate=" + Arrays.toString(aggregate) + ", length=" + length
+				+ ", profileCount=" + profileCount + ", counter=" + counter + "]";
+	}
+    
+    
+
 }

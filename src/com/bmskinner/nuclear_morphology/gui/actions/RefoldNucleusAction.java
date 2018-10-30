@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +12,29 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Refold the consensus nucleus for the selected dataset using default
@@ -43,8 +48,13 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
     /**
      * Refold the given selected dataset
      */
-    public RefoldNucleusAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
-        super(dataset, PROGRESS_LBL, mw);
+    public RefoldNucleusAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+        super(dataset, PROGRESS_LBL, acceptor, eh);
+        this.setLatch(doneSignal);
+    }
+    
+    public RefoldNucleusAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+        super(list, PROGRESS_LBL, acceptor, eh);
         this.setLatch(doneSignal);
     }
 
@@ -56,11 +66,12 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
             boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 
             IAnalysisMethod m;
-
+            int progressLength = PROGRESS_BAR_LENGTH;
             // The averaging method does not work for nuclei that are round, or have extreme variability. 
             // In these cases, or if the program config file has been set to override, use the old profile method.
             if (override){
                 m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+                progressLength = CurveRefoldingMode.FAST.maxIterations();
             } else {
                 
                 NucleusType t = dataset.getCollection().getNucleusType();
@@ -68,6 +79,7 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
                     case ROUND:
                     case NEUTROPHIL: {
                         m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+                        progressLength = CurveRefoldingMode.FAST.maxIterations();
                         break;
                     }
                     
@@ -77,7 +89,8 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
                 }
             }
 
-            worker = new DefaultAnalysisWorker(m, PROGRESS_BAR_LENGTH);
+            
+            worker = new DefaultAnalysisWorker(m, progressLength);
             worker.addPropertyChangeListener(this);
 
             this.setProgressMessage(PROGRESS_LBL + ": " + dataset.getName());
@@ -92,12 +105,26 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 
     @Override
     public void finished() {
+    	
+    	Thread thr = new Thread() {
 
-        this.cancel();
-        fine("Refolding finished, cleaning up");
-        super.finished();
-        this.countdownLatch();
+            public void run() {
 
+                // if no list was provided, or no more entries remain,
+                // call the finish
+                if (!hasRemainingDatasetsToProcess()) {
+                    countdownLatch();
+                    RefoldNucleusAction.super.finished();
+
+                } else {
+                    // otherwise analyse the next item in the list
+                    cancel(); // remove progress bar
+                    Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get());
+                    task.run();
+                }
+            }
+        };
+        thr.start();
     }
 
 }

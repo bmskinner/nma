@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -30,7 +29,6 @@ import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
@@ -53,7 +51,7 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
     private JRadioButton edgeBtn      = new JRadioButton(EDGE_LBL);
     private ButtonGroup  group        = new ButtonGroup();
 
-    public EdgeThresholdSwitchPanel(final IMutableDetectionOptions options) {
+    public EdgeThresholdSwitchPanel(final IDetectionOptions options) {
         super(options);
         this.add(createPanel(), BorderLayout.CENTER);
 
@@ -79,7 +77,7 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
         try {
             ICannyOptions canny = options.getCannyOptions();
 
-            SettingsPanel cannyPanel = new CannySettingsPanel(canny.unlock());
+            SettingsPanel cannyPanel = new CannySettingsPanel(canny);
             SettingsPanel thresholdPanel = new ThresholdSettingsPanel(options);
 
             this.addSubPanel(cannyPanel);
@@ -165,8 +163,10 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
         CardLayout cl = (CardLayout) (cardPanel.getLayout());
 
         if (showCanny) {
+        	edgeBtn.setSelected(true);
             cl.show(cardPanel, EDGE_LBL);
         } else {
+        	thresholdBtn.setSelected(true);
             cl.show(cardPanel, THRESHOLD_LBL);
         }
 
@@ -179,12 +179,4 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
         edgeBtn.setEnabled(b);
 
     }
-
-    @Override
-    public void set(IDetectionOptions options) {
-        this.options.set(options);
-        update();
-
-    }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
@@ -34,8 +32,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCr
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class CellSignalStatsPanel extends AbstractCellDetailPanel {
@@ -48,8 +47,8 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 
     private JScrollPane scrollPane;
 
-    public CellSignalStatsPanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellSignalStatsPanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();

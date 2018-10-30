@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Color;
@@ -25,6 +23,7 @@ import javax.swing.ImageIcon;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
@@ -232,14 +231,30 @@ public abstract class AbstractImageFilterer implements Loggable {
         }
         return new ImageIcon(ip.getBufferedImage());
     }
+    
+    /**
+     * Create an empty white byte processor
+     * 
+     * @param w the width
+     * @param h the height
+     * @return
+     */
+    public static ImageProcessor createBlankColorProcessor(int w, int h) {
+
+        // Create an empty white processor
+        ImageProcessor ip = new ColorProcessor(w, h);
+        for (int i = 0; i < ip.getPixelCount(); i++) {
+            ip.set(i, RGB_WHITE); // set all to white initially
+        }
+
+        return ip;
+    }
 
     /**
      * Create an empty white byte processor
      * 
-     * @param w
-     *            the width
-     * @param h
-     *            the height
+     * @param w the width
+     * @param h the height
      * @return
      */
     public static ImageProcessor createBlankByteProcessor(int w, int h) {
@@ -295,7 +310,7 @@ public abstract class AbstractImageFilterer implements Loggable {
                 // Since we are scaling from 255-0, this is 1- the actual
                 // fraction
 
-                float invF = ((float) pixel) / 255f;
+                float invF = (pixel) / 255f;
                 float f = 1f - invF;
 
                 // Set the saturation to the fractional intensity of the
@@ -325,6 +340,58 @@ public abstract class AbstractImageFilterer implements Loggable {
         }
 
         return cp;
+    }
+    
+    /**
+     * Crop the image to the region covered by the given component
+     * 
+     * @return
+     */
+    public void crop(@NonNull CellularComponent c) {
+
+        if (ip == null)
+            throw new IllegalArgumentException("Image processor is null");
+        // Choose a clip for the image (an enlargement of the original nucleus ROI
+        int[] positions = c.getPosition();
+        int wideW = positions[CellularComponent.WIDTH] + CellularComponent.COMPONENT_BUFFER*2;
+        int wideH = positions[CellularComponent.HEIGHT] + CellularComponent.COMPONENT_BUFFER*2;
+        int wideX = positions[CellularComponent.X_BASE] - CellularComponent.COMPONENT_BUFFER;
+        int wideY = positions[CellularComponent.Y_BASE] - CellularComponent.COMPONENT_BUFFER;
+
+        wideX = wideX < 0 ? 0 : wideX;
+        wideY = wideY < 0 ? 0 : wideY;
+
+        ip.setRoi(wideX, wideY, wideW, wideH);
+        ImageProcessor result = ip.crop();
+        ip = result;
+    }
+    
+    /**
+     * Resize the image to fit the given dimensions, preserving aspect ratio
+     * 
+     * @param newWidth
+     *            the new width of the image
+     * @return
+     */
+    public void resize(int maxWidth, int maxHeight) {
+
+        if (ip == null) {
+            throw new IllegalArgumentException("Image processor is null");
+        }
+
+        int originalWidth = ip.getWidth();
+        int originalHeight = ip.getHeight();
+
+        // keep the image aspect ratio
+        double ratio = (double) originalWidth / (double) originalHeight;
+
+        double finalWidth = maxHeight * ratio; // fix height
+        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
+                                                                    // constrain
+                                                                    // width too
+
+        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+        ip = result;
     }
     
     /**
@@ -365,9 +432,9 @@ public abstract class AbstractImageFilterer implements Loggable {
             int pixel = ip.get(i);
             int[] rgb = intToRgb(pixel);
             
-            double rProp = ((double) rgb[0] - rMin) / rRange;
-            double gProp = ((double) rgb[1] - gMin) / gRange;
-            double bProp = ((double) rgb[2] - bMin) / bRange;
+            double rProp = (rgb[0] - rMin) / rRange;
+            double gProp = (rgb[1] - gMin) / gRange;
+            double bProp = (rgb[2] - bMin) / bRange;
 
             
             int rNew = (int) (255 * rProp);
@@ -384,15 +451,13 @@ public abstract class AbstractImageFilterer implements Loggable {
      * Adjust the intensity of the given image so that the brightest pixel is at
      * 255 and the dimmest pixel is at 0
      * 
-     * @param ip
-     *            the image to adjust
+     * @param ip the image to adjust
      * @return a new ByteProcessor with rescaled values
      */
-    public static ImageProcessor rescaleImageIntensity(final ImageProcessor ip) {
+    public static ImageProcessor rescaleImageIntensity(@NonNull final ImageProcessor ip) {
 
-        if (ip == null) {
+        if (ip == null)
             throw new IllegalArgumentException("Image cannot be null");
-        }
 
         double maxIntensity = 0;
         double minIntensity = 255;
@@ -438,7 +503,7 @@ public abstract class AbstractImageFilterer implements Loggable {
         for (int i = 0; i < ip.getPixelCount(); i++) {
             int pixel = ip.get(i);
 
-            double proportion = ((double) pixel - minIntensity) / range;
+            double proportion = (pixel - minIntensity) / range;
 
             int newPixel = (int) (255 * proportion);
             result.set(i, newPixel);
@@ -544,7 +609,7 @@ public abstract class AbstractImageFilterer implements Loggable {
                 continue;
             }
 
-            float diff = (float) (r - b);
+            float diff = r - b;
             float scaled = Math.abs(diff) / 255f; // fraction of 8bit space
             float ranged = 0.17f * scaled;
 
@@ -557,7 +622,7 @@ public abstract class AbstractImageFilterer implements Loggable {
             // 128
             // float h = 300f + diff; // start at purple, variation of up to 128
 
-            float s = diff < 0 ? 1 - ((float) b / 255f) : 1 - ((float) r / 255f);
+            float s = diff < 0 ? 1 - (b / 255f) : 1 - (r / 255f);
 
             float v = 1f;
 
@@ -604,7 +669,7 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return a value from 0-1
      */
     protected static float getSaturationFromIntensity(int i) {
-        return (float) (255f - (255f - i)) / 255f;
+        return (255f - (255f - i)) / 255f;
     }
 
     /**
@@ -615,9 +680,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      */
     public static ImageProcessor averageRGBImages(List<ImageProcessor> list) {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException("List null or empty");
-        }
 
         // Check images are same dimensions
         int w = list.get(0).getWidth();
@@ -625,13 +689,11 @@ public abstract class AbstractImageFilterer implements Loggable {
 
         for (ImageProcessor ip : list) {
 
-            if (ip == null) {
+            if (ip == null)
                 throw new IllegalArgumentException("Null image in list");
-            }
 
-            if (w != ip.getWidth() || h != ip.getHeight()) {
+            if (w != ip.getWidth() || h != ip.getHeight())
                 throw new IllegalArgumentException("Dimensions do not match");
-            }
         }
 
         ImageProcessor cp = new ColorProcessor(w, h);

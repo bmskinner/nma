@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.awt.Color;
@@ -25,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.AbstractFinder;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -55,12 +54,12 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     final private INuclearSignalOptions signalOptions;
     final private ICellCollection       collection;
 
-    public SignalFinder(IAnalysisOptions op, INuclearSignalOptions signalOptions, ICellCollection collection) {
+    public SignalFinder(@NonNull IAnalysisOptions op, @NonNull INuclearSignalOptions signalOptions, @NonNull ICellCollection collection) {
         super(op);
         this.signalOptions = signalOptions;
         this.collection = collection;
 
-        IMutableNuclearSignalOptions testOptions = (IMutableNuclearSignalOptions) signalOptions.duplicate();
+        INuclearSignalOptions testOptions = (INuclearSignalOptions) signalOptions.duplicate();
         testOptions.setMinSize(5);
         testOptions.setMaxFraction(1d);
 
@@ -68,7 +67,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     }
 
     @Override
-    public List<INuclearSignal> findInFolder(File folder) throws ImageImportException, ComponentCreationException {
+    public List<INuclearSignal> findInFolder(@NonNull File folder) throws ImageImportException {
 
         if (folder == null) {
             throw new IllegalArgumentException("Folder cannot be null");
@@ -76,17 +75,16 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         List<INuclearSignal> list = new ArrayList<>();
 
-        if (folder.listFiles() == null) {
+        if (folder.listFiles() == null)
             return list;
-        }
 
-        Stream.of(folder.listFiles()).parallel().forEach(f -> {
+        Stream.of(folder.listFiles()).forEach(f -> {
             if (!f.isDirectory()) {
 
                 if (ImageImporter.fileIsImportable(f)) {
                     try {
                         list.addAll(findInImage(f));
-                    } catch (ImageImportException | ComponentCreationException e) {
+                    } catch (ImageImportException e) {
                         stack("Error searching image", e);
                     }
                 }
@@ -97,11 +95,11 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     }
 
     @Override
-    public List<INuclearSignal> findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
+    public List<INuclearSignal> findInImage(@NonNull File imageFile) throws ImageImportException {
 
         List<INuclearSignal> list = new ArrayList<>();
 
-        IMutableNuclearSignalOptions testOptions = (IMutableNuclearSignalOptions) signalOptions.duplicate();
+        INuclearSignalOptions testOptions = (INuclearSignalOptions) signalOptions.duplicate();
         testOptions.setMinSize(5);
         testOptions.setMaxFraction(1d);
         detector = new SignalDetector(testOptions, testOptions.getChannel());
@@ -113,7 +111,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         // Ignore incorrect channel selections
         if (stack.getSize() < stackNumber) {
-            fine("Channel not available");
+            fine("Channel not present in image");
             return list;
         }
 
@@ -122,7 +120,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 
         // Convert to an RGB processor for annotation
-        ImageProcessor ip = new ImageConverter(greyProcessor).convertToGreyscale().invert().toProcessor();
+        ImageProcessor ip = new ImageConverter(greyProcessor).convertToRGBGreyscale().invert().toProcessor();
 
         ImageProcessor ap = ip.duplicate();
 
@@ -173,65 +171,66 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
             // annotate detected signals onto the imagefile
             fireDetectionEvent(ap.duplicate(), "Annotated objects");
         }
-
         return list;
-
     }
 
-    public List<INuclearSignal> findInImage(File imageFile, Nucleus n) throws ImageImportException {
+    /**
+     * Find nuclear signals within the given image, for the given nucleus
+     * @param imageFile the image to search
+     * @param n the nucleus the signals should belong to
+     * @return
+     * @throws ImageImportException
+     */
+    public List<INuclearSignal> findInImage(@NonNull File imageFile, @NonNull Nucleus n) throws ImageImportException {
 
         detector = new SignalDetector(signalOptions, signalOptions.getChannel());
 
         List<INuclearSignal> list = new ArrayList<>();
-        ImageStack stack = new ImageImporter(imageFile).importToStack();
-
         try {
+        	ImageStack stack = new ImageImporter(imageFile).importToStack();
+
             // The detector also creates the signals currently
             List<INuclearSignal> temp = detector.detectSignal(imageFile, stack, n);
-
-            for (INuclearSignal s : temp) {
-                if (checkSignal(s, n)) {
+            for (INuclearSignal s : temp)
+                if (checkSignal(s, n)) 
                     list.add(s);
-                }
-            }
-
-        } catch (Exception e) {
-            error("Error in detector", e);
+        } catch (IllegalArgumentException | ImageImportException e) {
+        	warn("Unable to find images in image "+imageFile.getAbsolutePath()+": "+e.getMessage());
+            fine("Error in detector with image "+imageFile.getAbsolutePath(), e);
         }
-
         return list;
-
     }
 
-    protected void drawSignals(Nucleus n, List<INuclearSignal> list, ImageAnnotator an, boolean annotate) {
+    /**
+     * Draw the signals for the given nucleus on an annotator
+     * @param n the nucleus to annotate
+     * @param list the  signals in the nucleus to be annotated
+     * @param an the annotator
+     * @param annotateStats should the stats be drawn on the image
+     */
+    protected void drawSignals(@NonNull Nucleus n, @NonNull List<INuclearSignal> list, @NonNull ImageAnnotator an, boolean annotateStats) {
 
         an.annotateBorder(n, Color.BLUE);
-
         for (INuclearSignal s : list) {
-
             Color color = checkSignal(s, n) ? Color.ORANGE : Color.RED;
             an.annotateBorder(s, color);
-
-            if (annotate) {
+            if (annotateStats) {
                 an.annotateSignalStats(n, s, Color.YELLOW, Color.BLUE);
             }
-
         }
-
     }
 
-    private boolean checkSignal(INuclearSignal s, Nucleus n) {
-
-        if (s.getStatistic(PlottableStatistic.AREA) < signalOptions.getMinSize()) {
-
+    /**
+     * Test if the given signal passes the options criteria
+     * @param s the signal
+     * @param n the nucleus the signal belongs to
+     * @return
+     */
+    private boolean checkSignal(@NonNull INuclearSignal s, @NonNull Nucleus n) {
+        if (s.getStatistic(PlottableStatistic.AREA) < signalOptions.getMinSize())
             return false;
-        }
-
-        if (s.getStatistic(
-                PlottableStatistic.AREA) > (signalOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA))) {
-
+        if (s.getStatistic( PlottableStatistic.AREA) > (signalOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA)))
             return false;
-        }
         return true;
     }
 

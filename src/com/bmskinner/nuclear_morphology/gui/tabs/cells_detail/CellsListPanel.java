@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
@@ -27,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -39,12 +36,14 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 
 @SuppressWarnings("serial")
 public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelectionListener {
@@ -52,8 +51,8 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
     private static final String PANEL_TITLE_LBL = "Cell list";
     private JTree tree;
 
-    public CellsListPanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellsListPanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
@@ -123,14 +122,14 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
     /**
      * Create the nodes in the tree
      * 
-     * @param root
-     *            the root node
-     * @param dataset
-     *            the dataset to use
+     * @param root the root node
+     * @param dataset the dataset to use
      */
-    private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
-
-        List<ICell> cells = new ArrayList<ICell>(dataset.getCollection().getCells());
+    private synchronized void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
+    	if(dataset==null)
+    		return;
+    	
+        List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
         Collections.sort(cells);
 
         for (ICell cell : cells) {

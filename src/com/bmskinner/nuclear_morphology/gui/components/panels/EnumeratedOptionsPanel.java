@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.awt.FlowLayout;
@@ -27,16 +25,16 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener, Loggable {
 
-    protected List<ActionListener> listeners          = new ArrayList<ActionListener>();
-    private final List<Object>   interfaceListeners = new ArrayList<Object>();
+    protected List<ActionListener> listeners = new ArrayList<>();
+    private final List<EventListener> interfaceListeners = new ArrayList<>();
 
     public EnumeratedOptionsPanel() {
         this.setLayout(new FlowLayout());
@@ -59,20 +57,20 @@ public abstract class EnumeratedOptionsPanel extends JPanel implements ActionLis
         listeners.remove(l);
     }
 
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
+    public synchronized void addInterfaceEventListener(EventListener l) {
         interfaceListeners.add(l);
     }
 
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
+    public synchronized void removeInterfaceEventListener(EventListener l) {
         interfaceListeners.remove(l);
     }
 
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
 
         InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
+        Iterator<EventListener> iterator = interfaceListeners.iterator();
         while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
+            iterator.next().eventReceived(event);
         }
     }
 

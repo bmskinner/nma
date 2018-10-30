@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.IOException;
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -40,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 @Deprecated
-public class Cell implements IMutableCell {
+public class Cell implements ICell {
 
     private static final long serialVersionUID = 1L;
 
@@ -84,6 +81,11 @@ public class Cell implements IMutableCell {
         for (IAcrosome a : c.getAcrosomes()) {
             // acrosomes.add(new Acrosome(a));
         }
+    }
+    
+    @Override
+    public ICell duplicate() {
+    	return new Cell(this);
     }
 
     /*

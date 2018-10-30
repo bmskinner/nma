@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -23,12 +21,17 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -40,7 +43,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.IMutableCell;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -52,6 +55,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
@@ -59,9 +64,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -85,6 +88,7 @@ import ij.gui.Roi;
 public class DatasetConverter implements Loggable, Importer {
 
     private IAnalysisDataset oldDataset;
+    private boolean wasConverted = false;
 
     /**
      * Migration table for stats classes
@@ -122,101 +126,265 @@ public class DatasetConverter implements Loggable, Importer {
     /**
      * Construct using the old dataset version
      * 
-     * @param old
-     *            the old format dataset
+     * @param old the old format dataset
      */
-    public DatasetConverter(IAnalysisDataset old) {
+    public DatasetConverter(@NonNull IAnalysisDataset old) {
         this.oldDataset = old;
+    }
+    
+    public boolean shouldSave() {
+    	return wasConverted;
     }
 
     /**
-     * Run the converter and make a new DefaultAnalysisDataset from the root,
-     * and ChildAnalysisDatasets from children.
+     * Run the converter
      * 
      * @return
      */
     public IAnalysisDataset convert() throws DatasetConversionException {
-
-        try {
-            log("Old dataset version : " + oldDataset.getVersion());
-            log("Shiny target version: " + Version.currentVersion());
-
-            backupOldDataset();
-
-            log("Beginning conversion...");
-
-            ICellCollection newCollection = makeNewRootCollection();
-
-            IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, oldDataset.getSavePath());
-
-            if (oldDataset.getAnalysisOptions().isPresent()) {
-            	IAnalysisOptions oldOptions = oldDataset.getAnalysisOptions().get();
-                IMutableAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
-
-                IMutableDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
-
-                IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
-                newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-
-                for (UUID id : oldOptions.getNuclearSignalGroups()) {
-                    INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
-                    if(oldDataset.getCollection().hasSignalGroup(id)){
-                    	File folder = oldDataset.getCollection().getSignalGroup(id).get().getFolder();
-                    	int channel = oldDataset.getCollection().getSignalGroup(id).get().getChannel();
-
-                    	IMutableNuclearSignalOptions newSignalOptions = OptionsFactory
-                    			.makeNuclearSignalOptions(oldSignalOptions);
-                    	newSignalOptions.setFolder(folder);
-                    	newSignalOptions.setChannel(channel);
-
-                    	newOptions.setDetectionOptions(id.toString(), newSignalOptions);
-                    }
-                }
-
-                newDataset.setAnalysisOptions(newOptions);
-            } else {
-                newDataset.setAnalysisOptions(null);
-            }
-
-            newDataset.setDatasetColour(oldDataset.getDatasetColour().orElse(null));
-
-            // arrange root cluster groups
-            for (IClusterGroup oldGroup : oldDataset.getClusterGroups()) {
-
-                IClusterGroup newGroup = new ClusterGroup(oldGroup);
-
-                newDataset.addClusterGroup(newGroup);
-
-            }
-
-            // add the child datasets
-            makeVirtualCollections(oldDataset, newDataset);
-
-            // Add merge sources
-            makeMergeSources(oldDataset, newDataset);
-
-            oldDataset = null;
-            return newDataset;
-
-        } catch (Exception e) {
-            stack("Error converting dataset", e);
-            throw new DatasetConversionException(e.getCause());
-        }
+    	IAnalysisDataset result = oldDataset;
+    	
+    	// The oldest format did not implement a version field 
+    	if(result instanceof AnalysisDataset)
+    		result = convertAnalysisDatasetToCurrent(result);
+    	
+    	// Try to get the old dataset version
+    	// After converting an AnalysisDataset, the result version will be current
+    	// version, but if the source was older than 1.14.0 we need to adjust the spline fitting
+    	Version oldVersion = oldDataset.getVersion();
+    	if(oldVersion!=null && oldVersion.isOlderThan(Version.v_1_13_3))
+    		result = convertUpTo1_14_0(result);
+    	
+    	// Now the result will in a format with a checkable version
+    	if(result.getVersion().isOlderThan(Version.v_1_13_2))
+    		result = convertUpTo1_13_2(result);
+    	if(result.getVersion().isOlderThan(Version.v_1_14_0))
+    		result = convertUpTo1_14_0(result);
+    	return result;
     }
-
-    private void makeMergeSources(IAnalysisDataset template, IAnalysisDataset dest) throws DatasetConversionException {
+    
+    private IAnalysisDataset convertUpTo1_13_2(@NonNull IAnalysisDataset template) throws DatasetConversionException {
+    	// Correct signal border locations from older versions for all
+    	// imported datasets
+        fine("Updating signal locations for pre-1.13.2 dataset");
+        updateSignalPositions(template);
+        for (IAnalysisDataset child : template.getAllChildDatasets()) {
+        	updateSignalPositions(child);
+        }
 
         if (template.hasMergeSources()) {
+        	for (IAnalysisDataset source : template.getAllMergeSources()) {
+        		updateSignalPositions(source);
+        	}
+        }
+        return template;
+    
+    }
+    
+    /**
+     * In older versions of the program, signal border positions were stored
+     * differently to the CoM. This needs correcting, as it causes errors in
+     * rotating signals. The CoM is relative to the nucleus, but the border list
+     * is relative to the image. Adjust the border to bring it back in line with
+     * the CoM.
+     * 
+     * @param dataset
+     */
+    private void updateSignalPositions(@NonNull IAnalysisDataset dataset) {
+        dataset.getCollection().getNuclei().parallelStream().forEach(n -> {
 
-            for (IAnalysisDataset d : template.getMergeSources()) {
+            if (n.getSignalCollection().hasSignal()) {
 
-                dest.addMergeSource(d);
+                for (UUID id : n.getSignalCollection().getSignalGroupIds()) {
+
+                    n.getSignalCollection().getSignals(id).parallelStream().forEach(s -> {
+
+                        if (!s.containsPoint(s.getCentreOfMass())) {
+
+                            for (int i = 0; i < s.getBorderLength(); i++) {
+                                try {
+                                    s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
+                                } catch (UnavailableBorderPointException e) {
+                                    stack("Could not offset border point", e);
+                                }
+                            }
+                        }
+
+                    });
+                }
 
             }
 
+        });
+    }
+    
+    
+    /**
+     * Create a new dataset based on the values in the old dataset. The old
+     * classes cannot be used any more, so the resulting dataset will have
+     * the current version.
+     * @param template
+     * @return
+     * @throws DatasetConversionException
+     */
+    private IAnalysisDataset convertAnalysisDatasetToCurrent(@NonNull IAnalysisDataset template) throws DatasetConversionException {
+    	
+    	 try {
+             log("Old dataset version : " + template.getVersion());
+             log("Shiny target version: " + Version.currentVersion());
+
+             backupOldDataset();
+
+             log("Beginning conversion...");
+
+             ICellCollection newCollection = makeNewRootCollection();
+
+             IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, template.getSavePath());
+
+             if (oldDataset.getAnalysisOptions().isPresent()) {
+             	IAnalysisOptions oldOptions = template.getAnalysisOptions().get();
+             	IAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
+
+                 IDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+
+                 IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
+                 newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+
+                 for (UUID id : oldOptions.getNuclearSignalGroups()) {
+                     INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
+                     if(template.getCollection().hasSignalGroup(id)){
+                     	File folder = oldSignalOptions.getFolder();
+                     	int channel = oldSignalOptions.getChannel();
+
+                     	INuclearSignalOptions newSignalOptions = OptionsFactory
+                     			.makeNuclearSignalOptions(oldSignalOptions);
+                     	newSignalOptions.setFolder(folder);
+                     	newSignalOptions.setChannel(channel);
+                     	newOptions.setDetectionOptions(id.toString(), newSignalOptions);
+                     }
+                 }
+
+                 newDataset.setAnalysisOptions(newOptions);
+             } else {
+                 newDataset.setAnalysisOptions(null);
+             }
+
+             newDataset.setDatasetColour(template.getDatasetColour().orElse(null));
+
+             // arrange root cluster groups
+             for (IClusterGroup oldGroup : template.getClusterGroups()) {
+
+                 IClusterGroup newGroup = new ClusterGroup(oldGroup);
+
+                 newDataset.addClusterGroup(newGroup);
+
+             }
+
+             // add the child datasets
+             makeVirtualCollections(template, newDataset);
+
+             // Add merge sources
+             makeMergeSources(template, newDataset);
+             wasConverted = true;
+             return newDataset;
+
+         } catch (Exception e) {
+             stack("Error converting dataset", e);
+             throw new DatasetConversionException(e.getCause());
+         }
+    	
+    }
+    
+    
+    /**
+     * Check nuclei for profiles with segments not ending at the RP, and adjust as needed.
+     * @param template the dataset to convert
+     * @throws DatasetConversionException
+     */
+    public void realignSegmentsToRP(@NonNull IAnalysisDataset template) throws DatasetConversionException {
+    	try {
+    		
+    		for(Nucleus n : template.getCollection().getNuclei()) {
+    			realignSegmentsToRP(n);
+    		}
+
+    		// Update the collection profiles
+    		ICellCollection c = template.getCollection();
+    		
+    		if(c.hasConsensus())
+    			realignSegmentsToRP(c.getConsensus());
+    		
+    		Method m = c.getProfileCollection().getClass().getDeclaredMethod("createAndRestoreProfileAggregate", ICellCollection.class);
+    		m.setAccessible(false);
+    		m.invoke(c.getProfileCollection(), c);
+    		
+    		for(IAnalysisDataset d : template.getAllChildDatasets()) {
+    			ICellCollection child = d.getCollection();
+        		Method v = child.getProfileCollection().getClass().getDeclaredMethod("createAndRestoreProfileAggregate", ICellCollection.class);
+        		v.setAccessible(false);
+        		v.invoke(child.getProfileCollection(), child);
+    		}
+    		
+    	} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+    		throw new DatasetConversionException("Error updating segment boundaries", e);
+    	}
+    }
+    
+    private void realignSegmentsToRP(@NonNull Taggable n) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException, DatasetConversionException {
+    	n.refreshBorderList(false); // don't use spline fitting, to mimic the original border creation
+		n.calculateProfiles();
+		// At this point, some of the cells may have RPs that are not exactly at segment boundaries
+		// Correct this - find the first index of seg0. Update it to the RP
+		ISegmentedProfile rpProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IBorderSegment seg = rpProfile.getSegmentAt(0);    				
+		if(seg.getStartIndex()!=0) {
+			try {
+				seg.update(0, seg.getEndIndex());
+			} catch(SegmentUpdateException e) {
+				// Update failed, likely because the prev segment would become too short
+				// Try moving the prev segment start index back by the minimum number of points
+				// required.
+				IBorderSegment prevSeg = seg.prevSegment();
+				int testedLength = prevSeg.testLength(prevSeg.getStartIndex(), 0);
+				if(testedLength<=IBorderSegment.INTERPOLATION_MINIMUM_LENGTH) {
+					// yes, this was the issue. Try updating this segment
+					int adjustment = IBorderSegment.INTERPOLATION_MINIMUM_LENGTH-testedLength;
+					int prevStartUpdated = prevSeg.getStartIndex()-adjustment;
+					try {
+					prevSeg.update(prevStartUpdated, 0); // adjust both segments in one operation
+					} catch(SegmentUpdateException e1) {
+						// that failed too, rethrow
+						throw new DatasetConversionException("Unable to update previous segment boundaries", e1);
+					}
+				}
+				else {
+					// that was not the issue, rethrow
+					throw new DatasetConversionException("Unable to update current or previous segment boundaries; previous segment would be length "+testedLength, e);
+				}
+				
+			}
+			
+			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, rpProfile);
+		}
+    }
+    
+    private IAnalysisDataset convertUpTo1_14_0(@NonNull IAnalysisDataset template)  throws DatasetConversionException {
+    	try {
+    	realignSegmentsToRP(template);
+    	} catch (DatasetConversionException e) {
+    		stack(e.getMessage(), e.getCause());
+    	}
+    	return template;
+
+    }
+
+    private void makeMergeSources(@NonNull IAnalysisDataset template, @NonNull IAnalysisDataset dest) throws DatasetConversionException {
+        if (template.hasMergeSources()) {
+            for (IAnalysisDataset d : template.getMergeSources()) {
+                dest.addMergeSource(d);
+            }
             log("Added merge sources");
         }
-
     }
 
     /**
@@ -225,27 +393,21 @@ public class DatasetConverter implements Loggable, Importer {
      * @param template
      * @param dest
      */
-    private void makeVirtualCollections(IAnalysisDataset template, IAnalysisDataset dest)
+    private void makeVirtualCollections(@NonNull IAnalysisDataset template, @NonNull IAnalysisDataset dest)
             throws DatasetConversionException {
 
         for (IAnalysisDataset child : template.getChildDatasets()) {
 
-            // log("\tConverting: "+child.getName());
-
             ICellCollection oldCollection = child.getCollection();
             // make a virtual collection for the cells
-            ICellCollection newCollection = new VirtualCellCollection(dest, child.getName(), child.getUUID());
+            ICellCollection newCollection = new VirtualCellCollection(dest, child.getName(), child.getId());
 
             
-            child.getCollection().getCells().forEach(c->newCollection.addCell(c));
-//            for (ICell c : child.getCollection().getCells()) {
-//                newCollection.addCell(c);
-//            }
-
-            newCollection.createProfileCollection();
+            child.getCollection().getCells().forEach(c->newCollection.addCell(c));            
 
             // Copy segmentation patterns over
             try {
+            	newCollection.createProfileCollection();
                 oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
             } catch (ProfileException e) {
                 warn("Unable to copy profile offsets");
@@ -297,7 +459,6 @@ public class DatasetConverter implements Loggable, Importer {
             // Copy segmentation patterns over
             oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
 
-            // copyCollectionOffsets(oldCollection, newCollection);
         } catch (ProfileException e) {
             stack("Error updating profiles across datasets", e);
             throw new DatasetConversionException("Profiling error in root dataset");
@@ -311,122 +472,26 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    // /**
-    // * Copy profile offsets from the this collection, to the
-    // * destination and build the median profiles for all profile types.
-    // * Also copy the segments from the regular angle profile onto
-    // * all other profile types
-    // * @param destination the collection to update
-    // * @throws Exception
-    // */
-    // public void copyCollectionOffsets(final ICellCollection source, final
-    // ICellCollection destination) throws ProfileException {
-    //
-    // if(source instanceof CellCollection){
-    //
-    // CellCollection sourceCollection = (CellCollection) source;
-    //
-    // /*
-    // * Get the corresponding profile collection from the tempalte
-    // */
-    // ProfileCollection sourcePC = (ProfileCollection)
-    // sourceCollection.getProfileCollection(type);
-    //
-    // List<IBorderSegment> segments;
-    //
-    // segments = sourcePC.getSegments(Tag.REFERENCE_POINT);
-    //
-    // fine("Got existing list of "+segments.size()+" segments");
-    //
-    // // use the same array length as the source collection to avoid segment
-    // slippage
-    // int profileLength = sourcePC.length();
-    //
-    //
-    // /*
-    // * Get the empty profile collection from the new ICellCollection
-    // * This has a ProfileCollection containing a map of aggregates for each
-    // profile type
-    // */
-    // IProfileCollection destPC = destination.getProfileCollection();
-    //
-    //
-    //
-    // /*
-    // * Create an aggregate from the nuclei in the collection.
-    // * This will have the length of the source collection.
-    // */
-    // destPC.createProfileAggregate(destination, profileLength);
-    // fine("Created new profile aggregates with length "+profileLength);
-    //
-    // /*
-    // * Copy the offset keys from the source collection
-    // */
-    // try {
-    // for(Tag key : sourcePC.getBorderTags()){
-    //
-    // destPC.addIndex(key, sourcePC.getIndex(key));
-    //
-    // }
-    //
-    // destPC.addSegments(Tag.REFERENCE_POINT, segments);
-    //
-    // } catch (UnavailableBorderTagException | IllegalArgumentException e) {
-    // warn("Cannot add segments to RP: "+e.getMessage());
-    // fine("Cannot add segments to RP", e);
-    // }
-    // fine("Copied tags to new collection");
-    //
-    //
-    // } else {
-    // source.getProfileManager().copyCollectionOffsets(destination);
-    // }
-    //
-    //
-    //
-    // }
-
-    private ICell createNewCell(ICell oldCell) throws DatasetConversionException {
-        IMutableCell newCell = new DefaultCell(oldCell.getId());
-
-        // make a new nucleus
+    private ICell createNewCell(@NonNull ICell oldCell) throws DatasetConversionException {
+        ICell newCell = new DefaultCell(oldCell.getId());
         Nucleus newNucleus = createNewNucleus(oldCell.getNucleus());
-
         newCell.setNucleus(newNucleus);
-
         return newCell;
-
     }
 
-    private Nucleus createNewNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus createNewNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         NucleusType type = oldDataset.getCollection().getNucleusType();
 
-        fine("\tCreating nucleus: " + n.getNameAndNumber() + "\t" + type);
-
-        Nucleus newNucleus;
-
         switch (type) {
-        case PIG_SPERM:
-            newNucleus = makePigNucleus(n);
-            break;
-        case RODENT_SPERM:
-            newNucleus = makeRodentNucleus(n);
-            break;
-        case ROUND:
-            newNucleus = makeRoundNucleus(n);
-            break;
-        default:
-            newNucleus = makeRoundNucleus(n);
-            break;
-
+	        case PIG_SPERM:    return makePigNucleus(n);
+	        case RODENT_SPERM: return makeRodentNucleus(n);
+	        case ROUND:        return makeRoundNucleus(n);
+	        default:           return makeRoundNucleus(n);
         }
-
-        return newNucleus;
-
     }
 
-    private Nucleus makeRoundNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus makeRoundNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         // Easy stuff
         File f = n.getSourceFile(); // the source file
@@ -461,7 +526,7 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    private Nucleus makeRodentNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus makeRodentNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         // Easy stuff
         File f = n.getSourceFile(); // the source file
@@ -507,7 +572,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private Nucleus makePigNucleus(Nucleus n) throws DatasetConversionException {
+    private Nucleus makePigNucleus(@NonNull Nucleus n) throws DatasetConversionException {
 
         // Easy stuff
         File f = n.getSourceFile(); // the source file
@@ -543,7 +608,7 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    private Nucleus copyGenericData(Nucleus template, Nucleus newNucleus) throws DatasetConversionException {
+    private Nucleus copyGenericData(@NonNull Nucleus template, @NonNull Nucleus newNucleus) throws DatasetConversionException {
 
         // The nucleus ID is created with the nucleus and is not accessible
         // Use reflection to get access and set the new id to the same as the
@@ -649,7 +714,7 @@ public class DatasetConverter implements Loggable, Importer {
      * @param newNucleus
      * @param template
      */
-    private void convertPlottableStatistics(Nucleus newNucleus, Nucleus template) {
+    private void convertPlottableStatistics(@NonNull Nucleus newNucleus, @NonNull Nucleus template) {
 
         for (PlottableStatistic stat : template.getStatistics()) {
             try {
@@ -675,7 +740,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private void convertNuclearSegments(Nucleus template, Nucleus newNucleus) throws DatasetConversionException {
+    private void convertNuclearSegments(@NonNull Nucleus template, @NonNull Nucleus newNucleus) throws DatasetConversionException {
         // Copy segments from RP
         for (ProfileType type : ProfileType.values()) {
 
@@ -684,29 +749,20 @@ public class DatasetConverter implements Loggable, Importer {
             if (template.hasProfile(type)) {
                 try {
                     ISegmentedProfile profile = template.getProfile(type, Tag.REFERENCE_POINT);
-                    ISegmentedProfile target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
+                    ISegmentedProfile target  = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
 
                     ISegmentedProfile newProfile;
 
                     if (profile.size() != target.size()) {
-                        // log("Interpolating profile");
-                        // fine("\tNew nucleus profile length of
-                        // "+target.size()+" : original nucleus was
-                        // "+profile.size());
                         newProfile = profile.interpolate(target.size());
-                        // fine("\tInterpolated profile has length
-                        // "+target.size()+" with segment total length
-                        // "+target.getSegments().get(0).getTotalLength());
                     } else {
-                        // log("Not interpolating profile");
-                        newProfile = ISegmentedProfile.makeNew(profile);
+                        newProfile = profile.copy();//ISegmentedProfile.makeNew(profile);
                     }
 
                     if (newProfile.getSegmentCount() != profile.getSegmentCount()) {
                         warn("Segment count mismatch: new has " + newProfile.getSegmentCount() + ", target has "
                                 + profile.getSegmentCount());
-                        throw new DatasetConversionException(
-                                "Error copying segments for nucleus " + template.getNameAndNumber());
+                        throw new DatasetConversionException( "Error copying segments for nucleus " + template.getNameAndNumber());
                     }
 
                     fine("\tSetting the profile " + type + " in the new nucleus");
@@ -722,7 +778,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private void convertNuclearSignals(Nucleus template, Nucleus newNucleus) {
+    private void convertNuclearSignals(@NonNull Nucleus template, @NonNull Nucleus newNucleus) {
 
         // Copy signals
 
@@ -745,7 +801,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
     }
 
-    private INuclearSignal convertSignal(INuclearSignal oldSignal) throws UnavailableBorderPointException {
+    private INuclearSignal convertSignal(@NonNull INuclearSignal oldSignal) throws UnavailableBorderPointException {
         // Get the roi for the old signal
         float[] xpoints = new float[oldSignal.getBorderLength()], ypoints = new float[oldSignal.getBorderLength()];
 
@@ -760,8 +816,7 @@ public class DatasetConverter implements Loggable, Importer {
 
         // Move the roi over the original centre of mass in case it is not
         // already there
-        roi.setLocation(oldSignal.getPosition()[CellularComponent.X_BASE],
-                oldSignal.getPosition()[CellularComponent.Y_BASE]);
+        roi.setLocation(oldSignal.getOriginalBase().getX(), oldSignal.getOriginalBase().getY());
 
         INuclearSignal newSignal = new DefaultNuclearSignal(roi, oldSignal.getOriginalCentreOfMass(),
                 oldSignal.getSourceFile(), oldSignal.getChannel(), oldSignal.getPosition());
@@ -769,11 +824,10 @@ public class DatasetConverter implements Loggable, Importer {
         for (PlottableStatistic st : oldSignal.getStatistics()) {
 
             PlottableStatistic newStat = st;
-            if (st instanceof SignalStatistic) {
+            if (st instanceof SignalStatistic)
                 newStat = SIGNAL_STATS_MAP.get(st);
-            }
+
             newSignal.setStatistic(newStat, oldSignal.getStatistic(st));
-            ;
         }
         return newSignal;
     }
@@ -789,13 +843,12 @@ public class DatasetConverter implements Loggable, Importer {
 
         if (saveFile.exists()) {
 
-            File newFile = Importer.replaceFileExtension(saveFile, SAVE_FILE_EXTENSION, BAK_FILE_EXTENSION);
+            File newFile = new File(saveFile.getAbsolutePath());
+            if(saveFile.getName().endsWith(SAVE_FILE_EXTENSION))
+                newFile = Importer.replaceFileExtension(saveFile, SAVE_FILE_EXTENSION, BAK_FILE_EXTENSION);
 
-            if (newFile.exists()) {
-
+            if (newFile.exists()) 
                 warn("Overwriting existing backup file");
-
-            }
 
             try {
 
@@ -811,7 +864,7 @@ public class DatasetConverter implements Loggable, Importer {
 
     }
 
-    public class DatasetConversionException extends Exception {
+    public static class DatasetConversionException extends Exception {
         private static final long serialVersionUID = 1L;
 
         public DatasetConversionException() {

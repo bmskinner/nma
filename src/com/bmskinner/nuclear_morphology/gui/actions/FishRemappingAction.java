@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,19 +12,23 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Compare morphology images with post-FISH images, and select nuclei into new
@@ -36,8 +40,8 @@ public class FishRemappingAction extends SingleDatasetResultAction {
     
     private File fishDir;
 
-    public FishRemappingAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
-        super(datasets, PROGRESS_LBL, mw);
+    public FishRemappingAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, PROGRESS_LBL, acceptor, eh);
 
     }
 
@@ -52,7 +56,6 @@ public class FishRemappingAction extends SingleDatasetResultAction {
             }
 
             fishDir = FileSelector.choosePostFISHDirectory(dataset);
-            finer("Selected " + fishDir.getAbsolutePath() + " as post-FISH image directory");
             if (fishDir==null) {
                 log("Remapping cancelled");
                 cancel();
@@ -74,9 +77,18 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 
                 log("Reapplying morphology...");
 
-                Runnable r = new RunSegmentationAction(newList, dataset, ADD_POPULATION, mw);
-                r.run();
-                finished();
+                CountDownLatch latch = new CountDownLatch(1);
+                new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0), eh, latch).run();
+                new Thread( ()->{
+                	try {
+						latch.await();
+						getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, newList);
+						finished();
+					} catch (InterruptedException e) {
+						
+					}
+                }).start();;
+                
 
             } else {
                 log("Remapping cancelled");
@@ -94,7 +106,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
         // Do not use super.finished(), or it will trigger another save action
         fine("FISH mapping complete");
         cancel();
-        getInterfaceEventHandler().removeInterfaceEventListener(mw.getEventHandler());
-        getDatasetEventHandler().removeDatasetEventListener(mw.getEventHandler());
+        getInterfaceEventHandler().removeListener(eh);
+        getDatasetEventHandler().removeListener(eh);
     }
 }

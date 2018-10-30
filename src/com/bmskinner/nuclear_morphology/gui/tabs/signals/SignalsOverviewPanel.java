@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
@@ -36,6 +34,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
@@ -54,12 +53,13 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -67,40 +67,43 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
 
     private static final String PANEL_TITLE_LBL = "Overview";
-    private ConsensusNucleusChartPanel chartPanel;                // consensus
-                                                                  // nucleus
-                                                                  // plus
-                                                                  // signals
-    private ExportableTable            statsTable;                // table for
-                                                                  // signal
-                                                                  // stats
-    private JPanel                     consensusAndCheckboxPanel; // holds the
-                                                                  // consensus
-                                                                  // chart and
-                                                                  // the
-                                                                  // checkbox
-    private JPanel                     checkboxPanel;
 
+    /** Consensus nucleus with signals overlaid  */
+    private ConsensusNucleusChartPanel chartPanel;
+    
+    /** signal stats */
+    private ExportableTable statsTable;
+    
+    /** consensus chart and signal visibility checkboxes */
+    private JPanel consensusAndCheckboxPanel;
+    
+    /** Signal visibility checkbox panel */
+    private JPanel checkboxPanel;
+
+    /** Launch signal warping */
     private JButton warpButton;
 
+    /** Messages to clarify when UI is disabled */
     private JLabel headerText;
 
     private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
-    private static final String WARP_LBL                        = "Warp signals";
-
 
     private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
-    public SignalsOverviewPanel() {
-        super();
+    /**
+     * Create with an input supplier
+     * @param context the input supplier
+     */
+    public SignalsOverviewPanel(@NonNull InputSupplier inputSupplier) {
+        super(inputSupplier);
 
-        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         JScrollPane scrollPane = createStatsPane();
-        this.add(scrollPane);
+        add(scrollPane);
 
         consensusAndCheckboxPanel = createConsensusPanel();
-        this.add(consensusAndCheckboxPanel);
+        add(consensusAndCheckboxPanel);
 
     }
     
@@ -142,21 +145,43 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                 int row = table.rowAtPoint(e.getPoint());
                 int column = table.columnAtPoint(e.getPoint());
 
-                // double click
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == DOUBLE_CLICK && column>0) {
 
                     IAnalysisDataset d = getDatasets().get(column - 1);
-
-                    String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
+                    int nextRow = row+1;
+                    String nextRowName = table.getModel().getValueAt(nextRow, 0).toString();
                     if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
-//                        update(getDatasets());
+                        SignalTableCell signalGroup = getSignalGroupFromTable(table, nextRow, column);
+                        cosmeticHandler.changeSignalColour(d, signalGroup.getID());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 
-                }
+                    
+                    if( table.getModel().getValueAt(row, 0).toString().equals(Labels.Signals.SIGNAL_ID_LABEL)) {
+                    	int signalGroupNameRow = row-3;
+                    	String signalGroupRowName = table.getModel().getValueAt(signalGroupNameRow, 0).toString();
+                    	String signalGroupName = table.getModel().getValueAt(row, column).toString();
+                    	if(signalGroupRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL))                    		
+                    		signalGroupName = table.getModel().getValueAt(signalGroupNameRow, column).toString();
+                           
+                        UUID signalGroup = UUID.fromString(table.getModel().getValueAt(row, column).toString());
 
+                        String[] options = { "Don't delete signals", "Delete signals" };
+                        
+
+						try {
+							int result = getInputSupplier().requestOption(options, 0, String.format("Delete signal group %s in %s?", signalGroupName, d.getName()), "Delete signal group?");
+							if (result!=0) { 
+	                             d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
+	                             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+	                         }
+							
+						} catch (RequestCancelledException e1) {
+							// no action
+						}
+                         
+                    }
+                }
             }
         });
 
@@ -176,14 +201,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
-        warpButton = new JButton(WARP_LBL);
-        warpButton.setToolTipText(
-                "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
-        warpButton.addActionListener(e -> {
-
-            new SignalWarpingDialog(getDatasets());
-        });
-
+        warpButton = new JButton(Labels.Signals.WARP_BTN_LBL);
+        warpButton.setToolTipText(Labels.Signals.WARP_BTN_TOOLTIP);
+        warpButton.addActionListener(e ->  new SignalWarpingDialog(getDatasets()));
         warpButton.setEnabled(false);
 
         panel.add(warpButton);
@@ -257,7 +277,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
             consensusAndCheckboxPanel.repaint();
             consensusAndCheckboxPanel.setVisible(true);
 
-            if (activeDataset().getCollection().hasConsensus()
+            if (activeDataset()!=null && activeDataset().getCollection().hasConsensus()
                     && activeDataset().getCollection().getSignalManager().hasSignals()) {
                 warpButton.setEnabled(true);
             }
@@ -314,8 +334,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
             setChart(options);
 
         } catch (Exception e) {
-            warn("Error updating signal overview panel");
-            log(Level.FINE, "Error updating signal overview panel", e);
+        	chartPanel.setChart(AbstractChartFactory.makeErrorChart());
+            stack("Error updating signal overview panel", e);
         }
     }
 
@@ -367,12 +387,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return new OutlineChartFactory(options).makeSignalOutlineChart();
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
         return new NuclearSignalTableCreator(options).createSignalStatsTable();
     }
 

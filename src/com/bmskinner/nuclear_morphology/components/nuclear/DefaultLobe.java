@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,12 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.File;
+import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
@@ -43,19 +42,18 @@ public class DefaultLobe extends DefaultCellularComponent implements Lobe {
      * mass, and the mutable current centre of mass. It also assigns a random ID
      * to the component.
      * 
-     * @param roi
-     *            the roi of the object
-     * @param centerOfMass
-     *            the original centre of mass of the component
-     * @param source
-     *            the image file the component was found in
-     * @param channel
-     *            the RGB channel the component was found in
-     * @param position
-     *            the bounding position of the component in the original image
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
      */
     public DefaultLobe(Roi roi, IPoint centreOfMass, File source, int channel, int[] position) {
         super(roi, centreOfMass, source, channel, position);
+    }
+    
+    public DefaultLobe(Roi roi, IPoint centreOfMass, File source, int channel, int[] position, UUID id) {
+        super(roi, centreOfMass, source, channel, position, id);
     }
 
     protected DefaultLobe(Lobe l) {

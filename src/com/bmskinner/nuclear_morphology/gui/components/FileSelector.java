@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.io.File;
@@ -32,12 +30,10 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-//import com.bmskinner.nuclear_morphology.io.Importer;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 
 /**
@@ -53,13 +49,13 @@ public class FileSelector {
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
         
         File dir = GlobalOptions.getInstance().getDefaultDir();
-        File file = chooseSaveFile(dir, filter);
+        File file = chooseSaveFile(dir, filter, null);
         
         if(file==null)
             return null;
 
-        if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
-            file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
+        if (!file.getAbsolutePath().endsWith(Io.TAB_FILE_EXTENSION)) {
+            file = new File(file.getAbsolutePath() + Io.TAB_FILE_EXTENSION);
         }
 
         return file;
@@ -71,30 +67,66 @@ public class FileSelector {
      * @param datasets the datasets to be exported
      * @return the file to export to
      */
-    public static @Nullable File chooseStatsExportFile(@NonNull List<IAnalysisDataset> datasets) {
+    public static @Nullable File chooseStatsExportFile(@NonNull List<IAnalysisDataset> datasets, @Nullable String suffix) {
 
         File dir = null;
+        suffix = suffix==null ? "stats" : suffix;
+        String defaultName = "";
         if (datasets.size() == 1) {
             dir = datasets.get(0).getSavePath().getParentFile();
-
+            defaultName = datasets.get(0).getName()+"_"+suffix+Io.TAB_FILE_EXTENSION;
         } else {
             dir = IAnalysisDataset.commonPathOfFiles(datasets);
             if (!dir.exists() || !dir.isDirectory()) {
                 dir = GlobalOptions.getInstance().getDefaultDir();
+                defaultName = "Multiple_"+suffix+"_export"+Io.TAB_FILE_EXTENSION;
             }
         }
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
         
-        File file = chooseSaveFile(dir, filter);
+        File file = chooseSaveFile(dir, filter, defaultName);
         if(file==null)
             return null;
 
         // Add extension if needed
-        if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
-            file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
+        if (!file.getAbsolutePath().endsWith(Io.TAB_FILE_EXTENSION)) {
+            file = new File(file.getAbsolutePath() + Io.TAB_FILE_EXTENSION);
         }
 
         return file;
+    }
+    
+    /**
+     * Choose the folder to export dataset stats.
+     * @param datasets the datasets to be exported
+     * @return the file to export to
+     */
+    public static @Nullable File chooseOptionsExportFile(@NonNull IAnalysisDataset dataset) {
+
+
+    	File dir = dataset.getSavePath().getParentFile();
+    	String defaultName = dataset.getName()+Io.XML_FILE_EXTENSION;
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
+        
+        File file = chooseSaveFile(dir, filter, defaultName);
+        if(file==null)
+            return null;
+
+        // Add extension if needed
+        if (!file.getAbsolutePath().endsWith(Io.XML_FILE_EXTENSION))
+            file = new File(file.getAbsolutePath() + Io.XML_FILE_EXTENSION);
+        return file;
+    }
+    
+    /**
+     * Choose the folder to import detection options.
+     * @param datasets the datasets to be exported
+     * @return the file to export to
+     */
+    public static @Nullable File chooseOptionsImportFile(@Nullable File defaultFolder) {
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
+        return chooseFile(defaultFolder, filter, "Choose options file");
     }
     
     /**
@@ -107,16 +139,35 @@ public class FileSelector {
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Importer.LOC_FILE_EXTENSION);
         File defaultDir = null;
         
-        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	return null;
         
-        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
         defaultDir = im.get().getFolder();
-        return chooseOpenFile(defaultDir, filter);
+        return chooseOpenFile(defaultDir, filter, "Choose remapping file");
+    }
+    
+    /**
+     * Choose a file from a default folder with a file extension filter.
+     * @param defaultFolder the default folder
+     * @param filter the filename extension filter
+     * @return the selected file, or null on cancel or error
+     */
+    public static @Nullable File chooseFile(File defaultFolder, @Nullable FileNameExtensionFilter filter, @Nullable String message){
+        return chooseOpenFile(defaultFolder, filter, message);
+    }
+    
+    /**
+     * Choose a file from a default folder.
+     * @param defaultFolder the default folder
+     * @return the selected file, or null on cancel or error
+     */
+    public static @Nullable File chooseFile(File defaultFolder){
+        return chooseOpenFile(defaultFolder, null, null);
     }
         
     /**
@@ -125,11 +176,14 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    private static @Nullable File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter){
+    private static @Nullable File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter, @Nullable String message){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
         if(filter!=null)
             fc.setFileFilter(filter);
+        
+        if(message!=null)
+        	fc.setDialogTitle(message);;
 
         int returnVal = fc.showOpenDialog(fc);
         if (returnVal != 0)
@@ -148,14 +202,16 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    public static @Nullable File chooseSaveFile(@Nullable File defaultFolder, @Nullable FileNameExtensionFilter filter){
+    public static @Nullable File chooseSaveFile(@Nullable File defaultFolder, @Nullable FileNameExtensionFilter filter, @Nullable String defaultName){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
-        if(filter!=null){
+        if(filter!=null)
             fc.setFileFilter(filter);
-        }
 
         fc.setDialogTitle("Specify a file to save as");
+        
+        if(defaultName!=null)
+            fc.setSelectedFile(new File(defaultFolder, defaultName));
 
         int returnVal = fc.showSaveDialog(fc);
         if (returnVal != 0)
@@ -169,13 +225,13 @@ public class FileSelector {
      * @param defaultFolder the default folder for the file chooser
      * @return the selected folder, or null if cancelled or error
      */
-    public static @Nullable File chooseFolder(@Nullable File defaultFolder){
+    public static @Nullable File chooseFolder(@Nullable String title, @Nullable File defaultFolder){
         
     	if(defaultFolder!=null && !defaultFolder.exists())
     		defaultFolder=null;
     	
         JFileChooser fc = new JFileChooser(defaultFolder); // if null, will be home
-
+        fc.setDialogTitle(title);
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         int returnVal = fc.showOpenDialog(fc);
@@ -238,16 +294,16 @@ public class FileSelector {
      */
     public static File chooseFISHDirectory(IAnalysisDataset dataset) {
 
-    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	return null;
         
-        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
         File defaultDir = im.get().getFolder();
-        return chooseFolder(defaultDir);
+        return chooseFolder(null, defaultDir);
     }
     
     
@@ -258,16 +314,16 @@ public class FileSelector {
      * @return the selected folder, or null if user cancelled or invalid choice
      */
     public static File choosePostFISHDirectory(IAnalysisDataset dataset) {
-    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	return null;
         
-        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!im.isPresent())
         	return null;
         
         File defaultDir =  im.get().getFolder();
-        return chooseFolder(defaultDir);
+        return chooseFolder(null, defaultDir);
     }
     
     /**

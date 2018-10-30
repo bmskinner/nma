@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,32 +12,35 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.comparisons;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class ComparisonDetailPanel extends DetailPanel {
+	
+	JTabbedPane tabPanel;
     
     private static final String PANEL_TITLE_LBL = "Comparisons";
 
-    public ComparisonDetailPanel() {
-        super(PANEL_TITLE_LBL);
+    public ComparisonDetailPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 
-        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+        tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-        DetailPanel vennPanel = new VennDetailPanel();
-        DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel();
+        DetailPanel vennPanel = new VennDetailPanel(context);
+        DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel(context);
 
         this.addSubPanel(vennPanel);
         this.addSubPanel(pairwiseVennPanel);

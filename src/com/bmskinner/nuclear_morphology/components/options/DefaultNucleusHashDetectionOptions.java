@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,14 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**
  * A hash based options for nucleus detection settings
@@ -70,10 +68,19 @@ public class DefaultNucleusHashDetectionOptions extends AbstractHashDetectionOpt
         super(template);
 
     }
-
-    public IMutableDetectionOptions unlock() {
-        return this;
+        
+    public void set(IDetectionOptions template) {
+    	super.set(template);
+    	for(String s : template.getSubOptionKeys()) {
+    		try {
+				this.setSubOptions(s, template.getSubOptions(s).duplicate());
+			} catch (MissingOptionException e) {
+				// That would be odd. Ignore.
+			}
+    	}
     }
+
+
 
     public IDetectionOptions lock() {
         return this;
@@ -97,7 +104,7 @@ public class DefaultNucleusHashDetectionOptions extends AbstractHashDetectionOpt
     }
 
     @Override
-    public IMutableDetectionOptions duplicate() {
+    public IDetectionOptions duplicate() {
         return new DefaultNucleusHashDetectionOptions(this);
     }
 }

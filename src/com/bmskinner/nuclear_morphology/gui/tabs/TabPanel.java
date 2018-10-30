@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,25 +12,23 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import org.eclipse.jdt.annotation.NonNull;
 
-public interface TabPanel extends DatasetUpdateEventListener {
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+
+public interface TabPanel extends EventListener {
 
     /**
      * Update the panel display based on the datasets selected in the global
@@ -66,6 +64,19 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @return
      */
     boolean isUpdating();
+    
+    
+    /**
+     * Check if any cells have been updated since the last UI change.
+     * @return
+     */
+    boolean hasCellUpdate();
+    
+    /**
+     * Set the cell update state for the panel
+     * @param b
+     */
+    void setCellUpdate(boolean b);
 
     /**
      * Add the given panel as a sub-panel of this. The sub panel will be
@@ -75,17 +86,17 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param panel
      *            the panel to add
      */
-    void addSubPanel(TabPanel panel);
+    void addSubPanel(@NonNull TabPanel panel);
     
     TabPanel getParentPanel();
-
+    
     /**
      * Add a listener for signal change events from this panel
      * 
      * @param l
      *            the listener
      */
-    void addSignalChangeListener(SignalChangeListener l);
+    void addSignalChangeListener(EventListener l);
 
     /**
      * Remove a listener for signal change events from this panel
@@ -93,23 +104,21 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void removeSignalChangeListener(SignalChangeListener l);
+    void removeSignalChangeListener(EventListener l);
 
     /**
      * Add a listener for dataset events from this panel
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
-    void addDatasetEventListener(DatasetEventListener l);
+    void addDatasetEventListener(EventListener l);
 
     /**
      * Remove a listener for dataset events from this panel
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
-    void removeDatasetEventListener(DatasetEventListener l);
+    void removeDatasetEventListener(EventListener l);
 
     /**
      * Add a listener for interface events from this panel
@@ -117,7 +126,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void addInterfaceEventListener(InterfaceEventListener l);
+    void addInterfaceEventListener(EventListener l);
 
     /**
      * Remove a listener for interface events from this panel
@@ -125,7 +134,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void removeInterfaceEventListener(InterfaceEventListener l);
+    void removeInterfaceEventListener(EventListener l);
 
     /**
      * Add a listener for dataset update events from this panel
@@ -133,7 +142,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void addDatasetUpdateEventListener(DatasetUpdateEventListener l);
+    void addDatasetUpdateEventListener(EventListener l);
 
     /**
      * Remove a listener for dataset update events from this panel
@@ -141,7 +150,7 @@ public interface TabPanel extends DatasetUpdateEventListener {
      * @param l
      *            the listener
      */
-    void removeDatasetUpdateEventListener(DatasetUpdateEventListener l);
+    void removeDatasetUpdateEventListener(EventListener l);
 
     /**
      * Get the list of sub panels
@@ -238,5 +247,11 @@ public interface TabPanel extends DatasetUpdateEventListener {
     
 
     SignalChangeEventHandler getSignalChangeEventHandler();
+    
+    /**
+     * Get the input supplier for user interaction with this panel
+     * @return
+     */
+    InputSupplier getInputSupplier();
 
 }

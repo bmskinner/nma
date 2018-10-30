@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.io.File;
@@ -44,13 +42,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
-    protected IMutableNuclearSignalOptions options = null;
+    protected INuclearSignalOptions options = null;
     protected File                         folder;
     protected int                          channel;
     protected UUID                         signalGroup;
@@ -75,7 +72,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         if(!d.getCollection().hasSignalGroup(group))
         	throw new IllegalArgumentException("Signal group is not present in dataset");
 
-        this.options = (IMutableNuclearSignalOptions) options.duplicate();
+        this.options = (INuclearSignalOptions) options.duplicate();
         this.folder = options.getFolder();
         this.channel = options.getChannel();
         this.signalGroup = group;
@@ -151,18 +148,12 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
             // If the nucleus is asymmetric, calculate angles
             if (!dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)) {
-
-                finer("Nucleus type is asymmetric: " + n.getClass().getSimpleName());
-
                 if (n.hasBorderTag(Tag.ORIENTATION_POINT)) {
                     finest("Calculating angle from orientation point");
                     n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
                 } else {
                     finest("No orientation point in nucleus");
                 }
-
-            } else {
-                finer("Nucleus type is round: " + n.getClass().getSimpleName());
             }
 
         } catch (ImageImportException | UnavailableBorderPointException | UnavailableBorderTagException e) {
@@ -175,7 +166,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
         List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
 
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
 
         for (ICellCollection collection : signalPopulations) {
             finer("Processing " + collection.getName());
@@ -192,7 +183,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
      * 
      * @param collection
      */
-    private void processSubPopulation(ICellCollection collection) {
+    private void processSubPopulation(@NonNull ICellCollection collection) {
 
         try {
             finer("Creating new analysis dataset for " + collection.getName());
@@ -211,15 +202,13 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
      * Create two child populations for the given dataset: one with signals in
      * the given group, and one without signals
      * 
-     * @param r
-     *            the collection to split
-     * @param signalGroup
-     *            the signal group to split on
+     * @param r the collection to split
+     * @param signalGroup the signal group to split on
      * @return a list of new collections
      */
-    private List<ICellCollection> dividePopulationBySignals(ICellCollection r, UUID signalGroup) {
+    private List<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
 
-        List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
+        List<ICellCollection> signalPopulations = new ArrayList<>();
         log("Dividing population by signals...");
 
         Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
@@ -242,7 +231,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		    signalPopulations.add(listCollection);
 
 		    // Only add a group of cells without signals if at least one
-		    // cell does havea signal
+		    // cell does have a signal
 
 		    Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 		    if (!notList.isEmpty()) {

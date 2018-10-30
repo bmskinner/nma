@@ -1,0 +1,117 @@
+package com.bmskinner.nuclear_morphology.io.xml;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.jdom2.Document;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+
+/**
+ * Test that XML files can be read and deserialised correctly
+ * @author bms41
+ * @since 1.14.0
+ *
+ */
+public class DatasetXMLReaderTest extends ComponentTester {
+
+	private void testXMLRead(File f) throws Exception {
+		IAnalysisDataset d = SampleDatasetReader.openDataset(f.getAbsoluteFile());
+		DatasetXMLCreator dxc = new DatasetXMLCreator(d);
+		File xmlFile = new File(d.getSavePath().getParentFile(), d.getName()+".xml.nmd");
+		XMLWriter.writeXML(dxc.create(), xmlFile);
+
+		IAnalysisDataset read =  SampleDatasetReader.openXMLDataset(xmlFile);
+		
+		assertEquals(d.getName(), read.getName());
+		assertEquals(d.getId(), read.getId());
+		assertEquals(d.getDatasetColour(), read.getDatasetColour());
+		
+		for(UUID cellId : d.getCollection().getCellIDs()) {
+			ICell wroteCell = d.getCollection().getCell(cellId);
+			ICell readCell  = read.getCollection().getCell(cellId);
+			
+			Nucleus wroteNucleus = wroteCell.getNucleus();
+			Nucleus readNucleus = readCell.getNucleus();
+			List<String> skip = new ArrayList<>();
+			skip.add("profileMap");
+			skip.add("signalCollection");
+//			testDuplicatesByField(wroteNucleus, readNucleus, skip); //TODO
+		}
+		
+//		TODO: Functionality is not fully enabled
+//		assertEquals(d.getCollection(), read.getCollection());
+//		
+//		assertEquals(d, read);
+	}
+	
+	@Test 
+	public void testXMLReadForMouse() throws Exception {
+		File f = new File(TestResources.MOUSE_TEST_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForMouseWithClusters() throws Exception {
+		File f = new File(TestResources.MOUSE_CLUSTERS_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForMouseWithSignals() throws Exception {
+		File f = new File(TestResources.MOUSE_SIGNALS_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForPig() throws Exception {
+		File f = new File(TestResources.PIG_TEST_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForPigWithClusters() throws Exception {
+		File f = new File(TestResources.PIG_CLUSTERS_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForPigWithSignals() throws Exception {
+		File f = new File(TestResources.PIG_SIGNALS_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForRound() throws Exception {
+		File f = new File(TestResources.ROUND_TEST_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForRoundWithClusters() throws Exception {
+		File f = new File(TestResources.ROUND_CLUSTERS_DATASET);
+		testXMLRead(f);
+	}
+	
+	@Test 
+	public void testXMLReadForRoundWithSignals() throws Exception {
+		File f = new File(TestResources.ROUND_SIGNALS_DATASET);
+		testXMLRead(f);
+	}
+}

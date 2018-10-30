@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.event.WindowAdapter;
@@ -27,12 +25,15 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * This window adapter is used to check if datasets have changed when the main
@@ -45,9 +46,9 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  */
 public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
-    private MainWindow mw;
+    private MainView mw;
 
-    public MainWindowCloseAdapter(MainWindow mw) {
+    public MainWindowCloseAdapter(MainView mw) {
         super();
         this.mw = mw;
     }
@@ -58,30 +59,28 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
         if (DatasetListManager.getInstance().hashCodeChanged()) {
             fine("Found changed hashcode");
-            Object[] options = { "Save datasets", "Exit without saving", "Cancel exit" };
-            int save = JOptionPane.showOptionDialog(mw, "Datasets have changed since last save!", "Save datasets?",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            String[] options = { "Save and exit", "Exit without saving", "Do not exit" };
 
-            if (save == 0) {
-                saveAndClose();
-
+			try {
+				int save = mw.getInputSupplier().requestOption(options, 0, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?");
+				
+				switch(save) {
+	            	case 0: saveAndClose(); return;
+	            	case 1: close(); return;
+	            	case 2: return;
+	            	default: return;
             }
-
-            if (save == 1) {
-                fine("Exiting without save");
-                close();
-            }
-
-            if (save == 2) {
-                fine("Ignoring close");
-            }
-        } else {
-            fine("No change found");
-            close();
+				
+			} catch (RequestCancelledException e1) {
+				return;
+			}
         }
+		fine("No change found");
+		close();
     }
 
-    public void windowClosed(WindowEvent e) {
+    @Override
+	public void windowClosed(WindowEvent e) {
         close();
     }
 
@@ -92,34 +91,58 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
         for (Handler h : Logger.getLogger(Loggable.ERROR_LOGGER).getHandlers()) {
             h.close();
         }
+        for (Handler h : Logger.getLogger(Loggable.PROGRAM_LOGGER).getHandlers()) {
+            h.close();
+        }
 
         mw.dispose();
-        if (mw.isStandalone()) {
+        if (mw.isStandalone())
             System.exit(0);
-        }
     }
 
     /**
      * Save the root datasets, then dispose the frame
      */
     private void saveAndClose() {
-        Runnable r = () -> {
-            for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
-                final CountDownLatch latch = new CountDownLatch(1);
+    	
+    	final CountDownLatch latch = new CountDownLatch(1);
+    	
+    	// Run saves
+    	Runnable r = () ->{
+    		
+    		for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
+    			final CountDownLatch cl = new CountDownLatch(1);
+    			Runnable task = new ExportDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), cl, false, GlobalOptions.getInstance().getExportFormat());
+    			new Thread(task).run();
+    			try {
+    				cl.await();
+    			} catch (InterruptedException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+    		}
+    		log("All root datasets saved");
 
-                Runnable task = new SaveDatasetAction(root, mw, latch, false);
-                task.run();
-                try {
-                    latch.await();
-                } catch (InterruptedException e) {
-                    error("Interruption to thread", e);
-                }
-            }
-            log("All root datasets saved");
-            close();
-        };
+    		for (IWorkspace w : DatasetListManager.getInstance().getWorkspaces()) {
+    			Runnable wrkTask = new ExportWorkspaceAction(w, mw.getProgressAcceptor(), mw.getEventHandler());
+    			wrkTask.run();
+    		}
+    		log("All workspaces saved");
+    		latch.countDown();
+    	};
 
-        ThreadManager.getInstance().execute(r);
+    	// Wait for saves to complete, then close the window
+    	Runnable s = () ->{
+    		try {
+    			latch.await();
+    		} catch (InterruptedException e) {
+    			stack(e);
+    		}
+    		close();
+    	};
+    	
+    	new Thread(r).start();
+    	new Thread(s).start();
     }
 
 }

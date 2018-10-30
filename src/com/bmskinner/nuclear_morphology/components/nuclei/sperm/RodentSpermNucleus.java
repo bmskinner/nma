@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 /*
  * ----------------------- RODENT SPERM NUCLEUS CLASS -----------------------
  * Contains the variables for storing a rodentsperm nucleus. Sperm have a hook,
@@ -135,7 +134,7 @@ public class RodentSpermNucleus extends SpermNucleus {
             // BorderPoint[] points = getBorderPointsForVerticalAlignment();
             // testNucleus.alignPointsOnVertical(points[0], points[1] );
 
-            double vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
+            double vertX = testNucleus.getBorderPoint(Tag.TOP_VERTICAL).getX();
 
             /*
              * Find the x values in the bounding box of the vertical nucleus.
@@ -165,7 +164,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 
             double distanceHook = 0;
             double distanceHump = 0;
-            double referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+            double referenceX = testNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
 
             finer("TV is at " + vertX);
             finer("Max bounding x is " + maxBoundingX);
@@ -420,7 +419,7 @@ public class RodentSpermNucleus extends SpermNucleus {
          */
         double vertX;
         try {
-            vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+            vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
         } catch (UnavailableBorderTagException e) {
             return verticalNucleus;
         }
@@ -527,7 +526,7 @@ public class RodentSpermNucleus extends SpermNucleus {
         for (int i = 0; i < this.getBorderLength(); i++) {
 
             IBorderPoint p = this.getBorderPoint(i);
-            double angle = this.getCentreOfMass().findAngle(reference, p);
+            double angle = this.getCentreOfMass().findSmallestAngle(reference, p);
             if (Math.abs(90 - angle) < difference && p.getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT)) > this
                     .getCentreOfMass().getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT))) {
                 difference = 90 - angle;

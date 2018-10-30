@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -71,14 +71,11 @@ public class ImageImporter implements Loggable, Importer {
      * Construct from a file. Checks that the given File object is valid, and
      * throws an IllegalArgumentException if not.
      * 
-     * @param f
-     *            the file to import
+     * @param f the file to import
      */
     public ImageImporter(final File f) {
-        if (!Importer.isSuitableImportFile(f)) {
+        if (!Importer.isSuitableImportFile(f)) 
             throw new IllegalArgumentException(f.getAbsolutePath() + ": " + INVALID_FILE_ERROR);
-        }
-
         this.f = f;
     }
 
@@ -92,41 +89,38 @@ public class ImageImporter implements Loggable, Importer {
      * @return a true or false of whether the file passed checks
      */
     public static boolean fileIsImportable(File file) {
-
-        
+    	if(file==null)
+    		return false;
         if (!file.isFile())
             return false;
-
         String fileName = file.getName();
 
-        for (String prefix : PREFIXES_TO_IGNORE) {
+        for (String prefix : PREFIXES_TO_IGNORE) 
             if (fileName.startsWith(prefix))
                 return false;
-        }
-
-        for (String fileType : IMPORTABLE_FILE_TYPES) {
+        
+        for (String fileType : IMPORTABLE_FILE_TYPES)
             if (fileName.endsWith(fileType))
                 return true;
-        }
+        
         return false;
     }
 
     /**
      * Given an RGB channel, get the ImageStack stack for internal use
      * 
-     * @param channel
-     *            the channel
+     * @param channel the channel
      * @return the stack
      */
     public static int rgbToStack(int channel) {
-
-        if (channel < 0) {
+        if (channel < 0)
             throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
+        
+        switch(channel) {
+	        case RGB_RED: return FIRST_SIGNAL_CHANNEL;
+	        case RGB_GREEN: return FIRST_SIGNAL_CHANNEL+1;
+	        default: return COUNTERSTAIN;
         }
-
-        int stackNumber = channel == RGB_RED ? FIRST_SIGNAL_CHANNEL
-                : channel == RGB_GREEN ? FIRST_SIGNAL_CHANNEL + 1 : COUNTERSTAIN;
-        return stackNumber;
     }
 
     /**
@@ -137,21 +131,15 @@ public class ImageImporter implements Loggable, Importer {
      * @return
      */
     public static String channelIntToName(int channel) {
-
-        if (channel < 0) {
+        if (channel < 0)
             throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
-        }
 
-        if (channel == RGB_RED) {
-            return "Red";
+        switch(channel) {
+        	case RGB_RED:   return "Red";
+        	case RGB_GREEN: return "Green";
+        	case RGB_BLUE:  return "Blue";
+        	default:        return "Octarine";
         }
-        if (channel == RGB_GREEN) {
-            return "Green";
-        }
-        if (channel == RGB_BLUE) {
-            return "Blue";
-        }
-        return null;
     }
 
     /**
@@ -214,73 +202,43 @@ public class ImageImporter implements Loggable, Importer {
      * @param image
      * @return
      */
-    private boolean canImport(ImagePlus image) {
-        // check that we are able to handle this image type
-        boolean ok = false;
-        for (int i : IMAGE_TYPES_PROCESSED) {
-            if (i == image.getType()) {
-                ok = true;
-            }
-        }
-        return ok;
+    private boolean canImport(@NonNull ImagePlus image) {
+        for (int i : IMAGE_TYPES_PROCESSED)
+            if (i == image.getType())
+                return true;
+        return false;
     }
 
     /**
      * Create an ImageStack from the input image
      * 
-     * @param image
-     *            the image to be converted to a stack
-     * @return the stack with countertain in index 0
+     * @param image the image to be converted to a stack
+     * @return the stack with counterstain in slice 1, and other channels following 
      */
-    private ImageStack convert(ImagePlus image) throws ImageImportException {
-        if (image == null) {
+    private ImageStack convert(@NonNull ImagePlus image) throws ImageImportException {
+        if (image == null)
             throw new ImageImportException("Input image is null");
-        }
-
-        if (!canImport(image)) {
+        if (!canImport(image))
             throw new ImageImportException("Cannot handle image type: " + image.getType());
-        }
-
-        // do the conversions
-        ImageStack result = null;
 
         switch (image.getType()) {
-
-        case ImagePlus.GRAY8: {
-            result = convertGreyscale(image);
-            break;
+	        case ImagePlus.GRAY8:     return convertGreyscale(image);
+	        case ImagePlus.COLOR_RGB: return convertRGB(image);
+	        case ImagePlus.GRAY16:    return convert16bitGrey(image);
+	
+	        default: { // Should never occur given the test in canImport(), but shows intent
+	            throw new ImageImportException("Unsupported image type: " + image.getType());
+	        }
         }
-
-        case ImagePlus.COLOR_RGB: {
-            result = convertRGB(image);
-            break;
-        }
-
-        case ImagePlus.GRAY16: {
-            result = convert16bitGrey(image);
-            break;
-        }
-
-        default: {
-            // Should never occur given the test in canImport(), but shows the
-            // intent
-            throw new ImageImportException("Unsupported image type: " + image.getType());
-        }
-        }
-
-        return result;
     }
 
     /**
-     * @param image
-     *            the image to convert
+     * @param image the image to convert
      * @return a stack with the input image as position 0
      */
-    private ImageStack convertGreyscale(final ImagePlus image) {
-    	
-    	if(image==null){
+    private ImageStack convertGreyscale(@NonNull final ImagePlus image) {
+    	if(image==null)
     		throw new IllegalArgumentException("Image cannot be null");
-    	}
         ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
         result.addSlice("counterstain", image.getProcessor());
         result.deleteSlice(1); // remove the blank first slice
@@ -290,15 +248,12 @@ public class ImageImporter implements Loggable, Importer {
     /**
      * Given an RGB image, convert it to a stack, with the blue channel first
      * 
-     * @param image
-     *            the image to convert to a stack
+     * @param image the image to convert to a stack
      * @return the stack
      */
-    private ImageStack convertRGB(final ImagePlus image) {
-
-    	if(image==null){
+    private ImageStack convertRGB(@NonNull final ImagePlus image) {
+    	if(image==null)
     		throw new IllegalArgumentException("Image cannot be null");
-    	}
     	
         int imageDepth = 0; // number of images in the stack to begin
         int bitDepth = 8; // default 8 bit images
@@ -322,8 +277,7 @@ public class ImageImporter implements Loggable, Importer {
      * Convert a 16 bit greyscale image. For now, this just down converts to an
      * 8 bit image.
      * 
-     * @param image
-     *            the 16 bit image to convert
+     * @param image the 16 bit image to convert
      * @return the stack
      */
     private ImageStack convert16bitGrey(ImagePlus image) throws ImageImportException {
@@ -346,15 +300,12 @@ public class ImageImporter implements Loggable, Importer {
         public ImageImportException() {
             super();
         }
-
         public ImageImportException(String message) {
             super(message);
         }
-
         public ImageImportException(String message, Throwable cause) {
             super(message, cause);
         }
-
         public ImageImportException(Throwable cause) {
             super(cause);
         }

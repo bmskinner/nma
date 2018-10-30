@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
 /**
@@ -40,7 +37,7 @@ public class OptionsFactory {
      *            the folder to be searched
      * @return
      */
-	public static IMutableDetectionOptions makeNucleusDetectionOptions(File folder) {
+	public static IDetectionOptions makeNucleusDetectionOptions(File folder) {
         return new DefaultNucleusHashDetectionOptions(folder);
     }
 
@@ -51,7 +48,7 @@ public class OptionsFactory {
      *            the template options
      * @return
      */
-	public static IMutableDetectionOptions makeNucleusDetectionOptions(IDetectionOptions template) {
+	public static IDetectionOptions makeNucleusDetectionOptions(IDetectionOptions template) {
         return new DefaultNucleusHashDetectionOptions(template);
     }
 
@@ -60,7 +57,7 @@ public class OptionsFactory {
      * 
      * @return
      */
-	public static IMutableCannyOptions makeCannyOptions() {
+	public static ICannyOptions makeCannyOptions() {
         return new DefaultCannyHashOptions();
     }
 
@@ -72,7 +69,7 @@ public class OptionsFactory {
      *            the template options
      * @return
      */
-	public static IMutableCannyOptions makeCannyOptions(ICannyOptions template) {
+	public static ICannyOptions makeCannyOptions(ICannyOptions template) {
         return new DefaultCannyHashOptions(template);
     }
 
@@ -112,7 +109,7 @@ public class OptionsFactory {
      *            the folder to be searched
      * @return
      */
-	public static IMutableNuclearSignalOptions makeNuclearSignalOptions(File folder) {
+	public static INuclearSignalOptions makeNuclearSignalOptions(File folder) {
         return new DefaultNuclearSignalHashOptions(folder);
     }
 
@@ -124,7 +121,7 @@ public class OptionsFactory {
      *            the template options
      * @return
      */
-	public static IMutableNuclearSignalOptions makeNuclearSignalOptions(INuclearSignalOptions template) {
+	public static INuclearSignalOptions makeNuclearSignalOptions(INuclearSignalOptions template) {
         return new DefaultNuclearSignalHashOptions(template);
     }
 
@@ -133,7 +130,7 @@ public class OptionsFactory {
      * 
      * @return
      */
-    public static IMutableAnalysisOptions makeAnalysisOptions() {
+    public static IAnalysisOptions makeAnalysisOptions() {
         return new DefaultAnalysisOptions();
     }
 
@@ -144,7 +141,7 @@ public class OptionsFactory {
      *            the template options
      * @return
      */
-    public static IMutableAnalysisOptions makeAnalysisOptions(IAnalysisOptions template) {
+    public static IAnalysisOptions makeAnalysisOptions(IAnalysisOptions template) {
         return new DefaultAnalysisOptions(template);
     }
     
@@ -153,8 +150,8 @@ public class OptionsFactory {
      * @param testFolder the folder of images to analyse
      * @return the options
      */
-    public static IMutableAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
-        IMutableAnalysisOptions op = makeAnalysisOptions();
+    public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
+    	IAnalysisOptions op = makeAnalysisOptions();
         op.setDetectionOptions(IAnalysisOptions.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder));
         return op;
     }
@@ -164,11 +161,11 @@ public class OptionsFactory {
      * @param testFolder the folder of images to analyse
      * @return the options
      */
-    public static IMutableAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
-    	IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+    public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
+    	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
         op.setNucleusType(NucleusType.PIG_SPERM);
         
-        IMutableDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+        IDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
         nop.setMinCirc(0.1);
         nop.setMaxCirc(0.9);
         
@@ -181,12 +178,12 @@ public class OptionsFactory {
      * @param testFolder the folder of images to analyse
      * @return the options
      */
-    public static IMutableAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
-    	IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+    public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
+    	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
         op.setNucleusType(NucleusType.ROUND);
         
-        IMutableDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-        nop.setMinCirc(0.0);
+        IDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+        nop.setMinCirc(0.6);
         nop.setMaxCirc(1.0);
         
         op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
@@ -195,11 +192,11 @@ public class OptionsFactory {
 
     /**
      * Create an instance of the default clustering options using
-     * {@link IClusteringOptions.DEFAULT_CLUSTER_METHOD}
+     * {@link IClusteringOptions#DEFAULT_CLUSTER_METHOD}
      * @return
      */
-    public static IMutableClusteringOptions makeClusteringOptions() {
-        return new ClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
+    public static IClusteringOptions makeClusteringOptions() {
+        return new DefaultClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
     }
 
     /**
@@ -207,8 +204,8 @@ public class OptionsFactory {
      * @param template the tamplate options
      * @return
      */
-    public static IMutableClusteringOptions makeClusteringOptions(IClusteringOptions template) {
-        return new ClusteringOptions(template);
+    public static IClusteringOptions makeClusteringOptions(IClusteringOptions template) {
+        return new DefaultClusteringOptions(template);
     }
 
     /**
@@ -219,10 +216,10 @@ public class OptionsFactory {
      * @return
      * @throws MissingOptionException
      */
-    public static IMutableDetectionOptions makeDefaultNeutrophilCytoplasmDetectionOptions(File folder)
+    public static IDetectionOptions makeDefaultNeutrophilCytoplasmDetectionOptions(File folder)
             throws MissingOptionException {
 
-        IMutableDetectionOptions cytoOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+    	IDetectionOptions cytoOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
 
         cytoOptions.setBoolean(IDetectionOptions.IS_USE_WATERSHED, false);
         cytoOptions.setInt(IDetectionOptions.EROSION, IDetectionOptions.DEFAULT_EROSION);
@@ -255,11 +252,11 @@ public class OptionsFactory {
      * @return
      * @throws MissingOptionException
      */
-    public static IMutableDetectionOptions makeDefaultNeutrophilNucleusDetectionOptions(File folder)
+    public static IDetectionOptions makeDefaultNeutrophilNucleusDetectionOptions(File folder)
             throws MissingOptionException {
 
-        IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-        nucleusOptions.setInt(IMutableDetectionOptions.TOP_HAT_RADIUS, 20);
+    	IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+        nucleusOptions.setInt(IDetectionOptions.TOP_HAT_RADIUS, 20);
         nucleusOptions.setBoolean(IDetectionOptions.IS_USE_WATERSHED, true);
         nucleusOptions.setInt(IDetectionOptions.EROSION, IDetectionOptions.DEFAULT_EROSION);
         nucleusOptions.setInt(IDetectionOptions.DYNAMIC, IDetectionOptions.DEFAULT_DYNAMIC);
@@ -292,13 +289,13 @@ public class OptionsFactory {
      * @return
      * @throws MissingOptionException
      */
-    public static IMutableAnalysisOptions makeDefaultNeutrophilDetectionOptions(File folder) throws MissingOptionException {
+    public static IAnalysisOptions makeDefaultNeutrophilDetectionOptions(File folder) throws MissingOptionException {
 
-        IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
+    	IAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
         options.setNucleusType(NucleusType.NEUTROPHIL);
 
-        IMutableDetectionOptions cytoOptions = OptionsFactory.makeDefaultNeutrophilCytoplasmDetectionOptions(folder);
-        IMutableDetectionOptions nucleusOptions = OptionsFactory.makeDefaultNeutrophilNucleusDetectionOptions(folder);
+        IDetectionOptions cytoOptions = OptionsFactory.makeDefaultNeutrophilCytoplasmDetectionOptions(folder);
+        IDetectionOptions nucleusOptions = OptionsFactory.makeDefaultNeutrophilNucleusDetectionOptions(folder);
 
         options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
         options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);

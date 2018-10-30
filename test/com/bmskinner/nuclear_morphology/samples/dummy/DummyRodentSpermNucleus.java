@@ -157,13 +157,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		return nucleus.isClockwiseRP();
 	}
 
-	
-
-	@Override
-	public boolean equals(CellularComponent c) {
-		return nucleus.equals(c);
-	}
-
 	@Override
 	public boolean hasProfile(ProfileType type) {
 		return nucleus.hasProfile(type);
@@ -219,23 +212,18 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 
 	@Override
-	public int getBorderIndex(Tag tag) {
+	public int getBorderIndex(Tag tag) throws UnavailableBorderTagException {
 	    return nucleus.getBorderIndex(tag);
 	}
 
 	@Override
-	public Tag getBorderTag(Tag tag, int index) {
+	public Tag getBorderTag(Tag tag, int index) throws UnavailableBorderTagException {
 		return nucleus.getBorderTag(tag, index);
 	}
 
 	@Override
 	public Tag getBorderTag(int index) {
 	    return nucleus.getBorderTag(index);
-	}
-
-	@Override
-	public IBorderPoint getBorderTag(Tag tag) throws UnavailableBorderTagException {
-		return nucleus.getBorderTag(tag);
 	}
 
 	@Override
@@ -260,7 +248,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	@Override
 	public void setBorderTag(Tag reference, Tag tag,
-			int i) {
+			int i) throws IndexOutOfBoundsException, UnavailableBorderTagException {
 		nucleus.setBorderTag(reference, tag, i);		
 	}
 
@@ -287,7 +275,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public int getOffsetBorderIndex(Tag reference, int index) {
+	public int getOffsetBorderIndex(Tag reference, int index) throws UnavailableBorderTagException {
 		return nucleus.getOffsetBorderIndex(reference, index);
 	}
 

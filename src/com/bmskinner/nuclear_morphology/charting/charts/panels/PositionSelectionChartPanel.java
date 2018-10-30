@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
 import java.awt.Cursor;
@@ -25,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
@@ -32,8 +31,8 @@ import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlay;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
  * This class takes a chart and adds a single draggable rectangle overlay. The
@@ -78,19 +77,22 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     }
 
     @Override
-    public void setChart(final JFreeChart chart) {
-        finest("Setting new chart");
+    public synchronized void setChart(final JFreeChart chart) {
+        if(chart==null) {
+        	super.setChart(chart);
+        	return;
+        }
         double oldXPct = 0;
         double oldYPct = 0;
 
-        if (overlayRectangle != null) {
+        if (overlayRectangle != null && chart.getXYPlot()!=null) {
 
-            double maxX = getChart().getXYPlot().getDomainAxis().getUpperBound();
-            double minX = getChart().getXYPlot().getDomainAxis().getLowerBound();
+            double maxX = chart.getXYPlot().getDomainAxis().getUpperBound();
+            double minX = chart.getXYPlot().getDomainAxis().getLowerBound();
             double fullXRange = maxX - minX;
 
-            double maxY = getChart().getXYPlot().getRangeAxis().getUpperBound();
-            double minY = getChart().getXYPlot().getRangeAxis().getLowerBound();
+            double maxY = chart.getXYPlot().getRangeAxis().getUpperBound();
+            double minY = chart.getXYPlot().getRangeAxis().getLowerBound();
             double fullYRange = maxY - minY;
             // finest("Chart range "+fullXRange+": "+minX+" - "+maxX);
             finest("Rectangle is x: " + overlayRectangle.getXMinValue() + " - " + overlayRectangle.getXMaxValue()
@@ -135,8 +137,9 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     /**
      * Update the domain width of the rectangle overlay based on the set percent
      */
-    private void updateDomainWidth() {
-
+    private synchronized void updateDomainWidth() {
+    	if(getChart().getXYPlot()==null)
+    		return;
         // Get the x bounds of the plot
         double max = getChart().getXYPlot().getDomainAxis().getUpperBound();
         double min = getChart().getXYPlot().getDomainAxis().getLowerBound();
@@ -151,8 +154,9 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     /**
      * Update the range width of the rectangle overlay based on the set percent
      */
-    private void updateRangeWidth() {
-
+    private synchronized void updateRangeWidth() {
+    	if(getChart().getXYPlot()==null)
+    		return;
         // Get the bounds of the plot
         double max = getChart().getXYPlot().getRangeAxis().getUpperBound();
         double min = getChart().getXYPlot().getRangeAxis().getLowerBound();
@@ -787,15 +791,15 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
         SignalChangeEvent event = new SignalChangeEvent(this, message, this.getClass().getSimpleName());
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
+            ((EventListener) iterator.next()).eventReceived(event);
         }
     }
 
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
+    public synchronized void addSignalChangeListener(EventListener l) {
         listeners.add(l);
     }
 
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
+    public synchronized void removeSignalChangeListener(EventListener l) {
         listeners.remove(l);
     }
 

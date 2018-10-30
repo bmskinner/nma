@@ -1,0 +1,82 @@
+/*******************************************************************************
+ * Copyright (C) 2018 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
+package com.bmskinner.nuclear_morphology.components.nuclear;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+
+/**
+ * Key for mapping templates to images
+ * @author ben
+ * @since 1.14.0
+ *
+ */
+public class WarpedSignalKey implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private final CellularComponent targetShape;
+	private final UUID targetShapeId;
+	private final boolean isCellWithSignalsOnly;
+	
+	public WarpedSignalKey(@NonNull CellularComponent target, final boolean cellsWithSignals) {
+		targetShape = target;
+		targetShapeId = target.getID();
+		isCellWithSignalsOnly = cellsWithSignals;
+	}
+
+	public CellularComponent getTargetShape() {
+		return targetShape;
+	}
+
+	public boolean isCellWithSignalsOnly() {
+		return isCellWithSignalsOnly;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (isCellWithSignalsOnly ? 1231 : 1237);
+		result = prime * result + ((targetShapeId == null) ? 0 : targetShapeId.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		WarpedSignalKey other = (WarpedSignalKey) obj;
+		if (isCellWithSignalsOnly != other.isCellWithSignalsOnly)
+			return false;
+		if (targetShapeId == null) {
+			if (other.targetShapeId != null)
+				return false;
+		} else if (!targetShapeId.equals(other.targetShapeId))
+			return false;
+		return true;
+	}
+
+}
+

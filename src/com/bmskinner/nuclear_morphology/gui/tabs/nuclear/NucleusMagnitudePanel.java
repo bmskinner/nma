@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.FlowLayout;
@@ -35,9 +33,11 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.RandomSamplingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 
@@ -48,8 +48,8 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
     
     private JButton randomSamplingButton;
 
-    public NucleusMagnitudePanel() {
-        super();
+    public NucleusMagnitudePanel(@NonNull InputSupplier context) {
+        super(context);
     }
     
     @Override
@@ -70,8 +70,11 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
          */
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-        labelPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
-        labelPanel.add(new JLabel("Row median value as a proportion of column median value"));
+        
+        String infoString = "Pairwise magnitude comparisons between populations\n"
+        		+"Row median value as a proportion of column median value";
+        
+        labelPanel.add(new WrappedLabel(infoString));
 
         /*
          * Control buttons

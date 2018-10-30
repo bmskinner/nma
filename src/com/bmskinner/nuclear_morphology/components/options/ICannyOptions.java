@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
@@ -69,14 +67,15 @@ public interface ICannyOptions extends IDetectionSubOptions, Serializable, Logga
      * 
      * @return
      */
-    IMutableCannyOptions unlock();
+//    IMutableCannyOptions unlock();
 
     /**
      * Create a copy of this options
      * 
      * @return
      */
-    ICannyOptions duplicate();
+    @Override
+	ICannyOptions duplicate();
 
     /**
      * Should edge detection be run?
@@ -111,5 +110,39 @@ public interface ICannyOptions extends IDetectionSubOptions, Serializable, Logga
     int getKernelWidth();
 
     boolean isAddBorder();
+    
+    /**
+     * @param useCanny
+     */
+    void setUseCanny(boolean useCanny);
+
+    void setFlattenImage(boolean flattenImage);
+
+    void setFlattenThreshold(int flattenThreshold);
+
+    void setUseKuwahara(boolean b);
+
+    void setKuwaharaKernel(int radius);
+
+    void setClosingObjectRadius(int closingObjectRadius);
+
+    void setCannyAutoThreshold(boolean cannyAutoThreshold);
+
+    void setLowThreshold(float lowThreshold);
+
+    void setHighThreshold(float highThreshold);
+
+    void setKernelRadius(float kernelRadius);
+
+    void setKernelWidth(int kernelWidth);
+
+    void setAddBorder(boolean b);
+
+    /**
+     * Set the options to match the given values
+     * 
+     * @param options
+     */
+    void set(ICannyOptions options);
 
 }

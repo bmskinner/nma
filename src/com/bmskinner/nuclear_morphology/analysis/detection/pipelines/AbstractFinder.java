@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.util.ArrayList;
@@ -27,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
+import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -124,11 +122,13 @@ public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
      * 
      */
 
-    public synchronized void addProgressListener(ProgressListener l) {
+    @Override
+	public synchronized void addProgressListener(ProgressListener l) {
         progressListeners.add(l);
     }
 
-    public synchronized void removeProgressListener(ProgressListener l) {
+    @Override
+	public synchronized void removeProgressListener(ProgressListener l) {
         progressListeners.remove(l);
     }
 

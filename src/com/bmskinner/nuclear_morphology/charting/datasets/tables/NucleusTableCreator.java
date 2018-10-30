@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
 import java.util.List;
@@ -55,14 +53,12 @@ public class NucleusTableCreator extends AbstractTableCreator {
      * @return
      */
     public TableModel createLobeDetectionOptionsTable() {
-
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return AnalysisDatasetTableCreator.createBlankTable();
-        }
 
         DefaultTableModel model = new DefaultTableModel();
 
-        Vector<Object> rowNames = new Vector<Object>();
+        Vector<Object> rowNames = new Vector<>();
 
         // Make the row names for the options
         IDetectionSubOptions op = null;
@@ -70,8 +66,6 @@ public class NucleusTableCreator extends AbstractTableCreator {
 
         	Optional<? extends IAnalysisOptions> o = options.firstDataset().getAnalysisOptions();
         	if(o.isPresent()){
-                
-
                 IDetectionOptions ido = o.get().getDetectionOptions(CellularComponent.NUCLEUS).get();
 
                 if (ido.hasSubOptions(IDetectionSubOptions.HOUGH_OPTIONS)) {
@@ -79,9 +73,8 @@ public class NucleusTableCreator extends AbstractTableCreator {
                 }
             }
 
-            if (op == null) {
+            if (op == null)
                 return createBlankTable();
-            }
 
             rowNames.addAll(op.getKeys());
 

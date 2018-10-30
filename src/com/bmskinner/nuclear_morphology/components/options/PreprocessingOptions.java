@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
@@ -88,22 +86,44 @@ public class PreprocessingOptions extends AbstractHashOptions implements IPrepro
         setInt(MIN_BRI, DEFAULT_MIN_BRI);
         setInt(MAX_BRI, DEFAULT_MAX_BRI);
     }
+    
+	@Override
+	public PreprocessingOptions duplicate() {
+		PreprocessingOptions result = new PreprocessingOptions();
+		for(String key : getBooleanKeys()) {
+			result.setBoolean(key, getBoolean(key));
+    	}
+		for(String key : getIntegerKeys()) {
+			result.setInt(key, getInt(key));
+    	}
+		for(String key : getFloatKeys()) {
+			result.setFloat(key, getFloat(key));
+    	}
+		for(String key : getDoubleKeys()) {
+			result.setDouble(key, getDouble(key));
+    	}
+		return result;
+	}
 
-    public void setUseColourThreshold(boolean b) {
+    @Override
+	public void setUseColourThreshold(boolean b) {
         setBoolean(USE_COLOUR_THRESHOLD, b);
     }
 
-    public void setHueThreshold(int min, int max) {
+    @Override
+	public void setHueThreshold(int min, int max) {
         setInt(MIN_HUE, min);
         setInt(MAX_HUE, max);
     }
 
-    public void setSaturationThreshold(int min, int max) {
+    @Override
+	public void setSaturationThreshold(int min, int max) {
         setInt(MIN_SAT, min);
         setInt(MAX_SAT, max);
     }
 
-    public void setBrightnessThreshold(int min, int max) {
+    @Override
+	public void setBrightnessThreshold(int min, int max) {
         setInt(MIN_BRI, min);
         setInt(MAX_BRI, max);
     }

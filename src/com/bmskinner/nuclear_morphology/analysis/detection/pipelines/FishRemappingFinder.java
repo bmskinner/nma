@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,8 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.awt.Color;
@@ -65,7 +63,7 @@ public class FishRemappingFinder extends VoidFinder {
     }
 
     @Override
-    public Void findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
+    public Void findInImage(File imageFile) throws ImageImportException {
 
         ImageStack stack;
         try {
@@ -79,7 +77,7 @@ public class FishRemappingFinder extends VoidFinder {
         String imageName = imageFile.getName();
 
         finest("Converting image");
-        ImageProcessor openProcessor = new ImageConverter(stack).convertToGreyscale().invert().toProcessor();
+        ImageProcessor openProcessor = new ImageConverter(stack).convertToRGBGreyscale().invert().toProcessor();
 
         fireDetectionEvent(openProcessor.duplicate(), "Original image");
 

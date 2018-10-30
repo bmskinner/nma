@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,15 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -35,6 +34,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.Cache;
@@ -47,24 +47,24 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCr
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels
@@ -75,13 +75,17 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel, SignalChangeListener, DatasetEventListener,
-        InterfaceEventListener, Loggable, ChartOptionsRenderedEventListener {
+public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, CellUpdatedEventListener {
+	
+	protected static final int SINGLE_CLICK = 1;
+	protected static final int DOUBLE_CLICK = 2;
 
-    private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
+    private final List<Object> listeners = new CopyOnWriteArrayList<>();
+    
+    private final InputSupplier inputSupplier;
 
     private final TabPanel parentPanel;
-    private final List<TabPanel> subPanels = new ArrayList<TabPanel>();
+    private final List<TabPanel> subPanels = new ArrayList<>();
 
     // The chart cache holds rendered charts for all selected options, until a
     // change is made to a dataset
@@ -98,22 +102,24 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     private final InterfaceEventHandler     ih  = new InterfaceEventHandler(this);
     private final DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
     private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
+    
+    private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
 
-    public DetailPanel() {
-        this(DEFAULT_TAB_TITLE);
+    public DetailPanel(@NonNull final InputSupplier context) {
+        this(context, DEFAULT_TAB_TITLE);
     }
     
-    public DetailPanel(TabPanel parent) {
-    	this(parent, DEFAULT_TAB_TITLE);
+    public DetailPanel(@NonNull final TabPanel parent) {
+    	this(parent.getInputSupplier(), parent, DEFAULT_TAB_TITLE);
     }
     
-    public DetailPanel(String title) {
-        this(null, title);        
+    public DetailPanel(@NonNull final InputSupplier context, final String title) {
+        this(context, null, title);        
     }
     
-    public DetailPanel(TabPanel parent, String title) {
+    public DetailPanel(@NonNull final InputSupplier context, @Nullable final TabPanel parent, @NonNull final String title) {
+    	inputSupplier = context;
         parentPanel = parent;
-        this.addChartOptionsRenderedEventListener(this);
         panelTabTitleLbl = title;
     }
     
@@ -124,15 +130,20 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     public String getPanelTitle(){
         return panelTabTitleLbl;
     }
+    
+    @Override
+    public InputSupplier getInputSupplier() {
+    	return inputSupplier;
+    }
 
     /**
      * Add another detail panel as a sub panel to this. This will pass on
      * refreshes and UI updates
      * 
-     * @param panel
-     *            the panel to add
+     * @param panel the panel to add
      */
-    public void addSubPanel(final TabPanel panel) {
+    @Override
+	public void addSubPanel(final @NonNull TabPanel panel) {
         subPanels.add(panel);
         panel.addSignalChangeListener(this);
         panel.addDatasetEventListener(this);
@@ -164,7 +175,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @return
      */
-    public synchronized IAnalysisDataset activeDataset() {
+    @Override
+	public synchronized IAnalysisDataset activeDataset() {
         return DatasetListManager.getInstance().getActiveDataset();
     }
 
@@ -175,8 +187,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @return
      */
     public synchronized boolean isSingleDataset() {
-        // return(this.list.size()==1);
-        return DatasetListManager.getInstance().isSingleDataset();
+        return DatasetListManager.getInstance().isSingleSelectedDataset();
     }
 
     /**
@@ -185,7 +196,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @return
      */
     public synchronized boolean isMultipleDatasets() {
-        return DatasetListManager.getInstance().isMultipleDatasets();
+        return DatasetListManager.getInstance().isMultipleSelectedDatasets();
     }
 
     public synchronized boolean hasDatasets() {
@@ -208,7 +219,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         return this.chartCache;
     }
 
-    public synchronized boolean isUpdating() {
+    @Override
+	public synchronized boolean isUpdating() {
 
         if (this.isUpdating.get()) {
             return true;
@@ -232,7 +244,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param b
      */
-    public synchronized void setAnalysing(boolean b) {
+    @Override
+	public synchronized void setAnalysing(boolean b) {
         if (b) {
 
             for (Component c : this.getComponents()) {
@@ -258,7 +271,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * Force any chart panels currently visible on screen to redraw, allowing
      * text to be rendered with the appropriate aspect ratio
      */
-    public synchronized void updateSize() {
+    @Override
+	public synchronized void updateSize() {
 
         updateSize(this);
 
@@ -318,46 +332,39 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     public synchronized void update(final List<IAnalysisDataset> list) {
 
         setUpdating(true);
-
-        for (TabPanel t : this.getSubPanels()) {
+        for (TabPanel t : this.getSubPanels())
             t.update(list);
-        }
-
-        updateDetail(list);
-
+        final List<IAnalysisDataset> result = new ArrayList<>();
+        result.addAll(list);
+        updateDetail(result);
     }
 
     /**
      * This method sets which of the overriden handling methods are run by
      * extending classes.
      */
-    private synchronized void updateDetail(List<IAnalysisDataset> list) {
-//        List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
-
+    private synchronized void updateDetail(@NonNull final List<IAnalysisDataset> list) {
         try {
-            if (list.isEmpty()) {
+            if (list==null || list.isEmpty()) {
                 updateNull();
                 return;
             }
 
-            if (list.size() > 1) {
+            if (list.size()>1) {
                 updateMultiple();
                 return;
             }
-
             updateSingle();
 
         } catch (Exception e) {
-            warn("Error updating panel " + this.getClass().getName());
-            e.printStackTrace();
-            fine("Error updating panel", e); // save detail for fine logging
+            fine("Error updating panel " + this.getClass().getName());
+            stack("Error updating panel", e); // save detail for fine logging
 
             try {
                 updateNull();
             } catch (Exception e1) {
-                warn(this.getClass().getName() + ": Error recovering from error updating panel");
-                fine("Error recovering from error updating panel", e1);
-                setUpdating(false);
+            	fine(this.getClass().getName() + ": Error recovering from error updating panel");
+            	stack("Error recovering from error updating panel", e1);
             }
         } finally {
             setUpdating(false);
@@ -369,7 +376,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * actual update when a single dataset is selected
      */
     protected synchronized void updateSingle() {
-//        finest(this.getClass().getName() + ": Updating single dataset");
+
     }
 
     /**
@@ -377,7 +384,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * actual update when multiple datasets are selected
      */
     protected synchronized void updateMultiple() {
-//        finest(this.getClass().getName() + ": Updating multiple datasets");
     }
 
     /**
@@ -385,7 +391,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * actual update when no datasets are selected
      */
     protected synchronized void updateNull() {
-//        finest(this.getClass().getName() + ": Updating null dataset");
     }
 
     /**
@@ -519,7 +524,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void clearChartCache() {
+    @Override
+	public synchronized void clearChartCache() {
         this.getChartCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearChartCache();
@@ -532,7 +538,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
         getChartCache().clear(list);
         if (hasSubPanels()) {
             for (TabPanel panel : this.subPanels) {
@@ -546,7 +553,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void refreshChartCache() {
+    @Override
+	public synchronized void refreshChartCache() {
         clearChartCache();
         update(getDatasets());
     }
@@ -558,7 +566,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
         clearChartCache(list);
         update(getDatasets());
     }
@@ -572,7 +581,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void clearTableCache() {
+    @Override
+	public synchronized void clearTableCache() {
         getTableCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearTableCache();
@@ -585,7 +595,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
         getTableCache().clear(list);
         if (this.hasSubPanels()) {
             for (TabPanel panel : this.subPanels) {
@@ -599,7 +610,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void refreshTableCache() {
+    @Override
+	public synchronized void refreshTableCache() {
         clearTableCache();
         update(getDatasets());
     }
@@ -610,7 +622,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param list
      */
-    public synchronized void refreshTableCache(final List<IAnalysisDataset> list) {
+    @Override
+	public synchronized void refreshTableCache(final List<IAnalysisDataset> list) {
         clearTableCache(list);
         this.update(getDatasets());
     }
@@ -630,42 +643,44 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    public synchronized void addSignalChangeListener(SignalChangeListener l) {
-        sh.addSignalChangeListener(l);
-    }
-
-    public synchronized void removeSignalChangeListener(SignalChangeListener l) {
-        sh.removeSignalChangeListener(l);
-    }
-
-    public synchronized void addDatasetEventListener(DatasetEventListener l) {
-        dh.addDatasetEventListener(l);//datasetListeners.add(l);
-    }
-
-    public synchronized void removeDatasetEventListener(DatasetEventListener l) {
-        dh.removeDatasetEventListener(l);//datasetListeners.remove(l);
-    }
-    
-    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        duh.addDatasetUpdateEventListener(l);//datasetListeners.add(l);
-    }
-
-    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        duh.removeDatasetUpdateEventListener(l);//datasetListeners.remove(l);
-    }
-
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
-        ih.addInterfaceEventListener(l);// interfaceListeners.add(l);
-    }
-
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
-        ih.removeInterfaceEventListener(l);//interfaceListeners.remove(l);
+    @Override
+	public synchronized void addSignalChangeListener(EventListener l) {
+        sh.addListener(l);
     }
 
     @Override
-    public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
-        // To be overridden as needed by extending classes
-        update(getDatasets());
+	public synchronized void removeSignalChangeListener(EventListener l) {
+        sh.removeListener(l);
+    }
+    
+    @Override
+	public synchronized void addDatasetEventListener(EventListener l) {
+        dh.addListener(l);
+    }
+
+    @Override
+	public synchronized void removeDatasetEventListener(EventListener l) {
+        dh.removeListener(l);
+    }
+    
+    @Override
+	public synchronized void addDatasetUpdateEventListener(EventListener l) {
+        duh.addListener(l);
+    }
+
+    @Override
+	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
+        duh.removeListener(l);
+    }
+
+    @Override
+	public synchronized void addInterfaceEventListener(EventListener l) {
+        ih.addListener(l);
+    }
+
+    @Override
+	public synchronized void removeInterfaceEventListener(EventListener l) {
+        ih.removeListener(l);
     }
 
     @Override
@@ -688,17 +703,18 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         return sh;
     }
 
-    public void interfaceEventReceived(InterfaceEvent event) {
+    @Override
+    public void eventReceived(InterfaceEvent event) {
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
-                ih.fireInterfaceEvent(new InterfaceEvent(this, event));
+                ih.fire(new InterfaceEvent(this, event));
             }
         }
     }
-
-    public void datasetEventReceived(DatasetEvent event) {
-
+    
+    @Override
+    public void eventReceived(DatasetEvent event) {
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
@@ -707,15 +723,22 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    public void signalChangeReceived(SignalChangeEvent event) {
+    @Override
+    public void eventReceived(SignalChangeEvent event) {
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
-                sh.fireSignalChangeEvent(new SignalChangeEvent(this, event));
+                sh.fire(new SignalChangeEvent(this, event));
             }
         }
     }
-
+    
+    @Override
+    public void eventReceived(ChartOptionsRenderedEvent e) {
+        // To be overridden as needed by extending classes
+        update(getDatasets());
+    }
+    
     /**
      * Charting can be an intensive process, especially with background images
      * being imported for outline charts. This worker will keep the chart
@@ -724,7 +747,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @author bms41
      *
      */
-    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable {
+    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable, InterfaceUpdater {
 
         final private ChartOptions options;
 
@@ -784,7 +807,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @author bms41
      *
      */
-    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable {
+    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable, InterfaceUpdater {
 
         final private TableOptions options;
 
@@ -923,17 +946,35 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see gui.DatasetUpdateEventListener#datasetUpdateEventReceived(gui.
-     * DatasetUpdateEvent)
-     */
-    public void datasetUpdateEventReceived(DatasetUpdateEvent e) {
+    @Override
+    public void eventReceived(DatasetUpdateEvent e) {
         // Signal sub panels to update
         duh.fireDatasetUpdateEvent(e.getDatasets());
         this.update(e.getDatasets());
-
     }
+    
+
+	@Override
+	public void cellUpdatedEventReceived(CellUpdatedEvent event) {
+		isCellUpdateMade = true;
+	}
+	
+	@Override
+	public boolean hasCellUpdate() {
+		boolean result = isCellUpdateMade;
+		for(TabPanel t : getSubPanels()) {
+			result |= t.hasCellUpdate();
+		}
+		return result;
+	}
+
+	@Override
+	public void setCellUpdate(boolean b) {
+		isCellUpdateMade = b;
+		for(TabPanel t : getSubPanels()) {
+			t.setCellUpdate(b);
+		}
+		
+	}
 
 }

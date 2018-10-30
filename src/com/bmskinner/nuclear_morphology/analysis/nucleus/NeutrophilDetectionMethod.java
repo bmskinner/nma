@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,13 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,10 +27,10 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
-import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
@@ -41,8 +40,6 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
@@ -55,19 +52,19 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  * @since 1.13.4
  *
  */
-public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
+public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
     private static final String spacerString = "---------";
 
     private final String outputFolder;
 
-    private Finder<List<ICell>> finder;
+    private Finder<Collection<ICell>> finder;
 
     private final File folder;
 
-    private final IMutableAnalysisOptions analysisOptions;
+    private final IAnalysisOptions analysisOptions;
 
-    private Map<File, ICellCollection> collectionMap = new HashMap<File, ICellCollection>();
+    private Map<File, ICellCollection> collectionMap = new HashMap<>();
 
     List<IAnalysisDataset> datasets;
 
@@ -80,8 +77,8 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
      * @param debugFile the dataset log file
      * @param options the options to detect with
      */
-    public NeutrophilDetectionMethod(@NonNull String outputFolder, @NonNull File debugFile, @NonNull IMutableAnalysisOptions options) {
-        super(null);
+    public NeutrophilDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
+        super();
 
         if (outputFolder == null || options == null)
             throw new IllegalArgumentException("Must have output folder name and input options");
@@ -183,7 +180,7 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
                 if (analysisOptions.isKeepFailedCollections()) {
                     log("Keeping failed nuclei as new collection");
                     IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-                    IMutableAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
+                    IAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
                     failedOptions.setNucleusType(NucleusType.ROUND);
                     failed.setAnalysisOptions(failedOptions);
                     failed.setRoot(true);
@@ -354,17 +351,7 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
             makeFolder(folder);
 
             log("File:  " + file.getName());
-            List<ICell> cells = finder.findInImage(file);
-            // // Build a pipline for the image
-            // DetectionPipeline<ICell> pipe = new
-            // NeutrophilDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.CYTOPLASM),
-            // analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
-            // file,
-            // analysisOptions.getProfileWindowProportion());
-            //
-            // // Run each step of the pipeline without sampling intermediate
-            // results
-            // List<ICell> cells = pipe.findInImage();
+            Collection<ICell> cells = finder.findInImage(file);
 
             if (cells.isEmpty()) {
                 log("  No cells detected in image");

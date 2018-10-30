@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,11 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -49,20 +49,20 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
-    private IProfile targetCurve;
-
-    private Nucleus refoldNucleus;
-
+    
+	private IProfile targetCurve;
+	private Nucleus refoldNucleus;
     private ICellCollection collection;
 
-    private CurveRefoldingMode mode = CurveRefoldingMode.FAST; // the dafault
-                                                               // mode
+    private CurveRefoldingMode mode = CurveRefoldingMode.FAST;
 
     private int pointUpdateCounter = 0;
 
     public enum CurveRefoldingMode {
 
-        FAST("Fast", 50), INTENSIVE("Intensive", 1000), BRUTAL("Brutal", 10000);
+        FAST("Fast", 50), 
+        INTENSIVE("Intensive", 1000), 
+        BRUTAL("Brutal", 10000);
 
         private int    iterations;
         private String name;
@@ -72,7 +72,8 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             this.iterations = iterations;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return this.name;
         }
 
@@ -84,77 +85,58 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     /**
      * Construct from a collection of cells and the mode of refolding
      * 
-     * @param dataset
-     *            the dataset to be refolded
-     * @param refoldMode
-     *            the type of refolding
+     * @param dataset the dataset to be refolded
+     * @param refoldMode the type of refolding
      * @throws Exception
-     *             if one of the myriad profile or tag exceptions is encountered
-     *             TODO: clean this up
      */
-    public ProfileRefoldMethod(IAnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
+    public ProfileRefoldMethod(@NonNull IAnalysisDataset dataset, @NonNull CurveRefoldingMode refoldMode) throws Exception {
         super(dataset);
-
-        dataset.getCollection().setRefolding(true);
-
         collection = dataset.getCollection();
-
-        // make an entirely new nucleus to play with
-        Nucleus n = collection.getNucleusMostSimilarToMedian(Tag.REFERENCE_POINT);
-
-        refoldNucleus = new DefaultConsensusNucleus(n, collection.getNucleusType());
-        
-        IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Stats.MEDIAN);
-        IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Stats.LOWER_QUARTILE);
-        IProfile q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Stats.UPPER_QUARTILE);
-
-        if (targetProfile == null) {
-            throw new Exception("Null reference to target profile");
-        }
-        if (q25 == null || q75 == null) {
-            throw new Exception("Null reference to q25 or q75 profile");
-        }
-
-        this.targetCurve = targetProfile;
         this.setMode(refoldMode);
     }
 
     @Override
     public IAnalysisResult call() throws Exception {
-
         run();
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
-        return r;
+        return new DefaultAnalysisResult(dataset);
     }
 
     private void run() {
 
         try {
+        	// make an entirely new nucleus to play with
+            Nucleus n = collection.getNucleusMostSimilarToMedian(Tag.REFERENCE_POINT);
 
-            finer("Moving CoM of template to 0,0");
+            refoldNucleus = new DefaultConsensusNucleus(n, collection.getNucleusType());
+            
+            IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+                    Stats.MEDIAN);
+            IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+                    Stats.LOWER_QUARTILE);
+            IProfile q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+                    Stats.UPPER_QUARTILE);
 
+            if (targetProfile == null) {
+                throw new Exception("Null reference to target profile");
+            }
+            if (q25 == null || q75 == null) {
+                throw new Exception("Null reference to q25 or q75 profile");
+            }
+
+            targetCurve = targetProfile;
             refoldNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
 
             finer("Result: template at " + refoldNucleus.getCentreOfMass());
 
-            if (collection.size() > 1) {
-
-                smoothCurve(); // smooth the candidate nucleus to remove jagged
-                               // edges
+            if (collection.size() > 1) 
                 refoldCurve(); // carry out the refolding
-                smoothCurve(); // smooth the refolded nucleus to remove jagged
-                               // edges
-            }
 
             // orient refolded nucleus to put tail at the bottom
             refoldNucleus.alignVertically();
 
             // if rodent sperm, put tip on left if needed
             if (collection.getNucleusType().equals(NucleusType.RODENT_SPERM)) {
-                if (refoldNucleus.getBorderTag(Tag.REFERENCE_POINT).getX() > 0) {
+                if (refoldNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX() > 0) {
                     refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
                 }
             }
@@ -166,8 +148,6 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         } catch (Exception e) {
             warn("Unable to refold nucleus");
             stack("Unable to refold nucleus", e);
-        } finally {
-            collection.setRefolding(false);
         }
     }
 
@@ -182,18 +162,13 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
                     .absoluteSquareDifference(targetCurve);
 
             fine("Refolding curve: initial score: " + (int) score);
-
-            // double prevScore = score*2;
             int i = 0;
-
             while (i < mode.maxIterations()) { // iterate until converging
-                // prevScore = score;
                 score = this.iterateOverNucleus();
                 fireProgressEvent();
                 fine("Iteration " + i + ": " + (int) score);
                 i++;
             }
-
             fine("Refolded curve: final score: " + (int) score);
 
         } catch (Exception e) {
@@ -203,11 +178,6 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
     public void setMode(CurveRefoldingMode s) {
         this.mode = s;
-    }
-
-    private void smoothCurve() throws Exception {
-        // this.smoothCurve(0); // smooth with no offset
-        // this.smoothCurve(1); // smooth with intercalated offset
     }
 
     /**
@@ -230,9 +200,6 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
          * centre of the line Move ahead two points
          * 
          */
-        // boolean skip = false;
-
-        // int i=offset;
         for (int i = offset; i < refoldNucleus.getBorderLength(); i += 2) {
 
             IBorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
@@ -241,10 +208,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
             /*
              * get the point o, half way between the previous point p and next
-             * point n:
-             * 
-             * p o n \ / x
-             * 
+             * point n
              */
 
             LineEquation eq = new DoubleEquation(prevPoint, nextPoint);
@@ -252,10 +216,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             IPoint newPoint = eq.getPointOnLine(prevPoint, distance);
 
             /*
-             * get the point r, half way between o and this point x:
-             * 
-             * p o n \ r / x
-             * 
+             * get the point r, half way between o and this point x
              * This should smooth the curve without completely blunting corners
              */
             LineEquation eq2 = new DoubleEquation(newPoint, thisPoint);
@@ -264,10 +225,8 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
             boolean ok = checkPositionIsOK(newPoint, refoldNucleus, i, minDistance, maxDistance);
 
-            if (ok) {
-                // update the new position
+            if (ok) 
                 refoldNucleus.updateBorderPoint(i, replacementPoint.getX(), replacementPoint.getY());
-            }
         }
     }
 
@@ -344,7 +303,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * @throws UnavailableBorderPointException
      */
     private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore,
-            Nucleus testNucleus) throws ProfileException, UnavailableBorderTagException,
+    		 @NonNull Nucleus testNucleus) throws ProfileException, UnavailableBorderTagException,
             UnavailableProfileTypeException, UnavailableBorderPointException {
         // // make all changes to a fresh nucleus before buggering up the real
         // one
@@ -361,40 +320,8 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
         // Make a random adjustment to the x and y positions. Move them more
         // extensively when the score is high
-        double xDelta = 0.5 - Math.min(Math.random() * (similarityScore / 1000), 1); // when
-                                                                                     // score
-                                                                                     // is
-                                                                                     // 1000,
-                                                                                     // change
-                                                                                     // by
-                                                                                     // up
-                                                                                     // to
-                                                                                     // 1.
-                                                                                     // When
-                                                                                     // score
-                                                                                     // is
-                                                                                     // 300,
-                                                                                     // change
-                                                                                     // byup
-                                                                                     // to
-                                                                                     // 0.33
-        double yDelta = 0.5 - Math.min(Math.random() * (similarityScore / 1000), 1); // when
-                                                                                     // score
-                                                                                     // is
-                                                                                     // 1000,
-                                                                                     // change
-                                                                                     // by
-                                                                                     // up
-                                                                                     // to
-                                                                                     // 1.
-                                                                                     // When
-                                                                                     // score
-                                                                                     // is
-                                                                                     // 300,
-                                                                                     // change
-                                                                                     // byup
-                                                                                     // to
-                                                                                     // 0.33
+        double xDelta = 0.5 - Math.min(Math.random() * (similarityScore / 1000), 1);
+        double yDelta = 0.5 - Math.min(Math.random() * (similarityScore / 1000), 1);
 
         // Apply the calculated deltas to the x and y positions
         double newX = oldX + xDelta;
@@ -406,9 +333,6 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         boolean ok = checkPositionIsOK(newPoint, testNucleus, index, minDistance, maxDistance);
 
         if (ok) {
-
-            // log("\tNew point accepted at index "+index+" at
-            // "+newPoint.toString());
             // Update the test nucleus and recalculate the profiles
             testNucleus.updateBorderPoint(index, newPoint);
 
@@ -443,48 +367,32 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         }
 
         return similarityScore;
-
     }
 
     /**
      * // Do not apply a change if the distance from the surrounding points
      * changes too much
      * 
-     * @param point
-     *            the new point to test
-     * @param n
-     *            the nucleus
-     * @param index
-     *            the point position in the nucleus
-     * @param min
-     *            the min acceptable distance between points
-     * @param max
-     *            the max acceptable distance between points
+     * @param point the new point to test
+     * @param n the nucleus
+     * @param index the point position in the nucleus
+     * @param min the min acceptable distance between points
+     * @param max the max acceptable distance between points
      * @return
      * @throws UnavailableBorderPointException
      */
-    private boolean checkPositionIsOK(IPoint point, Nucleus n, int index, double min, double max)
+    private boolean checkPositionIsOK(@NonNull IPoint point, @NonNull Nucleus n, int index, double min, double max)
             throws UnavailableBorderPointException {
-        double distanceToPrev = point.getLengthTo(n.getBorderPoint(n.wrapIndex(index - 1)));
         double distanceToNext = point.getLengthTo(n.getBorderPoint(n.wrapIndex(index + 1)));
-
-        boolean ok = true;
-        if (distanceToNext > max) {
-            ok = false;
-
-        }
-
-        if (distanceToNext < min) {
-            ok = false;
-        }
-
-        if (distanceToPrev > max) {
-            ok = false;
-        }
-
-        if (distanceToPrev < min) {
-            ok = false;
-        }
-        return ok;
+        if (distanceToNext > max)
+        	return false;
+        if (distanceToNext < min)
+        	return false;
+        double distanceToPrev = point.getLengthTo(n.getBorderPoint(n.wrapIndex(index - 1)));
+        if (distanceToPrev > max)
+        	return false;
+        if (distanceToPrev < min)
+        	return false;
+        return true;
     }
 }

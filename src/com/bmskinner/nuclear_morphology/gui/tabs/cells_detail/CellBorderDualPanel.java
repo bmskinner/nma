@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
+ * Copyright (C) 2018 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,20 +12,22 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
+import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class CellBorderDualPanel extends DualChartPanel {
 
     public static final int DEFAULT_OVERLAY_PERCENT = 25;
 
     public CellBorderDualPanel() {
-        super();
+        super(true);
 
         chartPanel.setFixedAspectRatio(true);
 
@@ -35,5 +37,29 @@ public class CellBorderDualPanel extends DualChartPanel {
         updateChartPanelRange();
 
     }
+
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(InterfaceEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
