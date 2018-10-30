@@ -75,7 +75,7 @@ public abstract class XMLCreator<T> {
 	public static final String NAME_KEY                       = "Name";
 	public static final String VALUE_KEY                      = "Value";
 	public static final String INDEX_KEY                      = "Index";
-	public static final String STATS_KEY                      = "MeasuredStatistics";
+	public static final String STATS_SECTION_KEY                      = "MeasuredStatistics";
 	public static final String STAT_KEY                       = "Statistic";
 	public static final String COLOUR_KEY                     = "Colour";
 
@@ -368,11 +368,11 @@ public abstract class XMLCreator<T> {
 		
 		ISignalCollection sc = nucleus.getSignalCollection();
 		if(sc.hasSignal()) {
-			Element signals = new Element(NUCLEAR_SIGNALS_KEY);
+			Element signals = new Element(SIGNAL_GROUPS_SECTION_KEY);
 			
 			for(UUID signalGroupId : sc.getSignalGroupIds()) {
 				
-				Element group = new Element(NUCLEAR_SIGNAL_GROUP_KEY);
+				Element group = new Element(SIGNAL_GROUP_KEY);
 				group.addContent(createElement(ID_KEY, signalGroupId.toString()));
 				
 				List<INuclearSignal> sigList = sc.getSignals(signalGroupId);
@@ -463,7 +463,7 @@ public abstract class XMLCreator<T> {
 		e.addContent(border);
 		
 		// add stats
-		Element stats = new Element(STATS_KEY);
+		Element stats = new Element(STATS_SECTION_KEY);
 		for(PlottableStatistic s : component.getStatistics()) {
 			Element stat = new Element(STAT_KEY);
 			stat.addContent(createElement(NAME_KEY, s.toString()));

@@ -74,12 +74,12 @@ public abstract class XMLReader<T> implements Loggable {
 	 */
 	public abstract T read() throws XMLReadingException;
 	
-	public Document readDocument() throws XMLReadingException{
+	public Document readDocument() throws XMLReadingException {
 		SAXBuilder saxBuilder = new SAXBuilder();
 		try {
 			return saxBuilder.build(file);
 		} catch(JDOMException | IOException e) {
-			throw new XMLReadingException("Unable to read file as XML: "+e.getMessage(), e);
+			throw new XMLReadingException(String.format("Unable to read file %s as XML: %s", file.getAbsolutePath(), e.getMessage()), e);
 		}
 	}
 	
@@ -90,13 +90,17 @@ public abstract class XMLReader<T> implements Loggable {
 	protected int readY(Element e) {
 		return Integer.valueOf(e.getChildText(XMLCreator.Y));
 	}
+	
+	protected File readFile(Element e, String key) {
+		return new File(e.getChildText(key));
+	}
 
 	protected IPoint readPoint(Element e) {
 		float x = Float.valueOf(e.getChildText(XMLCreator.X));
 		float y = Float.valueOf(e.getChildText(XMLCreator.Y));
 		return IPoint.makeNew(x, y);
 	}
-	
+		
 	protected PlottableStatistic readStat(Element e) {
 		String name = e.getChildText(XMLCreator.NAME_KEY);
 		return PlottableStatistic.of(name);

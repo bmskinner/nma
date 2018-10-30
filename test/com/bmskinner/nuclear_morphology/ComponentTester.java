@@ -136,7 +136,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 				assertThat("Field "+f.getName()+" in "+original.getClass().getSimpleName()+": hashcodes: original "+oHash+" | dup "+dHash, dValue, equalTo(oValue));
 		}
 
-		assertEquals("Equals method", original, dup);
+		assertEquals("Equals method in "+original.getClass().getSimpleName(), original, dup);
 	}
 	
 	/**

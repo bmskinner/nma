@@ -34,8 +34,12 @@ import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
@@ -81,9 +85,12 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 			return readDataset(document.getRootElement(), type );
 			
 		} catch (ComponentCreationException e) {
-
 			throw new XMLReadingException("Could not create component from XML", e);
+		} catch(XMLReadingException e) { 
+			// Rethrow quietly
+			throw e;
 		} catch(Exception e) {
+			// log anything else
 			stack(e);
 			throw new XMLReadingException("Error reading XML: invalid XML format", e);
 		}
@@ -161,6 +168,10 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		Element segs = e.getChild(XMLCreator.BORDER_SEGS_KEY);
 		readCollectionSegments(segs, collection);
 		
+		// Add signals
+		Element signals = e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY);
+		readSignalGroups(signals, collection);		
+		
 		// Add consensus
 		try {
 			Nucleus consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
@@ -172,6 +183,23 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 
 		collection.updateVerticalNuclei();
 		return collection;
+	}
+	
+	private void readSignalGroups(Element e, ICellCollection collection) {
+		if(e==null)
+			return;
+		
+		for(Element groupElement : e.getChildren(XMLCreator.SIGNAL_GROUP_KEY)) {
+			fine("Adding signal group to "+collection.getName());
+			String name = groupElement.getChildText(XMLCreator.NAME_KEY);
+			UUID id = readUUID(groupElement);
+			ISignalGroup sg = new SignalGroup(name);
+			Element colourElement = groupElement.getChild(XMLCreator.COLOUR_KEY);
+			if(colourElement!=null)
+				sg.setGroupColour(Color.decode(colourElement.getText()));
+			fine("Adding signal group "+sg.toString());
+			collection.addSignalGroup(id, sg);
+		}
 	}
 	
 	private void readChildDatasets(Element children, IAnalysisDataset parent) {
@@ -237,17 +265,13 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		return new DefaultConsensusNucleus(template, type);
 	}
 	
-	private Nucleus readNucleus(Element e) throws ComponentCreationException {
-		
+	private Roi readRoi(Element e) {
 		Element border = e.getChild(XMLCreator.BORDER_POINTS_KEY);
-		
-		Element base = e.getChild(XMLCreator.BASE_KEY);
-
 		// Make the int array border list
 		List<Element> points = border.getChildren();
 		int[] xpoints = new int[points.size()];
 		int[] ypoints = new int[points.size()];
-		
+
 		for(int i=0; i<xpoints.length; i++) {
 			Element point = points.get(i);
 			xpoints[i] = readX(point);
@@ -255,17 +279,35 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		}
 
 		Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		return roi;
+	}
+	
+	private int[] readOriginalPosition(Element e) {
+		Element base = e.getChild(XMLCreator.BASE_KEY);
+        int[] originalPosition = { readInt(base, XMLCreator.X_BASE_KEY), 
+        		readInt(base, XMLCreator.Y_BASE_KEY), 
+        		readInt(base, XMLCreator.W_BASE_KEY), 
+        		readInt(base, XMLCreator.H_BASE_KEY) };
+        return originalPosition;
+	}
+	
+	private Nucleus readNucleus(Element e) throws ComponentCreationException {
+
+		Roi roi = readRoi(e);
+
+		int[] originalPosition = readOriginalPosition(e);
 		
+		Element base = e.getChild(XMLCreator.BASE_KEY);
 		int xbase = readInt(base, XMLCreator.X_BASE_KEY);
         int ybase = readInt(base, XMLCreator.Y_BASE_KEY);
-        int[] originalPosition = { xbase, ybase, readInt(base, XMLCreator.W_BASE_KEY), readInt(base, XMLCreator.H_BASE_KEY) };
 		
 		IPoint com = readPoint(e.getChild(XMLCreator.COM_KEY));
 		
-		File imageFile = new File(e.getChildText(XMLCreator.SOURCE_FILE_KEY));
-		int channel = Integer.valueOf((e.getChildText(XMLCreator.SOURCE_CHANNEL_KEY)));
+		File imageFile = readFile(e, XMLCreator.SOURCE_FILE_KEY);
 		
-		UUID id = UUID.fromString(e.getChildText(XMLCreator.ID_KEY));
+		int channel = readInt(e, XMLCreator.SOURCE_CHANNEL_KEY);
+		
+		UUID id = readUUID(e);
 		
 		int nucleusNumber = readInt(e, XMLCreator.NUCLEUS_NUMBER_KEY);
 		
@@ -276,19 +318,19 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		
 		
 		// Add stats
-		Element stats = e.getChild(XMLCreator.STATS_KEY);
+		Element stats = e.getChild(XMLCreator.STATS_SECTION_KEY);
 		for(Element stat : stats.getChildren(XMLCreator.STAT_KEY)) {
 			PlottableStatistic s = readStat(stat);
-			double d = Double.valueOf(stat.getChildText(XMLCreator.VALUE_KEY));
+			double d = readDouble(stat, XMLCreator.VALUE_KEY);
 			n.setStatistic(s, d);
 		}
 		
-		n.setScale(Double.valueOf(e.getChildText(XMLCreator.SOURCE_SCALE_KEY)));
+		n.setScale(readDouble(e, XMLCreator.SOURCE_SCALE_KEY));
 		
 		n.initialise(windowProportion);
 		
 		int actualLength = n.getBorderLength();
-		int expLength    = Integer.valueOf(e.getChildText(XMLCreator.BORDER_LENGTH_KEY));
+		int expLength    = readInt(e, XMLCreator.BORDER_LENGTH_KEY);
 		if(actualLength!=expLength)
 			warn(String.format("Border interpolation to %s does not match saved value %s", actualLength, expLength));
 		
@@ -297,17 +339,60 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		
 		// Apply segments
 		readSegments(e.getChild(XMLCreator.BORDER_SEGS_KEY), n);
+		
+		
+		// Apply signals
+		readSignals(e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY), n);
 
 		n.getVerticallyRotatedNucleus();
 		
 		return n;
 	}
 	
+	private void readSignals(Element signals, Nucleus n) {
+		if(signals==null)
+			return;
+		for(Element groupElement : signals.getChildren(XMLCreator.SIGNAL_GROUP_KEY)) {	
+			UUID groupId = readUUID(groupElement);
+			for(Element signalElement : groupElement.getChildren(XMLCreator.NUCLEAR_SIGNAL_KEY)) {
+				Roi roi = readRoi(signalElement);
+
+				int[] originalPosition = readOriginalPosition(signalElement);
+				
+				Element base = signalElement.getChild(XMLCreator.BASE_KEY);
+				int xbase = readInt(base, XMLCreator.X_BASE_KEY);
+		        int ybase = readInt(base, XMLCreator.Y_BASE_KEY);
+				
+				IPoint com = readPoint(signalElement.getChild(XMLCreator.COM_KEY));
+				
+				File imageFile = readFile(signalElement, XMLCreator.SOURCE_FILE_KEY);
+				
+				int channel = readInt(signalElement, XMLCreator.SOURCE_CHANNEL_KEY);
+				
+				UUID id = readUUID(signalElement);
+				INuclearSignal s = new DefaultNuclearSignal(roi, com, imageFile, channel, originalPosition, id);
+				
+				// Add stats
+				Element stats = signalElement.getChild(XMLCreator.STATS_SECTION_KEY);
+				for(Element statElement : stats.getChildren(XMLCreator.STAT_KEY)) {
+					PlottableStatistic stat = readStat(statElement);
+					double d = readDouble(statElement, XMLCreator.VALUE_KEY);
+					s.setStatistic(stat, d);
+				}
+				
+				s.setScale(readDouble(signalElement, XMLCreator.SOURCE_SCALE_KEY));
+				
+				n.getSignalCollection().addSignal(s, groupId);
+			}
+			
+		}
+	}
+	
 	
 	private void readTags(Element tags, Nucleus n) {
 		for(Element tag : tags.getChildren()) {			
 			Tag t = readTag(tag);
-			int index = Integer.valueOf(tag.getChildText(XMLCreator.INDEX_KEY));
+			int index = readInt(tag, XMLCreator.INDEX_KEY);
 			n.setBorderTag(t, index);
 		}
 	}

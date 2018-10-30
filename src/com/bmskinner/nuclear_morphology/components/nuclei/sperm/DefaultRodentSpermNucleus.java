@@ -127,7 +127,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         super.setBorderTag(tag, i);
 
         // If the flat region moved, update the cached lengths
-        if (this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+        if (this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL) && hasBorderTag(Tag.REFERENCE_POINT)) {
 
             if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
 

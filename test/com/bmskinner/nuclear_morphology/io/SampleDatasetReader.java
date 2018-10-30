@@ -30,6 +30,11 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
+import com.bmskinner.nuclear_morphology.io.DatasetImportMethod.UnloadableDatasetException;
+import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * Provides a simple access point to open datasets for testing classes
@@ -87,6 +92,14 @@ public class SampleDatasetReader {
      */
     public static IAnalysisDataset openDataset(@NonNull File f) throws Exception {
         return openDataset(f, null);
+    }
+    
+    public static IAnalysisDataset openXMLDataset(@NonNull File f) throws Exception {
+    	DatasetXMLReader dxr = new DatasetXMLReader(f);
+    	IAnalysisDataset d =  dxr.read();
+    	if(!Version.versionIsSupported(d.getVersion()))
+    		throw new UnsupportedVersionException(d.getVersion());
+    	return d;
     }
     
     /**
