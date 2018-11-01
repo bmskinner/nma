@@ -9,7 +9,7 @@
 	<!-- Define custom properties -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
-		<project.code.name>Daedalus</project.code.name>
+		<project.code.name>Excelsior</project.code.name>
 		<version.suffix></version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>

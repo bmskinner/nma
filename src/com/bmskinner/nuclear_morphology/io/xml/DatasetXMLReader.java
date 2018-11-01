@@ -237,15 +237,17 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		for(Element seg : segs.getChildren()) {			
 			UUID id = readUUID(seg);
 			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
-			if(prevStart!=-1) {
+			if(prevId!=null) {
 				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, profileLength, prevId);
 				newSegs.add(newSeg);
 			}
 			prevStart = startIndex;
 			prevId = id;
 		}
-		IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
-		newSegs.add(lastSeg);
+		if(prevId!=null) {
+			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
+			newSegs.add(lastSeg);
+		}
 		
 		collection.getProfileCollection().addSegments(newSegs);
 
@@ -404,18 +406,20 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		int prevStart = -1;
 		UUID prevId = null;
 		for(Element seg : segs.getChildren()) {			
-			UUID id = readUUID(seg);
+			UUID id = readUUID(seg);				
 			int startIndex = Integer.valueOf(seg.getChildText(XMLCreator.INDEX_KEY));
-			if(prevStart!=-1) {
+			if(prevId!=null) {
 				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, n.getBorderLength(), prevId);
 				newSegs.add(newSeg);
 			}
 			prevStart = startIndex;
 			prevId = id;
 		}
-		IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
-		newSegs.add(lastSeg);
-
+		
+		if(prevId!=null) {
+			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
+			newSegs.add(lastSeg);
+		}
 		try {			
 			for(ProfileType type : ProfileType.values()) { 
 				IProfile profile = n.getProfile(type);
