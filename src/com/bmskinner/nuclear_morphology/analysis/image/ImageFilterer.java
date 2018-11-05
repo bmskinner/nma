@@ -113,19 +113,16 @@ public class ImageFilterer extends AbstractImageFilterer {
      * to the interior of the nucleus. Make any pixel over threshold equal
      * threshold to remove internal structures
      * 
-     * @param stack
-     *            the stack to adjust
-     * @param stackNumber
-     *            the plane in the stack (starts at 1)
-     * @param threshold
-     *            the maximum intensity to allow
+     * @param stack the stack to adjust
+     * @param stackNumber the plane in the stack (starts at 1)
+     * @param threshold the maximum intensity to allow
      * @return a copy of the image processor, with flattening applied
      */
-    public ImageFilterer squashChromocentres(int stackNumber, int threshold) {
+    public ImageFilterer setMaximumPixelValue(int stackNumber, int threshold) {
 
         // fetch a copy of the int array
         ip = st.getProcessor(stackNumber);
-        ImageProcessor result = squashChromocentres(threshold).ip;
+        ImageProcessor result = setMaximumPixelValue(threshold).ip;
         ip = result;
         return this;
     }
@@ -135,13 +132,11 @@ public class ImageFilterer extends AbstractImageFilterer {
      * to the interior of the nucleus. Make any pixel over threshold equal
      * threshold to remove internal structures
      * 
-     * @param ip
-     *            the image processor to flatten
-     * @param threshold
-     *            the maximum intensity to allow
+     * @param ip the image processor to flatten
+     * @param threshold the maximum intensity to allow
      * @return a copy of the image processor, with flattening applied
      */
-    public ImageFilterer squashChromocentres(int threshold) {
+    public ImageFilterer setMaximumPixelValue(int threshold) {
 
         ImageProcessor result = ip.duplicate();
 

@@ -134,7 +134,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         }
 
         if (cannyOptions.isUseFlattenImage()) {
-            filt.squashChromocentres(cannyOptions.getFlattenThreshold());
+            filt.setMaximumPixelValue(cannyOptions.getFlattenThreshold());
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();
