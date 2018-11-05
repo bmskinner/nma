@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -69,13 +70,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         return map.get(target);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage#meshToImage(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
-     */
+
     @Override
     public ImageProcessor drawImage(@NonNull Mesh<E> mesh) throws UncomparableMeshImageException {
 
@@ -93,10 +88,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         int xBase = (int) mesh.toPath().getBounds().getX();
         int yBase = (int) mesh.toPath().getBounds().getY();
 
-        // Create a blank image processor with an appropriate size
-        // to hold the new image. Note that if the height or width is
-        // not sufficient, the image will wrap
-        ImageProcessor ip = createWhiteProcessor(w, h);
+        ImageProcessor ip = ImageFilterer.createWhiteByteProcessor(w, h);
 
         // Adjust from absolute position in original target image
         // Note that the consensus will have a position from its template
@@ -109,7 +101,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
             MeshFace targetFace = mesh.getFace(templateFace);
 
             if (targetFace == null) {
-                fine("Cannot find template face in target mesh");
+                finer("Cannot find template face in target mesh");
                 missingFaces++;
                 continue;
             }
@@ -118,8 +110,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         }
 
-        fine(missingFaces + " faces could not be found in the target mesh");
-        fine(missingPixels + " points lay outside the new image bounds");
+        finer(missingFaces + " faces could not be found in the target mesh");
+        finer(missingPixels + " points lay outside the new image bounds");
 
         interpolateMissingPixels(ip);
 
@@ -161,7 +153,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
             // This is because the consensus has -ve x and y positions
             try {
                 ip.set(x, y, pixelValue);
-                // finest("\tPixel set at "+x+", "+y);
             } catch (ArrayIndexOutOfBoundsException e) {
                 finer("\tPoint outside image bounds: " + x + ", " + y);
                 missingPixels++;
@@ -169,22 +160,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         }
         return missingPixels;
-    }
-
-    /**
-     * Make a ByteProcessor of the given dimensions with all pixels at 255
-     * 
-     * @param w
-     * @param h
-     * @return
-     */
-    private ImageProcessor createWhiteProcessor(int w, int h) {
-        ImageProcessor ip = new ByteProcessor(w, h);
-
-        for (int i = 0; i < ip.getPixelCount(); i++) {
-            ip.set(i, 255); // set all to white initially
-        }
-        return ip;
     }
 
     /**
@@ -196,21 +171,17 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     private void interpolateMissingPixels(ImageProcessor ip) {
 
         for (int x = 0; x < ip.getWidth(); x++) {
-
             for (int y = 0; y < ip.getHeight(); y++) {
 
-                if (ip.get(x, y) < 255) {
+                if (ip.get(x, y) < 255)
                     continue; // skip non-white pixels
-                }
 
                 int white = countSurroundingWhitePixels(x, y, ip);
 
                 // We can't interpolate unless there are a decent number of
                 // valid pixels
                 if (white <= 3) {
-                    // log("Found "+white+" whites at "+x+", "+y);
                     // interpolate from not white pixels
-
                     int pixelsToUse = 0;
                     int pixelValue = 0;
 
@@ -222,7 +193,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
                             try {
                                 value = ip.get(i, j);
                             } catch (ArrayIndexOutOfBoundsException e) {
-                                // warn("Array out of bounds: "+i+", "+j);
                                 continue;
                             }
                             if (value < 255) {
@@ -231,10 +201,9 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
                             }
                         }
                     }
-                    // log("\tUsable pixels: "+pixelsToUse);
+
                     if (pixelsToUse > 0) {
                         int newValue = pixelValue / pixelsToUse;
-                        // log("Interpolated to "+newValue);
                         ip.set(x, y, newValue);
                     }
 
@@ -312,7 +281,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         int missedCount = 0;
 
-        fine("Creating MeshPixels for the template mesh based on the image processor");
+        finer("Creating MeshPixels for the template mesh based on the image processor");
 
         // Add an empty list of MeshPixels to each face
         for (MeshFace face : template.getFaces()) {
@@ -335,17 +304,11 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
                 // The pixel
                 IPoint pixel = IPoint.makeNew(x, y);
-                // finer("Image pixel "+pixel);
-
-                if (!template.getComponent().containsOriginalPoint(pixel)) {
-                    // finer("\tTemplate component does not contain pixel
-                    // "+pixel);
+                if (!template.getComponent().containsOriginalPoint(pixel))
                     continue;
-                }
 
                 if (!template.contains(pixel)) {
                     missedCount++;
-                    // finer("\tTemplate mesh does not contain pixel "+pixel);
                     continue;
                 }
 
@@ -393,7 +356,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         }
 
         if (missedCount > 0) {
-            fine("Faces could not be found for " + missedCount + " points");
+            finer("Faces could not be found for " + missedCount + " points");
         }
     }
 

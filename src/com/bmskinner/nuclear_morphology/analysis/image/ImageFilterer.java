@@ -127,8 +127,7 @@ public class ImageFilterer extends AbstractImageFilterer {
             if (result.get(i) < threshold)
                 result.set(i, 0);
         }
-        ip = result;
-        return this;
+        return new ImageFilterer(result);
     }
 
     /**

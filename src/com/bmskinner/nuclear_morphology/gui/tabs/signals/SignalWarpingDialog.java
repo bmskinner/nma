@@ -43,9 +43,12 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -78,6 +81,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -106,7 +110,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
     private static final String RUN_LBL             = "Run";
     private static final String DIALOG_TITLE        = "Signal warping";
-    private static final String COW_LBL             = "Co-warpalise";
+    private static final String MIN_THRESHOLD_LBL   = "Min threshold";
+
     
     private static final int KEY_COLUMN_INDEX = 4;
 
@@ -120,6 +125,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     private JButton   runButton;
     private JCheckBox cellsWithSignalsBox;
+    private JSpinner minThresholdSpinner;
     private JSlider   thresholdSlider;
 
     private SignalWarper warper;
@@ -255,23 +261,24 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
         cellsWithSignalsBox.addActionListener(this);
         upperPanel.add(cellsWithSignalsBox);
+        
+        upperPanel.add(new JLabel(MIN_THRESHOLD_LBL));
+        SpinnerModel minThresholdModel = new SpinnerNumberModel(SignalWarper.DEFAULT_MIN_SIGNAL_THRESHOLD, 0, 255, 1);
+        minThresholdSpinner = new JSpinner(minThresholdModel);
+        upperPanel.add(minThresholdSpinner);
 
         lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
         lowerPanel.add(datasetBoxTwo);
 
         runButton = new JButton(RUN_LBL);
 
-        runButton.addActionListener(e -> {
-            Runnable task = () -> {
-                runWarping();
-            };
-            ThreadManager.getInstance().submit(task);
-        });
+        runButton.addActionListener(e ->  ThreadManager.getInstance().submit( () -> runWarping() ));
 
         lowerPanel.add(runButton);
 
         if (!signalBox.hasSelection()) 
             runButton.setEnabled(false);
+        
 
         
         thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
@@ -402,6 +409,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         	IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 
         	boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
+        	
+        	
+        	int minThreshold = (int) minThresholdSpinner.getValue();
 
         	Nucleus target = targetDataset.getCollection().getConsensus();
             setEnabled(false);
@@ -410,7 +420,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             progressBar.setVisible(true);
 
-            warper = new SignalWarper(sourceDataset, target, signalBox.getSelectedID(), cellsWithSignals, SignalWarper.REGULAR_MESH);
+            warper = new SignalWarper(sourceDataset, target, 
+            		signalBox.getSelectedID(), cellsWithSignals, 
+            		SignalWarper.REGULAR_MESH, 
+            		minThreshold);
             warper.addPropertyChangeListener(this);
             
             fine("Executing warper");
@@ -432,6 +445,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         runButton.setEnabled(b);
         datasetBoxOne.setEnabled(b);
         datasetBoxTwo.setEnabled(b);
+        minThresholdSpinner.setEnabled(b);
     }
 
     /**

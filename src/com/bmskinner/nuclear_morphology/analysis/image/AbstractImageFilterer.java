@@ -257,7 +257,7 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @param h the height
      * @return
      */
-    public static ImageProcessor createBlankByteProcessor(int w, int h) {
+    public static ImageProcessor createWhiteByteProcessor(int w, int h) {
 
         // Create an empty white processor
         ImageProcessor ip = new ByteProcessor(w, h);
@@ -265,6 +265,23 @@ public abstract class AbstractImageFilterer implements Loggable {
             ip.set(i, 255); // set all to white initially
         }
 
+        return ip;
+    }
+    
+    /**
+     * Create an empty black byte processor
+     * 
+     * @param w the width
+     * @param h the height
+     * @return
+     */
+    public static ImageProcessor createBlackByteProcessor(int w, int h) {
+
+        // Create an empty white processor
+        ImageProcessor ip = new ByteProcessor(w, h);
+        for (int i = 0; i < ip.getPixelCount(); i++) {
+            ip.set(i, 0);
+        }
         return ip;
     }
 
@@ -525,31 +542,21 @@ public abstract class AbstractImageFilterer implements Loggable {
         // Check images are same dimensions
         int w = list.get(0).getWidth();
         int h = list.get(0).getHeight();
-
-        for (ImageProcessor ip : list) {
-            if (ip == null) {
-                continue;
-            }
-            if (w != ip.getWidth() || h != ip.getHeight()) {
-                throw new IllegalArgumentException("Dimensions do not match");
-            }
-        }
-        // Create an empty white processor of the correct dimensions
-        ImageProcessor mergeProcessor = ImageFilterer.createBlankByteProcessor(w, h);
-
         int nonNull = 0;
-
+     
         // check sizes match
         for (ImageProcessor ip : list) {
-            if (ip == null) {
+            if (ip == null)
                 continue;
-            }
+            if (w != ip.getWidth() || h != ip.getHeight())
+                throw new IllegalArgumentException("Dimensions do not match");
             nonNull++;
         }
+        // Create an empty white processor of the correct dimensions
+        ImageProcessor mergeProcessor = ImageFilterer.createWhiteByteProcessor(w, h);
 
-        if (nonNull == 0) {
+        if (nonNull == 0)
             return mergeProcessor;
-        }
 
         // Average the pixels
         for (int x = 0; x < w; x++) {

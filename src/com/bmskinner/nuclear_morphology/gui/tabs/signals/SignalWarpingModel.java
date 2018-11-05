@@ -205,7 +205,7 @@ public class SignalWarpingModel implements Loggable {
      */
     private synchronized ImageProcessor createDisplayImage() {
     	if (selectedImageCount() == 0 || !isCommonTargetSelected()) 
-            return ImageFilterer.createBlankByteProcessor(100, 100);
+            return ImageFilterer.createWhiteByteProcessor(100, 100);
 
     	// Recolour each of the grey images according to the stored colours
         List<ImageProcessor> recoloured = new ArrayList<>();
@@ -230,7 +230,7 @@ public class SignalWarpingModel implements Loggable {
         } catch (Exception e) {
             warn("Error averaging images");
             stack(e);
-            return ImageFilterer.createBlankByteProcessor(100, 100);
+            return ImageFilterer.createWhiteByteProcessor(100, 100);
         }
 
     }

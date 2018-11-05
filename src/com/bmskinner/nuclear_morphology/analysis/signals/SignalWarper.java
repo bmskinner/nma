@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
 /**
@@ -62,16 +63,26 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	public static final boolean STRAIGHTEN_MESH = true;
 	public static final boolean REGULAR_MESH = false;
 	
+	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
+	
     private IAnalysisDataset sourceDataset;
     private Nucleus          target;
     private UUID             signalGroup;
-    private boolean          cellsWithSignals; // Only warp the cell images with
-                                               // detected signals
-    private boolean          straighten;       // Straighten the meshes
+    
+    /** Only warp the cell images with detected signals */
+    private boolean          isCellsWithSignals;
+    
+    /** Straighten the meshes */
+    private boolean          isStraighten;
+    
+    /** The warped images to be merged */
     private final List<ImageProcessor>     warpedImages = new ArrayList<>();
+    
+    /** The number of cell images to be merged */
     private int totalCells;
-
-    private ImageProcessor mergedImage = null;
+    
+    /** Pixels with values lower than this will not be included in the warped image */
+    private int minSignalThreshold = DEFAULT_MIN_SIGNAL_THRESHOLD;
 
     /**
      * Constructor
@@ -83,7 +94,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
      * @param straighten if true, the signals will be warped onto a straightened mesh
      */
     public SignalWarper(@NonNull final IAnalysisDataset source, @NonNull final Nucleus target, @NonNull final UUID signalGroup, boolean cellsWithSignals,
-            boolean straighten) {
+            boolean straighten, int minThreshold) {
 
         if (source == null)
             throw new IllegalArgumentException("Must have source dataset");
@@ -93,15 +104,16 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         this.sourceDataset = source;
         this.target = target;
         this.signalGroup = signalGroup;
-        this.cellsWithSignals = cellsWithSignals;
-        this.straighten = straighten;
+        isCellsWithSignals = cellsWithSignals;
+        isStraighten = straighten;
+        minSignalThreshold = minThreshold;
 
         // Count the number of cells to include
         SignalManager m = sourceDataset.getCollection().getSignalManager();
         Set<ICell> cells = cellsWithSignals ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
         totalCells = cells.size();
-        fine(String.format("Created signal warper for %s signal group %s with %s cells",
-        		sourceDataset.getName(), signalGroup, totalCells));
+        fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
+        		sourceDataset.getName(), signalGroup, totalCells, minSignalThreshold));
     }
 
     @Override
@@ -116,8 +128,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             stack("Error in signal warper", e);
             return null;
         }
-        return mergedImage;
-
+        
+        return mergeWarpedImages();
     }
 
     @Override
@@ -135,7 +147,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             if (this.get() != null) {
                 finest("Firing trigger for sucessful task");
                 firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);
-
             } else {
                 finest("Firing trigger for failed task");
                 firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
@@ -147,7 +158,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             error("Execution error in worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         }
-
     }
 
     private void generateImages() {
@@ -162,14 +172,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         }
 
         Rectangle r = meshConsensus.toPath().getBounds();
-        Set<ICell> cells = getCells(cellsWithSignals);
+        Set<ICell> cells = getCells(isCellsWithSignals);
 
         int cellNumber = 0;
 
         for (ICell cell : cells) {
 
             for (Nucleus n : cell.getNuclei()) {
-                fine("Drawing signals for " + n.getNameAndNumber());
+                finer("Drawing signals for " + n.getNameAndNumber());
 
                 generateNucleusImage(meshConsensus, r.width, r.height, n);
     		    publish(cellNumber++);
@@ -180,7 +190,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	private void generateNucleusImage(@NonNull Mesh<Nucleus> meshConsensus, int w, int h, @NonNull Nucleus n) {
 
 		try {
-			Mesh<Nucleus> cellMesh = new DefaultMesh<Nucleus>(n, meshConsensus);
+			Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
 
 		    // Get the image with the signal
 		    ImageProcessor ip;
@@ -194,6 +204,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    	File imageFile   = new File(imageFolder, n.getSourceFileName());
 		    	ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
 		    }
+		    
+		    if(minSignalThreshold>0)
+	    		ip = new ImageFilterer(ip).setMinimumPixelValue(minSignalThreshold).toProcessor();
 
 		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
 
@@ -203,21 +216,26 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 
 		} catch (IllegalArgumentException e) {
 		    fine(e.getMessage());
-		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
+		    warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
 		} catch (UnloadableImageException | ImageImportException e) {
 			fine(String.format("Unable to load signal image for signal group %s in nucleus %s ",
 					 signalGroup, n.getNameAndNumber()));
-		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
+		    warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
 		} catch (MeshCreationException e1) {
 			fine("Error creating mesh");
-		    warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
+		    warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
 		} catch (UncomparableMeshImageException | MeshImageCreationException e) {
 			fine("Cannot make mesh for " + n.getNameAndNumber());
-			 warpedImages.add(ImageFilterer.createBlankByteProcessor(w, h));
-		} finally {
-		    mergedImage = ImageFilterer.averageByteImages(warpedImages);
-		    mergedImage = ImageFilterer.rescaleImageIntensity(mergedImage);
+			 warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
 		}
+	}
+	
+	/**
+	 * Merge the warped images to a final image
+	 */
+	private ImageProcessor mergeWarpedImages() {
+		ImageProcessor mergedImage = ImageFilterer.averageByteImages(warpedImages);
+		return ImageFilterer.rescaleImageIntensity(mergedImage);
 	}
 
 
