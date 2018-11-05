@@ -61,6 +61,7 @@ public class NucleusImageProber extends IntegratedImageProber {
                     .addSizePanel(IAnalysisOptions.NUCLEUS)
                     .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
                     .build();
+            optionsSettingsPanel.setEnabled(false);
 
             Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options);
             imageProberPanel = new GenericImageProberPanel(folder, finder, this);
