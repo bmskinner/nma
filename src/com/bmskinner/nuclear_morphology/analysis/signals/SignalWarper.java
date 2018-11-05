@@ -74,9 +74,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	public static final String JUST_CELLS_WITH_SIGNAL_KEY   = "Cells withs signals only";
 	
 	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
-	
-	
-	
+
     private IAnalysisDataset sourceDataset;
     private Nucleus          target;
     private UUID             signalGroup;
@@ -105,14 +103,13 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             throw new IllegalArgumentException("Must have source dataset");
         if (target == null)
             throw new IllegalArgumentException("Must have target nucleus");
+        if (warpingOptions == null)
+            throw new IllegalArgumentException("Must have options");
 
         this.sourceDataset = source;
         this.target = target;
         this.signalGroup = signalGroup;
         this.warpingOptions = warpingOptions;
-//        isCellsWithSignals = cellsWithSignals;
-//        isStraighten = straighten;
-//        minSignalThreshold = minThreshold;
 
         // Count the number of cells to include
         SignalManager m = sourceDataset.getCollection().getSignalManager();
