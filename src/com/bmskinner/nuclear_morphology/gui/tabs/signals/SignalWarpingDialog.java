@@ -80,6 +80,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -409,8 +411,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         	IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 
         	boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
-        	
-        	
+
         	int minThreshold = (int) minThresholdSpinner.getValue();
 
         	Nucleus target = targetDataset.getCollection().getConsensus();
@@ -419,14 +420,15 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             progressBar.setStringPainted(true);
 
             progressBar.setVisible(true);
+            
+            HashOptions ho = new DefaultOptions();
+            ho.setBoolean(SignalWarper.IS_STRAIGHTEN_MESH_KEY, SignalWarper.REGULAR_MESH);
+            ho.setBoolean(SignalWarper.JUST_CELLS_WITH_SIGNAL_KEY,cellsWithSignals);
+            ho.setInt(SignalWarper.MIN_SIGNAL_THRESHOLD_KEY, minThreshold);
 
-            warper = new SignalWarper(sourceDataset, target, 
-            		signalBox.getSelectedID(), cellsWithSignals, 
-            		SignalWarper.REGULAR_MESH, 
-            		minThreshold);
+            warper = new SignalWarper(sourceDataset, target, signalBox.getSelectedID(), ho);
             warper.addPropertyChangeListener(this);
             
-            fine("Executing warper");
             ThreadManager.getInstance().execute(warper);
 
         } catch (Exception e) {

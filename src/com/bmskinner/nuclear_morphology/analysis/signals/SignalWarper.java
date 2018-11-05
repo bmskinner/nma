@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageExcep
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -63,27 +64,32 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	public static final boolean STRAIGHTEN_MESH = true;
 	public static final boolean REGULAR_MESH = false;
 	
+	/** Pixels with values lower than this will not be included in the warped image */
+	public static final String MIN_SIGNAL_THRESHOLD_KEY = "Min signal threshold";
+	
+	 /** Straighten the meshes */
+	public static final String IS_STRAIGHTEN_MESH_KEY   = "Straighten mesh";
+	
+	 /** Only warp the cell images with detected signals */
+	public static final String JUST_CELLS_WITH_SIGNAL_KEY   = "Cells withs signals only";
+	
 	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
+	
+	
 	
     private IAnalysisDataset sourceDataset;
     private Nucleus          target;
     private UUID             signalGroup;
     
-    /** Only warp the cell images with detected signals */
-    private boolean          isCellsWithSignals;
-    
-    /** Straighten the meshes */
-    private boolean          isStraighten;
-    
+    /** The options for the analysis */
+    private HashOptions warpingOptions;
+        
     /** The warped images to be merged */
     private final List<ImageProcessor>     warpedImages = new ArrayList<>();
     
     /** The number of cell images to be merged */
     private int totalCells;
     
-    /** Pixels with values lower than this will not be included in the warped image */
-    private int minSignalThreshold = DEFAULT_MIN_SIGNAL_THRESHOLD;
-
     /**
      * Constructor
      * 
@@ -93,8 +99,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
      * @param cellsWithSignals if true, only cells with defined signals will be included
      * @param straighten if true, the signals will be warped onto a straightened mesh
      */
-    public SignalWarper(@NonNull final IAnalysisDataset source, @NonNull final Nucleus target, @NonNull final UUID signalGroup, boolean cellsWithSignals,
-            boolean straighten, int minThreshold) {
+    public SignalWarper(@NonNull final IAnalysisDataset source, @NonNull final Nucleus target, @NonNull final UUID signalGroup, @NonNull HashOptions warpingOptions) {
 
         if (source == null)
             throw new IllegalArgumentException("Must have source dataset");
@@ -104,16 +109,17 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         this.sourceDataset = source;
         this.target = target;
         this.signalGroup = signalGroup;
-        isCellsWithSignals = cellsWithSignals;
-        isStraighten = straighten;
-        minSignalThreshold = minThreshold;
+        this.warpingOptions = warpingOptions;
+//        isCellsWithSignals = cellsWithSignals;
+//        isStraighten = straighten;
+//        minSignalThreshold = minThreshold;
 
         // Count the number of cells to include
         SignalManager m = sourceDataset.getCollection().getSignalManager();
-        Set<ICell> cells = cellsWithSignals ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
+        Set<ICell> cells = warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY) ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
         totalCells = cells.size();
         fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
-        		sourceDataset.getName(), signalGroup, totalCells, minSignalThreshold));
+        		sourceDataset.getName(), signalGroup, totalCells, warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
     }
 
     @Override
@@ -172,7 +178,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         }
 
         Rectangle r = meshConsensus.toPath().getBounds();
-        Set<ICell> cells = getCells(isCellsWithSignals);
+        Set<ICell> cells = getCells(warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY));
 
         int cellNumber = 0;
 
@@ -205,8 +211,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    	ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
 		    }
 		    
-		    if(minSignalThreshold>0)
-	    		ip = new ImageFilterer(ip).setMinimumPixelValue(minSignalThreshold).toProcessor();
+		    if(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)>0)
+	    		ip = new ImageFilterer(ip).setMinimumPixelValue(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)).toProcessor();
 
 		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
 
