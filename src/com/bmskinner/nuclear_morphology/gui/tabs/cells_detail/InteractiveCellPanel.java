@@ -190,6 +190,8 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	 */
 	protected synchronized IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
 		// The rescaled dimensions
+		if(imageLabel==null)
+			return null;
 		int iconWidth = imageLabel.getIcon().getIconWidth();
 		int iconHeight = imageLabel.getIcon().getIconHeight();
 		

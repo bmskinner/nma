@@ -163,6 +163,8 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				@Override
 				public synchronized void mouseMoved(MouseEvent e){
 					IPoint p = translatePanelLocationToRenderedImage(e); 
+					if(p==null)
+						return;
 					updateImage(p.getXAsInt(), p.getYAsInt());
 				}
 			});
