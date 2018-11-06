@@ -447,7 +447,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * 
      * @param ip the image processor. It must be convertible to a ByteProcessor
      * @param amount the radius of the circle
-     * @return a new ByteProcessor containing the closed image
+     * @return this filterer with a new ByteProcessor containing the closed image
      */
     public ImageFilterer dilate(int amount) {
 
@@ -465,12 +465,11 @@ public class ImageFilterer extends AbstractImageFilterer {
         return this;
     }
 
-    //
     /**
-     * Based on the ImageJ Fill holes command: Binary fill by Gabriel Landini,
-     * G.Landini at bham.ac.uk 21/May/2008
+     * Fill holes in the image. Based on the ImageJ Fill holes command: 
+     * Binary fill by Gabriel Landini, G.Landini at bham.ac.uk 21/May/2008
      * 
-     * @param ip
+     * @param ip the image to fill
      */
     private void fill(ImageProcessor ip) {
 
@@ -507,9 +506,9 @@ public class ImageFilterer extends AbstractImageFilterer {
      * Perform a Canny edge detection on the given image
      * 
      * @param options the canny options
-     * @return
+     * @return this filterer with a new ByteProcessor containing the edge detected image
      */
-    public ImageFilterer runEdgeDetector(ICannyOptions options) {
+    public ImageFilterer cannyEdgeDetection(@NonNull ICannyOptions options) {
         ByteProcessor result = null;
 
         // // calculation of auto threshold
@@ -537,11 +536,10 @@ public class ImageFilterer extends AbstractImageFilterer {
     /**
      * Run circle detection using given Hough transform options
      * 
-     * @param options
-     *            the detection options
-     * @return
+     * @param options the detection options
+     * @return the points at the centres of the detected circles
      */
-    public List<IPoint> runHoughCircleDetection(IHoughDetectionOptions options) {
+    public List<IPoint> houghCircleDetection(@NonNull IHoughDetectionOptions options) {
 
         fine("Running hough detection");
 
@@ -576,24 +574,20 @@ public class ImageFilterer extends AbstractImageFilterer {
      * Try to detect the optimal settings for the edge detector based on the
      * median image pixel intensity.
      * 
-     * @param nucleusCannyOptions
-     *            the options
-     * @param image
-     *            the image to analyse
-     * @throws Exception
+     * @param optons the canny options
+     * @param image the image to analyse
      */
     private void autoDetectCannyThresholds(ICannyOptions options, ImageProcessor image) {
         // calculation of auto threshold
 
         // find the median intensity of the image
-        double medianPixel = getMedianIntensity(image);
+        double medianPixel = findMedianIntensity(image);
 
         // if the median is >128, this is probably an inverted image.
         // invert it so the thresholds will work
         if (medianPixel > 128) {
-
             image.invert();
-            medianPixel = getMedianIntensity(image);
+            medianPixel = findMedianIntensity(image);
         }
 
         // set the thresholds either side of the median
@@ -610,29 +604,17 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Get the median pixel intensity in the image. Used in auto-selection of
+     * Find the median pixel intensity in the image. Used in auto-selection of
      * Canny thresholds.
      * 
-     * @param image
-     *            the image to process
+     * @param image the image to process
      * @return the median pixel intensity
      */
-    private double getMedianIntensity(ImageProcessor image) {
-
-        double[] values = new double[image.getWidth() * image.getHeight()];
-
-        int i = 0;
-        for (int w = 0; w < image.getWidth(); w++) {
-            for (int h = 0; h < image.getHeight(); h++) {
-                values[i] = (double) image.get(w, h);
-
-                i++;
-            }
-        }
-        DescriptiveStatistics ds = new DescriptiveStatistics();
-        for(double d : values){
-        	ds.addValue(d);
-        }
-        return ds.getPercentile(Stats.MEDIAN);
+    private double findMedianIntensity(ImageProcessor image) {
+        int max = image.getWidth()*image.getHeight();
+        double[] values = new double[max];
+        for(int i=0; i<max; i++)
+        	values[i]=image.get(i);
+        return Stats.quartile(values, Stats.MEDIAN);
     }
 }

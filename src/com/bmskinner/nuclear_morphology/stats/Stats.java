@@ -38,6 +38,7 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -311,15 +312,20 @@ public class Stats implements Loggable {
         if (values.length == 1)
             return values[0];
         
-        // Rank order the values
-        float[] v = new float[values.length];
-        System.arraycopy(values, 0, v, 0, values.length);
-        Arrays.sort(v);
-
-        if (values.length == 2)
-        	return quartile < MEDIAN ? v[0] : v[1];
-        int n = Math.round(((float) v.length * quartile) / ONE_HUNDRED_PERCENT);
-        return v[n];
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        for(float d : values)
+        	ds.addValue(d);
+        return (float) ds.getPercentile(quartile);
+        
+//        // Rank order the values
+//        float[] v = new float[values.length];
+//        System.arraycopy(values, 0, v, 0, values.length);
+//        Arrays.sort(v);
+//
+//        if (values.length == 2)
+//        	return quartile < MEDIAN ? v[0] : v[1];
+//        int n = Math.round(((float) v.length * quartile) / ONE_HUNDRED_PERCENT);
+//        return v[n];
     }
     
     /**
@@ -337,17 +343,22 @@ public class Stats implements Loggable {
         if (values.length == 1)
             return values[0];
         
-        // Rank order the values
-        int[] v = new int[values.length];
-        System.arraycopy(values, 0, v, 0, values.length);
-        Arrays.sort(v);
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        for(int d : values)
+        	ds.addValue(d);
+        return (int) ds.getPercentile(quartile);
         
-        if (values.length == 2)
-            return quartile < MEDIAN ? v[0] : v[1];
-
-        int n = Math.round(((float) v.length * quartile) / 100);
-
-        return v[n];
+//        // Rank order the values
+//        int[] v = new int[values.length];
+//        System.arraycopy(values, 0, v, 0, values.length);
+//        Arrays.sort(v);
+//        
+//        if (values.length == 2)
+//            return quartile < MEDIAN ? v[0] : v[1];
+//
+//        int n = Math.round(((float) v.length * quartile) / 100);
+//
+//        return v[n];
     }
 
     /**
@@ -364,17 +375,21 @@ public class Stats implements Loggable {
 
         if (values.length == 1)
             return values[0];
-
-        // Rank order the values
-        double[] v = new double[values.length];
-        System.arraycopy(values, 0, v, 0, values.length);
-        Arrays.sort(v);
         
-        if (values.length == 2)
-            return quartile < MEDIAN ? v[0] : v[1];
-        int n = Math.round(((float) v.length * quartile) / 100);
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        for(double d : values)
+        	ds.addValue(d);
+        return ds.getPercentile(quartile);
 
-        return v[n];
+//        // Rank order the values
+//        double[] v = new double[values.length];
+//        System.arraycopy(values, 0, v, 0, values.length);
+//        Arrays.sort(v);
+//        
+//        if (values.length == 2)
+//            return quartile < MEDIAN ? v[0] : v[1];
+//        int n = Math.round(((float) v.length * quartile) / 100);
+//        return v[n];
     }
     
     /**

@@ -183,7 +183,7 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 
             // new ImagePlus(cell.getNucleus().getNameAndNumber()+": Canny",
             // imf.toProcessor()).show();
-            List<IPoint> lobes = imf.runHoughCircleDetection(options);
+            List<IPoint> lobes = imf.houghCircleDetection(options);
             addPointsToNuclei(cell, lobes);
         }
 

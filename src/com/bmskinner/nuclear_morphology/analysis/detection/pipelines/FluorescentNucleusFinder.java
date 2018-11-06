@@ -143,7 +143,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         }
 
         if (cannyOptions.isUseCanny()) {
-            filt.runEdgeDetector(cannyOptions);
+            filt.cannyEdgeDetection(cannyOptions);
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();
