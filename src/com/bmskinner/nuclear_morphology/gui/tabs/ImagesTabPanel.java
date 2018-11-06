@@ -298,7 +298,7 @@ public class ImagesTabPanel extends DetailPanel {
     				dataset.ifPresent( d -> d.getCollection().getCells(f).stream().forEach( c-> an.annotateCellBorders(c)) );
 
     				ImageFilterer ic = new ImageFilterer(an.toProcessor());
-    				ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
+    				ic.resizeKeepingAspect(imagePanel.getWidth(), imagePanel.getHeight());
     				label.setIcon(ic.toImageIcon());
 
     			} catch (Exception e1) {

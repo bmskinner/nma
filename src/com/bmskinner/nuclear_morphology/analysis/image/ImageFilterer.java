@@ -239,15 +239,28 @@ public class ImageFilterer extends AbstractImageFilterer {
         result.setIntArray(array);
         ip = result;
         return this;
-        // return new ImageFilterer(result);
+    }
+    
+    /**
+     * Resize the image to fit on the screen. By default the width will be 80% of
+     * the screen width. If this would cause the height to become greater than the screen
+     * height, the image will be resized such that the height is 80% of the screen height.
+     * 
+     * @return the resized image, preserving aspect ratio
+     */
+    public ImageFilterer fitToScreen() {
+        if (ip == null)
+            throw new IllegalArgumentException("Image processor is null");
+        return fitToScreen(0.8);
     }
 
     /**
-     * Resize the image to fit on the screen with the given width.
+     * Resize the image to fit on the screen. By default the width will be the given fraction of
+     * the screen width. If this would cause the height to become greater than the screen
+     * height, the image will be resized such that the height is that fraction of the screen height.
      * 
-     * @param fraction
-     *            the fraction of the screen width to take up (0-1)
-     * @return
+     * @param fraction the fraction of the screen width to take up (0-1)
+     * @return the resized image, preserving aspect ratio
      */
     public ImageFilterer fitToScreen(double fraction) {
 
@@ -300,89 +313,13 @@ public class ImageFilterer extends AbstractImageFilterer {
         return this;
     }
 
-//    /**
-//     * Resize the image to fit the given dimensions, preserving aspect ratio
-//     * 
-//     * @param newWidth
-//     *            the new width of the image
-//     * @return
-//     */
-//    public ImageFilterer resize(int maxWidth, int maxHeight) {
-//
-//        if (ip == null) {
-//            throw new IllegalArgumentException("Image processor is null");
-//        }
-//
-//        int originalWidth = ip.getWidth();
-//        int originalHeight = ip.getHeight();
-//
-//        // keep the image aspect ratio
-//        double ratio = (double) originalWidth / (double) originalHeight;
-//
-//        double finalWidth = maxHeight * ratio; // fix height
-//        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
-//                                                                    // constrain
-//                                                                    // width too
-//
-//        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
-//        ip = result;
-//        return this;
-//        // return new ImageFilterer(result);
-//    }
-
-    /**
-     * Resize the image to fit on the screen. By default the width will be 80%,
-     * unless this causes the height to become too great. In this case the
-     * height will be set to 80%.
-     * 
-     * @return
-     */
-    public ImageFilterer fitToScreen() {
-
-        if (ip == null) {
-            throw new IllegalArgumentException("Image processor is null");
-        }
-
-        return fitToScreen(0.8);
-    }
-
-//    /**
-//     * Crop the image to the region covered by the given component
-//     * 
-//     * @return
-//     */
-//    public ImageFilterer crop(@NonNull CellularComponent c) {
-//
-//        if (ip == null) {
-//            throw new IllegalArgumentException("Image processor is null");
-//        }
-//        // Choose a clip for the image (an enlargement of the original nucleus
-//        // ROI
-//        int[] positions = c.getPosition();
-//        int wideW = (int) (positions[CellularComponent.WIDTH] + 20);
-//        int wideH = (int) (positions[CellularComponent.HEIGHT] + 20);
-//        int wideX = (int) (positions[CellularComponent.X_BASE] - 10);
-//        int wideY = (int) (positions[CellularComponent.Y_BASE] - 10);
-//
-//        wideX = wideX < 0 ? 0 : wideX;
-//        wideY = wideY < 0 ? 0 : wideY;
-//
-//        ip.setRoi(wideX, wideY, wideW, wideH);
-//        ImageProcessor result = ip.crop();
-//        ip = result;
-//        return this;
-//        // return new ImageFilterer(result);
-//    }
 
     /**
      * Fetch a 3x3 image kernel from within an int image array
      * 
-     * @param array
-     *            the input image
-     * @param x
-     *            the central x point
-     * @param y
-     *            the central y point
+     * @param array the input image
+     * @param x the central x point
+     * @param y the central y point
      * @return
      */
     public int[][] getKernel(int[][] array, int x, int y) {
@@ -479,15 +416,13 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Close holes in the nuclear borders
+     * Close holes in the nuclear borders using a circular structure element
      * 
-     * @param ip
-     *            the image processor. It must be convertible to a ByteProcessor
-     * @param closingRadius
-     *            the radius of the circle
+     * @param ip the image processor. It must be convertible to a ByteProcessor
+     * @param closingRadius the radius of the circle
      * @return a new ByteProcessor containing the closed image
      */
-    public ImageFilterer morphologyClose(int closingRadius) {
+    public ImageFilterer close(int closingRadius) {
 
         ByteProcessor result = ip.convertToByteProcessor();
 
@@ -498,28 +433,20 @@ public class ImageFilterer extends AbstractImageFilterer {
         StructureElement se = new StructureElement(elType, shift, closingRadius, offset);
         MorphoProcessor mp = new MorphoProcessor(se);
 
-        /*
-         * Better way of closing. Dilate, fill, then erode
-         */
+        /* Better way of closing. Dilate, fill, then erode */
         mp.dilate(result);
-
-        // fill holes
         fill(result);
-
         mp.erode(result);
+        
         ip = result;
         return this;
-        // return new ImageFilterer(result);
-
     }
 
     /**
-     * Dilate by the given amount
+     * Dilate by the given amount using a circular stucture element
      * 
-     * @param ip
-     *            the image processor. It must be convertible to a ByteProcessor
-     * @param amount
-     *            the radius of the circle
+     * @param ip the image processor. It must be convertible to a ByteProcessor
+     * @param amount the radius of the circle
      * @return a new ByteProcessor containing the closed image
      */
     public ImageFilterer dilate(int amount) {
@@ -533,14 +460,9 @@ public class ImageFilterer extends AbstractImageFilterer {
         StructureElement se = new StructureElement(elType, shift, amount, offset);
         MorphoProcessor mp = new MorphoProcessor(se);
 
-        /*
-         * Better way of closing. Dilate, fill, then erode
-         */
         mp.dilate(result);
         ip = result;
         return this;
-        // return new ImageFilterer(result);
-
     }
 
     //
@@ -582,40 +504,9 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Use Canny edge detection to produce an image with potential edges
-     * highlighted for the detector. Also performs morphology closing
-     * 
-     * @param image
-     *            the stack to process
-     * @return a stack with edges highlighted
-     * @throws Exception
-     */
-    public ImageFilterer runEdgeDetector(int stackNumber, ICannyOptions options) {
-
-        ImageStack searchStack = null;
-        // Run the edge detection
-        ip = st.getProcessor(stackNumber);
-        // ByteProcessor searchImage = runEdgeDetector( options);
-        // ip = runEdgeDetector( options).getProcessor();
-
-        // ByteProcessor closed = (ByteProcessor) morphologyClose(
-        // options.getClosingObjectRadius()).getProcessor() ;
-
-        int closingRadius = options.getClosingObjectRadius();
-        ImageProcessor closed = runEdgeDetector(options).morphologyClose(closingRadius).toProcessor();
-
-        searchStack = ImageStack.create(st.getWidth(), st.getHeight(), 0, 8);
-        searchStack.addSlice("closed", closed, 0);
-        st = searchStack;
-        return this;
-        // return new ImageFilterer(searchStack);
-    }
-
-    /**
      * Perform a Canny edge detection on the given image
      * 
-     * @param ip
-     * @param options
+     * @param options the canny options
      * @return
      */
     public ImageFilterer runEdgeDetector(ICannyOptions options) {
@@ -632,7 +523,7 @@ public class ImageFilterer extends AbstractImageFilterer {
         canny.process();
         BufferedImage edges = canny.getEdgesImage();
 
-        // convert to a TYPE_INT_GREY for use in a ByteProcessor
+        // convert to an unsigned byte processor
         BufferedImage converted = new BufferedImage(edges.getWidth(), edges.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
         converted.getGraphics().drawImage(edges, 0, 0, null);
 
@@ -641,7 +532,6 @@ public class ImageFilterer extends AbstractImageFilterer {
         converted = null;
         ip = result;
         return this;
-        // return new ImageFilterer(result);
     }
 
     /**

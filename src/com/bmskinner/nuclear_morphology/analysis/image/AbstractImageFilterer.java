@@ -289,8 +289,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * Recolour the given 8-bit image to use the given colour, weighting the
      * greyscale values by the HSB saturation level
      * 
-     * @param ip
-     * @param colour
+     * @param ip the image
+     * @param colour the maximum intensity colour for the image 
      * @return a colour processor with the recoloured values
      */
     public static ImageProcessor recolorImage(ImageProcessor ip, Color colour) {
@@ -384,13 +384,13 @@ public abstract class AbstractImageFilterer implements Loggable {
     }
     
     /**
-     * Resize the image to fit the given dimensions, preserving aspect ratio
+     * Resize the image to fit the given dimensions, preserving aspect ratio.
      * 
-     * @param newWidth
-     *            the new width of the image
-     * @return
+     * @param maxWidth the maximum width of the new image
+     * @param maxHeight the maximum height of the new image
+     * @return a new image resized to fit the given dimensions
      */
-    public void resize(int maxWidth, int maxHeight) {
+    public void resizeKeepingAspect(int maxWidth, int maxHeight) {
 
         if (ip == null) {
             throw new IllegalArgumentException("Image processor is null");
@@ -638,10 +638,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * ImageA is coloured red, imageB is coloured blue, and regions of
      * colocalisation will be purple
      * 
-     * @param imageA
-     *            the first image
-     * @param imageB
-     *            the second image
+     * @param imageA the first image
+     * @param imageB the second image
      * @return an image showing colocalisation of pixels
      */
     public static ImageProcessor cowarpalise(ImageProcessor imageA, ImageProcessor imageB) {
@@ -723,8 +721,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Express the given pixel intensity as a fraction of 255
      * 
-     * @param i
-     *            the pixel value
+     * @param i the pixel value
      * @return a value from 0-1
      */
     protected static float getSaturationFromIntensity(int i) {

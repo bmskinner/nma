@@ -92,7 +92,7 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
         ImageFilterer filt = new ImageFilterer(ip);
         ImageIcon ic = filt.toImageIcon();
         ProberTableCell iconCell = new ProberTableCell(ic, label, enabled);
-        filt.resize(maxDimension, maxDimension);
+        filt.resizeKeepingAspect(maxDimension, maxDimension);
         ImageIcon small = filt.toImageIcon();
 
         iconCell.setSmallIcon(small);

@@ -150,7 +150,7 @@ public class FluorescentNucleusFinder extends CellFinder {
             	fireDetectionEvent(ip.duplicate(), "Edge detection");
             }
 
-            filt.morphologyClose(cannyOptions.getClosingObjectRadius());
+            filt.close(cannyOptions.getClosingObjectRadius());
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();
