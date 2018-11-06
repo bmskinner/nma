@@ -88,7 +88,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         int xBase = (int) mesh.toPath().getBounds().getX();
         int yBase = (int) mesh.toPath().getBounds().getY();
 
-        ImageProcessor ip = ImageFilterer.createWhiteByteProcessor(w, h);
+        ImageProcessor ip = ImageFilterer.createBlackByteProcessor(w, h);
 
         // Adjust from absolute position in original target image
         // Note that the consensus will have a position from its template
@@ -163,8 +163,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     }
 
     /**
-     * Find white pixels surrounded by filled pixels, and set them to the
-     * average value. Must have <=3 white pixels touching.
+     * Find black pixels surrounded by filled pixels, and set them to the
+     * average value. Must have <=3 black pixels touching.
      * 
      * @param ip
      */
@@ -173,29 +173,27 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         for (int x = 0; x < ip.getWidth(); x++) {
             for (int y = 0; y < ip.getHeight(); y++) {
 
-                if (ip.get(x, y) < 255)
-                    continue; // skip non-white pixels
+                if (ip.get(x, y) > 0)
+                    continue; // skip non-black pixels
 
-                int white = countSurroundingWhitePixels(x, y, ip);
+                int black = countSurroundingBlackPixels(x, y, ip);
 
-                // We can't interpolate unless there are a decent number of
-                // valid pixels
-                if (white <= 3) {
-                    // interpolate from not white pixels
+                // We can't interpolate unless there are a decent number of valid pixels
+                if (black <= 3) {
+                    // interpolate from not black pixels
                     int pixelsToUse = 0;
                     int pixelValue = 0;
 
                     for (int i = x - 1; i <= x + 1; i++) {
-
                         for (int j = y - 1; j <= y + 1; j++) {
 
-                            int value = 255;
+                            int value = 0;
                             try {
                                 value = ip.get(i, j);
                             } catch (ArrayIndexOutOfBoundsException e) {
                                 continue;
                             }
-                            if (value < 255) {
+                            if (value > 0) {
                                 pixelsToUse++;
                                 pixelValue += value;
                             }
@@ -215,36 +213,29 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     }
 
     /**
-     * Count the number of white pixels surrounding the given pixel
+     * Count the number of black pixels within the 8-connected pixels surrounding the given pixel
      * 
-     * @param x
-     * @param y
-     * @param ip
-     * @return
+     * @param x the x position
+     * @param y the y position
+     * @param ip the image
+     * @return the number of 8-connected pixels with value of zero
      */
-    private int countSurroundingWhitePixels(int x, int y, ImageProcessor ip) {
+    private int countSurroundingBlackPixels(int x, int y, ImageProcessor ip) {
 
-        int white = 0;
+        int black = 0;
         for (int i = x - 1; i <= x + 1; i++) {
-
             for (int j = y - 1; j <= y + 1; j++) {
-
-                if (i == x && j == y) {
+                if (i == x && j == y)
                     continue;
-                }
-
                 try {
-                    if (ip.get(i, j) == 255) {
-                        white++;
-                    }
+                    if (ip.get(i, j) == 0)
+                    	black++;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     continue;
                 }
-
             }
-
         }
-        return white;
+        return black;
     }
 
     @Override
@@ -270,11 +261,9 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
     /**
      * Given an image, find the pixels within the nucleus, and convert them to
-     * face coordinates. Return a map of the face coordinates and their pixel
-     * values
+     * face coordinates.
      * 
-     * @param ip
-     * @return
+     * @param ip the image
      * @throws MeshImageCreationException
      */
     private void makeFaceCoordinates(final ImageProcessor ip) throws MeshImageCreationException {

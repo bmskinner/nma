@@ -212,10 +212,13 @@ public class SignalWarpingModel implements Loggable {
         
         for (WarpedImageKey k : displayImages) {        	
             // The image from the warper is greyscale. Change to use the signal colour
-        	ImageProcessor raw = cache.get(k);
-        	ImageProcessor recol = ImageFilterer.recolorImage(raw, cache.getColour(k));
+        	ImageProcessor raw = cache.get(k); // a short processor
+        	ImageProcessor bp = raw.convertToByteProcessor();
+        	bp.invert();
+        	ImageProcessor recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
         	recol.setMinAndMax(0, cache.getThreshold(k));
             recoloured.add(recol);
+//        	recoloured.add(bp);
         }
 
         if (selectedImageCount() == 1)
@@ -306,15 +309,16 @@ public class SignalWarpingModel implements Loggable {
          * Key to store warped images
          * 
          * @author ben
+         * @since 1.14.0
          *
          */
         public class WarpedImageKey {
 
-        	// These will never change hashcode due to normal activity
+        	// These will never change hashcode during normal activity
         	private final @NonNull UUID targetId;
         	private final @NonNull UUID templateId;
             private final @NonNull String targetName;
-            private final @NonNull UUID              signalGroupId;
+            private final @NonNull UUID  signalGroupId;
             private final boolean isOnlyCellsWithSignals;
         	
          // These may change hashcode due to normal activity, so should not be part of the hashed key

@@ -497,6 +497,12 @@ public abstract class AbstractImageFilterer implements Loggable {
             minIntensity = 255;
             result = new ColorProcessor(ip.getWidth(), ip.getHeight());
         }
+        
+        if (ip instanceof ShortProcessor) {
+            maxIntensity = 0;
+            minIntensity = Short.MAX_VALUE;
+            result = new ShortProcessor(ip.getWidth(), ip.getHeight());
+        }
 
         if (result == null) {
             throw new IllegalArgumentException("Unsupported image type: " + ip.getClass().getSimpleName());
@@ -553,7 +559,7 @@ public abstract class AbstractImageFilterer implements Loggable {
             nonNull++;
         }
         // Create an empty white processor of the correct dimensions
-        ImageProcessor mergeProcessor = ImageFilterer.createWhiteByteProcessor(w, h);
+        ImageProcessor mergeProcessor = ImageFilterer.createBlackByteProcessor(w, h);
 
         if (nonNull == 0)
             return mergeProcessor;
@@ -572,13 +578,59 @@ public abstract class AbstractImageFilterer implements Loggable {
 
                 pixelTotal /= nonNull; // scale back down to 0-255;
 
-                if (pixelTotal < 255) {// Ignore anything that is not signal -
-                                       // the background is already white
+                // Ignore anything that is not signal -
+                // the background is already black
+                if (pixelTotal > 0) {
                     mergeProcessor.set(x, y, pixelTotal);
                 }
             }
         }
         return mergeProcessor;
+    }
+    
+    /**
+     * Create a new 16-bit image processor with the sum of all the non-null
+     * 8-bit images in the given list
+     * 
+     * @return
+     */
+    public static ImageProcessor addByteImages(@NonNull List<ImageProcessor> list) {
+    	 if (list == null || list.isEmpty())
+             throw new IllegalArgumentException("List null or empty");
+
+         // Check images are same dimensions
+         int w = list.get(0).getWidth();
+         int h = list.get(0).getHeight();
+         int nonNull = 0;
+      
+         // check sizes match
+         for (ImageProcessor ip : list) {
+             if (ip == null)
+                 continue;
+             if (w != ip.getWidth() || h != ip.getHeight())
+                 throw new IllegalArgumentException("Dimensions do not match");
+             nonNull++;
+         }
+         // Create an empty white processor of the correct dimensions
+         ImageProcessor mergeProcessor = new ShortProcessor (w, h);
+
+         if (nonNull == 0)
+             return mergeProcessor;
+
+         // Average the pixels
+         for (int x = 0; x < w; x++) {
+             for (int y = 0; y < h; y++) {
+
+                 int pixelTotal = 0;
+                 for (ImageProcessor ip : list) {
+                     if (ip == null)
+                         continue;
+                     pixelTotal+= ip.get(x, y);
+                 }
+                 mergeProcessor.set(x, y, pixelTotal);
+             }
+         }
+         return mergeProcessor;
     }
 
     /**
@@ -697,10 +749,9 @@ public abstract class AbstractImageFilterer implements Loggable {
         for (ImageProcessor ip : list) {
 
             if (ip == null)
-                throw new IllegalArgumentException("Null image in list");
-
+                throw new IllegalArgumentException("Cannot average: a null warp image was encountered");
             if (w != ip.getWidth() || h != ip.getHeight())
-                throw new IllegalArgumentException("Dimensions do not match");
+                throw new IllegalArgumentException(String.format("Image dimensions %s by %s do not match expected dimensions %s by %s", w, h, ip.getWidth(), ip.getHeight()));
         }
 
         ImageProcessor cp = new ColorProcessor(w, h);

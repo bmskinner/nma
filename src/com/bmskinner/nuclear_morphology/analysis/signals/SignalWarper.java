@@ -48,6 +48,8 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
+import ij.ImageStack;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -83,7 +85,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
     private HashOptions warpingOptions;
         
     /** The warped images to be merged */
-    private final List<ImageProcessor>     warpedImages = new ArrayList<>();
+    private final List<ImageProcessor> warpedImages = new ArrayList<>();
     
     /** The number of cell images to be merged */
     private int totalCells;
@@ -199,6 +201,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    ImageProcessor ip;
 		    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will throw exception
 		    	ip = n.getSignalCollection().getImage(signalGroup);
+		    	ip.invert();
 		    } else {
 		    	// We need to get the file in which no signals were detected
 		    	// This is not stored in a nucleus, so combine the expected file name with the source folder
@@ -219,17 +222,17 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 
 		} catch (IllegalArgumentException e) {
 		    fine(e.getMessage());
-		    warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
+		    warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
 		} catch (UnloadableImageException | ImageImportException e) {
 			fine(String.format("Unable to load signal image for signal group %s in nucleus %s ",
 					 signalGroup, n.getNameAndNumber()));
-		    warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
+		    warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
 		} catch (MeshCreationException e1) {
 			fine("Error creating mesh");
-		    warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
+		    warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
 		} catch (UncomparableMeshImageException | MeshImageCreationException e) {
 			fine("Cannot make mesh for " + n.getNameAndNumber());
-			 warpedImages.add(ImageFilterer.createWhiteByteProcessor(w, h));
+			 warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
 		}
 	}
 	
@@ -237,8 +240,27 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	 * Merge the warped images to a final image
 	 */
 	private ImageProcessor mergeWarpedImages() {
-		ImageProcessor mergedImage = ImageFilterer.averageByteImages(warpedImages);
-		return ImageFilterer.rescaleImageIntensity(mergedImage);
+		
+//		ImageStack st = new ImageStack(warpedImages.get(0).getWidth(), warpedImages.get(0).getHeight());
+//		for(ImageProcessor ip : warpedImages)
+//			st.addSlice(ip);
+//		ImagePlus img = new ImagePlus("Stack", st);
+//		img.show();
+		
+//		ImageProcessor fp = new FloatProcessor(st.getWidth(), st.getHeight());
+		
+		ImageProcessor mergedImage = ImageFilterer.addByteImages(warpedImages);
+		
+//		ImagePlus img2 = new ImagePlus("Added", mergedImage);
+//		img2.show();
+		
+//		ImageProcessor scaledImage = ImageFilterer.rescaleImageIntensity(mergedImage);
+		
+//		ImagePlus img3 = new ImagePlus("Scaled", scaledImage);
+//		img3.show();
+		
+		return mergedImage;
+//		return ImageFilterer.rescaleImageIntensity(mergedImage);
 	}
 
 

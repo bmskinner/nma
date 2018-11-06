@@ -306,7 +306,7 @@ public class DefaultSignalCollection implements ISignalCollection {
         int c = this.getSourceChannel(signalGroup);
 
         try {
-            return new ImageImporter(f).importImage(c);
+            return new ImageImporter(f).importImageAndInvert(c);
         } catch (ImageImportException e) {
             stack("Error importing image source file " + f.getAbsolutePath(), e);
             throw new UnloadableImageException("Unable to load signal image", e);

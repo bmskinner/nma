@@ -645,7 +645,7 @@ public class SignalCollection implements ISignalCollection {
         int channel = this.sourceChannels.get(signalGroup);
 
         try {
-            return new ImageImporter(f).importImage(channel);
+            return new ImageImporter(f).importImageAndInvert(channel);
         } catch (ImageImportException e) {
             error("Error importing image source file " + f.getAbsolutePath(), e);
             return null;

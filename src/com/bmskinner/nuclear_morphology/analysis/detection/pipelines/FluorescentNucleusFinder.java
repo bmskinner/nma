@@ -74,7 +74,7 @@ public class FluorescentNucleusFinder extends CellFinder {
             // Display passing and failing size nuclei
             if (hasDetectionListeners()) {
 
-                ImageProcessor original = new ImageImporter(imageFile).importImage(nuclOptions.getChannel())
+                ImageProcessor original = new ImageImporter(imageFile).importImageAndInvert(nuclOptions.getChannel())
                         .convertToRGB();
                 ImageAnnotator ann = new ImageAnnotator(original);
 
