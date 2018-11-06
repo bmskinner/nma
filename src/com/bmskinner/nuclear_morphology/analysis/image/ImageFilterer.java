@@ -47,6 +47,7 @@ import mmorpho.StructureElement;
  * background removal and edge detection.
  * 
  * @author ben
+ * @since 1.11.0
  *
  */
 public class ImageFilterer extends AbstractImageFilterer {
@@ -60,11 +61,12 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Apply a thresholding on a greyscale processor. Has no effect if the
-     * processor is not greyscale
+     * Apply a binary thresholding to a greyscale processor. Has no effect if the
+     * processor is not greyscale.
      * 
-     * @param threshold
-     * @return
+     * @param threshold the threshold value.
+     * @return this filterer with the binary thresholded image.
+     * @see ImageProcessor#threshold(int)
      */
     public ImageFilterer threshold(int threshold) {
         if (ip.isGrayscale()) 
@@ -75,21 +77,21 @@ public class ImageFilterer extends AbstractImageFilterer {
     /**
      * Run a Kuwahara filter to enhance edges in the image
      * 
-     * @param stack the image
-     * @param filterSize the radius of the kernel
+     * @param stackNumber the image processor in the stack to filter (1-indexed)
+     * @param kernelRadius the radius of the kernel
      */
-    public ImageFilterer runKuwaharaFiltering(int stackNumber, int filterSize) {
+    public ImageFilterer kuwaharaFilter(int stackNumber, int kernelRadius) {
         ip = st.getProcessor(stackNumber).duplicate();
-        return runKuwaharaFiltering(filterSize);
+        return kuwaharaFilter(kernelRadius);
     }
 
     /**
      * Run a Kuwahara filter to enhance edges in the image
      * 
-     * @param filterSize the radius of the kernel
+     * @param kernelRadius the radius of the kernel
      * @return a new ImageFilterer with the processed image
      */
-    public ImageFilterer runKuwaharaFiltering(int filterSize) {
+    public ImageFilterer kuwaharaFilter(int kernelRadius) {
 
         Kuwahara_Filter kw = new Kuwahara_Filter();
         ImagePlus img = new ImagePlus("", ip);
@@ -97,7 +99,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 
         ImageProcessor result = ip.duplicate();
 
-        kw.filter(result, filterSize);
+        kw.filter(result, kernelRadius);
         ip = result;
         return this;
     }
@@ -109,9 +111,9 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @param threshold the minimum intensity to allow
      * @return this filterer
      */
-    public ImageFilterer setMinimumPixelValue(int stackNumber, int threshold) {
+    public ImageFilterer setBlackLevel(int stackNumber, int threshold) {
         ip = st.getProcessor(stackNumber);
-        ip = setMinimumPixelValue(threshold).ip;
+        ip = setBlackLevel(threshold).ip;
         return this;
     }
 
@@ -121,11 +123,39 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @param threshold the minimum intensity to allow
      * @return this filterer
      */
-    public ImageFilterer setMinimumPixelValue(int threshold) {
+    public ImageFilterer setBlackLevel(int threshold) {
         ImageProcessor result = ip.duplicate();
         for (int i = 0; i < result.getPixelCount(); i++) {
             if (result.get(i) < threshold)
                 result.set(i, 0);
+        }
+        return new ImageFilterer(result);
+    }
+    
+    /**
+     * Make any pixel above the threshold equal to the maximum intensity.
+     * 
+     * @param stackNumber the plane in the stack (1-indexed)
+     * @param threshold the maximum intensity
+     * @return this filterer
+     */
+    public ImageFilterer setWhiteLevel(int stackNumber, int threshold) {
+        ip = st.getProcessor(stackNumber);
+        ip = setWhiteLevel(threshold).ip;
+        return this;
+    }
+
+    /**
+     * Make any pixel above the threshold equal to the maximum intensity.
+     * 
+     * @param threshold the maximum intensity
+     * @return this filterer
+     */
+    public ImageFilterer setWhiteLevel(int threshold) {
+        ImageProcessor result = ip.duplicate();
+        for (int i = 0; i < result.getPixelCount(); i++) {
+            if (result.get(i) > threshold)
+                result.set(i, BYTE_MAX);
         }
         return new ImageFilterer(result);
     }
@@ -167,22 +197,34 @@ public class ImageFilterer extends AbstractImageFilterer {
         ip = result;
         return this;
     }
-
+    
     /**
-     * Make any pixel below the threshold equal the threshold.
+     *  Make any pixel value below the threshold equal to the threshold.
      * 
-     * @param threshold the maximum intensity to allow
+     * @param stackNumber the plane in the stack (1-indexed)
+     * @param threshold the minimum pixel value
      * @return this filterer
      */
-    public ImageFilterer raise(int threshold) {
+    public ImageFilterer setMinimumPixelValue(int stackNumber, int threshold) {
+        ip = st.getProcessor(stackNumber);
+        ImageProcessor result = setMinimumPixelValue(threshold).ip;
+        ip = result;
+        return this;
+    }
+
+    /**
+     * Make any pixel value below the threshold equal to the threshold.
+     * 
+     * @param threshold the minimum pixel value
+     * @return this filterer
+     */
+    public ImageFilterer setMinimumPixelValue(int threshold) {
 
         ImageProcessor result = ip.duplicate();
 
         for (int i = 0; i < result.getPixelCount(); i++) {
-
-            if (result.get(i) < threshold) {
+            if (result.get(i) < threshold)
                 result.set(i, threshold);
-            }
         }
         ip = result;
         return this;
@@ -322,7 +364,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @param y the central y point
      * @return
      */
-    public int[][] getKernel(int[][] array, int x, int y) {
+    private int[][] getKernel(int[][] array, int x, int y) {
 
         /*
          * Create the kernel array, and zero it
@@ -361,11 +403,10 @@ public class ImageFilterer extends AbstractImageFilterer {
      * Should a pixel kernel be bridged? If two or more pixels in the array are
      * filled, and not connected, return true
      * 
-     * @param array
-     *            the 3x3 array of pixels
+     * @param array the 3x3 array of pixels
      * @return
      */
-    public boolean bridgePixel(int[][] array) {
+    private boolean bridgePixel(int[][] array) {
 
         /*
          * If the central pixel is filled, do nothing.
@@ -611,7 +652,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return the median pixel intensity
      */
     private double findMedianIntensity(ImageProcessor image) {
-        int max = image.getWidth()*image.getHeight();
+        int max = image.getPixelCount();
         double[] values = new double[max];
         for(int i=0; i<max; i++)
         	values[i]=image.get(i);

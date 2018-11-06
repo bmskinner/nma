@@ -212,7 +212,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    }
 		    
 		    if(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)>0)
-	    		ip = new ImageFilterer(ip).setMinimumPixelValue(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)).toProcessor();
+	    		ip = new ImageFilterer(ip).setBlackLevel(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)).toProcessor();
 
 		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
 

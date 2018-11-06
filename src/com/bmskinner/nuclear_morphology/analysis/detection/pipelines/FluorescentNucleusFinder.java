@@ -125,7 +125,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         ImageFilterer filt = new ImageFilterer(ip.duplicate());
         if (cannyOptions.isUseKuwahara()) {
-            filt.runKuwaharaFiltering(cannyOptions.getKuwaharaKernel());
+            filt.kuwaharaFilter(cannyOptions.getKuwaharaKernel());
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();

@@ -45,6 +45,7 @@ import ij.process.TypeConverter;
 public abstract class AbstractImageFilterer implements Loggable {
 
     private static final int RGB_WHITE = 16777215;
+    protected static final int BYTE_MAX  = 255;
     protected ImageProcessor ip        = null;
     protected ImageStack     st        = null;
 
