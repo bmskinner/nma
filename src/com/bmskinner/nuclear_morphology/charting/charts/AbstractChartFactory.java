@@ -91,21 +91,11 @@ public abstract class AbstractChartFactory implements Loggable {
     }
 
     /**
-     * Create an empty chart appropriate for the factory chart type - e.g. a
-     * category chart for a boxplot factory, or an XY chart for a scatter
-     * factory
-     * 
-     * @return
-     */
-    // public static JFreeChart makeEmptyChart();
-
-    /**
      * Get a series or dataset index for colour selection when drawing charts.
      * The index is set in the DatasetCreator as part of the label. The format
      * is Name_index_other
      * 
-     * @param label
-     *            the label to extract the index from
+     * @param label the label to extract the index from
      * @return the index found
      */
     public static int getIndexFromLabel(String label) {

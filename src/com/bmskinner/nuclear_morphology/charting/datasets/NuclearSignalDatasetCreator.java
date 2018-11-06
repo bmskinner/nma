@@ -153,13 +153,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     /**
      * Create a boxplot dataset for signal statistics
      * 
-     * @param options
-     *            the chart options
      * @return a boxplot dataset
      * @throws Exception
      */
-    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset() throws ChartDatasetCreationException {
-
+    public NuclearSignalBoxAndWhiskerDataset createSignalStatisticBoxplotDataset() throws ChartDatasetCreationException {
         return createMultiDatasetSignalStatisticBoxplotDataset();
     }
 
@@ -167,15 +164,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * Create a boxplot dataset for signal statistics for a single analysis
      * dataset
      * 
-     * @param dataset
-     *            the AnalysisDataset to get signal info from
      * @return a boxplot dataset
      * @throws ChartDatasetCreationException
      */
-    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset()
+    private NuclearSignalBoxAndWhiskerDataset createMultiDatasetSignalStatisticBoxplotDataset()
             throws ChartDatasetCreationException {
 
-        ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
+    	NuclearSignalBoxAndWhiskerDataset result = new NuclearSignalBoxAndWhiskerDataset();
         PlottableStatistic stat = options.getStat();
 
         for (IAnalysisDataset d : options.getDatasets()) {
@@ -199,7 +194,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                     list.add(value);
                 }
 
-                result.add(list, CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup, collection.getName());
+                result.add(signalGroup, list, CellularComponent.NUCLEAR_SIGNAL, collection.getName());
             }
         }
         return result;
