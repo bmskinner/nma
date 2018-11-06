@@ -29,9 +29,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Manages the threading and task queue. Analysis methods and UI
+ * updates are treated separately for smoother UI refreshes.
+ * @author bms41
+ * @since 1.13.0
+ *
+ */
 public class ThreadManager implements Loggable {
     private static volatile ThreadManager instance   = null;
-    private static final Object           lockObject = new Object(); // synchronisation
+    
+    /** Object to lock on for synchronisation */
+    private static final Object lockObject = new Object();
    
     public static final int keepAliveTime   = 10000;
     
@@ -50,7 +59,10 @@ public class ThreadManager implements Loggable {
     private AtomicInteger uiQueueLength     = new AtomicInteger();
     private AtomicInteger methodQueueLength = new AtomicInteger();
     
-    protected ThreadManager() {
+    /**
+     * Private constructor since this should be accessed as a singleton
+     */
+    private ThreadManager() {
     	int maxThreads = Runtime.getRuntime().availableProcessors();
     	if(maxThreads>1)
     		maxThreads-=1; // leave something for the OS, EDT etc.
@@ -66,15 +78,7 @@ public class ThreadManager implements Loggable {
     	uiExecutorService = new ThreadPoolExecutor(uiThreads, uiThreads, keepAliveTime,
                 TimeUnit.MILLISECONDS, uiQueue);
     }
-    
-    public int uiQueueLength(){
-    	return uiQueueLength.get();
-    }
-    
-    public int methodQueueLength(){
-    	return methodQueueLength.get();
-    }
-    
+        
     /**
      * Fetch an instance
      * 
@@ -90,6 +94,14 @@ public class ThreadManager implements Loggable {
 		    }
 		}
 		return instance;
+    }
+    
+    public int uiQueueLength(){
+    	return uiQueueLength.get();
+    }
+    
+    public int methodQueueLength(){
+    	return methodQueueLength.get();
     }
     
     @Override
@@ -139,7 +151,6 @@ public class ThreadManager implements Loggable {
     		try {
 				o = r.call();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			}
@@ -156,6 +167,7 @@ public class ThreadManager implements Loggable {
      * when done, and allows access to the original Runnable for checking
      * the class.
      * @author ben
+     * @since 1.14.0
      *
      */
     private class TrackedRunnable implements Runnable {

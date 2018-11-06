@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -52,8 +53,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Construct with an image processor
      * 
-     * @param ip
-     *            the image processor
+     * @param ip the image processor
      */
     public AbstractImageFilterer(final ImageProcessor ip) {
         this.ip = ip;
@@ -62,8 +62,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Construct with an image processor from an image
      * 
-     * @param img
-     *            the image
+     * @param img the image
      */
     public AbstractImageFilterer(final ImagePlus img) {
         this(img.getProcessor());
@@ -72,8 +71,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Construct from a stack
      * 
-     * @param st
-     *            the image stack
+     * @param st the image stack
      */
     public AbstractImageFilterer(final ImageStack st) {
         this.st = st;
@@ -82,8 +80,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Duplicate the filterer - use the template processor and stack
      * 
-     * @param f
-     *            the template filterer
+     * @param f the template filterer
      */
     public AbstractImageFilterer(final AbstractImageFilterer f) {
         this.ip = f.ip;
@@ -123,9 +120,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public ImageProcessor toProcessor() {
-        if (ip == null) {
+        if (ip == null)
             throw new NullPointerException("Filterer does not contain an image processor");
-        }
         return ip;
     }
 
@@ -202,7 +198,6 @@ public abstract class AbstractImageFilterer implements Loggable {
      */
     public AbstractImageFilterer convertToColorProcessor() {
         if (!isColorProcessor()) {
-
             TypeConverter tc = new TypeConverter(ip, false);
             ip = tc.convertToRGB();
         }
@@ -215,9 +210,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public ImageStack toStack() {
-        if (st == null) {
+        if (st == null)
             throw new NullPointerException("Filterer does not contain an image stack");
-        }
         return st;
     }
 
@@ -227,27 +221,35 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public ImageIcon toImageIcon() {
-        if (ip == null) {
+        if (ip == null)
             throw new NullPointerException("Filterer does not contain an image processor");
-        }
         return new ImageIcon(ip.getBufferedImage());
     }
     
     /**
-     * Create an empty white byte processor
+     * Get the current image as a buffered image. If the filterer contains a
+     * stack, returns the first element of the stack
+     * @return
+     */
+    public BufferedImage toBufferedImage() {
+    	if (ip==null && st==null)
+            throw new NullPointerException("Filterer does not contain an image processor");
+    	if(ip!=null)
+    		return ip.getBufferedImage();
+    	return st.getProcessor(1).getBufferedImage();
+    }
+    
+    /**
+     * Create a white RGB colour processor
      * 
      * @param w the width
      * @param h the height
      * @return
      */
-    public static ImageProcessor createBlankColorProcessor(int w, int h) {
-
-        // Create an empty white processor
+    public static ImageProcessor createWhiteColorProcessor(int w, int h) {
         ImageProcessor ip = new ColorProcessor(w, h);
-        for (int i = 0; i < ip.getPixelCount(); i++) {
+        for (int i = 0; i < ip.getPixelCount(); i++)
             ip.set(i, RGB_WHITE); // set all to white initially
-        }
-
         return ip;
     }
 
@@ -259,13 +261,10 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public static ImageProcessor createWhiteByteProcessor(int w, int h) {
-
-        // Create an empty white processor
         ImageProcessor ip = new ByteProcessor(w, h);
         for (int i = 0; i < ip.getPixelCount(); i++) {
             ip.set(i, 255); // set all to white initially
         }
-
         return ip;
     }
     
@@ -277,12 +276,9 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public static ImageProcessor createBlackByteProcessor(int w, int h) {
-
-        // Create an empty white processor
         ImageProcessor ip = new ByteProcessor(w, h);
-        for (int i = 0; i < ip.getPixelCount(); i++) {
+        for (int i = 0; i < ip.getPixelCount(); i++)
             ip.set(i, 0);
-        }
         return ip;
     }
 

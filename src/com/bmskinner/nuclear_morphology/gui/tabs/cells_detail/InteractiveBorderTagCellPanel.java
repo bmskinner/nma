@@ -106,7 +106,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				ip = component.getImage();
 				
 			} catch(UnloadableImageException e){
-				ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
+				ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
 			}
 
 			ImageAnnotator an = new ImageAnnotator(ip);
@@ -123,34 +123,40 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			}    
 			
 			imageLabel.setIcon(an2.toImageIcon());
-			input = an2.toProcessor().getBufferedImage();
+			input = an2.toBufferedImage();
 			sourceWidth = an.toProcessor().getWidth();
 			sourceHeight = an.toProcessor().getHeight();
 			
-			for(MouseListener l : imageLabel.getMouseListeners()) {
+			for(MouseListener l : imageLabel.getMouseListeners())
 				imageLabel.removeMouseListener(l);
-			}
-			for(MouseMotionListener l : imageLabel.getMouseMotionListeners()) {
+
+			for(MouseMotionListener l : imageLabel.getMouseMotionListeners())
 				imageLabel.removeMouseMotionListener(l);
-			}
-			for(MouseWheelListener l : imageLabel.getMouseWheelListeners()) {
+
+			for(MouseWheelListener l : imageLabel.getMouseWheelListeners())
 				imageLabel.removeMouseWheelListener(l);
-			}
 			
 			imageLabel.addMouseWheelListener(new MouseAdapter() {
 				
+				private static final int MAX_BIG_RADIUS = 200;
+				private static final int MIN_BIG_RADIUS = 10;
+				private static final int MAX_SMALL_RADIUS = 100;
+				private static final int MIN_SMALL_RADIUS = 5;
+				
 				@Override
 	            public synchronized void mouseWheelMoved(MouseWheelEvent e) {
+					// Modify the square size
 	                if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
 	                    InputEvent.CTRL_DOWN_MASK){
 	                	int temp = smallRadius +( 1*e.getWheelRotation());
-	                	temp = temp>100?100:temp;
-	                	temp = temp<5?5:temp;
+	                	temp = temp>MAX_SMALL_RADIUS?MAX_SMALL_RADIUS:temp;
+	                	temp = temp<MAX_SMALL_RADIUS?MAX_SMALL_RADIUS:temp;
 	                    smallRadius = temp;
 	                } else {
+	                	// Modify the zoom
 	                	int temp = bigRadius +( 3 * e.getWheelRotation());
-	                	temp = temp>200?200:temp;
-	                	temp = temp<10?10:temp;
+	                	temp = temp>MAX_BIG_RADIUS?MAX_BIG_RADIUS:temp;
+	                	temp = temp<MIN_BIG_RADIUS?MIN_BIG_RADIUS:temp;
 	                	bigRadius = temp;
 	                }
 	                IPoint p = translatePanelLocationToRenderedImage(e); 
@@ -279,7 +285,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				try{
 					ip = component.getImage();
 				} catch(UnloadableImageException e){
-					ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
+					ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
 				}
 				ImageAnnotator an = new ImageAnnotator(ip);
 
@@ -314,7 +320,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				try{
 					ip = component.getImage();
 				} catch(UnloadableImageException e){
-					ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
+					ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
 				}
 				ImageAnnotator an = new ImageAnnotator(ip);
 
