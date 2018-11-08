@@ -225,7 +225,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         // Note - variability will remain zero here
         // These stats are specific to nuclei
                 
-        if (PlottableStatistic.ASPECT.equals(stat))
+        if (PlottableStatistic.ELLIPTICITY.equals(stat))
             return getAspectRatio();
 
         if (PlottableStatistic.BOUNDING_HEIGHT.equals(stat))
@@ -385,7 +385,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         setStatistic(PlottableStatistic.BOUNDING_WIDTH, w);
 
         double aspect = h / w;
-        setStatistic(PlottableStatistic.ASPECT, aspect);
+        setStatistic(PlottableStatistic.ELLIPTICITY, aspect);
 
         setStatistic(PlottableStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
         setStatistic(PlottableStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);

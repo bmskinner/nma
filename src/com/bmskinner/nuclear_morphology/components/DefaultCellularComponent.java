@@ -1309,7 +1309,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             }
 
             if (stat.equals(NucleusStatistic.ASPECT)) {
-                statistics.put(PlottableStatistic.ASPECT, value);
+                statistics.put(PlottableStatistic.ELLIPTICITY, value);
             }
 
             if (stat.equals(NucleusStatistic.BOUNDING_HEIGHT)) {

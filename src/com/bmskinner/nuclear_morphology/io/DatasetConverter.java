@@ -98,7 +98,7 @@ public class DatasetConverter implements Loggable, Importer {
     protected static final Map<SegmentStatistic, PlottableStatistic> SEGMENT_STATS_MAP = new HashMap<>();
     static {
         NUCLEUS_STATS_MAP.put(NucleusStatistic.AREA, PlottableStatistic.AREA);
-        NUCLEUS_STATS_MAP.put(NucleusStatistic.ASPECT, PlottableStatistic.ASPECT);
+        NUCLEUS_STATS_MAP.put(NucleusStatistic.ASPECT, PlottableStatistic.ELLIPTICITY);
         NUCLEUS_STATS_MAP.put(NucleusStatistic.BODY_WIDTH, PlottableStatistic.BODY_WIDTH);
         NUCLEUS_STATS_MAP.put(NucleusStatistic.BOUNDING_HEIGHT, PlottableStatistic.BOUNDING_HEIGHT);
         NUCLEUS_STATS_MAP.put(NucleusStatistic.BOUNDING_WIDTH, PlottableStatistic.BOUNDING_WIDTH);
