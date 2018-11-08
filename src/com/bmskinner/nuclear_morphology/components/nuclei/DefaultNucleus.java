@@ -233,10 +233,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         
         if (PlottableStatistic.ELONGATION.equals(stat))
             return calculateElongation();
-        
-        if (PlottableStatistic.RUGOSITY.equals(stat))
-            return calculateRugosity();
-        
+                
         if (PlottableStatistic.REGULARITY.equals(stat))
             return calculateRegularity();
 
@@ -259,18 +256,21 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         return result;
     }
     
+    /**
+     * Calculate the elongation of the object 
+     * @return
+     */
     private double calculateElongation() {
     	double h = getVerticallyRotatedNucleus().getBounds().getHeight();
         double w = getVerticallyRotatedNucleus().getBounds().getWidth();
         return (h-w)/(h+w);
     }
 
-    private double calculateRugosity() {
-    	double p = getStatistic(PlottableStatistic.PERIMETER);
-        double a = getStatistic(PlottableStatistic.AREA);
-        return (Math.PI*4*a)/(p*p);
-    }
 
+    /**
+     * Calculate the regularity of the object 
+     * @return
+     */
     private double calculateRegularity() {
     	double h = getVerticallyRotatedNucleus().getBounds().getHeight();
         double w = getVerticallyRotatedNucleus().getBounds().getWidth();
@@ -278,10 +278,18 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         return (Math.PI*h*w)/(4*a);
     }
     
+    /**
+     * Calculate the aspect of the object 
+     * @return
+     */
     private double calculateAspect() {
     	 return 1d/calculateEllipticity();
     }
 
+    /**
+     * Calculate the ellipticity of the object 
+     * @return
+     */
     private double calculateEllipticity() {
         double h = getVerticallyRotatedNucleus().getBounds().getHeight();
         double w = getVerticallyRotatedNucleus().getBounds().getWidth();

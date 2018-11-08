@@ -612,21 +612,21 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // Do not add getters for values added at creation time
         // or you'll get infinite loops when things break
         if (PlottableStatistic.CIRCULARITY.equals(stat))
-            return this.getCircularity();
+            return this.calculateCircularity();
         return result;
     }
-
+    
     /**
-     * 
+     * Calculate the circularity of the object
      * @return
      */
-    private double getCircularity() {
-        if (this.hasStatistic(PlottableStatistic.PERIMETER) && this.hasStatistic(PlottableStatistic.AREA)) {
-            double perim2 = Math.pow(this.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
-            return (4 * Math.PI) * (this.getStatistic(PlottableStatistic.AREA, MeasurementScale.PIXELS) / perim2);
-        }
-		return ERROR_CALCULATING_STAT;
-
+    private double calculateCircularity() {
+    	if (hasStatistic(PlottableStatistic.PERIMETER) && hasStatistic(PlottableStatistic.AREA)) {
+    		double p = getStatistic(PlottableStatistic.PERIMETER);
+    		double a = getStatistic(PlottableStatistic.AREA);
+    		return (Math.PI*4*a)/(p*p);
+    	}
+    	return ERROR_CALCULATING_STAT;
     }
 
     @Override
