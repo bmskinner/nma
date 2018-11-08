@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -160,7 +161,25 @@ public class DatasetConverter implements Loggable, Importer {
     		result = convertUpTo1_13_2(result);
     	if(result.getVersion().isOlderThan(Version.v_1_14_0))
     		result = convertUpTo1_14_0(result);
+    	if(result.getVersion().isOlderThan(Version.v_1_15_0))
+    		result = convertUpTo1_15_0(result);
     	return result;
+    }
+    
+    /**
+     * Update earlier versions to 1.15.0. The change here was making aspect ellipticity,
+     * and adding a new method for calculating aspect.
+     * @param template the dataset to update
+     * @return the template
+     * @throws DatasetConversionException
+     */
+    private IAnalysisDataset convertUpTo1_15_0(@NonNull IAnalysisDataset template) throws DatasetConversionException {
+    	for(Nucleus n : template.getCollection().getNuclei()) {
+    		n.setStatistic(PlottableStatistic.ASPECT, Statistical.STAT_NOT_CALCULATED);
+    		n.setStatistic(PlottableStatistic.ELLIPTICITY, Statistical.STAT_NOT_CALCULATED);
+    		n.updateDependentStats();
+    	}
+        return template;
     }
     
     private IAnalysisDataset convertUpTo1_13_2(@NonNull IAnalysisDataset template) throws DatasetConversionException {
