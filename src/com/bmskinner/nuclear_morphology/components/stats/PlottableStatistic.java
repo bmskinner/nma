@@ -50,6 +50,9 @@ public interface PlottableStatistic extends Serializable {
 		static final String ELLIPTICITY      = "Ellipticity";
 		static final String ASPECT           = "Aspect ratio";
 		static final String CIRCULARITY      = "Circularity";
+		static final String ELONGATION       = "Elongation";
+		static final String REGULARITY       = "Regularity";
+		static final String RUGOSITY         = "Rugosity";
 		static final String VARIABILITY      = "Difference from median";
 		static final String BOUNDING_HEIGHT  = "Bounding height";
 		static final String BOUNDING_WIDTH   = "Bounding width";
@@ -80,6 +83,9 @@ public interface PlottableStatistic extends Serializable {
     static final PlottableStatistic ASPECT          = new GenericStatistic(Names.ASPECT,          StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic CIRCULARITY     = new GenericStatistic(Names.CIRCULARITY,     StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic VARIABILITY     = new GenericStatistic(Names.VARIABILITY,     StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic ELONGATION      = new GenericStatistic(Names.ELONGATION,      StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic REGULARITY      = new GenericStatistic(Names.REGULARITY,      StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic RUGOSITY        = new GenericStatistic(Names.RUGOSITY,        StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic(Names.BOUNDING_HEIGHT, StatisticDimension.LENGTH);
     static final PlottableStatistic BOUNDING_WIDTH  = new GenericStatistic(Names.BOUNDING_WIDTH,  StatisticDimension.LENGTH);
     static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic(Names.OP_RP_ANGLE,     StatisticDimension.ANGLE);
@@ -137,6 +143,9 @@ public interface PlottableStatistic extends Serializable {
     	list.add(ASPECT);
     	list.add(CIRCULARITY);
     	list.add(VARIABILITY);
+    	list.add(ELONGATION);
+    	list.add(REGULARITY);
+    	list.add(RUGOSITY);
     	list.add(BOUNDING_HEIGHT);
     	list.add(BOUNDING_WIDTH);
     	list.add(OP_RP_ANGLE);
@@ -236,6 +245,9 @@ public interface PlottableStatistic extends Serializable {
         list.add(MIN_DIAMETER);
         list.add(ELLIPTICITY);
         list.add(ASPECT);
+        list.add(ELONGATION);
+    	list.add(REGULARITY);
+    	list.add(RUGOSITY);
         list.add(VARIABILITY);
         list.add(BOUNDING_HEIGHT);
         list.add(BOUNDING_WIDTH);
