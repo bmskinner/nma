@@ -48,6 +48,7 @@ public interface PlottableStatistic extends Serializable {
 		static final String MAX_FERET        = "Max feret";
 		static final String MIN_DIAMETER     = "Min diameter";
 		static final String ELLIPTICITY      = "Ellipticity";
+		static final String ASPECT           = "Aspect ratio";
 		static final String CIRCULARITY      = "Circularity";
 		static final String VARIABILITY      = "Difference from median";
 		static final String BOUNDING_HEIGHT  = "Bounding height";
@@ -76,6 +77,7 @@ public interface PlottableStatistic extends Serializable {
     static final PlottableStatistic MAX_FERET       = new GenericStatistic(Names.MAX_FERET,       StatisticDimension.LENGTH);
     static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic(Names.MIN_DIAMETER,    StatisticDimension.LENGTH);
     static final PlottableStatistic ELLIPTICITY     = new GenericStatistic(Names.ELLIPTICITY,     StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic ASPECT          = new GenericStatistic(Names.ASPECT,          StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic CIRCULARITY     = new GenericStatistic(Names.CIRCULARITY,     StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic VARIABILITY     = new GenericStatistic(Names.VARIABILITY,     StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic(Names.BOUNDING_HEIGHT, StatisticDimension.LENGTH);
@@ -132,6 +134,7 @@ public interface PlottableStatistic extends Serializable {
     	list.add(MAX_FERET);
     	list.add(MIN_DIAMETER);
     	list.add(ELLIPTICITY);
+    	list.add(ASPECT);
     	list.add(CIRCULARITY);
     	list.add(VARIABILITY);
     	list.add(BOUNDING_HEIGHT);
@@ -232,6 +235,7 @@ public interface PlottableStatistic extends Serializable {
         List<PlottableStatistic> list = getComponentStats();
         list.add(MIN_DIAMETER);
         list.add(ELLIPTICITY);
+        list.add(ASPECT);
         list.add(VARIABILITY);
         list.add(BOUNDING_HEIGHT);
         list.add(BOUNDING_WIDTH);

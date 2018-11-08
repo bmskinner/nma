@@ -226,7 +226,10 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         // These stats are specific to nuclei
                 
         if (PlottableStatistic.ELLIPTICITY.equals(stat))
-            return getAspectRatio();
+            return calculateEllipticity();
+        
+        if (PlottableStatistic.ASPECT.equals(stat))
+            return 1d/calculateEllipticity();
 
         if (PlottableStatistic.BOUNDING_HEIGHT.equals(stat))
             return getVerticallyRotatedNucleus().getBounds().getHeight();
@@ -247,7 +250,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         return result;
     }
 
-    private double getAspectRatio() {
+    private double calculateEllipticity() {
         double h = getVerticallyRotatedNucleus().getBounds().getHeight();
         double w = getVerticallyRotatedNucleus().getBounds().getWidth();
 
