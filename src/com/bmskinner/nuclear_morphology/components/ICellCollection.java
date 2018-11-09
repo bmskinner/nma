@@ -51,6 +51,9 @@ public interface ICellCollection
         extends Serializable, Loggable, Filterable, StatisticalCollection, Refoldable<Nucleus>, Collection<ICell> {
 
 	
+	/** The length to interpolate profiles for comparisons between objects */
+	int FIXED_PROFILE_LENGTH = 500;
+	
 	 /**
      * Create a copy of the collection
      * 
@@ -424,10 +427,8 @@ public interface ICellCollection
      * Set the number of cells in the collection that are shared with another
      * collection. This can be used to reduce calculation times
      * 
-     * @param d2
-     *            the other collection
-     * @param i
-     *            the number of shared nuclei
+     * @param d2 the other collection
+     * @param i the number of shared nuclei
      */
     void setSharedCount(@NonNull ICellCollection d2, int i);
 
@@ -460,12 +461,10 @@ public interface ICellCollection
      * Get the perimeter normalised veriabililty of a nucleus angle profile
      * compared to the median profile of the collection
      * 
-     * @param pointType
-     *            the tag to use as index 0
-     * @param c
-     *            the cell to test
-     * @return the variabililty score of the nucleus
-     * @throws UnavailableBorderTagException
+     * @param pointType the tag to use as index 0
+     * @param c the taggable object to test
+     * @return the variabililty score of the object
+     * @throws UnavailableBorderTagException if the tag is not present
      */
     double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) throws UnavailableBorderTagException;
 
