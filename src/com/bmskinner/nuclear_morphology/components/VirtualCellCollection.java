@@ -1086,7 +1086,7 @@ public class VirtualCellCollection implements ICellCollection {
 
                 IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
                 double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
-                return Math.sqrt(diff)/FIXED_PROFILE_LENGTH; // differences in degrees, rather than square degrees
+                return Math.sqrt(diff/FIXED_PROFILE_LENGTH); // differences in degrees, rather than square degrees
 
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
                 fine("Error getting nucleus profile", e);
@@ -1148,7 +1148,7 @@ public class VirtualCellCollection implements ICellCollection {
         	IProfile angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
             double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
-            return Math.sqrt(diff)/FIXED_PROFILE_LENGTH;
+            return Math.sqrt(diff/FIXED_PROFILE_LENGTH);
         } catch (ProfileException | UnavailableComponentException e) {
             fine("Error getting nucleus profile", e);
             return Double.NaN;
