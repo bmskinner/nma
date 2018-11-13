@@ -67,13 +67,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
      */
     public JFreeChart createScatterChart(String component) {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return makeEmptyChart();
-        }
 
-        if (options.getStats().size() != 2) {
+        if (options.getStats().size() != 2)
             return makeEmptyChart();
-        }
 
         PlottableStatistic firstStat = options.getStat();
 
@@ -84,13 +82,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
             }
         }
 
-        if (CellularComponent.NUCLEUS.equals(component)) {
+        if (CellularComponent.NUCLEUS.equals(component))
             return createNucleusStatisticScatterChart();
-        }
 
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
             return createSignalStatisticScatterChart();
-        }
 
         return makeEmptyChart();
     }

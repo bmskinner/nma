@@ -32,7 +32,10 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
 	public static final String MEDIAN_SERIES_PREFIX   = "Median_";
 
     protected static final String EMPTY_STRING = "";
+    
+    /** The maximum number of points from a single dataset that will be displayed in a chart */
     protected static final int MAX_SCATTER_CHART_ITEMS = 2000;
+    
     protected static final int MAX_PROFILE_CHART_ITEMS = 500;
     
     /**

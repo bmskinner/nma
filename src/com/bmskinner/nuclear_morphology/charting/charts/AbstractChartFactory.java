@@ -200,12 +200,9 @@ public abstract class AbstractChartFactory implements Loggable {
      * Create a new XY Line Chart, with vertical orientation, and set the
      * background to white
      * 
-     * @param xLabel
-     *            the x axis label
-     * @param yLabel
-     *            the y axis label
-     * @param ds
-     *            the charting dataset
+     * @param xLabel the x axis label
+     * @param yLabel the y axis label
+     * @param ds the charting dataset
      * @return a chart with default settings
      */
     protected static JFreeChart createBaseXYChart(String xLabel, String yLabel, XYDataset ds) {
@@ -226,10 +223,8 @@ public abstract class AbstractChartFactory implements Loggable {
      * Create a new XY Line Chart, with vertical orientation, and set the
      * background to white. The charting dataset is null.
      * 
-     * @param xLabel
-     *            the x axis label
-     * @param yLabel
-     *            the y axis label
+     * @param xLabel the x axis label
+     * @param yLabel the y axis label
      * @return a chart with default settings
      */
     protected static JFreeChart createBaseXYChart(String xLabel, String yLabel) {
