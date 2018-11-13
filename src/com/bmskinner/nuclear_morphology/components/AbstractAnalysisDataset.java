@@ -87,7 +87,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     public void setName(String s) {
         cellCollection.setName(s);
     }
-
+    
     public void setDatasetColour(Color colour) {
         datasetColour = colour;
 

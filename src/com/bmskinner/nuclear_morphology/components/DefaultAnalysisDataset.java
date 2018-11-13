@@ -114,20 +114,28 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     @Override
     public void addChildCollection(@NonNull final ICellCollection collection) {
 
-        if (collection instanceof VirtualCellCollection) {
-        	childDatasets.add(new ChildAnalysisDataset(this, collection));
+        if (collection.isVirtual()) {
+        	addChildDataset(new ChildAnalysisDataset(this, collection));
         } else {
         	IAnalysisDataset childDataset = new DefaultAnalysisDataset(collection, this.savePath);
             childDataset.setRoot(false);
             if(analysisOptions!=null)
                 childDataset.setAnalysisOptions(analysisOptions);
-            childDatasets.add(childDataset);
+            addChildDataset(childDataset);
         }
     }
 
     @Override
     public void addChildDataset(@NonNull final IAnalysisDataset dataset) {
         dataset.setRoot(false);
+        
+        // Ensure no duplicate dataset names - TODO: this is a temp fix for issue 159
+        if(getName().equals(dataset.getName()))
+    		dataset.setName(dataset.getName()+"_1");
+        for(IAnalysisDataset d : childDatasets ) {
+        	if(d.getName().equals(dataset.getName()))
+        		dataset.setName(dataset.getName()+"_1");
+        }
         childDatasets.add(dataset);
     }
 

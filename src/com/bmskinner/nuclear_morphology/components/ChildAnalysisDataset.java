@@ -83,12 +83,18 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
     @Override
     public void addChildCollection(@NonNull ICellCollection collection) {
-        IAnalysisDataset childDataset = new ChildAnalysisDataset(this, collection);
-        childDatasets.add(childDataset);
+        addChildDataset(new ChildAnalysisDataset(this, collection));
     }
 
     @Override
     public void addChildDataset(@NonNull IAnalysisDataset dataset) {
+    	// Ensure no duplicate dataset names - TODO: this is a temp fix for issue 159
+        if(getName().equals(dataset.getName()))
+    		dataset.setName(dataset.getName()+"_1");
+        for(IAnalysisDataset d : childDatasets ) {
+        	if(d.getName().equals(dataset.getName()))
+        		dataset.setName(dataset.getName()+"_1");
+        }
         childDatasets.add(dataset);
 
     }
