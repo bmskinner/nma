@@ -407,7 +407,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		UUID prevId = null;
 		for(Element seg : segs.getChildren()) {			
 			UUID id = readUUID(seg);				
-			int startIndex = Integer.valueOf(seg.getChildText(XMLCreator.INDEX_KEY));
+			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
 			if(prevId!=null) {
 				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, n.getBorderLength(), prevId);
 				newSegs.add(newSeg);
