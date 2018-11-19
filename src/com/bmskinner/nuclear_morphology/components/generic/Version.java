@@ -74,6 +74,17 @@ public class Version implements Serializable {
     public static Version currentVersion() {
         return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
     }
+    
+    /**
+     * Parse the given string to a version. The string should have three
+     * integers separated by dots - e.g. 1.11.5. Convenience method.
+     * 
+     * @param s the string to parse
+     * @return
+     */
+    public static Version fromString(@NonNull final String s) {
+    	return parseString(s);
+    }
 
     /**
      * Parse the given string to a version. The string should have three

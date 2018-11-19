@@ -31,13 +31,16 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
@@ -48,6 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 
 public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	
@@ -229,6 +233,25 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 		JMenuItem aboutItem = new JMenuItem("About");
 		aboutItem.addActionListener(e-> new VersionHelpDialog(mw));
 		menu.add(aboutItem);
+		
+		
+		JMenuItem checkItem = new JMenuItem("Check for updates");
+		checkItem.addActionListener(e-> {
+			Runnable r = () ->{
+				Version v = UpdateChecker.fetchLatestVersion();
+				if(v.isNewerThan(Version.currentVersion())) {
+					JOptionPane.showMessageDialog(this, "A new version - "+v+" - is available!", "Update found!", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(this, "You have the latest version: "+Version.currentVersion(), "No updates", JOptionPane.INFORMATION_MESSAGE);
+				}
+
+
+			};
+			ThreadManager.getInstance().submit(r);
+		});
+		menu.add(checkItem);
+		
+		
 		return menu;
 	}
 	
