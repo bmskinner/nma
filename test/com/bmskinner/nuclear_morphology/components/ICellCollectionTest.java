@@ -76,7 +76,7 @@ public class ICellCollectionTest extends ComponentTester {
 				v.addCell(c);
 			}
 			
-			d.addChildCollection(v);
+//			d.addChildCollection(v);
 			return v;
 		}
 
