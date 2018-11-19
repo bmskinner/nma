@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
@@ -92,6 +93,7 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 		add(createFileMenu());
         add(createEditMenu());
         add(createViewMenu());
+        add(createHelpMenu());
         contextMenu = createDatasetMenu();
 
         add(Box.createGlue());
@@ -221,6 +223,17 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 		return menu;
 	}
 	
+	private JMenu createHelpMenu() {
+		JMenu menu = new JMenu("Help");
+		
+		JMenuItem aboutItem = new JMenuItem("About");
+		aboutItem.addActionListener(e-> new VersionHelpDialog(mw));
+		menu.add(aboutItem);
+		return menu;
+	}
+	
+	
+	
 	private JMenu createWorkspaceMenu() {
 		JMenu menu = new JMenu("Workspace");
 		
@@ -238,17 +251,5 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 		
 		return menu;
 	}
-
-
-//	@Override
-//	public void updateSelectionContext(Collection<Object> objects) {
-//		
-//		switch(type) {
-//			case DATASET: contextMenu = createDatasetMenu(); break;
-//			case CLUSTER_GROUP: contextMenu = createClusterGroupMenu(); break;
-//			case WORKSPACE: contextMenu = createWorkspaceMenu(); break;
-//		}
-//		
-//	}
 
 }
