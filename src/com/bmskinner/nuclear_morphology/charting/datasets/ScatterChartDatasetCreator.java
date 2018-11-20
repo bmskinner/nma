@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -49,10 +50,9 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     /**
      * Construct with an options
      * 
-     * @param options
-     *            the chart options
+     * @param options the chart options
      */
-    public ScatterChartDatasetCreator(final ChartOptions options) {
+    public ScatterChartDatasetCreator(@NonNull final ChartOptions options) {
         super(options);
     }
 
@@ -77,18 +77,10 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
     }
 
-    /*
-     * 
-     * PRIVATE METHODS
-     * 
-     * 
-     */
-
     /**
      * Get a boxplot dataset for the given statistic for each collection
      * 
-     * @param options
-     *            the charting options
+     * @param options the charting options
      * @return
      * @throws ChartDatasetCreationException
      */
@@ -96,9 +88,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
         DefaultXYDataset ds = new DefaultXYDataset();
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return ds;
-        }
 
         List<IAnalysisDataset> datasets = options.getDatasets();
 
@@ -159,8 +150,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     /**
      * Get a boxplot dataset for the given statistic for each collection
      * 
-     * @param options
-     *            the charting options
+     * @param options the charting options
      * @return
      * @throws ChartDatasetCreationException
      * @throws Exception
