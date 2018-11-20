@@ -53,7 +53,35 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 
-public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
+public class MainWindowMenuBar extends JMenuBar  {
+	
+	private static final String TASK_QUEUE_LBL = "Task queue:";
+	private static final String MEMORY_LBL     = "Memory:";
+	
+	private static final String FILE_MENU_LBL          = "File";
+	private static final String NEW_ANALYSIS_MENU_LBL  = "New analysis";
+	private static final String NEW_ANALYSIS_CUSTOM_LBL = "Use custom detection options";
+	private static final String NEW_ANALYSIS_CUSTOM_TOOLTIP  = "Configure the nucleus detection options yourself";
+	private static final String NEW_ANALYSIS_SAVED_LBL  = "Use saved detection options";
+	private static final String NEW_ANALYSIS_SAVED_TOOLTIP  = "Use options saved in a file for automatic nucleus detection";
+	private static final String NEW_WORKSPACE_LBL  = "New workspace";
+	private static final String OPEN_MENU_LBL  = "Open";
+	private static final String OPEN_DATASET_LBL  = "Open dataset";
+	private static final String OPEN_WORKSPACE_LBL = "Open workspace";
+	
+	private static final String VIEW_MENU_LBL     = "View";
+	private static final String CHECK_FOR_UPDATES_ITEM_LBL = "Check for updates";
+	private static final String ABOUT_ITEM_LBL = "About";
+	private static final String HELP_MENU_LBL = "Help";
+	private static final String TASK_MONITOR_ITEM_LBL = "Task monitor";
+	private static final String FILL_CONSENSUS_ITEM_LBL = "Fill consensus";
+	private static final String SWATCH_ITEM_LBL = "Swatch";
+	private static final String SCALE_ITEM_LBL = "Scale";
+	private static final String OPTIONS_LBL = "Options";
+	private static final String EDIT_MENU_LBL = "Edit";
+	private static final String EXIT_LBL = "Exit";
+	private static final String SAVE_WORKSPACES_LBL = "Save workspaces";
+	private static final String SAVE_DATASETS_LBL = "Save datasets";
 	
 	final private SignalChangeEventHandler sh;
 	final private InterfaceEventHandler ih;
@@ -65,6 +93,7 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	private JMenu contextMenu;
 	
 	private MenuFactory fact = new MenuFactory();
+	
 	
 	private class MenuFactory {
 		public MenuFactory() {}
@@ -107,14 +136,14 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	
 	private JPanel createMonitorPanel() {
 		JPanel monitorPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		monitorPanel.add(new JLabel("Task queue:"));
+		monitorPanel.add(new JLabel(TASK_QUEUE_LBL));
         monitorPanel.add(Box.createHorizontalStrut(5));
         TaskListMonitor t = new TaskListMonitor();
         t.setPreferredSize(new Dimension(100, t.getPreferredSize().height));
         t.setBorder(BorderFactory.createBevelBorder(1));
         monitorPanel.add(t);
         monitorPanel.add(Box.createHorizontalStrut(10));
-        monitorPanel.add(new JLabel("Memory:"));
+        monitorPanel.add(new JLabel(MEMORY_LBL));
         monitorPanel.add(Box.createHorizontalStrut(5));
         MemoryIndicator m = new MemoryIndicator();
         m.setPreferredSize(new Dimension(100, m.getPreferredSize().height));
@@ -126,33 +155,35 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	}
 		
 	private JMenu createFileMenu() {
-		JMenu menu = new JMenu("File");
+		JMenu menu = new JMenu(FILE_MENU_LBL);
 		
-		JMenu newMenu = new JMenu("New analysis");
-		JMenuItem i1 = new JMenuItem("Use custom detection options");
-		i1.setToolTipText("Configure the nucleus detection options yourself");
+		JMenu newMenu = new JMenu(NEW_ANALYSIS_MENU_LBL);
+		
+		JMenuItem i1 = new JMenuItem(NEW_ANALYSIS_CUSTOM_LBL);
+		i1.setToolTipText(NEW_ANALYSIS_CUSTOM_TOOLTIP);
 		i1.addActionListener(e-> new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler()).run() );
 		newMenu.add(i1);
-		newMenu.add(fact.createSignalChangeMenuItem("Use saved detection options", 
-				SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, "Use options saved in a file for automatic nucleus detection"));
+		
+		newMenu.add(fact.createSignalChangeMenuItem(NEW_ANALYSIS_SAVED_LBL, 
+				SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, NEW_ANALYSIS_SAVED_TOOLTIP));
 		menu.add(newMenu);
 		
 		
-		menu.add(fact.createSignalChangeMenuItem("New workspace", SignalChangeEvent.NEW_WORKSPACE));
+		menu.add(fact.createSignalChangeMenuItem(NEW_WORKSPACE_LBL, SignalChangeEvent.NEW_WORKSPACE));
 		
 		
-		JMenu openMenu = new JMenu("Open");
+		JMenu openMenu = new JMenu(OPEN_MENU_LBL);
 		
-		openMenu.add(fact.createSignalChangeMenuItem("Open dataset", SignalChangeEvent.IMPORT_DATASET_PREFIX));
-		openMenu.add(fact.createSignalChangeMenuItem("Open workspace", SignalChangeEvent.IMPORT_WORKSPACE_PREFIX));
+		openMenu.add(fact.createSignalChangeMenuItem(OPEN_DATASET_LBL, SignalChangeEvent.IMPORT_DATASET_PREFIX));
+		openMenu.add(fact.createSignalChangeMenuItem(OPEN_WORKSPACE_LBL, SignalChangeEvent.IMPORT_WORKSPACE_PREFIX));
 		menu.add(openMenu);
 		
-		menu.add(fact.createSignalChangeMenuItem("Save datasets", SignalChangeEvent.SAVE_ALL_DATASETS));
-		menu.add(fact.createSignalChangeMenuItem("Save workspaces", SignalChangeEvent.EXPORT_WORKSPACE));
+		menu.add(fact.createSignalChangeMenuItem(SAVE_DATASETS_LBL, SignalChangeEvent.SAVE_ALL_DATASETS));
+		menu.add(fact.createSignalChangeMenuItem(SAVE_WORKSPACES_LBL, SignalChangeEvent.EXPORT_WORKSPACE));
 
 		
 		
-		JMenuItem exit = new JMenuItem("Exit");
+		JMenuItem exit = new JMenuItem(EXIT_LBL);
 		exit.addActionListener(e-> {
 			for(WindowListener l : mw.getWindowListeners()) {
 				if(l instanceof MainWindowCloseAdapter)
@@ -165,9 +196,9 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	}
 	
 	private JMenu createEditMenu() {
-		JMenu menu = new JMenu("Edit");
+		JMenu menu = new JMenu(EDIT_MENU_LBL);
 		
-		JMenuItem i1 = new JMenuItem("Options");
+		JMenuItem i1 = new JMenuItem(OPTIONS_LBL);
 		i1.addActionListener( e -> {
             MainOptionsDialog dialog = new MainOptionsDialog(mw);
             dialog.addInterfaceEventListener(mw.getEventHandler());
@@ -177,9 +208,9 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	}
 	
 	private JMenu createViewMenu() {
-		JMenu menu = new JMenu("View");
+		JMenu menu = new JMenu(VIEW_MENU_LBL);
 		
-		JMenu scaleMenu = new JMenu("Scale");
+		JMenu scaleMenu = new JMenu(SCALE_ITEM_LBL);
 		
 		ButtonGroup g = new ButtonGroup();
 		for(MeasurementScale m : MeasurementScale.values()) {
@@ -196,7 +227,7 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 		}
 		menu.add(scaleMenu);
 		
-		JMenu swatchMenu = new JMenu("Swatch");
+		JMenu swatchMenu = new JMenu(SWATCH_ITEM_LBL);
 		ButtonGroup swatchGroup = new ButtonGroup();
 		for(ColourSwatch c : ColourSwatch.values()) {
 			JMenuItem j = new JRadioButtonMenuItem(c.toString());
@@ -213,14 +244,14 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 		menu.add(swatchMenu);
 		
 		
-		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem("Fill consensus", GlobalOptions.getInstance().isFillConsensus());
+		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL, GlobalOptions.getInstance().isFillConsensus());
 		fillConsensusItem.addActionListener( e -> {
 			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
 			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 		});
 		menu.add(fillConsensusItem);
 		
-		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem("Task monitor", false);
+		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem(TASK_MONITOR_ITEM_LBL, false);
 		monitorItem.addActionListener( e -> monitorPanel.setVisible(!monitorPanel.isVisible()));
 		menu.add(monitorItem);
 		
@@ -228,14 +259,14 @@ public class MainWindowMenuBar extends JMenuBar  { //implements ContextEnabled
 	}
 	
 	private JMenu createHelpMenu() {
-		JMenu menu = new JMenu("Help");
+		JMenu menu = new JMenu(HELP_MENU_LBL);
 		
-		JMenuItem aboutItem = new JMenuItem("About");
+		JMenuItem aboutItem = new JMenuItem(ABOUT_ITEM_LBL);
 		aboutItem.addActionListener(e-> new VersionHelpDialog(mw));
 		menu.add(aboutItem);
 		
 		
-		JMenuItem checkItem = new JMenuItem("Check for updates");
+		JMenuItem checkItem = new JMenuItem(CHECK_FOR_UPDATES_ITEM_LBL);
 		checkItem.addActionListener(e-> {
 			Runnable r = () ->{
 				Version v = UpdateChecker.fetchLatestVersion();
