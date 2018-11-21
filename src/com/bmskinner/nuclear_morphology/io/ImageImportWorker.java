@@ -147,7 +147,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
             try {
                 ip = rotateToVertical(c, ip);
             } catch (UnavailableBorderTagException e) {
-                fine("Unable to rotate", e);
+                stack("Unable to rotate", e);
             }
             ip.flipVertical(); // Y axis needs inverting
         }

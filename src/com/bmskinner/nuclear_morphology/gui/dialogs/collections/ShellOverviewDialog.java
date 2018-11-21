@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkTy
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.ImagePlus;
@@ -104,59 +105,20 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         getContentPane().add(header, BorderLayout.NORTH);
         getContentPane().add(progressBar, BorderLayout.SOUTH);
 
-        TableModel model = createEmptyTableModel(rows, COLUMN_COUNT);
-
-        table = new JTable(model) {
-            // Returning the Class of each column will allow different
-            // renderers to be used based on Class
-            @Override
-			public Class<?> getColumnClass(int column) {
-                return JLabel.class;
-            }
-        };
-
-        for (int col = 0; col < COLUMN_COUNT; col++) {
-            table.getColumnModel().getColumn(col).setCellRenderer(new LabelInfoRenderer());
-        }
-
-        table.setRowHeight(180);
-        table.setCellSelectionEnabled(true);
-        table.setRowSelectionAllowed(false);
-        table.setColumnSelectionAllowed(false);
-        table.setTableHeader(null);
-
-        ListSelectionModel cellSelectionModel = table.getSelectionModel();
-        cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+        model = new CellCollectionOverviewModel(rows, COLUMN_COUNT);
+        
+        createTable();
+        
         table.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-
-                    // Get the data model for this table
-                    TableModel model = (TableModel) table.getModel();
-
-                    Point pnt = e.getPoint();
-                    int row = table.rowAtPoint(pnt);
-                    int col = table.columnAtPoint(pnt);
-
-                    LabelInfo selected = (LabelInfo) model.getValueAt(row, col);
-                    
-                    ICell c = selected.getCell();
-                    
-                    ImageProcessor full = renderFullImage(c);
-
-                    File folder = dataset.getCollection().getOutputFolder();
-                    File outputfile = new File(folder,  c.getNucleus().getNameAndNumber()+".tiff");
-
-                    FileSaver saver = new FileSaver(new ImagePlus("", full));
-                    saver.saveAsTiff(outputfile.getAbsolutePath());
-                }
-            }
-            
-            
-
+        	@Override
+        	public void mouseClicked(MouseEvent e) {
+        		if (e.getClickCount() == 2) {
+        			Point pnt = e.getPoint();
+        			int row = table.rowAtPoint(pnt);
+        			int col = table.columnAtPoint(pnt);                    
+        			export(model.getCell(rows,  col));
+        		}
+        	}
         });
 
         JScrollPane scrollPane = new JScrollPane();
@@ -165,6 +127,16 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         getContentPane().add(scrollPane, BorderLayout.CENTER);
 
     }
+	
+	private void export(ICell cell) {
+		ImageProcessor full = renderFullImage(cell);
+
+		File folder = dataset.getCollection().getOutputFolder();
+		File outputfile = new File(folder,  cell.getNucleus().getNameAndNumber()+Io.TIFF_FILE_EXTENSION);
+
+		FileSaver saver = new FileSaver(new ImagePlus("", full));
+		saver.saveAsTiff(outputfile.getAbsolutePath());
+	}
 	
 	private ImageProcessor renderFullImage(ICell c){
     	ImageProcessor ip;

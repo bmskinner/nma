@@ -18,6 +18,9 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -25,12 +28,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CollectionOverviewDialog.LabelInfoRenderer;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 
@@ -51,6 +56,7 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
     protected JTable           table;
     protected JProgressBar     progressBar;
     protected ImageImportWorker worker;
+    protected CellCollectionOverviewModel model;
 
     /**
      * Construct with a dataset to display
@@ -68,6 +74,35 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
         this.setVisible(true);
     }
     
+    
+    /**
+     * Create the table to display cells in the underlying model
+     * 
+     */
+    protected void createTable() {
+    	table = new JTable(model) {
+            // Returning the Class of each column will allow different
+            // renderers to be used based on Class
+            @Override
+			public Class<?> getColumnClass(int column) {
+                return JLabel.class;
+            }
+        };
+
+        for (int col = 0; col < COLUMN_COUNT; col++) {
+            table.getColumnModel().getColumn(col).setCellRenderer(new LabelInfoRenderer());
+        }
+
+        table.setRowHeight(180);
+        table.setCellSelectionEnabled(true);
+        table.setRowSelectionAllowed(false);
+        table.setColumnSelectionAllowed(false);
+        table.setTableHeader(null);
+
+        ListSelectionModel cellSelectionModel = table.getSelectionModel();
+        cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    }
+    
     /**
      * Create the image import worker needed to import and
      * annotate images.
@@ -79,32 +114,9 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
      */
     protected abstract void createUI();
     
+    
     protected abstract JPanel createHeader();
-    
-    protected TableModel createEmptyTableModel(int rows, int cols) {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) { // custom
-                                                                 // isCellEditable
-                                                                 // function
-                return false;
-            }
-        };
-
-        model.setRowCount(rows);
-        model.setColumnCount(cols);
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-
-                LabelInfo l = new LabelInfo(null, null);
-                model.setValueAt(l, row, col);
-            }
-        }
-
-        return model;
-    }
-    
+        
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         int value = 0;

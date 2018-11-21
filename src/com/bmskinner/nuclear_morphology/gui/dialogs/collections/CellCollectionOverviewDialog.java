@@ -29,6 +29,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -44,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 /**
  * This displays all the nuclei in the given dataset, annotated
@@ -55,8 +57,13 @@ import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 @SuppressWarnings("serial")
 public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	
+	private static final String MAKE_NEW_COLLECTION_LBL = "Make new collection from selected";
+	private static final String SELECT_ALL_LBL = "Select all";
+	private static final String ROTATE_VERTICAL_LBL = "Rotate vertical";
 	private static final int DEGREES_180 = 180;
 	private static final int DEGREES_360 = 360;
+	
+	
 
     public CellCollectionOverviewDialog(IAnalysisDataset dataset) {
         super(dataset);
@@ -81,7 +88,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
 
-        JCheckBox rotateBtn = new JCheckBox("Rotate vertical", true);
+        JCheckBox rotateBtn = new JCheckBox(ROTATE_VERTICAL_LBL, true);
         rotateBtn.addActionListener(e -> {
             progressBar.setVisible(true);
             ImageImportWorker worker = new ImageImportWorker(dataset, table.getModel(), rotateBtn.isSelected());
@@ -91,31 +98,21 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
         });
         header.add(rotateBtn);
+        
+        String[] componentStrings = {  }; // e.g Nucleus,  Nuclear signals. Switch images / channels as needed 
+        JComboBox<String> componntBox    = new JComboBox<>(componentStrings);
+//        channelBox.addActionListener(e -> );
 
-        JCheckBox selectAll = new JCheckBox("Select all");
+
+        JCheckBox selectAll = new JCheckBox(SELECT_ALL_LBL);
         selectAll.addActionListener(e -> {
-
-            boolean b = selectAll.isSelected();
-            for (int r = 0; r < table.getModel().getRowCount(); r++) {
-
-                for (int c = 0; c < table.getModel().getColumnCount(); c++) {
-                    LabelInfo info = (LabelInfo) table.getModel().getValueAt(r, c);
-
-                    info.setSelected(b);
-                }
-            }
+            model.setAllSelected(selectAll.isSelected());
             table.repaint();
-
         });
         header.add(selectAll);
 
-        JButton curateBtn = new JButton("Make new collection from selected");
-        curateBtn.addActionListener(e -> {
-
-            makeNewCollection();
-
-        });
-
+        JButton curateBtn = new JButton(MAKE_NEW_COLLECTION_LBL);
+        curateBtn.addActionListener(e ->  makeNewCollection());
         header.add(curateBtn);
         return header;
 		
@@ -125,7 +122,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	protected void createUI() {
 
         this.setLayout(new BorderLayout());
-        this.setTitle("Showing " + dataset.getCollection().size() + " cells in " + dataset.getName());
+        this.setTitle(String.format("Showing %s cells in %s", dataset.getCollection().size(), dataset.getName()));
 
         int cellCount = dataset.getCollection().size();
 
@@ -141,53 +138,22 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         JPanel header = createHeader();
         getContentPane().add(header, BorderLayout.NORTH);
         getContentPane().add(progressBar, BorderLayout.SOUTH);
-
-        TableModel model = createEmptyTableModel(rows, COLUMN_COUNT);
-
-        table = new JTable(model) {
-            // Returning the Class of each column will allow different
-            // renderers to be used based on Class
-            @Override
-			public Class<?> getColumnClass(int column) {
-                return JLabel.class;
-            }
-        };
-
-        for (int col = 0; col < COLUMN_COUNT; col++) {
-            table.getColumnModel().getColumn(col).setCellRenderer(new LabelInfoRenderer());
-        }
-
-        table.setRowHeight(180);
-        table.setCellSelectionEnabled(true);
-        table.setRowSelectionAllowed(false);
-        table.setColumnSelectionAllowed(false);
-        table.setTableHeader(null);
-
-        ListSelectionModel cellSelectionModel = table.getSelectionModel();
-        cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+        
+        model = new CellCollectionOverviewModel(rows, COLUMN_COUNT);
+        
+        createTable();
+        
         table.addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
-
-                    // Get the data model for this table
-                    TableModel model = (TableModel) table.getModel();
-
                     Point pnt = e.getPoint();
                     int row = table.rowAtPoint(pnt);
                     int col = table.columnAtPoint(pnt);
-
-                    LabelInfo selectedData = (LabelInfo) model.getValueAt(row, col);
-
-                    selectedData.setSelected(!selectedData.isSelected());
-
-                    table.repaint();
-
+                    model.toggleSelected(row,  col);
+                    table.repaint(table.getCellRect(row, col, true)); // need to trigger otherwise it will only update on the next click
                 }
             }
-
         });
 
         JScrollPane scrollPane = new JScrollPane();
@@ -198,17 +164,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
     }
 
     private void makeNewCollection() {
-        List<ICell> cells = new ArrayList<ICell>();
-        for (int r = 0; r < table.getModel().getRowCount(); r++) {
-
-            for (int c = 0; c < table.getModel().getColumnCount(); c++) {
-                LabelInfo info = (LabelInfo) table.getModel().getValueAt(r, c);
-
-                if (info.isSelected() && info.getCell() != null) {
-                    cells.add(info.getCell());
-                }
-            }
-        }
+    	List<ICell> cells = model.getSelected();
 
         ICellCollection newCollection = new VirtualCellCollection(dataset, dataset.getName() + "_Curated");
         for (ICell c : cells) {
@@ -216,7 +172,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         }
         log("Added " + cells.size() + " cells to new collection");
 
-        // We don;t want to run a new profling because this will bugger up the
+        // We don;t want to run a new profiling because this will bugger up the
         // segment patterns of
         // the original cells. We need to copy the segments over as with FISH
         // remapping
