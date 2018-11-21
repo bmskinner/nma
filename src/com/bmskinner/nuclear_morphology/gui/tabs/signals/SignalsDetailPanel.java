@@ -89,9 +89,9 @@ public class SignalsDetailPanel extends DetailPanel {
         if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
             update(getDatasets());
         }
-
-        if (event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX)) {
-
+        
+        if (event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX) && !event.getSource().getClass().getName().equals(getClass().getName())) {
+        	log("Receive Ping: "+this.getClass().getSimpleName());
             for (TabPanel p : this.getSubPanels()) {
             	p.refreshChartCache(getDatasets());
 //                p.update(getDatasets());

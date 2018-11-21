@@ -82,8 +82,6 @@ public class ImagesTabPanel extends DetailPanel {
     private JPanel imagePanel;
     private JLabel label;
     
-    private CosmeticHandler ch = new CosmeticHandler(this);
-
     private static final String IMAGES_LBL = "Images in dataset";
     private static final String PANEL_TITLE_LBL = "Images";
     private static final String HEADER_LBL = "Double click a folder to update image paths";

@@ -64,7 +64,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
+public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventListener {
 
     private static final String PANEL_TITLE_LBL = "Overview";
 
@@ -89,9 +89,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     /** Messages to clarify when UI is disabled */
     private JLabel headerText;
 
-    private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
-
-    private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
     /**
      * Create with an input supplier
@@ -156,7 +153,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                     if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, nextRow, column);
                         cosmeticHandler.changeSignalColour(d, signalGroup.getID());
-                        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 
                     
@@ -239,7 +235,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				box.addActionListener(e -> {
 				    activeDataset().getCollection().getSignalGroup(signalGroup).get().setVisible(box.isSelected());
 				    getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.GROUP_VISIBLE_PREFIX);
-				    this.refreshChartCache(getDatasets());
 				});
 				panel.add(box);
 
@@ -354,20 +349,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     private UUID getSignalGroupFromLabel(String label) {
         String[] names = label.split("_");
         return UUID.fromString(names[1]);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().startsWith(SET_SIGNAL_GROUP_VISIBLE_ACTION)) {
-
-            UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
-			JCheckBox box = (JCheckBox) e.getSource();
-			activeDataset().getCollection().getSignalGroup(signalGroup).get().setVisible(box.isSelected());
-			getSignalChangeEventHandler().fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
-			this.refreshChartCache(getDatasets());
-        }
-        updateSignalConsensusChart();
-
     }
 
     @Override

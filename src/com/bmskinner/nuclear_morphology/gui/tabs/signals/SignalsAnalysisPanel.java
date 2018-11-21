@@ -49,7 +49,6 @@ public class SignalsAnalysisPanel extends DetailPanel {
     private static final String PANEL_TITLE_LBL = "Detection settings";
     private ExportableTable table;     // table for analysis parameters
     private JScrollPane     scrollPane;
-    private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
     public SignalsAnalysisPanel(@NonNull InputSupplier context) {
         super(context ,PANEL_TITLE_LBL);

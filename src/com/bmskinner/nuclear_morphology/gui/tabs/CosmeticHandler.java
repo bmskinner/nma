@@ -51,6 +51,10 @@ public class CosmeticHandler implements Loggable {
     
     private final TabPanel parent;
     
+    /**
+     * Create the handler for a panel
+     * @param p the panel to register the handler to 
+     */
     public CosmeticHandler(@NonNull TabPanel p){
         parent = p;
     }
@@ -165,11 +169,12 @@ public class CosmeticHandler implements Loggable {
      * @param d the dataset
      * @param oldColour the old colour
      * @param signalGroupId the signal group to change
+     * @return true if the colour was changed, false otherwise
      */
-    public void changeSignalColour(@NonNull IAnalysisDataset d, @NonNull UUID signalGroupId) {
+    public boolean changeSignalColour(@NonNull IAnalysisDataset d, @NonNull UUID signalGroupId) {
 
     	if(!d.getCollection().hasSignalGroup(signalGroupId))
-    		return;
+    		return false;
     	
     	try {
 
@@ -179,8 +184,9 @@ public class CosmeticHandler implements Loggable {
     		d.getCollection().getSignalGroup(signalGroupId).get().setGroupColour(newColor);
     		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
     	} catch(RequestCancelledException e) {
-    		return;
+    		return false;
     	}
+    	return true;
     }
     
     /**

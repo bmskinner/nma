@@ -75,8 +75,6 @@ public class PopulationsPanel extends DetailPanel  {
 
     final private TreeSelectionHandler treeListener = new TreeSelectionHandler();
     
-    private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
-
     private boolean ctrlPressed = false;
 
     public boolean isCtrlPressed() {
