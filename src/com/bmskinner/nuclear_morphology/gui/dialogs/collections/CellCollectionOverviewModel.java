@@ -13,6 +13,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 /**
  * Display cell images in a collection. Tracks cell selections.  
  * @author bms41
+ * @since 1.15.0
  *
  */
 public class CellCollectionOverviewModel extends DefaultTableModel {

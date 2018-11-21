@@ -321,24 +321,27 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 			plot.setRenderer(1, rend);
 
 			int j = 0;
-			for (UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()) {
-				List<Shape> shapes = new NuclearSignalDatasetCreator(options)
-						.createSignalRadiusDataset(options.firstDataset(), signalGroup);
 
-				int signalCount = shapes.size();
+			if(options.isShowAnnotations()) { // transparent ellipse surrounding CoM
+				for (UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()) {
+					List<Shape> shapes = new NuclearSignalDatasetCreator(options)
+							.createSignalRadiusDataset(options.firstDataset(), signalGroup);
 
-				int alpha = (int) Math.floor(255 / ((double) signalCount)) + 20;
-				alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+					int signalCount = shapes.size();
 
-				Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(signalGroup);
-				if(g.isPresent()){
-					Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j++));
-					for (Shape s : shapes) {
-						XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,
-								ColourSelecter.getTransparentColour((Color) colour, true, alpha)); // layer
-						// transparent
-						// signals
-						plot.addAnnotation(an);
+					int alpha = (int) Math.floor(255 / ((double) signalCount)) + 20;
+					alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+
+					Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(signalGroup);
+					if(g.isPresent()){
+						Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j++));
+						for (Shape s : shapes) {
+							XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,
+									ColourSelecter.getTransparentColour((Color) colour, true, alpha)); // layer
+							// transparent
+							// signals
+							plot.addAnnotation(an);
+						}
 					}
 				}
 			}

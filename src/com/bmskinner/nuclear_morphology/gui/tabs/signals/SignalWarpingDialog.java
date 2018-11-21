@@ -39,6 +39,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -94,6 +95,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalWarpingModel.ImageCache.WarpedImageKey;
 
+import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
 /**
@@ -105,10 +107,12 @@ import ij.process.ImageProcessor;
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener {
 
-    private static final String SOURCE_DATASET_LBL  = "Source dataset";
+    private static final String EXPORT_IMAGE_LBL    = "Export image";
+	private static final String SOURCE_DATASET_LBL  = "Source dataset";
     private static final String TARGET_DATASET_LBL  = "Target dataset";
     private static final String SIGNAL_GROUP_LBL    = "Signal group";
     private static final String INCLUDE_CELLS_LBL   = "Only include cells with signals";
+    private static final String PSEUDOCOLOUR_LBL    = "Pseudocolour signals";
     private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
     private static final String RUN_LBL             = "Run";
     private static final String DIALOG_TITLE        = "Signal warping";
@@ -129,6 +133,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private JCheckBox cellsWithSignalsBox;
     private JSpinner minThresholdSpinner;
     private JSlider   thresholdSlider;
+    private JCheckBox pseudocolourBox;
 
     private SignalWarper warper;
 
@@ -210,6 +215,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
         chartPanel = new ExportableChartPanel(chart);
         chartPanel.setFixedAspectRatio(true);
+        
+        JMenuItem exportImageItem = new JMenuItem(EXPORT_IMAGE_LBL);
+        exportImageItem.addActionListener(e->exportImage());
+        chartPanel.getPopupMenu().add(exportImageItem);
         this.add(chartPanel, BorderLayout.CENTER);
 
         JPanel westPanel = createWestPanel();        
@@ -285,8 +294,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         
         thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
         lowerPanel.add(thresholdSlider);
-        thresholdSlider.setVisible(false);
+        thresholdSlider.setVisible(true);
         thresholdSlider.addChangeListener( makeThresholdChangeListener());
+        
+        pseudocolourBox = new JCheckBox(PSEUDOCOLOUR_LBL, true);
+        pseudocolourBox.addActionListener(e->updateChart());
+        lowerPanel.add(pseudocolourBox);
 
         lowerPanel.add(progressBar);
         progressBar.setVisible(false);
@@ -302,7 +315,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         	JSlider s = (JSlider) e.getSource();
     		int value = SignalWarpingModel.THRESHOLD_ALL_VISIBLE - s.getValue();
         	model.setThresholdOfSelected(value);
-        	chartPanel.setChart(model.getChart());
+        	chartPanel.setChart(model.getChart(pseudocolourBox.isSelected()));
         };
     }
 
@@ -328,7 +341,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
         	model.clearSelection();
         	int[] selectedRow = signalSelectionTable.getSelectedRows();
-        	thresholdSlider.setVisible(selectedRow.length==1);
+        	thresholdSlider.setEnabled(selectedRow.length==1);
         	for(ChangeListener l : thresholdSlider.getChangeListeners())
         		thresholdSlider.removeChangeListener(l);
         	for (int i = 0; i < selectedRow.length; i++) {
@@ -355,7 +368,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private void updateChart() {
 
         Runnable task = () -> {
-            chartPanel.setChart(model.getChart());
+            chartPanel.setChart(model.getChart(pseudocolourBox.isSelected()));
             chartPanel.restoreAutoBounds();
         };
         ThreadManager.getInstance().submit(task);
@@ -448,6 +461,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         datasetBoxOne.setEnabled(b);
         datasetBoxTwo.setEnabled(b);
         minThresholdSpinner.setEnabled(b);
+        pseudocolourBox.setEnabled(b);
     }
 
     /**
@@ -476,7 +490,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             updateSignalSelectionTable();
             updateChart();
-
+            thresholdSlider.setVisible(true);
             setEnabled(true);
 
         } catch (Exception e) {
@@ -521,6 +535,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
     	chartPanel.setChart(chart);
+    }
+    
+    private void exportImage() {
+    	ImageProcessor ip = model.getDisplayImage(pseudocolourBox.isSelected());
+    	ip.flipVertical();
+    	new ImagePlus("Image",ip).show();
     }
 
     @Override

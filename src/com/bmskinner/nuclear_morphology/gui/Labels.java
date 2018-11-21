@@ -133,6 +133,7 @@ public class Labels {
     	public static final String SIGNAL_SOURCE_LABEL     = "Source (double click to change)";
     	public static final String SIGNAL_CHANNEL_LABEL    = "Channel";
     	public static final String WARP_BTN_LBL            = "Warp signals";
+    	public static final String SHOW_SIGNAL_RADII_LBL   = "Show signal radii";
     	public static final String WARP_BTN_TOOLTIP        = "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments";
     	
         /*

@@ -83,6 +83,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     /** Launch signal warping */
     private JButton warpButton;
 
+    /** Show signal radius or just CoM */
+    boolean isShowAnnotations = false;
+
     /** Messages to clarify when UI is disabled */
     private JLabel headerText;
 
@@ -205,8 +208,15 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
         warpButton.setToolTipText(Labels.Signals.WARP_BTN_TOOLTIP);
         warpButton.addActionListener(e ->  new SignalWarpingDialog(getDatasets()));
         warpButton.setEnabled(false);
-
         panel.add(warpButton);
+        
+        JCheckBox showAnnotationsBox = new JCheckBox(Labels.Signals.SHOW_SIGNAL_RADII_LBL, isShowAnnotations);
+        showAnnotationsBox.addActionListener(e -> {
+        	isShowAnnotations = showAnnotationsBox.isSelected();
+		    refreshChartCache(getDatasets());
+		});
+		panel.add(showAnnotationsBox);
+		showAnnotationsBox.setEnabled(this.hasDatasets());
 
         if (isSingleDataset()) {
 
@@ -328,8 +338,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
             // so we must invalidate the cache whenever they change
             this.clearChartCache(getDatasets());
 
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setShowWarp(false)
-                    .setTarget(chartPanel).build();
+            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+            		.setShowWarp(false)
+                    .setTarget(chartPanel)
+                    .setShowAnnotations(isShowAnnotations).build();
 
             setChart(options);
 

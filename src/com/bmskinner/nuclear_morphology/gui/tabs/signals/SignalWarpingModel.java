@@ -142,11 +142,11 @@ public class SignalWarpingModel implements Loggable {
 	 * Get the chart matching the current display criteria
 	 * @return
 	 */
-	public synchronized JFreeChart getChart() {
+	public synchronized JFreeChart getChart(boolean isPseudocolour) {
 		if(!isCommonTargetSelected())
 			return OutlineChartFactory.makeEmptyChart();
 			
-		ImageProcessor image = createDisplayImage();
+		ImageProcessor image = createDisplayImage(isPseudocolour);
 
         ChartOptions options = new ChartOptionsBuilder()
         		.setCellularComponent(getCommonSelectedTarget())
@@ -154,6 +154,28 @@ public class SignalWarpingModel implements Loggable {
                 .setShowBounds(false).build();
 
         return new OutlineChartFactory(options).makeSignalWarpChart(image);
+	}
+	
+//	/**
+//	 * Get the chart matching the current display criteria
+//	 * @return
+//	 */
+//	public synchronized JFreeChart getChart() {
+//		if(!isCommonTargetSelected())
+//			return OutlineChartFactory.makeEmptyChart();
+//			
+//		ImageProcessor image = createDisplayImage();
+//
+//        ChartOptions options = new ChartOptionsBuilder()
+//        		.setCellularComponent(getCommonSelectedTarget())
+//        		.setShowXAxis(false).setShowYAxis(false)
+//                .setShowBounds(false).build();
+//
+//        return new OutlineChartFactory(options).makeSignalWarpChart(image);
+//	}
+	
+	public ImageProcessor getDisplayImage(boolean isPseudocolour) {
+		return createDisplayImage(isPseudocolour);
 	}
 	
 	public void showImage(WarpedImageKey k) {
@@ -203,22 +225,27 @@ public class SignalWarpingModel implements Loggable {
      * @param image
      * @return
      */
-    private synchronized ImageProcessor createDisplayImage() {
+    private synchronized ImageProcessor createDisplayImage(boolean isPseudoColour) {
     	if (selectedImageCount() == 0 || !isCommonTargetSelected()) 
             return ImageFilterer.createWhiteByteProcessor(100, 100);
 
     	// Recolour each of the grey images according to the stored colours
         List<ImageProcessor> recoloured = new ArrayList<>();
-        
+
         for (WarpedImageKey k : displayImages) {        	
-            // The image from the warper is greyscale. Change to use the signal colour
+        	// The image from the warper is greyscale. Change to use the signal colour
         	ImageProcessor raw = cache.get(k); // a short processor
         	ImageProcessor bp = raw.convertToByteProcessor();
         	bp.invert();
-        	ImageProcessor recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
-        	recol.setMinAndMax(0, cache.getThreshold(k));
-            recoloured.add(recol);
-//        	recoloured.add(bp);
+
+        	if(isPseudoColour) {
+        		ImageProcessor recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
+        		recol.setMinAndMax(0, cache.getThreshold(k));
+        		recoloured.add(recol);
+        	} else {
+        		bp.setMinAndMax(0, cache.getThreshold(k));
+        		recoloured.add(bp);
+        	}
         }
 
         if (selectedImageCount() == 1)

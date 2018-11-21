@@ -40,7 +40,17 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 @SuppressWarnings("serial")
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
-    public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel";
+    private static final String RESET_OFFSET_LBL = "Reset offset to zero";
+
+	private static final String OFFSET_LBL = "Offset...";
+
+	private static final String RESET_ROTATION_LBL = "Reset rotation to tail";
+
+	private static final String ROTATE_BY_LBL = "Rotate by...";
+
+	private static final String ALIGN_VERTICAL_LBL = "Align vertical";
+
+	public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel";
 
     public static final String EXPORT_SVG_LBL = "Export SVG";
 
@@ -129,30 +139,24 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
         JPopupMenu popup = this.getPopupMenu();
         popup.addSeparator();
 
-        JMenuItem alignItem = new JMenuItem("Align vertical");
-        alignItem.addActionListener(this);
-        alignItem.setActionCommand("AlignVertical");
+        JMenuItem alignItem = new JMenuItem(ALIGN_VERTICAL_LBL);
+        alignItem.addActionListener(e-> fireSignalChangeEvent("AlignVertical"));
         alignItem.setEnabled(true);
 
-        JMenuItem rotateItem = new JMenuItem("Rotate by...");
-        rotateItem.addActionListener(this);
-        rotateItem.setActionCommand("RotateConsensus");
+        JMenuItem rotateItem = new JMenuItem(ROTATE_BY_LBL);
+        rotateItem.addActionListener(e->fireSignalChangeEvent("RotateConsensus"));
 
-        JMenuItem resetItem = new JMenuItem("Reset rotation to tail");
-        resetItem.addActionListener(this);
-        resetItem.setActionCommand("RotateReset");
+        JMenuItem resetItem = new JMenuItem(RESET_ROTATION_LBL);
+        resetItem.addActionListener(e->fireSignalChangeEvent("RotateReset"));
 
-        JMenuItem offsetItem = new JMenuItem("Offset...");
-        offsetItem.addActionListener(this);
-        offsetItem.setActionCommand("OffsetAction");
+        JMenuItem offsetItem = new JMenuItem(OFFSET_LBL);
+        offsetItem.addActionListener(e->fireSignalChangeEvent("OffsetAction"));
 
-        JMenuItem resetOffsetItem = new JMenuItem("Reset offset to zero");
-        resetOffsetItem.addActionListener(this);
-        resetOffsetItem.setActionCommand("OffsetReset");
-
+        JMenuItem resetOffsetItem = new JMenuItem(RESET_OFFSET_LBL);
+        resetOffsetItem.addActionListener(e->fireSignalChangeEvent("OffsetReset"));
+        
         JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG_LBL);
-        exportSvgItem.addActionListener(this);
-        exportSvgItem.setActionCommand(EXPORT_SVG_LBL);
+        exportSvgItem.addActionListener(e->fireSignalChangeEvent(EXPORT_SVG_LBL));
 
         popup.add(alignItem);
         popup.add(rotateItem);
@@ -164,40 +168,6 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
         popup.add(exportSvgItem);
 
         return popup;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        super.actionPerformed(arg0);
-
-        // Align two points to the vertical
-        if (arg0.getActionCommand().equals("AlignVertical")) {
-
-            fireSignalChangeEvent("AlignVertical");
-        }
-
-        // Rotate the consensus in the chart by the given amount
-        if (arg0.getActionCommand().equals("RotateConsensus")) {
-            fireSignalChangeEvent("RotateConsensus");
-        }
-
-        // reset the rotation to the orientation point (tail)
-        if (arg0.getActionCommand().equals("RotateReset")) {
-            fireSignalChangeEvent("RotateReset");
-        }
-
-        if (arg0.getActionCommand().equals("OffsetAction")) {
-            fireSignalChangeEvent("OffsetAction");
-        }
-
-        if (arg0.getActionCommand().equals("OffsetReset")) {
-            fireSignalChangeEvent("OffsetReset");
-        }
-
-        if (arg0.getActionCommand().equals(EXPORT_SVG_LBL)) {
-            fireSignalChangeEvent(EXPORT_SVG_LBL);
-        }
-
     }
 
     public synchronized void addSignalChangeListener(EventListener l) {
