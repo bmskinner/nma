@@ -118,6 +118,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private static final String SIGNAL_GROUP_LBL    = "Signal group";
     private static final String INCLUDE_CELLS_LBL   = "Only include cells with signals";
     private static final String PSEUDOCOLOUR_LBL    = "Pseudocolour signals";
+    private static final String ENHANCE_LBL         = "Enhance signals";
     private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
     private static final String RUN_LBL             = "Run";
     private static final String DIALOG_TITLE        = "Signal warping";
@@ -139,6 +140,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private JSpinner minThresholdSpinner;
     private JSlider   thresholdSlider;
     private JCheckBox pseudocolourBox;
+    private JCheckBox enhanceBox;
 
     private SignalWarper warper;
 
@@ -233,81 +235,85 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
      */
     private JPanel createHeader() {
 
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+    	JPanel headerPanel = new JPanel();
+    	headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 
-        JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    	JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    	JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        datasetBoxOne = new DatasetSelectionPanel(datasets);
-        datasetBoxTwo = new DatasetSelectionPanel(datasets);
+    	datasetBoxOne = new DatasetSelectionPanel(datasets);
+    	datasetBoxTwo = new DatasetSelectionPanel(datasets);
 
-        datasetBoxOne.setSelectedDataset(datasets.get(0));
-        datasetBoxTwo.setSelectedDataset(datasets.get(0));
+    	datasetBoxOne.setSelectedDataset(datasets.get(0));
+    	datasetBoxTwo.setSelectedDataset(datasets.get(0));
 
-        datasetBoxOne.addActionListener(e -> {
-            if (datasetBoxOne.getSelectedDataset().getCollection().getSignalManager().hasSignals()) {
+    	datasetBoxOne.addActionListener(e -> {
+    		if (datasetBoxOne.getSelectedDataset().getCollection().getSignalManager().hasSignals()) {
 
-                signalBox.setDataset(datasetBoxOne.getSelectedDataset());
-            }
-        });
-        datasetBoxTwo.addActionListener(e -> {
-            updateBlankChart();
-        });
+    			signalBox.setDataset(datasetBoxOne.getSelectedDataset());
+    		}
+    	});
+    	datasetBoxTwo.addActionListener(e -> {
+    		updateBlankChart();
+    	});
 
-        upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
-        upperPanel.add(datasetBoxOne);
+    	upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
+    	upperPanel.add(datasetBoxOne);
 
-        signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
+    	signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
 
-        if (!signalBox.hasSelection()) {
-            signalBox.setEnabled(false);
-        }
+    	if (!signalBox.hasSelection()) {
+    		signalBox.setEnabled(false);
+    	}
 
-        upperPanel.add(new JLabel(SIGNAL_GROUP_LBL));
-        upperPanel.add(signalBox);
+    	upperPanel.add(new JLabel(SIGNAL_GROUP_LBL));
+    	upperPanel.add(signalBox);
 
-        signalBox.addActionListener(this);
+    	signalBox.addActionListener(this);
 
-        cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
-        cellsWithSignalsBox.addActionListener(this);
-        upperPanel.add(cellsWithSignalsBox);
-        
-        upperPanel.add(new JLabel(MIN_THRESHOLD_LBL));
-        SpinnerModel minThresholdModel = new SpinnerNumberModel(SignalWarper.DEFAULT_MIN_SIGNAL_THRESHOLD, 0, 255, 1);
-        minThresholdSpinner = new JSpinner(minThresholdModel);
-        upperPanel.add(minThresholdSpinner);
+    	cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
+    	cellsWithSignalsBox.addActionListener(this);
+    	upperPanel.add(cellsWithSignalsBox);
 
-        lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
-        lowerPanel.add(datasetBoxTwo);
+    	upperPanel.add(new JLabel(MIN_THRESHOLD_LBL));
+    	SpinnerModel minThresholdModel = new SpinnerNumberModel(SignalWarper.DEFAULT_MIN_SIGNAL_THRESHOLD, 0, 255, 1);
+    	minThresholdSpinner = new JSpinner(minThresholdModel);
+    	upperPanel.add(minThresholdSpinner);
 
-        runButton = new JButton(RUN_LBL);
+    	lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
+    	lowerPanel.add(datasetBoxTwo);
 
-        runButton.addActionListener(e ->  ThreadManager.getInstance().submit( () -> runWarping() ));
+    	runButton = new JButton(RUN_LBL);
 
-        lowerPanel.add(runButton);
+    	runButton.addActionListener(e ->  ThreadManager.getInstance().submit( () -> runWarping() ));
 
-        if (!signalBox.hasSelection()) 
-            runButton.setEnabled(false);
-        
+    	lowerPanel.add(runButton);
 
-        
-        thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
-        lowerPanel.add(thresholdSlider);
-        thresholdSlider.setVisible(true);
-        thresholdSlider.addChangeListener( makeThresholdChangeListener());
-        
-        pseudocolourBox = new JCheckBox(PSEUDOCOLOUR_LBL, true);
-        pseudocolourBox.addActionListener(e->updateChart());
-        lowerPanel.add(pseudocolourBox);
+    	if (!signalBox.hasSelection()) 
+    		runButton.setEnabled(false);
 
-        lowerPanel.add(progressBar);
-        progressBar.setVisible(false);
 
-        headerPanel.add(upperPanel);
-        headerPanel.add(lowerPanel);
 
-        return headerPanel;
+    	thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
+    	lowerPanel.add(thresholdSlider);
+    	thresholdSlider.setVisible(true);
+    	thresholdSlider.addChangeListener( makeThresholdChangeListener());
+
+    	pseudocolourBox = new JCheckBox(PSEUDOCOLOUR_LBL, true);
+    	pseudocolourBox.addActionListener(e->updateChart());
+    	lowerPanel.add(pseudocolourBox);
+
+    	enhanceBox = new JCheckBox(ENHANCE_LBL, true);
+    	enhanceBox.addActionListener(e->updateChart());
+    	lowerPanel.add(enhanceBox);
+
+    	lowerPanel.add(progressBar);
+    	progressBar.setVisible(false);
+
+    	headerPanel.add(upperPanel);
+    	headerPanel.add(lowerPanel);
+
+    	return headerPanel;
     }
     
     private ChangeListener makeThresholdChangeListener() {
@@ -315,7 +321,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         	JSlider s = (JSlider) e.getSource();
     		int value = SignalWarpingModel.THRESHOLD_ALL_VISIBLE - s.getValue();
         	model.setThresholdOfSelected(value);
-        	chartPanel.setChart(model.getChart(pseudocolourBox.isSelected()));
+        	chartPanel.setChart(model.getChart(pseudocolourBox.isSelected(), enhanceBox.isSelected()));
         };
     }
 
@@ -374,47 +380,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private void updateChart() {
 
         Runnable task = () -> {
-            chartPanel.setChart(model.getChart(pseudocolourBox.isSelected()));
+            chartPanel.setChart(model.getChart(pseudocolourBox.isSelected(), enhanceBox.isSelected()));
             chartPanel.restoreAutoBounds();
         };
         ThreadManager.getInstance().submit(task);
 
     }
-
-//    private void updateSignalSelectionTable() {
-//    	
-//    	DefaultTableModel tableModel = new DefaultTableModel();
-//    	
-//    	Vector<IAnalysisDataset> templateDatasets = new Vector<>();
-//    	Vector<ISignalGroup>     templateSignals  = new Vector<>();
-//    	Vector<Boolean>          isSignalsOnly    = new Vector<>();
-//    	Vector<String > targetShape     = new Vector<>();
-//    	Vector<WarpedImageKey> keys     = new Vector<>();
-//    	
-//        for (CellularComponent d : model.getTargets()) {
-//            for (WarpedImageKey k : model.getKeys(d)) {
-//            	
-//            	templateDatasets.add(k.getTemplate());
-//            	
-//            	UUID signalGroupId = k.getSignalGroupId();
-//            	ISignalGroup s = k.getTemplate().getCollection().getSignalGroup(signalGroupId).get();
-//            	templateSignals.add(s);
-//            	
-//            	isSignalsOnly.add(k.isOnlyCellsWithSignals());
-//            	targetShape.add(k.getTargetName());
-//            	keys.add(k);
-//            }
-//        }
-//        
-//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_DATASET, templateDatasets);
-//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_SIGNALS, templateSignals);
-//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY, isSignalsOnly);
-//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_TARGET_SHAPE, targetShape);
-//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN, keys);
-//
-//        signalSelectionTable.setModel(tableModel);
-//        
-//    }
 
     /**
      * Run the warper with the currently selected settings
@@ -436,7 +407,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             setEnabled(false);
 
             progressBar.setStringPainted(true);
-
             progressBar.setVisible(true);
             
             HashOptions ho = new DefaultOptions();
@@ -467,6 +437,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         datasetBoxTwo.setEnabled(b);
         minThresholdSpinner.setEnabled(b);
         pseudocolourBox.setEnabled(b);
+        enhanceBox.setEnabled(b);
     }
 
     /**
@@ -493,7 +464,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             model.clearSelection();
             model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, image);
 
-//            updateSignalSelectionTable();
             updateChart();
             thresholdSlider.setVisible(true);
             setEnabled(true);
@@ -543,7 +513,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     }
     
     private void exportImage() {
-    	ImageProcessor ip = model.getDisplayImage(pseudocolourBox.isSelected());
+    	ImageProcessor ip = model.getDisplayImage(pseudocolourBox.isSelected(), enhanceBox.isSelected());
     	ip.flipVertical();
     	new ImagePlus("Image",ip).show();
     }

@@ -172,11 +172,11 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 	 * Get the chart matching the current display criteria
 	 * @return
 	 */
-	public synchronized JFreeChart getChart(boolean isPseudocolour) {
+	public synchronized JFreeChart getChart(boolean isPseudocolour, boolean isEnhance) {
 		if(!isCommonTargetSelected())
 			return OutlineChartFactory.makeEmptyChart();
 			
-		ImageProcessor image = createDisplayImage(isPseudocolour);
+		ImageProcessor image = createDisplayImage(isPseudocolour, isEnhance);
 
         ChartOptions options = new ChartOptionsBuilder()
         		.setCellularComponent(getCommonSelectedTarget())
@@ -185,27 +185,9 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 
         return new OutlineChartFactory(options).makeSignalWarpChart(image);
 	}
-	
-//	/**
-//	 * Get the chart matching the current display criteria
-//	 * @return
-//	 */
-//	public synchronized JFreeChart getChart() {
-//		if(!isCommonTargetSelected())
-//			return OutlineChartFactory.makeEmptyChart();
-//			
-//		ImageProcessor image = createDisplayImage();
-//
-//        ChartOptions options = new ChartOptionsBuilder()
-//        		.setCellularComponent(getCommonSelectedTarget())
-//        		.setShowXAxis(false).setShowYAxis(false)
-//                .setShowBounds(false).build();
-//
-//        return new OutlineChartFactory(options).makeSignalWarpChart(image);
-//	}
-	
-	public ImageProcessor getDisplayImage(boolean isPseudocolour) {
-		return createDisplayImage(isPseudocolour);
+		
+	public ImageProcessor getDisplayImage(boolean isPseudocolour, boolean isEnhance) {
+		return createDisplayImage(isPseudocolour, isEnhance);
 	}
 	
 	public void showImage(WarpedImageKey k) {
@@ -255,7 +237,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
      * @param image
      * @return
      */
-    private synchronized ImageProcessor createDisplayImage(boolean isPseudoColour) {
+    private synchronized ImageProcessor createDisplayImage(boolean isPseudoColour, boolean isEnhance) {
     	if (selectedImageCount() == 0 || !isCommonTargetSelected()) 
             return ImageFilterer.createWhiteByteProcessor(100, 100);
 
@@ -268,14 +250,14 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         	ImageProcessor bp = raw.convertToByteProcessor();
         	bp.invert();
 
-        	if(isPseudoColour) {
-        		ImageProcessor recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
-        		recol.setMinAndMax(0, cache.getThreshold(k));
-        		recoloured.add(recol);
-        	} else {
-        		bp.setMinAndMax(0, cache.getThreshold(k));
-        		recoloured.add(bp);
-        	}
+        	ImageProcessor recol = bp;
+        	if(isPseudoColour)
+        		recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
+        	else 
+        		recol = bp.convertToColorProcessor();
+        	
+        	recol.setMinAndMax(0, cache.getThreshold(k));
+    		recoloured.add(recol);
         }
 
         if (selectedImageCount() == 1)
@@ -285,7 +267,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         // values so territories can be compared
         try {
             ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
-            return averaged;
+            if(isEnhance)
+              return ImageFilterer.rescaleRGBImageIntensity(averaged);
+            else
+            	return averaged;
 
         } catch (Exception e) {
             warn("Error averaging images");

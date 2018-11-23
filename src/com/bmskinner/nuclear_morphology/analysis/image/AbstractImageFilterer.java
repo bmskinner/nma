@@ -414,9 +414,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return a new ColorProcessor with rescaled values
      */
     public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip) {
-    	if (ip == null) {
+    	if (ip == null)
             throw new IllegalArgumentException("Image cannot be null");
-        }
     	
     	double rMax = 0, gMax=0, bMax=0;
     	double rMin = 255, gMin=255, bMin=255;
@@ -472,6 +471,9 @@ public abstract class AbstractImageFilterer implements Loggable {
 
         if (ip == null)
             throw new IllegalArgumentException("Image cannot be null");
+        
+        if (ip instanceof ColorProcessor)
+            return rescaleRGBImageIntensity(ip);
 
         double maxIntensity = 0;
         double minIntensity = 255;
@@ -487,12 +489,6 @@ public abstract class AbstractImageFilterer implements Loggable {
             maxIntensity = 0;
             minIntensity = Float.MAX_VALUE;
             result = new FloatProcessor(ip.getWidth(), ip.getHeight());
-        }
-
-        if (ip instanceof ColorProcessor) {
-            maxIntensity = 0;
-            minIntensity = 255;
-            result = new ColorProcessor(ip.getWidth(), ip.getHeight());
         }
         
         if (ip instanceof ShortProcessor) {
