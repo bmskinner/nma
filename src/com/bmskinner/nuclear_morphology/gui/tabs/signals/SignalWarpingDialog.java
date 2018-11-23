@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -26,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +56,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -71,6 +74,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -89,6 +93,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
@@ -139,7 +144,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     private JProgressBar progressBar = new JProgressBar(0, 100);
 
-//    private JTree tree;
     private JTable signalSelectionTable;
 
     private final SignalWarpingModel model;
@@ -162,11 +166,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     public SignalWarpingDialog(final List<IAnalysisDataset> datasets) {
         super();
         this.datasets = datasets;
-        model = new SignalWarpingModel();
-        
-        // Add saved warped images to the image cache 
-        model.addSavedImages(datasets);
-        
+        model = new SignalWarpingModel(datasets); // adds any saved warp images       
         createUI();
         addCtrlPressListener();
         this.setModal(false);
@@ -328,10 +328,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         
-        signalSelectionTable = new ExportableTable();
+        signalSelectionTable = new ExportableTable(model, false);
         signalSelectionTable.setCellSelectionEnabled(false);
         signalSelectionTable.setRowSelectionAllowed(true);
         signalSelectionTable.setColumnSelectionAllowed(false);
+        TableColumn keyColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
+        
+        signalSelectionTable.removeColumn(keyColumn);
+        
+        TableColumn colourColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN);
+        colourColumn.setCellRenderer(new SignalWarpingTableCellRenderer());
         ListSelectionModel cellSelectionModel = signalSelectionTable.getSelectionModel();
         cellSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         
@@ -345,6 +351,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         	for(ChangeListener l : thresholdSlider.getChangeListeners())
         		thresholdSlider.removeChangeListener(l);
         	for (int i = 0; i < selectedRow.length; i++) {
+
         		WarpedImageKey selectedKey = (WarpedImageKey) signalSelectionTable.getModel().getValueAt(selectedRow[i], KEY_COLUMN_INDEX);
         		model.addSelection(selectedKey);
         		thresholdSlider.setValue(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedKey));
@@ -353,7 +360,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     		updateChart();
         });
 
-        updateSignalSelectionTable();
         JScrollPane sp = new JScrollPane(signalSelectionTable);
         panel.add(sp, BorderLayout.CENTER);
         return panel;
@@ -375,41 +381,40 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     }
 
-    private void updateSignalSelectionTable() {
-    	
-    	DefaultTableModel tableModel = new DefaultTableModel();
-    	
-    	Vector<IAnalysisDataset> templateDatasets = new Vector<>();
-    	Vector<ISignalGroup>     templateSignals  = new Vector<>();
-    	Vector<Boolean>          isSignalsOnly    = new Vector<>();
-    	Vector<String > targetShape     = new Vector<>();
-    	Vector<WarpedImageKey> keys     = new Vector<>();
-    	
-        for (CellularComponent d : model.getTargets()) {
-            for (WarpedImageKey k : model.getKeys(d)) {
-            	
-            	templateDatasets.add(k.getTemplate());
-            	
-            	UUID signalGroupId = k.getSignalGroupId();
-            	ISignalGroup s = k.getTemplate().getCollection().getSignalGroup(signalGroupId).get();
-            	templateSignals.add(s);
-            	
-            	isSignalsOnly.add(k.isOnlyCellsWithSignals());
-            	targetShape.add(k.getTargetName());
-            	keys.add(k);
-            }
-        }
-        
-        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_DATASET, templateDatasets);
-        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_SIGNALS, templateSignals);
-        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY, isSignalsOnly);
-        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_TARGET_SHAPE, targetShape);
-        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN, keys);
-
-        signalSelectionTable.setModel(tableModel);
-        TableColumn keyColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
-        signalSelectionTable.removeColumn(keyColumn);
-    }
+//    private void updateSignalSelectionTable() {
+//    	
+//    	DefaultTableModel tableModel = new DefaultTableModel();
+//    	
+//    	Vector<IAnalysisDataset> templateDatasets = new Vector<>();
+//    	Vector<ISignalGroup>     templateSignals  = new Vector<>();
+//    	Vector<Boolean>          isSignalsOnly    = new Vector<>();
+//    	Vector<String > targetShape     = new Vector<>();
+//    	Vector<WarpedImageKey> keys     = new Vector<>();
+//    	
+//        for (CellularComponent d : model.getTargets()) {
+//            for (WarpedImageKey k : model.getKeys(d)) {
+//            	
+//            	templateDatasets.add(k.getTemplate());
+//            	
+//            	UUID signalGroupId = k.getSignalGroupId();
+//            	ISignalGroup s = k.getTemplate().getCollection().getSignalGroup(signalGroupId).get();
+//            	templateSignals.add(s);
+//            	
+//            	isSignalsOnly.add(k.isOnlyCellsWithSignals());
+//            	targetShape.add(k.getTargetName());
+//            	keys.add(k);
+//            }
+//        }
+//        
+//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_DATASET, templateDatasets);
+//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_SIGNALS, templateSignals);
+//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY, isSignalsOnly);
+//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_TARGET_SHAPE, targetShape);
+//        tableModel.addColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN, keys);
+//
+//        signalSelectionTable.setModel(tableModel);
+//        
+//    }
 
     /**
      * Run the warper with the currently selected settings
@@ -488,7 +493,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
             model.clearSelection();
             model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, image);
 
-            updateSignalSelectionTable();
+//            updateSignalSelectionTable();
             updateChart();
             thresholdSlider.setVisible(true);
             setEnabled(true);
@@ -562,5 +567,22 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         }
 
     }
-
+    
+    /**
+     * Colour the background of the pseudocolour column in the signal warping table
+     * @author bms41
+     * @since 1.15.0
+     *
+     */
+    @SuppressWarnings("serial")
+    public class SignalWarpingTableCellRenderer extends DefaultTableCellRenderer {
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+        	Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            Color colour = (Color)value;
+            l.setBackground(colour);
+            l.setForeground(colour);
+            return l;
+        }
+    }
 }

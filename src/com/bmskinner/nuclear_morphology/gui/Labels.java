@@ -184,6 +184,7 @@ public class Labels {
         	public static final String TABLE_HEADER_SIGNALS_ONLY   = "Only cells with signals?";
         	public static final String TABLE_HEADER_TARGET_SHAPE   = "Target shape";
         	public static final String TABLE_HEADER_KEY_COLUMN     = "Keys";
+        	public static final String TABLE_HEADER_COLOUR_COLUMN  = "Pseudocolour";
         	
         }
 

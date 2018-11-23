@@ -22,8 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import javax.swing.table.DefaultTableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -37,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -46,10 +50,11 @@ import ij.process.ImageProcessor;
 /**
  * The model for signal warping views
  * @author bms41
+ * @since 1.14.0
  *
  */
-public class SignalWarpingModel implements Loggable {
-	
+public class SignalWarpingModel extends DefaultTableModel implements Loggable {
+
 	public static final int THRESHOLD_ALL_VISIBLE = 255;
 	
 	/** images currently displayed */
@@ -57,6 +62,21 @@ public class SignalWarpingModel implements Loggable {
 	
 	private volatile ImageCache cache = new ImageCache();
 	
+	public SignalWarpingModel() {
+		super();
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_DATASET, new Vector<IAnalysisDataset>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_SIGNALS, new Vector<ISignalGroup>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY, new Vector<Boolean>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_TARGET_SHAPE, new Vector<String>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN, new Vector<WarpedImageKey>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN, new Vector<Color>());
+	}
+	
+	public SignalWarpingModel(@NonNull List<IAnalysisDataset> datasets) {
+		this();
+		addSavedImages(datasets);
+	}
+		
 	public synchronized void addSelection(@NonNull final WarpedImageKey k) {
         displayImages.add(k);
     }
@@ -85,34 +105,32 @@ public class SignalWarpingModel implements Loggable {
 	}
 
 	
-	public void addSavedImages(@NonNull List<IAnalysisDataset> list) {
+	private void addSavedImages(@NonNull List<IAnalysisDataset> list) {
 		for(IAnalysisDataset d : list) {
 			addSavedImages(d);
 		}
 	}
 
-	public void addSavedImages(@NonNull IAnalysisDataset d) {
+	private void addSavedImages(@NonNull IAnalysisDataset d) {
 		for(UUID signalGroupId : d.getCollection().getSignalGroupIDs()) {
 			ISignalGroup sg  = d.getCollection().getSignalGroup(signalGroupId).get();
-			
-            Optional<IWarpedSignal> ws = sg.getWarpedSignals();
-            if(ws.isPresent()) {
-            	IWarpedSignal warpedSignal = ws.get();
-            	for(WarpedSignalKey c : warpedSignal.getWarpedSignalKeys()) {
-            		
-            		Optional<ImageProcessor> im = warpedSignal.getWarpedImage(c);
-            		if(im.isPresent()) {
-            			WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), warpedSignal.getTargetName(c), d, signalGroupId,c.isCellWithSignalsOnly());
-            			cache.add(k, im.get());
-                        Color col = sg.getGroupColour().orElse(Color.WHITE);
-                        cache.setColour(k, col);
-                        
-                        cache.setThreshold(k, THRESHOLD_ALL_VISIBLE);
-            		}
-            		
-            		
-            	}                	
-            }
+
+			Optional<IWarpedSignal> ws = sg.getWarpedSignals();
+			if(ws.isPresent()) {
+				IWarpedSignal warpedSignal = ws.get();
+				for(WarpedSignalKey c : warpedSignal.getWarpedSignalKeys()) {
+
+					Optional<ImageProcessor> im = warpedSignal.getWarpedImage(c);
+					if(im.isPresent()) {
+						WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), warpedSignal.getTargetName(c), d, signalGroupId,c.isCellWithSignalsOnly());
+						cache.add(k, im.get());
+						Color col = sg.getGroupColour().orElse(Color.WHITE);
+						cache.setColour(k, col);
+						cache.setThreshold(k, THRESHOLD_ALL_VISIBLE);
+						addTableRow(k);
+					}
+				}                	
+			}
 		}
 	}
 	
@@ -129,6 +147,17 @@ public class SignalWarpingModel implements Loggable {
 		cache.setThreshold(k, threshold);;
 	}
 	
+	private void addTableRow(WarpedImageKey k) {
+        Vector v = new Vector();
+		v.add(k.getTemplate().getName());
+        v.add(k.getTemplate().getCollection().getSignalGroup(k.getSignalGroupId()).get());
+        v.add(k.isOnlyCellsWithSignals());
+        v.add(k.getTargetName());
+        v.add(k);
+        v.add(cache.getColour(k));
+        this.addRow(v);
+	}
+	
 	public void addImage(@NonNull CellularComponent consensusTemplate, @NonNull String targetName, @NonNull IAnalysisDataset signalSource, @NonNull UUID signalGroupId, boolean isCellsWithSignals, @NonNull ImageProcessor image) {
 		WarpedImageKey k = cache.new WarpedImageKey(consensusTemplate, targetName, signalSource, signalGroupId,isCellsWithSignals);
 
@@ -136,6 +165,7 @@ public class SignalWarpingModel implements Loggable {
         Color c = signalSource.getCollection().getSignalGroup(signalGroupId).get().getGroupColour().orElse(Color.WHITE);
         cache.setColour(k, c);
         cache.setThreshold(k, THRESHOLD_ALL_VISIBLE);
+        addTableRow(k);
 	}
 	
 	/**
