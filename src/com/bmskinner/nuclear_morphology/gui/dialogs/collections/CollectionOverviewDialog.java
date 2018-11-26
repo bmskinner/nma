@@ -34,7 +34,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.components.LabelInfo;
+import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CollectionOverviewDialog.LabelInfoRenderer;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
@@ -49,6 +49,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 public abstract class CollectionOverviewDialog extends LoadingIconDialog implements PropertyChangeListener {
 
     public static final int COLUMN_COUNT = 3;
+
     
     protected static final String LOADING_LBL = "Loading";
 
@@ -151,8 +152,8 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
 
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            LabelInfo info = (LabelInfo) value;
-            setIcon(info.getIcon());
+            SelectableCellIcon info = (SelectableCellIcon) value;
+            setIcon(info);
             setHorizontalAlignment(JLabel.CENTER);
             setHorizontalTextPosition(JLabel.CENTER);
             setVerticalTextPosition(JLabel.BOTTOM);

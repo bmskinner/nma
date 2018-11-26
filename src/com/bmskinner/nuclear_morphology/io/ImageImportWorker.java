@@ -26,6 +26,7 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -35,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
-import com.bmskinner.nuclear_morphology.gui.components.LabelInfo;
+import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -50,7 +51,7 @@ import ij.process.ImageProcessor;
  * @author ben
  *
  */
-public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implements Loggable {
+public class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> implements Loggable {
 
 	protected final IAnalysisDataset dataset;
 	protected final TableModel       model;
@@ -72,9 +73,8 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         	if(isCancelled())
         		return false;
             try {
-                ImageIcon ic = importCellImage(c);
-                LabelInfo inf = new LabelInfo(ic, c);
-                publish(inf);
+            	SelectableCellIcon ic = importCellImage(c);
+                publish(ic);
             } catch (Exception e) {
                 stack("Error importing cell image", e);
             }
@@ -103,7 +103,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         }
     }
 
-    protected ImageIcon importCellImage(ICell c) {
+    protected SelectableCellIcon importCellImage(ICell c) {
         ImageProcessor ip;
 
         try {
@@ -115,7 +115,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 
         } catch (UnloadableImageException e) {
             stack("Cannot load image for component", e);
-            return new ImageIcon();
+            return new SelectableCellIcon();
         }
 
         ImageAnnotator an = new ImageAnnotator(ip);
@@ -152,10 +152,8 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
             ip.flipVertical(); // Y axis needs inverting
         }
         // Rescale the resulting image
-        ip = scaleImage(ip);
-
-        ImageIcon ic = new ImageIcon(ip.getBufferedImage());
-        return ic;
+        ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+        return new SelectableCellIcon(ip, c);
     }
 
     protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
@@ -270,20 +268,10 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         return newIp;
     }
 
-    protected ImageProcessor scaleImage(ImageProcessor ip) {
-        double aspect = (double) ip.getWidth() / (double) ip.getHeight();
-        double finalWidth = 150 * aspect; // fix height
-        finalWidth = finalWidth > 150 ? 150 : finalWidth; // but constrain width
-                                                          // too
-
-        ip = ip.resize((int) finalWidth);
-        return ip;
-    }
-
     @Override
-    protected void process(List<LabelInfo> chunks) {
+    protected void process(List<SelectableCellIcon> chunks) {
 
-        for (LabelInfo im : chunks) {
+        for (SelectableCellIcon im : chunks) {
 
             int row = loaded / COLUMN_COUNT;
             int col = loaded % COLUMN_COUNT;

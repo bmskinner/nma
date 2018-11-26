@@ -387,7 +387,7 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @param maxHeight the maximum height of the new image
      * @return a new image resized to fit the given dimensions
      */
-    public void resizeKeepingAspect(int maxWidth, int maxHeight) {
+    public AbstractImageFilterer resizeKeepingAspect(int maxWidth, int maxHeight) {
 
         if (ip == null) {
             throw new IllegalArgumentException("Image processor is null");
@@ -406,6 +406,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 
         ImageProcessor result = ip.duplicate().resize((int) finalWidth);
         ip = result;
+        return this;
     }
     
     /**

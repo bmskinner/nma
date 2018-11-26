@@ -37,6 +37,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
@@ -46,7 +47,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.gui.components.LabelInfo;
+import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -199,7 +200,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	    }
 
 	    @Override
-	    protected ImageIcon importCellImage(ICell c) {
+	    protected SelectableCellIcon importCellImage(ICell c) {
 	        ImageProcessor ip = renderFullImage(c);
 
 	        if (rotate) {
@@ -211,10 +212,9 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	            ip.flipVertical(); // Y axis needs inverting
 	        }
 	        // Rescale the resulting image
-	        ip = scaleImage(ip);
+	        ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
 
-	        ImageIcon ic = new ImageIcon(ip.getBufferedImage());
-	        return ic;
+	        return new SelectableCellIcon(ip, c);
 	    }
 	}
 

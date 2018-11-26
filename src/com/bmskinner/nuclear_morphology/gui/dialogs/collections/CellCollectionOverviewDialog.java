@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.gui.components.LabelInfo;
+import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -62,7 +62,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	private static final String ROTATE_VERTICAL_LBL = "Rotate vertical";
 	private static final int DEGREES_180 = 180;
 	private static final int DEGREES_360 = 360;
-	
+    public static final int ROW_IMAGE_HEIGHT   = 150;
 	
 
     public CellCollectionOverviewDialog(IAnalysisDataset dataset) {
@@ -187,31 +187,31 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
     
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        int value = 0;
-        try {
-            Object newValue = evt.getNewValue();
-
-            if (newValue.getClass().isAssignableFrom(Integer.class)) {
-                value = (int) newValue;
-
-            }
-            if (value >= 0 && value <= 100) {
-                progressBar.setValue(value);
-            }
-
-            if (evt.getPropertyName().equals("Finished")) {
-                finest("Worker signaled finished");
-                progressBar.setVisible(false);
-
-            }
-
-        } catch (Exception e) {
-            error("Error getting value from property change", e);
-        }
-
-    }
+//    @Override
+//    public void propertyChange(PropertyChangeEvent evt) {
+//        int value = 0;
+//        try {
+//            Object newValue = evt.getNewValue();
+//
+//            if (newValue.getClass().isAssignableFrom(Integer.class)) {
+//                value = (int) newValue;
+//
+//            }
+//            if (value >= 0 && value <= 100) {
+//                progressBar.setValue(value);
+//            }
+//
+//            if (evt.getPropertyName().equals("Finished")) {
+//                finest("Worker signaled finished");
+//                progressBar.setVisible(false);
+//
+//            }
+//
+//        } catch (Exception e) {
+//            error("Error getting value from property change", e);
+//        }
+//
+//    }
 
     
 

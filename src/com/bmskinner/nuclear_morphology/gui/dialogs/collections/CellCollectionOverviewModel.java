@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.gui.components.LabelInfo;
+import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 
 /**
  * Display cell images in a collection. Tracks cell selections.  
@@ -32,9 +32,7 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < cols; col++) {
-
-				LabelInfo l = new LabelInfo(null, null);
-				setValueAt(l, row, col);
+				setValueAt(new SelectableCellIcon(), row, col);
 			}
 		}
 
@@ -46,7 +44,7 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
     }
 	
 	public ICell getCell(int r, int c) {
-		return ((LabelInfo)getValueAt(r, c)).getCell();
+		return ((SelectableCellIcon)getValueAt(r, c)).getCell();
 	}
 	
 	/**
@@ -77,7 +75,7 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 	 */
 	public void setSelected(int r, int c, boolean b) {
 		Object o = getValueAt(r, c);
-		((LabelInfo)o).setSelected(b);
+		((SelectableCellIcon)o).setSelected(b);
 		if(b)
 			selected.add(o);
 		
@@ -90,7 +88,7 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 	 * @return
 	 */
 	public List<ICell> getSelected(){
-		return selected.stream().map(o -> ((LabelInfo)o).getCell()).collect(Collectors.toList());
+		return selected.stream().map(o -> ((SelectableCellIcon)o).getCell()).collect(Collectors.toList());
 	}
 	
 	
