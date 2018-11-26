@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
+import com.bmskinner.nuclear_morphology.gui.components.LabelInfo;
 
 /**
  * Display cell images in a collection. Tracks cell selections.  

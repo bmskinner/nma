@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
+package com.bmskinner.nuclear_morphology.gui.components;
 
 import javax.swing.ImageIcon;
 
