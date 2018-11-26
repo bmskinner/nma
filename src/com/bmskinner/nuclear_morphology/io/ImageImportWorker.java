@@ -20,22 +20,16 @@ import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -51,7 +45,7 @@ import ij.process.ImageProcessor;
  * @author ben
  *
  */
-public class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> implements Loggable {
+public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> implements Loggable {
 
 	protected final IAnalysisDataset dataset;
 	protected final TableModel       model;
@@ -102,60 +96,8 @@ public class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> 
             firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         }
     }
-
-    protected SelectableCellIcon importCellImage(ICell c) {
-        ImageProcessor ip;
-
-        try {
-            if (c.hasCytoplasm()) {
-                ip = c.getCytoplasm().getComponentRGBImage();
-            } else {
-                ip = c.getNucleus().getComponentImage();
-            }
-
-        } catch (UnloadableImageException e) {
-            stack("Cannot load image for component", e);
-            return new SelectableCellIcon();
-        }
-
-        ImageAnnotator an = new ImageAnnotator(ip);
-        if (c.hasCytoplasm()) {
-
-            an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
-            for (Nucleus n : c.getNuclei()) {
-                an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
-
-                if (n instanceof LobedNucleus) {
-
-                    for (Lobe l : ((LobedNucleus) n).getLobes()) {
-                        an.annotateBorder(l, c.getCytoplasm(), Color.RED);
-                        an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
-                    }
-                }
-            }
-
-        } else {
-
-            for (Nucleus n : c.getNuclei()) {
-                an = an.annotateSegments(n, n);
-            }
-        }
-
-        ip = an.toProcessor();
-
-        if (rotate) {
-            try {
-                ip = rotateToVertical(c, ip);
-            } catch (UnavailableBorderTagException e) {
-                stack("Unable to rotate", e);
-            }
-            ip.flipVertical(); // Y axis needs inverting
-        }
-        // Rescale the resulting image
-        ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
-        return new SelectableCellIcon(ip, c);
-    }
-
+    protected abstract SelectableCellIcon importCellImage(ICell c);
+    
     protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
         // Calculate angle for vertical rotation
         Nucleus n = c.getNucleus();

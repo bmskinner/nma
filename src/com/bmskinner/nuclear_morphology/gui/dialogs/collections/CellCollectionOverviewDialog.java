@@ -17,35 +17,43 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
+import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 /**
  * This displays all the nuclei in the given dataset, annotated
@@ -71,12 +79,11 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
 	@Override
 	protected void createWorker(){
-		worker = new ImageImportWorker(dataset, table.getModel(), true);
+		worker = new CellImportWorker(dataset, table.getModel(), true, CellularComponent.NUCLEUS);
         worker.addPropertyChangeListener(this);
         worker.execute();
         
         this.addWindowListener(new WindowAdapter() {
-        	
         	 @Override
         	    public void windowClosing(WindowEvent e) {
         	        worker.cancel(true);
@@ -89,20 +96,36 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 		JPanel header = new JPanel(new FlowLayout());
 
         JCheckBox rotateBtn = new JCheckBox(ROTATE_VERTICAL_LBL, true);
-        rotateBtn.addActionListener(e -> {
-            progressBar.setVisible(true);
-            ImageImportWorker worker = new ImageImportWorker(dataset, table.getModel(), rotateBtn.isSelected());
-            worker.addPropertyChangeListener(this);
+        
+        List<String> components = new ArrayList<>();
+        components.add(CellularComponent.CYTOPLASM);
+        components.add(CellularComponent.NUCLEUS);
+        for(UUID signalGroupId : dataset.getCollection().getSignalGroupIDs()) {
+        	ISignalGroup sg = dataset.getCollection().getSignalGroup(signalGroupId).get();
+        	components.add(sg.getGroupName()+"|"+signalGroupId);
+        }
 
+        JComboBox<String> componntBox    = new JComboBox<>(components.toArray(new String[0]));
+        componntBox.setSelectedItem(CellularComponent.NUCLEUS);
+        componntBox.addActionListener(e -> {
+        	worker.cancel(true);
+            progressBar.setVisible(true);
+            worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem().toString());
             worker.execute();
 
         });
-        header.add(rotateBtn);
         
-        String[] componentStrings = {  }; // e.g Nucleus,  Nuclear signals. Switch images / channels as needed 
-        JComboBox<String> componntBox    = new JComboBox<>(componentStrings);
-//        channelBox.addActionListener(e -> );
+        rotateBtn.addActionListener(e -> {
+        	worker.cancel(true);
+            progressBar.setVisible(true);
+            worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem().toString());
+            worker.execute();
 
+        });
+        
+        
+        header.add(componntBox);
+        header.add(rotateBtn);
 
         JCheckBox selectAll = new JCheckBox(SELECT_ALL_LBL);
         selectAll.addActionListener(e -> {
@@ -184,35 +207,132 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
             fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, list, dataset);
         }
     }
-
     
+    /**
+     * Import the cell images for the curator
+     * @author ben
+     * @since 1.15.0
+     *
+     */
+    public class CellImportWorker extends ImageImportWorker {
+    	
+    	private String component;
 
-//    @Override
-//    public void propertyChange(PropertyChangeEvent evt) {
-//        int value = 0;
-//        try {
-//            Object newValue = evt.getNewValue();
-//
-//            if (newValue.getClass().isAssignableFrom(Integer.class)) {
-//                value = (int) newValue;
-//
-//            }
-//            if (value >= 0 && value <= 100) {
-//                progressBar.setValue(value);
-//            }
-//
-//            if (evt.getPropertyName().equals("Finished")) {
-//                finest("Worker signaled finished");
-//                progressBar.setVisible(false);
-//
-//            }
-//
-//        } catch (Exception e) {
-//            error("Error getting value from property change", e);
-//        }
-//
-//    }
+	    /**
+	     * Constructor
+	     * @param dataset the dataset to fetch cells from 
+	     * @param model the table to display cells in
+	     * @param rotate if true, cells are rotated to vertical
+	     * @param component the component of the cell to display
+	     */
+	    public CellImportWorker(IAnalysisDataset dataset, TableModel model, boolean rotate, String component) {
+	        super(dataset, model, rotate);
+	        this.component = component;
+	    }
 
-    
+	    private ImageProcessor importCytoplasm(ICell c) throws UnloadableImageException {
+	    	if(!c.hasCytoplasm())
+	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
+	    	ImageProcessor ip = c.getCytoplasm().getComponentRGBImage();
+	    	ImageAnnotator an = new ImageAnnotator(ip);
+	    	an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
+	    	for (Nucleus n : c.getNuclei()) {
+	    		an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
+
+	    		if (n instanceof LobedNucleus) {
+
+	    			for (Lobe l : ((LobedNucleus) n).getLobes()) {
+	    				an.annotateBorder(l, c.getCytoplasm(), Color.RED);
+	    				an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
+	    			}
+	    		}
+	    	}
+
+	    	ip = an.toProcessor();
+
+	    	if (rotate) {
+	    		try {
+	    			ip = rotateToVertical(c, ip);
+	    		} catch (UnavailableBorderTagException e) {
+	    			stack("Unable to rotate", e);
+	    		}
+	    		ip.flipVertical(); // Y axis needs inverting
+	    	}
+	    	// Rescale the resulting image
+	    	ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+	    	return ip;
+	    }
+	    
+	    private ImageProcessor importNucleus(ICell c) throws UnloadableImageException {
+	    	ImageProcessor ip = c.getNucleus().getComponentImage();
+	    	ImageAnnotator an = new ImageAnnotator(ip);
+	    	for (Nucleus n : c.getNuclei()) {
+	    		an = an.annotateSegments(n, n);
+	    	}
+	    	ip = an.toProcessor();
+
+	    	if (rotate) {
+	    		try {
+	    			ip = rotateToVertical(c, ip);
+	    		} catch (UnavailableBorderTagException e) {
+	    			stack("Unable to rotate", e);
+	    		}
+	    		ip.flipVertical(); // Y axis needs inverting
+	    	}
+	    	// Rescale the resulting image
+	    	return new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+	    }
+	    
+	    private ImageProcessor importSignal(UUID signal, ICell c) throws UnloadableImageException {
+	    	ImageProcessor ip = c.getNucleus().getSignalCollection().getImage(signal);
+	    	ImageAnnotator an = new ImageAnnotator(ip);
+	    	for (Nucleus n : c.getNuclei()) {
+	    		an = an.annotateSegments(n, n);
+	    	}
+	    	ip = an.toProcessor();
+
+	    	if (rotate) {
+	    		try {
+	    			ip = rotateToVertical(c, ip);
+	    		} catch (UnavailableBorderTagException e) {
+	    			stack("Unable to rotate", e);
+	    		}
+	    		ip.flipVertical(); // Y axis needs inverting
+	    	}
+	    	// Rescale the resulting image
+	    	return new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+	    }
+	    
+	    @Override
+		protected SelectableCellIcon importCellImage(ICell c) {
+	        ImageProcessor ip = null;
+
+	        try {
+	        	
+	            if (CellularComponent.CYTOPLASM.equals(component))
+	                ip = importCytoplasm(c);
+	                
+	            if (CellularComponent.NUCLEUS.equals(component))
+	            	 ip = importNucleus(c);
+	            
+	            if(ip==null) {
+	            	String idString = component.replaceAll("\\w+\\|", "");
+	            	UUID id = UUID.fromString(idString);
+	            	ip = importSignal(id, c);
+	            }
+
+	            
+	            return new SelectableCellIcon(ip, c);
+	            
+	        } catch (UnloadableImageException e) {
+	            stack("Cannot load image for component", e);
+	            return new SelectableCellIcon();
+	        }
+
+	       
+	       
+	    }
+	}
+
 
 }
