@@ -196,7 +196,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
         int xBase = (w - ip.getWidth()) >> 1;
         int yBase = (h - ip.getHeight()) >> 1;
 
-        finer("New image " + w + " x " + h + " from " + ip.getWidth() + " x " + ip.getHeight() + " : Rot: " + degrees);
+        finer(String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
 
         finest("Copy starting at " + xBase + ", " + yBase);
 

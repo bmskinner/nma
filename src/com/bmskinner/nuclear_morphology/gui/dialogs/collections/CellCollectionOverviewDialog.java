@@ -24,8 +24,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JButton;
@@ -48,9 +50,14 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.process.ImageProcessor;
@@ -283,9 +290,22 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    	return new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
 	    }
 	    
-	    private ImageProcessor importSignal(UUID signal, ICell c) throws UnloadableImageException {
-	    	ImageProcessor ip = c.getNucleus().getSignalCollection().getImage(signal);
+	    private ImageProcessor importSignal(UUID signal, ICell c) throws UnloadableImageException, ImageImportException {
+	    	
+	    	ISignalGroup sg = dataset.getCollection().getSignalGroup(signal).get();
+	    	INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal);
+	    	
+	    	if(signalOptions==null)
+	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
+	    	
+	    	File signalFile = new File(signalOptions.getFolder(),c.getNucleus().getSourceFileName());
+	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getChannel());
+	    	ip.invert();
+//	    	log("Importing "+signalFile.getAbsolutePath());
+//	    	ImageProcessor ip = c.getNucleus().getSignalCollection().getImage(signal);
 	    	ImageAnnotator an = new ImageAnnotator(ip);
+	    	an.convertToColorProcessor();
+	    	an.crop(c.getNucleus());
 	    	for (Nucleus n : c.getNuclei()) {
 	    		an = an.annotateSegments(n, n);
 	    	}
@@ -316,7 +336,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	            	 ip = importNucleus(c);
 	            
 	            if(ip==null) {
-	            	String idString = component.replaceAll("\\w+\\|", "");
+	            	String idString = component.replaceAll("[^\\|]+\\|", "");
 	            	UUID id = UUID.fromString(idString);
 	            	ip = importSignal(id, c);
 	            }
@@ -324,7 +344,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	            
 	            return new SelectableCellIcon(ip, c);
 	            
-	        } catch (UnloadableImageException e) {
+	        } catch (UnloadableImageException | ImageImportException e) {
 	            stack("Cannot load image for component", e);
 	            return new SelectableCellIcon();
 	        }
