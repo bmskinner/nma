@@ -59,20 +59,19 @@ public class BoxplotChartFactory extends AbstractChartFactory {
      * 
      * @return
      */
-    public static JFreeChart makeEmptyChart() {
-
-        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null,
-                new DefaultBoxAndWhiskerCategoryDataset(), false);
-
-        formatBoxplot(boxplot);
-        return boxplot;
-    }
+//    public static JFreeChart makeEmptyChart() {
+//
+//        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null,
+//                new DefaultBoxAndWhiskerCategoryDataset(), false);
+//
+//        formatBoxplot(boxplot);
+//        return boxplot;
+//    }
 
     public JFreeChart createStatisticBoxplot(String component) {
 
-        if (!options.hasDatasets()) {
-            return makeEmptyChart();
-        }
+        if (!options.hasDatasets())
+            return createEmptyChart();
 
         if (CellularComponent.NUCLEUS.equals(component)) {
             return createNucleusStatisticBoxplot();
@@ -86,7 +85,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
             return createSegmentBoxplot();
         }
 
-        return makeEmptyChart();
+        return createEmptyChart();
 
     }
 

@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -52,7 +53,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
 
-            JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
+        	JFreeChart chart = AbstractChartFactory.createEmptyChart();
             ViolinChartPanel panel = new ViolinChartPanel(chart);
             panel.getChartRenderingInfo().setEntityCollection(null);
             panel.setPreferredSize(preferredSize);

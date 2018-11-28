@@ -62,7 +62,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellF
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer.ShellResultFilterOperation;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.NuclearSignalChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ShellChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
@@ -358,7 +358,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private JPanel createShellBarPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         ChartOptions options = new ChartOptionsBuilder().build();
-        JFreeChart chart = new NuclearSignalChartFactory(options).createEmptyShellChart();
+        JFreeChart chart = new ShellChartFactory(options).createEmptyShellChart();
         chartPanel = new ExportableChartPanel(chart);
 
         panel.add(chartPanel, BorderLayout.CENTER);
@@ -443,7 +443,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     @Override
     protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-    	return new NuclearSignalChartFactory(options).createShellChart();
+    	return new ShellChartFactory(options).createShellChart();
 
     }
 

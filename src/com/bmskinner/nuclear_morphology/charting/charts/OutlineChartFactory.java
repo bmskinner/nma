@@ -20,6 +20,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -60,6 +62,7 @@ import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.CellDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDataset;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusMeshXYDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.OutlineDataset;
@@ -87,14 +90,12 @@ import ij.process.ImageProcessor;
  *
  */
 public class OutlineChartFactory extends AbstractChartFactory {
+	
+	protected static final String NO_CONSENSUS_ERROR_LBL = "No consensus nucleus in dataset";
 
     public OutlineChartFactory(ChartOptions o) {
         super(o);
     }
-
-//    public static JFreeChart makeEmptyChart() {
-//        return ConsensusNucleusChartFactory.createEmptyChart();
-//    }
 
     /**
      * Create a chart showing the nuclear signal locations in a consensus nucleus.
@@ -116,7 +117,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
             if (!options.firstDataset().getCollection().hasConsensus()) {
                 finer("No consensus for signal outline chart");
-                return createTextAnnotatedEmptyChart("No consensus nucleus in dataset");
+                return createTextAnnotatedEmptyChart(NO_CONSENSUS_ERROR_LBL);
             }
 
             if (options.isShowWarp()) {
@@ -124,14 +125,86 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 return makeSignalWarpChart();
             }
 			finer("Signal CoM for signal outline chart");
-			return new NuclearSignalChartFactory(options).makeSignalCoMNucleusOutlineChart();
-        } catch (Exception e) {
+			return makeSignalCoMNucleusOutlineChart();
+        } catch (ChartCreationException | ChartDatasetCreationException e) {
             warn("Error making signal chart");
             stack("Error making signal chart", e);
             return createErrorChart();
         }
 
     }
+    
+    /**
+	 * Create a nucleus outline chart with nuclear signals drawn as transparent
+	 * circles
+	 * 
+	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
+	 * @param signalCoMs the dataset with the signal centre of masses
+	 * @return
+     * @throws ChartDatasetCreationException 
+	 * @throws Exception
+	 */
+	private JFreeChart makeSignalCoMNucleusOutlineChart() throws ChartCreationException, ChartDatasetCreationException {
+
+		XYDataset signalCoMs = new NuclearSignalDatasetCreator(options).createSignalCoMDataset(options.firstDataset());
+
+		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
+
+		XYPlot plot = chart.getXYPlot();
+
+		if (signalCoMs.getSeriesCount() > 0) {
+			plot.setDataset(1, signalCoMs);
+
+			XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+			for (int series = 0; series < signalCoMs.getSeriesCount(); series++) {
+
+				Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+				rend.setSeriesShape(series, circle);
+
+				String name = (String) signalCoMs.getSeriesKey(series);
+				// int seriesGroup = getIndexFromLabel(name);
+				UUID seriesGroup = getSignalGroupFromLabel(name);
+
+				Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(seriesGroup);
+				if(g.isPresent()){
+					Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(series));
+					rend.setSeriesPaint(series, colour);
+				}
+
+				rend.setBaseLinesVisible(false);
+				rend.setBaseShapesVisible(true);
+				rend.setBaseSeriesVisibleInLegend(false);
+			}
+			plot.setRenderer(1, rend);
+
+			int j = 0;
+
+			if(options.isShowAnnotations()) { // transparent ellipse surrounding CoM
+				for (UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()) {
+					List<Shape> shapes = new NuclearSignalDatasetCreator(options)
+							.createSignalRadiusDataset(options.firstDataset(), signalGroup);
+
+					int signalCount = shapes.size();
+
+					int alpha = (int) Math.floor(255 / ((double) signalCount)) + 20;
+					alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+
+					Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(signalGroup);
+					if(g.isPresent()){
+						Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j++));
+						for (Shape s : shapes) {
+							XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,
+									ColourSelecter.getTransparentColour((Color) colour, true, alpha)); // layer
+							// transparent
+							// signals
+							plot.addAnnotation(an);
+						}
+					}
+				}
+			}
+		}
+		return chart;
+	}
 
     /**
      * Draw the given images onto a consensus outline nucleus.

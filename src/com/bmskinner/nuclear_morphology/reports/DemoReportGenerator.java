@@ -39,7 +39,7 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
 
-import com.bmskinner.nuclear_morphology.charting.charts.NuclearSignalChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ShellChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -105,7 +105,7 @@ public class DemoReportGenerator implements Loggable {
 				
 				IDetectionOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId);
 				
-				JFreeChart chart = new NuclearSignalChartFactory(barChartOptions).createShellChart();
+				JFreeChart chart = new ShellChartFactory(barChartOptions).createShellChart();
 				chart.setTitle(String.format("%s", dataset.getName()));
 				Title channelSubtitle = new TextTitle(String.format("Signal group: %s (%s)", group.getGroupName(), ImageImporter.channelIntToName(signalOptions.getChannel())));
 				chart.addSubtitle(channelSubtitle);

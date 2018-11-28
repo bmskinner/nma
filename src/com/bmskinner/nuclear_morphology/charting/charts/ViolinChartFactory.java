@@ -44,9 +44,9 @@ public class ViolinChartFactory extends AbstractChartFactory {
         super(o);
     }
 
-    public JFreeChart makeEmptyChart() {
-        return BoxplotChartFactory.makeEmptyChart();
-    }
+//    public JFreeChart makeEmptyChart() {
+//        return BoxplotChartFactory.makeEmptyChart();
+//    }
 
     /**
      * Create a statistic plot for the given component.
@@ -57,7 +57,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      */
     public synchronized JFreeChart createStatisticPlot(String component) {
         if (!options.hasDatasets()) 
-            return makeEmptyChart();
+            return createEmptyChart();
 
         try {  	
         	switch(component) {
@@ -65,7 +65,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
         		case CellularComponent.NUCLEUS: return createNucleusStatisticPlot();
         		case CellularComponent.NUCLEAR_SIGNAL: return createSignalStatisticPlot();
         		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return createSegmentPlot();
-        		default: return makeEmptyChart();
+        		default: return createEmptyChart();
         	}
         } catch (Exception e) {
             stack("Error making violin chart", e);
@@ -81,7 +81,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      */
     public synchronized JFreeChart createSignalColocalisationViolinChart() {
     	if(!options.hasDatasets())
-    		return makeEmptyChart();
+    		return createEmptyChart();
 
     	try {
     		ViolinCategoryDataset ds = new SignalViolinDatasetCreator(options).createSignalColocalisationViolinDataset();
@@ -143,7 +143,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 return createErrorChart();
             }
         } else {
-            return makeEmptyChart();
+            return createEmptyChart();
         }
 
         JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
@@ -178,7 +178,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
     private JFreeChart createNucleusStatisticPlot() {
     	
     	if(!options.hasDatasets())
-    		return makeEmptyChart();
+    		return createEmptyChart();
 
         ViolinCategoryDataset ds = null;
 
@@ -238,7 +238,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 return createErrorChart();
             }
         } else {
-            return makeEmptyChart();
+            return createEmptyChart();
         }
 
         JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);

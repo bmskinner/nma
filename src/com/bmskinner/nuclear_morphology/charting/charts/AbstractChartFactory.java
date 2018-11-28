@@ -42,14 +42,20 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Base class for chart generation. Contains static methods to create loading and
+ * error charts.
+ * @author bms41
+ *
+ */
 public abstract class AbstractChartFactory implements Loggable {
 
     protected static final int DEFAULT_EMPTY_RANGE         = 10;
     protected static final int DEFAULT_PROFILE_START_INDEX = -1;
     
-    private static final String LOADING_LBL = "Loading...";
+    private static final String CHART_LOADING_LBL       = "Loading...";
     private static final String MULTI_DATASET_ERROR_LBL = "Cannot display multiple datasets";
-    private static final String GENERAL_ERROR_LBL = "Error creating chart";
+    private static final String GENERAL_ERROR_LBL       = "Error creating chart";
     
     protected static final boolean DEFAULT_CREATE_TOOLTIPS = false;
     protected static final boolean DEFAULT_CREATE_LEGEND   = false;
@@ -57,11 +63,14 @@ public abstract class AbstractChartFactory implements Loggable {
 
     protected final ChartOptions options;
 
+    /**
+     * Create with options for the chart to be created
+     * @param o the options
+     */
     public AbstractChartFactory(@NonNull final ChartOptions o) {
         if (o == null)
             throw new IllegalArgumentException("Options cannot be null");
         options = o;
-
     }
 
     /**
@@ -89,11 +98,10 @@ public abstract class AbstractChartFactory implements Loggable {
      * @return a chart with the given message
      */
     protected static JFreeChart createTextAnnotatedEmptyChart(String labelText) {
-   	 JFreeChart chart = createEmptyChart();
-        XYPlot plot = chart.getXYPlot();
+    	JFreeChart chart = createEmptyChart();
         XYTextAnnotation annotation = new XYTextAnnotation(labelText, 0, 0);
         annotation.setPaint(Color.BLACK);
-        plot.addAnnotation(annotation);
+        chart.getXYPlot().addAnnotation(annotation);
         return chart;
    }
     
@@ -102,7 +110,7 @@ public abstract class AbstractChartFactory implements Loggable {
      * @return
      */
     public static JFreeChart createLoadingChart() {
-    	return createTextAnnotatedEmptyChart(LOADING_LBL);
+    	return createTextAnnotatedEmptyChart(CHART_LOADING_LBL);
     }
     
 
@@ -122,21 +130,6 @@ public abstract class AbstractChartFactory implements Loggable {
      */
     public static JFreeChart createErrorChart() {
     	return createTextAnnotatedEmptyChart(GENERAL_ERROR_LBL);
-//        JFreeChart chart = createBaseXYChart();
-//        XYPlot plot = chart.getXYPlot();
-//
-//        plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-//        plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-//
-//        for (int i = -100; i <= 100; i += 20) {
-//            for (int j = -100; j <= 100; j += 20) {
-//                XYTextAnnotation annotation = new XYTextAnnotation("Error creating chart", i, j);
-//                annotation.setPaint(Color.BLACK);
-//                plot.addAnnotation(annotation);
-//            }
-//        }
-//
-//        return chart;
     }
 
     /**
