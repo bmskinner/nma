@@ -136,56 +136,82 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
         statsTable = new ExportableTable(tableModel); // table for basic stats
         statsTable.setEnabled(false);
 
-        statsTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-                JTable table = (JTable) e.getSource();
-
-                int row = table.rowAtPoint(e.getPoint());
-                int column = table.columnAtPoint(e.getPoint());
-
-                if (e.getClickCount() == DOUBLE_CLICK && column>0) {
-
-                    IAnalysisDataset d = getDatasets().get(column - 1);
-                    int nextRow = row+1;
-                    String nextRowName = table.getModel().getValueAt(nextRow, 0).toString();
-                    if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-                        SignalTableCell signalGroup = getSignalGroupFromTable(table, nextRow, column);
-                        cosmeticHandler.changeSignalColour(d, signalGroup.getID());
-                    }
-
-                    
-                    if( table.getModel().getValueAt(row, 0).toString().equals(Labels.Signals.SIGNAL_ID_LABEL)) {
-                    	int signalGroupNameRow = row-3;
-                    	String signalGroupRowName = table.getModel().getValueAt(signalGroupNameRow, 0).toString();
-                    	String signalGroupName = table.getModel().getValueAt(row, column).toString();
-                    	if(signalGroupRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL))                    		
-                    		signalGroupName = table.getModel().getValueAt(signalGroupNameRow, column).toString();
-                           
-                        UUID signalGroup = UUID.fromString(table.getModel().getValueAt(row, column).toString());
-
-                        String[] options = { "Don't delete signals", "Delete signals" };
-                        
-
-						try {
-							int result = getInputSupplier().requestOption(options, 0, String.format("Delete signal group %s in %s?", signalGroupName, d.getName()), "Delete signal group?");
-							if (result!=0) { 
-	                             d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
-	                             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-	                         }
-							
-						} catch (RequestCancelledException e1) {
-							// no action
-						}
-                         
-                    }
-                }
-            }
-        });
+        statsTable.addMouseListener(new SignalStatsTableMouseListener());
 
         JScrollPane scrollPane = new JScrollPane(statsTable);
         return scrollPane;
+    }
+    
+    /**
+     * Listener for interaction with the signal stats table
+     * @author bms41
+     * @since 1.15.0
+     *
+     */
+    private class SignalStatsTableMouseListener extends MouseAdapter {
+    	
+    	private SignalStatsTableMouseListener() {
+    		super();
+    	}
+    	
+    	private boolean isSignalIdRow(JTable table, int row) {
+    		return table.getModel().getValueAt(row, 0).toString().equals(Labels.Signals.SIGNAL_ID_LABEL);
+    	}
+    	
+    	private boolean isSignalColourRow(JTable table, int row) {
+    		int nextRow = row+1;
+    		String nextRowName = table.getModel().getValueAt(nextRow, 0).toString();
+    		return nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL);
+    	}
+    	
+    	private void offerToDeleteSignals(JTable table, int row, int col) {
+    		IAnalysisDataset d = getDatasets().get(col - 1);
+    		int signalGroupNameRow = row-3;
+			String signalGroupRowName = table.getModel().getValueAt(signalGroupNameRow, 0).toString();
+			String signalGroupName = table.getModel().getValueAt(row, col).toString();
+			if(signalGroupRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL))                    		
+				signalGroupName = table.getModel().getValueAt(signalGroupNameRow, col).toString();
+
+			UUID signalGroup = UUID.fromString(table.getModel().getValueAt(row, col).toString());
+
+			String[] options = { "Don't delete signals", "Delete signals" };
+
+
+			try {
+				int result = getInputSupplier().requestOption(options, 0, String.format("Delete signal group %s in %s?", signalGroupName, d.getName()), "Delete signal group?");
+				if (result!=0) { 
+					d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
+					getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				}
+
+			} catch (RequestCancelledException e1) {
+				// no action
+			}
+    	}
+    	
+    	@Override
+    	public void mouseClicked(MouseEvent e) {
+
+    		JTable table = (JTable) e.getSource();
+
+    		int row = table.rowAtPoint(e.getPoint());
+    		int column = table.columnAtPoint(e.getPoint());
+
+    		if (e.getClickCount() == DOUBLE_CLICK && column>0) {
+
+    			IAnalysisDataset d = getDatasets().get(column - 1);
+
+    			if (isSignalColourRow(table, row)) {
+    				SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
+    				cosmeticHandler.changeSignalColour(d, signalGroup.getID());
+    			}
+
+
+    			if(isSignalIdRow(table, row))
+    				offerToDeleteSignals(table, row, column);
+    		}
+    	}
+
     }
 
     private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
