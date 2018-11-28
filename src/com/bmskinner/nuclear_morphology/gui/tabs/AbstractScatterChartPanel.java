@@ -107,7 +107,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
         this.add(headerPanel, BorderLayout.NORTH);
 
-        JFreeChart chart = ScatterChartFactory.makeEmptyChart();
+        JFreeChart chart = ScatterChartFactory.createEmptyChart();
 
         chartPanel = new ExportableChartPanel(chart);
         chartPanel.getChartRenderingInfo().setEntityCollection(null);

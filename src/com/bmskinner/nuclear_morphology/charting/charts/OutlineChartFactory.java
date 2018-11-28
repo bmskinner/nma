@@ -1158,28 +1158,28 @@ public class OutlineChartFactory extends AbstractChartFactory {
         return new Color(r, g, b);
     }
 
-    /**
-     * Create a histogram of log 2 ratios for a NucleusMesh
-     * 
-     * @param mesh
-     *            the comparison mesh with length ratios
-     * @return
-     * @throws Exception
-     */
-    public JFreeChart createMeshHistogram(Mesh<Nucleus> mesh) throws ChartCreationException {
-
-        HistogramDataset ds;
-        try {
-            ds = new NucleusDatasetCreator(options).createNucleusMeshHistogramDataset(mesh);
-        } catch (Exception e) {
-            throw new ChartCreationException("Cannot make mesh histogram", e);
-        }
-        JFreeChart chart = HistogramChartFactory.createHistogram(ds, "Log2 ratio", "Number of edges");
-        XYPlot plot = chart.getXYPlot();
-        plot.setBackgroundPaint(Color.WHITE);
-        plot.addDomainMarker(new ValueMarker(0, Color.BLACK, ChartComponents.PROFILE_STROKE));
-
-        return chart;
-    }
+//    /**
+//     * Create a histogram of log 2 ratios for a NucleusMesh
+//     * 
+//     * @param mesh
+//     *            the comparison mesh with length ratios
+//     * @return
+//     * @throws Exception
+//     */
+//    public JFreeChart createMeshHistogram(Mesh<Nucleus> mesh) throws ChartCreationException {
+//
+//        HistogramDataset ds;
+//        try {
+//            ds = new NucleusDatasetCreator(options).createNucleusMeshHistogramDataset(mesh);
+//        } catch (Exception e) {
+//            throw new ChartCreationException("Cannot make mesh histogram", e);
+//        }
+//        JFreeChart chart = HistogramChartFactory.createHistogram(ds, "Log2 ratio", "Number of edges");
+//        XYPlot plot = chart.getXYPlot();
+//        plot.setBackgroundPaint(Color.WHITE);
+//        plot.addDomainMarker(new ValueMarker(0, Color.BLACK, ChartComponents.PROFILE_STROKE));
+//
+//        return chart;
+//    }
 
 }

@@ -56,6 +56,9 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  *
  */
 public class HistogramChartFactory extends AbstractChartFactory {
+	
+	private static final boolean HISTOGRAM_CREATE_LEGEND = true;
+	private static final boolean HISTOGRAM_CREATE_TOOLTIP = true;
 
     public HistogramChartFactory(ChartOptions o) {
         super(o);
@@ -66,10 +69,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
      * 
      * @return a chart with no data
      */
-    public static JFreeChart makeEmptyChart() {
+    public static JFreeChart createEmptyHistogram() {
 
-        JFreeChart chart = ChartFactory.createHistogram(null, null, null, null, PlotOrientation.VERTICAL, true, true,
-                true);
+        JFreeChart chart = ChartFactory.createHistogram(null, null, null, null, 
+        		PlotOrientation.VERTICAL, HISTOGRAM_CREATE_LEGEND, HISTOGRAM_CREATE_TOOLTIP,
+                DEFAULT_CREATE_URLS);
 
         XYPlot plot = chart.getXYPlot();
         plot.setBackgroundPaint(Color.white);
@@ -83,18 +87,16 @@ public class HistogramChartFactory extends AbstractChartFactory {
     /**
      * Create a histogram from a histogram dataset and apply basic formatting
      * 
-     * @param ds
-     *            the dataset to use
-     * @param xLabel
-     *            the label of the x axis
-     * @param yLabel
-     *            the label of the y axis
-     * @return a chart
+     * @param ds the dataset to use
+     * @param xLabel the label of the x axis
+     * @param yLabel the label of the y axis
+     * @return a histogram
      */
     public static JFreeChart createHistogram(HistogramDataset ds, String xLabel, String yLabel) {
 
-        JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, ds, PlotOrientation.VERTICAL, true, true,
-                true);
+        JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, ds, 
+        		PlotOrientation.VERTICAL, HISTOGRAM_CREATE_LEGEND, HISTOGRAM_CREATE_TOOLTIP,
+        		DEFAULT_CREATE_URLS);
 
         XYPlot plot = chart.getXYPlot();
         plot.setBackgroundPaint(Color.white);
@@ -115,7 +117,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         finest("Creating stats histogram for " + component + ": " + options.getStat());
 
         if (!options.hasDatasets()) {
-            return makeEmptyChart();
+            return createEmptyHistogram();
         }
 
         if (CellularComponent.NUCLEUS.equals(component)) {
@@ -130,7 +132,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
             return createSegmentStatisticHistogram();
         }
 
-        return makeEmptyChart();
+        return createEmptyHistogram();
 
     }
 
@@ -181,8 +183,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
     /**
      * Create a signal angle histogram for a dataset
      * 
-     * @param options
-     *            the ChartOptions
+     * @param options the ChartOptions
      * @return
      * @throws Exception
      */
@@ -271,7 +272,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
     private JFreeChart createSignalDensityStatsChart() {
 
         if (!options.hasDatasets()) {
-            return makeEmptyChart();
+            return createEmptyHistogram();
         }
 
         List<DefaultXYDataset> list;
@@ -340,7 +341,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
             return createNuclearDensityStatsChart();
 
         if (!options.hasDatasets())
-            return makeEmptyChart();
+            return createEmptyHistogram();
 
         HistogramDataset ds;
 
@@ -398,7 +399,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
     private JFreeChart createNuclearDensityStatsChart() {
 
         if (!options.hasDatasets()) {
-            return makeEmptyChart();
+            return createEmptyHistogram();
         }
 
         XYDataset ds;
@@ -453,7 +454,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         }
 
         if (!options.hasDatasets()) {
-            return makeEmptyChart();
+            return createEmptyHistogram();
         }
 
         HistogramDataset ds;
@@ -515,7 +516,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
         if (!options.hasDatasets()) {
 
-            return makeEmptyChart();
+            return createEmptyHistogram();
 
         }
 

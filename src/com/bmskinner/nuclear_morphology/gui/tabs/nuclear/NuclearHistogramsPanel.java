@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.Dimension;
 import java.text.DecimalFormat;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -42,30 +43,23 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 @SuppressWarnings("serial")
 public class NuclearHistogramsPanel extends HistogramsTabPanel  {
 
-    public NuclearHistogramsPanel(@NonNull InputSupplier context) {
-        super(context, CellularComponent.NUCLEUS);
+	public NuclearHistogramsPanel(@NonNull InputSupplier context) {
+		super(context, CellularComponent.NUCLEUS);
+		Dimension preferredSize = new Dimension(HISTOGRAM_CHART_WIDTH, HISTOGRAM_CHART_HEIGHT);
+		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
 
-        try {
+			JFreeChart chart = HistogramChartFactory.createEmptyHistogram();
 
-            Dimension preferredSize = new Dimension(400, 150);
-            for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+			SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
+			panel.getChartRenderingInfo().setEntityCollection(null);
+			panel.setPreferredSize(preferredSize);
+			panel.addSignalChangeListener(this);
+			chartPanels.put(stat.toString(), panel);
+			mainPanel.add(panel);
 
-                JFreeChart chart = HistogramChartFactory.makeEmptyChart();
+		}
 
-                SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
-                panel.getChartRenderingInfo().setEntityCollection(null);
-                panel.setPreferredSize(preferredSize);
-                panel.addSignalChangeListener(this);
-                chartPanels.put(stat.toString(), panel);
-                mainPanel.add(panel);
-
-            }
-
-        } catch (Exception e) {
-            error("Error creating histogram panel", e);
-        }
-
-    }
+	}
 
     protected void updateSingle() {
         updateMultiple();
@@ -126,8 +120,6 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
      */
     private PlottableStatistic getPanelStatisticFromName(String name) {
         PlottableStatistic stat = null;
-        // NucleusType type =
-        // IAnalysisDataset.getBroadestNucleusType(getDatasets());
         for (PlottableStatistic n : PlottableStatistic.getNucleusStats()) {
             if (n.toString().equals(name)) {
                 stat = n;
@@ -157,7 +149,10 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
         if (!lower.isNaN() && !upper.isNaN()) {
 
             // Make a dialog to ask if a filter should be performed
-            int result = getFilterDialogResult(lower, upper);
+        	Optional<Integer> filterResult = getFilterDialogResult(lower, upper);
+        	if(!filterResult.isPresent())
+        		return;
+            int result = filterResult.get();
 
             if (result == 0) { // button at index 0 - continue
 

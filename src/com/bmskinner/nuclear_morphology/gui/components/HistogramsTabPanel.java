@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -57,16 +59,23 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public abstract class HistogramsTabPanel extends DetailPanel implements ActionListener {
 
     private static final String PANEL_TITLE_LBL = "Histograms";
-    protected Map<String, SelectableChartPanel> chartPanels = new HashMap<String, SelectableChartPanel>();
+    
+    protected static final int HISTOGRAM_CHART_WIDTH  = 400;
+    protected static final int HISTOGRAM_CHART_HEIGHT = 150;
+    
+    /** Map statistics to individual charts */
+    protected Map<String, SelectableChartPanel> chartPanels = new HashMap<>();
 
-    protected JPanel               mainPanel;                                                                 // hold
-                                                                                                              // the
-                                                                                                              // charts
-    protected JPanel               headerPanel;                                                               // hold
-                                                                                                              // buttons
+    /** Hold the charts */
+    protected JPanel mainPanel; 
+    
+    /** Holds the buttons */
+    protected JPanel headerPanel;
+    
+    
     protected GenericCheckboxPanel useDensityPanel = new GenericCheckboxPanel("Probability density function");
 
-    protected JScrollPane scrollPane; // hold the main panel
+    protected JScrollPane scrollPane;
 
     protected String component;
 
@@ -142,16 +151,18 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
     }
 
-    protected int getFilterDialogResult(double lower, double upper) {
+    protected Optional<Integer> getFilterDialogResult(double lower, double upper) {
         DecimalFormat df = new DecimalFormat("#.##");
-        Object[] options = { "Filter collection", "Cancel", };
-        int result = JOptionPane.showOptionDialog(null,
-                "Filter between " + df.format(lower) + "-" + df.format(upper) + "?", "Confirm filter",
-
-                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-                null, options, options[0]);
-        return result;
+        String[] options = { "Filter collection", "Cancel", };
+        
+        String message = String.format("Filter between %s-%s?", df.format(lower), df.format(upper));
+        
+        try {
+        	int selected = this.getInputSupplier().requestOption(options, 0, message, "Confirm filter");
+        	return Optional.of(selected);
+        } catch(RequestCancelledException e) {
+        	return Optional.empty();
+        }
     }
 
 }

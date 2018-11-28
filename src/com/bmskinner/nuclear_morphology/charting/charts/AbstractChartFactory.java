@@ -44,13 +44,17 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for chart generation. Contains static methods to create loading and
- * error charts.
+ * error charts. All chart factories should extend this class.
  * @author bms41
  *
  */
 public abstract class AbstractChartFactory implements Loggable {
 
+	/** The X and Y axis positive & negative range magnitude for empty charts  */
     protected static final int DEFAULT_EMPTY_RANGE         = 10;
+    
+    /** The index profile charts begin at. Since the first index is 0, 
+     * this prevents the value at zero being hidden by the chart border  */
     protected static final int DEFAULT_PROFILE_START_INDEX = -1;
     
     private static final String CHART_LOADING_LBL       = "Loading...";
@@ -61,6 +65,7 @@ public abstract class AbstractChartFactory implements Loggable {
     protected static final boolean DEFAULT_CREATE_LEGEND   = false;
     protected static final boolean DEFAULT_CREATE_URLS     = false;
 
+    /** The options that will be used for chart generation */
     protected final ChartOptions options;
 
     /**

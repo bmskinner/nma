@@ -43,11 +43,6 @@ public class ViolinChartFactory extends AbstractChartFactory {
     public ViolinChartFactory(@NonNull final ChartOptions o) {
         super(o);
     }
-
-//    public JFreeChart makeEmptyChart() {
-//        return BoxplotChartFactory.makeEmptyChart();
-//    }
-
     /**
      * Create a statistic plot for the given component.
      * 

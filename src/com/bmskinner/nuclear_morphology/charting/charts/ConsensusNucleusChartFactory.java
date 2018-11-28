@@ -74,7 +74,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     }
 
     /**
-     * Craete a consensus chart from the given dataset. Gives an empty chart if
+     * Create a consensus chart from the given dataset. Gives an empty chart if
      * null.
      * 
      * @param ds the dataset

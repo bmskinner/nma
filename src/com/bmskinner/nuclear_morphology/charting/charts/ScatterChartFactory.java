@@ -48,16 +48,6 @@ public class ScatterChartFactory extends AbstractChartFactory {
         super(o);
     }
 
-    /**
-     * Create a blank scatter chart
-     * 
-     * @return
-     */
-    public static JFreeChart makeEmptyChart() {
-        JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null);
-        chart.getXYPlot().setBackgroundPaint(Color.WHITE);
-        return chart;
-    }
 
     /**
      * Create a scatter plot of two nucleus statistics
@@ -66,19 +56,21 @@ public class ScatterChartFactory extends AbstractChartFactory {
      * @return
      */
     public JFreeChart createScatterChart(String component) {
+    	
+    	try {
 
         if (!options.hasDatasets())
-            return makeEmptyChart();
+            return createEmptyChart();
 
         if (options.getStats().size() != 2)
-            return makeEmptyChart();
+            return createTextAnnotatedEmptyChart("Only one variable selected");
 
         PlottableStatistic firstStat = options.getStat();
 
         for (PlottableStatistic stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {
                 fine("Statistic classes are different");
-                return makeEmptyChart();
+                return createTextAnnotatedEmptyChart("Variable classes are different");
             }
         }
 
@@ -87,25 +79,22 @@ public class ScatterChartFactory extends AbstractChartFactory {
 
         if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
             return createSignalStatisticScatterChart();
+        
+    	} catch(ChartDatasetCreationException e) {
+    		stack(e.getMessage(), e);
+    		return createErrorChart();
+    	}
 
-        return makeEmptyChart();
+        return createEmptyChart();
     }
 
     /**
      * Create a scatter plot of two nucleus statistics
-     * 
-     * @param options
      * @return
      */
-    public JFreeChart createNucleusStatisticScatterChart() {
+    public JFreeChart createNucleusStatisticScatterChart() throws ChartDatasetCreationException {
 
-        XYDataset ds;
-        try {
-            ds = new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEUS);
-        } catch (ChartDatasetCreationException e) {
-            stack("Error creating scatter dataset", e);
-            return createErrorChart();
-        }
+        XYDataset ds = new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEUS);
 
         String xLabel = options.getStat(0).label(options.getScale());
         String yLabel = options.getStat(1).label(options.getScale());
