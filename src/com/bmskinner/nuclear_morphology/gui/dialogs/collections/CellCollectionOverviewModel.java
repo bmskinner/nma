@@ -57,6 +57,23 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
                 setSelected(r, c,b);
 	}
 	
+	
+	/**
+	 * Set the selection of the given cell
+	 * @param c
+	 * @param b
+	 */
+	public void setSelected(ICell c, boolean b) {
+		for (int row = 0; row < getRowCount(); row++) {
+			for (int col = 0; col < getColumnCount(); col++) {
+				if(getValueAt(row, col)==c) {
+					setSelected(row, col, b);
+					return;
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Invert the selection of the given cell
 	 * @param r
@@ -78,7 +95,6 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 		((SelectableCellIcon)o).setSelected(b);
 		if(b)
 			selected.add(o);
-		
 		else
 			selected.remove(o);
 	}

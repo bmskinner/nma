@@ -36,7 +36,7 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CollectionOverviewDialog.LabelInfoRenderer;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CollectionOverviewDialog.SelectableTableCellRenderer;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 
 /**
@@ -91,7 +91,7 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
         };
 
         for (int col = 0; col < COLUMN_COUNT; col++) {
-            table.getColumnModel().getColumn(col).setCellRenderer(new LabelInfoRenderer());
+            table.getColumnModel().getColumn(col).setCellRenderer(new SelectableTableCellRenderer());
         }
 
         table.setRowHeight(180);
@@ -145,7 +145,7 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
     }
 
  // @SuppressWarnings("serial")
-    public class LabelInfoRenderer extends DefaultTableCellRenderer {
+    public class SelectableTableCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                 int row, int column) {

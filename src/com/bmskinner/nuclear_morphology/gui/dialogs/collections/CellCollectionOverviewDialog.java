@@ -110,6 +110,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	@Override
 	protected void createWorker(){
 		worker = new CellImportWorker(dataset, table.getModel(), true, CellularComponent.NUCLEUS);
+		worker.removePropertyChangeListener(this);
         worker.addPropertyChangeListener(this);
         worker.execute();
         
