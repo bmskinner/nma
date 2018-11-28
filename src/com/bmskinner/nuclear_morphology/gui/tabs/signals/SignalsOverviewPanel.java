@@ -92,7 +92,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
 
     /**
      * Create with an input supplier
-     * @param context the input supplier
+     * @param inputSupplier the input supplier
      */
     public SignalsOverviewPanel(@NonNull InputSupplier inputSupplier) {
         super(inputSupplier);

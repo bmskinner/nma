@@ -58,6 +58,7 @@ public class ExportableTable extends JTable {
      */
     public ExportableTable() {
         super();
+        setComponentPopupMenu(new TablePopupMenu());
     }
 
     /**
@@ -84,8 +85,8 @@ public class ExportableTable extends JTable {
      */
     private class TablePopupMenu extends JPopupMenu {
     	
-    	private static final String EXPORT_LBL = "Export";
-    	private static final String COPY_LBL   = "Copy";
+    	private static final String EXPORT_LBL = "Export to file";
+    	private static final String COPY_LBL   = "Copy to clipboard";
 
         public TablePopupMenu() {
             super("Popup");
