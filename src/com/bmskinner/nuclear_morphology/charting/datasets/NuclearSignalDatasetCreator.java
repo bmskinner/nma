@@ -62,15 +62,12 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * Get the XY coordinates of a given signal centre of mass on a nuclear
      * outline
      * 
-     * @param n
-     *            the signal to plos
-     * @param outline
-     *            the outline to draw the signal on
+     * @param n the signal to plot
+     * @param outline the outline to draw the signal on
      * @return the point of the signal centre of mass
-     * @throws Exception
+     * @throws ChartDatasetCreationException
      */
     public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline) throws ChartDatasetCreationException {
-
         double angle = n.getStatistic(PlottableStatistic.ANGLE);
 
         double fractionalDistance = n.getStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM);
@@ -91,25 +88,39 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     /**
      * Create a chart dataset for the centres of mass of signals in the dataset
      * 
-     * @param dataset
-     *            the dataset
+     * @param dataset the dataset
      * @return
      * @throws Exception
      */
-    public XYDataset createSignalCoMDataset(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
+    public XYDataset createSignalCoMDataset() throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
-        ICellCollection collection = dataset.getCollection();
+    	NuclearSignalXYDataset ds = new NuclearSignalXYDataset();
+        ICellCollection collection = options.firstDataset().getCollection();
 
         if (collection.getSignalManager().hasSignals()) {
             for (UUID uuid : collection.getSignalManager().getSignalGroupIDs()) {
 
-                if (dataset.getCollection().getSignalGroup(uuid).get().isVisible()) {
-				    double[] xpoints = new double[collection.getSignalManager().getSignals(uuid).size()];
-				    double[] ypoints = new double[collection.getSignalManager().getSignals(uuid).size()];
+                if (options.firstDataset().getCollection().getSignalGroup(uuid).get().isVisible()) {
+                	
+                	List<INuclearSignal> signals = collection.getSignalManager().getSignals(uuid);
+				    double[] xpoints = new double[signals.size()];
+				    double[] ypoints = new double[signals.size()];
 
 				    int signalCount = 0;
-				    for (INuclearSignal n : collection.getSignalManager().getSignals(uuid)) {
+				    
+				    List<INuclearSignal> signalList = new ArrayList<>();
+				    List<Nucleus> nucleusList = new ArrayList<>();
+				    for (Nucleus n : collection.getNuclei()) {
+				    	if(n.getSignalCollection().hasSignal(uuid)) {
+				    		for(INuclearSignal s : n.getSignalCollection().getSignals(uuid)) {
+				    			signalList.add(s);
+				    			nucleusList.add(n);
+				    		}
+				    	}
+			        }
+				    
+				    
+				    for (INuclearSignal n : signals) {
 
 				        IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
@@ -119,7 +130,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 				    }
 				    double[][] data = { xpoints, ypoints };
-				    ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data);
+				    
+				    ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data, signalList, nucleusList);
 				}
             }
         }

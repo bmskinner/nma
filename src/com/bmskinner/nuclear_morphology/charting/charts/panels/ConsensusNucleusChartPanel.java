@@ -78,7 +78,6 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
      * @return
      */
     public void setFillConsensus(boolean b) {
-        //
         fillConsensus = b;
     }
 

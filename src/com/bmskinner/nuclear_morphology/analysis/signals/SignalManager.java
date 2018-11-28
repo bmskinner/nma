@@ -321,7 +321,7 @@ public class SignalManager implements Loggable {
      */
     public List<INuclearSignal> getSignals(@NonNull final UUID signalGroupId) {
 
-        List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
+        List<INuclearSignal> result = new ArrayList<>();
         for (Nucleus n : collection.getNuclei()) {
             result.addAll(n.getSignalCollection().getSignals(signalGroupId));
         }

@@ -17,6 +17,8 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -35,13 +37,21 @@ import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.entity.XYItemEntity;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDataset;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalXYDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTableCreator;
@@ -50,9 +60,12 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -62,6 +75,9 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventListener {
@@ -122,12 +138,66 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
         chartPanel = new ConsensusNucleusChartPanel(chart);// {
         panel.add(chartPanel, BorderLayout.CENTER);
         chartPanel.setFillConsensus(false);
+        
+        chartPanel.addChartMouseListener(new ImageThumbnailGenerator());
 
         checkboxPanel = createSignalCheckboxPanel();
 
         panel.add(checkboxPanel, BorderLayout.NORTH);
 
         return panel;
+    }
+    
+    /**
+     * Display an image thumbnail when the appropriate point in the the chart
+     * is hovered over
+     * @author bms41
+     * @since 1.15.0
+     *
+     */
+    private class ImageThumbnailGenerator implements ChartMouseListener {
+    	
+    	public ImageThumbnailGenerator() {}
+
+    	@Override
+    	public void chartMouseClicked(ChartMouseEvent event) {
+    		//do something on mouse click
+//    		System.out.println("Entity clicked: " + event.getEntity());
+    	}
+
+    	@Override
+    	public void chartMouseMoved(ChartMouseEvent event) { // display thumbnail of nucleus
+
+    		if( !(event.getEntity() instanceof XYItemEntity) ) {
+    			chartPanel.repaint(); // clear the chart
+    			return;
+    		}
+    		XYItemEntity entity = (XYItemEntity) event.getEntity();
+    		if(entity.getDataset() instanceof ComponentOutlineDataset) // ComponentOutlineDataset is the nucleus outline 
+    			return;
+
+    		NuclearSignalXYDataset ds = (NuclearSignalXYDataset) entity.getDataset();
+    		String key = entity.getDataset().getSeriesKey(entity.getSeriesIndex()).toString();
+    		
+    		UUID signalGroupId = UUID.fromString(key.replace(CellularComponent.NUCLEAR_SIGNAL+"_", "")); 
+    		
+//    		System.out.println("Series: "+signalGroupId+"; Entity: " + entity.getItem());	
+    		INuclearSignal signal = ds.getSignal(key, entity.getItem());
+    		Nucleus n = ds.getNucleus(key, entity.getItem());
+    		
+    		try {
+    			ImageProcessor ip = n.getComponentRGBImage();
+    			ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+
+    			Graphics2D g2  = (Graphics2D) chartPanel.getGraphics();
+    			Point pnt = event.getTrigger().getPoint();
+    			g2.drawImage(ip.createImage(), pnt.x, pnt.y, ip.getWidth(), ip.getHeight(), null);
+    		} catch(UnloadableImageException e) {
+    			stack(e);
+    		}
+    		
+    	}
+
     }
 
     private JScrollPane createStatsPane() {

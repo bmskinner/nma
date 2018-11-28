@@ -146,7 +146,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart makeSignalCoMNucleusOutlineChart() throws ChartCreationException, ChartDatasetCreationException {
 
-		XYDataset signalCoMs = new NuclearSignalDatasetCreator(options).createSignalCoMDataset(options.firstDataset());
+		XYDataset signalCoMs = new NuclearSignalDatasetCreator(options).createSignalCoMDataset();
 
 		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
