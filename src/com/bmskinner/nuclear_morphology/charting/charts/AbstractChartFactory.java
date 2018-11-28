@@ -46,6 +46,14 @@ public abstract class AbstractChartFactory implements Loggable {
 
     protected static final int DEFAULT_EMPTY_RANGE         = 10;
     protected static final int DEFAULT_PROFILE_START_INDEX = -1;
+    
+    private static final String LOADING_LBL = "Loading...";
+    private static final String MULTI_DATASET_ERROR_LBL = "Cannot display multiple datasets";
+    private static final String GENERAL_ERROR_LBL = "Error creating chart";
+    
+    protected static final boolean DEFAULT_CREATE_TOOLTIPS = false;
+    protected static final boolean DEFAULT_CREATE_LEGEND   = false;
+    protected static final boolean DEFAULT_CREATE_URLS     = false;
 
     protected final ChartOptions options;
 
@@ -56,25 +64,10 @@ public abstract class AbstractChartFactory implements Loggable {
 
     }
 
-    public static JFreeChart createLoadingChart() {
-
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
-
-        plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-        plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-
-        plot.getDomainAxis().setVisible(false);
-        plot.getRangeAxis().setVisible(false);
-
-        XYTextAnnotation annotation = new XYTextAnnotation("Loading...", 0, 0);
-        annotation.setPaint(Color.BLACK);
-        plot.addAnnotation(annotation);
-
-        return chart;
-
-    }
-
+    /**
+     *  Creates an empty chart with the default range 
+     * @return an empty chart
+     */
     public static JFreeChart createEmptyChart() {
 
         JFreeChart chart = createBaseXYChart();
@@ -88,6 +81,62 @@ public abstract class AbstractChartFactory implements Loggable {
 
         return chart;
 
+    }
+    
+    /**
+     * Creates an empty chart with a message in the centre
+     * @param labelText the text to display
+     * @return a chart with the given message
+     */
+    protected static JFreeChart createTextAnnotatedEmptyChart(String labelText) {
+   	 JFreeChart chart = createEmptyChart();
+        XYPlot plot = chart.getXYPlot();
+        XYTextAnnotation annotation = new XYTextAnnotation(labelText, 0, 0);
+        annotation.setPaint(Color.BLACK);
+        plot.addAnnotation(annotation);
+        return chart;
+   }
+    
+    /**
+     * Creates an empty chart with a message that a further chart is loading
+     * @return
+     */
+    public static JFreeChart createLoadingChart() {
+    	return createTextAnnotatedEmptyChart(LOADING_LBL);
+    }
+    
+
+    /**
+     * Creates an empty chart with a message that multiple datasets cannot be displayed in
+     * this chart type.
+     * @return
+     */
+    public static JFreeChart createMultipleDatasetEmptyChart() {
+        return createTextAnnotatedEmptyChart(MULTI_DATASET_ERROR_LBL);
+    }
+    
+    /**
+     * Create a chart displaying an error message
+     * 
+     * @return
+     */
+    public static JFreeChart createErrorChart() {
+    	return createTextAnnotatedEmptyChart(GENERAL_ERROR_LBL);
+//        JFreeChart chart = createBaseXYChart();
+//        XYPlot plot = chart.getXYPlot();
+//
+//        plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
+//        plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
+//
+//        for (int i = -100; i <= 100; i += 20) {
+//            for (int j = -100; j <= 100; j += 20) {
+//                XYTextAnnotation annotation = new XYTextAnnotation("Error creating chart", i, j);
+//                annotation.setPaint(Color.BLACK);
+//                plot.addAnnotation(annotation);
+//            }
+//        }
+//
+//        return chart;
     }
 
     /**
@@ -174,29 +223,6 @@ public abstract class AbstractChartFactory implements Loggable {
     }
 
     /**
-     * Create a chart displaying an error message
-     * 
-     * @return
-     */
-    public static JFreeChart makeErrorChart() {
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
-
-        plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-        plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-
-        for (int i = -100; i <= 100; i += 20) {
-            for (int j = -100; j <= 100; j += 20) {
-                XYTextAnnotation annotation = new XYTextAnnotation("Error creating chart", i, j);
-                annotation.setPaint(Color.BLACK);
-                plot.addAnnotation(annotation);
-            }
-        }
-
-        return chart;
-    }
-
-    /**
      * Create a new XY Line Chart, with vertical orientation, and set the
      * background to white
      * 
@@ -214,7 +240,8 @@ public abstract class AbstractChartFactory implements Loggable {
 
         plot.getRenderer().setBaseToolTipGenerator(null);
         plot.getRenderer().setURLGenerator(null);
-        chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias());
+        chart.setAntiAlias(true);
+//        chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias()); // disabled for performance testing
 
         return chart;
     }

@@ -104,7 +104,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
                 ds = new NucleusDatasetCreator(options).createBoxplotDataset();
             } catch (ChartDatasetCreationException e) {
                 fine("Error creating boxplot", e);
-                return makeErrorChart();
+                return createErrorChart();
             }
         }
 
@@ -132,7 +132,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
             ds = new NucleusDatasetCreator(options).createSegmentStatDataset();
         } catch (ChartDatasetCreationException e) {
             fine("Error creating boxplot", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
         JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null,
                 "Segment " + stat.label(options.getScale()), ds, false);
@@ -174,7 +174,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
         try {
             ds = new NuclearSignalDatasetCreator(options).createSignalStatisticBoxplotDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null,

@@ -491,7 +491,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
                 | IllegalArgumentException e1) {
             stack("Error getting profile", e1);
-            chart = MorphologyChartFactory.makeErrorChart();
+            chart = MorphologyChartFactory.createErrorChart();
         }
 
         // Draw the rule on the chart

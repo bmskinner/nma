@@ -115,7 +115,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
     private JPanel createConsensusPanel() {
 
         final JPanel panel = new JPanel(new BorderLayout());
-        JFreeChart chart = OutlineChartFactory.makeEmptyChart();
+        JFreeChart chart = OutlineChartFactory.createEmptyChart();
 
         // the chart is inside a chartPanel; the chartPanel is inside a JPanel
         // this allows a checkbox panel to be added to the JPanel later
@@ -341,7 +341,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
             setChart(options);
 
         } catch (Exception e) {
-        	chartPanel.setChart(AbstractChartFactory.makeErrorChart());
+        	chartPanel.setChart(AbstractChartFactory.createErrorChart());
             stack("Error updating signal overview panel", e);
         }
     }

@@ -87,18 +87,18 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         try {
             positionDataset = new CellDatasetCreator(options).createPositionFeatureDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
         XYDataset nuclearOutlines;
         try {
             nuclearOutlines = new NucleusDatasetCreator(options).createMultiNucleusOutline();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
         
         if (positionDataset == null || nuclearOutlines == null) {
             // a null dataset is returned if segment counts do not match
-            return ConsensusNucleusChartFactory.makeEmptyChart();
+            return ConsensusNucleusChartFactory.createEmptyChart();
         }
 
         JFreeChart chart = createBaseXYChart();
@@ -240,7 +240,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createModalityProfileDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         JFreeChart chart = createBaseXYChart();
@@ -276,7 +276,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         try {
             chart = createModalityChart(options.getModalityPosition(), options.getDatasets(), options.getType());
         } catch (Exception e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
         XYPlot plot = chart.getXYPlot();
 
@@ -300,7 +300,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
                 pvalue = new DipTester(dataset.getCollection()).getPValueForPositon(options.getModalityPosition(),
                         options.getType());
             } catch (Exception e) {
-                return makeErrorChart();
+                return createErrorChart();
             }
 
             // Add the annotation
@@ -368,7 +368,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             secondProfileDataset = creator.createProfileDataset();
 
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         JFreeChart chart = ChartFactory.createXYLineChart(null, "Position", "Probability", null,
@@ -440,7 +440,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createBooleanProfileDataset(p, limits);
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         JFreeChart chart = ChartFactory.createXYLineChart(null, "Position", "Angle", ds, PlotOrientation.VERTICAL, true,

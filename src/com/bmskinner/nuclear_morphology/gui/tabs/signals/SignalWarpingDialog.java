@@ -417,7 +417,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        } catch (Exception e) {
     	        	warn("Error running warping");
     	            stack("Error running warping", e);
-    	            JFreeChart chart = ConsensusNucleusChartFactory.makeErrorChart();
+    	            JFreeChart chart = ConsensusNucleusChartFactory.createErrorChart();
     	            chartPanel.setChart(chart);
     	            setEnabled(true);
     	        }

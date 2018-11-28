@@ -174,7 +174,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 	 */
 	public synchronized JFreeChart getChart(boolean isPseudocolour, boolean isEnhance) {
 		if(!isCommonTargetSelected())
-			return OutlineChartFactory.makeEmptyChart();
+			return OutlineChartFactory.createEmptyChart();
 			
 		ImageProcessor image = createDisplayImage(isPseudocolour, isEnhance);
 

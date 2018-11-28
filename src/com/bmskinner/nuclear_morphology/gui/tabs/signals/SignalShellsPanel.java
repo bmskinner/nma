@@ -222,7 +222,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     private ExportableChartPanel createConsensusPanel() {
 
-        JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();
+        JFreeChart chart = ConsensusNucleusChartFactory.createEmptyChart();
 
         ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
         chartPanel.setFixedAspectRatio(true);

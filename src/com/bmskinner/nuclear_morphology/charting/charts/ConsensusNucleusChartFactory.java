@@ -57,20 +57,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * 
      * @return an empty chart
      */
-    public static JFreeChart makeEmptyChart() {
-
-        JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null, PlotOrientation.VERTICAL, true, true,
-                false);
-
-        chart.getPlot().setBackgroundPaint(Color.WHITE);
-        chart.getXYPlot().getDomainAxis().setVisible(false);
-        chart.getXYPlot().getRangeAxis().setVisible(false);
+    public static JFreeChart createEmptyChart() {
+    	JFreeChart chart = AbstractChartFactory.createEmptyChart();
         chart.getXYPlot().addRangeMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
         chart.getXYPlot().addDomainMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
-
-        int range = DEFAULT_EMPTY_RANGE;
-        chart.getXYPlot().getDomainAxis().setRange(-range, range);
-        chart.getXYPlot().getRangeAxis().setRange(-range, range);
         return chart;
     }
 
@@ -93,10 +83,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     private JFreeChart makeConsensusChart(XYDataset ds) {
         JFreeChart chart = null;
         if (ds == null) {
-            chart = ChartFactory.createXYLineChart(null, null, null, null);
-
+        	chart = createEmptyChart();
         } else {
-            chart = ChartFactory.createXYLineChart(null, null, null, ds, PlotOrientation.VERTICAL, true, true, false);
+            chart = ChartFactory.createXYLineChart(null, null, null, ds, 
+            		PlotOrientation.VERTICAL, DEFAULT_CREATE_LEGEND, DEFAULT_CREATE_TOOLTIPS, DEFAULT_CREATE_URLS);
         }
         formatConsensusChart(chart);
         return chart;
@@ -109,13 +99,13 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     public JFreeChart makeConsensusChart() {
 
         if (!options.hasDatasets())
-            return makeEmptyChart();
+            return createEmptyChart();
 
         if (options.isMultipleDatasets()) {
             boolean oneHasConsensus = options.getDatasets().stream().anyMatch(d->d.getCollection().hasConsensus());
             if (oneHasConsensus) 
                 return makeMultipleConsensusChart();
-			return makeEmptyChart();
+			return createEmptyChart();
         }
         
         // Single dataset
@@ -129,7 +119,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
         	} catch (ChartCreationException | MeshCreationException e) {
         		stack("Error making mesh chart", e);
-        		return makeErrorChart();
+        		return createErrorChart();
         	}
         }
         return makeSegmentedConsensusChart(options.firstDataset());
@@ -167,7 +157,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     		IAnalysisDataset dataset = options.firstDataset();
 
     		if (!dataset.getCollection().hasConsensus()) {
-    			return makeEmptyChart();
+    			return createEmptyChart();
     		}
     		component = dataset.getCollection().getConsensus();
     	}
@@ -177,7 +167,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
         } catch (ChartDatasetCreationException e) {
             fine("Error creating boxplot", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);
 
@@ -247,7 +237,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     private JFreeChart makeSegmentedConsensusChart(@NonNull IAnalysisDataset dataset) {
 
         if (!dataset.getCollection().hasConsensus())
-            return makeEmptyChart();
+            return createEmptyChart();
         
         fine("Making segmented consenusus chart");
         XYDataset ds = null;
@@ -331,7 +321,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             ds = new NucleusDatasetCreator(options).createMultiNucleusOutline();
         } catch (ChartDatasetCreationException e) {
             fine("Error making consensus dataset", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);
 

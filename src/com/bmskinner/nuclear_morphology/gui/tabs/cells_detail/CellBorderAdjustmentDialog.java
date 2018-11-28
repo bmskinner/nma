@@ -188,8 +188,8 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             JPanel header = createHeader();
             this.add(header, BorderLayout.NORTH);
 
-            JFreeChart empty1 = ConsensusNucleusChartFactory.makeEmptyChart();
-            JFreeChart empty2 = ConsensusNucleusChartFactory.makeEmptyChart();
+            JFreeChart empty1 = ConsensusNucleusChartFactory.createEmptyChart();
+            JFreeChart empty2 = ConsensusNucleusChartFactory.createEmptyChart();
 
             dualPanel = new CellBorderDualPanel();
 

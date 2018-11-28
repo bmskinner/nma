@@ -156,7 +156,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			ds = new ProfileDatasetCreator(options).createProfileDataset(profile);
 		} catch (ChartDatasetCreationException e) {
 			fine("Error creating profile chart", e);
-			return makeErrorChart();
+			return createErrorChart();
 		}
 
 		JFreeChart chart = makeProfileChart(ds, profile.size());
@@ -177,7 +177,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			ds = new ProfileDatasetCreator(options).createProfileDataset(n);
 		} catch (ChartDatasetCreationException e) {
 			fine("Error creating profile chart", e);
-			return makeErrorChart();
+			return createErrorChart();
 		}
 		JFreeChart chart = makeProfileChart(ds, options.getCell().getNucleus().getBorderLength());
 		
@@ -193,7 +193,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				addSegmentTextAnnotations(profile, chart.getXYPlot());
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				fine("Error adding segment annotations", e);
-				return makeErrorChart();
+				return createErrorChart();
 			}
 		}
 		return chart;
@@ -265,7 +265,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			}
 		} catch (ChartDatasetCreationException e) {
 			stack("Error making profile dataset", e);
-			return makeErrorChart();
+			return createErrorChart();
 		}
 
 		
@@ -318,7 +318,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				addSegmentTextAnnotations(profile, plot);
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 				fine("Error adding segment annotations", e);
-				return makeErrorChart();
+				return createErrorChart();
 			}
 		}
 				
@@ -339,7 +339,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
     		profiles = new ProfileDatasetCreator(options).createProfileDataset();
     	} catch (ChartDatasetCreationException e) {
     		fine("Unable to create profile dataset", e);
-    		return makeErrorChart();
+    		return createErrorChart();
     	}
     	    	
     	// Set x-axis length
@@ -521,7 +521,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
                 return makeSingleVariabilityChart();
             return makeMultiVariabilityChart();
         } catch (Exception e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
     }
 
@@ -534,7 +534,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
         try {
             ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         JFreeChart chart = makeProfileChart(ds, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);

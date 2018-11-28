@@ -92,14 +92,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
         super(o);
     }
 
-    public static JFreeChart makeEmptyChart() {
-        return ConsensusNucleusChartFactory.makeEmptyChart();
-    }
+//    public static JFreeChart makeEmptyChart() {
+//        return ConsensusNucleusChartFactory.createEmptyChart();
+//    }
 
     /**
-     * Create a chart showing the nuclear signal locations in a dataset
-     * 
-     * @param options
+     * Create a chart showing the nuclear signal locations in a consensus nucleus.
      * @return
      */
     public JFreeChart makeSignalOutlineChart() {
@@ -108,17 +106,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
             if (!options.hasDatasets()) {
                 finer("No datasets for signal outline chart");
-                return makeEmptyChart();
+                return createEmptyChart();
             }
 
             if (options.isMultipleDatasets()) {
                 finer("Multiple datasets for signal outline chart");
-                return makeEmptyChart();
+                return createMultipleDatasetEmptyChart();
             }
 
             if (!options.firstDataset().getCollection().hasConsensus()) {
                 finer("No consensus for signal outline chart");
-                return makeEmptyChart();
+                return createTextAnnotatedEmptyChart("No consensus nucleus in dataset");
             }
 
             if (options.isShowWarp()) {
@@ -130,7 +128,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         } catch (Exception e) {
             warn("Error making signal chart");
             stack("Error making signal chart", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
     }
@@ -153,7 +151,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         } catch (MeshCreationException e1) {
             fine("Cannot make consensus mesh");
             stack("Error creating mesh", e1);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         XYDataset ds;
@@ -161,7 +159,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getComponent());
         } catch (ChartDatasetCreationException e) {
             stack("Error creating outline", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         double xMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();
@@ -207,7 +205,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
         } catch (MeshCreationException e) {
             stack("Error creating consensus mesh", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         // Get the bounding box size for the consensus, to find the offsets for
@@ -240,7 +238,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             } catch (MeshCreationException e1) {
                 fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
                 stack("Error creating mesh", e1);
-                return makeErrorChart();
+                return createErrorChart();
             }
 
             // Get the image with the signal
@@ -259,7 +257,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 } catch (UncomparableMeshImageException | MeshImageCreationException e) {
                     fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
                     stack("Error creating mesh", e);
-                    return makeErrorChart();
+                    return createErrorChart();
                     // warped = null;
                 }
 
@@ -281,7 +279,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
         } catch (ChartDatasetCreationException e) {
             stack("Error creating outline", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
         plot.setDataset(0, ds);
         plot.getRenderer(0).setBasePaint(Color.BLACK);
@@ -298,7 +296,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
     public JFreeChart makeCellOutlineChart() {
 
         if (options.getCell() == null || !options.hasDatasets())
-            return makeEmptyChart();
+            return createEmptyChart();
 
         try {
 
@@ -322,11 +320,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     } catch (MeshCreationException e) {
                         stack("Error creating mesh", e);
-                        return makeErrorChart();
+                        return createErrorChart();
                     }
 
                 }
-				return makeEmptyChart();
+				return createEmptyChart();
 
             }
 
@@ -355,28 +353,28 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         warn("Cannot load nucleus image: "
                                 + options.getCell().getNucleus().getSourceFile().getAbsolutePath());
                         stack("Error loading nucleus image", e);
-                        return makeErrorChart();
+                        return createErrorChart();
                     } catch (MeshImageCreationException e) {
                         fine("Cannot create mesh for " + options.getCell().getNucleus().getNameAndNumber());
                         stack("Error creating mesh", e);
-                        return makeErrorChart();
+                        return createErrorChart();
                     } catch (UncomparableMeshImageException e) {
                         fine("Cannot compare mesh for " + options.getCell().getNucleus().getNameAndNumber());
                         stack("Error comparing mesh", e);
-                        return makeErrorChart();
+                        return createErrorChart();
                     } catch (MeshCreationException e) {
                         stack("Error creating mesh", e);
-                        return makeErrorChart();
+                        return createErrorChart();
                     }
 
                 }
-				return makeEmptyChart();
+				return createEmptyChart();
             }
             return makeStandardCellOutlineChart();
         } catch (ChartCreationException e) {
             warn("Error creating cell outline chart");
             fine("Error creating cell outline chart", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
     }
@@ -385,7 +383,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         if (!options.hasCell()) {
             finest("No cell to draw");
-            return ConsensusNucleusChartFactory.makeEmptyChart();
+            return ConsensusNucleusChartFactory.createEmptyChart();
         }
 
         JFreeChart chart = createBaseXYChart();
@@ -399,7 +397,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 new OutlineDatasetCreator(options, cell.getCytoplasm()).addOutline(ds, false);
             } catch (ChartDatasetCreationException e) {
                 fine("Error making cytoplasm outline", e);
-                return makeErrorChart();
+                return createErrorChart();
             }
 
         }
@@ -412,7 +410,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     new OutlineDatasetCreator(options, n).addOutline(ds, false);
                 } catch (ChartDatasetCreationException e) {
                     fine("Error making nucleus outline", e);
-                    return makeErrorChart();
+                    return createErrorChart();
                 }
 
             }
@@ -456,10 +454,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
     private JFreeChart makeStandardCellOutlineChart() throws ChartCreationException {
 
         if (!options.hasCell())
-            return ConsensusNucleusChartFactory.makeEmptyChart();
+            return ConsensusNucleusChartFactory.createEmptyChart();
 
         if (!options.hasDatasets())
-            return ConsensusNucleusChartFactory.makeEmptyChart();
+            return ConsensusNucleusChartFactory.createEmptyChart();
 
         ICell cell = options.getCell();
         IAnalysisDataset dataset = options.firstDataset();
@@ -866,10 +864,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
     public JFreeChart createVerticalNucleiChart() {
 
         if (!options.hasDatasets())
-            return makeEmptyChart();
+            return createEmptyChart();
         if (options.isMultipleDatasets())
             return createMultipleDatasetVerticalNucleiChart();
-        return makeEmptyChart();
+        return createEmptyChart();
     }
 
     /**

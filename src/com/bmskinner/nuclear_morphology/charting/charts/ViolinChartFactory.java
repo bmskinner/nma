@@ -69,7 +69,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
         	}
         } catch (Exception e) {
             stack("Error making violin chart", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
     }
 
@@ -103,7 +103,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
     		return chart;
     	} catch (ChartDatasetCreationException e) {
     		stack("Error creating volin dataset", e);
-    		return makeErrorChart();
+    		return createErrorChart();
     	}
     }
 
@@ -140,7 +140,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                         .createPlottableStatisticViolinDataset(CellularComponent.WHOLE_CELL);
             } catch (ChartDatasetCreationException e) {
                 stack("Error making chart dataset", e);
-                return makeErrorChart();
+                return createErrorChart();
             }
         } else {
             return makeEmptyChart();
@@ -186,7 +186,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEUS);
             } catch (ChartDatasetCreationException e) {
                 stack("Error making chart dataset", e);
-                return makeErrorChart();
+                return createErrorChart();
             }
 
 
@@ -235,7 +235,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                         .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_SIGNAL);
             } catch (ChartDatasetCreationException e) {
                 stack("Error making chart dataset", e);
-                return makeErrorChart();
+                return createErrorChart();
             }
         } else {
             return makeEmptyChart();
@@ -295,7 +295,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                         .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_BORDER_SEGMENT);
             } catch (ChartDatasetCreationException e) {
                 stack("Error creating volin dataset", e);
-                return makeErrorChart();
+                return createErrorChart();
             }
         }
 

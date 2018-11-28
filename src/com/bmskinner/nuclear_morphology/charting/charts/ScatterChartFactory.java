@@ -104,7 +104,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
             ds = new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEUS);
         } catch (ChartDatasetCreationException e) {
             stack("Error creating scatter dataset", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         String xLabel = options.getStat(0).label(options.getScale());
@@ -139,7 +139,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
                     .createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
         } catch (ChartDatasetCreationException e) {
             stack("Error creating scatter dataset", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         String xLabel = options.getStat(0).label(options.getScale());

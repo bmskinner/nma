@@ -83,7 +83,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	public static JFreeChart makeEmptyChart() {
-		return ConsensusNucleusChartFactory.makeEmptyChart();
+		return ConsensusNucleusChartFactory.createEmptyChart();
 	}
 
 
@@ -183,7 +183,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
 			return chart;
 		} catch (ChartDatasetCreationException e) {
-			return makeErrorChart();
+			return createErrorChart();
 		}
 	}
 
@@ -224,7 +224,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 	        chart.addSubtitle(psl);
 	        return chart;
 		} catch (ChartDatasetCreationException e) {
-			return makeErrorChart();
+			return createErrorChart();
 		}
 	}
 	
@@ -279,7 +279,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
 		// Do not allow multi datasets here
 		if (options.isMultipleDatasets()) {
-			finer("Multiple datasets for signal outline chart");
+			finer("Multiple datasets cannot be displayed as signal outline chart");
 			return makeEmptyChart();
 		}
 

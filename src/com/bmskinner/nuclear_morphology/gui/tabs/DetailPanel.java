@@ -468,7 +468,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
             } catch (Exception e) {
                 warn("Error creating chart: " + this.getClass().getSimpleName());
                 fine(this.getClass().getName() + ": Error creating chart", e);
-                return ScatterChartFactory.makeErrorChart();
+                return ScatterChartFactory.createErrorChart();
             }
         }
     }

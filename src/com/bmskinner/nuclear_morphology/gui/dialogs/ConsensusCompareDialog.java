@@ -87,7 +87,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
         finest("Created consensus compare header");
         this.add(header, BorderLayout.NORTH);
 
-        JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();
+        JFreeChart chart = ConsensusNucleusChartFactory.createEmptyChart();
         finest("Created empty chart");
         /*
          * Create a central panel for all charts
@@ -266,22 +266,22 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 
             } catch (Exception e) {
 
-                chartOne = ConsensusNucleusChartFactory.makeErrorChart();
-                chartTwo = ConsensusNucleusChartFactory.makeErrorChart();
+                chartOne = ConsensusNucleusChartFactory.createErrorChart();
+                chartTwo = ConsensusNucleusChartFactory.createErrorChart();
 
-                histoChartOne = ConsensusNucleusChartFactory.makeErrorChart();
-                histoChartTwo = ConsensusNucleusChartFactory.makeErrorChart();
+                histoChartOne = ConsensusNucleusChartFactory.createErrorChart();
+                histoChartTwo = ConsensusNucleusChartFactory.createErrorChart();
 
                 stack("Error creating mesh chart", e);
             }
 
         } else {
 
-            chartOne = ConsensusNucleusChartFactory.makeEmptyChart();
-            chartTwo = ConsensusNucleusChartFactory.makeEmptyChart();
+            chartOne = ConsensusNucleusChartFactory.createEmptyChart();
+            chartTwo = ConsensusNucleusChartFactory.createEmptyChart();
 
-            histoChartOne = ConsensusNucleusChartFactory.makeEmptyChart();
-            histoChartTwo = ConsensusNucleusChartFactory.makeEmptyChart();
+            histoChartOne = ConsensusNucleusChartFactory.createEmptyChart();
+            histoChartTwo = ConsensusNucleusChartFactory.createEmptyChart();
 
         }
 

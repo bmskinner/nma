@@ -189,7 +189,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
     				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
     			}
     		} catch (ChartDatasetCreationException e1) {
-    			chart = HistogramChartFactory.makeErrorChart();
+    			chart = HistogramChartFactory.createErrorChart();
     			stack(e1.getMessage(), e1);
     		}
 

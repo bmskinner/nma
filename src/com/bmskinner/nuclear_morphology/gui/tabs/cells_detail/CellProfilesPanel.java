@@ -131,7 +131,7 @@ public class CellProfilesPanel extends AbstractCellDetailPanel {
 
         } catch (Exception e) {
             stack("Error updating cell panel", e);
-            chartPanel.setChart(MorphologyChartFactory.makeErrorChart());
+            chartPanel.setChart(MorphologyChartFactory.createErrorChart());
             profileOptions.setEnabled(false);
         }
 

@@ -200,11 +200,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
                     .createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale()) : null;
         } catch (ChartDatasetCreationException e) {
             stack("Error making signal dataset", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         if (list == null) {
-            return makeErrorChart();
+            return createErrorChart();
         }
         // Make a histogram from the first dataset.
 
@@ -278,7 +278,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         try {
             list = new SignalHistogramDatasetCreator(options).createSignalDensityHistogramDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         String xLabel = options.getStat().label(options.getScale());
@@ -347,7 +347,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         try {
             ds = new NuclearHistogramDatasetCreator(options).createNuclearStatsHistogramDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         String xLabel = options.getStat().label(options.getScale());
@@ -405,7 +405,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         try {
             ds = new NuclearHistogramDatasetCreator(options).createNuclearDensityHistogramDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         String xLabel = options.getStat().label(options.getScale());
@@ -461,7 +461,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         try {
             ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthHistogramDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         JFreeChart chart = createHistogram(ds,
@@ -524,7 +524,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         try {
             ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthDensityDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         String xLabel = "Seg_" + options.getSegPosition() + " length (" + options.getScale() + ")";

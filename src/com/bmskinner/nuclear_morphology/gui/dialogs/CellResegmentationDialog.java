@@ -138,7 +138,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
             JPanel mainPanel = new JPanel(new BorderLayout());
 
-            JFreeChart outlineChart = ConsensusNucleusChartFactory.makeEmptyChart();
+            JFreeChart outlineChart = ConsensusNucleusChartFactory.createEmptyChart();
 
             ExportableChartPanel profile = new ExportableChartPanel(
                     ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));

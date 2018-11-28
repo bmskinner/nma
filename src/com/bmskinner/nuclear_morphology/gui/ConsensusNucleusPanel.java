@@ -69,7 +69,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     public ConsensusNucleusPanel(@NonNull InputSupplier context) {
         super(context);
         this.setLayout(new BorderLayout());
-        JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyChart();
+        JFreeChart consensusChart = ConsensusNucleusChartFactory.createEmptyChart();
         consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
         consensusChartPanel.addSignalChangeListener(this);
 
@@ -369,7 +369,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     @Override
     protected synchronized void updateNull() {
 
-        consensusChartPanel.setChart(ConsensusNucleusChartFactory.makeEmptyChart());
+        consensusChartPanel.setChart(ConsensusNucleusChartFactory.createEmptyChart());
         runRefoldingButton.setVisible(false);
         offsetsPanel.setVisible(false);
         consensusChartPanel.restoreAutoBounds();
