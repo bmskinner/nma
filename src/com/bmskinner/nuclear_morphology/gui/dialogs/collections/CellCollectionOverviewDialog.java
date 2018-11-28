@@ -75,9 +75,32 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	private static final String MAKE_NEW_COLLECTION_LBL = "Make new collection from selected";
 	private static final String SELECT_ALL_LBL = "Select all";
 	private static final String ROTATE_VERTICAL_LBL = "Rotate vertical";
+	private static final String NUCLEAR_SIGNAL_LBL = "Nuclear signal: ";
 	private static final int DEGREES_180 = 180;
 	private static final int DEGREES_360 = 360;
     public static final int ROW_IMAGE_HEIGHT   = 150;
+    
+    /**
+     * Map ids for e.g. signal groups to a display name.
+     * Used in the component selection combobox
+     * @author bms41
+     * @since 1.15.0
+     *
+     */
+    private class ComponentSelectionItem {
+    	public UUID uuid;
+    	public String displayName;
+    	
+    	public ComponentSelectionItem(String s, UUID id) {
+    		this.uuid = id;
+    		this.displayName = s;
+    	}
+    	
+    	@Override
+    	public String toString() {
+    		return displayName;
+    	}
+    }
 	
 
     public CellCollectionOverviewDialog(IAnalysisDataset dataset) {
@@ -104,28 +127,34 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
         JCheckBox rotateBtn = new JCheckBox(ROTATE_VERTICAL_LBL, true);
         
-        List<String> components = new ArrayList<>();
+        List<Object> components = new ArrayList<>();
         components.add(CellularComponent.CYTOPLASM);
         components.add(CellularComponent.NUCLEUS);
         for(UUID signalGroupId : dataset.getCollection().getSignalGroupIDs()) {
         	ISignalGroup sg = dataset.getCollection().getSignalGroup(signalGroupId).get();
-        	components.add(sg.getGroupName()+"|"+signalGroupId);
+        	components.add(new ComponentSelectionItem(NUCLEAR_SIGNAL_LBL+sg.getGroupName(), signalGroupId));
         }
 
-        JComboBox<String> componntBox    = new JComboBox<>(components.toArray(new String[0]));
+        JComboBox<Object> componntBox    = new JComboBox<>(components.toArray(new Object[0]));
         componntBox.setSelectedItem(CellularComponent.NUCLEUS);
         componntBox.addActionListener(e -> {
         	worker.cancel(true);
+        	worker.removePropertyChangeListener(this);
             progressBar.setVisible(true);
-            worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem().toString());
+            progressBar.setValue(0);
+            worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem());
+            worker.addPropertyChangeListener(this);
             worker.execute();
 
         });
         
         rotateBtn.addActionListener(e -> {
         	worker.cancel(true);
+        	worker.removePropertyChangeListener(this);
             progressBar.setVisible(true);
-            worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem().toString());
+            progressBar.setValue(0);
+            worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem());
+            worker.addPropertyChangeListener(this);
             worker.execute();
 
         });
@@ -223,7 +252,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
      */
     public class CellImportWorker extends ImageImportWorker {
     	
-    	private String component;
+    	private Object component;
 
 	    /**
 	     * Constructor
@@ -232,7 +261,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	     * @param rotate if true, cells are rotated to vertical
 	     * @param component the component of the cell to display
 	     */
-	    public CellImportWorker(IAnalysisDataset dataset, TableModel model, boolean rotate, String component) {
+	    public CellImportWorker(IAnalysisDataset dataset, TableModel model, boolean rotate, Object component) {
 	        super(dataset, model, rotate);
 	        this.component = component;
 	    }
@@ -292,7 +321,6 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    
 	    private ImageProcessor importSignal(UUID signal, ICell c) throws UnloadableImageException, ImageImportException {
 	    	
-	    	ISignalGroup sg = dataset.getCollection().getSignalGroup(signal).get();
 	    	INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal);
 	    	
 	    	if(signalOptions==null)
@@ -301,8 +329,6 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    	File signalFile = new File(signalOptions.getFolder(),c.getNucleus().getSourceFileName());
 	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getChannel());
 	    	ip.invert();
-//	    	log("Importing "+signalFile.getAbsolutePath());
-//	    	ImageProcessor ip = c.getNucleus().getSignalCollection().getImage(signal);
 	    	ImageAnnotator an = new ImageAnnotator(ip);
 	    	an.convertToColorProcessor();
 	    	an.crop(c.getNucleus());
@@ -329,16 +355,15 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
 	        try {
 	        	
-	            if (CellularComponent.CYTOPLASM.equals(component))
+	            if (CellularComponent.CYTOPLASM.equals(component.toString()))
 	                ip = importCytoplasm(c);
 	                
-	            if (CellularComponent.NUCLEUS.equals(component))
+	            if (CellularComponent.NUCLEUS.equals(component.toString()))
 	            	 ip = importNucleus(c);
 	            
-	            if(ip==null) {
-	            	String idString = component.replaceAll("[^\\|]+\\|", "");
-	            	UUID id = UUID.fromString(idString);
-	            	ip = importSignal(id, c);
+	            if(component instanceof ComponentSelectionItem) {
+	            	UUID signalId = ((ComponentSelectionItem)component).uuid;
+	            	ip = importSignal(signalId, c);
 	            }
 
 	            
@@ -346,7 +371,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	            
 	        } catch (UnloadableImageException | ImageImportException e) {
 	            stack("Cannot load image for component", e);
-	            return new SelectableCellIcon();
+	            return new SelectableCellIcon(ImageFilterer.createBlackColorProcessor(150, 150), c);
 	        }
 
 	       

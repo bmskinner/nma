@@ -46,6 +46,7 @@ import ij.process.TypeConverter;
 public abstract class AbstractImageFilterer implements Loggable {
 
     private static final int RGB_WHITE = 16777215;
+    private static final int RGB_BLACK = 0;
     protected static final int BYTE_MAX  = 255;
     protected ImageProcessor ip        = null;
     protected ImageStack     st        = null;
@@ -265,6 +266,20 @@ public abstract class AbstractImageFilterer implements Loggable {
         for (int i = 0; i < ip.getPixelCount(); i++) {
             ip.set(i, 255); // set all to white initially
         }
+        return ip;
+    }
+    
+    /**
+     * Create a white RGB colour processor
+     * 
+     * @param w the width
+     * @param h the height
+     * @return
+     */
+    public static ImageProcessor createBlackColorProcessor(int w, int h) {
+        ImageProcessor ip = new ColorProcessor(w, h);
+        for (int i = 0; i < ip.getPixelCount(); i++)
+            ip.set(i, RGB_BLACK); // set all to white initially
         return ip;
     }
     
