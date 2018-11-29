@@ -266,10 +266,35 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	        super(dataset, model, rotate);
 	        this.component = component;
 	    }
+	    
+	    /**
+	     * Scale and rotate the image as needed
+	     * @param c
+	     * @param ip
+	     * @return
+	     */
+	    private ImageProcessor flipAndScaleImage(ICell c, ImageProcessor ip) {
+	    	if (rotate) {
+	    		try {
+	    			ip = rotateToVertical(c, ip);
+	    		} catch (UnavailableBorderTagException e) {
+	    			stack("Unable to rotate", e);
+	    		}
+	    		ip.flipVertical(); // Y axis needs inverting
+	    		
+	    		fine(String.format("Nucleus %s is clockwise: %s", c.getNucleus().getNameAndNumber(), c.getNucleus().isClockwiseRP()));
+	    		
+	    		if(c.getNucleus().isClockwiseRP())
+	    			ip.flipHorizontal();
+	    	}
+	    	// Rescale the resulting image
+	    	ip = new ImageFilterer(ip).resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT).toProcessor();
+	    	return ip;
+	    }
 
 	    private ImageProcessor importCytoplasm(ICell c) throws UnloadableImageException {
 	    	if(!c.hasCytoplasm())
-	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
+	    		return ImageFilterer.createWhiteColorProcessor(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT);
 	    	ImageProcessor ip = c.getCytoplasm().getComponentRGBImage();
 	    	ImageAnnotator an = new ImageAnnotator(ip);
 	    	an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
@@ -286,18 +311,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    	}
 
 	    	ip = an.toProcessor();
-
-	    	if (rotate) {
-	    		try {
-	    			ip = rotateToVertical(c, ip);
-	    		} catch (UnavailableBorderTagException e) {
-	    			stack("Unable to rotate", e);
-	    		}
-	    		ip.flipVertical(); // Y axis needs inverting
-	    	}
-	    	// Rescale the resulting image
-	    	ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
-	    	return ip;
+	    	return flipAndScaleImage(c, ip);
 	    }
 	    
 	    private ImageProcessor importNucleus(ICell c) throws UnloadableImageException {
@@ -307,17 +321,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    		an = an.annotateSegments(n, n);
 	    	}
 	    	ip = an.toProcessor();
-
-	    	if (rotate) {
-	    		try {
-	    			ip = rotateToVertical(c, ip);
-	    		} catch (UnavailableBorderTagException e) {
-	    			stack("Unable to rotate", e);
-	    		}
-	    		ip.flipVertical(); // Y axis needs inverting
-	    	}
-	    	// Rescale the resulting image
-	    	return new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+	    	return flipAndScaleImage(c, ip);
 	    }
 	    
 	    private ImageProcessor importSignal(UUID signal, ICell c) throws UnloadableImageException, ImageImportException {
@@ -337,17 +341,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    		an = an.annotateSegments(n, n);
 	    	}
 	    	ip = an.toProcessor();
-
-	    	if (rotate) {
-	    		try {
-	    			ip = rotateToVertical(c, ip);
-	    		} catch (UnavailableBorderTagException e) {
-	    			stack("Unable to rotate", e);
-	    		}
-	    		ip.flipVertical(); // Y axis needs inverting
-	    	}
-	    	// Rescale the resulting image
-	    	return new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+	    	return flipAndScaleImage(c, ip);
 	    }
 	    
 	    @Override
