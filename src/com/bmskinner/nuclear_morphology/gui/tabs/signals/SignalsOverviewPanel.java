@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -192,6 +193,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
     			Graphics2D g2  = (Graphics2D) chartPanel.getGraphics();
     			Point pnt = event.getTrigger().getPoint();
     			g2.drawImage(ip.createImage(), pnt.x, pnt.y, ip.getWidth(), ip.getHeight(), null);
+    			Color c = g2.getColor();
+    			g2.setColor(Color.WHITE);
+    			g2.drawString(n.getNameAndNumber(), pnt.x+1, pnt.y+ip.getHeight()-1);
+    			g2.setColor(c);
     		} catch(UnloadableImageException e) {
     			stack(e);
     		}
