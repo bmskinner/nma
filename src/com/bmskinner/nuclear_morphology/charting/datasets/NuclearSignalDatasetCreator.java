@@ -63,12 +63,14 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * outline
      * 
      * @param n the signal to plot
-     * @param outline the outline to draw the signal on
+     * @param outline the nucleus outline to draw the signal on
      * @return the point of the signal centre of mass
      * @throws ChartDatasetCreationException
      */
     public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline) throws ChartDatasetCreationException {
-        double angle = n.getStatistic(PlottableStatistic.ANGLE);
+        
+    	// the anti-clockwise angle from the OP to the signal
+    	double angle = n.getStatistic(PlottableStatistic.ANGLE);
 
         double fractionalDistance = n.getStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM);
 
@@ -76,12 +78,14 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         double distanceToBorder = outline.getDistanceFromCoMToBorderAtAngle(angle);
 
         // convert to fractional distance to signal
-        double signalDistance = distanceToBorder * fractionalDistance;
+        double distanceFromCoM = distanceToBorder * fractionalDistance;
+        
+//        fine(String.format("Drawing signal with angle %s at distance %s", angle, distanceFromCoM));
 
-        // adjust X and Y because we are now counting angles from the vertical
-        // axis
-        double signalX = AngleTools.getXComponentOfAngle(signalDistance, angle - 90);
-        double signalY = AngleTools.getYComponentOfAngle(signalDistance, angle - 90);
+        // adjust X and Y because we are counting angles from the vertical axis
+        // but the angle tools returns angles against the x-axis
+        double signalX = AngleTools.getXComponentOfAngle(distanceFromCoM, angle - 90);
+        double signalY = AngleTools.getYComponentOfAngle(distanceFromCoM, angle - 90);
         return IPoint.makeNew(signalX, signalY);
     }
 
@@ -90,7 +94,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * 
      * @param dataset the dataset
      * @return
-     * @throws Exception
      */
     public XYDataset createSignalCoMDataset() throws ChartDatasetCreationException {
 

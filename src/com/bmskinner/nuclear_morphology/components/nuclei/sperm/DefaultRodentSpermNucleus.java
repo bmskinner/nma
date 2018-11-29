@@ -109,17 +109,13 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     protected double calculateStatistic(PlottableStatistic stat) {
         double result = super.calculateStatistic(stat);
 
-        if (PlottableStatistic.HOOK_LENGTH.equals(stat)) {
+        if (PlottableStatistic.HOOK_LENGTH.equals(stat))
             return getHookOrBodyLength(true);
 
-        }
-
-        if (PlottableStatistic.BODY_WIDTH.equals(stat)) {
+        if (PlottableStatistic.BODY_WIDTH.equals(stat))
             return getHookOrBodyLength(false);
-        }
 
         return result;
-
     }
 
     @Override
@@ -234,103 +230,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         setStatistic(PlottableStatistic.BODY_WIDTH, dBody);
     }
 
-    /**
-     * Get a copy of the points in the hook roi
-     * 
-     * @return
-     */
-    public List<IBorderPoint> getHookRoi() {
 
-        List<IBorderPoint> result = new ArrayList<>(0);
-
-        IBorderPoint testPoint;
-        IBorderPoint referencePoint;
-        IBorderPoint interSectionPoint;
-        IBorderPoint orientationPoint;
-
-        try {
-
-            testPoint = this.getBorderPoint (Tag.REFERENCE_POINT);
-            referencePoint = this.getBorderPoint (Tag.REFERENCE_POINT);
-            interSectionPoint = this.getBorderPoint (Tag.INTERSECTION_POINT);
-            orientationPoint = this.getBorderPoint (Tag.ORIENTATION_POINT);
-
-        } catch (UnavailableBorderTagException e) {
-            fine("Cannot get border tag", e);
-            return result;
-        }
-
-        /*
-         * Go from the reference point. We hit either the IP or the OP depending
-         * on direction. On hitting one, move to the other and continue until
-         * we're back at the RP
-         */
-
-        // boolean hasHitPoint = false;
-        int i = 0;
-        IBorderPoint continuePoint = null;
-
-        while (testPoint.hasNextPoint()) {
-            result.add(testPoint);
-
-            if (testPoint.overlapsPerfectly(interSectionPoint)) {
-                continuePoint = orientationPoint;
-                break;
-            }
-
-            if (testPoint.overlapsPerfectly(orientationPoint)) {
-                continuePoint = interSectionPoint;
-                break;
-            }
-
-            testPoint = testPoint.nextPoint();
-
-            /*
-             * Only allow the loop to go around the nucleus once
-             */
-            if (testPoint.overlapsPerfectly(referencePoint)) {
-                break;
-            }
-
-            i++;
-            if (i > 1000) {
-                warn("Forced break");
-                break;
-            }
-        }
-
-        if (continuePoint == null) {
-            warn("Error getting roi - IP and OP not found");
-            return result;
-        }
-
-        /*
-         * Continue until we're back at the RP
-         */
-        while (continuePoint.hasNextPoint()) {
-            result.add(continuePoint);
-            // IJ.log("Continue point :"+continuePoint.toString());
-            if (continuePoint.overlapsPerfectly(referencePoint.prevPoint())) {
-                break;
-            }
-
-            continuePoint = continuePoint.nextPoint();
-            i++;
-            if (i > 2000) {
-                warn("Forced break for continue point");
-                break;
-            }
-        }
-        return result;
-
-    }
-
-    /*
-     * Identify key points: tip, estimated tail position
-     */
     @Override
     public void findPointsAroundBorder() throws ComponentCreationException {
-
+        /* Identify key points: tip, estimated tail position  */
         try {
 
             RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
@@ -402,14 +305,12 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         } catch (UnavailableProfileTypeException e1) {
             stack("Cannot get profile type", e1);
         }
-
     }
 
     /**
      * Create a polygon from the given list of border points
      * 
-     * @param list
-     *            the list of points
+     * @param list the list of points
      * @return a polygon enclosing the points
      */
     private FloatPolygon createRoiPolygon(List<IBorderPoint> list) {
@@ -428,30 +329,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
         return new FloatPolygon(xpoints, ypoints);
     }
-
-    /**
-     * Check if the given point is in the hook side of the nucleus
-     * 
-     * @param p
-     *            the point to test, which must lie within the nucleus
-     * @return
-     */
-    public boolean isHookSide(IPoint p) {
-
-        if (!containsPoint(p)) {
-            throw new IllegalArgumentException("Requested point is not in the nucleus: " + p.toString());
-        }
-
-        /*
-         * Find out which side has been captured. The hook side has the
-         * reference point
-         */
-        FloatPolygon poly = createRoiPolygon(getHookRoi());
-
-        return poly.contains((float) p.getX(), (float) p.getY());
-
-    }
-
+    
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
         super.getVerticallyRotatedNucleus();
@@ -460,9 +338,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             return null;
         }
 
-        /*
-         * Get the X position of the reference point
-         */
+        /* Get the X position of the reference point */
         double vertX;
         try {
             vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
@@ -470,18 +346,20 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             stack("Cannot get RP from vertical nucleus; returning default orientation", e);
             return verticalNucleus;
         }
+        
         /*
          * If the reference point is left of the centre of mass, the nucleus is
          * pointing left. If not, flip the nucleus
          */
-
         if (vertX > verticalNucleus.getCentreOfMass().getX()) {
-            clockwiseRP = true; // this is only set to true, as the default is
-                                // false, and will become false after the
-                                // nucleus is flipped
+        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
             verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+            
+            if(!orientationChecked) {
+            	clockwiseRP = true;
+            	orientationChecked = true;
+            }
         }
-
         return verticalNucleus;
     }
 
@@ -590,11 +468,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     }
 
     /*
-     * ----------------------- Methods for dividing the nucleus to hook and hump
-     * sides -----------------------
-     */
-
-    /*
      * In order to split the nuclear roi into hook and hump sides, we need to
      * get an intersection point of the line through the tail and centre of mass
      * with the opposite border of the nucleus.
@@ -633,36 +506,15 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         return minDeltaYIndex;
     }
 
-    public void splitNucleusToHeadAndHump() {
-
-        if (!this.hasBorderTag(Tag.INTERSECTION_POINT)) {
-            int index;
-            try {
-                index = findIntersectionPointForNuclearSplit();
-            } catch (UnavailableBorderTagException e) {
-                stack("Cannot get border tag", e);
-                return;
-            }
-            this.setBorderTag(Tag.INTERSECTION_POINT, index);
-        }
-    }
-
-    /*
-     * ----------------------- Methods for measuring signal positions
-     * -----------------------
-     */
-
-    // needs to override AsymmetricNucleus version because hook/hump
-    @Override
+    
+    @Override // needs to override AsymmetricNucleus version because hook/hump calculation
     public void calculateSignalAnglesFromPoint(IBorderPoint p) {
 
         super.calculateSignalAnglesFromPoint(p);
 
         if (this.getSignalCollection().hasSignal()) {
 
-            // IJ.log(this.dumpInfo(BORDER_TAGS));
-
-            // update signal angles with hook or hump side
+            // update signal angles depending on nucleus orientation
             for (UUID i : signalCollection.getSignalGroupIds()) {
 
                 if (signalCollection.hasSignal(i)) {
@@ -671,30 +523,11 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
                     for (INuclearSignal n : signals) {
 
-                        /*
-                         * Angle begins from the orientation point
-                         */
-
+                        /* Angle begins from the orientation point */
                         double angle = n.getStatistic(PlottableStatistic.ANGLE);
-
-                        try {
-                            // This com is offset, not original
-                            IPoint com = n.getCentreOfMass();
-
-                            // These rois are offset, not original
-                            if (this.isHookSide(com)) {
-                                angle = 360 - angle;
-
-                            }
-
-                        } catch (Exception e) {
-                            // IJ.log(this.getNameAndNumber()+": Error detected:
-                            // falling back on default angle: "+e.getMessage());
-                        } finally {
-
-                            n.setStatistic(PlottableStatistic.ANGLE, angle);
-
-                        }
+                        if(!isClockwiseRP())
+                        	angle = 360-angle;    
+                        n.setStatistic(PlottableStatistic.ANGLE, angle);
                     }
                 }
             }

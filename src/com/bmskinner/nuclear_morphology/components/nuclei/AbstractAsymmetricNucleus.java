@@ -45,6 +45,7 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
     
    // Does the orientation of the nucleus have RP clockwise to the CoM. Only applicable to hooked sperm
     protected transient boolean clockwiseRP = false;
+    protected transient boolean orientationChecked = false;
     
     /**
      * Construct with an ROI, a source image and channel, and the original
@@ -98,6 +99,7 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
         in.defaultReadObject();
         tailEstimatePoints = new ArrayList<>(0);
         clockwiseRP = false;
+        orientationChecked = false;
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {

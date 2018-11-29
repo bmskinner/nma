@@ -319,16 +319,11 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     // RodentSpermNucleus
     @Override
 	public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
-
-    	//TODO - there is an issue with pigs. The smallest angle wrt the OP is not the correct angle to choose
     	
         for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
             if (signalCollection.hasSignal(signalGroup)) {
-
-                List<INuclearSignal> signals = signalCollection.getSignals(signalGroup);
-
-                for (INuclearSignal s : signals) {
+                for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
 
                     double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
                     s.setStatistic(PlottableStatistic.ANGLE, angle);

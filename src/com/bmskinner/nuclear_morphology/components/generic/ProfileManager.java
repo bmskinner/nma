@@ -268,6 +268,7 @@ public class ProfileManager implements Loggable {
 
         			if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
         				n.alignPointsOnVertical(n.getBorderPoint(Tag.TOP_VERTICAL), n.getBorderPoint(Tag.BOTTOM_VERTICAL));
+        				n.updateVerticallyRotatedNucleus();
         				if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
         					n.flipXAroundPoint(n.getCentreOfMass());
         			} else {

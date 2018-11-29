@@ -187,7 +187,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					int signalCount = shapes.size();
 
 					int alpha = (int) Math.floor(255 / ((double) signalCount)) + 20;
-					alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+					alpha = alpha < 1 ? 1 : alpha > 156 ? 156 : alpha;
 
 					Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(signalGroup);
 					if(g.isPresent()){
