@@ -153,7 +153,7 @@ public interface IPoint {
     double findSmallestAngle(final @NonNull IPoint a, final @NonNull IPoint b);
     
     /**
-     * Measure the absolute angle between the two lines a-this and this-b
+     * Measure the absolute angle between the two lines {@code a-this} and {@code this-b}
      * connecting the three points. The measurement is made clockwise from the
      * start point to the end point.
      * <p>
@@ -161,14 +161,14 @@ public interface IPoint {
      * 
      * <pre>    a<br>    |<br>    o  135<br> 225 \<br>       b<br></pre>
      * 
-     * findAbsoluteAngle(b, a) will return 225<br>
-     * findAbsoluteAngle(a, b) will return 135<br>
-     * findSmallestAngle(b, a) will return 135<br>
-     * findSmallestAngle(a, b) will return 135<br>
+     * {@code o.findAbsoluteAngle(b, a)} will return 225<br>
+     * {@code o.findAbsoluteAngle(a, b)} will return 135<br>
+     * {@code o.findSmallestAngle(b, a)} will return 135<br>
+     * {@code o.findSmallestAngle(a, b)} will return 135<br>
      * 
-     * @param start the first line endpoint
-     * @param end the second line endpoint
-     * @return
+     * @param start the point from which measurement starts
+     * @param end the point at which measurement ends
+     * @return the angle measured clockwise from start to end about this point 
      */
     double findAbsoluteAngle(final @NonNull IPoint start, final @NonNull IPoint end);
 
