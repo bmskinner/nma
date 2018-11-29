@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -63,7 +64,10 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
     @Override
     protected Boolean doInBackground() throws Exception {
 
-        for (ICell c : dataset.getCollection().getCells()) {
+    	List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
+    	
+    	cells.sort((c1, c2)-> c1.getNucleus().getNameAndNumber().compareTo(c2.getNucleus().getNameAndNumber()));
+        for (ICell c : cells) {
         	if(isCancelled())
         		return false;
             try {
