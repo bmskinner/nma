@@ -148,12 +148,7 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
     @Override
     public void setEnabled(boolean b) {
         super.setEnabled(b);
-
-        if (b) {
-            copyBtn.setEnabled(DatasetListManager.getInstance().hasDatasets());
-        } else {
-            copyBtn.setEnabled(false);
-        }
-
+        openBtn.setEnabled(b);
+        copyBtn.setEnabled(b ? DatasetListManager.getInstance().hasDatasets() : false);
     }
 }
