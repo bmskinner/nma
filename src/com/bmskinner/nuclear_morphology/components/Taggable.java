@@ -92,8 +92,7 @@ public interface Taggable extends Profileable {
      * Check if the nucleus has any border tag at the given index in the raw
      * border list
      * 
-     * @param i
-     *            the index to be tested
+     * @param i the index to be tested
      * @return true if a tag is present at the index
      */
     boolean hasBorderTag(int index) throws IndexOutOfBoundsException;
@@ -172,14 +171,4 @@ public interface Taggable extends Profileable {
      * @throws UnavailableBorderTagException if the reference tag is not present
      */
     int getOffsetBorderIndex(@NonNull Tag reference, int index) throws UnavailableBorderTagException;
-
-    /**
-     * This will completely replace the map of border tags with new positions,
-     * without attempting vertical updating, or RP shifting until after all new
-     * points are set. Used in the CellBorderAdjustmentDialog
-     * 
-     * @param tagMap
-     */
-    void replaceBorderTags(@NonNull Map<Tag, Integer> tagMap);
-
 }

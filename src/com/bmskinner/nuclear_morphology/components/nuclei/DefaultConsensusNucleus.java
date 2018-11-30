@@ -40,7 +40,7 @@ import ij.process.FloatPolygon;
  * @since 1.13.3
  *
  */
-public class DefaultConsensusNucleus extends DefaultNucleus {
+public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus {
 
     private static final long serialVersionUID = 1L;
 
@@ -142,6 +142,80 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
     	return true;
     }
     
+    protected Nucleus createVerticallyRotatedNucleus() {
+    	super.getVerticallyRotatedNucleus();
+        if (verticalNucleus == null) {
+            fine("Unknown error creating vertical nucleus");
+            return null;
+        }
+
+        /* Get the X position of the reference point */
+        double vertX;
+        try {
+            vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
+        } catch (UnavailableBorderTagException e) {
+            stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+            return verticalNucleus;
+        }
+        
+        /*
+         * If the reference point is left of the centre of mass, the nucleus is
+         * pointing left. If not, flip the nucleus
+         */
+        if (vertX > verticalNucleus.getCentreOfMass().getX()) {
+//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
+            verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+            
+            if(!orientationChecked) {
+            	clockwiseRP = true;
+            	orientationChecked = true;
+            }
+        }
+        return verticalNucleus;
+    }
+    
+    @Override
+    public Nucleus getVerticallyRotatedNucleus() {
+    	if(orientationChecked && verticalNucleus!=null)
+    		return verticalNucleus;
+    	return createVerticallyRotatedNucleus();
+    }
+    
+//    @Override
+//    public Nucleus getVerticallyRotatedNucleus() {
+//        super.getVerticallyRotatedNucleus();
+//        if (verticalNucleus == null) {
+//            fine("Unknown error creating vertical nucleus");
+//            return null;
+//        }
+//        
+//        if(type.equals(NucleusType.RODENT_SPERM)){
+//        	/* Get the X position of the reference point */
+//        	double vertX;
+//        	try {
+//        		vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
+//        	} catch (UnavailableBorderTagException e) {
+//        		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+//        		return verticalNucleus;
+//        	}
+//
+//        	/*
+//        	 * If the reference point is left of the centre of mass, the nucleus is
+//        	 * pointing left. If not, flip the nucleus
+//        	 */
+//        	if (vertX > verticalNucleus.getCentreOfMass().getX()) {
+//        		//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
+//        		verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+//
+//        		if(!orientationChecked) {
+//        			clockwiseRP = true;
+//        			orientationChecked = true;
+//        		}
+//        	}
+//        }
+//        return verticalNucleus;
+//    }
+    
     @Override
     public int hashCode() {
     	final int prime = 31;
@@ -153,14 +227,14 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-        try {
+//        try {
         	alignVertically();
-        	this.getVerticallyRotatedNucleus().alignVertically();
-        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderPoint(Tag.REFERENCE_POINT).getX() > 0)
-        			flipXAroundPoint(getCentreOfMass());
-        } catch (UnavailableBorderTagException e1) {
-        	fine("Cannot get border tag", e1);
-        }
+        	createVerticallyRotatedNucleus();
+//        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderPoint(Tag.REFERENCE_POINT).getX() > 0)
+//        			flipXAroundPoint(getCentreOfMass());
+//        } catch (UnavailableBorderTagException e1) {
+//        	fine("Cannot get border tag", e1);
+//        }
 
 
     }

@@ -72,21 +72,17 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
     /**
      * Create a table of stats for the given cell.
      * 
-     * @param cell
-     *            the cell
      * @return a table model
      * @throws ChartDatasetCreationException
      * @throws Exception
      */
     public TableModel createCellInfoTable() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return AbstractTableCreator.createBlankTable();
-        }
 
-        if (options.isMultipleDatasets()) {
+        if (options.isMultipleDatasets())
             return AbstractTableCreator.createBlankTable();
-        }
 
         IAnalysisDataset d = options.firstDataset();
         DefaultTableModel model = new DefaultTableModel();
@@ -298,6 +294,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         fieldNames.add("Current nucleus position");
         rowData.add("x: " + n.getMinX() + " : y: " + n.getMinY());
+        
+        fieldNames.add("Is RP clockwise?");
+        rowData.add(n.isClockwiseRP());
 
         NucleusType type = NucleusType.getNucleusType(n);
 

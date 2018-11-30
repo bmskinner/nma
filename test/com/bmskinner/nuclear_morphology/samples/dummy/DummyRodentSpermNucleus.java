@@ -279,11 +279,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		return nucleus.getOffsetBorderIndex(reference, index);
 	}
 
-	@Override
-	public void replaceBorderTags(Map<Tag, Integer> tagMap) {
-		nucleus.replaceBorderTags(tagMap);
-	}
-
 	
 	@Override
 	public double getDistanceFromCoMToBorderAtAngle(double angle) {

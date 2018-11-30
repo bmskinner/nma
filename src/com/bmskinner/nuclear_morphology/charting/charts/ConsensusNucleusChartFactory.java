@@ -46,6 +46,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  * Methods to make charts with a consensus nucleus.
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
+	
+	private static final String MULTIPLE_DATASETS_NO_CONSENSUS_ERROR = "No consensus in dataset(s)";
 
     public ConsensusNucleusChartFactory(@NonNull ChartOptions o) {
         super(o);
@@ -105,7 +107,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             boolean oneHasConsensus = options.getDatasets().stream().anyMatch(d->d.getCollection().hasConsensus());
             if (oneHasConsensus) 
                 return makeMultipleConsensusChart();
-			return createEmptyChart();
+			return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
         }
         
         // Single dataset
@@ -156,9 +158,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     	if(component==null) {
     		IAnalysisDataset dataset = options.firstDataset();
 
-    		if (!dataset.getCollection().hasConsensus()) {
-    			return createEmptyChart();
-    		}
+    		if (!dataset.getCollection().hasConsensus())
+    			return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
+
     		component = dataset.getCollection().getConsensus();
     	}
 
@@ -166,7 +168,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
         } catch (ChartDatasetCreationException e) {
-            fine("Error creating boxplot", e);
+            stack("Error creating boxplot", e);
             return createErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);
@@ -237,7 +239,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     private JFreeChart makeSegmentedConsensusChart(@NonNull IAnalysisDataset dataset) {
 
         if (!dataset.getCollection().hasConsensus())
-            return createEmptyChart();
+        	return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
         
         fine("Making segmented consenusus chart");
         XYDataset ds = null;

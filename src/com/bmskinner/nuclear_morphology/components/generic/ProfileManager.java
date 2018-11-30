@@ -265,15 +265,8 @@ public class ProfileManager implements Loggable {
         			Nucleus n = collection.getConsensus();
         			int existingIndex = n.getBorderIndex(existingTag);
         			n.setBorderTag(tag, existingIndex);
-
-        			if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-        				n.alignPointsOnVertical(n.getBorderPoint(Tag.TOP_VERTICAL), n.getBorderPoint(Tag.BOTTOM_VERTICAL));
-        				n.updateVerticallyRotatedNucleus();
-        				if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
-        					n.flipXAroundPoint(n.getCentreOfMass());
-        			} else {
-        				n.rotatePointToBottom(n.getBorderPoint(Tag.ORIENTATION_POINT));
-        			}
+        			n.alignVertically();
+        			n.updateVerticallyRotatedNucleus();
         		}
 
         		// Update signals as needed

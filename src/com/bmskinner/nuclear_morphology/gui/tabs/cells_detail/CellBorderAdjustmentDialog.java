@@ -517,7 +517,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
                 // workingCell.getNucleus().setBorderTag(tag, newIndex);
                 newMap.put(tag, newIndex);
             }
-            workingCell.getNucleus().replaceBorderTags(newMap);
+//            workingCell.getNucleus().replaceBorderTags(newMap);
 
         } catch (Exception e) {
             warn("Cannot calculate profiles for cell");

@@ -144,4 +144,10 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
         }
 
     }
+
+	@Override
+	protected Nucleus createVerticallyRotatedNucleus() {
+		// TODO Auto-generated method stub
+		return super.getVerticallyRotatedNucleus();
+	}
 }

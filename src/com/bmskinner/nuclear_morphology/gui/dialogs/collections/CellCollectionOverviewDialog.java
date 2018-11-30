@@ -129,7 +129,10 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         JCheckBox rotateBtn = new JCheckBox(ROTATE_VERTICAL_LBL, true);
         
         List<Object> components = new ArrayList<>();
-        components.add(CellularComponent.CYTOPLASM);
+        
+        boolean hasCytoplasm = dataset.getCollection().getCells().stream().anyMatch(c->c.hasCytoplasm());
+        if(hasCytoplasm) // Only add cytoplasm option if present in at least one cell
+        	components.add(CellularComponent.CYTOPLASM);
         components.add(CellularComponent.NUCLEUS);
         for(UUID signalGroupId : dataset.getCollection().getSignalGroupIDs()) {
         	ISignalGroup sg = dataset.getCollection().getSignalGroup(signalGroupId).get();
@@ -282,7 +285,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    		}
 	    		ip.flipVertical(); // Y axis needs inverting
 	    		
-	    		fine(String.format("Nucleus %s is clockwise: %s", c.getNucleus().getNameAndNumber(), c.getNucleus().isClockwiseRP()));
+//	    		fine(String.format("Nucleus %s is clockwise: %s", c.getNucleus().getNameAndNumber(), c.getNucleus().isClockwiseRP()));
 	    		
 	    		if(c.getNucleus().isClockwiseRP())
 	    			ip.flipHorizontal();

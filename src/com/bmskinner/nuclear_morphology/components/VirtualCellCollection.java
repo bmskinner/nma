@@ -396,7 +396,7 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public Nucleus getConsensus() {
-        return consensusNucleus;
+        return consensusNucleus.getVerticallyRotatedNucleus();
     }
 
     @Override
@@ -1168,10 +1168,9 @@ public class VirtualCellCollection implements ICellCollection {
         signalManager = new SignalManager(this);
         profileManager = new ProfileManager(this);
 
-        if(this.hasConsensus()) {
-			this.getConsensus().getVerticallyRotatedNucleus();
-			this.getConsensus().alignVertically();
-		}
+//        if(this.hasConsensus()) {
+//			this.getConsensus().alignVertically();
+//		}
         
         // Don't try to restore profile aggregates here - the parent collection has
         // not finished loading, and so calls to parent will be null. Do the restore in the

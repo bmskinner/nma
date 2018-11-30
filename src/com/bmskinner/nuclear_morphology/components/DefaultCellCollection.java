@@ -390,7 +390,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public Nucleus getConsensus() {
-		return consensusNucleus;
+		return consensusNucleus.getVerticallyRotatedNucleus();
 	}
 
 	@Override
@@ -1262,10 +1262,10 @@ public class DefaultCellCollection implements ICellCollection {
 			stack(e);
 		}
 		
-		if(this.hasConsensus()) {
-			this.getConsensus().getVerticallyRotatedNucleus();
-			this.getConsensus().alignVertically();
-		}
+//		if(this.hasConsensus()) {
+//			this.getConsensus().getVerticallyRotatedNucleus();
+//			this.getConsensus().alignVertically();
+//		}
 
 	}
 	

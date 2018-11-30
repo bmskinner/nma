@@ -20,11 +20,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 
@@ -55,35 +57,38 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
      * 
      * @param roi the roi of the object
      * @param centerOfMass the original centre of mass of the component
-     * @param source the image file the component was found in
+     * @param sourceFile the image file the component was found in
      * @param channel the RGB channel the component was found in
      * @param position the bounding position of the component in the original image
+     * @param number the number of the nucleus in the source image
      * @param id the id of the component. Only use when deserialising!
      */
-    public AbstractAsymmetricNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, int number, @NonNull UUID id) {
-        super(roi, centreOfMass, source, channel, position, number, id);
+    public AbstractAsymmetricNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File sourceFile, int channel, int[] position, int number, @NonNull UUID id) {
+        super(roi, centreOfMass, sourceFile, channel, position, number, id);
     }
 
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image
      * 
-     * @param roi
-     * @param f
-     * @param channel
-     * @param position
-     * @param centreOfMass
+     * @param roi the roi of the object
+     * @param centreOfMass the original centre of mass of the component
+     * @param sourceFile the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
+     * @param number the number of the nucleus in the source image
      */
-    public AbstractAsymmetricNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number) {
-        super(roi, centreOfMass, f, channel, position, number);
+    public AbstractAsymmetricNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File sourceFile, int channel, int[] position, int number) {
+        super(roi, centreOfMass, sourceFile, channel, position, number);
     }
 
+    /**
+     * Construct from an existing nucleus
+     * @param n the nucleus to use as a template
+     * @throws UnprofilableObjectException
+     */
     protected AbstractAsymmetricNucleus(Nucleus n) throws UnprofilableObjectException {
         super(n);
-    }
-
-    public List<IBorderPoint> getEstimatedTailPoints() {
-        return tailEstimatePoints;
     }
 
     protected void addTailEstimatePosition(IBorderPoint p) {
@@ -93,6 +98,15 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
     @Override
     public boolean isClockwiseRP() {
         return clockwiseRP;
+    }
+        
+    protected abstract Nucleus createVerticallyRotatedNucleus();
+        
+    
+    @Override
+   	public void setBorderTag(@NonNull Tag tag, int i) {
+    	super.setBorderTag(tag, i);
+    	orientationChecked = false;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

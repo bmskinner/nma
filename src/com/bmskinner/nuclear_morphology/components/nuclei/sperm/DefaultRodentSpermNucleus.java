@@ -262,7 +262,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
                 }
 
             } catch (NoDetectedIndexException e) {
-                fine("Unable to detect RP in nucleus");
+                stack("Unable to detect RP in nucleus");
                 setBorderTag(Tag.REFERENCE_POINT, 0);
             }
 
@@ -330,9 +330,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         return new FloatPolygon(xpoints, ypoints);
     }
     
-    @Override
-    public Nucleus getVerticallyRotatedNucleus() {
-        super.getVerticallyRotatedNucleus();
+    protected Nucleus createVerticallyRotatedNucleus() {
+    	super.getVerticallyRotatedNucleus();
         if (verticalNucleus == null) {
             fine("Unknown error creating vertical nucleus");
             return null;
@@ -352,7 +351,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          * pointing left. If not, flip the nucleus
          */
         if (vertX > verticalNucleus.getCentreOfMass().getX()) {
-        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
+//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
             verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
             
             if(!orientationChecked) {
@@ -361,6 +360,13 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             }
         }
         return verticalNucleus;
+    }
+    
+    @Override
+    public Nucleus getVerticallyRotatedNucleus() {
+    	if(orientationChecked && verticalNucleus!=null)
+    		return verticalNucleus;
+    	return createVerticallyRotatedNucleus();
     }
 
 
@@ -548,8 +554,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        if(!this.hasBorderTag(Tag.REFERENCE_POINT))
-        	warn("Nucleus "+this.getNameAndNumber()+" has no RP");
+//        if(!this.hasBorderTag(Tag.REFERENCE_POINT))
+//        	warn("Nucleus "+this.getNameAndNumber()+" has no RP");
         calculateHookAndBodyLength();
 
     }

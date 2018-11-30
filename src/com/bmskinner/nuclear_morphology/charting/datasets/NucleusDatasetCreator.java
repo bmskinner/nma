@@ -764,8 +764,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public List<ComponentOutlineDataset> createSignalOutlines(@NonNull ICell cell, @NonNull IAnalysisDataset dataset)
             throws ChartDatasetCreationException {
 
-        List<ComponentOutlineDataset> result = new ArrayList<ComponentOutlineDataset>(0);
-        List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(0);
+        List<ComponentOutlineDataset> result = new ArrayList<>();
+        List<IAnalysisDataset> datasets = new ArrayList<>();
         datasets.add(dataset);
 
         if (cell == null) {
