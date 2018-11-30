@@ -99,6 +99,12 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
     public boolean isClockwiseRP() {
         return clockwiseRP;
     }
+    
+    @Override
+    public void updateVerticallyRotatedNucleus() {
+    	orientationChecked = false;
+    	super.updateVerticallyRotatedNucleus();
+    }
         
     protected abstract Nucleus createVerticallyRotatedNucleus();
         

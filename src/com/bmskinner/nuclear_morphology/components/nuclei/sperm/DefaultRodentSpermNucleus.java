@@ -340,18 +340,17 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     	/* Check the orientation of the RP once vertical */
     	try {
     		/* Get the X position of the reference point */
-    		double vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
+    		double rpX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
     		
     		/*
-        	 * If the reference point is left of the centre of mass, the nucleus is
-        	 * pointing left. If not, flip the nucleus
+        	 * If the reference point X is greater than the centre of mass X, the nucleus is
+        	 * pointing to the right (i.e. anti-clockwise).
         	 */
-    		if (vertX > verticalNucleus.getCentreOfMass().getX()) {
-        		//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
-        		verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-        		clockwiseRP = false;
-        	}
-            orientationChecked = true;    		
+    		clockwiseRP = rpX > verticalNucleus.getCentreOfMass().getX();
+    		orientationChecked = true;
+           
+           if(clockwiseRP) 
+        	   verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
     		
     	} catch (UnavailableBorderTagException e) {
     		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
