@@ -287,7 +287,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    		
 //	    		fine(String.format("Nucleus %s is clockwise: %s", c.getNucleus().getNameAndNumber(), c.getNucleus().isClockwiseRP()));
 	    		
-	    		if(c.getNucleus().isClockwiseRP())
+	    		if(!c.getNucleus().isClockwiseRP())
 	    			ip.flipHorizontal();
 	    	}
 	    	// Rescale the resulting image

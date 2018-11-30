@@ -332,34 +332,32 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     
     protected Nucleus createVerticallyRotatedNucleus() {
     	super.getVerticallyRotatedNucleus();
-        if (verticalNucleus == null) {
-            fine("Unknown error creating vertical nucleus");
-            return null;
-        }
-
-        /* Get the X position of the reference point */
-        double vertX;
-        try {
-            vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
-        } catch (UnavailableBorderTagException e) {
-            stack("Cannot get RP from vertical nucleus; returning default orientation", e);
-            return verticalNucleus;
-        }
-        
-        /*
-         * If the reference point is left of the centre of mass, the nucleus is
-         * pointing left. If not, flip the nucleus
-         */
-        if (vertX > verticalNucleus.getCentreOfMass().getX()) {
-//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
-            verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-            
-            if(!orientationChecked) {
-            	clockwiseRP = true;
-            	orientationChecked = true;
-            }
-        }
-        return verticalNucleus;
+    	if (verticalNucleus == null) {
+    		fine("Unknown error creating vertical nucleus");
+    		return null;
+    	}
+    	
+    	/* Check the orientation of the RP once vertical */
+    	try {
+    		/* Get the X position of the reference point */
+    		double vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
+    		
+    		/*
+        	 * If the reference point is left of the centre of mass, the nucleus is
+        	 * pointing left. If not, flip the nucleus
+        	 */
+    		if (vertX > verticalNucleus.getCentreOfMass().getX()) {
+        		//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
+        		verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+        		clockwiseRP = false;
+        	}
+            orientationChecked = true;    		
+    		
+    	} catch (UnavailableBorderTagException e) {
+    		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+    		orientationChecked = false;
+    	}
+    	return verticalNucleus;
     }
     
     @Override

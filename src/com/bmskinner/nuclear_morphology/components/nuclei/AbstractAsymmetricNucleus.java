@@ -46,7 +46,7 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
     private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<>(3);
     
    // Does the orientation of the nucleus have RP clockwise to the CoM. Only applicable to hooked sperm
-    protected transient boolean clockwiseRP = false;
+    protected transient boolean clockwiseRP = true;
     protected transient boolean orientationChecked = false;
     
     /**
@@ -112,7 +112,7 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         tailEstimatePoints = new ArrayList<>(0);
-        clockwiseRP = false;
+        clockwiseRP = true;
         orientationChecked = false;
     }
 

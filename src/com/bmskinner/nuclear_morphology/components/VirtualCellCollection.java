@@ -386,7 +386,7 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public boolean hasConsensus() {
-        return this.consensusNucleus != null;
+        return consensusNucleus != null;
     }
 
     @Override
