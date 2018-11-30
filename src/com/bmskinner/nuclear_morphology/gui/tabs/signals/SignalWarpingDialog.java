@@ -358,6 +358,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        datasetBoxOne.setEnabled(b);
     	        datasetBoxTwo.setEnabled(b);
     	        minThresholdSpinner.setEnabled(b);
+    	        thresholdSlider.setEnabled(b);
     	        pseudocolourBox.setEnabled(b);
     	        enhanceBox.setEnabled(b);
     	    }
@@ -388,7 +389,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private void runWarping() {
 
     	        try {
-    	        	thresholdSlider.setVisible(false);
     	        	progressBar.setValue(0);
 
     	        	IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
