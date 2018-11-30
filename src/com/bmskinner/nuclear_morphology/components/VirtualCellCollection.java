@@ -502,7 +502,7 @@ public class VirtualCellCollection implements ICellCollection {
         // result
         // This SignalGroup is never saved to file, so does not need serialising
         @SuppressWarnings("serial")
-        ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup).get()) {
+        ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup).get(), true) {
 
             @Override
             public void setShellResult(@NonNull IShellResult result) {

@@ -174,7 +174,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 			}
 
 			if (addSignalGroup) {
-				ISignalGroup newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId).get());
+				ISignalGroup newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId).get(), false);
 			    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
 			}
         }

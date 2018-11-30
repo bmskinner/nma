@@ -61,18 +61,19 @@ public class SignalGroup implements ISignalGroup {
      * 
      * @param s
      */
-    public SignalGroup(@NonNull ISignalGroup s) {
+    public SignalGroup(@NonNull ISignalGroup s, boolean copyWarped) {
 
     	shellResult = null;
         groupName = s.getGroupName();
         isVisible = s.isVisible();
         groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
-        warpedSignals = s.getWarpedSignals().orElse(null);
+        if(copyWarped)
+        	warpedSignals = s.getWarpedSignals().orElse(null);
     }
     
 	@Override
 	public ISignalGroup duplicate() {
-		return new SignalGroup(this);
+		return new SignalGroup(this, true);
 	}
 	
 	@Override
