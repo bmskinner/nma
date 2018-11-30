@@ -143,41 +143,37 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus {
     }
     
     protected Nucleus createVerticallyRotatedNucleus() {
-    	super.getVerticallyRotatedNucleus();
+    	Nucleus verticalNucleus = super.getVerticallyRotatedNucleus();
         if (verticalNucleus == null) {
             fine("Unknown error creating vertical nucleus");
             return null;
         }
 
-        /* Get the X position of the reference point */
-        double vertX;
         try {
-            vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
-        } catch (UnavailableBorderTagException e) {
-            stack("Cannot get RP from vertical nucleus; returning default orientation", e);
-            return verticalNucleus;
-        }
-        
-        /*
-         * If the reference point is left of the centre of mass, the nucleus is
-         * pointing left. If not, flip the nucleus
-         */
-        if (vertX > verticalNucleus.getCentreOfMass().getX()) {
-//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
-            verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-            
-            if(!orientationChecked) {
-            	clockwiseRP = true;
-            	orientationChecked = true;
-            }
-        }
-        return verticalNucleus;
+    		/* Get the X position of the reference point */
+    		double rpX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
+    		
+    		/*
+        	 * If the reference point X is greater than the centre of mass X, the nucleus is
+        	 * pointing to the right (i.e. anti-clockwise).
+        	 */
+    		clockwiseRP = rpX > verticalNucleus.getCentreOfMass().getX();
+    		orientationChecked = true;
+           
+           if(clockwiseRP) 
+        	   verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+    		
+    	} catch (UnavailableBorderTagException e) {
+    		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+    		orientationChecked = false;
+    	}
+    	return verticalNucleus;
     }
     
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-    	if(orientationChecked && verticalNucleus!=null)
-    		return verticalNucleus;
+//    	if(orientationChecked && verticalNucleus!=null)
+//    		return verticalNucleus;
     	return createVerticallyRotatedNucleus();
     }
     

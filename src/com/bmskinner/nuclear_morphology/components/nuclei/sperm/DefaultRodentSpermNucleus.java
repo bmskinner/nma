@@ -331,7 +331,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     }
     
     protected Nucleus createVerticallyRotatedNucleus() {
-    	super.getVerticallyRotatedNucleus();
+    	Nucleus verticalNucleus = super.getVerticallyRotatedNucleus();
     	if (verticalNucleus == null) {
     		fine("Unknown error creating vertical nucleus");
     		return null;
@@ -361,8 +361,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-    	if(orientationChecked && verticalNucleus!=null)
-    		return verticalNucleus;
+//    	if(orientationChecked && verticalNucleus!=null)
+//    		return verticalNucleus;
     	return createVerticallyRotatedNucleus();
     }
 

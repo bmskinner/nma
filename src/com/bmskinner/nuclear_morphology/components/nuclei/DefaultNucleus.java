@@ -74,7 +74,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
     /** cache the vertically rotated nucleus */
-    protected transient Nucleus verticalNucleus = null;
+//    protected transient Nucleus verticalNucleus = null;
 
     protected transient boolean canReverse = true;
     
@@ -396,18 +396,18 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public void updateVerticallyRotatedNucleus() {
-    	verticalNucleus = null;
-        verticalNucleus = getVerticallyRotatedNucleus();
+//    	verticalNucleus = null;
+//        verticalNucleus = getVerticallyRotatedNucleus();
     }
 
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-        if (verticalNucleus != null)
-            return verticalNucleus;
+//        if (verticalNucleus != null)
+//            return verticalNucleus;
 
         // Make an exact copy of the nucleus
         finer("Creating vertical nucleus");
-        verticalNucleus = this.duplicate();
+        Nucleus verticalNucleus = this.duplicate();
 
         // At this point the new nucleus was created at the original image
         // coordinates
@@ -675,6 +675,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-        this.verticalNucleus = null;
+//        this.verticalNucleus = null;
     }
 }
