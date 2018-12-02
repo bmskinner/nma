@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusC
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.Refoldable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -165,6 +166,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         return panel;
 
     }
+    
+    private void offsetConsensus(double x, double y) {
+    	if (activeDataset().getCollection().hasConsensus()) {
+    		IPoint com = activeDataset().getCollection().getConsensus().getCentreOfMass();
+    		activeDataset().getCollection().offsetConsensus(com.getX()+x, com.getY()+y);
+    		refreshChartCache(getDatasets());
+    	}
+    }
 
     private JPanel createTranslatePanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -180,22 +189,12 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         JButton moveUp = new JButton(Labels.Consensus.INCREASE_Y_LBL);
         moveUp.setToolTipText(Labels.Consensus.INCREASE_Y_TOOLTIP);
 
-        moveUp.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                activeDataset().getCollection().getConsensus().offset(0, 1);
-                refreshChartCache(getDatasets());
-            }
-        });
+        moveUp.addActionListener(e -> offsetConsensus(0, 1) );
         panel.add(moveUp, constraints);
 
         JButton moveDown = new JButton(Labels.Consensus.DECREASE_Y_LBL);
         moveDown.setToolTipText(Labels.Consensus.DECREASE_Y_TOOLTIP);
-        moveDown.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                activeDataset().getCollection().getConsensus().offset(0, -1);
-                refreshChartCache(getDatasets());
-            }
-        });
+        moveDown.addActionListener(e -> offsetConsensus(0, -1) );
 
         constraints.gridx = 1;
         constraints.gridy = 2;
@@ -203,12 +202,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         JButton moveLeft = new JButton(Labels.Consensus.DECREASE_X_LBL);
         moveLeft.setToolTipText(Labels.Consensus.DECREASE_X_TOOLTIP);
-        moveLeft.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                activeDataset().getCollection().getConsensus().offset(-1, 0);
-                refreshChartCache(getDatasets());
-            }
-        });
+        moveLeft.addActionListener(e -> offsetConsensus(-1, 0));
 
         constraints.gridx = 0;
         constraints.gridy = 1;
@@ -216,12 +210,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         JButton moveRight = new JButton(Labels.Consensus.INCREASE_X_LBL);
         moveRight.setToolTipText(Labels.Consensus.INCREASE_X_TOOLTIP);
-        moveRight.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                activeDataset().getCollection().getConsensus().offset(1, 0);
-                refreshChartCache(getDatasets());
-            }
-        });
+        moveRight.addActionListener(e -> offsetConsensus(1, 0));
 
         constraints.gridx = 2;
         constraints.gridy = 1;
@@ -230,21 +219,25 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         JButton moveRst = new JButton(Labels.Consensus.RESET_LBL);
         moveRst.setToolTipText(Labels.Consensus.RESET_COM_TOOLTIP);
         moveRst.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                double x = 0;
-                double y = 0;
-                IPoint point = IPoint.makeNew(x, y);
-
-                activeDataset().getCollection().getConsensus().moveCentreOfMass(point);
-                refreshChartCache(getDatasets());
-            }
+        	activeDataset().getCollection().offsetConsensus(0, 0);
+        	refreshChartCache(getDatasets());
         });
 
         constraints.gridx = 1;
         constraints.gridy = 1;
         panel.add(moveRst, constraints);
+        
+        
 
         return panel;
+    }
+    
+    private void rotateConsensus(double degrees) {
+    	Refoldable<Nucleus> collection = activeDataset().getCollection();
+    	if (collection.hasConsensus()) {
+    		collection.rotateConsensus(collection.currentConsensusRotation()+degrees);
+            refreshChartCache(getDatasets());
+        }
     }
 
     private JPanel createRotationPanel() {
@@ -259,25 +252,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         JButton rotateFwd = new JButton(Labels.Consensus.DECREASE_ROTATION_LBL);
         rotateFwd.setToolTipText(Labels.Consensus.DECREASE_ROTATION_TOOLTIP);
-        rotateFwd.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                activeDataset().getCollection().getConsensus().rotate(-89);
-                refreshChartCache(getDatasets());
-
-            }
-        });
+        rotateFwd.addActionListener(e -> rotateConsensus(1));
 
         panel.add(rotateFwd, constraints);
 
         JButton rotateBck = new JButton(Labels.Consensus.INCREASE_ROTATION_LBL);
         rotateBck.setToolTipText(Labels.Consensus.INCREASE_ROTATION_TOOLTIP);
 
-        rotateBck.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                activeDataset().getCollection().getConsensus().rotate(-91);
-                refreshChartCache(getDatasets());
-            }
-        });
+        rotateBck.addActionListener(e -> rotateConsensus(-1));
 
         constraints.gridx = 2;
         constraints.gridy = 0;
@@ -287,10 +269,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         rotateRst.setToolTipText(Labels.Consensus.RESET_ROTATION_TOOLTIP);
 
         rotateRst.addActionListener(e -> {
-            if (activeDataset().getCollection().hasConsensus()) {
-                activeDataset().getCollection().getConsensus().alignVertically();
-                refreshChartCache(getDatasets());
-            }
+        	activeDataset().getCollection().rotateConsensus(0);
+        	refreshChartCache(getDatasets());
         });
 
         constraints.gridx = 1;
@@ -298,9 +278,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         panel.add(rotateRst, constraints);
 
         JButton refoldBtn = new JButton(Labels.Consensus.RE_REFOLD_LBL);
-        refoldBtn.addActionListener(e -> {
-            getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDataset());
-        });
+        refoldBtn.addActionListener(e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDataset()));
 
         constraints.gridwidth = 3;
         constraints.gridheight = 1;
@@ -383,7 +361,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         try {
         	double angle = getInputSupplier().requestDouble("Choose the amount to rotate", 0, -360, 360, 1.0);
-        	activeDataset().getCollection().getConsensus().rotate(angle - 90);
+        	activeDataset().getCollection().rotateConsensus(angle - 90);
         	update(activeDataset());
         	
 		} catch (RequestCancelledException e) {
@@ -396,15 +374,16 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     		return;
     	if (!activeDataset().getCollection().hasConsensus())
     		return;
-    	Nucleus nucleus = activeDataset().getCollection().getConsensus();
-    	nucleus.alignVertically();
+    	activeDataset().getCollection().rotateConsensus(-90);
     	update(activeDataset());
     }
 
     private void offsetConsensusNucleus() {
     	if (activeDataset()==null) 
     		return;
-    	if (!activeDataset().getCollection().hasConsensus())
+    	
+    	Refoldable<Nucleus> collection = activeDataset().getCollection();
+    	if (collection.hasConsensus())
     		return;
 
 
@@ -422,12 +401,10 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     	if (option == JOptionPane.CANCEL_OPTION) {
     		// user hit cancel
     	} else if (option == JOptionPane.OK_OPTION) {
-
-    		// offset by 90 because reasons?
     		double x = (Double) xSpinner.getModel().getValue();
     		double y = (Double) ySpinner.getModel().getValue();
 
-    		activeDataset().getCollection().getConsensus().offset(x, y);
+    		collection.offsetConsensus(x, y);
 
     		this.update(activeDataset());
     	}
@@ -438,11 +415,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     		return;
     	if (!activeDataset().getCollection().hasConsensus())
     		return;
-
-    	double x = 0;
-    	double y = 0;
-    	IPoint point = IPoint.makeNew(x, y);
-    	activeDataset().getCollection().getConsensus().moveCentreOfMass(point);
+    	activeDataset().getCollection().offsetConsensus(0, 0);
     	update(activeDataset());
     }
 

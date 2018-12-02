@@ -19,6 +19,7 @@ import org.jdom2.output.XMLOutputter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.Consensus;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
@@ -174,9 +175,9 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		
 		// Add consensus
 		try {
-			Nucleus consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
+			Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
 			collection.setConsensus(consensus);
-			consensus.alignVertically();
+//			consensus.alignVertically();
 		} catch (UnprofilableObjectException e1) {
 			stack(e1);
 		}
@@ -262,7 +263,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		return cell;
 	}
 	
-	private Nucleus readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException {
+	private Consensus<Nucleus> readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException {
 		Nucleus template = readNucleus(e.getChild(XMLCreator.NUCLEUS_KEY));
 		return new DefaultConsensusNucleus(template, type);
 	}

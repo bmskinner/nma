@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.Consensus;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
@@ -51,7 +52,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     
 	private IProfile targetCurve;
-	private Nucleus refoldNucleus;
+	private Consensus<Nucleus> refoldNucleus;
     private ICellCollection collection;
 
     private CurveRefoldingMode mode = CurveRefoldingMode.FAST;
@@ -124,20 +125,20 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             }
 
             targetCurve = targetProfile;
-            refoldNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
+            refoldNucleus.component().moveCentreOfMass(IPoint.makeNew(0, 0));
 
-            finer("Result: template at " + refoldNucleus.getCentreOfMass());
+            finer("Result: template at " + refoldNucleus.component().getCentreOfMass());
 
             if (collection.size() > 1) 
                 refoldCurve(); // carry out the refolding
 
             // orient refolded nucleus to put tail at the bottom
-            refoldNucleus.alignVertically();
+            refoldNucleus.component().alignVertically();
 
             // if rodent sperm, put tip on left if needed
             if (collection.getNucleusType().equals(NucleusType.RODENT_SPERM)) {
-                if (refoldNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX() > 0) {
-                    refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
+                if (refoldNucleus.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > 0) {
+                    refoldNucleus.component().flipXAroundPoint(refoldNucleus.component().getCentreOfMass());
                 }
             }
             //
@@ -158,7 +159,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     public void refoldCurve() throws Exception {
 
         try {
-            double score = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+            double score = refoldNucleus.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
                     .absoluteSquareDifference(targetCurve);
 
             fine("Refolding curve: initial score: " + (int) score);
@@ -191,7 +192,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         // candidate nucleus.
         // Use this to establish the max and min distances a point can migrate
         // from its neighbours
-        double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
+        double medianDistanceBetweenPoints = refoldNucleus.component().getMedianDistanceBetweenPoints();
         double minDistance = medianDistanceBetweenPoints * 0.5;
         double maxDistance = medianDistanceBetweenPoints * 1.2;
 
@@ -200,9 +201,9 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
          * centre of the line Move ahead two points
          * 
          */
-        for (int i = offset; i < refoldNucleus.getBorderLength(); i += 2) {
+        for (int i = offset; i < refoldNucleus.component().getBorderLength(); i += 2) {
 
-            IBorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
+            IBorderPoint thisPoint = refoldNucleus.component().getBorderPoint(i);
             IBorderPoint prevPoint = thisPoint.prevPoint();
             IBorderPoint nextPoint = thisPoint.nextPoint();
 
@@ -223,10 +224,10 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             double distance2 = newPoint.getLengthTo(thisPoint) / 2;
             IPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
 
-            boolean ok = checkPositionIsOK(newPoint, refoldNucleus, i, minDistance, maxDistance);
+            boolean ok = checkPositionIsOK(newPoint, refoldNucleus.component(), i, minDistance, maxDistance);
 
             if (ok) 
-                refoldNucleus.updateBorderPoint(i, replacementPoint.getX(), replacementPoint.getY());
+                refoldNucleus.component().updateBorderPoint(i, replacementPoint.getX(), replacementPoint.getY());
         }
     }
 
@@ -240,7 +241,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     private double iterateOverNucleus() throws ProfileException, UnavailableBorderTagException,
             UnavailableProfileTypeException, UnavailableBorderPointException {
 
-        ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        ISegmentedProfile refoldProfile = refoldNucleus.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
         // Get the difference between the candidate nucleus profile and the
         // median profile
@@ -251,7 +252,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         // Use this to establish the max and min distances a point can migrate
         // from its neighbours
         // This is the 'habitable zone' a point can occupy
-        double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
+        double medianDistanceBetweenPoints = refoldNucleus.component().getMedianDistanceBetweenPoints();
         double minDistance = medianDistanceBetweenPoints * 0.5;
         double maxDistance = medianDistanceBetweenPoints * 1.2;
 
@@ -261,7 +262,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         Nucleus testNucleus;
         try {
 
-            testNucleus = new DefaultConsensusNucleus(refoldNucleus, NucleusType.ROUND);
+            testNucleus = new DefaultConsensusNucleus(refoldNucleus.component(), NucleusType.ROUND);
 
             // When errors occur, the testNucleus CoM is offset at 0,-15 (may
             // not be constant).
@@ -272,7 +273,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
             finer("Test nucleus COM: " + testNucleus.getCentreOfMass());
             finest("Beginning border tests");
-            for (int i = 0; i < refoldNucleus.getBorderLength(); i++) {
+            for (int i = 0; i < refoldNucleus.component().getBorderLength(); i++) {
                 similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
             }
 
@@ -350,13 +351,13 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
                 // real consensus nucleus
 
                 if (score < similarityScore) {
-                    IPoint exisiting = refoldNucleus.getBorderPoint(index);
+                    IPoint exisiting = refoldNucleus.component().getBorderPoint(index);
                     fine("Updating " + exisiting.toString() + " to " + newPoint.toString() + ": "
                             + exisiting.getLengthTo(newPoint));
-                    refoldNucleus.updateBorderPoint(index, newPoint);
+                    refoldNucleus.component().updateBorderPoint(index, newPoint);
                     pointUpdateCounter++;
 
-                    refoldNucleus.calculateProfiles();
+                    refoldNucleus.component().calculateProfiles();
 
                     similarityScore = score;
                 }

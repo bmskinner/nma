@@ -49,6 +49,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -99,7 +100,7 @@ public class CellCollection implements ICellCollection {
     // this holds the mapping of tail indexes etc in the median profile arrays
     protected Map<ProfileType, ProfileCollection> profileCollections = new HashMap<ProfileType, ProfileCollection>();
 
-    private Nucleus consensusNucleus; // the refolded consensus nucleus
+    private Consensus<Nucleus> consensusNucleus; // the refolded consensus nucleus
 
     private Map<UUID, Cell> mappedCollection = new HashMap<UUID, Cell>(); // store
                                                                           // all
@@ -377,9 +378,8 @@ public class CellCollection implements ICellCollection {
 	public boolean hasCells() {
         if (this.mappedCollection.isEmpty()) {
             return false;
-        } else {
-            return true;
         }
+		return true;
     }
 
     @Override
@@ -410,9 +410,19 @@ public class CellCollection implements ICellCollection {
     }
 
     @Override
-	public void setConsensus(@Nullable Nucleus n) {
+	public void setConsensus(@Nullable Consensus<Nucleus> n) {
         this.consensusNucleus = n;
     }
+    
+    @Override
+	public void offsetConsensus(double xOffset, double yOffset) {
+		consensusNucleus.offset(xOffset, yOffset);
+	}
+
+	@Override
+	public void rotateConsensus(double degrees) {
+		consensusNucleus.rotate(degrees);
+	}
 
     /**
      * Get the cell with the given UUID
@@ -451,7 +461,7 @@ public class CellCollection implements ICellCollection {
 
     @Override
 	public Nucleus getConsensus() {
-        return this.consensusNucleus;
+        return this.consensusNucleus.component();
     }
 
     /**
@@ -2076,6 +2086,18 @@ public class CellCollection implements ICellCollection {
         // TODO Auto-generated method stub
         return 0;
     }
+
+	@Override
+	public IPoint currentConsensusOffset() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public double currentConsensusRotation() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return 0;
+	}
 
 
 }

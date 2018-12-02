@@ -40,7 +40,8 @@ public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus
     /**
      * @return a copy of the data in this nucleus
      */
-    Nucleus duplicate();
+    @Override
+	Nucleus duplicate();
 
     /**
      * Get a representation of the nucleus name as the name of the image plus

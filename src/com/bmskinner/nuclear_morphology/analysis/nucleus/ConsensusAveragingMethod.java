@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.Consensus;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -77,14 +78,14 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     private void run() {
         try {
             List<IPoint> border = getPointAverage();
-            Nucleus refoldNucleus = makeConsensus(border);
+            Consensus<Nucleus> refoldNucleus = makeConsensus(border);
             dataset.getCollection().setConsensus(refoldNucleus);
         } catch (Exception e) {
             error("Error getting points for consensus nucleus", e);
         }
     }
 
-    private Nucleus makeConsensus(List<IPoint> list)
+    private Consensus<Nucleus> makeConsensus(List<IPoint> list)
             throws UnprofilableObjectException, MissingOptionException, ComponentCreationException,
             UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
@@ -100,7 +101,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
         // Build a consensus nucleus from the template points
-        Nucleus cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
+        Consensus<Nucleus> cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
 
         for (Tag tag : BorderTagObject.values()) {
             if (Tag.INTERSECTION_POINT.equals(tag)) // not relevant here
@@ -109,18 +110,18 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             	
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
                         Stats.MEDIAN);
-                int newIndex = cons.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
+                int newIndex = cons.component().getProfile(ProfileType.ANGLE).findBestFitOffset(median);
                 fine(String.format("Setting %s in consensus to %s ", tag, newIndex));
-                cons.setBorderTag(tag, newIndex);
+                cons.component().setBorderTag(tag, newIndex);
                 n.setBorderTag(tag, newIndex);
             }
         }
         n.alignVertically();
-        cons.alignVertically();
+        cons.component().alignVertically();
         
         // Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {
-        	ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        	ISegmentedProfile profile = cons.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
         	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
         	fine(profile.toString());
@@ -129,16 +130,16 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	for(IBorderSegment s : newSegs)
         		fine(s.toString());
         	profile.setSegments(newSegs);
-        	cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        	cons.component().setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         }
         
         // Do not use DefaultNucleus::rotateVertically; it will not align properly
-        if (cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-            cons.alignPointsOnVertical(cons.getBorderPoint(Tag.TOP_VERTICAL), cons.getBorderPoint(Tag.BOTTOM_VERTICAL));
+        if (cons.component().hasBorderTag(Tag.TOP_VERTICAL) && cons.component().hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+            cons.component().alignPointsOnVertical(cons.component().getBorderPoint(Tag.TOP_VERTICAL), cons.component().getBorderPoint(Tag.BOTTOM_VERTICAL));
 
-            if (cons.getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.getCentreOfMass().getX())
-                cons.flipXAroundPoint(cons.getCentreOfMass());
+            if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
+                cons.component().flipXAroundPoint(cons.component().getCentreOfMass());
         }
         return cons;
 

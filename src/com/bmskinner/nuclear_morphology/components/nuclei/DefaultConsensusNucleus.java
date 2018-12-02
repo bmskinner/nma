@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.Consensus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -40,11 +41,15 @@ import ij.process.FloatPolygon;
  * @since 1.13.3
  *
  */
-public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus {
+public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implements Consensus<Nucleus>  {
 
     private static final long serialVersionUID = 1L;
 
     private NucleusType type;
+    
+    private double xOffset = 0;
+    private double yOffset = 0;
+    private double rotOffset = 0;
 
     public DefaultConsensusNucleus(Nucleus n, NucleusType type) throws UnprofilableObjectException {
 
@@ -117,6 +122,22 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus {
         assignProfile(ProfileType.ANGLE, profile);
 
     }
+    
+    @Override
+	public void offset(double xOffset, double yOffset) {
+    	this.xOffset = xOffset;
+    	this.yOffset = yOffset;
+    }
+    
+    @Override
+	public void rotate(double angle) {
+    	this.rotOffset = angle;
+    }
+    
+    @Override
+	public double currentRotation() {
+    	return rotOffset;
+    }
 
     @Override
     public FloatPolygon toOriginalPolygon() {
@@ -142,7 +163,8 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus {
     	return true;
     }
     
-    protected Nucleus createVerticallyRotatedNucleus() {
+    @Override
+	protected Nucleus createVerticallyRotatedNucleus() {
     	Nucleus verticalNucleus = super.getVerticallyRotatedNucleus();
         if (verticalNucleus == null) {
             fine("Unknown error creating vertical nucleus");
@@ -167,50 +189,16 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus {
     		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
     		orientationChecked = false;
     	}
+        
+        verticalNucleus.offset(xOffset, yOffset);
+        verticalNucleus.rotate(rotOffset);
     	return verticalNucleus;
     }
     
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-//    	if(orientationChecked && verticalNucleus!=null)
-//    		return verticalNucleus;
     	return createVerticallyRotatedNucleus();
     }
-    
-//    @Override
-//    public Nucleus getVerticallyRotatedNucleus() {
-//        super.getVerticallyRotatedNucleus();
-//        if (verticalNucleus == null) {
-//            fine("Unknown error creating vertical nucleus");
-//            return null;
-//        }
-//        
-//        if(type.equals(NucleusType.RODENT_SPERM)){
-//        	/* Get the X position of the reference point */
-//        	double vertX;
-//        	try {
-//        		vertX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
-//        	} catch (UnavailableBorderTagException e) {
-//        		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
-//        		return verticalNucleus;
-//        	}
-//
-//        	/*
-//        	 * If the reference point is left of the centre of mass, the nucleus is
-//        	 * pointing left. If not, flip the nucleus
-//        	 */
-//        	if (vertX > verticalNucleus.getCentreOfMass().getX()) {
-//        		//        	fine(String.format("Nucleus %s has clockwiseRP: %s > %s", this.getNameAndNumber(), vertX, verticalNucleus.getCentreOfMass().getX()));
-//        		verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-//
-//        		if(!orientationChecked) {
-//        			clockwiseRP = true;
-//        			orientationChecked = true;
-//        		}
-//        	}
-//        }
-//        return verticalNucleus;
-//    }
     
     @Override
     public int hashCode() {
@@ -222,17 +210,30 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus {
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
-        in.defaultReadObject();
-//        try {
-        	alignVertically();
-        	createVerticallyRotatedNucleus();
-//        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderPoint(Tag.REFERENCE_POINT).getX() > 0)
-//        			flipXAroundPoint(getCentreOfMass());
-//        } catch (UnavailableBorderTagException e1) {
-//        	fine("Cannot get border tag", e1);
-//        }
+    	in.defaultReadObject();
+    	alignVertically();
+    	createVerticallyRotatedNucleus();    }
 
-
-    }
+	@Override
+	public IPoint currentOffset() {
+		return IPoint.makeNew(xOffset, yOffset);
+	}
+	
+	@Override
+	public Consensus<Nucleus> duplicateConsensus() {
+		// TODO Auto-generated method stub
+		try {
+			return new DefaultConsensusNucleus(this, type);
+		} catch (UnprofilableObjectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	@Override
+	public Nucleus component() {
+		return this;
+	}
 
 }

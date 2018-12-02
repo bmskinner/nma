@@ -48,7 +48,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -103,7 +103,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private IProfileCollection profileCollection = IProfileCollection.makeNew();
 
 	/** Refolded consensus nucleus */
-	private Nucleus consensusNucleus; // 
+	private Consensus<Nucleus> consensusNucleus; 
 
 	/** All the cells in this collection */
 	private volatile Set<ICell> cells = new HashSet<>(100);
@@ -193,7 +193,7 @@ public class DefaultCellCollection implements ICellCollection {
 		for(ICell c : this)
 			result.addCell(c.duplicate());
 		
-		result.consensusNucleus = consensusNucleus==null? null : consensusNucleus.duplicate();
+		result.consensusNucleus = consensusNucleus==null? null : consensusNucleus.duplicateConsensus();
 		result.profileCollection = profileCollection.duplicate();
 		
 		// copy the signals
@@ -384,13 +384,35 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public void setConsensus(@Nullable Nucleus n) {
+	public void setConsensus(@Nullable Consensus<Nucleus> n) {
 		consensusNucleus = n;
 	}
 
 	@Override
 	public Nucleus getConsensus() {
-		return consensusNucleus.getVerticallyRotatedNucleus();
+		return consensusNucleus.component().getVerticallyRotatedNucleus();
+	}
+	
+	@Override
+	public void offsetConsensus(double xOffset, double yOffset) {
+		if(consensusNucleus!=null)
+			consensusNucleus.offset(xOffset, yOffset);
+	}
+
+	@Override
+	public void rotateConsensus(double degrees) {
+		if(consensusNucleus!=null)
+			consensusNucleus.rotate(degrees);
+	}
+	
+	@Override
+	public IPoint currentConsensusOffset() {
+		return consensusNucleus.currentOffset();
+	}
+	
+	@Override
+	public double currentConsensusRotation() {
+		return consensusNucleus.currentRotation();
 	}
 
 	@Override
@@ -1027,7 +1049,7 @@ public class DefaultCellCollection implements ICellCollection {
 			});
 			
 			if(this.hasConsensus())
-				consensusNucleus.alignVertically();
+				consensusNucleus.component().alignVertically();
 
 			statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
 			statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
@@ -1199,7 +1221,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		if (hasConsensus())
-			consensusNucleus.setScale(scale);
+			consensusNucleus.component().setScale(scale);
 	}
 
 	@Override
