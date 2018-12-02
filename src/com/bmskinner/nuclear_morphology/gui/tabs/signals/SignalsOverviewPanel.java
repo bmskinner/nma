@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -180,10 +181,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
     		NuclearSignalXYDataset ds = (NuclearSignalXYDataset) entity.getDataset();
     		String key = entity.getDataset().getSeriesKey(entity.getSeriesIndex()).toString();
     		
-    		UUID signalGroupId = UUID.fromString(key.replace(CellularComponent.NUCLEAR_SIGNAL+"_", "")); 
+//    		UUID signalGroupId = UUID.fromString(key.replace(CellularComponent.NUCLEAR_SIGNAL+"_", "")); 
     		
 //    		System.out.println("Series: "+signalGroupId+"; Entity: " + entity.getItem());	
-    		INuclearSignal signal = ds.getSignal(key, entity.getItem());
+//    		INuclearSignal signal = ds.getSignal(key, entity.getItem());
     		Nucleus n = ds.getNucleus(key, entity.getItem());
     		
     		try {
@@ -195,7 +196,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
     			g2.drawImage(ip.createImage(), pnt.x, pnt.y, ip.getWidth(), ip.getHeight(), null);
     			Color c = g2.getColor();
     			g2.setColor(Color.WHITE);
-    			g2.drawString(n.getNameAndNumber(), pnt.x+1, pnt.y+ip.getHeight()-1);
+    			g2.drawString(n.getNameAndNumber(), pnt.x+4, pnt.y+ip.getHeight()-4);
+    			g2.setColor(Color.DARK_GRAY);
+    			g2.setStroke(new BasicStroke(3));
+    			g2.drawRect(pnt.x, pnt.y, ip.getWidth(), ip.getHeight());
     			g2.setColor(c);
     		} catch(UnloadableImageException e) {
     			stack(e);
