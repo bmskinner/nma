@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui.tabs.signals;
+package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -100,7 +101,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalWarpingModel.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
@@ -238,9 +239,25 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private JCheckBox binariseBox;
     	    
     	    public WarpingSettingsPanel() {
-    	    	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    	    	setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
+    	    	JPanel setupPanel = createAnalysisSettingsPanel();
+    	    	setupPanel.setBorder(BorderFactory.createTitledBorder("Setup"));
+    	    	
+    	    	JPanel displayPanel = createDisplaySettingsPanel();
+    	    	displayPanel.setBorder(BorderFactory.createTitledBorder("Display"));
+    	    	
+    	    	add(setupPanel);
+    	    	add(displayPanel);
+    	    }
+    
+    	    
+    	    private JPanel createAnalysisSettingsPanel() {
+    	    	JPanel panel = new JPanel();
+    	    	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    	    	
     	    	JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    	    	JPanel midPanel   = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	    	JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     	    	datasetBoxOne = new DatasetSelectionPanel(datasets);
@@ -248,76 +265,79 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     	    	datasetBoxOne.setSelectedDataset(datasets.get(0));
     	    	datasetBoxTwo.setSelectedDataset(datasets.get(0));
-
     	    	datasetBoxOne.addActionListener(e -> {
-    	    		if (datasetBoxOne.getSelectedDataset().getCollection().getSignalManager().hasSignals()) {
-
+    	    		if (datasetBoxOne.getSelectedDataset().getCollection().getSignalManager().hasSignals())
     	    			signalBox.setDataset(datasetBoxOne.getSelectedDataset());
-    	    		}
     	    	});
     	    	datasetBoxTwo.addActionListener(e -> controller.updateBlankChart() );
 
-    	    	upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
-    	    	upperPanel.add(datasetBoxOne);
-
     	    	signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
-
-    	    	if (!signalBox.hasSelection()) {
+    	    	if (!signalBox.hasSelection())
     	    		signalBox.setEnabled(false);
-    	    	}
-
-    	    	upperPanel.add(new JLabel(SIGNAL_GROUP_LBL));
-    	    	upperPanel.add(signalBox);
-
     	    	signalBox.addActionListener(this);
 
     	    	cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
     	    	cellsWithSignalsBox.addActionListener(this);
-    	    	upperPanel.add(cellsWithSignalsBox);
-
-    	    	upperPanel.add(new JLabel(MIN_THRESHOLD_LBL));
+    	    	
     	    	SpinnerModel minThresholdModel = new SpinnerNumberModel(SignalWarper.DEFAULT_MIN_SIGNAL_THRESHOLD, 0, 255, 1);
     	    	minThresholdSpinner = new JSpinner(minThresholdModel);
-    	    	upperPanel.add(minThresholdSpinner);
-    	    	
+
     	    	binariseBox = new JCheckBox(BINARISE_LBL, true);
     	    	binariseBox.addActionListener(this);
-    	    	upperPanel.add(binariseBox);
+    	    	
+    	    	
+    	    	runButton = new JButton(RUN_LBL);
+    	    	runButton.addActionListener(e ->  ThreadManager.getInstance().submit( () -> runWarping() ));
+    	    	if(!signalBox.hasSelection()) 
+    	    		runButton.setEnabled(false);
+    	    	
+    	    	progressBar.setVisible(false);
+    	    	
+    	    	upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
+    	    	upperPanel.add(datasetBoxOne);
+    	    	upperPanel.add(new JLabel(SIGNAL_GROUP_LBL));
+    	    	upperPanel.add(signalBox);
+
+    	    	midPanel.add(new JLabel(MIN_THRESHOLD_LBL));
+    	    	midPanel.add(minThresholdSpinner);
+    	    	midPanel.add(binariseBox);
+    	    	midPanel.add(cellsWithSignalsBox);
 
     	    	lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
     	    	lowerPanel.add(datasetBoxTwo);
-
-    	    	runButton = new JButton(RUN_LBL);
-
-    	    	runButton.addActionListener(e ->  ThreadManager.getInstance().submit( () -> runWarping() ));
-
     	    	lowerPanel.add(runButton);
+    	    	
+    	    	lowerPanel.add(progressBar);
 
-    	    	if (!signalBox.hasSelection()) 
-    	    		runButton.setEnabled(false);
-
-
-
+    	    	panel.add(upperPanel);
+    	    	panel.add(midPanel);
+    	    	panel.add(lowerPanel);
+    	    	
+    	    	return panel;
+    	    }
+    	    
+    	    private JPanel createDisplaySettingsPanel() {
+    	    	JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    	    	
     	    	thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
-    	    	lowerPanel.add(thresholdSlider);
     	    	thresholdSlider.setVisible(true);
     	    	thresholdSlider.addChangeListener( makeThresholdChangeListener());
 
     	    	pseudocolourBox = new JCheckBox(PSEUDOCOLOUR_LBL, true);
     	    	pseudocolourBox.addActionListener(e->controller.updateChart());
-    	    	lowerPanel.add(pseudocolourBox);
 
     	    	enhanceBox = new JCheckBox(ENHANCE_LBL, true);
     	    	enhanceBox.addActionListener(e->controller.updateChart());
-    	    	lowerPanel.add(enhanceBox);
 
-    	    	lowerPanel.add(progressBar);
-    	    	progressBar.setVisible(false);
+    	    	panel.add(pseudocolourBox);
+    	    	panel.add(enhanceBox);
+    	    	panel.add(new JLabel("Threshold"));
+    	    	panel.add(thresholdSlider);
 
-    	    	add(upperPanel);
-    	    	add(lowerPanel);
+    	    	return panel;
     	    }
-    
+    	    
+    	    
     	    public boolean isPseudocolour() {
     	    	return pseudocolourBox.isSelected();
     	    }

@@ -77,6 +77,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.process.ImageProcessor;
