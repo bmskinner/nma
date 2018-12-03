@@ -122,7 +122,8 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 
 					Optional<ImageProcessor> im = warpedSignal.getWarpedImage(c);
 					if(im.isPresent()) {
-						WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), warpedSignal.getTargetName(c), d, signalGroupId,c.isCellWithSignalsOnly());
+						WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), warpedSignal.getTargetName(c), d, 
+								signalGroupId,c.isCellWithSignalsOnly(), false, 0); // TODO default binarise and threshold for now 
 						cache.add(k, im.get());
 						Color col = sg.getGroupColour().orElse(Color.WHITE);
 						cache.setColour(k, col);
@@ -147,6 +148,14 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		cache.setThreshold(k, threshold);;
 	}
 	
+	public void removeRow(int row) {
+		WarpedImageKey k = (WarpedImageKey) this.getValueAt(row, 4);
+		removeSelection(k);
+		cache.remove(k);
+		super.removeRow(row);
+
+	}
+	
 	private void addTableRow(WarpedImageKey k) {
         Vector v = new Vector();
 		v.add(k.getTemplate().getName());
@@ -158,8 +167,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         this.addRow(v);
 	}
 	
-	public void addImage(@NonNull CellularComponent consensusTemplate, @NonNull String targetName, @NonNull IAnalysisDataset signalSource, @NonNull UUID signalGroupId, boolean isCellsWithSignals, @NonNull ImageProcessor image) {
-		WarpedImageKey k = cache.new WarpedImageKey(consensusTemplate, targetName, signalSource, signalGroupId,isCellsWithSignals);
+	public void addImage(@NonNull CellularComponent consensusTemplate, @NonNull String targetName, 
+			@NonNull IAnalysisDataset signalSource, @NonNull UUID signalGroupId, boolean isCellsWithSignals,
+			final boolean binarise, final int minThreshold, @NonNull ImageProcessor image) {
+		WarpedImageKey k = cache.new WarpedImageKey(consensusTemplate, targetName, signalSource, signalGroupId,isCellsWithSignals, binarise, minThreshold);
 
         cache.add(k, image);
         Color c = signalSource.getCollection().getSignalGroup(signalGroupId).get().getGroupColour().orElse(Color.WHITE);
@@ -328,12 +339,21 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
             map.put(k, ip);
         }
 
-        public synchronized void add(@NonNull final CellularComponent target, @NonNull final String targetName, @NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, final boolean isCellsWithSignals, @NonNull final ImageProcessor ip) {
-        	add(new WarpedImageKey(target, targetName, template, signalGroupId, isCellsWithSignals), ip);
+        public synchronized void add(@NonNull final CellularComponent target, @NonNull final String targetName, 
+        		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
+        		final boolean isCellsWithSignals, final boolean binarise, final int minThreshold,
+        		@NonNull final ImageProcessor ip) {
+        	add(new WarpedImageKey(target, targetName, template, signalGroupId, isCellsWithSignals, binarise, minThreshold), ip);
         }
 
         public synchronized ImageProcessor get(@NonNull final WarpedImageKey k) {
             return map.get(k);
+        }
+        
+        public void remove(@NonNull final WarpedImageKey k) {
+        	map.remove(k);
+        	imageColours.remove(k);
+        	thresholds.remove(k);
         }
         
         public List<CellularComponent> getTargets() {
@@ -362,13 +382,18 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
             private final @NonNull String targetName;
             private final @NonNull UUID  signalGroupId;
             private final boolean isOnlyCellsWithSignals;
+            private final boolean isBinarise;
+            private final int minThreshold;
+            
         	
          // These may change hashcode due to normal activity, so should not be part of the hashed key
             private final @NonNull CellularComponent target;
             private final @NonNull IAnalysisDataset  template;
 
 
-            public WarpedImageKey(@NonNull final CellularComponent target, @NonNull final String targetName, @NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, final boolean isCellsWithSignals) {
+            public WarpedImageKey(@NonNull final CellularComponent target, @NonNull final String targetName, 
+            		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
+            		final boolean isCellsWithSignals, final boolean binarise, final int minThreshold) {
             	targetId = target.getID();
             	templateId = template.getId();
             	
@@ -377,6 +402,8 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
                 this.template = template;
                 this.signalGroupId = signalGroupId;
                 this.isOnlyCellsWithSignals = isCellsWithSignals;
+                this.isBinarise = binarise;
+                this.minThreshold = minThreshold;
             }
 
             public CellularComponent getTarget() {
@@ -408,7 +435,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 				result = prime * result + ((targetId == null) ? 0 : targetId.hashCode());
 				result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
 				result = prime * result + ((templateId == null) ? 0 : templateId.hashCode());
+				result = prime * result + (isBinarise ? 1231 : 1237);
+				result = prime * result + minThreshold;
 				return result;
+				
 			}
 
 			@Override
@@ -443,6 +473,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 					if (other.templateId != null)
 						return false;
 				} else if (!templateId.equals(other.templateId))
+					return false;
+				if (isBinarise != other.isBinarise)
+					return false;
+				if (minThreshold != other.minThreshold)
 					return false;
 				return true;
 			}

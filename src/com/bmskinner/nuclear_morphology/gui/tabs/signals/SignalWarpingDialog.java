@@ -25,6 +25,8 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -123,6 +125,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private static final String RUN_LBL             = "Run";
     private static final String DIALOG_TITLE        = "Signal warping";
     private static final String MIN_THRESHOLD_LBL   = "Min threshold";
+    private static final String BINARISE_LBL        = "Binarise";
 
     private List<IAnalysisDataset> datasets;
     private ExportableChartPanel   chartPanel;
@@ -232,6 +235,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private JSlider   thresholdSlider;
     	    private JCheckBox pseudocolourBox;
     	    private JCheckBox enhanceBox;
+    	    private JCheckBox binariseBox;
     	    
     	    public WarpingSettingsPanel() {
     	    	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -275,6 +279,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	SpinnerModel minThresholdModel = new SpinnerNumberModel(SignalWarper.DEFAULT_MIN_SIGNAL_THRESHOLD, 0, 255, 1);
     	    	minThresholdSpinner = new JSpinner(minThresholdModel);
     	    	upperPanel.add(minThresholdSpinner);
+    	    	
+    	    	binariseBox = new JCheckBox(BINARISE_LBL, true);
+    	    	binariseBox.addActionListener(this);
+    	    	upperPanel.add(binariseBox);
 
     	    	lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
     	    	lowerPanel.add(datasetBoxTwo);
@@ -322,6 +330,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	return cellsWithSignalsBox.isSelected();
     	    }
     	    
+    	    public boolean isBinarise() {
+    	    	return binariseBox.isSelected();
+    	    }
+    	    
     	    public IAnalysisDataset getSource() {
     	    	return datasetBoxOne.getSelectedDataset();
     	    }
@@ -361,6 +373,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        thresholdSlider.setEnabled(b);
     	        pseudocolourBox.setEnabled(b);
     	        enhanceBox.setEnabled(b);
+    	        binariseBox.setEnabled(b);
     	    }
     	    
     	    @Override
@@ -373,12 +386,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	            cellsWithSignalsBox.setEnabled(false);
     	            runButton.setEnabled(false);
     	            datasetBoxTwo.setEnabled(false);
+    	            binariseBox.setEnabled(false);
 
     	        } else {
     	            signalBox.setEnabled(true);
     	            cellsWithSignalsBox.setEnabled(true);
     	            runButton.setEnabled(true);
     	            datasetBoxTwo.setEnabled(true);
+    	            binariseBox.setEnabled(true);
     	        }
 
     	    }
@@ -395,6 +410,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        	IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 
     	        	boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
+    	        	
+    	        	boolean binarise = binariseBox.isSelected();
 
     	        	int minThreshold = (int) minThresholdSpinner.getValue();
 
@@ -407,6 +424,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	            HashOptions ho = new DefaultOptions();
     	            ho.setBoolean(SignalWarper.IS_STRAIGHTEN_MESH_KEY, SignalWarper.REGULAR_MESH);
     	            ho.setBoolean(SignalWarper.JUST_CELLS_WITH_SIGNAL_KEY,cellsWithSignals);
+    	            ho.setBoolean(SignalWarper.BINARISE_KEY, binarise);
     	            ho.setInt(SignalWarper.MIN_SIGNAL_THRESHOLD_KEY, minThreshold);
 
     	            warper = new SignalWarper(sourceDataset, target, getSignalId(), ho);
@@ -452,11 +470,21 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         signalSelectionTable.setRowSelectionAllowed(true);
         signalSelectionTable.setColumnSelectionAllowed(false);
         TableColumn keyColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
-        
         signalSelectionTable.removeColumn(keyColumn);
         
         TableColumn colourColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN);
         colourColumn.setCellRenderer(new SignalWarpingTableCellRenderer());
+        
+        signalSelectionTable.addMouseListener(new MouseAdapter() { 	
+        	private static final int DOUBLE_CLICK = 2;
+        	@Override
+        	public void mouseClicked(MouseEvent e) {
+        		JTable table = (JTable) e.getSource();
+        		int row = table.rowAtPoint(e.getPoint());
+        		if (e.getClickCount() == DOUBLE_CLICK) 
+        			controller.deleteWarpedSignal(row);
+        	}
+        });
         
         JScrollPane sp = new JScrollPane(signalSelectionTable);
         panel.add(sp, BorderLayout.CENTER);

@@ -58,13 +58,6 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	static byte[] toByteArray(ByteProcessor ip) {
 		byte[] arr = new byte[ip.getWidth()*ip.getHeight()];
 		return (byte[])ip.getPixels();
-//		
-//		for(int w=0; w<ip.getWidth(); w++) {
-//			for(int h=0; h<ip.getHeight(); h++) {
-//				arr[w][h] = (byte) ip.get(w, h);
-//			}
-//		}
-//		return arr;
 	}
 	
 	/**
@@ -109,6 +102,13 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	 * @param image the warped image
 	 */	
 	void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, boolean isCellWithSignalsOnly, @NonNull ByteProcessor image);
+	
+	
+	/**
+	 * Remove the given warped image
+	 * @param key the key to remove
+	 */
+	void removeWarpedImage(@NonNull WarpedSignalKey key);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 

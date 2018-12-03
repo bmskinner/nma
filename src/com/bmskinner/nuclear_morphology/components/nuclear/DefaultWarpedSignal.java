@@ -85,6 +85,12 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	}
 	
 	@Override
+	public void removeWarpedImage(@NonNull WarpedSignalKey key) {
+		images.remove(key);
+		targetNames.remove(key);
+	}
+	
+	@Override
 	public Optional<ImageProcessor> getWarpedImage(@NonNull WarpedSignalKey k){
 		if(!images.containsKey(k))
 			return Optional.empty();

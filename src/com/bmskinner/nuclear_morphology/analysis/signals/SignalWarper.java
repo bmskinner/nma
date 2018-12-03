@@ -75,6 +75,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	 /** Only warp the cell images with detected signals */
 	public static final String JUST_CELLS_WITH_SIGNAL_KEY   = "Cells withs signals only";
 	
+	public static final String BINARISE_KEY   = "Binarise source images";
+	
 	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
 
     private IAnalysisDataset sourceDataset;
@@ -213,6 +215,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    
 		    if(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)>0)
 	    		ip = new ImageFilterer(ip).setBlackLevel(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)).toProcessor();
+		    
+		    if(warpingOptions.getBoolean(BINARISE_KEY))
+		    	ip.threshold(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY));
 
 		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
 

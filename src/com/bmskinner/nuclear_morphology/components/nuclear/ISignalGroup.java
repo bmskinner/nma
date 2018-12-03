@@ -59,7 +59,7 @@ public interface ISignalGroup extends Serializable {
      * @param result
      */
     void setWarpedSignals(@NonNull IWarpedSignal result);
-
+    
     /**
      * Get the shell result for the group, if present
      * 

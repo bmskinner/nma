@@ -19,6 +19,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -86,6 +87,19 @@ public class SignalWarpingDialogController implements Loggable {
 		};
 		ThreadManager.getInstance().submit(task);
 	}
+	
+	public void deleteWarpedSignal(int row) {
+		
+		WarpedImageKey selectedKey = (WarpedImageKey) model.getValueAt(row, KEY_COLUMN_INDEX);
+		
+		ISignalGroup sg  = selectedKey.getTemplate().getCollection().getSignalGroup(selectedKey.getSignalGroupId()).get();
+		
+		WarpedSignalKey k = new WarpedSignalKey(selectedKey.getTemplate().getCollection().getConsensus(), selectedKey.isOnlyCellsWithSignals());
+		sg.getWarpedSignals().get().removeWarpedImage(k);
+		
+		model.removeRow(row);
+		
+	}
 
 	/**
 	 * Run when the warper is finished. Create the final image for display and
@@ -101,15 +115,19 @@ public class SignalWarpingDialogController implements Loggable {
 			UUID signalGroupId = settingsPanel.getSignalId();
 
 			boolean isCellsWithSignals = settingsPanel.isCellsWithSignals();
+			
+			boolean isBinarise = settingsPanel.isBinarise();
+			
+			int minThreshold = settingsPanel.getMinThreshold();
 
 			ISignalGroup sg  = signalSource.getCollection().getSignalGroup(signalGroupId).get();
 			IWarpedSignal ws = sg.getWarpedSignals().orElse(new DefaultWarpedSignal(signalGroupId));
 
-			ws.addWarpedImage(consensusTemplate, targetDataset.getName(), isCellsWithSignals, image.convertToByteProcessor());
-			sg.setWarpedSignals(ws);
+//			ws.addWarpedImage(consensusTemplate, targetDataset.getName(), isCellsWithSignals, image.convertToByteProcessor());
+//			sg.setWarpedSignals(ws);
 
 			model.clearSelection();
-			model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, image);
+			model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, isBinarise, minThreshold, image);
 
 			updateChart();
 			settingsPanel.setEnabled(true);
