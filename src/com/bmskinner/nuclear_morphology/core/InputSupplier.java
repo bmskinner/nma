@@ -186,6 +186,26 @@ public interface InputSupplier {
 	 * @return the chosen option
 	 */
 	int requestOption( String[] options, int defaultOption, String message) throws RequestCancelledException;
+	
+	/**
+	 * Request the user to choose between a set of options. All the options will be on screen.
+	 * @param options the options to choose between
+	 * @param defaultOption the index of the default option
+	 * @param message the message to provide to the user
+	 * @param title a title to provide on dialog boxes
+	 * @return the chosen option
+	 */
+	int requestOptionAllVisible( String[] options, int defaultOption, String message, String title) throws RequestCancelledException;
+	
+	/**
+	 * Request the user to approve an action. Responds yes (true), no (false) or 
+	 * excepts on cancel.
+	 * @param message the message to provide to the user
+	 * @param title a title to provide on dialog boxes
+	 * @return
+	 * @throws RequestCancelledException 
+	 */
+	boolean requestApproval(String message, String title) throws RequestCancelledException;
 		
 	/**
 	 * Exception thwown when the user cancels the input request

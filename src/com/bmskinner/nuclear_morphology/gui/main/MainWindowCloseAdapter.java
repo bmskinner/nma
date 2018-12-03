@@ -62,7 +62,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
             String[] options = { "Save and exit", "Exit without saving", "Do not exit" };
 
 			try {
-				int save = mw.getInputSupplier().requestOption(options, 0, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?");
+				int save = mw.getInputSupplier().requestOptionAllVisible(options, 0, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?");
 				
 				switch(save) {
 	            	case 0: saveAndClose(); return;

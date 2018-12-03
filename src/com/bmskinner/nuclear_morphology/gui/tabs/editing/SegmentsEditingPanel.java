@@ -149,7 +149,12 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         
         segmentButton = new JButton(STR_SEGMENT_PROFILE);
         segmentButton.addActionListener(e->{
-        	 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
+        	try {
+				boolean ok = getInputSupplier().requestApproval("This action will resegment the dataset. Manual segments will be lost. Continue?", "Continue?");
+				if(ok)
+					getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
+			} catch (RequestCancelledException e1) {}
+        	 
         });
         panel.add(segmentButton);
 
@@ -432,30 +437,30 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
      */
     private void mergeAction(ISegmentedProfile medianProfile) throws Exception {
 
-        List<SegMergeItem> names = new ArrayList<SegMergeItem>();
+    	List<SegMergeItem> names = new ArrayList<>();
 
-        // Put the names of the mergable segments into a list
-        for (IBorderSegment seg : medianProfile.getOrderedSegments()) {
-            SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
-            names.add(item);
-        }
-        SegMergeItem[] nameArray = names.toArray(new SegMergeItem[0]);
+    	// Put the names of the mergable segments into a list
+    	for (IBorderSegment seg : medianProfile.getOrderedSegments()) {
+    		SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
+    		names.add(item);
+    	}
 
-        SegMergeItem mergeOption = (SegMergeItem) JOptionPane.showInputDialog(null, "Choose segments to merge", "Merge",
-                JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
+    	String[] nameArray = names.stream().map(e->e.toString()).toArray(String[]::new);
 
-        if (mergeOption != null) {
-            this.setAnalysing(true);
-            SegmentationHandler sh = new SegmentationHandler(activeDataset());
-            sh.mergeSegments(mergeOption.getOne().getID(), mergeOption.getTwo().getID());
+    	try {
+    		int mergeOption = getInputSupplier().requestOption(nameArray, 0, "Choose segments to merge", "Merge");
+    		SegMergeItem item = names.get(mergeOption);
+    		this.setAnalysing(true);
+    		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+    		sh.mergeSegments(item.getOne().getID(), item.getTwo().getID());
 
-            refreshEditingPanelCharts();
+    		refreshEditingPanelCharts();
 
-        } else {
-            JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
-        }
-        this.setAnalysing(false);
+    		this.setAnalysing(false);
 
+    	} catch(RequestCancelledException e) {
+    		// user cancelled
+    	}
     }
 
     private class SegMergeItem {
