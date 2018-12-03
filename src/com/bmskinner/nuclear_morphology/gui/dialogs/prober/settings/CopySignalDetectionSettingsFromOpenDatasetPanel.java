@@ -87,22 +87,40 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 	@Override
 	protected ActionListener createOpenActionListener() {
 		return (e) -> {
-//			File folder = options.getFolder();
-//			File f = FileSelector.chooseOptionsImportFile(folder);
-//			if(f==null)
-//				return;
-//
-//			try {
-//				IAnalysisOptions o = new OptionsXMLReader(f).read();
-//				options.set(o.getDetectionOptions(IAnalysisOptions.SIGNAL_GROUP).get());
-//				parent.setNucleusType(o.getNucleusType());
-//				parent.setAngleWindowProportion(o.getProfileWindowProportion());
-//				options.setFolder(folder);
-//				fireOptionsChangeEvent();
-//
-//			} catch (XMLReadingException e1) {
-//				stack(e1);
-//			}
+			File folder = options.getFolder();
+			File f = FileSelector.chooseOptionsImportFile(folder);
+			if(f==null)
+				return;
+
+			try {
+				IAnalysisOptions o = new OptionsXMLReader(f).read();
+				
+				// Find the channels in the imported file
+				String[] choices = o.getNuclearSignalGroups().stream().map(id->{
+					return "Channel "+String.valueOf(o.getNuclearSignalOptions(id).getChannel());
+				}).toArray(String[]::new);
+				
+				String choice = (String) JOptionPane.showInputDialog(null,
+	                    "Choose the channel options to copy", "Choose channel", JOptionPane.QUESTION_MESSAGE, null, choices,
+	                    choices[0]);
+				
+				if(choice==null)
+					return;
+				
+				// Get the first option set matching the channel
+				int channel = Integer.valueOf(choice.replaceAll("Channel ", ""));
+
+				o.getNuclearSignalGroups().stream()
+					.map(id-> o.getNuclearSignalOptions(id))
+					.filter(op->op.getChannel()==channel)
+					.findFirst()
+					.ifPresent(op->options.set(op));
+				options.setFolder(folder);
+				fireOptionsChangeEvent();
+
+			} catch (XMLReadingException e1) {
+				stack(e1);
+			}
 		};
 	}
 
