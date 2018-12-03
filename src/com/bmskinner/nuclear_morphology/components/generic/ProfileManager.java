@@ -736,7 +736,7 @@ public class ProfileManager implements Loggable {
          * Update the consensus if present
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+            Nucleus n = collection.getRawConsensus().component();
             mergeSegments(n, seg1, seg2, newID);
         }
 
