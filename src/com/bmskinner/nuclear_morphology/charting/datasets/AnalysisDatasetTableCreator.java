@@ -418,7 +418,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
         return data;
     }
-
+    
     /**
      * Get an array of formatted info from a dataset analysis options
      * 

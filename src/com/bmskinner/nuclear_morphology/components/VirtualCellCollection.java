@@ -393,6 +393,11 @@ public class VirtualCellCollection implements ICellCollection {
 	public void setConsensus(@Nullable Consensus<Nucleus> n) {
 		consensusNucleus = n;
 	}
+	
+	@Override
+	public Consensus<Nucleus> getRawConsensus() {
+		return consensusNucleus;
+	}
 
 	@Override
 	public Nucleus getConsensus() {
@@ -584,8 +589,6 @@ public class VirtualCellCollection implements ICellCollection {
     @Override
     public void updateVerticalNuclei() {
         parent.getCollection().updateVerticalNuclei();
-        if(this.hasConsensus())
-			consensusNucleus.component().alignVertically();
     }
 
     @Override

@@ -133,14 +133,14 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
                 refoldCurve(); // carry out the refolding
 
             // orient refolded nucleus to put tail at the bottom
-            refoldNucleus.component().alignVertically();
+//            refoldNucleus.component().alignVertically();
 
             // if rodent sperm, put tip on left if needed
-            if (collection.getNucleusType().equals(NucleusType.RODENT_SPERM)) {
-                if (refoldNucleus.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > 0) {
-                    refoldNucleus.component().flipXAroundPoint(refoldNucleus.component().getCentreOfMass());
-                }
-            }
+//            if (collection.getNucleusType().equals(NucleusType.RODENT_SPERM)) {
+//                if (refoldNucleus.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > 0) {
+//                    refoldNucleus.component().flipXAroundPoint(refoldNucleus.component().getCentreOfMass());
+//                }
+//            }
             //
             collection.setConsensus(refoldNucleus);
 

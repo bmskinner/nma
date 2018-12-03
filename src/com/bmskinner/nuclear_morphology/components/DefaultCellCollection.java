@@ -387,6 +387,11 @@ public class DefaultCellCollection implements ICellCollection {
 	public void setConsensus(@Nullable Consensus<Nucleus> n) {
 		consensusNucleus = n;
 	}
+	
+	@Override
+	public Consensus<Nucleus> getRawConsensus() {
+		return consensusNucleus;
+	}
 
 	@Override
 	public Nucleus getConsensus() {
@@ -414,7 +419,7 @@ public class DefaultCellCollection implements ICellCollection {
 	public double currentConsensusRotation() {
 		return consensusNucleus.currentRotation();
 	}
-
+	
 	@Override
 	public IProfileCollection getProfileCollection() {
 		return profileCollection;
@@ -1035,29 +1040,12 @@ public class DefaultCellCollection implements ICellCollection {
 								   : new DefaultCellCollection(this, newName);
 	}
 
-	/**
-	 * Invalidate the existing cached vertically rotated nuclei, and
-	 * recalculate.
-	 */
+
 	@Override
 	public void updateVerticalNuclei() {
-
-		try {
-			getNuclei().parallelStream().forEach(n -> {
-				n.updateVerticallyRotatedNucleus();
-				n.updateDependentStats();
-			});
-			
-			if(this.hasConsensus())
-				consensusNucleus.component().alignVertically();
-
-			statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
-			statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
-		} catch (Exception e) {
-			warn("Cannot update all vertical nuclei");
-			stack("Error updating vertical nuclei", e);
-		}
-
+		getNuclei().parallelStream().forEach(n -> n.updateDependentStats());
+		statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
+		statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
 	}
 
 	@Override

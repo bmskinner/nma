@@ -335,6 +335,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
 	    	
 	    	File signalFile = new File(signalOptions.getFolder(),c.getNucleus().getSourceFileName());
+	    	fine("Loading signal image "+signalFile.getAbsolutePath());
 	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getChannel());
 	    	ip.invert();
 	    	ImageAnnotator an = new ImageAnnotator(ip);

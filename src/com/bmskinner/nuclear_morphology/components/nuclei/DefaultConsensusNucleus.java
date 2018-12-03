@@ -55,19 +55,6 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
 
         super(n);
         this.type = type;
-        // this.originalCoM = n.getCentreOfMass();
-
-        // At this point the new consensus has created its border list
-        // based on the int points from the template nucleus.
-
-        // The border list is no longer at zero.
-
-        // Update the int points as well, so the nucleus does not 'snap back'
-        // from 0, 0 after loading from file. Then recreate the border list
-
-        // The centre of mass will match the template nucleus, since this is
-        // copied directly.
-
         if (n instanceof DefaultConsensusNucleus) {
 
             // If a consensus nucleus is used as the template, the CoM is
@@ -166,6 +153,7 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     @Override
 	protected Nucleus createVerticallyRotatedNucleus() {
     	Nucleus verticalNucleus = super.getVerticallyRotatedNucleus();
+    	verticalNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
         if (verticalNucleus == null) {
             fine("Unknown error creating vertical nucleus");
             return null;

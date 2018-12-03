@@ -463,6 +463,11 @@ public class CellCollection implements ICellCollection {
 	public Nucleus getConsensus() {
         return this.consensusNucleus.component();
     }
+    
+    @Override
+	public Consensus<Nucleus> getRawConsensus() {
+		return consensusNucleus;
+	}
 
     /**
      * Get the profile collection of the given type
@@ -1575,17 +1580,9 @@ public class CellCollection implements ICellCollection {
         return newCollection;
     }
 
-    /**
-     * Invalidate the existing cached vertically rotated nuclei, and
-     * recalculate.
-     */
     @Override
 	public void updateVerticalNuclei() {
-
-        getNuclei().parallelStream().forEach(n -> {
-            n.updateVerticallyRotatedNucleus();
-        });
-
+        getNuclei().parallelStream().forEach(n ->  n.updateDependentStats());
     }
 
     @Override

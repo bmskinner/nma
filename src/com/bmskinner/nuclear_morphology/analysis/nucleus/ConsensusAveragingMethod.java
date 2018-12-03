@@ -116,8 +116,8 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                 n.setBorderTag(tag, newIndex);
             }
         }
-        n.alignVertically();
-        cons.component().alignVertically();
+//        n.alignVertically();
+//        cons.component().alignVertically();
         
         // Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {

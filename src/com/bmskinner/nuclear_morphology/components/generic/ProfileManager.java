@@ -103,7 +103,7 @@ public class ProfileManager implements Loggable {
                 }
 
                 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-                    n.updateVerticallyRotatedNucleus();
+//                    n.updateVerticallyRotatedNucleus();
                     n.updateDependentStats();
                 }
             }
@@ -241,32 +241,27 @@ public class ProfileManager implements Loggable {
         	if(index==existingTagIndex) {
         		updateProfileCollectionOffsets(tag, index);
         		// update nuclei
-        		collection.getNuclei().stream().forEach(n -> {
+        		
+        		for(Nucleus n : collection.getNuclei()) {
         			if(n.isLocked())
-        				return;
+        				continue;
         			
-        			int existingIndex;
         			try {
-        				existingIndex = n.getBorderIndex(existingTag);
+        				int existingIndex = n.getBorderIndex(existingTag);
+        				n.setBorderTag(tag, existingIndex);
+        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL))
+            				n.updateDependentStats();
         			} catch (UnavailableBorderTagException e) {
         				stack(e);
-        				return;
+        				continue;
         			}
-        			n.setBorderTag(tag, existingIndex);
-        			if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-        				n.updateVerticallyRotatedNucleus();
-        				n.updateDependentStats();
-        			}
-        			
-        		});
+        		}
         		
         		//Update consensus
         		if (collection.hasConsensus()) {
-        			Nucleus n = collection.getConsensus();
+        			Nucleus n = collection.getRawConsensus().component();
         			int existingIndex = n.getBorderIndex(existingTag);
         			n.setBorderTag(tag, existingIndex);
-        			n.alignVertically();
-        			n.updateVerticallyRotatedNucleus();
         		}
 
         		// Update signals as needed
@@ -294,24 +289,10 @@ public class ProfileManager implements Loggable {
          * Set the border tag in the consensus median profile
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+            Nucleus n = collection.getRawConsensus().component();
             int oldNIndex = n.getBorderIndex(tag);
             int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
             n.setBorderTag(tag, newIndex);
-
-            if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-                n.alignPointsOnVertical(n.getBorderPoint(Tag.TOP_VERTICAL), n.getBorderPoint(Tag.BOTTOM_VERTICAL));
-
-                if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX()) {
-                    // need to flip about the CoM
-                    n.flipXAroundPoint(n.getCentreOfMass());
-                }
-
-            } else {
-                n.rotatePointToBottom(n.getBorderPoint(Tag.ORIENTATION_POINT));
-            }
-            //
-            finest("Set border tag in consensus to " + newIndex + " from " + oldNIndex);
         }
         
      // Update signals as needed
@@ -569,7 +550,7 @@ public class ProfileManager implements Loggable {
         			}
         		}
 
-        		n.updateVerticallyRotatedNucleus();
+//        		n.updateVerticallyRotatedNucleus();
         		n.updateDependentStats();
 
         	} else {
@@ -895,7 +876,7 @@ public class ProfileManager implements Loggable {
          * Update the consensus if present
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+        	Nucleus n = collection.getRawConsensus().component();
             boolean wasLocked = n.isLocked();
             n.setLocked(false); // Merging segments is not destructive
             splitSegment(n, seg.getID(), proportion, newID1, newID2);
@@ -937,7 +918,7 @@ public class ProfileManager implements Loggable {
         
         // check consensus //TODO replace with remove consensus
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+        	Nucleus n = collection.getRawConsensus().component();
             if (!isSplittable(n, id, proportion)) {
                 fine("Consensus not splittable");
                 return false;
@@ -1043,7 +1024,7 @@ public class ProfileManager implements Loggable {
          * Update the consensus if present
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+        	Nucleus n = collection.getRawConsensus().component();
             unmergeSegments(n, segId);
         }
 

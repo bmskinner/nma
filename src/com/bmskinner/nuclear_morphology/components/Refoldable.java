@@ -53,6 +53,8 @@ public interface Refoldable<E extends CellularComponent> {
      */
     E getConsensus();
     
+    Consensus<E> getRawConsensus();
+    
     /**
      * Apply an offset to the consensus shape
      * @param xOffset
