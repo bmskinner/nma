@@ -95,7 +95,7 @@ public class SignalWarpingDialogController implements Loggable {
 		ISignalGroup sg  = selectedKey.getTemplate().getCollection().getSignalGroup(selectedKey.getSignalGroupId()).get();
 		
 		WarpedSignalKey k = new WarpedSignalKey(selectedKey.getTemplate().getCollection().getConsensus(), selectedKey.isOnlyCellsWithSignals());
-		sg.getWarpedSignals().get().removeWarpedImage(k);
+		sg.getWarpedSignals().ifPresent(e->e.removeWarpedImage(k));
 		
 		model.removeRow(row);
 		
