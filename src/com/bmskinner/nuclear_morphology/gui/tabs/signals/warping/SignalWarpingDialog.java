@@ -503,6 +503,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         		int row = table.rowAtPoint(e.getPoint());
         		if (e.getClickCount() == DOUBLE_CLICK) 
         			controller.deleteWarpedSignal(row);
+        		controller.updateBlankChart();
         	}
         });
         

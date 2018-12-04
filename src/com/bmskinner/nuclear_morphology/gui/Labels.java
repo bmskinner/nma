@@ -185,6 +185,7 @@ public class Labels {
         	public static final String TABLE_HEADER_TARGET_SHAPE   = "Target shape";
         	public static final String TABLE_HEADER_KEY_COLUMN     = "Keys";
         	public static final String TABLE_HEADER_N_CELLS        = "Cells";
+        	public static final String TABLE_HEADER_THRESHOLD      = "Threshold";
         	public static final String TABLE_HEADER_COLOUR_COLUMN  = "Pseudocolour";
         	
         }

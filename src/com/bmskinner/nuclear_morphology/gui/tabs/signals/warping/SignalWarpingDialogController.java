@@ -40,7 +40,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalWarpingDialogController implements Loggable {
 
-	private static final int KEY_COLUMN_INDEX = 4;
+	private static final int KEY_COLUMN_INDEX = 5;
 
 	private SignalWarpingModel model;
 	private ChartPanel chart;

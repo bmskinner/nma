@@ -68,6 +68,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_SIGNALS, new Vector<ISignalGroup>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY, new Vector<Boolean>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_TARGET_SHAPE, new Vector<String>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_THRESHOLD, new Vector<String>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN, new Vector<WarpedImageKey>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN, new Vector<Color>());
 	}
@@ -148,8 +149,9 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		cache.setThreshold(k, threshold);;
 	}
 	
+	@Override
 	public void removeRow(int row) {
-		WarpedImageKey k = (WarpedImageKey) this.getValueAt(row, 4);
+		WarpedImageKey k = (WarpedImageKey) this.getValueAt(row, 5);
 		removeSelection(k);
 		cache.remove(k);
 		super.removeRow(row);
@@ -162,6 +164,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         v.add(k.getTemplate().getCollection().getSignalGroup(k.getSignalGroupId()).get());
         v.add(k.isOnlyCellsWithSignals());
         v.add(k.getTargetName());
+        v.add(k.minThreshold);
         v.add(k);
         v.add(cache.getColour(k));
         this.addRow(v);
