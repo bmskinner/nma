@@ -239,7 +239,15 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private JCheckBox binariseBox;
     	    
     	    public WarpingSettingsPanel() {
-    	    	setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+    	    	
+    	    	setLayout(new BorderLayout());
+    	    	
+    	    	JPanel descriptionPanel = new JPanel(new FlowLayout());
+    	    	descriptionPanel.add(new JLabel("Choose a signal group to be warped, and the conensus nucleus shape to warp onto"));
+    	    	
+    	    	JPanel settingsPanel = new JPanel();
+    	    	
+    	    	settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.X_AXIS));
 
     	    	JPanel setupPanel = createAnalysisSettingsPanel();
     	    	setupPanel.setBorder(BorderFactory.createTitledBorder("Setup"));
@@ -247,10 +255,27 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	JPanel displayPanel = createDisplaySettingsPanel();
     	    	displayPanel.setBorder(BorderFactory.createTitledBorder("Display"));
     	    	
-    	    	add(setupPanel);
-    	    	add(displayPanel);
+    	    	settingsPanel.add(setupPanel);
+    	    	settingsPanel.add(displayPanel);
+    	    	
+    	    	add(descriptionPanel, BorderLayout.NORTH);
+    	    	add(settingsPanel, BorderLayout.CENTER);
     	    }
     
+    	    
+    	    /**
+    	     * Set the signal-specific controls - anything
+    	     * after a signal group has been chosen
+    	     * @param b
+    	     */
+    	    private void setSignalSettingsEnabled(boolean b) {
+    	    	signalBox.setEnabled(b);
+	            cellsWithSignalsBox.setEnabled(b);
+	            runButton.setEnabled(b);
+	            datasetBoxTwo.setEnabled(b);
+	            binariseBox.setEnabled(b);
+	            minThresholdSpinner.setEnabled(b);
+    	    }
     	    
     	    private JPanel createAnalysisSettingsPanel() {
     	    	JPanel panel = new JPanel();
@@ -266,20 +291,42 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	datasetBoxOne.setSelectedDataset(datasets.get(0));
     	    	datasetBoxTwo.setSelectedDataset(datasets.get(0));
     	    	datasetBoxOne.addActionListener(e -> {
-    	    		if (datasetBoxOne.getSelectedDataset().getCollection().getSignalManager().hasSignals())
+    	    		if (datasetBoxOne.getSelectedDataset().getCollection().getSignalManager().hasSignals()) {
     	    			signalBox.setDataset(datasetBoxOne.getSelectedDataset());
+    	    			
+    	    			int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
+    	    					.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold();
+    	    			minThresholdSpinner.setValue(threshold);
+    	    		}
+    	    		
     	    	});
     	    	datasetBoxTwo.addActionListener(e -> controller.updateBlankChart() );
 
     	    	signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
     	    	if (!signalBox.hasSelection())
     	    		signalBox.setEnabled(false);
-    	    	signalBox.addActionListener(this);
+//    	    	signalBox.addActionListener(this);
+    	    	signalBox.addActionListener(e->{
+    	    		IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
+
+        	        SignalManager m = sourceDataset.getCollection().getSignalManager();
+        	        if (!m.hasSignals()) {
+        	        	setSignalSettingsEnabled(false);
+        	        } else {
+        	        	setSignalSettingsEnabled(true);
+        	            int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
+    	    					.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold();
+    	    			minThresholdSpinner.setValue(threshold);
+        	        }
+    	    	});
 
     	    	cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
     	    	cellsWithSignalsBox.addActionListener(this);
     	    	
-    	    	SpinnerModel minThresholdModel = new SpinnerNumberModel(SignalWarper.DEFAULT_MIN_SIGNAL_THRESHOLD, 0, 255, 1);
+    	    	// Set the initial value to the signal detection threshold of the initial selected signal group
+    	    	int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
+    					.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold();
+    	    	SpinnerModel minThresholdModel = new SpinnerNumberModel(threshold, 0, 255, 1);
     	    	minThresholdSpinner = new JSpinner(minThresholdModel);
 
     	    	binariseBox = new JCheckBox(BINARISE_LBL, true);
@@ -396,6 +443,17 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        binariseBox.setEnabled(b);
     	    }
     	    
+    	    public void setSettingsEnabled(boolean b) {
+    	        signalBox.setEnabled(b);
+    	        cellsWithSignalsBox.setEnabled(b);
+    	        runButton.setEnabled(b);
+    	        datasetBoxOne.setEnabled(b);
+    	        datasetBoxTwo.setEnabled(b);
+    	        minThresholdSpinner.setEnabled(b);
+    	        binariseBox.setEnabled(b);
+    	    }
+    	    
+    	    
     	    @Override
     	    public void actionPerformed(ActionEvent e) {
     	        IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
@@ -436,7 +494,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        	int minThreshold = (int) minThresholdSpinner.getValue();
 
     	        	Nucleus target = targetDataset.getCollection().getConsensus();
-    	            setEnabled(false);
+    	        	setSettingsEnabled(false);
 
     	            progressBar.setStringPainted(true);
     	            progressBar.setVisible(true);
@@ -457,7 +515,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	            stack("Error running warping", e);
     	            JFreeChart chart = ConsensusNucleusChartFactory.createErrorChart();
     	            chartPanel.setChart(chart);
-    	            setEnabled(true);
+    	            setSettingsEnabled(true);
     	        }
     	    }
     	    

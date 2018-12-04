@@ -130,7 +130,7 @@ public class SignalWarpingDialogController implements Loggable {
 			model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, isBinarise, minThreshold, image);
 
 			updateChart();
-			settingsPanel.setEnabled(true);
+			settingsPanel.setSettingsEnabled(true);
 
 		} catch (Exception e) {
 			error("Error getting warp results", e);

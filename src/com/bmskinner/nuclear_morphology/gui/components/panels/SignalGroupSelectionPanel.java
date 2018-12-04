@@ -108,14 +108,13 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
     private List<SignalIDToGroup> getGroups(IAnalysisDataset d) {
         SignalManager m = d.getCollection().getSignalManager();
         Set<UUID> signalGroups = m.getSignalGroupIDs();
-        List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
+        List<SignalIDToGroup> list = new ArrayList<>();
         for (UUID id : signalGroups) {
-
-            if (id.equals(IShellResult.RANDOM_SIGNAL_ID)) {
+            if (id.equals(IShellResult.RANDOM_SIGNAL_ID)) 
                 continue;
-            }
             list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id).get()));
         }
+        list.sort( (c1, c2) -> c1.group.getGroupName().compareTo(c2.group.getGroupName()));
         return list;
     }
 
@@ -141,7 +140,6 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 		public String toString() {
             return group.getGroupName();
         }
-
     }
 
 }

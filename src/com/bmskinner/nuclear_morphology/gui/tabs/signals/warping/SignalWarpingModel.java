@@ -282,7 +282,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         try {
             ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
             if(isEnhance)
-              return ImageFilterer.rescaleRGBImageIntensity(averaged);
+              return ImageFilterer.rescaleRGBImageIntensity(averaged, 128 ,255);
             else
             	return averaged;
 
