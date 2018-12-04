@@ -429,12 +429,16 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @param ip the image to adjust
      * @return a new ColorProcessor with rescaled values
      */
-    public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip) {
+    public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip, int min, int max) {
     	if (ip == null)
             throw new IllegalArgumentException("Image cannot be null");
+    	if(min<0||min>255)
+    		throw new IllegalArgumentException("Min threshold must be within 0-255");
+    	if(max<0||max>255)
+    		throw new IllegalArgumentException("Max threshold must be within 0-255");
     	
-    	double rMax = 0, gMax=0, bMax=0;
-    	double rMin = 255, gMin=255, bMin=255;
+    	double rMax = min, gMax=min, bMax=min;
+    	double rMin = max, gMin=max, bMin=max;
         ImageProcessor result = new ColorProcessor(ip.getWidth(), ip.getHeight());
         
         for (int i = 0; i < ip.getPixelCount(); i++) {
@@ -456,7 +460,7 @@ public abstract class AbstractImageFilterer implements Loggable {
         double gRange = gMax - gMin;
         double bRange = bMax - bMin;
 
-        // Adjust each pixel to the proportion in range 0-255
+        // Adjust each pixel to the proportion in range min-max
         for (int i = 0; i < ip.getPixelCount(); i++) {
             int pixel = ip.get(i);
             int[] rgb = intToRgb(pixel);
@@ -466,14 +470,68 @@ public abstract class AbstractImageFilterer implements Loggable {
             double bProp = (rgb[2] - bMin) / bRange;
 
             
-            int rNew = (int) (255 * rProp);
-            int gNew = (int) (255 * gProp);
-            int bNew = (int) (255 * bProp);
+            int rNew = (int) (max * rProp);
+            int gNew = (int) (max * gProp);
+            int bNew = (int) (max * bProp);
             
             int newPixel = rgbToInt(rNew, gNew, bNew);
             result.set(i, newPixel);
         }
         return result;
+    	
+    }
+    
+    /**
+     * Rescale the image intensity to fill the 0-255 range
+     * @param ip the image to adjust
+     * @return a new ColorProcessor with rescaled values
+     */
+    public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip) {
+    	return rescaleRGBImageIntensity(ip, 0, 255);
+//    	if (ip == null)
+//            throw new IllegalArgumentException("Image cannot be null");
+//    	
+//    	double rMax = 0, gMax=0, bMax=0;
+//    	double rMin = 255, gMin=255, bMin=255;
+//        ImageProcessor result = new ColorProcessor(ip.getWidth(), ip.getHeight());
+//        
+//        for (int i = 0; i < ip.getPixelCount(); i++) {
+//            int pixel = ip.get(i);
+//            
+//            int[] rgb = intToRgb(pixel);
+//
+//            rMax = Math.max(rgb[0], rMax);
+//            gMax = Math.max(rgb[1], gMax);
+//            bMax = Math.max(rgb[2], bMax);
+//            
+//            rMin = Math.min(rgb[0], rMin);
+//            gMin = Math.min(rgb[1], gMin);
+//            bMin = Math.min(rgb[2], bMin);
+//        }
+//
+//
+//        double rRange = rMax - rMin;
+//        double gRange = gMax - gMin;
+//        double bRange = bMax - bMin;
+//
+//        // Adjust each pixel to the proportion in range 0-255
+//        for (int i = 0; i < ip.getPixelCount(); i++) {
+//            int pixel = ip.get(i);
+//            int[] rgb = intToRgb(pixel);
+//            
+//            double rProp = (rgb[0] - rMin) / rRange;
+//            double gProp = (rgb[1] - gMin) / gRange;
+//            double bProp = (rgb[2] - bMin) / bRange;
+//
+//            
+//            int rNew = (int) (255 * rProp);
+//            int gNew = (int) (255 * gProp);
+//            int bNew = (int) (255 * bProp);
+//            
+//            int newPixel = rgbToInt(rNew, gNew, bNew);
+//            result.set(i, newPixel);
+//        }
+//        return result;
     }
 
     /**
