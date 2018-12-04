@@ -25,6 +25,8 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -166,7 +168,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
         XYDataset ds;
         try {
-            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
+            ds = new NucleusDatasetCreator(options).createAnnotatedNucleusOutline();
         } catch (ChartDatasetCreationException e) {
             stack("Error creating boxplot", e);
             return createErrorChart();
@@ -181,12 +183,26 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         plot.getRangeAxis().setRange(-max, max);
 
         int seriesCount = plot.getSeriesCount();
+        XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+        rend.setSeriesLinesVisible(0, true);
+        rend.setSeriesShapesVisible(0, false);
+        
+        rend.setSeriesLinesVisible(1, false);
+        rend.setSeriesShapesVisible(1, true);
+        
+        rend.setSeriesVisibleInLegend(0, Boolean.FALSE);
+        rend.setSeriesStroke(0, new BasicStroke(3));
+        rend.setSeriesPaint(0, Color.BLACK);
+        
+        rend.setSeriesVisibleInLegend(1, Boolean.FALSE);
+        rend.setSeriesPaint(1, Color.BLUE);
+        plot.setRenderer(rend);
+        
+        
 
-        for (int i = 0; i < seriesCount; i++) {
-            plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-            plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-            plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-        }
+//        for (int i = 0; i < seriesCount; i++) {
+//            
+//        }
         return chart;
     }
 
