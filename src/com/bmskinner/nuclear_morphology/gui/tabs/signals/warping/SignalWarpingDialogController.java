@@ -40,7 +40,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalWarpingDialogController implements Loggable {
 
-	private static final int KEY_COLUMN_INDEX = 5;
+	
 
 	private SignalWarpingModel model;
 	private ChartPanel chart;
@@ -64,10 +64,8 @@ public class SignalWarpingDialogController implements Loggable {
 			model.clearSelection();
 			int[] selectedRow = table.getSelectedRows();
 			for (int i = 0; i < selectedRow.length; i++) {
-				WarpedImageKey selectedKey = (WarpedImageKey) model.getValueAt(selectedRow[i], KEY_COLUMN_INDEX);
-				model.addSelection(selectedKey);
-				settingsPanel.setDisplayThreshold(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedKey));
-
+				model.addSelection(selectedRow[i]);
+				settingsPanel.setDisplayThreshold(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
 			}
 			updateChart();
 		});
@@ -90,7 +88,7 @@ public class SignalWarpingDialogController implements Loggable {
 	
 	public void deleteWarpedSignal(int row) {
 		
-		WarpedImageKey selectedKey = (WarpedImageKey) model.getValueAt(row, KEY_COLUMN_INDEX);
+		WarpedImageKey selectedKey = model.getKey(row);
 		
 		ISignalGroup sg  = selectedKey.getTemplate().getCollection().getSignalGroup(selectedKey.getSignalGroupId()).get();
 		

@@ -56,6 +56,7 @@ import ij.process.ImageProcessor;
 public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 
 	public static final int THRESHOLD_ALL_VISIBLE = 255;
+	private static final int KEY_COLUMN_INDEX = 5;
 	
 	/** images currently displayed */
 	final private List<WarpedImageKey> displayImages = new ArrayList<>(); 
@@ -77,12 +78,20 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		this();
 		addSavedImages(datasets);
 	}
-		
-	public synchronized void addSelection(@NonNull final WarpedImageKey k) {
+	
+	public WarpedImageKey getKey(int row) {
+		return (WarpedImageKey) getValueAt(row, KEY_COLUMN_INDEX);
+	}
+	
+	public synchronized void addSelection(int row) {
+		addSelection(getKey(row));
+    }
+	
+	private synchronized void addSelection(@NonNull final WarpedImageKey k) {
         displayImages.add(k);
     }
 
-    public synchronized void removeSelection(@NonNull final WarpedImageKey k) {
+	private synchronized void removeSelection(@NonNull final WarpedImageKey k) {
         displayImages.remove(k);
     }
 
@@ -136,10 +145,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		}
 	}
 	
-	public synchronized int getThreshold(@NonNull WarpedImageKey k) {
-		return cache.getThreshold(k);
+	public synchronized int getThreshold(int row) {
+		return cache.getThreshold(getKey(row));
 	}
-	
+		
 	public synchronized void setThresholdOfSelected(int threshold) {
 		for(WarpedImageKey k : displayImages)
 			cache.setThreshold(k, threshold);;
