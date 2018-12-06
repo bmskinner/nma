@@ -343,6 +343,8 @@ public class ImagesTabPanel extends DetailPanel {
 
 
     	        try {
+    	        	
+    	        	oldFolder = getExistingParent(oldFolder);
     	        	File newFolder = getInputSupplier().requestFolder(oldFolder);
     	        	node.setFile(newFolder); // update node
 
@@ -357,7 +359,7 @@ public class ImagesTabPanel extends DetailPanel {
     	        		getDatasets().stream()
 	    	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
 	    	        		.flatMap(c->c.getNuclei().stream())
-	    	        		.forEach(n->n.setSourceFile(newFolder));
+	    	        		.forEach(n->n.setSourceFile(new File(newFolder, imageFile.getName())));
     	        		imageData.setFile( new File(newFolder, imageFile.getName()));
     	        	}
     	        } catch (RequestCancelledException e1) {
@@ -369,6 +371,21 @@ public class ImagesTabPanel extends DetailPanel {
 
     	};
     	return l;
+    }
+    
+    /**
+     * Fetch the first existing folder in the given path, or
+     * null if none of the path exists.
+     * @param folder the folder to check
+     * @return
+     */
+    private File getExistingParent(File folder) {
+    	if(folder==null)
+    		return null;
+    	if(folder.exists())
+    		return folder;
+    	return getExistingParent(folder.getParentFile());
+    	
     }
         
     private class ImageTreeNode extends DefaultMutableTreeNode {
