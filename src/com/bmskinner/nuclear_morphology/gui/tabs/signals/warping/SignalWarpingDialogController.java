@@ -157,9 +157,22 @@ public class SignalWarpingDialogController implements Loggable {
 	public void exportImage() {
 		ImageProcessor ip = model.getDisplayImage(settingsPanel.isPseudocolour(), settingsPanel.isEnhance());
 		ip.flipVertical();
-		ImagePlus imp = new ImagePlus("Image",ip);
+		
+		
+		int[] selectedRow = table.getSelectedRows();
+		
+		File defaultFolder = null;
+		String imageName = "Image";
+		if(selectedRow.length==1) {
+			WarpedImageKey k = model.getKey(selectedRow[0]);
+			defaultFolder = k.getTemplate().getSavePath().getParentFile();
+			imageName = k.getTargetName()+"_"+k.getTemplate().getName()+"-"+k.getTemplate().getCollection().getSignalGroup(k.getSignalGroupId()).get().getGroupName();
+		}
+
+		
+		ImagePlus imp = new ImagePlus(imageName,ip);
 		try {
-			File saveFile = new DefaultInputSupplier().requestFileSave(null, "Image", "tiff");
+			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder, imageName, "tiff");
 			IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
 		} catch (RequestCancelledException e) {}
 	}

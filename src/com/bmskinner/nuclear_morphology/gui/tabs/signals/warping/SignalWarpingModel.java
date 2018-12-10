@@ -228,7 +228,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 	public synchronized List<CellularComponent> getTargets() {
         return cache.getTargets();
     }
-
+	
     /**
      * Get all the keys in the model for the given target
      * @param n the target consenus shape
