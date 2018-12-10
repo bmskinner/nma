@@ -161,8 +161,9 @@ public interface InputSupplier {
 	/**
 	 * Request a file to save to, with the default name and extension.
 	 * @param defaultFolder the default folder
-	 * 
-	 * @return
+	 * @param name the file name
+	 * @param extension the file extension, with no '.'
+	 * @return the selected file
 	 * @throws RequestCancelledException
 	 */
 	File requestFileSave(@Nullable File defaultFolder, String name, String extension) throws RequestCancelledException;

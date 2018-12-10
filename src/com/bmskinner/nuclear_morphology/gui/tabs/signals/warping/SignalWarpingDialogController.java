@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
+import java.io.File;
 import java.util.UUID;
 
 import javax.swing.JTable;
@@ -23,12 +24,16 @@ import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog.WarpingSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
@@ -39,8 +44,6 @@ import ij.process.ImageProcessor;
  *
  */
 public class SignalWarpingDialogController implements Loggable {
-
-	
 
 	private SignalWarpingModel model;
 	private ChartPanel chart;
@@ -64,6 +67,7 @@ public class SignalWarpingDialogController implements Loggable {
 			model.clearSelection();
 			int[] selectedRow = table.getSelectedRows();
 			for (int i = 0; i < selectedRow.length; i++) {
+				fine("Selecting table row "+selectedRow[i]);
 				model.addSelection(selectedRow[i]);
 				settingsPanel.setDisplayThreshold(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
 			}
@@ -153,7 +157,11 @@ public class SignalWarpingDialogController implements Loggable {
 	public void exportImage() {
 		ImageProcessor ip = model.getDisplayImage(settingsPanel.isPseudocolour(), settingsPanel.isEnhance());
 		ip.flipVertical();
-		new ImagePlus("Image",ip).show();
+		ImagePlus imp = new ImagePlus("Image",ip);
+		try {
+			File saveFile = new DefaultInputSupplier().requestFileSave(null, "Image", "tiff");
+			IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
+		} catch (RequestCancelledException e) {}
 	}
 
 }

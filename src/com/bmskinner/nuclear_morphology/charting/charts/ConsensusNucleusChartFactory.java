@@ -146,10 +146,56 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         chart.getXYPlot().getDomainAxis().setRange(-range, range);
         chart.getXYPlot().getRangeAxis().setRange(-range, range);
     }
-
+    
     /**
      * Create a consenusus chart for the given nucleus collection. This chart
      * draws the nucleus border in black. There are no IQRs or segments.
+     * 
+     * @return the consensus chart
+     */
+    public JFreeChart makeNucleusBareOutlineChart() {
+    	CellularComponent component = options.hasComponent() ? options.getComponent() : null;
+    	
+    	if(component==null) {
+    		IAnalysisDataset dataset = options.firstDataset();
+
+    		if (!dataset.getCollection().hasConsensus())
+    			return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
+
+    		component = dataset.getCollection().getConsensus();
+    	}
+
+        XYDataset ds;
+        try {
+            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
+        } catch (ChartDatasetCreationException e) {
+            stack("Error creating boxplot", e);
+            return createErrorChart();
+        }
+        JFreeChart chart = makeConsensusChart(ds);
+
+        double max = getConsensusChartRange(component);
+
+        XYPlot plot = chart.getXYPlot();
+
+        plot.getDomainAxis().setRange(-max, max);
+        plot.getRangeAxis().setRange(-max, max);
+
+        int seriesCount = plot.getSeriesCount();
+
+        for (int i = 0; i < seriesCount; i++) {
+        	plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+        	plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+        	plot.getRenderer().setSeriesVisibleInLegend(i, false);
+        }
+        return chart;
+    }
+
+    /**
+     * Create a consenusus chart for the given nucleus collection. This chart
+     * draws the nucleus border in black. There are no IQRs or segments. The OP
+     * is drawn as a blue square in series 1 of dataset 0. If you don't want this, use
+     * {@link ConsensusNucleusChartFactory#makeNucleusBareOutlineChart}
      * 
      * @return the consensus chart
      */

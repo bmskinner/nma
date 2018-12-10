@@ -80,7 +80,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 	}
 	
 	public WarpedImageKey getKey(int row) {
-		return (WarpedImageKey) getValueAt(row, KEY_COLUMN_INDEX);
+		
+		WarpedImageKey key = (WarpedImageKey) getValueAt(row, KEY_COLUMN_INDEX);
+		fine("Selecting key "+key.toString());
+		return key;
 	}
 	
 	public synchronized void addSelection(int row) {
@@ -199,6 +202,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		if(!isCommonTargetSelected())
 			return OutlineChartFactory.createEmptyChart();
 			
+		fine("Creating display image from "+displayImages.size()+" selected keys");
 		ImageProcessor image = createDisplayImage(isPseudocolour, isEnhance);
 
         ChartOptions options = new ChartOptionsBuilder()

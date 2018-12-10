@@ -214,7 +214,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeSignalWarpChart(ImageProcessor image) {
 
-        JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
+        JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
 
         XYPlot plot = chart.getXYPlot();
 
@@ -769,10 +769,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * @param ip
      * @param plot
      * @param alpha
-     * @param xOffset
-     *            a position to move the image 0,0 to
-     * @param yOffset
-     *            a position to move the image 0,0 to
+     * @param xOffset a position to move the image 0,0 to
+     * @param yOffset a position to move the image 0,0 to
      * @return
      */
     private void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha, int xOffset, int yOffset,

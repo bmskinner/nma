@@ -559,9 +559,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         	public void mouseClicked(MouseEvent e) {
         		JTable table = (JTable) e.getSource();
         		int row = table.rowAtPoint(e.getPoint());
-        		if (e.getClickCount() == DOUBLE_CLICK) 
+        		if (e.getClickCount() == DOUBLE_CLICK) {
         			controller.deleteWarpedSignal(row);
-        		controller.updateBlankChart();
+        			controller.updateBlankChart();
+        		}
         	}
         });
         
