@@ -213,8 +213,23 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         return new OutlineChartFactory(options).makeSignalWarpChart(image);
 	}
 		
+	/**
+	 * Get the image for display based on the current selection.
+	 * @param isPseudocolour
+	 * @param isEnhance
+	 * @return
+	 */
 	public ImageProcessor getDisplayImage(boolean isPseudocolour, boolean isEnhance) {
 		return createDisplayImage(isPseudocolour, isEnhance);
+	}
+	
+	/**
+	 * Get the image for a given key.
+	 * @param k
+	 * @return
+	 */
+	public ImageProcessor getImage(WarpedImageKey k) {
+		return cache.get(k);
 	}
 	
 	public void showImage(WarpedImageKey k) {

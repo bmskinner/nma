@@ -45,7 +45,9 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 /**
  * Allow clusters to be assigned to a dataset, based on their map in a file.
  * This is used to import clusters determined outside the program, so (e.g.) consensus refolding
- * can be performed on these clusters.
+ * can be performed on these clusters. The mapping format is {@code <UUID> <cluster_number>}. 
+ * The nucleus name/number is not used because there can be multiple cells with the same name
+ * if this is a merge of datasets.
  * @author bms41
  * @since 1.14.0
  *

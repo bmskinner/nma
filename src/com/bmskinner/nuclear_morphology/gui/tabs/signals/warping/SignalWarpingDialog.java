@@ -237,6 +237,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private JCheckBox pseudocolourBox;
     	    private JCheckBox enhanceBox;
     	    private JCheckBox binariseBox;
+    	    private JLabel mssimScore;
     	    
     	    public WarpingSettingsPanel() {
     	    	
@@ -375,13 +376,25 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     	    	enhanceBox = new JCheckBox(ENHANCE_LBL, true);
     	    	enhanceBox.addActionListener(e->controller.updateChart());
+    	    	
+    	    	JButton showComparisonBtn = new JButton("MS-SSIM");
+    	    	showComparisonBtn.addActionListener(e->controller.calculateSimilarities());
+    	    	
+    	    	mssimScore = new JLabel("");
+    	    	
 
     	    	panel.add(pseudocolourBox);
     	    	panel.add(enhanceBox);
     	    	panel.add(new JLabel("Threshold"));
     	    	panel.add(thresholdSlider);
-
+    	    	panel.add(mssimScore);
+    	    	panel.add(showComparisonBtn);
+    	    	
     	    	return panel;
+    	    }
+    	    
+    	    public void setMSSIM(String s) {
+    	    	mssimScore.setText(s);
     	    }
     	    
     	    

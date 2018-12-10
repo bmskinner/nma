@@ -1,6 +1,8 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.swing.JTable;
@@ -10,6 +12,7 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -65,12 +68,25 @@ public class SignalWarpingDialogController implements Loggable {
 				return;
 
 			model.clearSelection();
+			List<WarpedImageKey> keys = new ArrayList<>();
 			int[] selectedRow = table.getSelectedRows();
 			for (int i = 0; i < selectedRow.length; i++) {
 				fine("Selecting table row "+selectedRow[i]);
 				model.addSelection(selectedRow[i]);
 				settingsPanel.setDisplayThreshold(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
+				keys.add(model.getKey(selectedRow[i]));
 			}
+			
+			if(keys.size()==2 &&keys.get(0).getTarget().equals(keys.get(1).getTarget())) {
+				double value = MultiScaleStructuralSimilarityIndex.calculateMSSIM(model.getImage(keys.get(0)), model.getImage(keys.get(1)));
+				settingsPanel.setMSSIM(String.valueOf(value));
+			} else {
+				settingsPanel.setMSSIM("");
+			}
+			
+			
+			
+			
 			updateChart();
 		});
 	}
@@ -168,13 +184,33 @@ public class SignalWarpingDialogController implements Loggable {
 			defaultFolder = k.getTemplate().getSavePath().getParentFile();
 			imageName = k.getTargetName()+"_"+k.getTemplate().getName()+"-"+k.getTemplate().getCollection().getSignalGroup(k.getSignalGroupId()).get().getGroupName();
 		}
-
 		
 		ImagePlus imp = new ImagePlus(imageName,ip);
 		try {
 			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder, imageName, "tiff");
 			IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
 		} catch (RequestCancelledException e) {}
+	}
+	
+	/**
+	 * Calculate MS-SSIM for all pairwise combinations of signals in each target shape.
+	 */
+	public void calculateSimilarities() {
+		for(CellularComponent c : model.getTargets()) {
+			for(WarpedImageKey k1 : model.getKeys(c)) {
+				for(WarpedImageKey k2 : model.getKeys(c)) {
+					if(k1==k2)
+						continue;
+					ImageProcessor ip1 = model.getImage(k1);
+					ImageProcessor ip2 = model.getImage(k2);
+					System.out.println(k1+" vs "+k2);
+					double value = MultiScaleStructuralSimilarityIndex.calculateMSSIM(ip1, ip2);
+					
+				}
+				
+			}
+		}
+		
 	}
 
 }

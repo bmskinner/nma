@@ -52,17 +52,16 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 		
 		for(ICell c : d.getCollection()) {
 			for(Nucleus n : c.getNuclei()) {
-
 				try {
 					ImageProcessor ip = cropToSquare(n);
 					ImagePlus imp = new ImagePlus("", ip);
-					IJ.saveAsTiff(imp, new File(outFolder, n.getNameAndNumber()+".tiff").getAbsolutePath());
+					String fileName = String.format("%s_%s_.tiff", n.getNameAndNumber(), c.getId());
+					IJ.saveAsTiff(imp, new File(outFolder, fileName).getAbsolutePath());
 					fireProgressEvent();
 					
 				} catch (UnloadableImageException e) {
 					stack("Unable to load image for nucleus "+n.getNameAndNumber(), e);
 				}
-
 			}
 		}
 
@@ -71,7 +70,9 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	/**
 	 * Crop the source image of the nucleus to a square containing just 
 	 * the nucleus. 
-	 * @param n
+	 * TODO: fixed size of 265, scaling based on pixel/micron
+	 * TODO: mask regions not within the nucleus ROI (avoid including other nuclei fragments)
+	 * @param n the nucleus to be exported
 	 * @return
 	 * @throws UnloadableImageException
 	 */
