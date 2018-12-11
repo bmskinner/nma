@@ -59,8 +59,9 @@ public interface Io {
 
 	String XML_FILE_EXTENSION_NODOT  = "xml";
 	String XML_FILE_EXTENSION        = "."+XML_FILE_EXTENSION_NODOT;
-	
-	String TIFF_FILE_EXTENSION = ".tiff";
+		
+	String TIFF_FILE_EXTENSION_NODOT = "tiff";
+	String TIFF_FILE_EXTENSION = "."+TIFF_FILE_EXTENSION_NODOT;
 
 	String INVALID_FILE_ERROR       = "File is not valid for importing";
 	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
