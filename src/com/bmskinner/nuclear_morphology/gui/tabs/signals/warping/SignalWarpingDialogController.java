@@ -174,7 +174,6 @@ public class SignalWarpingDialogController implements Loggable {
 		ImageProcessor ip = model.getDisplayImage(settingsPanel.isPseudocolour(), settingsPanel.isEnhance());
 		ip.flipVertical();
 		
-		
 		int[] selectedRow = table.getSelectedRows();
 		
 		File defaultFolder = null;
@@ -184,10 +183,10 @@ public class SignalWarpingDialogController implements Loggable {
 			defaultFolder = k.getTemplate().getSavePath().getParentFile();
 			imageName = k.getTargetName()+"_"+k.getTemplate().getName()+"-"+k.getTemplate().getCollection().getSignalGroup(k.getSignalGroupId()).get().getGroupName();
 		}
-		
+
 		ImagePlus imp = new ImagePlus(imageName,ip);
 		try {
-			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder, imageName, "tiff");
+			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder, imageName, Io.TIFF_FILE_EXTENSION_NODOT);
 			IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
 		} catch (RequestCancelledException e) {}
 	}
