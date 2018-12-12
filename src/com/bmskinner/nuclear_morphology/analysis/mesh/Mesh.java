@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
  * 
@@ -180,6 +181,13 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @return
      */
     Set<MeshFace> getFaces();
+    
+    /**
+     * Get the faces whose periperal vertices are within the given segment
+     * @param seg the segment
+     * @return
+     */
+    Set<MeshFace> getFaces(IBorderSegment seg);
 
     /**
      * Test if the given mesh can be compared to this mesh. That is,

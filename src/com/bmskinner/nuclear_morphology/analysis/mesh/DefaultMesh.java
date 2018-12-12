@@ -19,11 +19,13 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -66,6 +68,8 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     /** Track the faces in the mesh */
     private Set<MeshFace> faces = new LinkedHashSet<>();
+    
+    private Map<IBorderSegment, Set<MeshVertex>> segmentFaces = new HashMap<>();
 
     E component;
 
@@ -88,7 +92,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
     public DefaultMesh(@NonNull E n, int vertexSpacing) throws MeshCreationException {
         this.component = n;
         this.vertexSpacing = vertexSpacing;
-
+        
         try {
             this.determineVertexProportions();
 
@@ -517,7 +521,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     		for(int segNumber=0; segNumber<segments.size(); segNumber++) {
     			IBorderSegment seg = segments.get(segNumber);
-    			List<Double> proportions = new ArrayList<Double>();
+    			List<Double> proportions = new ArrayList<>();
 
     			double div = (double) seg.length() / (double) vertexSpacing;
 
@@ -535,6 +539,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     			// Store the  proportion through the segment of each vertex
     			segmentVertexProportions.put(segNumber, proportions);
+    			segmentFaces.put(seg, new HashSet<MeshVertex>());
     		}
     	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
     		throw new MeshCreationException("Unable to get segments from template nucleus", e);
@@ -558,6 +563,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             for (int segIndex : segs) {
 
                 IBorderSegment segment = list.get(segIndex);
+                Set<MeshVertex> vertices = this.segmentFaces.get(segment);
                 finer("Segment " + segIndex + ": " + segment.length());
 
                 List<Double> proportions = segmentVertexProportions.get(segIndex);
@@ -581,7 +587,10 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
                     finest("Fetching point at index " + correctedIndex);
 
-                    addVertex(component.getOriginalBorderPoint(correctedIndex), true);
+                    int vertIndex = addVertex(component.getOriginalBorderPoint(correctedIndex), true);
+                    
+                    // Add the vertex to the map with the segment. Used later to rec 
+                    vertices.add(peripheralVertices.get(vertIndex));
                 }
 
             }
@@ -776,6 +785,15 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     }
 
+    @Override
+	public Set<MeshFace> getFaces(IBorderSegment seg){
+    	Set<MeshVertex> vertices = this.segmentFaces.get(seg);
+    	
+    	return edges.stream().filter(e->vertices.contains(e.getV1())&&vertices.contains(e.getV2()))
+    			.flatMap(e->faces.stream().filter(f->f.contains(e)))
+    			.collect(Collectors.toSet());
+    }
+    
     @Override
     public String toString() {
 
