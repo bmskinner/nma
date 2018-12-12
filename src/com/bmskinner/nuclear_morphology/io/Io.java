@@ -32,18 +32,24 @@ import ij.IJ;
  */
 public interface Io {
     
-	String TAB_FILE_EXTENSION = ".txt";
-	String SVG_FILE_EXTENSION = ".svg";
-	String PNG_FILE_EXTENSION = ".png";
-
 	String NEWLINE = System.getProperty("line.separator");
-
 	String TAB = "\t";
+	String DOT = ".";
+	
+	String TAB_FILE_EXTENSION = ".txt";
+		
+	String PNG_FILE_EXTENSION_NODOT = "png";
+	String PNG_FILE_EXTENSION       =  DOT+PNG_FILE_EXTENSION_NODOT;
+	
+	String SVG_FILE_EXTENSION_NODOT = "svg";
+	String SVG_FILE_EXTENSION       = DOT+SVG_FILE_EXTENSION_NODOT;
+
+
 
 	String SAVE_FILE_EXTENSION_NODOT = "nmd";
 	String BACKUP_FILE_EXTENSION_NODOT = "bak";
-	String SAVE_FILE_EXTENSION       = "." + SAVE_FILE_EXTENSION_NODOT;
-	String BACKUP_FILE_EXTENSION = "." + BACKUP_FILE_EXTENSION_NODOT;
+	String SAVE_FILE_EXTENSION       = DOT + SAVE_FILE_EXTENSION_NODOT;
+	String BACKUP_FILE_EXTENSION = DOT + BACKUP_FILE_EXTENSION_NODOT;
 	String LOG_FILE_EXTENSION        = ".log";
 
 
@@ -55,13 +61,13 @@ public interface Io {
 
 	/** Workspace file extension*/
 	String WRK_FILE_EXTENSION_NODOT  = "wrk";
-	String WRK_FILE_EXTENSION        = "."+WRK_FILE_EXTENSION_NODOT;
+	String WRK_FILE_EXTENSION        = DOT+WRK_FILE_EXTENSION_NODOT;
 
 	String XML_FILE_EXTENSION_NODOT  = "xml";
-	String XML_FILE_EXTENSION        = "."+XML_FILE_EXTENSION_NODOT;
+	String XML_FILE_EXTENSION        = DOT+XML_FILE_EXTENSION_NODOT;
 		
 	String TIFF_FILE_EXTENSION_NODOT = "tiff";
-	String TIFF_FILE_EXTENSION = "."+TIFF_FILE_EXTENSION_NODOT;
+	String TIFF_FILE_EXTENSION = DOT+TIFF_FILE_EXTENSION_NODOT;
 
 	String INVALID_FILE_ERROR       = "File is not valid for importing";
 	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";

@@ -43,7 +43,7 @@ import ij.process.ImageProcessor;
 
 public class MultiScaleStructuralSimilarityIndex {
 
-	public static double calculateMSSIM(@NonNull ImageProcessor inputImageA, @NonNull ImageProcessor inputImageB) {
+	public static double[] calculateMSSIM(@NonNull ImageProcessor inputImageA, @NonNull ImageProcessor inputImageB) {
 		ImageProcessor image_1_p, image_2_p;
 		int  pointer, filter_length, image_height, image_width, image_dimension, bits_per_pixel_1, bits_per_pixel_2, a, b, c;
 		float filter_weights [];
@@ -118,7 +118,7 @@ public class MultiScaleStructuralSimilarityIndex {
 		String[] window_type = {"Gaussian","Same weight"};  // WE CAN WEIGHTS THE WINDOW WITH A GAUSSIAN WEIGHTING FUNCTION OR GIVING THE SAME WEIGHT TO ALL THE PIXELS IN THE WINDOW
 		String window_selection = window_type[0];
 		String[] kind_of_algorithm = {"Zhou Wang","Rouse/Hemami"};  // WE CAN USE THE INDEX FOR THE SUPRA-THRESHOLD LEVEL (WANG)  OR THE RECOGNITION THRESHOLD (ROUSE/HEMAMI)
-		String algorithm_selection = kind_of_algorithm[0];
+		String algorithm_selection = kind_of_algorithm[1]; // DEFAULT TO ROUSE/HENAMI
 		boolean out=false;
 		boolean show_ssim_map= false;
 
@@ -498,11 +498,11 @@ public class MultiScaleStructuralSimilarityIndex {
 		// results.showDialog();
 		// results.dispose();
 
-		System.out.println("Luminance comparison: "+luminance_comparison);
-		System.out.println("Contrast comparison: "+contrast_comparison);
-		System.out.println("Structure comparison: "+structure_comparison);
-		System.out.println("MS-SSIM index: "+ms_ssim_index);
-		return ms_ssim_index;
-		// for (a=0;a<10;a++) System.gc();
+//		System.out.println("Luminance comparison: "+luminance_comparison);
+//		System.out.println("Contrast comparison: "+contrast_comparison);
+//		System.out.println("Structure comparison: "+structure_comparison);
+//		System.out.println("MS-SSIM index: "+ms_ssim_index);
+		double[] result = { luminance_comparison, contrast_comparison, structure_comparison, ms_ssim_index};
+		return result;
 	}
 }

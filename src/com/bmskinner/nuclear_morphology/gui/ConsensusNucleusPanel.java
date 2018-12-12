@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFac
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Refoldable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -421,18 +422,13 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
     private void exportConsensusNuclei() {
     	
-        String defaultFileName = this.isMultipleDatasets() ? "Outlines.svg" : activeDataset().getName()+".svg";
+        String defaultFileName = this.isMultipleDatasets() ? "Outlines" : activeDataset().getName();
+        File defaultFolder = IAnalysisDataset.commonPathOfFiles(getDatasets());
         
         try {
-        	File exportFile = getInputSupplier().requestFileSave(null, defaultFileName, "svg");
-        	
-        	if(!exportFile.getName().endsWith(Io.SVG_FILE_EXTENSION))
-        		exportFile = new File(exportFile.getParentFile(), exportFile.getName()+Io.SVG_FILE_EXTENSION);
-
-        	if(exportFile!=null){
-        		SVGWriter wr = new SVGWriter(exportFile);
-        		wr.exportConsensusOutlines(getDatasets()); 
-        	}
+        	File exportFile = getInputSupplier().requestFileSave(defaultFolder, defaultFileName, Io.SVG_FILE_EXTENSION_NODOT);
+        	SVGWriter wr = new SVGWriter(exportFile);
+        	wr.exportConsensusOutlines(getDatasets()); 
 		} catch (RequestCancelledException e) {
 			return;
 		}

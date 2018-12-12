@@ -256,8 +256,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	JPanel displayPanel = createDisplaySettingsPanel();
     	    	displayPanel.setBorder(BorderFactory.createTitledBorder("Display"));
     	    	
+    	    	JPanel comparisonPanel = createComparisonSettingsPanel();
+    	    	comparisonPanel.setBorder(BorderFactory.createTitledBorder("Comparison"));
+    	    	
     	    	settingsPanel.add(setupPanel);
     	    	settingsPanel.add(displayPanel);
+    	    	settingsPanel.add(comparisonPanel);
     	    	
     	    	add(descriptionPanel, BorderLayout.NORTH);
     	    	add(settingsPanel, BorderLayout.CENTER);
@@ -376,19 +380,25 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     	    	enhanceBox = new JCheckBox(ENHANCE_LBL, true);
     	    	enhanceBox.addActionListener(e->controller.updateChart());
+
+    	    	panel.add(pseudocolourBox);
+    	    	panel.add(enhanceBox);
+    	    	panel.add(new JLabel("Threshold"));
+    	    	panel.add(thresholdSlider);
+    	    	    	    	
+    	    	return panel;
+    	    }
+    	    
+    	    private JPanel createComparisonSettingsPanel() {
+    	    	JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	    	
     	    	JButton showComparisonBtn = new JButton("MS-SSIM");
     	    	showComparisonBtn.addActionListener(e->controller.calculateSimilarities());
     	    	
     	    	mssimScore = new JLabel("");
     	    	
-
-    	    	panel.add(pseudocolourBox);
-    	    	panel.add(enhanceBox);
-    	    	panel.add(new JLabel("Threshold"));
-    	    	panel.add(thresholdSlider);
-    	    	panel.add(mssimScore);
     	    	panel.add(showComparisonBtn);
+    	    	panel.add(mssimScore);
     	    	
     	    	return panel;
     	    }

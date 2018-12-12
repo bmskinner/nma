@@ -245,27 +245,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	 * Merge the warped images to a final image
 	 */
 	private ImageProcessor mergeWarpedImages() {
-		
-//		ImageStack st = new ImageStack(warpedImages.get(0).getWidth(), warpedImages.get(0).getHeight());
-//		for(ImageProcessor ip : warpedImages)
-//			st.addSlice(ip);
-//		ImagePlus img = new ImagePlus("Stack", st);
-//		img.show();
-		
-//		ImageProcessor fp = new FloatProcessor(st.getWidth(), st.getHeight());
-		
 		ImageProcessor mergedImage = ImageFilterer.addByteImages(warpedImages);
-		
-//		ImagePlus img2 = new ImagePlus("Added", mergedImage);
-//		img2.show();
-		
-//		ImageProcessor scaledImage = ImageFilterer.rescaleImageIntensity(mergedImage);
-		
-//		ImagePlus img3 = new ImagePlus("Scaled", scaledImage);
-//		img3.show();
-		
 		return mergedImage;
-//		return ImageFilterer.rescaleImageIntensity(mergedImage);
 	}
 
 

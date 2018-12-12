@@ -1,13 +1,19 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
+import java.awt.BorderLayout;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.swing.JDialog;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -76,10 +82,10 @@ public class SignalWarpingDialogController implements Loggable {
 				settingsPanel.setDisplayThreshold(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
 				keys.add(model.getKey(selectedRow[i]));
 			}
-			
+			DecimalFormat df = new DecimalFormat("0.000");
 			if(keys.size()==2 &&keys.get(0).getTarget().equals(keys.get(1).getTarget())) {
-				double value = MultiScaleStructuralSimilarityIndex.calculateMSSIM(model.getImage(keys.get(0)), model.getImage(keys.get(1)));
-				settingsPanel.setMSSIM(String.valueOf(value));
+				double[] values = MultiScaleStructuralSimilarityIndex.calculateMSSIM(model.getImage(keys.get(0)), model.getImage(keys.get(1)));
+				settingsPanel.setMSSIM(df.format(values[3]));
 			} else {
 				settingsPanel.setMSSIM("");
 			}
@@ -141,8 +147,8 @@ public class SignalWarpingDialogController implements Loggable {
 			ISignalGroup sg  = signalSource.getCollection().getSignalGroup(signalGroupId).get();
 			IWarpedSignal ws = sg.getWarpedSignals().orElse(new DefaultWarpedSignal(signalGroupId));
 
-//			ws.addWarpedImage(consensusTemplate, targetDataset.getName(), isCellsWithSignals, image.convertToByteProcessor());
-//			sg.setWarpedSignals(ws);
+			ws.addWarpedImage(consensusTemplate, targetDataset.getName(), isCellsWithSignals, image.convertToByteProcessor());
+			sg.setWarpedSignals(ws);
 
 			model.clearSelection();
 			model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, isBinarise, minThreshold, image);
@@ -195,21 +201,7 @@ public class SignalWarpingDialogController implements Loggable {
 	 * Calculate MS-SSIM for all pairwise combinations of signals in each target shape.
 	 */
 	public void calculateSimilarities() {
-		for(CellularComponent c : model.getTargets()) {
-			for(WarpedImageKey k1 : model.getKeys(c)) {
-				for(WarpedImageKey k2 : model.getKeys(c)) {
-					if(k1==k2)
-						continue;
-					ImageProcessor ip1 = model.getImage(k1);
-					ImageProcessor ip2 = model.getImage(k2);
-					System.out.println(k1+" vs "+k2);
-					double value = MultiScaleStructuralSimilarityIndex.calculateMSSIM(ip1, ip2);
-					
-				}
-				
-			}
-		}
-		
+		new StructuralSimilarityComparisonDialog(model);
 	}
-
+	
 }

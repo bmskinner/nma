@@ -429,6 +429,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
             	templateId = template.getId();
             	
             	this.target   = target;
+            	this.target.alignVertically();
                 this.targetName = targetName;
                 this.template = template;
                 this.signalGroupId = signalGroupId;
