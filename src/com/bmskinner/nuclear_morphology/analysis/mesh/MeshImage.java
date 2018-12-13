@@ -51,5 +51,14 @@ public interface MeshImage<E extends CellularComponent> {
      * @return the pixels within the face
      */
     List<MeshPixel> getMeshPixels(@NonNull MeshFace f);
+    
+    
+    /**
+     * Calculate the fractional signal intensity within the given face
+     * as a proportion of the total signal intensity within the image.
+     * @param f the face to quantify.
+     * @return
+     */
+    double quantifySignalProportion(@NonNull MeshFace f);
 
 }

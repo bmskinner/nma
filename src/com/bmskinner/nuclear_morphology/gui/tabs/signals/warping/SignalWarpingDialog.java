@@ -397,9 +397,13 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	
     	    	mssimScore = new JLabel("");
     	    	
+    	    	JButton showQuantificationBtn = new JButton("Quantify sectors");
+    	    	showQuantificationBtn.addActionListener(e->new SectorQuantificationDialog(model));
+    	    	
+    	    	panel.add(showQuantificationBtn);
     	    	panel.add(showComparisonBtn);
     	    	panel.add(mssimScore);
-    	    	
+
     	    	return panel;
     	    }
     	    

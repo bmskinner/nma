@@ -280,10 +280,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         Rectangle bounds = template.getComponent().toOriginalShape().getBounds();
 
         for (int x = 0; x < ip.getWidth(); x++) {
-
-            if (x < bounds.getMinX() || x > bounds.getMaxX()) {
+            if (x < bounds.getMinX() || x > bounds.getMaxX()) // skip pixels outside the object bounds
                 continue;
-            }
 
             for (int y = 0; y < ip.getHeight(); y++) {
 
@@ -348,5 +346,26 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
             finer("Faces could not be found for " + missedCount + " points");
         }
     }
+
+    @Override
+    public double quantifySignalProportion(@NonNull MeshFace f) {
+    	long total = calculateTotalPixelIntensity();
+    	long faceTotal = 0;
+    	List<MeshPixel> faceMap = map.get(f);
+    	for (MeshPixel c : faceMap)
+    		faceTotal += c.getValue();
+
+    	double fraction = ((double)faceTotal/(double)total);
+    	fine("Face: "+fraction+" of "+total);
+    	return fraction;
+    }
+	
+	private long calculateTotalPixelIntensity() {
+		long total = 0;
+		for(MeshFace f : map.keySet())
+			for (MeshPixel c : map.get(f))
+				total += c.getValue();
+		return total;
+	}
 
 }
