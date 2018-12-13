@@ -244,6 +244,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         return cache.getTargets();
     }
 	
+	public synchronized List<IAnalysisDataset> getTemplates() {
+        return cache.getTemplates();
+    }
+	
     /**
      * Get all the keys in the model for the given target
      * @param n the target consenus shape
@@ -389,6 +393,12 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         
         public List<CellularComponent> getTargets() {
             return map.keySet().stream().map(k ->  k.target)
+            		.distinct()
+            		.collect(Collectors.toList());
+        }
+        
+        public List<IAnalysisDataset> getTemplates() {
+            return map.keySet().stream().map(k ->  k.template)
             		.distinct()
             		.collect(Collectors.toList());
         }

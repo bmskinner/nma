@@ -42,8 +42,19 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 public class MultiScaleStructuralSimilarityIndex {
+	
+	public class MSSIMScore {
+		public double luminance, contrast, structure, msSsimIndex;
+		
+		public MSSIMScore(double l, double c, double s, double m) {
+			luminance = l;
+			contrast = c;
+			structure = s;
+			msSsimIndex = m;
+		}
+	}
 
-	public static double[] calculateMSSIM(@NonNull ImageProcessor inputImageA, @NonNull ImageProcessor inputImageB) {
+	public MSSIMScore calculateMSSIM(@NonNull ImageProcessor inputImageA, @NonNull ImageProcessor inputImageB) {
 		ImageProcessor image_1_p, image_2_p;
 		int  pointer, filter_length, image_height, image_width, image_dimension, bits_per_pixel_1, bits_per_pixel_2, a, b, c;
 		float filter_weights [];
@@ -502,7 +513,7 @@ public class MultiScaleStructuralSimilarityIndex {
 //		System.out.println("Contrast comparison: "+contrast_comparison);
 //		System.out.println("Structure comparison: "+structure_comparison);
 //		System.out.println("MS-SSIM index: "+ms_ssim_index);
-		double[] result = { luminance_comparison, contrast_comparison, structure_comparison, ms_ssim_index};
+		MSSIMScore result = new MSSIMScore(luminance_comparison, contrast_comparison, structure_comparison, ms_ssim_index);
 		return result;
 	}
 }
