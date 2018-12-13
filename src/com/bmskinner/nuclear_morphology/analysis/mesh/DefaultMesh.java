@@ -706,6 +706,8 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 	public Set<MeshFace> getFaces(IBorderSegment seg){
     	Set<MeshVertex> vertices = this.segmentFaces.get(seg);
     	
+//    	faces.stream().filter(f->f.isPeripheral()&&f.getPeripheralVertices().stream().allMatch(v->vertices.contains(v)));
+    	
     	return edges.stream().filter(e->{
     		return (vertices.contains(e.getV1()))
     				&&(vertices.contains(e.getV2())||e.getV2().isInternal());
