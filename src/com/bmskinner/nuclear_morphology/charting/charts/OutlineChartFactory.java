@@ -57,6 +57,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.CellDataset;
@@ -73,6 +74,11 @@ import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -999,12 +1005,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * Create the chart with the outlines of all the nuclei within a single
      * dataset.
      * 
-     * @param mesh
-     *            the mesh to draw
-     * @param log2ratio
-     *            the ratio to set as full colour intensity
-     * @param options
-     *            the drawing options
+     * @param mesh the mesh to draw
+     * @param log2ratio the ratio to set as full colour intensity
+     * @param options the drawing options
      * @return
      * @throws Exception
      */
@@ -1039,21 +1042,37 @@ public class OutlineChartFactory extends AbstractChartFactory {
         plot.setDataset(0, dataset);
         plot.setRenderer(0, renderer);
 
-        // Show faces as polygon annotations under the chart
+        // Show faces as polygon annotations under the chart. Faces are coloured by underlying segment if possible
         if (options.isShowMeshFaces()) {
+        	
+        	try {
+				List<IBorderSegment> segments = options.firstDataset().getCollection().getConsensus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+				
+				for(int i=0; i<segments.size(); i++) {
+					IBorderSegment s = segments.get(i);
+					for (MeshFace f : mesh.getFaces(s)) {
+						Path2D path = f.toPath();
+	        			Color colour = ColourSelecter.getColor(i, options.getSwatch());
+	        			XYShapeAnnotation a = new XYShapeAnnotation(path, null, null, colour);
+	        			renderer.addAnnotation(a, Layer.BACKGROUND);
+					}
+				}
+				
+        	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+        		stack("Error getting segments for mesh");
+        		stack(e);
+        		stack("Falling back to old mesh face annotation");
 
-            for (MeshFace f : mesh.getFaces()) {
+        		for (MeshFace f : mesh.getFaces()) {
 
-                Path2D path = f.toPath();
+        			Path2D path = f.toPath();
+        			Color colour = getGradientColour(f.getLog2Ratio(), log2Ratio);
+        			XYShapeAnnotation a = new XYShapeAnnotation(path, null, null, colour);
+        			renderer.addAnnotation(a, Layer.BACKGROUND);
+        		}
+        	}
 
-                Color colour = getGradientColour(f.getLog2Ratio(), log2Ratio); // not
-                                                                               // quite
-                                                                               // black
-
-                XYShapeAnnotation a = new XYShapeAnnotation(path, null, null, colour);
-
-                renderer.addAnnotation(a, Layer.BACKGROUND);
-            }
+           
 
         }
 

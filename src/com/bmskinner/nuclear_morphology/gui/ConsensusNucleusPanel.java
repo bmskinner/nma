@@ -120,7 +120,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
          * Used for debugging only - do not include in releases
          */
         JPanel meshPanel = createMeshPanel();
-//        panel.add(meshPanel, BorderLayout.CENTER);
+        panel.add(meshPanel, BorderLayout.CENTER);
 
         JPanel offsetPanel = createTranslatePanel();
         panel.add(offsetPanel, BorderLayout.SOUTH);
@@ -334,8 +334,10 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     @Override
     protected synchronized void updateMultiple() {
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-                .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+        ChartOptions options = new ChartOptionsBuilder()
+        		.setDatasets(getDatasets())
+                .setScale(GlobalOptions.getInstance().getScale())
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setTarget(consensusChartPanel).build();
 
         setChart(options);
