@@ -24,9 +24,16 @@ public interface MeshVertex {
 
     /**
      * Test if the vertex is at the periphery of the mesh
-     * @return
+     * @return true if the vertex is peripheral, false otherwise
      */
     boolean isPeripheral();
+    
+    /**
+     * Test if the vertex is interior to the mesh. Inverse of
+     * {@link MeshVertex#isPeripheral()}
+     * @return true if the vertex is internal, false otherwise
+     */
+    boolean isInternal();
 
     String getName();
 

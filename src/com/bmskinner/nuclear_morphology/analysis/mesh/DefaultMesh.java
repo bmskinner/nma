@@ -376,89 +376,6 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#straighten()
-     */
-//    @Override
-//    public Mesh<E> straighten() {
-//        fine("Straightening mesh");
-//        DefaultMesh result = new DefaultMesh(this);
-//
-//        result.clearEdges();
-//        result.clearFaces();
-//
-//        float nucleusHeight = (float) result.component.getBounds().getHeight();
-//        float nucleusWidth = (float) result.component.getBounds().getWidth();
-//        float vertices = result.getInternalVertexCount();
-//
-//        float xStep = nucleusWidth / 2;
-//        float xStart = 0;
-//        float yStart = 0;
-//        float yStep = nucleusHeight / vertices;
-//
-//        IPoint pos = IPoint.makeNew(xStart, yStart);
-//
-//        // Straighten internal skeleton
-//
-//        for (int i = 0; i < result.internalVertices.size(); i++) {
-//
-//            MeshVertex v = result.internalVertices.get(i);
-//            v = new DefaultMeshVertex(pos, v.getName(), v.isPeripheral());
-//            result.peripheralVertices.set(i, v);
-//
-//            // update for the next point
-//            pos = IPoint.makeNew(xStart, pos.getY() + yStep);
-//        }
-//        finer("Set skeleton");
-//
-//        // Position peripheral vertices around skeleton
-//
-//        // Positon the first vertex under the skeleton
-//        MeshVertex v = result.peripheralVertices.get(0);
-//        v = new DefaultMeshVertex(IPoint.makeNew(xStart, yStart - yStep), v.getName(), v.isPeripheral());
-//        result.peripheralVertices.set(0, v);
-//        // v.setPosition( IPoint.makeNew(xStart, yStart-yStep) );
-//
-//        int halfArray = (int) Math.floor(((double) result.peripheralVertices.size() / 2));
-//
-//        for (int i = 1, j = result.getPeripheralVertexCount() - 1; i < halfArray; i++, j--) {
-//
-//            // Get the vertices either side of the skeleton
-//            MeshVertex v1 = result.peripheralVertices.get(i);
-//            MeshVertex v2 = result.peripheralVertices.get(j);
-//
-//            v1 = new DefaultMeshVertex(IPoint.makeNew(xStart - xStep, (i * yStep) - (yStep / 2)), v1.getName(),
-//                    v1.isPeripheral());
-//            v2 = new DefaultMeshVertex(IPoint.makeNew(xStart + xStep, (i * yStep) - (yStep / 2)), v2.getName(),
-//                    v2.isPeripheral());
-//
-//            result.peripheralVertices.set(i, v1);
-//            result.peripheralVertices.set(j, v2);
-//        }
-//
-//        finer("Peripheral vertex count = " + result.getPeripheralVertexCount());
-//
-//        // if needed, adjust the final vertex above the skeleton
-//        if (result.peripheralVertices.size() % 2 == 0) {
-//            finer("Setting final vertex");
-//            MeshVertex p1 = result.peripheralVertices.get(halfArray);
-//            p1 = new DefaultMeshVertex(IPoint.makeNew(xStart, (halfArray * yStep) - (yStep / 2)), p1.getName(),
-//                    p1.isPeripheral());
-//            result.peripheralVertices.set(halfArray, p1);
-//        }
-//
-//        finer("Set periphery");
-//
-//        result.createEdgesAndFaces();
-//
-//        finer("Straightened mesh");
-//        finer(result.toString());
-//
-//        return result;
-//    }
-
     @Override
     public Path2D toPath() {
         Path2D path = new Path2D.Double();
@@ -789,8 +706,10 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 	public Set<MeshFace> getFaces(IBorderSegment seg){
     	Set<MeshVertex> vertices = this.segmentFaces.get(seg);
     	
-    	return edges.stream().filter(e->vertices.contains(e.getV1())&&vertices.contains(e.getV2()))
-    			.flatMap(e->faces.stream().filter(f->f.contains(e)))
+    	return edges.stream().filter(e->{
+    		return (vertices.contains(e.getV1()))
+    				&&(vertices.contains(e.getV2())||e.getV2().isInternal());
+    			}).flatMap(e->faces.stream().filter(f->f.contains(e)))
     			.collect(Collectors.toSet());
     }
     
