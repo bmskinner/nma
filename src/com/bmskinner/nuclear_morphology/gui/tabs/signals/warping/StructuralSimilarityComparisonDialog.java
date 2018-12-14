@@ -1,6 +1,10 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -8,14 +12,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
 
+import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
+import com.bmskinner.ViolinPlots.ViolinRenderer;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
@@ -24,30 +41,82 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
+import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
-public class StructuralSimilarityComparisonDialog extends JDialog {
+public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 	
 	private SignalWarpingModel model;
 	
+	private ChartPanel chartPanel;
+	
+	private JProgressBar progressBar = new JProgressBar(0, 100);
+	
 	public StructuralSimilarityComparisonDialog(SignalWarpingModel model) {
+		super();
 		this.model = model;
-		TableModel compModel = createTableModel();
-		ExportableTable table = new ExportableTable(compModel);
-		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setColumnHeaderView(table.getTableHeader());
+		
 		setLocationRelativeTo(null);
+		centerOnScreen();
 		setTitle(DIALOG_TITLE);
 		setLayout(new BorderLayout());
-		add(scrollPane, BorderLayout.CENTER);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setModal(false);
+		
+		
+		try {
+			TableModel compModel = createTableModel();
+			ExportableTable table = new ExportableTable(compModel);
+			JScrollPane scrollPane = new JScrollPane(table);
+			scrollPane.setColumnHeaderView(table.getTableHeader());
+			
+			chartPanel = new ExportableChartPanel(ViolinChartFactory.createLoadingChart());
+			
+			JPanel headerPanel = new JPanel(new FlowLayout());
+			headerPanel.add(getLoadingLabel());
+			headerPanel.add(progressBar);
+			
+			
+			JPanel centrePanel = new JPanel(new GridBagLayout());
+			
+			GridBagConstraints constraints = new GridBagConstraints();
+	        constraints.fill = GridBagConstraints.BOTH;
+	        constraints.gridx = 0;
+	        constraints.gridy = 0;
+	        constraints.gridheight = 1;
+	        constraints.gridwidth = 1;
+	        constraints.weightx = 0.5;
+	        constraints.weighty = 0.5;
+	        constraints.anchor = GridBagConstraints.CENTER;
+			
+			centrePanel.add(scrollPane, constraints);
+			
+			constraints.gridx = 1;
+	        constraints.gridy = 0;
+	        constraints.gridwidth = GridBagConstraints.REMAINDER;
+			centrePanel.add(chartPanel, constraints);
+			
+			add(headerPanel, BorderLayout.NORTH);
+			add(centrePanel, BorderLayout.CENTER);
+			
+
+			makePerCellCharts();
+			
+		} catch(Exception e) {
+			stack(e);
+		}
 		validate();
 		pack();
 		setVisible(true);
@@ -67,7 +136,7 @@ public class StructuralSimilarityComparisonDialog extends JDialog {
 
 					ImageProcessor ip1 = model.getImage(k1);
 					ImageProcessor ip2 = model.getImage(k2);
-					System.out.println(k1+" vs "+k2);
+					finer(k1+" vs "+k2);
 					MSSIMScore score = msi.calculateMSSIM(ip1, ip2);
 
 					Object[] reverseData = { k2, k1, df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
@@ -92,59 +161,265 @@ public class StructuralSimilarityComparisonDialog extends JDialog {
 		return false;
 	}
 	
-	private Map<String, List<MSSIMScore>> calculatePerCellMSSSIMs() {
-		MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
-		Map<String, List<MSSIMScore>> scores = new HashMap();
-		for(IAnalysisDataset d : model.getTemplates()) {
+		
+	private void makePerCellCharts() {
+		fine("Creating per cell charts");
+		
+		
+		PerCellMSSSIDCalculator calc = new PerCellMSSSIDCalculator();
+		calc.addPropertyChangeListener( evt ->{
+			if (evt.getNewValue() instanceof Integer) {
+	            int percent = (Integer) evt.getNewValue(); // should be percent
+	            if (percent >= 0 && percent <= 100) {
+	                if (progressBar.isIndeterminate()) {
+	                    progressBar.setIndeterminate(false);
+	                }
+	                progressBar.setValue(percent);
+	            }
+	        }
 
-			Mesh<Nucleus> meshConsensus;
-			try {
-				meshConsensus = new DefaultMesh<Nucleus>(d.getCollection().getConsensus());
-			} catch (MeshCreationException e2) {
-				return scores;
-			}
-
-			Rectangle r = meshConsensus.toPath().getBounds();
-
-			for(Nucleus n : d.getCollection().getNuclei()) {
-				if(n.getSignalCollection().getSignalGroupIds().size()==2) {
-					List<UUID> signalIds = new ArrayList<>(n.getSignalCollection().getSignalGroupIds());
-					ImageProcessor ip1 = generateNucleusImage(meshConsensus, r.width, r.height, n, signalIds.get(0));
-					ImageProcessor ip2 = generateNucleusImage(meshConsensus, r.width, r.height, n, signalIds.get(1));
-					MSSIMScore score =  msi.calculateMSSIM(ip1, ip2);
-					
-					String key = d.getName()+"_"+signalIds.get(0).toString()+"_"+signalIds.get(1).toString();
-					if(!scores.containsKey(key))
-						scores.put(key, new ArrayList<>());
-					scores.get(key).add(score);
+	        if (IAnalysisWorker.FINISHED_MSG.equals(evt.getPropertyName())) {
+	            progressBar.setValue(0);
+	            progressBar.setVisible(false);
+				setLoadingLabelText("");
+				
+				Map<ViolinKey, List<MSSIMScore>> scores;
+				try {
+					scores = calc.get();
+					chartPanel.setChart(makeCharts(scores));
+				} catch (InterruptedException | ExecutionException e) {
+					stack(e);
+					chartPanel.setChart(ViolinChartFactory.createErrorChart());
 				}
-			}
-		}
-		return scores;
+				
+	        }
+		});
+		ThreadManager.getInstance().execute(calc);		
+
 	}
 	
-	private ImageProcessor generateNucleusImage(@NonNull Mesh<Nucleus> meshConsensus, int w, int h, @NonNull Nucleus n, UUID signalGroup) {
+	private JFreeChart makeCharts(Map<ViolinKey, List<MSSIMScore>> scores) {
+		ViolinCategoryDataset ds = new ViolinCategoryDataset();
+		for(ViolinKey key : scores.keySet()) {
+			List<Double> msssims = scores.get(key).stream().map(s->s.msSsimIndex).collect(Collectors.toList());
+			ds.add(msssims, key.colKey+" - msssim", key.rowKey);
 
-		try {
-			Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
+			List<Double> values = scores.get(key).stream().map(s->s.structure).collect(Collectors.toList());
+			ds.add(values, key.colKey+" - structure", key.rowKey);
+		}
 
-		    // Get the image with the signal
-		    ImageProcessor ip;
-		    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will throw exception
-		    	ip = n.getSignalCollection().getImage(signalGroup);
-		    	ip.invert();
-		    } else {
-		    	return ImageFilterer.createBlackByteProcessor(w, h);
-		    }
-
-		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
-
-		    // Draw NucleusMeshImage onto consensus mesh.
-		    return meshImage.drawImage(meshConsensus);
-
-		} catch (Exception e) {
-			return ImageFilterer.createBlackByteProcessor(w, h);
-		} 
+		ViolinRenderer renderer = new ViolinRenderer();
+		CategoryAxis categoryAxis = new CategoryAxis("Sample");
+		NumberAxis valueAxis = new NumberAxis("Score");
+		valueAxis.setAutoRangeIncludesZero(true);
+		CategoryPlot plot = new CategoryPlot(ds, categoryAxis, valueAxis, renderer);
+		valueAxis.setRange(0, 1);
+		return new JFreeChart("", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
 	}
+	
+	/**
+	 * A key for values entered into the violin datasets
+	 * @author bms41
+	 * @since 1.15.0
+	 *
+	 */
+	private class ViolinKey {
+		public final String colKey;
+		public final String rowKey;
+		
+		public ViolinKey(String col, String row) {
+			colKey = col;
+			rowKey = row;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((colKey == null) ? 0 : colKey.hashCode());
+			result = prime * result + ((rowKey == null) ? 0 : rowKey.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ViolinKey other = (ViolinKey) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (colKey == null) {
+				if (other.colKey != null)
+					return false;
+			} else if (!colKey.equals(other.colKey))
+				return false;
+			if (rowKey == null) {
+				if (other.rowKey != null)
+					return false;
+			} else if (!rowKey.equals(other.rowKey))
+				return false;
+			return true;
+		}
+
+		private StructuralSimilarityComparisonDialog getOuterType() {
+			return StructuralSimilarityComparisonDialog.this;
+		}
+		
+		
+	}
+	
+	
+	/**
+	 * Calculate the similarities between warped images for signal pairs in nuclei.
+	 * @author bms41
+	 * @since 1.15.0
+	 *
+	 */
+	private class PerCellMSSSIDCalculator extends SwingWorker<Map<ViolinKey, List<MSSIMScore>>, Integer> {
+		
+		int totalCells =  0;
+		
+		public PerCellMSSSIDCalculator() {
+			for(IAnalysisDataset d : model.getTemplates())
+				totalCells += d.getCollection().getNucleusCount();
+		}
+		
+		@Override
+	    protected Map<ViolinKey, List<MSSIMScore>> doInBackground() throws Exception {
+			Map<ViolinKey, List<MSSIMScore>> result = new HashMap<>();
+	        try {
+	            finer("Running warping");
+	            result = calculatePerCellMSSSIMs();
+
+	        } catch (Exception e) {
+	            warn("Error in warper");
+	            stack("Error in signal warper", e);
+	        }
+	        
+	        return result;
+	    }
+		
+		private Map<ViolinKey, List<MSSIMScore>> calculatePerCellMSSSIMs() {
+			int progress = 0;
+			MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
+			Map<ViolinKey, List<MSSIMScore>> scores = new HashMap();
+			for(IAnalysisDataset d : model.getTemplates()) {
+				setLoadingLabelText("Generating pairwise comparison plots for "+d.getName()+"...");
+				fine("Calculating score for "+d.getName());
+				Mesh<Nucleus> meshConsensus;
+				try {
+					meshConsensus = new DefaultMesh<Nucleus>(d.getCollection().getConsensus());
+				} catch (MeshCreationException e2) {
+					stack(e2);
+					progress+=d.getCollection().getNucleusCount();
+					publish(progress);
+					continue;
+				}
+				
+				Map<UUID, String>  signalNames = new HashMap<>();
+				Map<UUID, Integer> signalThresholds = new HashMap<>();
+				for(UUID id : d.getCollection().getSignalGroupIDs()) {
+					signalNames.put(id, d.getCollection().getSignalGroup(id).get().getGroupName());
+					signalThresholds.put(id, d.getAnalysisOptions().get().getNuclearSignalOptions(id).getThreshold());
+				}
+				
+				
+			
+
+				
+
+				Rectangle r = meshConsensus.toPath().getBounds();
+
+				for(Nucleus n : d.getCollection().getNuclei()) {
+					finer("Calculating "+n.getNameAndNumber());
+					if(n.getSignalCollection().getSignalGroupIds().size()==2) {
+						List<UUID> signalIds = new ArrayList<>(n.getSignalCollection().getSignalGroupIds());
+						UUID sig0 = signalIds.get(0);
+						UUID sig1 = signalIds.get(1);
+						if(n.getSignalCollection().hasSignal(sig0)&&n.getSignalCollection().hasSignal(sig1)) {
+							List<MSSIMScore> scoreList;
+							ViolinKey vkRev = new ViolinKey(d.getName(), signalNames.get(sig1)+"_"+signalNames.get(sig0));
+							if(scores.containsKey(vkRev))
+								scoreList = scores.get(vkRev);
+							else {
+								ViolinKey vk = new ViolinKey(d.getName(), signalNames.get(sig0)+"_"+signalNames.get(sig1));
+								if(!scores.containsKey(vk))
+									scores.put(vk, new ArrayList<>());
+								scoreList = scores.get(vk);
+							}
+								
+							ImageProcessor ip1 = generateNucleusImage(meshConsensus, r.width, r.height, n, sig0, signalThresholds.get(sig0));
+							ImageProcessor ip2 = generateNucleusImage(meshConsensus, r.width, r.height, n, sig1, signalThresholds.get(sig1));
+							MSSIMScore score =  msi.calculateMSSIM(ip1, ip2);
+							scoreList.add(score);
+						}
+					}
+					publish(++progress);
+				}
+			}
+			return scores;
+		}
+
+	   
+		private ImageProcessor generateNucleusImage(@NonNull Mesh<Nucleus> meshConsensus, int w, int h, @NonNull Nucleus n, UUID signalGroup, int threshold) {
+
+			try {
+				Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
+
+			    // Get the image with the signal
+			    ImageProcessor ip;
+			    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will throw exception
+			    	ip = n.getSignalCollection().getImage(signalGroup);
+			    	ip.invert();
+			    	ip = new ImageFilterer(ip).setBlackLevel(150).toProcessor();
+			    } else {
+			    	return ImageFilterer.createBlackByteProcessor(w, h);
+			    }
+
+			    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
+
+			    // Draw NucleusMeshImage onto consensus mesh.
+			    return meshImage.drawImage(meshConsensus);
+
+			} catch (Exception e) {
+				stack(e);
+				return ImageFilterer.createBlackByteProcessor(w, h);
+			} 
+		}
+		
+		@Override
+	    protected void process(List<Integer> chunks) {
+	        for (Integer i : chunks) {
+	            int percent = (int) ((double) i / (double) totalCells * 100);
+	            if (percent >= 0 && percent <= 100)
+	                setProgress(percent);
+	        }
+	    }
+
+	    @Override
+	    public void done() {
+	        try {
+	            if (this.get() != null) {
+	                finest("Firing trigger for sucessful task");
+	                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);
+	            } else {
+	                finest("Firing trigger for failed task");
+	                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+	            }
+	        } catch (InterruptedException e) {
+	            error("Interruption error in worker", e);
+	            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+	        } catch (ExecutionException e) {
+	            error("Execution error in worker", e);
+	            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+	        }
+	    }
+	}
+	
 
 }

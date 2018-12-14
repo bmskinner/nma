@@ -493,7 +493,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
         CategoryPlot plot = this.getChart().getCategoryPlot();
         StringBuilder builder = new StringBuilder();
-        DecimalFormat df = new DecimalFormat("#0.00");
+        DecimalFormat df = new DecimalFormat("#0.000");
 
         for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
 

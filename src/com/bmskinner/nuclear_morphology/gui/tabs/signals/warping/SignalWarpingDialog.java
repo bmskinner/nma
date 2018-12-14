@@ -393,12 +393,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	    	
     	    	JButton showComparisonBtn = new JButton("MS-SSIM");
-    	    	showComparisonBtn.addActionListener(e->controller.calculateSimilarities());
+    	    	showComparisonBtn.addActionListener(e->new Thread(()->new StructuralSimilarityComparisonDialog(model)).start());
     	    	
     	    	mssimScore = new JLabel("");
     	    	
     	    	JButton showQuantificationBtn = new JButton("Quantify sectors");
-    	    	showQuantificationBtn.addActionListener(e->new SectorQuantificationDialog(model));
+    	    	showQuantificationBtn.addActionListener(e->new Thread(()->new SectorQuantificationDialog(model)).start());
     	    	
     	    	panel.add(showQuantificationBtn);
     	    	panel.add(showComparisonBtn);

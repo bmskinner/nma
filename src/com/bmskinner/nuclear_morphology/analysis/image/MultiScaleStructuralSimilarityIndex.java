@@ -44,7 +44,7 @@ import ij.process.ImageProcessor;
 public class MultiScaleStructuralSimilarityIndex {
 	
 	public class MSSIMScore {
-		public double luminance, contrast, structure, msSsimIndex;
+		public final double luminance, contrast, structure, msSsimIndex;
 		
 		public MSSIMScore(double l, double c, double s, double m) {
 			luminance = l;

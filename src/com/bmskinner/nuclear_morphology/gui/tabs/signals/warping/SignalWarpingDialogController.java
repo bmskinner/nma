@@ -19,6 +19,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
+import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -84,8 +85,9 @@ public class SignalWarpingDialogController implements Loggable {
 			}
 			DecimalFormat df = new DecimalFormat("0.000");
 			if(keys.size()==2 &&keys.get(0).getTarget().equals(keys.get(1).getTarget())) {
-				double[] values = MultiScaleStructuralSimilarityIndex.calculateMSSIM(model.getImage(keys.get(0)), model.getImage(keys.get(1)));
-				settingsPanel.setMSSIM(df.format(values[3]));
+				MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
+				MSSIMScore values = msi.calculateMSSIM(model.getImage(keys.get(0)), model.getImage(keys.get(1)));
+				settingsPanel.setMSSIM(df.format(values.msSsimIndex));
 			} else {
 				settingsPanel.setMSSIM("");
 			}
@@ -195,13 +197,5 @@ public class SignalWarpingDialogController implements Loggable {
 			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder, imageName, Io.TIFF_FILE_EXTENSION_NODOT);
 			IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
 		} catch (RequestCancelledException e) {}
-	}
-	
-	/**
-	 * Calculate MS-SSIM for all pairwise combinations of signals in each target shape.
-	 */
-	public void calculateSimilarities() {
-		new StructuralSimilarityComparisonDialog(model);
-	}
-	
+	}	
 }
