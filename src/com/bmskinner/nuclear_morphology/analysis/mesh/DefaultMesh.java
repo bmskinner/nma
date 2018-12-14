@@ -48,60 +48,64 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
+	
+	private static final boolean IS_PERIPERHAL = true;
+	private static final boolean IS_INTERNAL   = false;
+	private static final double DEFAULT_EDGE_WEIGHT = 1;
 
-    private int segmentCount = 0; // the number of segments to divide on
-
-    private int vertexSpacing = 10; // the default average number of border
-                                    // points between vertices
+    /**  The average number of border points between vertices */
+    private int vertexSpacing = DEFAULT_VERTEX_SPACING;
 
     /** For each segment, list the proportions through the segment at which a vertex is found */
-    private Map<Integer, List<Double>> segmentVertexProportions = new HashMap<>();
+    private final Map<Integer, List<Double>> segmentVertexProportions = new HashMap<>();
 
     /** Store the vertices in the mesh. List, so we can index it. */
-    private List<MeshVertex> peripheralVertices = new ArrayList<>();
+    private final List<MeshVertex> peripheralVertices = new ArrayList<>();
 
     /** Store the skeleton vertices in the mesh */
-    private List<MeshVertex> internalVertices = new ArrayList<>();
+    private final List<MeshVertex> internalVertices = new ArrayList<>();
 
     /** Track the edges in the mesh */
-    private Set<MeshEdge> edges = new LinkedHashSet<>();
+    private final Set<MeshEdge> edges = new LinkedHashSet<>();
 
     /** Track the faces in the mesh */
-    private Set<MeshFace> faces = new LinkedHashSet<>();
+    private final Set<MeshFace> faces = new LinkedHashSet<>();
     
-    private Map<IBorderSegment, Set<MeshVertex>> segmentFaces = new HashMap<>();
+    /** Track the faces associated with each segment */
+    private final Map<Integer, Set<MeshVertex>> segmentFaces = new HashMap<>();
 
-    E component;
+    /** The component the mesh is constructed from */
+    private final E component;
 
     /**
-     * Construct a mesh from the given nucleus with default vertex spacing
+     * Construct a mesh from the given component with default vertex spacing
      * 
-     * @param n
+     * @param c the component to construct from 
      * @throws MeshCreationException
      */
-    public DefaultMesh(@NonNull E n) throws MeshCreationException {
-        this(n, DEFAULT_VERTEX_SPACING);
+    public DefaultMesh(@NonNull E c) throws MeshCreationException {
+        this(c, DEFAULT_VERTEX_SPACING);
     }
 
     /**
-     * Construct a mesh from the given nucleus
+     * Construct a mesh from the given component
      * 
-     * @param n
+     * @param c the component to construct from 
+     * @param vertexSpacing the spacing between peripheral vertices
      * @throws MeshCreationException
      */
-    public DefaultMesh(@NonNull E n, int vertexSpacing) throws MeshCreationException {
-        this.component = n;
+    public DefaultMesh(@NonNull E c, int vertexSpacing) throws MeshCreationException {
+        this.component = c;
         this.vertexSpacing = vertexSpacing;
         
         try {
-            this.determineVertexProportions();
-
-            this.createPeripheralVertices();
-
-            this.createInternalVertices();
-
-            this.createEdgesAndFaces();
+            determineVertexProportions();
+            createPeripheralVertices();
+            createInternalVertices();
+            createEdgesAndFaces();
+            
         } catch (IllegalArgumentException e) {
+        	stack(e);
             throw new MeshCreationException("Unable to create mesh for component", e);
         }
     }
@@ -116,14 +120,18 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
      */
     public DefaultMesh(@NonNull E n, @NonNull Mesh<E> template) throws MeshCreationException {
         this.component = n;
-        this.segmentVertexProportions = template.getVertexProportions();
+        
+        for(Integer segIndex : template.getVertexProportions().keySet()) {
+        	segmentVertexProportions.put(segIndex, template.getVertexProportions().get(segIndex));
+    		segmentFaces.put(segIndex, new HashSet<>());
+        }
+        
         this.vertexSpacing = template.getVertexSpacing();
-        this.segmentCount = template.getSegmentCount();
 
         try {
-            this.createPeripheralVertices();
-            this.createInternalVertices();
-            this.createEdgesAndFaces();
+            createPeripheralVertices();
+            createInternalVertices();
+            createEdgesAndFaces();
 
         } catch (IllegalArgumentException e) {
             fine("Error creating mesh");
@@ -132,27 +140,27 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
     }
 
     /**
-     * Duplicate the mesh. Does not yet keep consistency of vertices and edges
+     * Duplicate the mesh.
      * 
      * @param template
      */
     public DefaultMesh(Mesh<E> template) {
-        this.component = template.getComponent();
-        this.segmentVertexProportions = template.getVertexProportions();
-        this.vertexSpacing = template.getVertexSpacing();
-        this.segmentCount = template.getSegmentCount();
-
-        for (MeshEdge e : template.getEdges()) {
-            this.edges.add(new DefaultMeshEdge(e));
+        component = template.getComponent();
+        vertexSpacing = template.getVertexSpacing();
+        
+        for(Integer segIndex : template.getVertexProportions().keySet()) {
+        	segmentVertexProportions.put(segIndex, template.getVertexProportions().get(segIndex));
+    		segmentFaces.put(segIndex, new HashSet<>());
         }
 
-        for (MeshFace e : template.getFaces()) {
-            this.faces.add(new DefaultMeshFace(e));
-        }
+        for (MeshEdge e : template.getEdges())
+            edges.add(new DefaultMeshEdge(e));
 
-        this.peripheralVertices = template.getPeripheralVertices();
-        this.internalVertices = template.getInternalVertices();
+        for (MeshFace e : template.getFaces())
+            faces.add(new DefaultMeshFace(e));
 
+        peripheralVertices.addAll(template.getPeripheralVertices());
+        internalVertices.addAll(template.getInternalVertices());
     }
 
     @Override
@@ -203,11 +211,10 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
         if (this.contains(v1) && this.contains(v2)) {
             for (MeshEdge e : edges) {
-                if (e.containsVertex(v1) && e.containsVertex(v2)) {
+                if (e.containsVertex(v1) && e.containsVertex(v2))
                     return e;
-                }
             }
-            MeshEdge e = new DefaultMeshEdge(v1, v2, 1);
+            MeshEdge e = new DefaultMeshEdge(v1, v2, DEFAULT_EDGE_WEIGHT);
             edges.add(e);
             return e;
         }
@@ -260,10 +267,6 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         return e != null && edges.contains(e);
     }
 
-    @Override
-    public int getSegmentCount() {
-        return segmentCount;
-    }
 
     @Override
     public int getVertexSpacing() {
@@ -456,7 +459,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     			// Store the  proportion through the segment of each vertex
     			segmentVertexProportions.put(segNumber, proportions);
-    			segmentFaces.put(seg, new HashSet<MeshVertex>());
+    			segmentFaces.put(segNumber, new HashSet<>());
     		}
     	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
     		throw new MeshCreationException("Unable to get segments from template nucleus", e);
@@ -480,34 +483,34 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             for (int segIndex : segs) {
 
                 IBorderSegment segment = list.get(segIndex);
-                Set<MeshVertex> vertices = this.segmentFaces.get(segment);
+                Set<MeshVertex> segVertices = segmentFaces.get(segIndex);
                 finer("Segment " + segIndex + ": " + segment.length());
 
                 List<Double> proportions = segmentVertexProportions.get(segIndex);
 
                 if (segment.length() <= proportions.size()) {
-                    // The segment is too small for each vertex to have a
-                    // separate XYPoint
-                    // Usually caused when mapping a poorly segmented nucleus
-                    // onto a template mesh.
+                    /* The segment is too small for each vertex to have a
+                    separate point. Usually caused when mapping a poorly segmented 
+                    nucleus onto a template mesh. */
                     throw new IllegalArgumentException("Segment " + segIndex + " is too small to fit mesh");
                 }
+                
+                // Now go through the segment and take the point at each determined proportion as a vertex
 
                 for (Double d : proportions) {
                     int index = segment.getProportionalIndex(d);
 
-                    // Since the segments have been offset to the RP, correct
-                    // back
-                    // to the actual nucleus index
+                    // Since the segments have been offset to the RP, correct back to the actual nucleus index
                     int correctedIndex = CellularComponent
                             .wrapIndex(index + component.getBorderIndex(Tag.REFERENCE_POINT), segment.getProfileLength());
 
                     finest("Fetching point at index " + correctedIndex);
 
-                    int vertIndex = addVertex(component.getOriginalBorderPoint(correctedIndex), true);
+                    int vertIndex = addVertex(component.getOriginalBorderPoint(correctedIndex), IS_PERIPERHAL);
                     
-                    // Add the vertex to the map with the segment. Used later to rec 
-                    vertices.add(peripheralVertices.get(vertIndex));
+                    // Add the vertex to the map with the segment.
+                    MeshVertex v = peripheralVertices.get(vertIndex);
+                    segVertices.add(v);
                 }
 
             }
@@ -517,21 +520,13 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         }
     }
 
-    /**
-     * Get the face containing the given point within the nucleus
-     * 
-     * @param p
-     * @return
-     */
+
     @Override
     public MeshFace getFace(@NonNull IPoint p) {
         if (component.containsOriginalPoint(p)) {
-            for (MeshFace f : faces) {
-                if (f.contains(p)) {
+            for (MeshFace f : faces)
+                if (f.contains(p))
                     return f;
-                }
-            }
-
         }
         return null;
     }
@@ -568,9 +563,8 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             MeshVertex v1 = peripheralVertices.get(i);
             MeshVertex v2 = peripheralVertices.get(peripheralVertices.size() - i);
 
-            MeshEdge e = new DefaultMeshEdge(v1, v2, 1);
-
-            this.addVertex(e.getMidpoint(), false);
+            MeshEdge e = new DefaultMeshEdge(v1, v2, DEFAULT_EDGE_WEIGHT);
+            addVertex(e.getMidpoint(), IS_INTERNAL);
         }
 
     }
@@ -704,7 +698,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     @Override
 	public Set<MeshFace> getFaces(IBorderSegment seg){
-    	Set<MeshVertex> vertices = this.segmentFaces.get(seg);
+    	Set<MeshVertex> vertices = this.segmentFaces.get(seg.getPosition());
     	
 //    	faces.stream().filter(f->f.isPeripheral()&&f.getPeripheralVertices().stream().allMatch(v->vertices.contains(v)));
     	

@@ -25,34 +25,35 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  * A nucleus imaplementation of the MeshVertex
  * 
  * @author ben
+ * @since 1.13.3
  *
  */
 public class DefaultMeshVertex implements MeshVertex {
 
-    final private String  name;       // the number in the mesh - use to compare
-                                      // vertexes between nuclei
-    final private IPoint  position;   // the posiiton of the vertex
-    final private boolean peripheral; // is the vertex on the border of the
-                                      // object
+    /** The number in the mesh - use to compare vertices between nuclei  */
+    final private String  name;
+    
+    /**  The position of the vertex */
+    final private IPoint position;
+    
+    /** True if the vertex lies on the periphery of the object */
+    final private boolean isPeripheral;
 
-    Set<MeshEdge> edges = new HashSet<MeshEdge>(); // store the edges attached
-                                                   // to the vertex
+    /** Strong reference to the edges attached to the vertex */
+    final private Set<MeshEdge> edges = new HashSet<>();
 
     /**
      * Create a vertex as a given position
      * 
-     * @param p
-     *            the position of the vertex
-     * @param name
-     *            the name of the vertex
-     * @param peripheral
-     *            true if the vertex is on the periphery of the mesh, false
+     * @param p the position of the vertex
+     * @param name the name of the vertex
+     * @param peripheral true if the vertex is on the periphery of the mesh, false
      *            otherwise
      */
     public DefaultMeshVertex(IPoint p, String name, boolean peripheral) {
         this.name = name;
         this.position = p;
-        this.peripheral = peripheral;
+        this.isPeripheral = peripheral;
     }
 
     /**
@@ -63,13 +64,13 @@ public class DefaultMeshVertex implements MeshVertex {
     public DefaultMeshVertex(MeshVertex v) {
         this.name = v.getName();
         this.position = IPoint.makeNew(v.getPosition());
-        this.peripheral = v.isPeripheral();
+        this.isPeripheral = v.isPeripheral();
     }
 
 
     @Override
     public boolean isPeripheral() {
-        return peripheral;
+        return isPeripheral;
     }
     
     @Override
@@ -144,7 +145,7 @@ public class DefaultMeshVertex implements MeshVertex {
     }
 
     public String toString() {
-        return this.name + ": " + position.toString() + " : " + peripheral;
+        return this.name + ": " + position.toString() + " : " + isPeripheral;
     }
 
     @Override
@@ -152,7 +153,7 @@ public class DefaultMeshVertex implements MeshVertex {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + (peripheral ? 1231 : 1237);
+        result = prime * result + (isPeripheral ? 1231 : 1237);
         return result;
     }
 
@@ -170,7 +171,7 @@ public class DefaultMeshVertex implements MeshVertex {
                 return false;
         } else if (!name.equals(other.name))
             return false;
-        if (peripheral != other.peripheral)
+        if (isPeripheral != other.isPeripheral)
             return false;
 
         // Don't worry about position - the name will allow equality

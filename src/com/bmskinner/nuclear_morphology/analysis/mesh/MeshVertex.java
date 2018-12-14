@@ -20,6 +20,12 @@ import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
+/**
+ * Describes a vertex within a {@link Mesh}
+ * @author bms41
+ * @since 1.13.3
+ *
+ */
 public interface MeshVertex {
 
     /**

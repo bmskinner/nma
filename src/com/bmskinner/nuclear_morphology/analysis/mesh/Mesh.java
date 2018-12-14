@@ -95,20 +95,13 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
     boolean contains(@NonNull IPoint p);
 
     /**
-     * Get the face containing the given point, or null if there is no face with
+     * Get the face containing the given cartesian point, or null if there is no face with
      * the point
      * 
-     * @param p the point to test
-     * @return the face with the point or null
+     * @param p the point
+     * @return the face containing the point or null
      */
     MeshFace getFace(@NonNull IPoint p);
-
-    /**
-     * Get the number of segments used to construct the mesh
-     * 
-     * @return
-     */
-    int getSegmentCount();
 
     /**
      * Get the index spacing between vertices
@@ -117,6 +110,10 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      */
     int getVertexSpacing();
 
+    /**
+     * Get the proportions of each peripheral vertex along each segment
+     * @return
+     */
     Map<Integer, List<Double>> getVertexProportions();
 
     /**
