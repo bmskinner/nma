@@ -32,6 +32,7 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
@@ -1134,6 +1135,36 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         return ds;
 
     }
+    
+    /**
+     * Create an XYDataset with the edges in a NucleusMesh comparison. Also
+     * stores the result edge length ratios.
+     * 
+     * @param mesh
+     * @return
+     * @throws Exception
+     */
+    public NucleusMeshXYDataset createNucleusMeshVertexDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
+        NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
+
+        for (MeshVertex v : mesh.getPeripheralVertices()) {
+
+            double[] yvalues = { v.getPosition().getY() };
+            double[] xvalues = { v.getPosition().getX() };
+            double[][] data = { xvalues, yvalues };
+            ds.addSeries(v.toString(), data);
+            ds.setRatio(v.toString(), 1);
+        }
+        
+        for (MeshVertex v : mesh.getInternalVertices()) {
+            double[] yvalues = { v.getPosition().getY() };
+            double[] xvalues = { v.getPosition().getX() };
+            double[][] data = { xvalues, yvalues };
+            ds.addSeries(v.toString(), data);
+            ds.setRatio(v.toString(), -1);
+        }
+        return ds;
+    }
 
     /**
      * Create an XYDataset with the edges in a NucleusMesh comparison. Also
@@ -1146,13 +1177,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
         NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
-        // log(mesh.toString());
-
-        // log("Building dataset");
 
         for (MeshEdge edge : mesh.getEdges()) {
-
-            // log(edge.getV1().toString());
 
             double[] yvalues = { edge.getV1().getPosition().getY(), edge.getV2().getPosition().getY() };
 

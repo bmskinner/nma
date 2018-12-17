@@ -1012,35 +1012,63 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * @throws Exception
      */
     public JFreeChart createMeshChart(Mesh<Nucleus> mesh, double log2Ratio) throws ChartCreationException {
+    	JFreeChart chart = createBaseXYChart();
+		XYPlot plot = chart.getXYPlot();
+		
+		int datasetIndex = 0;
+		
+		if(options.isShowMeshVertices()) {
+			try {
+				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options).createNucleusMeshVertexDataset(mesh);
+				XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(false, true);
+				renderer.setBaseSeriesVisibleInLegend(false);
 
-        NucleusMeshXYDataset dataset;
-        try {
-            dataset = new NucleusDatasetCreator(options).createNucleusMeshEdgeDataset(mesh);
-        } catch (Exception e) {
-            throw new ChartCreationException("Cannot create mesh chart", e);
-        }
+				for (int series = 0; series < dataset.getSeriesCount(); series++) {
 
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
+					double ratio = dataset.getRatio(dataset.getSeriesKey(series));
+					Color colour = getGradientColour(ratio, log2Ratio);
+					Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+					renderer.setSeriesShape(series, circle);
+					renderer.setSeriesPaint(series, colour);
+					renderer.setSeriesItemLabelsVisible(series, false);
+					renderer.setSeriesVisible(series, true);
 
-        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
-        renderer.setBaseSeriesVisibleInLegend(false);
-        renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
+				}
 
-        for (int series = 0; series < dataset.getSeriesCount(); series++) {
+				plot.setDataset(datasetIndex, dataset);
+				plot.setRenderer(datasetIndex, renderer);
+				datasetIndex++;
+			} catch (Exception e) {
+				throw new ChartCreationException("Cannot create mesh chart", e);
+			}
+		}
+		
+		if(options.isShowMeshEdges()) {
+			try {
+				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options).createNucleusMeshEdgeDataset(mesh);
+				XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
+				renderer.setBaseSeriesVisibleInLegend(false);
+				renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
 
-            double ratio = dataset.getRatio(dataset.getSeriesKey(series));
-            Color colour = getGradientColour(ratio, log2Ratio);
+				for (int series = 0; series < dataset.getSeriesCount(); series++) {
 
-            renderer.setSeriesPaint(series, colour);
-            renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
-            renderer.setSeriesItemLabelsVisible(series, false);
-            renderer.setSeriesVisible(series, options.isShowMeshEdges());
+					double ratio = dataset.getRatio(dataset.getSeriesKey(series));
+					Color colour = getGradientColour(ratio, log2Ratio);
 
-        }
+					renderer.setSeriesPaint(series, colour);
+					renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
+					renderer.setSeriesItemLabelsVisible(series, false);
+					renderer.setSeriesVisible(series, true);
 
-        plot.setDataset(0, dataset);
-        plot.setRenderer(0, renderer);
+				}
+
+				plot.setDataset(datasetIndex, dataset);
+				plot.setRenderer(datasetIndex, renderer);
+				datasetIndex++;
+			} catch (Exception e) {
+				throw new ChartCreationException("Cannot create mesh chart", e);
+			}
+		}
 
         // Show faces as polygon annotations under the chart. Faces are coloured by underlying segment if possible
         if (options.isShowMeshFaces()) {
@@ -1054,7 +1082,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 						Path2D path = f.toPath();
 	        			Color colour = ColourSelecter.getColor(i, options.getSwatch());
 	        			XYShapeAnnotation a = new XYShapeAnnotation(path, null, null, colour);
-	        			renderer.addAnnotation(a, Layer.BACKGROUND);
+	        			plot.getRenderer().addAnnotation(a, Layer.BACKGROUND);
 					}
 				}
 				
@@ -1068,7 +1096,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         			Path2D path = f.toPath();
         			Color colour = getGradientColour(f.getLog2Ratio(), log2Ratio);
         			XYShapeAnnotation a = new XYShapeAnnotation(path, null, null, colour);
-        			renderer.addAnnotation(a, Layer.BACKGROUND);
+        			plot.getRenderer().addAnnotation(a, Layer.BACKGROUND);
         		}
         	}
 

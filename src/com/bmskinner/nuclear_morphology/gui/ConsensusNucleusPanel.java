@@ -63,6 +63,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
     // Debugging tools for the nucleus mesh - not visible in the final panel
     private JCheckBox showMeshBox;
+    private JCheckBox showMeshVerticesBox;
     private JCheckBox showMeshEdgesBox;
     private JCheckBox showMeshFacesBox;
     private JCheckBox straightenMeshBox;
@@ -142,6 +143,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         meshSizeSpinner.setToolTipText("Mesh size");
         JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner, "0");
         meshSizeSpinner.setEditor(meshNumberEditor);
+        
+        showMeshVerticesBox = new JCheckBox("Mesh vertices");
+        showMeshVerticesBox.setSelected(true);
+        showMeshVerticesBox.setEnabled(false);
+        showMeshVerticesBox.addChangeListener(this);
 
         showMeshEdgesBox = new JCheckBox("Mesh edges");
         showMeshEdgesBox.setSelected(true);
@@ -160,6 +166,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         panel.add(showMeshBox);
         panel.add(meshSizeSpinner);
+        panel.add(showMeshVerticesBox);
         panel.add(showMeshEdgesBox);
         panel.add(showMeshFacesBox);
         panel.add(straightenMeshBox);
@@ -299,7 +306,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     protected synchronized void updateSingle() {
         super.updateSingle();
 
-
+        showMeshVerticesBox.setEnabled(showMeshVerticesBox.isSelected());
         showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
         showMeshFacesBox.setEnabled(showMeshBox.isSelected());
         straightenMeshBox.setEnabled(showMeshBox.isSelected());
@@ -308,6 +315,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                 .setScale(GlobalOptions.getInstance().getScale())
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowMesh(showMeshBox.isSelected())
+                .setShowMeshVertices(showMeshVerticesBox.isSelected())
                 .setShowMeshEdges(showMeshEdgesBox.isSelected())
                 .setShowMeshFaces(showMeshFacesBox.isSelected())
                 .setStraightenMesh(straightenMeshBox.isSelected())
