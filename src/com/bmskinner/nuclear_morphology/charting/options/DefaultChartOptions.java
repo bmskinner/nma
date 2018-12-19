@@ -245,7 +245,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     }
     
     public void setShowMeshVertices(boolean showMeshVertices) {
-        this.showMeshVertices = showMeshEdges;
+        this.showMeshVertices = showMeshVertices;
     }
 
     public void setShowMeshEdges(boolean showMeshEdges) {

@@ -145,7 +145,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         meshSizeSpinner.setEditor(meshNumberEditor);
         
         showMeshVerticesBox = new JCheckBox("Mesh vertices");
-        showMeshVerticesBox.setSelected(true);
+        showMeshVerticesBox.setSelected(false);
         showMeshVerticesBox.setEnabled(false);
         showMeshVerticesBox.addChangeListener(this);
 
@@ -306,7 +306,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     protected synchronized void updateSingle() {
         super.updateSingle();
 
-        showMeshVerticesBox.setEnabled(showMeshVerticesBox.isSelected());
+        showMeshVerticesBox.setEnabled(showMeshBox.isSelected());
         showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
         showMeshFacesBox.setEnabled(showMeshBox.isSelected());
         straightenMeshBox.setEnabled(showMeshBox.isSelected());
