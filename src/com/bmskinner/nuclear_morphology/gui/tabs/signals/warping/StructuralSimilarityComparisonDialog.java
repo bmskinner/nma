@@ -133,15 +133,21 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 				for(WarpedImageKey k2 : model.getKeys(c)) {
 					if(k1==k2)
 						continue;
+					
+					// choose the order of keys 
+					List<WarpedImageKey> keys = new ArrayList<>();
+					keys.add(k1);
+					keys.add(k2);
+					keys.sort((c1, c2)-> (c1.getSignalGroupName().compareTo(c2.getSignalGroupName())*10+c1.getTargetName().compareTo(c2.getTargetName())));
+					
 
-					ImageProcessor ip1 = model.getImage(k1);
-					ImageProcessor ip2 = model.getImage(k2);
-					finer(k1+" vs "+k2);
+					ImageProcessor ip1 = model.getImage(keys.get(0));
+					ImageProcessor ip2 = model.getImage(keys.get(1));
+					finer(keys.get(0)+" vs "+keys.get(1));
 					MSSIMScore score = msi.calculateMSSIM(ip1, ip2);
 
-					Object[] reverseData = { k2, k1, df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
-					if(!containsRow(reverseData, compModel)) {
-						Object[] rowData = { k1, k2, df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
+					Object[] rowData = { keys.get(0), keys.get(1), df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
+					if(!containsRow(rowData, compModel)) {
 						compModel.addRow(rowData);
 					}
 				}

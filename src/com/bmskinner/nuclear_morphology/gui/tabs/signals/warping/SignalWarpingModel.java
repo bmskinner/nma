@@ -86,6 +86,14 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		return key;
 	}
 	
+	public synchronized int getRow(WarpedImageKey key) {
+		for(int r=0; r<getRowCount(); r++) {
+			if( getValueAt(r, KEY_COLUMN_INDEX).equals(key))
+				return r;
+		}
+		return -1;
+	}
+	
 	public synchronized void addSelection(int row) {
 		addSelection(getKey(row));
     }
@@ -134,13 +142,13 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 				for(WarpedSignalKey c : warpedSignal.getWarpedSignalKeys()) {
 
 					Optional<ImageProcessor> im = warpedSignal.getWarpedImage(c);
-					if(im.isPresent()) {
+					if(im.isPresent() && d.getId().equals(c.getTemplateId())) { // skip child dataset signals
 						WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), warpedSignal.getTargetName(c), d, 
-								signalGroupId,c.isCellWithSignalsOnly(), false, 0); // TODO default binarise and threshold for now 
+								signalGroupId, c.isCellWithSignalsOnly(), c.isCellWithSignalsOnly(), c.getThreshold());
 						cache.add(k, im.get());
 						Color col = sg.getGroupColour().orElse(Color.WHITE);
 						cache.setColour(k, col);
-						cache.setThreshold(k, THRESHOLD_ALL_VISIBLE);
+						cache.setThreshold(k, THRESHOLD_ALL_VISIBLE); // display threshold, not detection threshold
 						addTableRow(k);
 					}
 				}                	
@@ -161,19 +169,24 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		cache.setThreshold(k, threshold);;
 	}
 	
+	
+	public void removeRow(WarpedImageKey k) {
+		removeSelection(k);
+		cache.remove(k);
+		super.removeRow(getRow(k));
+
+	}
+	
 	@Override
 	public void removeRow(int row) {
 		WarpedImageKey k = (WarpedImageKey) this.getValueAt(row, 5);
-		removeSelection(k);
-		cache.remove(k);
-		super.removeRow(row);
-
+		removeRow(k);
 	}
 	
 	private void addTableRow(WarpedImageKey k) {
         Vector v = new Vector();
 		v.add(k.getTemplate().getName());
-        v.add(k.getTemplate().getCollection().getSignalGroup(k.getSignalGroupId()).get());
+        v.add(k.getSignalGroupName());
         v.add(k.isOnlyCellsWithSignals());
         v.add(k.getTargetName());
         v.add(k.minThreshold);
@@ -425,7 +438,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
             private final boolean isOnlyCellsWithSignals;
             private final boolean isBinarise;
             private final int minThreshold;
-            
+
         	
          // These may change hashcode due to normal activity, so should not be part of the hashed key
             private final @NonNull CellularComponent target;
@@ -463,9 +476,17 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 			public UUID getSignalGroupId() {
 				return signalGroupId;
 			}
+			
+			public String getSignalGroupName() {
+				return getTemplate().getCollection().getSignalGroup(signalGroupId).get().getGroupName();
+			}
 
 			public boolean isOnlyCellsWithSignals() {
 				return isOnlyCellsWithSignals;
+			}
+			
+			public int getThreshold() {
+				return minThreshold;
 			}
 
             @Override

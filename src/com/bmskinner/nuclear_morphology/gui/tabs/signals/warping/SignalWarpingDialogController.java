@@ -114,17 +114,18 @@ public class SignalWarpingDialogController implements Loggable {
 		ThreadManager.getInstance().submit(task);
 	}
 	
-	public void deleteWarpedSignal(int row) {
-		
-		WarpedImageKey selectedKey = model.getKey(row);
-		
+	public void deleteWarpedSignal(WarpedImageKey selectedKey) {
+				
 		ISignalGroup sg  = selectedKey.getTemplate().getCollection().getSignalGroup(selectedKey.getSignalGroupId()).get();
 		
-		WarpedSignalKey k = new WarpedSignalKey(selectedKey.getTemplate().getCollection().getConsensus(), selectedKey.isOnlyCellsWithSignals());
+		WarpedSignalKey k = new WarpedSignalKey(selectedKey.getTemplate().getCollection().getConsensus(), selectedKey.getTemplate().getId(), selectedKey.isOnlyCellsWithSignals(), selectedKey.getThreshold() );
 		sg.getWarpedSignals().ifPresent(e->e.removeWarpedImage(k));
-		
-		model.removeRow(row);
-		
+		model.removeRow(selectedKey);
+	}
+	
+	public void deleteWarpedSignal(int row) {
+		WarpedImageKey selectedKey = model.getKey(row);
+		deleteWarpedSignal(selectedKey);		
 	}
 
 	/**
@@ -149,7 +150,7 @@ public class SignalWarpingDialogController implements Loggable {
 			ISignalGroup sg  = signalSource.getCollection().getSignalGroup(signalGroupId).get();
 			IWarpedSignal ws = sg.getWarpedSignals().orElse(new DefaultWarpedSignal(signalGroupId));
 
-			ws.addWarpedImage(consensusTemplate, targetDataset.getName(), isCellsWithSignals, image.convertToByteProcessor());
+			ws.addWarpedImage(consensusTemplate, signalSource.getId(), targetDataset.getName(), isCellsWithSignals, minThreshold, image.convertToByteProcessor());
 			sg.setWarpedSignals(ws);
 
 			model.clearSelection();

@@ -97,11 +97,12 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	/**
 	 * Add a warped signal image for the given template
 	 * @param template the template object signals were warped on to 
+	 * @param templateId the id of the dataset the signals came from
 	 * @param name the name of the template object
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset
 	 * @param image the warped image
 	 */	
-	void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, boolean isCellWithSignalsOnly, @NonNull ByteProcessor image);
+	void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId, @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ByteProcessor image);
 	
 	
 	/**
@@ -117,7 +118,7 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset, or just those with defined signals
 	 * @return
 	 */
-	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template, boolean isCellWithSignalsOnly);
+	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template,  @NonNull UUID templateId, boolean isCellWithSignalsOnly, int threshold);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 

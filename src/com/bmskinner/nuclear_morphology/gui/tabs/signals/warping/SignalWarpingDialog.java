@@ -46,6 +46,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -592,6 +593,20 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         		}
         	}
         });
+        
+        JPopupMenu tableMenu = signalSelectionTable.getComponentPopupMenu();
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        deleteItem.addActionListener(e->{
+        	List<WarpedImageKey> keys = new ArrayList<>();
+        	for(int row : signalSelectionTable.getSelectedRows())
+        		keys.add(model.getKey(row));
+        	
+        	for(WarpedImageKey k : keys)
+        		controller.deleteWarpedSignal(k);
+        	
+        	controller.updateBlankChart();
+        });
+        tableMenu.add(deleteItem);
         
         JScrollPane sp = new JScrollPane(signalSelectionTable);
         panel.add(sp, BorderLayout.CENTER);
