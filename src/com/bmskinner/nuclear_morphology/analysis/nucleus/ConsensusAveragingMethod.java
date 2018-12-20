@@ -116,8 +116,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                 n.setBorderTag(tag, newIndex);
             }
         }
-//        n.alignVertically();
-//        cons.component().alignVertically();
         
         // Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {
@@ -135,12 +133,12 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         }
         
         // Do not use DefaultNucleus::rotateVertically; it will not align properly
-        if (cons.component().hasBorderTag(Tag.TOP_VERTICAL) && cons.component().hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-            cons.component().alignPointsOnVertical(cons.component().getBorderPoint(Tag.TOP_VERTICAL), cons.component().getBorderPoint(Tag.BOTTOM_VERTICAL));
-
-            if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
-                cons.component().flipXAroundPoint(cons.component().getCentreOfMass());
-        }
+//        if (cons.component().hasBorderTag(Tag.TOP_VERTICAL) && cons.component().hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+//            cons.component().alignPointsOnVertical(cons.component().getBorderPoint(Tag.TOP_VERTICAL), cons.component().getBorderPoint(Tag.BOTTOM_VERTICAL));
+//
+//            if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
+//                cons.component().flipXAroundPoint(cons.component().getCentreOfMass());
+//        }
         return cons;
 
     }

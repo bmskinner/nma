@@ -1263,6 +1263,11 @@ public class DefaultCellCollection implements ICellCollection {
 
 		signalManager = new SignalManager(this);
 		profileManager = new ProfileManager(this);
+		
+		 if(this.hasConsensus()) {
+				rotateConsensus(0);
+				offsetConsensus(0, 0);
+	        }
 
 		// Make sure any profile aggregates match the length of saved segments
 		try {
@@ -1272,11 +1277,6 @@ public class DefaultCellCollection implements ICellCollection {
 			stack(e);
 		}
 		
-//		if(this.hasConsensus()) {
-//			this.getConsensus().getVerticallyRotatedNucleus();
-//			this.getConsensus().alignVertically();
-//		}
-
 	}
 	
 	@Override

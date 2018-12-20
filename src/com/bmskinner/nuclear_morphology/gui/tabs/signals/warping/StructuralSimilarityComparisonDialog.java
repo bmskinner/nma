@@ -140,27 +140,31 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 				for(WarpedImageKey k2 : model.getKeys(c)) {
 					if(k1==k2)
 						continue;
-					
-					// choose the order of keys 
-					List<WarpedImageKey> keys = new ArrayList<>();
-					keys.add(k1);
-					keys.add(k2);
-					keys.sort((c1, c2)-> (c1.getSignalGroupName().compareTo(c2.getSignalGroupName())*10+c1.getTemplate().getName().compareTo(c2.getTemplate().getName())));
-					
 
-					ImageProcessor ip1 = model.getImage(keys.get(0));
-					ImageProcessor ip2 = model.getImage(keys.get(1));
-					finer(keys.get(0)+" vs "+keys.get(1));
-					MSSIMScore score = msi.calculateMSSIM(ip1, ip2);
+					try {
+						// choose the order of keys 
+						List<WarpedImageKey> keys = new ArrayList<>();
+						keys.add(k1);
+						keys.add(k2);
+						keys.sort((c1, c2)-> (c1.getSignalGroupName().compareTo(c2.getSignalGroupName())*10+c1.getTemplate().getName().compareTo(c2.getTemplate().getName())));
 
-					Object[] rowData = { keys.get(0).getTemplate().getName(), 
-							keys.get(0).getSignalGroupName(), 
-							keys.get(1).getTemplate().getName(), 
-							keys.get(1).getSignalGroupName(), 
-							keys.get(1).getTargetName(), 
-							df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
-					if(!containsRow(rowData, compModel)) {
-						compModel.addRow(rowData);
+
+						ImageProcessor ip1 = model.getImage(keys.get(0));
+						ImageProcessor ip2 = model.getImage(keys.get(1));
+						finer(keys.get(0)+" vs "+keys.get(1));
+						MSSIMScore score = msi.calculateMSSIM(ip1, ip2);
+
+						Object[] rowData = { keys.get(0).getTemplate().getName(), 
+								keys.get(0).getSignalGroupName(), 
+								keys.get(1).getTemplate().getName(), 
+								keys.get(1).getSignalGroupName(), 
+								keys.get(1).getTargetName(), 
+								df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
+						if(!containsRow(rowData, compModel))
+							compModel.addRow(rowData);
+
+					} catch(Exception e) {
+						stack(String.format("Error calculating MS-SSIM* for pair %s and %s: %s", k1, k2, e.getMessage()), e);
 					}
 				}
 			}

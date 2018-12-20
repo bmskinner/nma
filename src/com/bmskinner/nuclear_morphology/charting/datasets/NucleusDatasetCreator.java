@@ -855,9 +855,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Given a list of analysis datasets, get the outlines of the consensus
      * nuclei they contain
-     * 
-     * @param list
-     *            the analysis datasets
+
      * @return a chartable dataset
      */
     public XYDataset createMultiNucleusOutline() throws ChartDatasetCreationException {

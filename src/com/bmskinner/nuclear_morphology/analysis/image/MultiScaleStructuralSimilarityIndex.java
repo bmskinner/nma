@@ -38,10 +38,15 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 public class MultiScaleStructuralSimilarityIndex {
+	
+	private static final String ZHOU_WANG = "Zhou Wang";
+	private static final String ROUSE_HEMAMI = "Rouse/Hemami";
+	private static final int MIN_IMAGE_DIMENSION_PIXELS = 32;
 	
 	public class MSSIMScore {
 		public final double luminance, contrast, structure, msSsimIndex;
@@ -54,7 +59,26 @@ public class MultiScaleStructuralSimilarityIndex {
 		}
 	}
 
+	/**
+	 * Calculate the MS-SSIM* index for the given images. Images must have the same dimensions,
+	 * and must be either byte, float or short.
+	 * @param inputImageA
+	 * @param inputImageB
+	 * @return
+	 */
 	public MSSIMScore calculateMSSIM(@NonNull ImageProcessor inputImageA, @NonNull ImageProcessor inputImageB) {
+		if(inputImageA.getWidth()!=inputImageB.getWidth())
+			throw new IllegalArgumentException(String.format("Widths unqual: %s and %s", inputImageA.getWidth(), inputImageB.getWidth()));
+		if(inputImageA.getHeight()!=inputImageB.getHeight())
+			throw new IllegalArgumentException(String.format("Heights unqual: %s and %s", inputImageA.getHeight(), inputImageB.getHeight()));
+		if(inputImageA.getHeight()<MIN_IMAGE_DIMENSION_PIXELS || inputImageA.getWidth()<MIN_IMAGE_DIMENSION_PIXELS)
+			throw new IllegalArgumentException(String.format("Image is too small: %sx%s", inputImageA.getWidth(), inputImageA.getHeight()));
+		if(inputImageA.getBitDepth()!=inputImageB.getBitDepth())
+			throw new IllegalArgumentException(String.format("Bit depths do not match: %s and %s", inputImageA.getBitDepth(), inputImageB.getBitDepth()));
+		if(inputImageA instanceof ColorProcessor)
+			throw new IllegalArgumentException("Cannot handle colour images");
+		
+		
 		ImageProcessor image_1_p, image_2_p;
 		int  pointer, filter_length, image_height, image_width, image_dimension, bits_per_pixel_1, bits_per_pixel_2, a, b, c;
 		float filter_weights [];
@@ -67,51 +91,10 @@ public class MultiScaleStructuralSimilarityIndex {
 		double ms_ssim_index;
 		double [] ssim_map;
 		double ssim_index;
-		//
-		// ERROR CONTROLS. TWO IMAGES SHOULD BE OPENED AND BOTH WITH THE SAME DIMENSIONS
-		//
-		// int[] wList = WindowManager.getIDList();
-		// if (wList==null) {
-		// 	IJ.error("There is no image open");
-		// 	return;
-		// }
-		// a = WindowManager.getImageCount();
-		// if (a!=2) {
-		// 	IJ.error("There must be two images open to calculate SSIM index");
-		// 	return;
-		// }
-		// image_1_imp = WindowManager.getImage(wList[0]);
-		// image_2_imp = WindowManager.getImage(wList[1]);
-		// image_height = image_1_imp.getHeight();
-		// a= image_2_imp.getHeight();
-		// if (a!=image_height) {
-		// 	IJ.error("Both images must have the same height");
-		// 	return;
-		// }
-		// image_width = image_1_imp.getWidth(); 
-		// a= image_2_imp.getWidth();
-		// if (a!=image_width) {
-		// 	IJ.error("Both images must have the same width");
-		// 	return;
-		// }
-		// if ((image_height < 32) | (image_width < 32)) {
-		// 	IJ.error("Miminum height and width must be 32 pixels");
-		// 	return;
-		// }
+
 		bits_per_pixel_1=inputImageA.getBitDepth();
 		bits_per_pixel_2=inputImageB.getBitDepth();
-		// if (bits_per_pixel_1 != bits_per_pixel_2){
-		// 	IJ.error("Both images must have the same number of bits per pixel");
-		// 	return;
-		// }
-		// if (bits_per_pixel_1 == 24){
-		// 	IJ.error("RGB images are not supportedl");
-		// 	return;
-		// }
-		//
-		// END OF CONTROL ERRORS
-		//	
-		//
+
 		// THIS DIALOG BOX SHOWS DIFFERENT OPTIONS TO CREATE THE WINDOW WE ARE GOING TO USE TO EVALUATE SSIM INDEX OVER THE ENTIRE IMAGES
 		//	
 		double sigma_gauss = 1.5;
@@ -128,8 +111,8 @@ public class MultiScaleStructuralSimilarityIndex {
 		boolean gaussian_window = true;
 		String[] window_type = {"Gaussian","Same weight"};  // WE CAN WEIGHTS THE WINDOW WITH A GAUSSIAN WEIGHTING FUNCTION OR GIVING THE SAME WEIGHT TO ALL THE PIXELS IN THE WINDOW
 		String window_selection = window_type[0];
-		String[] kind_of_algorithm = {"Zhou Wang","Rouse/Hemami"};  // WE CAN USE THE INDEX FOR THE SUPRA-THRESHOLD LEVEL (WANG)  OR THE RECOGNITION THRESHOLD (ROUSE/HEMAMI)
-		String algorithm_selection = kind_of_algorithm[1]; // DEFAULT TO ROUSE/HENAMI
+		String[] kind_of_algorithm = {ZHOU_WANG,ROUSE_HEMAMI};  // WE CAN USE THE INDEX FOR THE SUPRA-THRESHOLD LEVEL (WANG)  OR THE RECOGNITION THRESHOLD (ROUSE/HEMAMI)
+		String algorithm_selection = ROUSE_HEMAMI; // DEFAULT TO ROUSE/HENAMI
 		boolean out=false;
 		boolean show_ssim_map= false;
 
@@ -411,7 +394,7 @@ public class MultiScaleStructuralSimilarityIndex {
 			contrast [level] = 0;
 			structure [level] = 0;
 
-			if (algorithm_selection == "Zhou Wang") {
+			if (algorithm_selection.equals(ZHOU_WANG)) {
 
 				for (pointer =0; pointer<image_dimension; pointer++) {
 

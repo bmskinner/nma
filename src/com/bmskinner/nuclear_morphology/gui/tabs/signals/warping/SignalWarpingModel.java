@@ -18,9 +18,11 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +61,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 	private static final int KEY_COLUMN_INDEX = 5;
 	
 	/** images currently displayed */
-	final private List<WarpedImageKey> displayImages = new ArrayList<>(); 
+	final private Set<WarpedImageKey> displayImages = new LinkedHashSet<>(); 
 	
 	private volatile ImageCache cache = new ImageCache();
 	
@@ -273,7 +275,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
     private synchronized CellularComponent getCommonSelectedTarget() {
     	if(!isCommonTargetSelected())
     		return null;
-    	return displayImages.get(0).target;
+    	return displayImages.stream().findFirst().get().target;
     }
     
     /**
@@ -282,9 +284,9 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
      */
     private synchronized boolean isCommonTargetSelected() {
     	
-    	WarpedImageKey k = displayImages.get(0);
+    	WarpedImageKey k = displayImages.stream().findFirst().get();
     	for (WarpedImageKey j : displayImages) {
-    		if(!k.target.equals(j.target))
+    		if(!k.target.getID().equals(j.target.getID()))
     			return false;
     	}
     	return true;
@@ -452,7 +454,8 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
             	templateId = template.getId();
             	
             	this.target   = target;
-            	this.target.alignVertically();
+            	target.alignVertically();
+            	
                 this.targetName = targetName;
                 this.template = template;
                 this.signalGroupId = signalGroupId;

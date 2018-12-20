@@ -51,6 +51,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
@@ -213,10 +214,13 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         JMenuItem exportImageItem = new JMenuItem(EXPORT_IMAGE_LBL);
         exportImageItem.addActionListener(e->controller.exportImage());
         chartPanel.getPopupMenu().add(exportImageItem);
-        this.add(chartPanel, BorderLayout.CENTER);
 
         JPanel westPanel = createWestPanel();        
-        this.add(westPanel, BorderLayout.WEST);
+        
+        JSplitPane centrePanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, westPanel, chartPanel);
+        centrePanel.setDividerLocation(0.5);
+        add(centrePanel, BorderLayout.CENTER);
+        
         this.controller = new SignalWarpingDialogController(model, chartPanel, signalSelectionTable, settingsPanel);
     }
     
@@ -401,7 +405,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	JButton showQuantificationBtn = new JButton("Quantify sectors");
     	    	showQuantificationBtn.addActionListener(e->new Thread(()->new SectorQuantificationDialog(model)).start());
     	    	
-    	    	panel.add(showQuantificationBtn);
+//    	    	panel.add(showQuantificationBtn);
     	    	panel.add(showComparisonBtn);
     	    	panel.add(mssimScore);
 
@@ -521,7 +525,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     	        	int minThreshold = (int) minThresholdSpinner.getValue();
 
-    	        	Nucleus target = targetDataset.getCollection().getConsensus();
+    	        	Nucleus target = targetDataset.getCollection().getConsensus().duplicate().getVerticallyRotatedNucleus();
     	        	setSettingsEnabled(false);
 
     	            progressBar.setStringPainted(true);
