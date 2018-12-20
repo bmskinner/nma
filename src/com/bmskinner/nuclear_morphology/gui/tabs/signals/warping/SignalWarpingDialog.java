@@ -575,6 +575,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         signalSelectionTable.setCellSelectionEnabled(false);
         signalSelectionTable.setRowSelectionAllowed(true);
         signalSelectionTable.setColumnSelectionAllowed(false);
+        signalSelectionTable.setAutoCreateRowSorter(true);
         TableColumn keyColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
         signalSelectionTable.removeColumn(keyColumn);
         

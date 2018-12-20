@@ -84,17 +84,14 @@ public class SignalWarpingDialogController implements Loggable {
 				keys.add(model.getKey(selectedRow[i]));
 			}
 			DecimalFormat df = new DecimalFormat("0.000");
-			if(keys.size()==2 &&keys.get(0).getTarget().equals(keys.get(1).getTarget())) {
+			if(keys.size()==2 &&keys.get(0).getTarget().getID().equals(keys.get(1).getTarget().getID())) {
 				MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
 				MSSIMScore values = msi.calculateMSSIM(model.getImage(keys.get(0)), model.getImage(keys.get(1)));
 				settingsPanel.setMSSIM(df.format(values.msSsimIndex));
 			} else {
 				settingsPanel.setMSSIM("");
 			}
-			
-			
-			
-			
+
 			updateChart();
 		});
 	}

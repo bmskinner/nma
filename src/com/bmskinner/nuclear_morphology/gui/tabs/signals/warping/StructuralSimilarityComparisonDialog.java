@@ -22,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -77,8 +79,8 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		
 		
 		try {
-			TableModel compModel = createTableModel();
-			ExportableTable table = new ExportableTable(compModel);
+			
+			ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 			JScrollPane scrollPane = new JScrollPane(table);
 			scrollPane.setColumnHeaderView(table.getTableHeader());
 			
@@ -111,7 +113,12 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 			add(headerPanel, BorderLayout.NORTH);
 			add(centrePanel, BorderLayout.CENTER);
 			
-
+			ThreadManager.getInstance().execute( () ->{
+				TableModel compModel = createTableModel();
+				table.setModel(compModel);
+				table.setRowSorter(new TableRowSorter(compModel));
+			});
+			
 			makePerCellCharts();
 			
 		} catch(Exception e) {
@@ -126,7 +133,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		DecimalFormat df = new DecimalFormat("0.000");
 		DefaultTableModel compModel = new DefaultTableModel();
 		MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
-		Object[] columns = { "Key 1", "Key 2", "Luminance", "Contrast", "Structure", "MS-SSIM*"};
+		Object[] columns = { "Source 1", "Signal 1", "Source 2", "Signal 2", "Target", "Luminance", "Contrast", "Structure", "MS-SSIM*"};
 		compModel.setColumnIdentifiers(columns);
 		for(CellularComponent c : model.getTargets()) {
 			for(WarpedImageKey k1 : model.getKeys(c)) {
@@ -138,7 +145,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 					List<WarpedImageKey> keys = new ArrayList<>();
 					keys.add(k1);
 					keys.add(k2);
-					keys.sort((c1, c2)-> (c1.getSignalGroupName().compareTo(c2.getSignalGroupName())*10+c1.getTargetName().compareTo(c2.getTargetName())));
+					keys.sort((c1, c2)-> (c1.getSignalGroupName().compareTo(c2.getSignalGroupName())*10+c1.getTemplate().getName().compareTo(c2.getTemplate().getName())));
 					
 
 					ImageProcessor ip1 = model.getImage(keys.get(0));
@@ -146,7 +153,12 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 					finer(keys.get(0)+" vs "+keys.get(1));
 					MSSIMScore score = msi.calculateMSSIM(ip1, ip2);
 
-					Object[] rowData = { keys.get(0), keys.get(1), df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
+					Object[] rowData = { keys.get(0).getTemplate().getName(), 
+							keys.get(0).getSignalGroupName(), 
+							keys.get(1).getTemplate().getName(), 
+							keys.get(1).getSignalGroupName(), 
+							keys.get(1).getTargetName(), 
+							df.format(score.luminance), df.format(score.contrast),  df.format(score.structure),  df.format(score.msSsimIndex) };
 					if(!containsRow(rowData, compModel)) {
 						compModel.addRow(rowData);
 					}
@@ -208,10 +220,10 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 		for(ViolinKey key : scores.keySet()) {
 			List<Double> msssims = scores.get(key).stream().map(s->s.msSsimIndex).collect(Collectors.toList());
-			ds.add(msssims, key.colKey+" - msssim", key.rowKey);
+			ds.add(msssims, key.colKey, key.rowKey);
 
-			List<Double> values = scores.get(key).stream().map(s->s.structure).collect(Collectors.toList());
-			ds.add(values, key.colKey+" - structure", key.rowKey);
+//			List<Double> values = scores.get(key).stream().map(s->s.structure).collect(Collectors.toList());
+//			ds.add(values, key.colKey+" - structure", key.rowKey);
 		}
 
 		ViolinRenderer renderer = new ViolinRenderer();
