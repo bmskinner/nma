@@ -56,10 +56,18 @@ import com.bmskinner.nuclear_morphology.io.SVGWriter;
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
 
-    private ConsensusNucleusChartPanel consensusChartPanel;
+    private static final String MESH_FACES_LBL = "Mesh faces";
+	private static final String MESH_EDGES_LBL = "Mesh edges";
+	private static final String MESH_VERTICES_LBL = "Mesh vertices";
+	private static final String MESH_SIZE_LBL = "Mesh size";
+	private static final String SHOW_MESH_LBL = "Show mesh";
+	private static final String PANEL_TITLE = "Consensus panel";
+	
+	private ConsensusNucleusChartPanel consensusChartPanel;
     private JButton                    runRefoldingButton;
 
-    private JPanel offsetsPanel; // store controls for rotating and translating
+    /** Controls for rotating and translating the consensus */
+    private JPanel offsetsPanel;
 
     // Debugging tools for the nucleus mesh - not visible in the final panel
     private JCheckBox showMeshBox;
@@ -84,7 +92,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         });
 
         runRefoldingButton.setVisible(false);
-
         consensusChartPanel.add(runRefoldingButton);
 
         add(consensusChartPanel, BorderLayout.CENTER);
@@ -96,7 +103,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     
     @Override
     public String getPanelTitle(){
-        return "Consensus panel";
+        return PANEL_TITLE;
     }
 
     @Override
@@ -117,11 +124,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         JPanel rotatePanel = createRotationPanel();
         panel.add(rotatePanel, BorderLayout.NORTH);
 
-        /*
-         * Used for debugging only - do not include in releases
-         */
+        /* Used for debugging only - do not include in releases */
         JPanel meshPanel = createMeshPanel();
-        panel.add(meshPanel, BorderLayout.CENTER);
+//        panel.add(meshPanel, BorderLayout.CENTER);
 
         JPanel offsetPanel = createTranslatePanel();
         panel.add(offsetPanel, BorderLayout.SOUTH);
@@ -133,36 +138,31 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        showMeshBox = new JCheckBox("Show mesh");
+        showMeshBox = new JCheckBox(SHOW_MESH_LBL);
         showMeshBox.setSelected(false);
         showMeshBox.addChangeListener(this);
 
         SpinnerNumberModel meshSizeModel = new SpinnerNumberModel(10, 2, 100, 1);
         meshSizeSpinner = new JSpinner(meshSizeModel);
         meshSizeSpinner.addChangeListener(this);
-        meshSizeSpinner.setToolTipText("Mesh size");
+        meshSizeSpinner.setToolTipText(MESH_SIZE_LBL);
         JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner, "0");
         meshSizeSpinner.setEditor(meshNumberEditor);
         
-        showMeshVerticesBox = new JCheckBox("Mesh vertices");
+        showMeshVerticesBox = new JCheckBox(MESH_VERTICES_LBL);
         showMeshVerticesBox.setSelected(false);
         showMeshVerticesBox.setEnabled(false);
         showMeshVerticesBox.addChangeListener(this);
 
-        showMeshEdgesBox = new JCheckBox("Mesh edges");
+        showMeshEdgesBox = new JCheckBox(MESH_EDGES_LBL);
         showMeshEdgesBox.setSelected(true);
         showMeshEdgesBox.setEnabled(false);
         showMeshEdgesBox.addChangeListener(this);
 
-        showMeshFacesBox = new JCheckBox("Mesh faces");
+        showMeshFacesBox = new JCheckBox(MESH_FACES_LBL);
         showMeshFacesBox.setSelected(false);
         showMeshFacesBox.setEnabled(false);
         showMeshFacesBox.addChangeListener(this);
-
-        straightenMeshBox = new JCheckBox("Straighten mesh");
-        straightenMeshBox.setSelected(false);
-        straightenMeshBox.setEnabled(false);
-        straightenMeshBox.addChangeListener(this);
 
         panel.add(showMeshBox);
         panel.add(meshSizeSpinner);
@@ -375,9 +375,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         	activeDataset().getCollection().rotateConsensus(angle - 90);
         	update(activeDataset());
         	
-		} catch (RequestCancelledException e) {
-			return;
-		}
+		} catch (RequestCancelledException e) { }
     }
 
     private void resetConsensusNucleusRotation() {
@@ -439,9 +437,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         	File exportFile = getInputSupplier().requestFileSave(defaultFolder, defaultFileName, Io.SVG_FILE_EXTENSION_NODOT);
         	SVGWriter wr = new SVGWriter(exportFile);
         	wr.exportConsensusOutlines(getDatasets()); 
-		} catch (RequestCancelledException e) {
-			return;
-		}
+		} catch (RequestCancelledException e) {}
     }
 
     @Override
@@ -480,7 +476,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
     @Override
     public void stateChanged(ChangeEvent arg0) {
-
         this.update(getDatasets());
     }
 

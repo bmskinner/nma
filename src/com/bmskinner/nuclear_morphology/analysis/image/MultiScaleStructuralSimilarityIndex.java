@@ -42,12 +42,32 @@ import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+/**
+ * Calculate MS-SSIM* scores, using the algorithm from:
+ * David M. Rouse and Sheila S. Hemami, "Analyzing the Role of Visual Structure 
+ * in the Recognition of Natural Image Content with Multi-Scale SSIM," 
+ * Proc. SPIE Vol. 6806, Human Vision and Electronic Imaging 2008.
+ * This implementation was originally created as "MS_SSIM Index and MS_SSIM* Index as a Java plugin for ImageJ":
+ * http://www.ucm.es/info/fismed/MSSIM/MSSIM.htm
+ * @author Gabriel Prieto
+ * @author Margarita Chevalier
+ * @author Eduardo Guibelalde
+ * @since 1.15.0
+ *
+ */
 public class MultiScaleStructuralSimilarityIndex {
 	
 	private static final String ZHOU_WANG = "Zhou Wang";
 	private static final String ROUSE_HEMAMI = "Rouse/Hemami";
 	private static final int MIN_IMAGE_DIMENSION_PIXELS = 32;
+	private static final double DEFAULT_SIGMA_GAUSS = 1.5;
 	
+	/**
+	 * All the values calculated by MS-SSIM
+	 * @author ben
+	 * @since 1.15.0
+	 *
+	 */
 	public class MSSIMScore {
 		public final double luminance, contrast, structure, msSsimIndex;
 		
@@ -64,7 +84,7 @@ public class MultiScaleStructuralSimilarityIndex {
 	 * and must be either byte, float or short.
 	 * @param inputImageA
 	 * @param inputImageB
-	 * @return
+	 * @return the image MS-SSIM scores
 	 */
 	public MSSIMScore calculateMSSIM(@NonNull ImageProcessor inputImageA, @NonNull ImageProcessor inputImageB) {
 		if(inputImageA.getWidth()!=inputImageB.getWidth())
@@ -97,7 +117,7 @@ public class MultiScaleStructuralSimilarityIndex {
 
 		// THIS DIALOG BOX SHOWS DIFFERENT OPTIONS TO CREATE THE WINDOW WE ARE GOING TO USE TO EVALUATE SSIM INDEX OVER THE ENTIRE IMAGES
 		//	
-		double sigma_gauss = 1.5;
+		double sigma_gauss = DEFAULT_SIGMA_GAUSS;
 		int filter_width = 11;
 		double K1 = 0.01; 
 		double K2 = 0.03;
@@ -109,79 +129,17 @@ public class MultiScaleStructuralSimilarityIndex {
 		double number_of_levels = 5;
 		double downsampled=1;
 		boolean gaussian_window = true;
-		String[] window_type = {"Gaussian","Same weight"};  // WE CAN WEIGHTS THE WINDOW WITH A GAUSSIAN WEIGHTING FUNCTION OR GIVING THE SAME WEIGHT TO ALL THE PIXELS IN THE WINDOW
-		String window_selection = window_type[0];
-		String[] kind_of_algorithm = {ZHOU_WANG,ROUSE_HEMAMI};  // WE CAN USE THE INDEX FOR THE SUPRA-THRESHOLD LEVEL (WANG)  OR THE RECOGNITION THRESHOLD (ROUSE/HEMAMI)
+//		String[] window_type = {"Gaussian","Same weight"};  // WE CAN WEIGHTS THE WINDOW WITH A GAUSSIAN WEIGHTING FUNCTION OR GIVING THE SAME WEIGHT TO ALL THE PIXELS IN THE WINDOW
+//		String window_selection = window_type[0];
+//		String[] kind_of_algorithm = {ZHOU_WANG,ROUSE_HEMAMI};  // WE CAN USE THE INDEX FOR THE SUPRA-THRESHOLD LEVEL (WANG)  OR THE RECOGNITION THRESHOLD (ROUSE/HEMAMI)
 		String algorithm_selection = ROUSE_HEMAMI; // DEFAULT TO ROUSE/HENAMI
-		boolean out=false;
+//		boolean out=false;
 		boolean show_ssim_map= false;
 
-		String[] ssim_map_level_option = {"0", "1", "2", "3", "4", "5"};
-		String ssim_map_selection = ssim_map_level_option[0];
+//		String[] ssim_map_level_option = {"0", "1", "2", "3", "4", "5"};
+//		String ssim_map_selection = ssim_map_level_option[0];
 		int ssim_map_level=0;
-		boolean show_downsampled_images= false;
 
-		// 	while (!out){	
-		// 		out=true;
-		// 		GenericDialog gd = new GenericDialog ("MS-SSIM Index calculation");
-		// 		gd.addNumericField ("Standard deviation:", sigma_gauss, 1);
-		// 		gd.addChoice("Window type:", window_type, window_selection);
-		// 		gd.addChoice("Algorithm:", kind_of_algorithm, algorithm_selection);
-		// 		gd.addNumericField ("Filter width:",  filter_width, 0);
-		// 		gd.addNumericField ("K1:", K1, 2);
-		// 		gd.addNumericField ("K2:", K2, 2);
-		// 		gd.addNumericField ("Downsample image (prior to calculate MS-SSIM):", downsampled, 0);
-
-		// 		gd.addChoice("Show SSIM map (with exponents alfa, beta, gamma eq 1) at level: ", ssim_map_level_option, ssim_map_selection);	
-		// 		gd.addNumericField ("lod_11_33:", lod[0], 4, 7, "");	
-		// 		gd.addNumericField ("lod_12_32:", lod[1], 4, 7, "");
-		// 		gd.addNumericField ("lod_13_31:", lod[2], 4, 7, "");
-		// 		gd.addNumericField ("lod_21_23:", lod[3], 4, 7, "");
-		// 		gd.addNumericField ("lod_22:", lod[4], 4, 7, "");
-
-		// 		gd.showDialog();
-		// 		if (gd.wasCanceled()) return;
-		// 		sigma_gauss = gd.getNextNumber();
-		// 		window_selection = gd.getNextChoice();
-		// 		algorithm_selection = gd.getNextChoice();
-		// 		filter_width = (int) (gd.getNextNumber());
-		// 		K1 = gd.getNextNumber();
-		// 		K2 = gd.getNextNumber();
-		// 		downsampled =  (int) gd.getNextNumber ();
-		// 		ssim_map_level = gd.getNextChoiceIndex();
-		// 		lod[0] = lod[8]=gd.getNextNumber();
-		// 		lod[1] = lod[7]=gd.getNextNumber();
-		// 		lod[2] = lod[6]=gd.getNextNumber();
-		// 		lod[3] = lod[5]=gd.getNextNumber();
-		// 		lod[4] = gd.getNextNumber();
-		// //
-		// // WE  SHOW THE DIALOG BOX
-		// //
-		// 		double d;
-		// 		a = filter_width/2;
-		// 		d = filter_width -a*2;
-		// 		if (window_selection != "Gaussian") gaussian_window = false;
-		// 		if (d==0) {
-		// 			IJ.error("Filter width and heigth must be odd"); 
-		// 			out = false;
-		// 		}
-		// 		if (gaussian_window & sigma_gauss <= 0) {
-		// 			IJ.error("Sigma must be greater than 0");
-		// 			out = false;
-		// 		}
-		// 		if ((image_height/downsampled < 32) | (image_width/downsampled < 32)) {
-		// 			IJ.error("Miminum height must be 32 pixels (review downsample value)");
-		// 			out = false;
-		// 		}
-		// 		if (downsampled < 1) {
-		// 			IJ.error("Minimun value of Viewing scale must be 1");
-		// 			out = false;
-		// 		}
-		// 		if (downsampled != 1){
-		// 			show_downsampled_images = true;
-		// 		}
-		// 		gd.dispose();
-		// 	}
 		double C1 = (Math.pow(2, bits_per_pixel_1) - 1)*K1;
 		C1= C1*C1;
 		double C2 = (Math.pow(2, bits_per_pixel_1) - 1)*K2;
@@ -252,19 +210,6 @@ public class MultiScaleStructuralSimilarityIndex {
 		image_1_p= inputImageA.resize (image_width);
 		image_2_p= inputImageB.resize (image_width);
 
-		// if (show_downsampled_images) {
-		// 	title_1 = image_1_imp.getTitle();
-		// 	title_2 = image_2_imp.getTitle();
-		// 	title_1 = title_1 + " down scaled " + downsampled + " times";
-		// 	title_2 = title_2 + " down scaled " + downsampled + " times";
-		// 	ImagePlus image_1_final_imp = new ImagePlus (title_1, image_1_p);
-		// 	image_1_final_imp.show();
-		// 	image_1_final_imp.updateAndDraw();
-		// 	ImagePlus image_2_final_imp = new ImagePlus (title_2, image_2_p);
-		// 	image_2_final_imp.show();
-		// 	image_2_final_imp.updateAndDraw();
-		// }
-		//
 		// WE ARE GOING TO USE ARRAYS OF 6 LEVELS INSTEAD OF 5.
 		// WE WANT TO FORCE THAT THE INDEX OVER THE LEVEL WERE THE SAME THAN THE INDEX OVER THE ARRAY. 
 		// REMEMBER THAT IN JAVA THE FIRST INDEX OF AN ARRAY IS THE "0" POSITION. WE WILL NEVER USE THIS POSITION IN THE FOLLOWING THREE ARRAYS.
@@ -456,20 +401,6 @@ public class MultiScaleStructuralSimilarityIndex {
 			else 
 				luminance [level] =1;
 
-			// if (show_ssim_map) {	
-
-			// 	ssim_index = (double) suma / image_dimension;
-			// 	message_1= " ";
-			// 	message_2 = "SSIM_index:  " + ssim_index; 
-			// 	IJ.showProgress(1.0);
-			// 	IJ.showMessage (message_1, message_2);	
-			// 	ImageProcessor ssim_map_ip = new FloatProcessor (image_width, image_height, ssim_map);
-			// 	message_1= "SSIM Index at level " + level + ":  "+ ssim_index;
-			// 	ImagePlus ssim_map_imp = new ImagePlus (message_1, ssim_map_ip);
-			// 	ssim_map_imp.show();
-			// 	ssim_map_imp.updateAndDraw();	
-			// }	
-			//
 		} 	// END-FOR OF OUTER LOOP OVER THE DIFFERENT VIEWING LEVELS
 		//
 		for (level=1; level <=number_of_levels; level++) {
@@ -481,21 +412,6 @@ public class MultiScaleStructuralSimilarityIndex {
 		}
 		ms_ssim_index= luminance_comparison*contrast_comparison*structure_comparison;
 
-		// GenericDialog results = new GenericDialog ("RESULTS: MS-SSIM Index and components");
-		// results.addNumericField ("Luminance comparison: ", luminance_comparison, 5, 7, "");
-		// results.addNumericField ("Contrast comparison: ", contrast_comparison, 5, 7, "");
-		// results.addNumericField ("Structure comparison: ", structure_comparison, 5, 7, "");
-		// if (algorithm_selection == "Zhou Wang") 
-		// 	results.addNumericField ("MS-SSIM index Zhou Wang: ", ms_ssim_index, 5, 7, "");
-		// else
-		// 	results.addNumericField ("MS-SSIM index Rouse/Hemami: ", ms_ssim_index, 5, 7, "");
-		// results.showDialog();
-		// results.dispose();
-
-//		System.out.println("Luminance comparison: "+luminance_comparison);
-//		System.out.println("Contrast comparison: "+contrast_comparison);
-//		System.out.println("Structure comparison: "+structure_comparison);
-//		System.out.println("MS-SSIM index: "+ms_ssim_index);
 		MSSIMScore result = new MSSIMScore(luminance_comparison, contrast_comparison, structure_comparison, ms_ssim_index);
 		return result;
 	}

@@ -47,7 +47,7 @@ public class ConfigFileReader implements Loggable {
             File dir = Importer.getProgramDir();
 
             File ini = new File(dir, INI_FILE);
-            log("ini: " + ini.getAbsolutePath());
+            fine("ini: " + ini.getAbsolutePath());
 
             if (ini.exists()) {
                 // Read the properties
