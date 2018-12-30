@@ -230,7 +230,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     public class WarpingSettingsPanel extends JPanel implements ActionListener{
     	
 
-    	    private DatasetSelectionPanel datasetBoxOne;
+    	    private static final String QUANTIFY_SECTORS_LBL = "Quantify sectors";
+			private static final String MS_SSIM_LBL = "MS-SSIM*";
+			
+			private DatasetSelectionPanel datasetBoxOne;
     	    private DatasetSelectionPanel datasetBoxTwo;
 
     	    private SignalGroupSelectionPanel signalBox;
@@ -397,12 +400,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private JPanel createComparisonSettingsPanel() {
     	    	JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	    	
-    	    	JButton showComparisonBtn = new JButton("MS-SSIM");
-    	    	showComparisonBtn.addActionListener(e->new Thread(()->new StructuralSimilarityComparisonDialog(model)).start());
+    	    	JButton showComparisonBtn = new JButton(MS_SSIM_LBL);
+    	    	showComparisonBtn.addActionListener(e->new StructuralSimilarityComparisonDialog(model));
     	    	
     	    	mssimScore = new JLabel("");
     	    	
-    	    	JButton showQuantificationBtn = new JButton("Quantify sectors");
+    	    	JButton showQuantificationBtn = new JButton(QUANTIFY_SECTORS_LBL);
     	    	showQuantificationBtn.addActionListener(e->new Thread(()->new SectorQuantificationDialog(model)).start());
     	    	
 //    	    	panel.add(showQuantificationBtn);

@@ -61,6 +61,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 	
 	private SignalWarpingModel model;
+	private ExportableTable comparisonTable;
 	
 	private ChartPanel chartPanel;
 	
@@ -76,50 +77,24 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setModal(false);
-		
-		
+
 		try {
-			
-			ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
-			JScrollPane scrollPane = new JScrollPane(table);
-			scrollPane.setColumnHeaderView(table.getTableHeader());
-			
+
 			chartPanel = new ExportableChartPanel(ViolinChartFactory.createLoadingChart());
+
+			JPanel headerPanel = createHeaderPanel();
+			JPanel centrePanel = createCentrePanel();
 			
-			JPanel headerPanel = new JPanel(new FlowLayout());
-			headerPanel.add(getLoadingLabel());
-			headerPanel.add(progressBar);
-			
-			
-			JPanel centrePanel = new JPanel(new GridBagLayout());
-			
-			GridBagConstraints constraints = new GridBagConstraints();
-	        constraints.fill = GridBagConstraints.BOTH;
-	        constraints.gridx = 0;
-	        constraints.gridy = 0;
-	        constraints.gridheight = 1;
-	        constraints.gridwidth = 1;
-	        constraints.weightx = 0.5;
-	        constraints.weighty = 0.5;
-	        constraints.anchor = GridBagConstraints.CENTER;
-			
-			centrePanel.add(scrollPane, constraints);
-			
-			constraints.gridx = 1;
-	        constraints.gridy = 0;
-	        constraints.gridwidth = GridBagConstraints.REMAINDER;
-			centrePanel.add(chartPanel, constraints);
-			
-			add(headerPanel, BorderLayout.NORTH);
+//			add(headerPanel, BorderLayout.NORTH);
 			add(centrePanel, BorderLayout.CENTER);
 			
 			ThreadManager.getInstance().execute( () ->{
 				TableModel compModel = createTableModel();
-				table.setModel(compModel);
-				table.setRowSorter(new TableRowSorter(compModel));
+				comparisonTable.setModel(compModel);
+				comparisonTable.setRowSorter(new TableRowSorter(compModel));
 			});
 			
-			makePerCellCharts();
+//			makePerCellCharts();
 			
 		} catch(Exception e) {
 			stack(e);
@@ -127,6 +102,39 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		validate();
 		pack();
 		setVisible(true);
+	}
+	
+	private JPanel createHeaderPanel() {
+		JPanel headerPanel = new JPanel(new FlowLayout());
+		headerPanel.add(getLoadingLabel());
+		headerPanel.add(progressBar);
+		return headerPanel;
+	}
+	
+	private JPanel createCentrePanel() {
+		JPanel centrePanel = new JPanel(new GridBagLayout());
+		
+		GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridheight = 1;
+        constraints.gridwidth = 1;
+        constraints.weightx = 0.5;
+        constraints.weighty = 0.5;
+        constraints.anchor = GridBagConstraints.CENTER;
+        
+        comparisonTable = new ExportableTable(AbstractTableCreator.createLoadingTable());
+		JScrollPane scrollPane = new JScrollPane(comparisonTable);
+		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
+		
+		centrePanel.add(scrollPane, constraints);
+		
+		constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.gridwidth = GridBagConstraints.REMAINDER;
+//		centrePanel.add(chartPanel, constraints);
+        return centrePanel;
 	}
 
 	private TableModel createTableModel() {
