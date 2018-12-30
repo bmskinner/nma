@@ -209,7 +209,6 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
 	
 	@Override
 	public Consensus<Nucleus> duplicateConsensus() {
-		// TODO Auto-generated method stub
 		try {
 			return new DefaultConsensusNucleus(this, type);
 		} catch (UnprofilableObjectException e) {

@@ -448,7 +448,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     	String[] nameArray = names.stream().map(e->e.toString()).toArray(String[]::new);
 
     	try {
-    		int mergeOption = getInputSupplier().requestOption(nameArray, 0, "Choose segments to merge", "Merge");
+    		int mergeOption = getInputSupplier().requestOption(nameArray, "Choose segments to merge", "Merge");
     		SegMergeItem item = names.get(mergeOption);
     		this.setAnalysing(true);
     		SegmentationHandler sh = new SegmentationHandler(activeDataset());
@@ -492,7 +492,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     	String[] options = Arrays.stream(nameArray).map(s->s.getName()).toArray(String[]::new);
 
     	try {
-    		int option = getInputSupplier().requestOption(options, 0, "Choose segment to split", "Split segment");
+    		int option = getInputSupplier().requestOptionAllVisible(options, "Choose segment to split", "Split segment");
 
     		setAnalysing(true);
     		SegmentationHandler sh = new SegmentationHandler(activeDataset());
@@ -524,7 +524,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         String[] options = Arrays.stream(nameArray).map(s->s.getName()).toArray(String[]::new);
         
         try {
-    		int option = getInputSupplier().requestOption(options, 0, "Choose merged segment to unmerge", "Unmerge segment");
+    		int option = getInputSupplier().requestOption(options, "Choose merged segment to unmerge", "Unmerge segment");
 
     		setAnalysing(true);
     		SegmentationHandler sh = new SegmentationHandler(activeDataset());

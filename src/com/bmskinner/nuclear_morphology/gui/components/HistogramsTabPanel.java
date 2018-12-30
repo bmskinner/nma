@@ -155,10 +155,11 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
         DecimalFormat df = new DecimalFormat("#.##");
         String[] options = { "Filter collection", "Cancel", };
         
+        String title = "Confirm filter";
         String message = String.format("Filter between %s-%s?", df.format(lower), df.format(upper));
         
         try {
-        	int selected = this.getInputSupplier().requestOption(options, 0, message, "Confirm filter");
+        	int selected = getInputSupplier().requestOptionAllVisible(options, message, title);
         	return Optional.of(selected);
         } catch(RequestCancelledException e) {
         	return Optional.empty();

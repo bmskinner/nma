@@ -250,15 +250,14 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
 
 
 			try {
-				int result = getInputSupplier().requestOption(options, 0, String.format("Delete signal group %s in %s?", signalGroupName, d.getName()), "Delete signal group?");
+				int result = getInputSupplier().requestOptionAllVisible(options, String.format("Delete signal group %s in %s?", 
+						signalGroupName, d.getName()), "Delete signal group?");
 				if (result!=0) { 
 					d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
 					getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 				}
 
-			} catch (RequestCancelledException e1) {
-				// no action
-			}
+			} catch (RequestCancelledException e1) {} // no action
     	}
     	
     	@Override
