@@ -328,11 +328,6 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void setChannel(int channel) {
-		component.setChannel(channel);
-	}
-
-	@Override
 	public void setSourceFolder(File sourceFolder) {
 		component.setSourceFolder(sourceFolder);
 	}

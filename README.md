@@ -1,6 +1,6 @@
 # Nuclear Morphology Analysis version 1.15.0 #
 
-Copyright (C) Ben Skinner 2015-2018
+Copyright (C) Ben Skinner 2015-2019
 
 This software allows for automated detection of nuclei in images,
 and morphological analysis. It can recognise mouse sperm nuclei and

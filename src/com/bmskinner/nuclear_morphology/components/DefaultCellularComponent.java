@@ -24,7 +24,6 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,9 +41,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -105,7 +102,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private File sourceFile;
 
     /** The RGB channel in which this component was detected */
-    private int channel;
+    private final int channel;
 
     /**
      * The length of a micron in pixels. Allows conversion between pixels and SI
@@ -567,11 +564,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    @Override
 	public double getScale() {
         return this.scale;
     }
@@ -581,24 +573,22 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.scale = scale;
     }
 
-
-
     @Override
-	public synchronized boolean hasStatistic(PlottableStatistic stat) {
+	public synchronized boolean hasStatistic(final PlottableStatistic stat) {
         return this.statistics.containsKey(stat);
     }
 
     @Override
-    public synchronized double getStatistic(PlottableStatistic stat) {
+    public synchronized double getStatistic(final PlottableStatistic stat) {
         return this.getStatistic(stat, MeasurementScale.PIXELS);
     }
 
     @Override
-    public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
+    public synchronized double getStatistic(final PlottableStatistic stat, final MeasurementScale measurementScale) {
 
         if (this.statistics.containsKey(stat)) {
             double result = statistics.get(stat);
-            return stat.convert(result, this.scale, scale);
+            return stat.convert(result, this.scale, measurementScale);
         }
         
         double result = calculateStatistic(stat);
@@ -606,8 +596,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return result;
     }
 
-    protected double calculateStatistic(PlottableStatistic stat) {
-        double result = ERROR_CALCULATING_STAT;
+    protected double calculateStatistic(final PlottableStatistic stat) {
+        double result = Statistical.ERROR_CALCULATING_STAT;
 
         // Do not add getters for values added at creation time
         // or you'll get infinite loops when things break
@@ -630,7 +620,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-    public synchronized void setStatistic(PlottableStatistic stat, double d) {
+    public synchronized void setStatistic(final PlottableStatistic stat, double d) {
         this.statistics.put(stat, d);
     }
 
@@ -639,13 +629,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return this.statistics.keySet().toArray(new PlottableStatistic[0]);
     }
 
-    /**
-     * If any stats are listed as uncalcualted, attempt to calculate them
-     */
     @Override
 	public void updateDependentStats() {
-        for (PlottableStatistic stat : this.getStatistics()) {
-            if (this.getStatistic(stat) == STAT_NOT_CALCULATED)
+        for (PlottableStatistic stat : statistics.keySet()) {
+            if (this.getStatistic(stat) == Statistical.STAT_NOT_CALCULATED)
                 this.setStatistic(stat, calculateStatistic(stat));
         }
 

@@ -567,11 +567,6 @@ public class ShellDetector extends Detector {
 		}
 
 		@Override
-		public void setChannel(int channel) {
-			
-		}
-
-		@Override
 		public void setSourceFolder(File sourceFolder) {
 		}
 
