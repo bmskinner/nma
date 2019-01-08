@@ -75,7 +75,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();
 
-        JFreeChart chart = new ProfileChartFactory(options).makeVariabilityChart();
+        JFreeChart chart = new ProfileChartFactory(options).createVariabilityChart();
 
         chartPanel = new ExportableChartPanel(chart);
         chartPanel.getChartRenderingInfo().setEntityCollection(null);
@@ -187,7 +187,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new ProfileChartFactory(options).makeVariabilityChart();
+        return new ProfileChartFactory(options).createVariabilityChart();
     }
 
 }

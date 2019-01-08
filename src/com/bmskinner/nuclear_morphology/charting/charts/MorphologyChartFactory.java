@@ -156,7 +156,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
                 plot.getRenderer(1).setSeriesPaint(j, profileColour);
             }
         }
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
         return chart;
 
     }
@@ -262,7 +262,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
             plot.getRenderer().setSeriesVisibleInLegend(i, false);
         }
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
         return chart;
     }
 
@@ -318,7 +318,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             plot.addAnnotation(annotation);
             index++;
         }
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
         return chart;
     }
 

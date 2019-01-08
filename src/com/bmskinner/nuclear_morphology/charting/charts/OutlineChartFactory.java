@@ -263,7 +263,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         plot.getRenderer(0).setBasePaint(Color.BLACK);
         plot.getRenderer(0).setBaseSeriesVisible(true);
 
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
 
         return chart;
     }
@@ -363,7 +363,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         plot.setDataset(0, ds);
         plot.getRenderer(0).setBasePaint(Color.BLACK);
         plot.getRenderer(0).setBaseSeriesVisible(true);
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
         return chart;
     }
 
@@ -515,7 +515,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         if (options.hasComponent()) {
             drawImageAsAnnotation(plot, options.getCell(), options.getComponent(), true);
         }
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
         return chart;
 
     }
@@ -752,7 +752,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             i++;
 
         }
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
         return chart;
     }
 
@@ -997,7 +997,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
             }
         }
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
         return chart;
     }
 
@@ -1146,7 +1146,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         }
 
-        applyAxisOptions(chart);
+        applyDefaultAxisOptions(chart);
 
         return chart;
     }

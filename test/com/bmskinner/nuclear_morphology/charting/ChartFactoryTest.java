@@ -60,7 +60,7 @@ public abstract class ChartFactoryTest {
 				.setShowProfiles(true)
 				.build();
 		
-		showSingleChart(new ProfileChartFactory(options).createProfileChart(profile), options, title, false);
+		showSingleChart(new ProfileTestChartFactory(options).createProfileChart(profile), options, title, false);
 	}
 	
 	/**
@@ -77,7 +77,7 @@ public abstract class ChartFactoryTest {
 		
 		List<JPanel> panels = new ArrayList<>();
 		for(int i=0; i<profiles.size(); i++) {
-			panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(profiles.get(i)), options, names.get(i), false));
+			panels.add(makeChartPanel(new ProfileTestChartFactory(options).createProfileChart(profiles.get(i)), options, names.get(i), false));
 		}
 		showCharts(panels, title);
 	}

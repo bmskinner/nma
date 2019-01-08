@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.UUID;
-import java.util.concurrent.ForkJoinPool;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
@@ -169,13 +168,13 @@ public abstract class AbstractChartFactory implements Loggable {
     }
 
     /**
-     * Draw domain markers for the given border tag at the given position
+     * Draw a domain marker - a vertical line - for the given border tag at the given position
      * 
-     * @param plot
-     * @param tag
-     * @param value
+     * @param plot the plot
+     * @param tag the tag to use for colour selection
+     * @param value the domain axis value to draw at
      */
-    protected void addMarkerToXYPlot(XYPlot plot, Tag tag, double value) {
+    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Tag tag, final double value) {
         Color colour = chooseTagColour(tag);
         plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
     }
@@ -183,11 +182,11 @@ public abstract class AbstractChartFactory implements Loggable {
     /**
      * Draw domain markers for the given border tag at the given position
      * 
-     * @param plot
-     * @param tag
-     * @param value
+     * @param plot the plot
+     * @param tag the tag to use for colour selection
+     * @param value the domain axis value to draw at
      */
-    protected void addMarkerToXYPlot(XYPlot plot, Tag tag, int value) {
+    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Tag tag, final int value) {
         Color colour = chooseTagColour(tag);
         plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
     }
@@ -195,41 +194,35 @@ public abstract class AbstractChartFactory implements Loggable {
     /**
      * Get the appropriate colour for rendering tag markers
      * 
-     * @param tag
-     *            the tag to be rendered
+     * @param tag the tag to be rendered
      * @return the colour for the tag, or black if the tag was null or unknown
      */
-    private Color chooseTagColour(Tag tag) {
+    private Color chooseTagColour(final Tag tag) {
         Color colour = Color.BLACK;
 
-        if (tag.equals(Tag.ORIENTATION_POINT)) {
+        if (tag.equals(Tag.ORIENTATION_POINT))
             colour = Color.BLUE;
-        }
-        if (tag.equals(Tag.REFERENCE_POINT)) {
+        if (tag.equals(Tag.REFERENCE_POINT))
             colour = Color.ORANGE;
-        }
-        if (tag.getName().equals(BorderTag.INTERSECTION_POINT.toString())) {
+        if (tag.getName().equals(BorderTag.INTERSECTION_POINT.toString()))
             colour = Color.CYAN;
-        }
-        if (tag.getName().equals(BorderTag.TOP_VERTICAL.toString())) {
+        if (tag.getName().equals(BorderTag.TOP_VERTICAL.toString()))
             colour = Color.GRAY;
-        }
-        if (tag.getName().equals(BorderTag.BOTTOM_VERTICAL.toString())) {
+        if (tag.getName().equals(BorderTag.BOTTOM_VERTICAL.toString()))
             colour = Color.GRAY;
-        }
         return colour;
     }
 
     /**
-     * Create a new XY Line Chart, with vertical orientation, and set the
-     * background to white
+     * Create a new XY line Chart, with vertical orientation, and set the
+     * background to white.
      * 
      * @param xLabel the x axis label
      * @param yLabel the y axis label
      * @param ds the charting dataset
      * @return a chart with default settings
      */
-    protected static JFreeChart createBaseXYChart(String xLabel, String yLabel, XYDataset ds) {
+    protected static JFreeChart createBaseXYChart(final String xLabel, final String yLabel, final XYDataset ds) {
         JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, yLabel, ds, PlotOrientation.VERTICAL, false,
                 false, false);
 
@@ -238,8 +231,8 @@ public abstract class AbstractChartFactory implements Loggable {
 
         plot.getRenderer().setBaseToolTipGenerator(null);
         plot.getRenderer().setURLGenerator(null);
-        chart.setAntiAlias(true);
-//        chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias()); // disabled for performance testing
+//        chart.setAntiAlias(true);
+        chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias()); // disabled for performance testing
 
         return chart;
     }
@@ -252,7 +245,7 @@ public abstract class AbstractChartFactory implements Loggable {
      * @param yLabel the y axis label
      * @return a chart with default settings
      */
-    protected static JFreeChart createBaseXYChart(String xLabel, String yLabel) {
+    protected static JFreeChart createBaseXYChart(final String xLabel, final String yLabel) {
         return createBaseXYChart(xLabel, yLabel, null);
     }
 
@@ -270,8 +263,10 @@ public abstract class AbstractChartFactory implements Loggable {
      * Assuming there is a single XYDataset in the XYPlot of the chart, and a
      * single renderer, apply dataset colours based on position in the chart
      * options dataset list.
+     * 
+     * @param plot the plot to apply colours to 
      */
-    protected void applySingleXYDatasetColours(XYPlot plot) {
+    protected void applySingleXYDatasetColours(final XYPlot plot) {
         int seriesCount = plot.getDataset().getSeriesCount();
 
         XYItemRenderer renderer = plot.getRenderer();
@@ -289,7 +284,7 @@ public abstract class AbstractChartFactory implements Loggable {
      * @param chart
      * @param options
      */
-    protected void applyAxisOptions(JFreeChart chart) {
+    protected void applyDefaultAxisOptions(final JFreeChart chart) {
 
         Plot plot = chart.getPlot();
 

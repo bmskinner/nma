@@ -241,8 +241,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         ChartOptions options = new ChartOptionsBuilder().setShowXAxis(false).setShowYAxis(false).build();
 
-        JFreeChart mainChart = ProfileChartFactory.makeEmptyChart(null);
-        JFreeChart rangeChart = ProfileChartFactory.makeEmptyChart(null);
+        JFreeChart mainChart = ProfileChartFactory.createEmptyChart(null);
+        JFreeChart rangeChart = ProfileChartFactory.createEmptyChart(null);
 
         dualPanel.setCharts(mainChart, rangeChart);
         setButtonsEnabled(false);

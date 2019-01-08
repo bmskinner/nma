@@ -433,7 +433,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     private JPanel createChartPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        chartPanel = new ExportableChartPanel(ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
+        chartPanel = new ExportableChartPanel(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
 
         panel.add(chartPanel, BorderLayout.CENTER);
 
@@ -448,7 +448,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
         ProfileIndexFinder finder = new ProfileIndexFinder();
 
-        JFreeChart chart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
+        JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
 
         ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
         MorphologyChartFactory chf = new MorphologyChartFactory(options);
