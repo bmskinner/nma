@@ -19,6 +19,8 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
@@ -33,6 +35,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -98,5 +101,40 @@ public class NucleusTest {
 		int expectedY = 70;				
 		assertEquals("X int values", expectedX, nucleus.getCentreOfMass().getXAsInt());
 		assertEquals("Y int values", expectedY, nucleus.getCentreOfMass().getYAsInt());
+	}
+	
+	@Test
+	public void testAlignVertical() throws Exception {
+		nucleus.setBorderTag(Tag.TOP_VERTICAL, 10);
+		nucleus.setBorderTag(Tag.BOTTOM_VERTICAL, 20);
+		assertTrue(nucleus.hasBorderTag(Tag.TOP_VERTICAL));
+		assertTrue(nucleus.hasBorderTag(Tag.BOTTOM_VERTICAL));
+		
+		IPoint tvPre = nucleus.getBorderPoint(Tag.TOP_VERTICAL);
+		IPoint bvPre = nucleus.getBorderPoint(Tag.BOTTOM_VERTICAL);
+		assertFalse(Math.abs(tvPre.getX()-bvPre.getX())<1);
+		
+		nucleus.alignVertically();
+		IPoint tv = nucleus.getBorderPoint(Tag.TOP_VERTICAL);
+		IPoint bv = nucleus.getBorderPoint(Tag.BOTTOM_VERTICAL);
+		
+		assertEquals(tv.getX(), bv.getX(), 0.9);
+		assertTrue(tv.getY()>bv.getY());
+	}
+	
+	@Test
+	public void testGetVerticalNucleusIsIdenticalToAlignVertical() throws Exception {
+		nucleus.setBorderTag(Tag.TOP_VERTICAL, 10);
+		nucleus.setBorderTag(Tag.BOTTOM_VERTICAL, 20);
+		Nucleus vert = nucleus.getVerticallyRotatedNucleus();
+		
+		nucleus.alignVertically();
+		IPoint tv = nucleus.getBorderPoint(Tag.TOP_VERTICAL);
+		IPoint bv = nucleus.getBorderPoint(Tag.BOTTOM_VERTICAL);
+		IPoint vTv = vert.getBorderPoint(Tag.TOP_VERTICAL);
+		IPoint vBv = vert.getBorderPoint(Tag.BOTTOM_VERTICAL);
+		
+		assertEquals("Top vertical", tv, vTv);
+		assertEquals("Bottom vertical", bv, vBv);
 	}
 }
