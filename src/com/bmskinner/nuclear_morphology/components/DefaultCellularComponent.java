@@ -304,17 +304,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     /**
-     * Duplicate a component. The ID is kept consistent.
+     * Defensively dDuplicate a component. The ID is kept consistent.
      * 
      * @param a the template component
      */
     protected DefaultCellularComponent(CellularComponent a) {
     	finer("Constructing a new component from existing template component");
-        this.id = a.getID();
-        this.position = a.getPosition();
-        this.originalCentreOfMass = a.getOriginalCentreOfMass();
+        this.id = UUID.fromString(a.getID().toString());
+        this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);
+        this.originalCentreOfMass = IPoint.makeNew(a.getOriginalCentreOfMass());
         this.centreOfMass = IPoint.makeNew(a.getCentreOfMass());
-        this.sourceFile = a.getSourceFile();
+        this.sourceFile = new File(a.getSourceFile().getAbsolutePath());
         this.channel = a.getChannel();
         this.scale = a.getScale();
 
@@ -323,7 +323,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
                 this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
             } catch (Exception e) {
                 stack("Error getting " + stat + " from template", e);
-                this.setStatistic(stat, 0);
+                this.setStatistic(stat, Statistical.ERROR_CALCULATING_STAT);
             }
         }
 

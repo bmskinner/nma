@@ -402,9 +402,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-//        if (verticalNucleus != null)
-//            return verticalNucleus;
-
         // Make an exact copy of the nucleus
         finer("Creating vertical nucleus");
         Nucleus verticalNucleus = this.duplicate();
@@ -432,7 +429,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     }
 
     @Override
-    public void moveCentreOfMass(IPoint point) {
+    public void moveCentreOfMass(@NonNull IPoint point) {
 
         double diffX = point.getX() - getCentreOfMass().getX();
         double diffY = point.getY() - getCentreOfMass().getY();
@@ -559,7 +556,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     }
 
     @Override
-    public void flipXAroundPoint(IPoint p) {
+    public void flipXAroundPoint(@NonNull IPoint p) {
         super.flipXAroundPoint(p);
 
         for (UUID id : signalCollection.getSignalGroupIds()) {

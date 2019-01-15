@@ -152,13 +152,9 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     
     @Override
 	protected Nucleus createVerticallyRotatedNucleus() {
-    	Nucleus verticalNucleus = super.getVerticallyRotatedNucleus();
-    	verticalNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
-        if (verticalNucleus == null) {
-            fine("Unknown error creating vertical nucleus");
-            return null;
-        }
-
+    	Nucleus verticalNucleus = this.duplicate();
+        verticalNucleus.alignVertically();
+    	
         try {
     		/* Get the X position of the reference point */
     		double rpX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
@@ -168,18 +164,17 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
         	 * pointing to the right (i.e. anti-clockwise).
         	 */
     		clockwiseRP = rpX > verticalNucleus.getCentreOfMass().getX();
-    		orientationChecked = true;
            
            if(clockwiseRP) 
         	   verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
     		
     	} catch (UnavailableBorderTagException e) {
     		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
-    		orientationChecked = false;
     	}
         
-        verticalNucleus.offset(xOffset, yOffset);
-        verticalNucleus.rotate(rotOffset);
+//        verticalNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
+//        verticalNucleus.offset(xOffset, yOffset);
+//        verticalNucleus.rotate(rotOffset);
     	return verticalNucleus;
     }
     
@@ -199,8 +194,9 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
     	in.defaultReadObject();
-    	alignVertically();
-    	createVerticallyRotatedNucleus();    }
+//    	alignVertically();
+//    	createVerticallyRotatedNucleus();    
+    }
 
 	@Override
 	public IPoint currentOffset() {

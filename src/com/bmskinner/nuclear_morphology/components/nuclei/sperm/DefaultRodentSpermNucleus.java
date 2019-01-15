@@ -330,7 +330,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         return new FloatPolygon(xpoints, ypoints);
     }
     
-    protected Nucleus createVerticallyRotatedNucleus() {
+    @Override
+	protected Nucleus createVerticallyRotatedNucleus() {
     	Nucleus verticalNucleus = super.getVerticallyRotatedNucleus();
     	if (verticalNucleus == null) {
     		fine("Unknown error creating vertical nucleus");
