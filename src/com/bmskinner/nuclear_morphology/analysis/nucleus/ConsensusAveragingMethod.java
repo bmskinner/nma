@@ -132,12 +132,13 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         }
         
-        // Do not use DefaultNucleus::rotateVertically; it will not align properly
+        cons.component().alignVertically();
+        
 //        if (cons.component().hasBorderTag(Tag.TOP_VERTICAL) && cons.component().hasBorderTag(Tag.BOTTOM_VERTICAL)) {
 //            cons.component().alignPointsOnVertical(cons.component().getBorderPoint(Tag.TOP_VERTICAL), cons.component().getBorderPoint(Tag.BOTTOM_VERTICAL));
 //
-//            if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
-//                cons.component().flipXAroundPoint(cons.component().getCentreOfMass());
+            if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
+                cons.component().flipXAroundPoint(cons.component().getCentreOfMass());
 //        }
         return cons;
 
