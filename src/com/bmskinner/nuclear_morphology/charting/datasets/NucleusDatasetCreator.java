@@ -619,6 +619,21 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         	stack("Error getting nucleus angle profile from " + Tag.REFERENCE_POINT, e);
         	throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
+        
+        // Add the TV, BV as a series
+        try {
+			IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
+			IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+			
+			float[] xpoints = { (float) tv.getX(), (float) bv.getX() };
+			float[] ypoints = { (float) tv.getY(), (float) bv.getY() };
+			
+			float[][] data = { xpoints, ypoints };
+			ds.addSeries(TAG_PREFIX, data, ds.getSeriesCount());
+		} catch (UnavailableBorderTagException e) {
+			stack("Error getting border tags", e);
+		}
+        
         return ds;
     }
 

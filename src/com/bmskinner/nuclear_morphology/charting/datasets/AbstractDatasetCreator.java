@@ -31,6 +31,7 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
 
     protected final E options;
     
+    public static final String TAG_PREFIX             = "Tag_";
 	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
 	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
 	public static final String QUARTILE_SERIES_PREFIX = "Q";
