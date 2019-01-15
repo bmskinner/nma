@@ -70,7 +70,13 @@ import ij.process.ImageProcessor;
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
 
-    private static final long serialVersionUID = 1L;
+	/** the distance from a point to allow for searching an opposite border point*/
+    private static final int OPPOSITE_BORDER_INTERVAL_PIXELS = 4;
+    
+    /** The pixel spacing between border points after roi interpolation */
+	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
+	
+	private static final long serialVersionUID = 1L;
     private final UUID        id;
 
     /**
@@ -1097,7 +1103,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) {
         // Find the point that is closest to 180 degrees across the CoM
     	double distToCom = p.getLengthTo(centreOfMass);
-    	double gateRadius = 3; // the distance from each point to allow for searching
+    	
+    	// Checking the angle of every point is expensive.
+    	// We can filter out most of the points beforehand.
     	
     	// d1 = p1 to com
     	// d2 = com to p2
@@ -1111,15 +1119,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         	.filter(point->{
         		double d3 = point.getLengthTo(p);
         		double d1d2 = distToCom+point.getLengthTo(centreOfMass);
-        		return d1d2>d3-gateRadius && d1d2>d3+gateRadius;
+        		return d1d2>d3-OPPOSITE_BORDER_INTERVAL_PIXELS && d1d2>d3+OPPOSITE_BORDER_INTERVAL_PIXELS;
         	})
             .min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
-            .get();
+            .orElse(null); // TODO: backup solution?
     }
 
     @Override
     public IBorderPoint findOrthogonalBorderPoint(@NonNull IBorderPoint a) {
-        
         return borderList.stream()
                 .min(Comparator.comparing(point-> Math.abs(90-centreOfMass.findSmallestAngle(a, point)) ))
                 .get();
@@ -1127,7 +1134,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public IBorderPoint findClosestBorderPoint(@NonNull IPoint p) {
-        
         return borderList.stream()
                 .min(Comparator.comparing(point->point.getLengthTo(p) ))
                 .get();
@@ -1237,7 +1243,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         if(useSplineFitting)
         	roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
                 
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
+        FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, isSmooth);
 
         finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
