@@ -249,13 +249,6 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     double getMinY();
 
     /**
-     * Flip the nucleus on the x-axis (horizontally) about the given point
-     * 
-     * @param p the point with the x coordinate to flip on
-     */
-    void flipXAroundPoint(@NonNull IPoint p);
-
-    /**
      * Get the median distance between each pair of border points
      * 
      * @return

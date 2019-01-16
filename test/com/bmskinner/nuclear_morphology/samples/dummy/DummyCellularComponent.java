@@ -216,10 +216,15 @@ public class DummyCellularComponent implements CellularComponent {
 	public double getMinY() {
 		return component.getMinY();
 	}
+	
+	@Override
+	public void flipHorizontal() {
+		component.flipHorizontal(component.getCentreOfMass());		
+	}
 
 	@Override
-	public void flipXAroundPoint(IPoint p) {
-		component.flipXAroundPoint(p);		
+	public void flipHorizontal(IPoint p) {
+		component.flipHorizontal(p);		
 	}
 	
 	@Override

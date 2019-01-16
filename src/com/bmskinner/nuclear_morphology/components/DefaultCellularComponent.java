@@ -19,7 +19,9 @@ package com.bmskinner.nuclear_morphology.components;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
@@ -796,9 +798,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public double getMinY() {
         return bounds.getMinY();
     }
+    
+    @Override
+	public void flipHorizontal() {
+    	flipHorizontal(centreOfMass);
+    }
 
     @Override
-	public void flipXAroundPoint(@NonNull IPoint p) {
+	public void flipHorizontal(@NonNull IPoint p) {
 
         double xCentre = p.getX();
 
@@ -807,7 +814,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             double xNew = xCentre + dx;
             n.setX(xNew);
         }
-
     }
 
     @Override
@@ -1385,20 +1391,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public abstract void alignVertically();
 
+
+    
     @Override
     public void rotate(double angle) {
         if (angle != 0) {
-
+        	double rad = Math.toRadians(-angle); 
+        	AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
             for (IPoint p : borderList) {
-
-                IPoint newPoint = AngleTools.rotateAboutPoint(p, centreOfMass, angle);
-                // IPoint newPoint = getPositionAfterRotation(p, angle);
-                p.set(newPoint);
+            	Point2D result = tf.transform(p.toPoint2D(), null);
+                p.set(result);
             }
         }
         calculateBounds();
         shapeCache.clear();
-
     }
 
     /**

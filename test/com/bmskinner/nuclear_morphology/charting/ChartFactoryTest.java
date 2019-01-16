@@ -19,6 +19,8 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.junit.Before;
 
+import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -128,6 +130,22 @@ public abstract class ChartFactoryTest {
 		showCharts(panels, "Cells in dataset "+d.getName());
 	}
 	
+	public static JPanel makeConsensusChartPanel(IAnalysisDataset d) throws InterruptedException {
+//		List<JPanel> panels = new ArrayList<>();
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(d).build();
+		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeConsensusChart();
+		return makeChartPanel(chart, options, "Consensus", true);
+//		showCharts(panels, "Consensus");
+	}
+	
+	public static void showConsensus(IAnalysisDataset d) throws InterruptedException {
+		List<JPanel> panels = new ArrayList<>();
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(d).build();
+		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeConsensusChart();
+		panels.add(makeChartPanel(chart, options, "Consensus", true));
+		showCharts(panels, "Consensus");
+	}
+	
 	protected static void showSingleChart(JFreeChart chart, ChartOptions options, String variable, boolean fixedAspect) throws InterruptedException {
 		List<JPanel> panels = new ArrayList<>();
 		panels.add(makeChartPanel(chart, options, variable, fixedAspect));
@@ -158,7 +176,7 @@ public abstract class ChartFactoryTest {
 	 * @param the title of the window
 	 * @throws InterruptedException
 	 */
-	protected static void showCharts(List<JPanel> panels, String title) throws InterruptedException {
+	public static void showCharts(List<JPanel> panels, String title) throws InterruptedException {
 		JFrame f = new JFrame();
 		
 		JPanel content = new JPanel();

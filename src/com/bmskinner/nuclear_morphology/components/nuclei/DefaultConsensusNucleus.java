@@ -116,10 +116,10 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     	this.yOffset = yOffset;
     }
     
-    @Override
-	public void rotate(double angle) {
-    	this.rotOffset = angle;
-    }
+//    @Override
+//	public void rotate(double angle) {
+//    	this.rotOffset = angle;
+//    }
     
     @Override
 	public double currentRotation() {
@@ -152,30 +152,16 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     
     @Override
 	protected Nucleus createVerticallyRotatedNucleus() {
-    	Nucleus verticalNucleus = this.duplicate();
-        verticalNucleus.alignVertically();
+    	alignVertically();
     	
-        try {
-    		/* Get the X position of the reference point */
-    		double rpX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
-    		
-    		/*
-        	 * If the reference point X is greater than the centre of mass X, the nucleus is
-        	 * pointing to the right (i.e. anti-clockwise).
-        	 */
-    		clockwiseRP = rpX > verticalNucleus.getCentreOfMass().getX();
-           
-           if(clockwiseRP) 
-        	   verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-    		
+    	try {
+    		if (getBorderPoint(Tag.REFERENCE_POINT).getX() > getCentreOfMass().getX())
+    			flipHorizontal();
     	} catch (UnavailableBorderTagException e) {
     		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
     	}
-        
-//        verticalNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
-//        verticalNucleus.offset(xOffset, yOffset);
-//        verticalNucleus.rotate(rotOffset);
-    	return verticalNucleus;
+    	
+    	return this;
     }
     
     @Override

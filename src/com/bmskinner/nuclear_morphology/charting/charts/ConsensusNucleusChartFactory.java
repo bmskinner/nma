@@ -371,7 +371,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             }
             
             if(name.startsWith(NucleusDatasetCreator.TAG_PREFIX)) {
-            	plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
+            	plot.getRenderer().setSeriesStroke(i, new BasicStroke(8));
                 plot.getRenderer().setSeriesPaint(i, Color.BLUE);
             }
         }

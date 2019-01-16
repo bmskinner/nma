@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 import ij.process.Blitter;
 import ij.process.ColorProcessor;
@@ -124,12 +125,20 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
                 btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
             }
         }
+        
+        double angle = findVerticalRotationAngle(topPoint, btmPoint);
 
+        // Increase the canvas size so rotation does not crop the nucleus
+        finer("Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
+        ImageProcessor newIp = createEnlargedProcessor(ip, angle);
+
+        newIp.rotate(angle);
+        return newIp;
+    }
+    
+    private double findVerticalRotationAngle(IPoint top, IPoint bottom) {
         // Find which point is higher in the image
-        IPoint upperPoint = topPoint.getY() > btmPoint.getY() ? topPoint : btmPoint;
-        IPoint lowerPoint = upperPoint == topPoint ? btmPoint : topPoint;
-
-        IPoint comp = IPoint.makeNew(lowerPoint.getX(), upperPoint.getY());
+        IPoint comp = IPoint.makeNew(bottom.getX(), top.getY());
 
         /*
          * LA RA RB LB
@@ -145,38 +154,32 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
          * However, the image coordinates have a reversed Y axis
          */
 
-        double angleFromVertical = lowerPoint.findSmallestAngle(upperPoint, comp);
+        double angleFromVertical = bottom.findSmallestAngle(top, comp);
 
         double angle = 0;
-        if (topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)) {
+        if (top.isLeftOf(bottom) && top.isAbove(bottom)) {
             angle = 360 - angleFromVertical;
             // log("LA: "+angleFromVertical+" to "+angle); // Tested working
         }
 
-        if (topPoint.isRightOf(btmPoint) && topPoint.isAbove(btmPoint)) {
+        if (top.isRightOf(bottom) && top.isAbove(bottom)) {
             angle = angleFromVertical;
             // log("RA: "+angleFromVertical+" to "+angle); // Tested working
         }
 
-        if (topPoint.isLeftOf(btmPoint) && topPoint.isBelow(btmPoint)) {
+        if (top.isLeftOf(bottom) && top.isBelow(bottom)) {
             angle = angleFromVertical + 180;
             // angle = 180-angleFromVertical;
             // log("LB: "+angleFromVertical+" to "+angle); // Tested working
         }
 
-        if (topPoint.isRightOf(btmPoint) && topPoint.isBelow(btmPoint)) {
+        if (top.isRightOf(bottom) && top.isBelow(bottom)) {
             // angle = angleFromVertical+180;
             angle = 180 - angleFromVertical;
             // log("RB: "+angleFromVertical+" to "+angle); // Tested working
         }
-
-        // Increase the canvas size so rotation does not crop the nucleus
-        finer("Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
-        ImageProcessor newIp = createEnlargedProcessor(ip, angle);
-
-        newIp.rotate(angle);
-        return newIp;
-    }
+        return angle;
+      }
 
     protected ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees) {
 

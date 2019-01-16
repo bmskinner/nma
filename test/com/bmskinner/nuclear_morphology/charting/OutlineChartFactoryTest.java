@@ -32,6 +32,17 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 		
 	private static final boolean IS_FIXED_ASPECT = true;
 	
+	
+	public static void generateOutlineChart(@NonNull IAnalysisDataset dataset, @NonNull ICell cell) throws InterruptedException {
+		String title = new Exception().getStackTrace()[0].getMethodName();
+		List<JPanel> panels = new ArrayList<>();
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(dataset)
+				.setCell(cell)
+				.build();
+		JPanel outline = makeChartPanel(new OutlineChartFactory(options).makeCellOutlineChart(), options, title, IS_FIXED_ASPECT);
+		
+	}
+	
 	/**
 	 * Create and display outline and profile charts for all cells in the dataset
 	 * @param dataset
@@ -118,5 +129,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.segmented().build();
 		generateOutlineChartsForAllCells(d, null);
 	}
+	
+	
 
 }

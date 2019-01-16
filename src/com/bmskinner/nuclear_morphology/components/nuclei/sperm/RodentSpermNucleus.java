@@ -433,7 +433,7 @@ public class RodentSpermNucleus extends SpermNucleus {
             clockwiseRP = true; // this is only set to true, as the default is
                                 // false, and will become false after the
                                 // nucleus is flipped
-            verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+            verticalNucleus.flipHorizontal();
             verticalNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
         }
 

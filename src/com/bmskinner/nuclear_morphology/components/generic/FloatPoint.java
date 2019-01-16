@@ -95,6 +95,14 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         this.y = (float) p.getY();
     }
     
+    @Override
+    public void set(@NonNull Point2D p) {
+    	if (p==null)
+            throw new IllegalArgumentException("Destination point is null");
+        this.x = (float) p.getX();
+        this.y = (float) p.getY();
+    }
+    
     private double getLengthTo(final FloatPoint a) {
     	 // a2 = b2 + c2
         double dx = x - a.x;

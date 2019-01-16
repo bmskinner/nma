@@ -351,7 +351,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     		orientationChecked = true;
            
            if(clockwiseRP) 
-        	   verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+        	   verticalNucleus.flipHorizontal();
     		
     	} catch (UnavailableBorderTagException e) {
     		stack("Cannot get RP from vertical nucleus; returning default orientation", e);

@@ -1310,12 +1310,6 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         return true;
     }
 
-//    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//        // finest("\tWriting nucleus");
-//        out.defaultWriteObject();
-//        // finest("\tWrote nucleus");
-//    }
-
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
@@ -1349,5 +1343,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 	public double wrapIndex(double d) {
 		return CellularComponent.wrapIndex(d, getBorderLength());
 	}
+
+
 
 }

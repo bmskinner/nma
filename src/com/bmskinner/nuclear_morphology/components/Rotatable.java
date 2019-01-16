@@ -19,7 +19,9 @@ package com.bmskinner.nuclear_morphology.components;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 /**
  * Objects implementing this interface can be rotated by arbirtary amounts, and
@@ -46,61 +48,24 @@ public interface Rotatable extends Loggable {
      * @param topPoint the point to have the higher Y value
      * @param bottomPoint the point to have the lower Y value
      */
-    default void alignPointsOnVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
-
-        /*
-         * If the points are already aligned vertically, the rotation should not
-         * have any effect
-         */
-        double angleToRotate = 0;
-
-        IPoint upperPoint = topPoint.getY() > bottomPoint.getY() ? topPoint : bottomPoint;
-        IPoint lowerPoint = upperPoint == topPoint ? bottomPoint : topPoint;
-
-        IPoint comp = IPoint.makeNew(lowerPoint.getX(), upperPoint.getY());
-
-        /*
-         * LA RA RB LB
-         * 
-         * T C C T B C C B \ | | / \ | | / B B T T
-         * 
-         * When Ux<Lx, angle describes the clockwise rotation around L needed to
-         * move U above it. When Ux>Lx, angle describes the anticlockwise
-         * rotation needed to move U above it.
-         * 
-         * If L is supposed to be on top, the clockwise rotation must be 180+a
-         * 
-         */
-
-        double currentAngle = lowerPoint.findSmallestAngle(upperPoint, comp);
-
-        if (topPoint.isLeftOf(bottomPoint) && topPoint.isAbove(bottomPoint)) {
-            angleToRotate = 360 - currentAngle;
-            // log("LA: "+currentAngle+" to "+angleToRotate); // Tested working
-        }
-
-        if (topPoint.isRightOf(bottomPoint) && topPoint.isAbove(bottomPoint)) {
-            angleToRotate = currentAngle;
-            // log("RA: "+currentAngle+" to "+angleToRotate); // Tested working
-        }
-
-        if (topPoint.isLeftOf(bottomPoint) && topPoint.isBelow(bottomPoint)) {
-            angleToRotate = currentAngle + 180;
-            // angle = 180-angleFromVertical;
-            // log("LB: "+currentAngle+" to "+angleToRotate); // Tested working
-        }
-
-        if (topPoint.isRightOf(bottomPoint) && topPoint.isBelow(bottomPoint)) {
-            // angle = angleFromVertical+180;
-            angleToRotate = 180 - currentAngle;
-            // log("RB: "+currentAngle+" to "+angleToRotate); // Tested working
-        }
-
-        angleToRotate += 270; // dunno why this works. The basic code is copied
-                              // from
-        // the image import worker, and does not use an extra rotation
-
-        this.rotate(angleToRotate);
+    default void alignPointsOnVertical(final @NonNull IPoint topPoint, final @NonNull IPoint bottomPoint) {
+    	double angle = getAngleToRotateVertical(topPoint, bottomPoint);
+    	System.out.println("Rotate by "+angle);
+        rotate(angle);
+    }
+    
+    /**
+     * Find the clockwise angle in degrees required to place the top point above the bottom point
+     * such that their x coordinates are zero, and the y value of topPoint is greater than the y value
+     * of bottomPoint
+     * @param topPoint
+     * @param bottomPoint
+     * @return
+     */
+    static double getAngleToRotateVertical(final @NonNull IPoint topPoint, final @NonNull IPoint bottomPoint) {
+        // Take a vertical line from B to Bi. Rotate object by the absolute angle T-B-Bi 
+        IPoint bi = IPoint.makeNew(bottomPoint.getX(), bottomPoint.getY()+10);
+        return bottomPoint.findAbsoluteAngle(topPoint, bi);
     }
 
     /**
@@ -112,10 +77,21 @@ public interface Rotatable extends Loggable {
     void rotatePointToBottom(IPoint bottomPoint);
 
     /**
-     * Rotate the object by the given amount around the centre of mass
+     * Rotate the object by the given amount clockwise around the centre of mass
      * 
-     * @param angle
+     * @param angle the angle in degrees
      */
     void rotate(double angle);
+        
+    /**
+     * Flip the object horizontally, centred on the given point
+     * @param centre the point about which to flip
+     */
+    void flipHorizontal(IPoint centre);
+    
+    /**
+     * Flip the object horizontally about the centre of mass
+     */
+    void flipHorizontal();
 
 }

@@ -55,7 +55,7 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 				try {
 					ImageProcessor ip = cropToSquare(n);
 					ImagePlus imp = new ImagePlus("", ip);
-					String fileName = String.format("%s_%s_.tiff", n.getNameAndNumber(), c.getId());
+					String fileName = String.format("%s_%s.tiff", n.getNameAndNumber(), c.getId());
 					IJ.saveAsTiff(imp, new File(outFolder, fileName).getAbsolutePath());
 					fireProgressEvent();
 					

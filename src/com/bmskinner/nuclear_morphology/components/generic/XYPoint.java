@@ -44,10 +44,8 @@ public class XYPoint implements Serializable, Loggable, IPoint {
     /**
      * Constructor using doubles.
      *
-     * @param x
-     *            the x-coordinate
-     * @param y
-     *            the y-coordinate
+     * @param x the x-coordinate
+     * @param y the y-coordinate
      * @return An XYPoint at these coordinates
      */
     public XYPoint(final double x, final double y) {
@@ -59,8 +57,7 @@ public class XYPoint implements Serializable, Loggable, IPoint {
      * Constructor using XYPoint. Copies the x and y coordinates from the given
      * point
      *
-     * @param p
-     *            the XYPoint
+     * @param p point
      * @return An XYPoint at these coordinates
      */
     public XYPoint(final IPoint p) {
@@ -68,82 +65,50 @@ public class XYPoint implements Serializable, Loggable, IPoint {
         this.y = p.getY();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getX()
-     */
     @Override
     public double getX() {
         return this.x;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getY()
-     */
     @Override
     public double getY() {
         return this.y;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getXAsInt()
-     */
     @Override
     public int getXAsInt() {
         return (int) Math.round(x);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getYAsInt()
-     */
     @Override
     public int getYAsInt() {
         return (int) Math.round(y);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#setX(double)
-     */
     @Override
     public void setX(double x) {
         this.x = x;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#setY(double)
-     */
     @Override
     public void setY(double y) {
         this.y = y;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#set(components.generic.XYPoint)
-     */
     @Override
     public void set(IPoint p) {
         this.x = p.getX();
         this.y = p.getY();
     }
+    
+    @Override
+    public void set(@NonNull Point2D p) {
+    	if (p==null)
+            throw new IllegalArgumentException("Destination point is null");
+        this.x = p.getX();
+        this.y = p.getY();
+    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#getLengthTo(components.generic.IPoint)
-     */
     @Override
     public double getLengthTo(final IPoint a) {
 

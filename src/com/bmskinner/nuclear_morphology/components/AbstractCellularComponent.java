@@ -737,40 +737,29 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
 
     public double getMaxY() {
         return this.toShape().getBounds().getMaxY();
-        // double d = 0;
-        // for(int i=0;i<getBorderLength();i++){
-        // if(this.borderList.get(i).getY()>d){
-        // d = this.borderList.get(i).getY();
-        // }
-        // }
-        // return d;
     }
 
     public double getMinY() {
         return this.toShape().getBounds().getMinY();
-        // double d = getMaxY();
-        // for(int i=0;i<getBorderLength();i++){
-        // if(this.borderList.get(i).getY()<d){
-        // d = this.borderList.get(i).getY();
-        // }
-        // }
-        // return d;
     }
-
-    /*
-     * Flip the X positions of the border points around an X position
-     */
-    public void flipXAroundPoint(IPoint p) {
-        // log("Flipping about X");
-        double xCentre = p.getX();
+    
+	@Override
+	public void flipHorizontal(IPoint centre) {
+		 // log("Flipping about X");
+        double xCentre = centre.getX();
 
         for (IBorderPoint n : borderList) {
             double dx = xCentre - n.getX();
             double xNew = xCentre + dx;
             n.setX(xNew);
         }
+	}
 
-    }
+	@Override
+	public void flipHorizontal() {
+		flipHorizontal(this.centreOfMass);	
+	}
+
 
     public double getMedianDistanceBetweenPoints() {
         double[] distances = new double[this.borderList.size()];

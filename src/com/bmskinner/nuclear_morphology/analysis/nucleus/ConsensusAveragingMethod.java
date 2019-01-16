@@ -133,13 +133,9 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         }
         
         cons.component().alignVertically();
-        
-//        if (cons.component().hasBorderTag(Tag.TOP_VERTICAL) && cons.component().hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-//            cons.component().alignPointsOnVertical(cons.component().getBorderPoint(Tag.TOP_VERTICAL), cons.component().getBorderPoint(Tag.BOTTOM_VERTICAL));
-//
-            if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
-                cons.component().flipXAroundPoint(cons.component().getCentreOfMass());
-//        }
+
+        if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
+        	cons.component().flipHorizontal();
         return cons;
 
     }

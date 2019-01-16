@@ -395,7 +395,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public Nucleus getConsensus() {
-		return consensusNucleus.component().getVerticallyRotatedNucleus();
+		return consensusNucleus.component();//.getVerticallyRotatedNucleus();
 	}
 	
 	@Override
