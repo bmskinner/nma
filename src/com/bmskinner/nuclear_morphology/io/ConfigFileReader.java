@@ -82,7 +82,7 @@ public class ConfigFileReader implements Loggable {
         properties.setProperty(GlobalOptions.DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
         properties.setProperty(GlobalOptions.REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
         properties.setProperty(GlobalOptions.IS_DOCKABLE_INTERFACE_KEY, String.valueOf(op.isUseDockableInterface()));
-
+        properties.setProperty(GlobalOptions.IS_DEBUG_INTERFACE_KEY, String.valueOf(op.getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)));
         return properties;
 
     }
@@ -121,6 +121,9 @@ public class ConfigFileReader implements Loggable {
             
             if (GlobalOptions.IS_DOCKABLE_INTERFACE_KEY.equals(key))
                 op.setBoolean(GlobalOptions.IS_DOCKABLE_INTERFACE_KEY, Boolean.valueOf(value));
+            
+            if (GlobalOptions.IS_DEBUG_INTERFACE_KEY.equals(key))
+                op.setBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY, Boolean.valueOf(value));
 
         }
     }

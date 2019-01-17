@@ -64,6 +64,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -620,19 +621,21 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         	throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
         
-        // Add the TV, BV as a series
-        try {
-			IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-			IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
-			
-			float[] xpoints = { (float) tv.getX(), (float) bv.getX() };
-			float[] ypoints = { (float) tv.getY(), (float) bv.getY() };
-			
-			float[][] data = { xpoints, ypoints };
-			ds.addSeries(TAG_PREFIX, data, ds.getSeriesCount());
-		} catch (UnavailableBorderTagException e) {
-			stack("Error getting border tags", e);
-		}
+        // Add the TV, BV as a series only if the options are in debug mode
+        if(GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)) {
+        	try {
+        		IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
+        		IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+
+        		float[] xpoints = { (float) tv.getX(), (float) bv.getX() };
+        		float[] ypoints = { (float) tv.getY(), (float) bv.getY() };
+
+        		float[][] data = { xpoints, ypoints };
+        		ds.addSeries(TAG_PREFIX, data, ds.getSeriesCount());
+        	} catch (UnavailableBorderTagException e) {
+        		stack("Error getting border tags", e);
+        	}
+        }
         
         return ds;
     }
