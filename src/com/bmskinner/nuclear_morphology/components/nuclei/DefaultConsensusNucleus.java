@@ -116,10 +116,10 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     	this.yOffset = yOffset;
     }
     
-//    @Override
-//	public void rotate(double angle) {
-//    	this.rotOffset = angle;
-//    }
+    @Override
+	public void addRotation(double angle) {
+    	this.rotOffset = angle;
+    }
     
     @Override
 	public double currentRotation() {
@@ -152,16 +152,18 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     
     @Override
 	protected Nucleus createVerticallyRotatedNucleus() {
-    	alignVertically();
+    	Nucleus n = super.getVerticallyRotatedNucleus();
+    	
     	
     	try {
-    		if (getBorderPoint(Tag.REFERENCE_POINT).getX() > getCentreOfMass().getX())
-    			flipHorizontal();
+    		if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
+    			n.flipHorizontal();
     	} catch (UnavailableBorderTagException e) {
     		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
     	}
-    	
-    	return this;
+    	n.rotate(rotOffset);
+    	n.offset(xOffset, yOffset);
+    	return n;
     }
     
     @Override
@@ -180,8 +182,7 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
     	in.defaultReadObject();
-//    	alignVertically();
-//    	createVerticallyRotatedNucleus();    
+    	alignVertically();
     }
 
 	@Override

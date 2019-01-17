@@ -50,7 +50,6 @@ public interface Rotatable extends Loggable {
      */
     default void alignPointsOnVertical(final @NonNull IPoint topPoint, final @NonNull IPoint bottomPoint) {
     	double angle = getAngleToRotateVertical(topPoint, bottomPoint);
-    	System.out.println("Rotate by "+angle);
         rotate(angle);
     }
     

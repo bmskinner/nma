@@ -421,7 +421,7 @@ public class CellCollection implements ICellCollection {
 
 	@Override
 	public void rotateConsensus(double degrees) {
-		consensusNucleus.rotate(degrees);
+		consensusNucleus.addRotation(degrees);
 	}
 
     /**

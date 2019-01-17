@@ -6,30 +6,32 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
+import com.bmskinner.nuclear_morphology.charting.OutlineTestChartFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
-public class RotatableTest {
+public class RotatableTest extends ComponentTester {
 	
-	private void assertAreVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
-		double err = bottomPoint.getX()-topPoint.getX();
-		System.out.println("Error = "+err);
-		assertEquals(bottomPoint.getX(), topPoint.getX(), 0.0001);
-		
-		assertTrue(topPoint.getY()>bottomPoint.getY());
+	@Before
+	public void setUp() throws Exception{
+		super.setUp();
+		logger.setLevel(Level.INFO);
 	}
-	
+
 	@Test
 	public void testAlignVertical() {
 
@@ -44,10 +46,10 @@ public class RotatableTest {
 
 			t = AngleTools.rotateAboutPoint(t, c, angle);
 			b = AngleTools.rotateAboutPoint(b, c, angle);
-			System.out.println("A: "+angle);
-			System.out.println("T: "+t.toString());
-			System.out.println("B: "+b.toString());
-			assertAreVertical(t, b);
+			logger.fine("A: "+angle);
+			logger.fine("T: "+t.toString());
+			logger.fine("B: "+b.toString());
+			assertTrue(areVertical(t, b));
 
 		}
 	}
@@ -71,28 +73,37 @@ public class RotatableTest {
 
 				IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1)
 						.ofType(NucleusType.ROUND)
-						.withMaxSizeVariation(10)
+						.withMaxSizeVariation(0)
 						.randomOffsetProfiles(true)
 						.segmented().build();
 
-				for(Nucleus n : d.getCollection().getNuclei()) {
-					System.out.println("Testing "+tIndex+" and "+bIndex);
+				for(ICell c : d.getCollection()) {
+					List<JPanel> panels = new ArrayList<>();
+					
+					Nucleus n = c.getNucleus();
+					logger.info("Testing "+tIndex+" and "+bIndex+" of "+length);
 					n.setBorderTag(Tag.TOP_VERTICAL, tIndex);
 					n.setBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
-
+					panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
 					IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
 					IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
-					System.out.println("TV: "+tv);
-					System.out.println("BV: "+bv);
+					logger.fine("TV: "+tv);
+					logger.fine("BV: "+bv);
 
 					n.alignVertically();
 					tv = n.getBorderPoint(Tag.TOP_VERTICAL);
 					bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
-					System.out.println("TV: "+tv);
-					System.out.println("BV: "+bv);
-					assertAreVertical(tv, bv);
+					logger.fine("TV: "+tv);
+					logger.fine("BV: "+bv);
+					
+					panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
+
+					boolean areVertical = areVertical(tv, bv);
+//					if(!areVertical)
+//						ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
+					assertTrue(areVertical);
 				}
 			}
 

@@ -90,42 +90,6 @@ public class DefaultCellCollectionTest extends ComponentTester {
 		assertTrue(c.isReal());
 	}
 	
-	@Test
-	public void testGetConsensusOrientsVertically() throws Exception {
-		
-		ProfileManager m = c.getProfileManager();
-		IProfile p = c.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		m.updateBorderTag(Tag.TOP_VERTICAL, 0);
-		m.updateBorderTag(Tag.BOTTOM_VERTICAL, 10);
-		new ConsensusAveragingMethod(d).call();
-		
-		for(int tIndex=0; tIndex<p.size(); tIndex++) {
-			for(int bIndex=0; bIndex<p.size(); bIndex++) {
-				if(tIndex==bIndex)
-					continue;
-				if(Math.abs(tIndex-bIndex)<5)
-					continue;
-				m.updateBorderTag(Tag.TOP_VERTICAL, tIndex);
-				m.updateBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
 
-				assertTrue(c.hasConsensus());
-
-				List<JPanel> panels = new ArrayList<>();
-				panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
-				ChartFactoryTest.showCharts(panels, "Consensus: "+tIndex+" - "+bIndex);
-				
-				
-				Nucleus n = c.getConsensus(); // is aligned vertically
-				IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-				IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
-				IPoint bi = IPoint.makeNew(bv.getX(), bv.getY()+10);
-				assertEquals(tIndex+" and "+bIndex, 0, bv.findSmallestAngle(tv, bi), 0.1);
-//				assertEquals(tIndex+" and "+bIndex, tv.getX(), bv.getX(), 0.001);
-//				assertTrue(tIndex+" and "+bIndex, tv.getY()>bv.getY());
-				
-			}
-		}
-		
-	}
 
 }

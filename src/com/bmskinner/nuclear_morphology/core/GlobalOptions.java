@@ -56,6 +56,8 @@ public class GlobalOptions extends AbstractHashOptions {
     public static final String IS_CONVERT_DATASETS_KEY      = "CONVERT_DATASETS";
     
     public static final String IS_DOCKABLE_INTERFACE_KEY    = "DOCKABLE_INTERFACE";
+    
+    public static final String IS_DEBUG_INTERFACE_KEY    = "USE_DEBUG_INTERFACE";
 
     private File defaultDir; // where to fall back to for finding images or
                              // saving files
@@ -109,6 +111,7 @@ public class GlobalOptions extends AbstractHashOptions {
         setBoolean(REFOLD_OVERRIDE_KEY, false);
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
         setBoolean(IS_DOCKABLE_INTERFACE_KEY, true);
+        setBoolean(IS_DEBUG_INTERFACE_KEY, false);
         this.datasetExportFormat = ExportFormat.JAVA;
     }
 

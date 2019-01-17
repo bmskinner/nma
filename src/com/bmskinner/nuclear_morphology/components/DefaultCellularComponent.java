@@ -316,7 +316,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);
         this.originalCentreOfMass = IPoint.makeNew(a.getOriginalCentreOfMass());
         this.centreOfMass = IPoint.makeNew(a.getCentreOfMass());
-        this.sourceFile = new File(a.getSourceFile().getAbsolutePath());
+        this.sourceFile = new File(a.getSourceFile().getPath());
         this.channel = a.getChannel();
         this.scale = a.getScale();
 
@@ -1398,7 +1398,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         if (angle != 0) {
         	double rad = Math.toRadians(-angle); 
         	AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
-            for (IPoint p : borderList) {
+            for (IBorderPoint p : borderList) {
             	Point2D result = tf.transform(p.toPoint2D(), null);
                 p.set(result);
             }

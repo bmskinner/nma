@@ -125,7 +125,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         /* Used for debugging only - do not include in releases */
         JPanel meshPanel = createMeshPanel();
-//        panel.add(meshPanel, BorderLayout.CENTER);
+        
+        if(GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY))
+        	panel.add(meshPanel, BorderLayout.CENTER);
 
         JPanel offsetPanel = createTranslatePanel();
         panel.add(offsetPanel, BorderLayout.SOUTH);
@@ -168,7 +170,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         panel.add(showMeshVerticesBox);
         panel.add(showMeshEdgesBox);
         panel.add(showMeshFacesBox);
-//        panel.add(straightenMeshBox);
 
         return panel;
 
@@ -242,7 +243,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     private void rotateConsensus(double degrees) {
     	Refoldable<Nucleus> collection = activeDataset().getCollection();
     	if (collection.hasConsensus()) {
-    		collection.rotateConsensus(collection.currentConsensusRotation()+degrees);
+    		collection.rotateConsensus(collection.currentConsensusRotation()-degrees);
             refreshChartCache(getDatasets());
         }
     }

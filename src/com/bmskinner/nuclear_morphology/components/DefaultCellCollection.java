@@ -395,7 +395,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public Nucleus getConsensus() {
-		return consensusNucleus.component();//.getVerticallyRotatedNucleus();
+		return consensusNucleus.component().getVerticallyRotatedNucleus();
 	}
 	
 	@Override
@@ -407,7 +407,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public void rotateConsensus(double degrees) {
 		if(consensusNucleus!=null)
-			consensusNucleus.rotate(degrees);
+			consensusNucleus.addRotation(degrees);
 	}
 	
 	@Override

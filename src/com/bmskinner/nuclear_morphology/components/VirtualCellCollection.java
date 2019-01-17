@@ -413,7 +413,7 @@ public class VirtualCellCollection implements ICellCollection {
 	@Override
 	public void rotateConsensus(double degrees) {
 		if(consensusNucleus!=null)
-			consensusNucleus.rotate(degrees);
+			consensusNucleus.addRotation(degrees);
 	}
 	
 	@Override

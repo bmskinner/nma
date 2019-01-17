@@ -457,7 +457,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public void alignVertically() {
-
     	boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
 
     	if (useTVandBV) {
@@ -471,10 +470,10 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     			IPoint[] points = getBorderPointsForVerticalAlignment();
 //    			System.out.println("Before rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
-    			fine("Before rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
+//    			fine("Before rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
     			alignPointsOnVertical(points[0], points[1]);
 //    			System.out.println("After rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
-    			fine("After rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
+//    			fine("After rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
 
     		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
     			stack("Cannot get border tag or profile", e);
@@ -516,43 +515,45 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         topPoint = this.getBorderPoint(Tag.TOP_VERTICAL);
         bottomPoint = this.getBorderPoint(Tag.BOTTOM_VERTICAL);
-
-        // Find the border points between the top and bottom verticals
-        List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();
-
-        int topIndex = this.getBorderIndex(Tag.TOP_VERTICAL);
-        int btmIndex = this.getBorderIndex(Tag.BOTTOM_VERTICAL);
-        int totalSize = this.getProfile(ProfileType.ANGLE).size();
-
-        // A segment has built in methods for iterating through just the points
-        // it contains
-        // TODO: This has problems if we have short regions. Replace.
-        IBorderSegment region = new OpenBorderSegment(topIndex, btmIndex, totalSize);
-
-        int index = topIndex;
-
-        Iterator<Integer> it = region.iterator();
-
-        while (it.hasNext()) {
-            index = it.next();
-            pointsInRegion.add(this.getBorderPoint(index));
-        }
-
-        // As an anti-bibble defence, get a best fit line acrosss the region
-        // Use the line of best fit to find appropriate top and bottom vertical
-        // points
-        LineEquation eq = DoubleEquation.calculateBestFitLine(pointsInRegion);
-//        System.out.println("Best fit: "+eq);
-
-        // Take values along the best fit line that are close to the original TV
-        // and BV
-
-        IPoint top = IPoint.makeNew(topPoint.getX(), eq.getY(topPoint.getX()));
-        IPoint btm = IPoint.makeNew(bottomPoint.getX(), eq.getY(bottomPoint.getX()));
         
-//        System.out.println("Alignment point top: "+top);
-//        System.out.println("Alignment point bottom: "+btm);
-        return new IPoint[] { top, btm };
+        return new IPoint[] { topPoint, bottomPoint };
+
+//        // Find the border points between the top and bottom verticals
+//        List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();
+//
+//        int topIndex = this.getBorderIndex(Tag.TOP_VERTICAL);
+//        int btmIndex = this.getBorderIndex(Tag.BOTTOM_VERTICAL);
+//        int totalSize = this.getProfile(ProfileType.ANGLE).size();
+//
+//        // A segment has built in methods for iterating through just the points
+//        // it contains
+//        // TODO: This has problems if we have short regions. Replace.
+//        IBorderSegment region = new OpenBorderSegment(topIndex, btmIndex, totalSize);
+//
+//        int index = topIndex;
+//
+//        Iterator<Integer> it = region.iterator();
+//
+//        while (it.hasNext()) {
+//            index = it.next();
+//            pointsInRegion.add(this.getBorderPoint(index));
+//        }
+//
+//        // As an anti-bibble defence, get a best fit line acrosss the region
+//        // Use the line of best fit to find appropriate top and bottom vertical
+//        // points
+//        LineEquation eq = DoubleEquation.calculateBestFitLine(pointsInRegion);
+////        System.out.println("Best fit: "+eq);
+//
+//        // Take values along the best fit line that are close to the original TV
+//        // and BV
+//
+//        IPoint top = IPoint.makeNew(topPoint.getX(), eq.getY(topPoint.getX()));
+//        IPoint btm = IPoint.makeNew(bottomPoint.getX(), eq.getY(bottomPoint.getX()));
+//        
+////        System.out.println("Alignment point top: "+top);
+////        System.out.println("Alignment point bottom: "+btm);
+//        return new IPoint[] { top, btm };
 
     }
     

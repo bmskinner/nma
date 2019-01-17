@@ -13,7 +13,7 @@ public interface Consensus<E extends CellularComponent> {
 
 	void offset(double xOffset, double yOffset);
 
-	void rotate(double angle);
+	void addRotation(double angle);
 
 	double currentRotation();
 
