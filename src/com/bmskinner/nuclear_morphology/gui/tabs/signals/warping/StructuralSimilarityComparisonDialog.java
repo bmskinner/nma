@@ -4,25 +4,48 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
 
+import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
+import com.bmskinner.ViolinPlots.ViolinRenderer;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
@@ -40,15 +63,16 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 	
-	private SignalWarpingModel model;
+	private final SignalWarpingModel model;
 	private final ExportableTable comparisonTable;
 	
 	private final ChartPanel chartPanel;
 	
 	private final JProgressBar progressBar = new JProgressBar(0, 100);
 	
-	public StructuralSimilarityComparisonDialog(SignalWarpingModel model) {
+	public StructuralSimilarityComparisonDialog(@NonNull final SignalWarpingModel model) {
 		super();
+		fine("Creating MS-SSIM dialog");
 		this.model = model;
 		chartPanel = new ExportableChartPanel(ViolinChartFactory.createLoadingChart());
 		comparisonTable = new ExportableTable(AbstractTableCreator.createLoadingTable());
@@ -56,13 +80,13 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		JPanel headerPanel = createHeaderPanel();
 		JPanel centrePanel = createCentrePanel();
 		
+		setLayout(new BorderLayout());
 //		add(headerPanel, BorderLayout.NORTH);
 		add(centrePanel, BorderLayout.CENTER);
 		
 		setLocationRelativeTo(null);
 		centerOnScreen();
 		setTitle(DIALOG_TITLE);
-		setLayout(new BorderLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setModal(false);
 		
@@ -77,9 +101,11 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 			
 		} catch(Exception e) {
 			stack(e);
+			comparisonTable.setModel(AbstractTableCreator.createBlankTable());
 		}
 		validate();
 		pack();
+		fine("Showing MS-SSIM dialog");
 		setVisible(true);
 	}
 	
@@ -91,26 +117,28 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	}
 	
 	private JPanel createCentrePanel() {
-		JPanel centrePanel = new JPanel(new GridBagLayout());
+//		JPanel centrePanel = new JPanel(new GridBagLayout());
 		
-		GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridheight = 1;
-        constraints.gridwidth = 1;
-        constraints.weightx = 0.5;
-        constraints.weighty = 0.5;
-        constraints.anchor = GridBagConstraints.CENTER;
+		JPanel centrePanel = new JPanel(new BorderLayout());
+		
+//		GridBagConstraints constraints = new GridBagConstraints();
+//        constraints.fill = GridBagConstraints.BOTH;
+//        constraints.gridx = 0;
+//        constraints.gridy = 0;
+//        constraints.gridheight = 1;
+//        constraints.gridwidth = 1;
+//        constraints.weightx = 0.5;
+//        constraints.weighty = 0.5;
+//        constraints.anchor = GridBagConstraints.CENTER;
         
 		JScrollPane scrollPane = new JScrollPane(comparisonTable);
 		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
+		centrePanel.add(scrollPane, BorderLayout.CENTER);
+//		centrePanel.add(scrollPane, constraints);
 		
-		centrePanel.add(scrollPane, constraints);
-		
-		constraints.gridx = 1;
-        constraints.gridy = 0;
-        constraints.gridwidth = GridBagConstraints.REMAINDER;
+//		constraints.gridx = 1;
+//        constraints.gridy = 0;
+//        constraints.gridwidth = GridBagConstraints.REMAINDER;
 //		centrePanel.add(chartPanel, constraints);
         return centrePanel;
 	}
@@ -205,7 +233,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //		ThreadManager.getInstance().execute(calc);		
 //
 //	}
-	
+//	
 //	private JFreeChart makeCharts(Map<ViolinKey, List<MSSIMScore>> scores) {
 //		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 //		for(ViolinKey key : scores.keySet()) {
@@ -221,7 +249,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //		valueAxis.setRange(0, 1);
 //		return new JFreeChart("", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
 //	}
-	
+//	
 //	/**
 //	 * A key for values entered into the violin datasets
 //	 * @author bms41
@@ -425,6 +453,6 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //	        }
 //	    }
 //	}
-	
+//	
 
 }
