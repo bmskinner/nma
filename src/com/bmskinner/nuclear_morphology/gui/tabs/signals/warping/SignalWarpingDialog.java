@@ -213,6 +213,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private JCheckBox enhanceBox;
     	    private JCheckBox binariseBox;
     	    private JLabel mssimScore;
+    	    private JButton showComparisonBtn;
     	    
     	    public WarpingSettingsPanel() {
     	    	
@@ -367,7 +368,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    private JPanel createComparisonSettingsPanel() {
     	    	JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	    	
-    	    	JButton showComparisonBtn = new JButton(MS_SSIM_LBL);
+    	    	showComparisonBtn = new JButton(MS_SSIM_LBL);
     	    	showComparisonBtn.addActionListener(e->new StructuralSimilarityComparisonDialog(model));
     	    	
     	    	mssimScore = new JLabel("");
@@ -443,6 +444,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        pseudocolourBox.setEnabled(b);
     	        enhanceBox.setEnabled(b);
     	        binariseBox.setEnabled(b);
+    	        showComparisonBtn.setEnabled(b);
     	    }
     	    
     	    public void setSettingsEnabled(boolean b) {
