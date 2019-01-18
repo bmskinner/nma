@@ -10,6 +10,11 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 
+/**
+ * Tests for image filterer
+ * @author bms41
+ *
+ */
 public class ImageFiltererTest {
 	
 	
