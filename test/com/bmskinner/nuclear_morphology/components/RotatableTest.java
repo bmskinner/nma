@@ -63,48 +63,47 @@ public class RotatableTest extends ComponentTester {
 				.segmented().build();
 		
 		int length = t.getCollection().stream().findFirst().get().getNucleus().getBorderLength();
+		int bIndex = 1;
+		
+		for(int tIndex=0; tIndex<length; tIndex++) {			
+			if(tIndex==bIndex)
+				continue;
+			if(Math.abs(tIndex-bIndex)<5)
+				continue;
 
-		for(int tIndex=0; tIndex<length; tIndex++) {
-			for(int bIndex=0; bIndex<length; bIndex++) {
-				if(tIndex==bIndex)
-					continue;
-				if(Math.abs(tIndex-bIndex)<5)
-					continue;
+			IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1)
+					.ofType(NucleusType.ROUND)
+					.withMaxSizeVariation(0)
+					.randomOffsetProfiles(true)
+					.segmented().build();
 
-				IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1)
-						.ofType(NucleusType.ROUND)
-						.withMaxSizeVariation(0)
-						.randomOffsetProfiles(true)
-						.segmented().build();
+			for(ICell c : d.getCollection()) {
+				List<JPanel> panels = new ArrayList<>();
 
-				for(ICell c : d.getCollection()) {
-					List<JPanel> panels = new ArrayList<>();
-					
-					Nucleus n = c.getNucleus();
-					logger.info("Testing "+tIndex+" and "+bIndex+" of "+length);
-					n.setBorderTag(Tag.TOP_VERTICAL, tIndex);
-					n.setBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
-					panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
-					IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-					IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+				Nucleus n = c.getNucleus();
+				logger.info("Testing "+tIndex+" and "+bIndex+" of "+length);
+				n.setBorderTag(Tag.TOP_VERTICAL, tIndex);
+				n.setBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
+				panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
+				IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
+				IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
-					logger.fine("TV: "+tv);
-					logger.fine("BV: "+bv);
+				logger.fine("TV: "+tv);
+				logger.fine("BV: "+bv);
 
-					n.alignVertically();
-					tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-					bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+				n.alignVertically();
+				tv = n.getBorderPoint(Tag.TOP_VERTICAL);
+				bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
-					logger.fine("TV: "+tv);
-					logger.fine("BV: "+bv);
-					
-					panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
+				logger.fine("TV: "+tv);
+				logger.fine("BV: "+bv);
 
-					boolean areVertical = areVertical(tv, bv);
-//					if(!areVertical)
-//						ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
-					assertTrue(areVertical);
-				}
+				panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
+
+				boolean areVertical = areVertical(tv, bv);
+				//					if(!areVertical)
+				//						ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
+				assertTrue(areVertical);
 			}
 
 		}
