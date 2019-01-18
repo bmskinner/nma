@@ -1110,25 +1110,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // Find the point that is closest to 180 degrees across the CoM
     	double distToCom = p.getLengthTo(centreOfMass);
     	
-    	// Checking the angle of every point is expensive.
+    	// Checking the angle of every point via atan2 is expensive.
     	// We can filter out most of the points beforehand.
-    	
-    	// d1 = p1 to com
-    	// d2 = com to p2
-    	// d3 = p1 to p2
-    	
-    	// The distance d1 + d2 should be approximately d3 when we are directly opposite.
-    	// It won't be exact because the points will not be exactly opposite each other
-    	// We can filter for only points for which d1+d2 is between d3-gateRadius and d3+gateRadius
-    	// This saves an expensive atan2 check in the final step
-        return borderList.stream()
-        	.filter(point->{
-        		double d3 = point.getLengthTo(p);
-        		double d1d2 = distToCom+point.getLengthTo(centreOfMass);
-        		return d1d2>d3-OPPOSITE_BORDER_INTERVAL_PIXELS && d1d2>d3+OPPOSITE_BORDER_INTERVAL_PIXELS;
-        	})
-            .min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
-            .orElse(null); // TODO: backup solution?
+    	return borderList.stream()
+    			.filter(point->point.getLengthTo(p)>distToCom)
+    			.min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
+    			.orElse(null); // TODO: backup solution?
     }
 
     @Override
