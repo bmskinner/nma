@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -103,8 +105,8 @@ public class ProfileManager implements Loggable {
                 }
 
                 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-//                    n.updateVerticallyRotatedNucleus();
                     n.updateDependentStats();
+                    setOpUsingTvBv(n);
                 }
             }
         });
@@ -249,8 +251,10 @@ public class ProfileManager implements Loggable {
         			try {
         				int existingIndex = n.getBorderIndex(existingTag);
         				n.setBorderTag(tag, existingIndex);
-        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL))
+        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
             				n.updateDependentStats();
+            				setOpUsingTvBv(n);
+        				}
         			} catch (UnavailableBorderTagException e) {
         				stack(e);
         				continue;
@@ -262,6 +266,7 @@ public class ProfileManager implements Loggable {
         			Nucleus n = collection.getRawConsensus().component();
         			int existingIndex = n.getBorderIndex(existingTag);
         			n.setBorderTag(tag, existingIndex);
+        			setOpUsingTvBv(n);
         		}
 
         		// Update signals as needed
@@ -293,11 +298,32 @@ public class ProfileManager implements Loggable {
             int oldNIndex = n.getBorderIndex(tag);
             int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
             n.setBorderTag(tag, newIndex);
+            setOpUsingTvBv(n);
         }
         
      // Update signals as needed
         collection.getSignalManager().recalculateSignalAngles();
 
+    }
+    
+    
+    /**
+     * If the TV and BV are present, move the OP to a more sensible 
+     * position for signal angle measurement: the border point directly
+     * below the centre of mass.
+     * @param n the nucleus to alter
+     */
+    private void setOpUsingTvBv(@NonNull final Nucleus n) {
+    	// also update the OP to be directly below the CoM in vertically oriented nucleus
+		if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+			finer("Updating OP due to TV or BV change");
+			Nucleus vertN = n.getVerticallyRotatedNucleus();
+			IBorderPoint bottom = vertN.getBorderList().stream()
+				.filter(p-> p.getY()<vertN.getCentreOfMass().getY())
+				.min(Comparator.comparing(p->Math.abs(p.getX()-vertN.getCentreOfMass().getX()))).get();
+			int newOp = vertN.getBorderIndex(bottom);
+			n.setBorderTag(Tag.ORIENTATION_POINT, newOp);
+		}
     }
 
     /**

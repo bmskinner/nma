@@ -254,8 +254,10 @@ public class SegmentationHandler implements Loggable {
 
         if (tag == null)
             throw new IllegalArgumentException("Tag is null");
-        if (dataset.getCollection().isVirtual())
+        if (dataset.getCollection().isVirtual()) {
+        	fine("Cannot update tag in virtual collection");
             return;
+        }
         try {
 
         	if(couldUpdateTagToExistingTagIndex(tag, index))
