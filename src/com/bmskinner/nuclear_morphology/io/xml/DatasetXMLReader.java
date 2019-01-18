@@ -173,11 +173,12 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		Element signals = e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY);
 		readSignalGroups(signals, collection);		
 		
-		// Add consensus
+		// Add consensus if present
 		try {
-			Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
-			collection.setConsensus(consensus);
-//			consensus.alignVertically();
+			if(e.getChild(XMLCreator.CONSENSUS_KEY)!=null){
+				Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
+				collection.setConsensus(consensus);
+			}
 		} catch (UnprofilableObjectException e1) {
 			stack(e1);
 		}
