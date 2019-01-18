@@ -341,33 +341,26 @@ public class ICellCollectionTest extends ComponentTester {
 		m.updateBorderTag(Tag.BOTTOM_VERTICAL, 10);
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
 		new ConsensusAveragingMethod(d).call();
-		
+		int bIndex=0;
 		for(int tIndex=0; tIndex<p.size(); tIndex++) {
-			for(int bIndex=0; bIndex<p.size(); bIndex++) {
-				if(tIndex==bIndex)
-					continue;
-				if(Math.abs(tIndex-bIndex)<5)
-					continue;
-				m.updateBorderTag(Tag.TOP_VERTICAL, tIndex);
-				m.updateBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
+			if(tIndex==bIndex)
+				continue;
+			m.updateBorderTag(Tag.TOP_VERTICAL, tIndex);
+			m.updateBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
 
-				assertTrue(collection.hasConsensus());
+			assertTrue(collection.hasConsensus());
 
-				List<JPanel> panels = new ArrayList<>();
-				panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
-				
-				
-				Nucleus n = collection.getConsensus(); // is aligned vertically
-				IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-				IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
-				IPoint bi = IPoint.makeNew(bv.getX(), bv.getY()+10);				
-				boolean areVertical = areVertical(tv, bv);
-				if(!areVertical)
-					ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
-				assertTrue(areVertical);
+			List<JPanel> panels = new ArrayList<>();
+			panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
 
-				
-			}
+			Nucleus n = collection.getConsensus(); // is aligned vertically
+			IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
+			IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+			
+			boolean areVertical = areVertical(tv, bv);
+			if(!areVertical)
+				ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
+			assertTrue(areVertical);
 		}
 		
 	}

@@ -26,6 +26,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class DefaultNucleusTest extends ComponentTester {
 
 	private Nucleus nucleus;	
+	@Override
 	@Before
 	public void setUp() throws Exception {
 		nucleus = TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20);

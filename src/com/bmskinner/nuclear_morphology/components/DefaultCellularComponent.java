@@ -805,7 +805,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public void flipHorizontal(@NonNull IPoint p) {
+	public void flipHorizontal(final @NonNull IPoint p) {
 
         double xCentre = p.getX();
 

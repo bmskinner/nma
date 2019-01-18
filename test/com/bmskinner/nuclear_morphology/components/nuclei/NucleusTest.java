@@ -118,7 +118,7 @@ public class NucleusTest {
 		IPoint tv = nucleus.getBorderPoint(Tag.TOP_VERTICAL);
 		IPoint bv = nucleus.getBorderPoint(Tag.BOTTOM_VERTICAL);
 		
-		assertEquals(tv.getX(), bv.getX(), 0.9);
+		assertEquals(tv.getX(), bv.getX(), 0.0);
 		assertTrue(tv.getY()>bv.getY());
 	}
 	

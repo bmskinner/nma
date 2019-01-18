@@ -73,7 +73,7 @@ public interface Rotatable extends Loggable {
      * 
      * @param bottomPoint
      */
-    void rotatePointToBottom(IPoint bottomPoint);
+    void rotatePointToBottom(final @NonNull IPoint bottomPoint);
 
     /**
      * Rotate the object by the given amount clockwise around the centre of mass
@@ -86,7 +86,7 @@ public interface Rotatable extends Loggable {
      * Flip the object horizontally, centred on the given point
      * @param centre the point about which to flip
      */
-    void flipHorizontal(IPoint centre);
+    void flipHorizontal(final @NonNull IPoint centre);
     
     /**
      * Flip the object horizontally about the centre of mass
