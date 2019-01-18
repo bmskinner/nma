@@ -198,7 +198,7 @@ public interface ISignalCollection extends Serializable, Loggable {
 
     /**
      * Get the ImageJ image processor for the source image for signals in the
-     * given group
+     * given group. Inverts the image such that black is full signal and white is no signal
      * 
      * @param signalGroup the signal group ID
      * @return an image processor

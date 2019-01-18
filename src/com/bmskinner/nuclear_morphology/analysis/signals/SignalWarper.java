@@ -85,12 +85,12 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
     
     /** The options for the analysis */
     private HashOptions warpingOptions;
-        
-    /** The warped images to be merged */
-    private final List<ImageProcessor> warpedImages = new ArrayList<>();
-    
+            
     /** The number of cell images to be merged */
     private int totalCells;
+    
+    /** The mesh images are warped onto */
+    private final Mesh<Nucleus> meshConsensus;
     
     /**
      * Constructor
@@ -121,22 +121,23 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         totalCells = cells.size();
         fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
         		sourceDataset.getName(), signalGroup, totalCells, warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
+        
+        try {
+    		// Create the consensus mesh to warp each cell onto
+    		meshConsensus = new DefaultMesh<Nucleus>(target);
+        } catch (MeshCreationException e2) {
+    		stack("Error creating mesh", e2);
+    		throw new IllegalArgumentException("Could not create mesh", e2);
+    	}
     }
 
     @Override
     protected ImageProcessor doInBackground() throws Exception {
 
-        try {
-            finer("Running warper");
-            generateImages();
+    	finer("Running warper");
 
-        } catch (Exception e) {
-            warn("Error in warper");
-            stack("Error in signal warper", e);
-            return null;
-        }
-        
-        return mergeWarpedImages();
+        List<ImageProcessor> warpedImages =  generateImages();
+        return ImageFilterer.addByteImages(warpedImages);
     }
 
     @Override
@@ -167,34 +168,50 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         }
     }
 
-    private void generateImages() {
-        finer("Generating warped images for " + sourceDataset.getName());
+    /**
+     * Create the warped images for all selected nuclei in the dataset
+     * 
+     */
+    private List<ImageProcessor> generateImages() {
+    	finer("Generating warped images for " + sourceDataset.getName());
+    	List<ImageProcessor> warpedImages = new ArrayList<>();
+    	
+    	Set<ICell> cells = getCells(warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY));
 
-        Mesh<Nucleus> meshConsensus;
-        try {
-            meshConsensus = new DefaultMesh<Nucleus>(target);
-        } catch (MeshCreationException e2) {
-            stack("Error creating mesh", e2);
-            return;
-        }
+    	int cellNumber = 0;
 
-        Rectangle r = meshConsensus.toPath().getBounds();
-        Set<ICell> cells = getCells(warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY));
+    	for (ICell cell : cells) {
 
-        int cellNumber = 0;
+    		for (Nucleus n : cell.getNuclei()) {
+    			finer("Drawing signals for " + n.getNameAndNumber());
 
-        for (ICell cell : cells) {
-
-            for (Nucleus n : cell.getNuclei()) {
-                finer("Drawing signals for " + n.getNameAndNumber());
-
-                generateNucleusImage(meshConsensus, r.width, r.height, n);
-    		    publish(cellNumber++);
-            }
-        }
+    			ImageProcessor nImage = generateNucleusImage(n);
+    			warpedImages.add(nImage);
+    			publish(cellNumber++);
+    		}
+    	}
+    	return warpedImages;
+    }
+    
+    /**
+     * The empty processor to return if a warp fails. Finds the image dimensions 
+     * for the warped images - used for blank images if the warping fails
+     * @return
+     */
+    private ImageProcessor createEmptyProcessor() {
+    	Rectangle r = meshConsensus.toPath().getBounds();
+    	return ImageFilterer.createBlackByteProcessor(r.width, r.height);
     }
 
-	private void generateNucleusImage(@NonNull Mesh<Nucleus> meshConsensus, int w, int h, @NonNull Nucleus n) {
+	/**
+	 * Create the warped image for a nucleus
+	 * @param meshConsensus the mesh to warp to
+	 * @param w
+	 * @param h
+	 * @param n
+	 * @return
+	 */
+	private ImageProcessor generateNucleusImage(@NonNull Nucleus n) {
 
 		try {
 			Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
@@ -203,7 +220,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    ImageProcessor ip;
 		    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will throw exception
 		    	ip = n.getSignalCollection().getImage(signalGroup);
-		    	ip.invert();
+		    	ip.invert(); // image is imported as white background. Need black background.
 		    } else {
 		    	// We need to get the file in which no signals were detected
 		    	// This is not stored in a nucleus, so combine the expected file name with the source folder
@@ -219,37 +236,20 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    if(warpingOptions.getBoolean(BINARISE_KEY))
 		    	ip.threshold(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY));
 
+		    // Create a mesh coordinate image from the nucleus
 		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
 
-		    // Draw NucleusMeshImage onto consensus mesh.
+		    // Draw the mesh image onto the consensus mesh.
 		    finer("Warping image onto consensus mesh");
-		    warpedImages.add(meshImage.drawImage(meshConsensus));
+		   return meshImage.drawImage(meshConsensus);
 
-		} catch (IllegalArgumentException e) {
-		    fine(e.getMessage());
-		    warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
-		} catch (UnloadableImageException | ImageImportException e) {
-			fine(String.format("Unable to load signal image for signal group %s in nucleus %s ",
-					 signalGroup, n.getNameAndNumber()));
-		    warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
-		} catch (MeshCreationException e1) {
-			fine("Error creating mesh");
-		    warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
-		} catch (UncomparableMeshImageException | MeshImageCreationException e) {
-			fine("Cannot make mesh for " + n.getNameAndNumber());
-			 warpedImages.add(ImageFilterer.createBlackByteProcessor(w, h));
+		} catch (IllegalArgumentException | UnloadableImageException |ImageImportException | MeshCreationException | UncomparableMeshImageException | MeshImageCreationException e) {
+		    stack(e.getMessage(), e);
+		    return createEmptyProcessor();
 		}
+		
 	}
 	
-	/**
-	 * Merge the warped images to a final image
-	 */
-	private ImageProcessor mergeWarpedImages() {
-		ImageProcessor mergedImage = ImageFilterer.addByteImages(warpedImages);
-		return mergedImage;
-	}
-
-
     /**
      * Get the cells to be used for the warping
      * 

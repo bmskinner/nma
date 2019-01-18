@@ -159,6 +159,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 //        return ds;
 //    }
 
+    /**
+     * Create a dataset containing only the given bounds, starting at 0,0. 
+     * @param w
+     * @param h
+     * @return
+     */
     public FloatXYDataset createAnnotationRectangleDataset(int w, int h) {
         FloatXYDataset ds = new FloatXYDataset();
 

@@ -196,9 +196,7 @@ public class ImageImporter implements Loggable, Importer {
     
     /**
      * Import the image in the given file, and return an image processor for the
-     * channel requested. Inverts the greyscale image so white==no signal and
-     * black==full signal
-     * 
+     * channel requested.  
      * @param channel
      * @return
      */

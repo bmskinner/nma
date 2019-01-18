@@ -220,19 +220,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeSignalWarpChart(ImageProcessor image) {
 
+    	// Create the outline of the nucleus
         JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
 
         XYPlot plot = chart.getXYPlot();
 
-        Mesh<Nucleus> meshConsensus;
-        try {
-            meshConsensus = new DefaultMesh((com.bmskinner.nuclear_morphology.components.Taggable) options.getComponent());
-        } catch (MeshCreationException e1) {
-            fine("Cannot make consensus mesh");
-            stack("Error creating mesh", e1);
-            return createErrorChart();
-        }
-
+        // Make an outline of the component to draw
         XYDataset ds;
         try {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getComponent());
@@ -241,24 +234,22 @@ public class OutlineChartFactory extends AbstractChartFactory {
             return createErrorChart();
         }
 
-        double xMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();
-        double yMin = DatasetUtilities.findMinimumRangeValue(ds).doubleValue();
-
-        // Get the bounding box size for the consensus, to find the offsets for
-        // the images created
-        Rectangle r = meshConsensus.toPath().getBounds();
-
-        int xOffset = (int) Math.round(-xMin);
-        int yOffset = (int) Math.round(-yMin);
-
-        int w = r.width;
-        int h = r.height;
-
-        finest("Consensus bounds: " + w + " x " + h + " : " + r.x + ", " + r.y);
-        finest("Image: " + image.getWidth() + " x " + image.getHeight());
+        // Calculate the offset at which to draw the image
+        // The plot area is larger than the image to be drawn 
+        double xChartMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();
+        double yChartMin = DatasetUtilities.findMinimumRangeValue(ds).doubleValue();
+        
+     // Get the bounding box size for the consensus, to find the offsets for the images created
+        Rectangle2D consensusBounds = options.getComponent().getBounds();
+        fine(String.format("Consensus bounds: %s x %s : x%s y%s", consensusBounds.getWidth(), consensusBounds.getHeight(), consensusBounds.getX(), consensusBounds.getY() ));
+        fine(String.format("Image bounds: %s x %s",image.getWidth(), image.getHeight()));
+        
+        int xOffset = (int) Math.round(-xChartMin);
+        int yOffset = (int) Math.round(-yChartMin);
 
         drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
 
+        // Set the colour of the nucleus outline
         plot.setDataset(0, ds);
         plot.getRenderer(0).setBasePaint(Color.BLACK);
         plot.getRenderer(0).setBaseSeriesVisible(true);
@@ -772,9 +763,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * Create a chart with an image drawn as an annotation in the background
      * layer.
      * 
-     * @param ip
-     * @param plot
-     * @param alpha
+     * @param ip the image
+     * @param plot the plot to draw on
+     * @param alpha the opacity (0-255)
      * @param xOffset a position to move the image 0,0 to
      * @param yOffset a position to move the image 0,0 to
      * @return
@@ -784,13 +775,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
         plot.setBackgroundPaint(Color.WHITE);
         plot.getRangeAxis().setInverted(false);
 
-        // Make a dataset to allow the autoscale to work
+        // Make a dataset to allow the autoscale to work even if no other datasets are present
+        // Hide the dataset from visibility
         XYDataset bounds = new NucleusDatasetCreator(options).createAnnotationRectangleDataset(ip.getWidth(),
                 ip.getHeight());
         plot.setDataset(0, bounds);
-
-        XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
-                                                   // nucleus outline dataset
+        XYItemRenderer rend = plot.getRenderer(0);
         rend.setBaseSeriesVisible(false);
 
         plot.getDomainAxis().setRange(0, ip.getWidth());
@@ -809,15 +799,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     }
 
                 } else {
-                    if (pixel < 255) {// Ignore anything that is not signal -
-                                      // the background is already white
+                    if (pixel < 255) // Ignore anything that is not signal - the background is already white
                         col = new Color(pixel, pixel, pixel, alpha);
-                    }
                 }
 
-                if (col == null && showBounds) {
+                if (col == null && showBounds)
                     col = new Color(255, 0, 0, alpha);
-                }
 
                 if (col != null) {
                     // Ensure the 'pixels' overlap to avoid lines of background
@@ -827,6 +814,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     rend.addAnnotation(a, Layer.BACKGROUND);
                 }
+                
+                // Draw the image border - debug only
+//                if( x==0 || x==ip.getWidth()-1 ||y==0 || y==ip.getHeight()-1) {
+//                	Rectangle2D r = new Rectangle2D.Double(x + xOffset - 0.1, y + yOffset - 0.1, 1.2, 1.2);
+//                    rend.addAnnotation( new XYShapeAnnotation(r, null, null, Color.BLACK), Layer.BACKGROUND);
+//                }
             }
         }
 
