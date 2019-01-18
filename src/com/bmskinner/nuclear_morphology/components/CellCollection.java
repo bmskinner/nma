@@ -100,7 +100,7 @@ public class CellCollection implements ICellCollection {
     // this holds the mapping of tail indexes etc in the median profile arrays
     protected Map<ProfileType, ProfileCollection> profileCollections = new HashMap<ProfileType, ProfileCollection>();
 
-    private Consensus<Nucleus> consensusNucleus; // the refolded consensus nucleus
+    private Nucleus consensusNucleus; // the refolded consensus nucleus - old format, cannot be removed
 
     private Map<UUID, Cell> mappedCollection = new HashMap<UUID, Cell>(); // store
                                                                           // all
@@ -111,6 +111,8 @@ public class CellCollection implements ICellCollection {
     private Map<UUID, SignalGroup> signalGroups = new HashMap<UUID, SignalGroup>(0);
 
     private volatile transient boolean isRefolding = false;
+    
+    private transient Consensus<Nucleus> consensus; // new format consensus
 
     private RuleSetCollection ruleSets = new RuleSetCollection();
 
@@ -411,17 +413,17 @@ public class CellCollection implements ICellCollection {
 
     @Override
 	public void setConsensus(@Nullable Consensus<Nucleus> n) {
-        this.consensusNucleus = n;
+        this.consensus = n;
     }
     
     @Override
 	public void offsetConsensus(double xOffset, double yOffset) {
-		consensusNucleus.offset(xOffset, yOffset);
+    	consensus.offset(xOffset, yOffset);
 	}
 
 	@Override
 	public void rotateConsensus(double degrees) {
-		consensusNucleus.addRotation(degrees);
+		consensus.addRotation(degrees);
 	}
 
     /**
@@ -461,12 +463,12 @@ public class CellCollection implements ICellCollection {
 
     @Override
 	public Nucleus getConsensus() {
-        return this.consensusNucleus.component();
+        return this.consensus.component();
     }
     
     @Override
 	public Consensus<Nucleus> getRawConsensus() {
-		return consensusNucleus;
+		return consensus;
 	}
 
     /**
@@ -1861,25 +1863,24 @@ public class CellCollection implements ICellCollection {
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("Writing cell collection");
         out.defaultWriteObject();
-        // finest("Wrote cell collection");
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("Reading cell collection");
-        in.defaultReadObject();
+
+
+    	in.defaultReadObject();
+    	
+    	consensus = null;
+
         isRefolding = false;
-        vennCache = new HashMap<UUID, Integer>(); // cache the number of shared
+        vennCache = new HashMap<>(); // cache the number of shared
                                                   // nuclei with other datasets
 
         if (ruleSets == null || ruleSets.isEmpty()) {
             log("Creating default ruleset for collection");
             ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
         }
-        // finest("Creating default ruleset for nucleus type "+nucleusType);
-        // ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
-        // finest("Read cell collection");
     }
 
     @Override
