@@ -272,6 +272,10 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
         return cache.getKeys(n);
     }
     
+    /**
+     * Get the target shape in common to all selected keys
+     * @return
+     */
     private synchronized CellularComponent getCommonSelectedTarget() {
     	if(!isCommonTargetSelected())
     		return null;

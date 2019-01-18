@@ -117,29 +117,12 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	}
 	
 	private JPanel createCentrePanel() {
-//		JPanel centrePanel = new JPanel(new GridBagLayout());
 		
 		JPanel centrePanel = new JPanel(new BorderLayout());
-		
-//		GridBagConstraints constraints = new GridBagConstraints();
-//        constraints.fill = GridBagConstraints.BOTH;
-//        constraints.gridx = 0;
-//        constraints.gridy = 0;
-//        constraints.gridheight = 1;
-//        constraints.gridwidth = 1;
-//        constraints.weightx = 0.5;
-//        constraints.weighty = 0.5;
-//        constraints.anchor = GridBagConstraints.CENTER;
         
 		JScrollPane scrollPane = new JScrollPane(comparisonTable);
 		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
 		centrePanel.add(scrollPane, BorderLayout.CENTER);
-//		centrePanel.add(scrollPane, constraints);
-		
-//		constraints.gridx = 1;
-//        constraints.gridy = 0;
-//        constraints.gridwidth = GridBagConstraints.REMAINDER;
-//		centrePanel.add(chartPanel, constraints);
         return centrePanel;
 	}
 

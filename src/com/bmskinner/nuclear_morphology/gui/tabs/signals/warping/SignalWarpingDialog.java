@@ -64,6 +64,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -497,7 +498,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     	        	int minThreshold = (int) minThresholdSpinner.getValue();
 
-    	        	Nucleus target = targetDataset.getCollection().getConsensus().duplicate().getVerticallyRotatedNucleus();
+    	        	Nucleus target = targetDataset.getCollection().getConsensus(); // Issue here when using '.duplicate()' - causes image sizing issue
     	        	setSettingsEnabled(false);
 
     	            progressBar.setStringPainted(true);
