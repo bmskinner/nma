@@ -111,7 +111,7 @@ public class Labels {
         public static final String EXPORT_SHELLS          = "Nuclear signal shells";
         public static final String EXPORT_CELL_LOCS       = "Cell locations within images";
         public static final String EXPORT_OPTIONS         = "Dataset analysis options";
-        public static final String EXPORT_XML_DATASET     = "Dataset to XML";
+        public static final String EXPORT_XML_DATASET     = "XML format dataset";
         public static final String EXPORT_CELL_IMAGES     = "Single cell images";
     }
     

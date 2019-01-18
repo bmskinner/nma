@@ -198,10 +198,10 @@ public void createButtons() {
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
-//        exportXMLDatasetItem = fact.makeItem(Labels.Populations.EXPORT_XML_DATASET, 
-//        		SignalChangeEvent.EXPORT_XML_DATASET, 
-//        		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
-//				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+        exportXMLDatasetItem = fact.makeItem(Labels.Populations.EXPORT_XML_DATASET, 
+        		SignalChangeEvent.EXPORT_XML_DATASET, 
+        		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
+				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
         exportSubMenu.add(exportStatsMenuItem);
         exportSubMenu.add(exportSignalsItem);
@@ -209,6 +209,7 @@ public void createButtons() {
         exportSubMenu.add(saveCellsMenuItem);
         exportSubMenu.add(exportOptionsMenuItem);
         exportSubMenu.add(exportCellImagesItem);
+//        exportSubMenu.add(exportXMLDatasetItem);
         
         addNuclearSignalMenuItem = fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, 
         		SignalChangeEvent.ADD_NUCLEAR_SIGNAL, 
