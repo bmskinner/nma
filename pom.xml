@@ -16,9 +16,7 @@
 		<project.template.directory>templates</project.template.directory>
 		<project.scripts.directory>scripts</project.scripts.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-
 	</properties>
-
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -448,7 +446,7 @@
 	</dependencies>
 	<name>Nuclear Morphology Analysis</name>
 	<url>https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Home</url>
-	<description>Nuclear Morphology Analysis  is a program that allows for automated detection of round or asymmetric nuclei in images, and subsequent morphological analysis.</description>
+	<description>Nuclear Morphology Analysis is a program that allows for automated detection of round or asymmetric nuclei in images, and subsequent morphological analysis.</description>
 	<inceptionYear>2015</inceptionYear>
 	<licenses>
 		<license>
