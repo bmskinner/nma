@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -45,14 +46,15 @@ import ij.process.TypeConverter;
 public abstract class AbstractImageFilterer implements Loggable {
 
     private static final int RGB_WHITE = 16777215;
+    private static final int RGB_BLACK = 0;
+    protected static final int BYTE_MAX  = 255;
     protected ImageProcessor ip        = null;
     protected ImageStack     st        = null;
 
     /**
      * Construct with an image processor
      * 
-     * @param ip
-     *            the image processor
+     * @param ip the image processor
      */
     public AbstractImageFilterer(final ImageProcessor ip) {
         this.ip = ip;
@@ -61,8 +63,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Construct with an image processor from an image
      * 
-     * @param img
-     *            the image
+     * @param img the image
      */
     public AbstractImageFilterer(final ImagePlus img) {
         this(img.getProcessor());
@@ -71,8 +72,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Construct from a stack
      * 
-     * @param st
-     *            the image stack
+     * @param st the image stack
      */
     public AbstractImageFilterer(final ImageStack st) {
         this.st = st;
@@ -81,8 +81,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Duplicate the filterer - use the template processor and stack
      * 
-     * @param f
-     *            the template filterer
+     * @param f the template filterer
      */
     public AbstractImageFilterer(final AbstractImageFilterer f) {
         this.ip = f.ip;
@@ -122,9 +121,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public ImageProcessor toProcessor() {
-        if (ip == null) {
+        if (ip == null)
             throw new NullPointerException("Filterer does not contain an image processor");
-        }
         return ip;
     }
 
@@ -201,7 +199,6 @@ public abstract class AbstractImageFilterer implements Loggable {
      */
     public AbstractImageFilterer convertToColorProcessor() {
         if (!isColorProcessor()) {
-
             TypeConverter tc = new TypeConverter(ip, false);
             ip = tc.convertToRGB();
         }
@@ -214,9 +211,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public ImageStack toStack() {
-        if (st == null) {
+        if (st == null)
             throw new NullPointerException("Filterer does not contain an image stack");
-        }
         return st;
     }
 
@@ -226,27 +222,35 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public ImageIcon toImageIcon() {
-        if (ip == null) {
+        if (ip == null)
             throw new NullPointerException("Filterer does not contain an image processor");
-        }
         return new ImageIcon(ip.getBufferedImage());
     }
     
     /**
-     * Create an empty white byte processor
+     * Get the current image as a buffered image. If the filterer contains a
+     * stack, returns the first element of the stack
+     * @return
+     */
+    public BufferedImage toBufferedImage() {
+    	if (ip==null && st==null)
+            throw new NullPointerException("Filterer does not contain an image processor");
+    	if(ip!=null)
+    		return ip.getBufferedImage();
+    	return st.getProcessor(1).getBufferedImage();
+    }
+    
+    /**
+     * Create a white RGB colour processor
      * 
      * @param w the width
      * @param h the height
      * @return
      */
-    public static ImageProcessor createBlankColorProcessor(int w, int h) {
-
-        // Create an empty white processor
+    public static ImageProcessor createWhiteColorProcessor(int w, int h) {
         ImageProcessor ip = new ColorProcessor(w, h);
-        for (int i = 0; i < ip.getPixelCount(); i++) {
+        for (int i = 0; i < ip.getPixelCount(); i++)
             ip.set(i, RGB_WHITE); // set all to white initially
-        }
-
         return ip;
     }
 
@@ -257,14 +261,39 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @param h the height
      * @return
      */
-    public static ImageProcessor createBlankByteProcessor(int w, int h) {
-
-        // Create an empty white processor
+    public static ImageProcessor createWhiteByteProcessor(int w, int h) {
         ImageProcessor ip = new ByteProcessor(w, h);
         for (int i = 0; i < ip.getPixelCount(); i++) {
             ip.set(i, 255); // set all to white initially
         }
-
+        return ip;
+    }
+    
+    /**
+     * Create a white RGB colour processor
+     * 
+     * @param w the width
+     * @param h the height
+     * @return
+     */
+    public static ImageProcessor createBlackColorProcessor(int w, int h) {
+        ImageProcessor ip = new ColorProcessor(w, h);
+        for (int i = 0; i < ip.getPixelCount(); i++)
+            ip.set(i, RGB_BLACK); // set all to white initially
+        return ip;
+    }
+    
+    /**
+     * Create an empty black byte processor
+     * 
+     * @param w the width
+     * @param h the height
+     * @return
+     */
+    public static ImageProcessor createBlackByteProcessor(int w, int h) {
+        ImageProcessor ip = new ByteProcessor(w, h);
+        for (int i = 0; i < ip.getPixelCount(); i++)
+            ip.set(i, 0);
         return ip;
     }
 
@@ -272,8 +301,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * Recolour the given 8-bit image to use the given colour, weighting the
      * greyscale values by the HSB saturation level
      * 
-     * @param ip
-     * @param colour
+     * @param ip the image
+     * @param colour the maximum intensity colour for the image 
      * @return a colour processor with the recoloured values
      */
     public static ImageProcessor recolorImage(ImageProcessor ip, Color colour) {
@@ -367,13 +396,13 @@ public abstract class AbstractImageFilterer implements Loggable {
     }
     
     /**
-     * Resize the image to fit the given dimensions, preserving aspect ratio
+     * Resize the image to fit the given dimensions, preserving aspect ratio.
      * 
-     * @param newWidth
-     *            the new width of the image
-     * @return
+     * @param maxWidth the maximum width of the new image
+     * @param maxHeight the maximum height of the new image
+     * @return a new image resized to fit the given dimensions
      */
-    public void resize(int maxWidth, int maxHeight) {
+    public AbstractImageFilterer resizeKeepingAspect(int maxWidth, int maxHeight) {
 
         if (ip == null) {
             throw new IllegalArgumentException("Image processor is null");
@@ -392,6 +421,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 
         ImageProcessor result = ip.duplicate().resize((int) finalWidth);
         ip = result;
+        return this;
     }
     
     /**
@@ -399,13 +429,16 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @param ip the image to adjust
      * @return a new ColorProcessor with rescaled values
      */
-    public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip) {
-    	if (ip == null) {
+    public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip, int min, int max) {
+    	if (ip == null)
             throw new IllegalArgumentException("Image cannot be null");
-        }
+    	if(min<0||min>255)
+    		throw new IllegalArgumentException("Min threshold must be within 0-255");
+    	if(max<0||max>255)
+    		throw new IllegalArgumentException("Max threshold must be within 0-255");
     	
-    	double rMax = 0, gMax=0, bMax=0;
-    	double rMin = 255, gMin=255, bMin=255;
+    	double rMax = min, gMax=min, bMax=min;
+    	double rMin = max, gMin=max, bMin=max;
         ImageProcessor result = new ColorProcessor(ip.getWidth(), ip.getHeight());
         
         for (int i = 0; i < ip.getPixelCount(); i++) {
@@ -427,7 +460,7 @@ public abstract class AbstractImageFilterer implements Loggable {
         double gRange = gMax - gMin;
         double bRange = bMax - bMin;
 
-        // Adjust each pixel to the proportion in range 0-255
+        // Adjust each pixel to the proportion in range min-max
         for (int i = 0; i < ip.getPixelCount(); i++) {
             int pixel = ip.get(i);
             int[] rgb = intToRgb(pixel);
@@ -437,14 +470,68 @@ public abstract class AbstractImageFilterer implements Loggable {
             double bProp = (rgb[2] - bMin) / bRange;
 
             
-            int rNew = (int) (255 * rProp);
-            int gNew = (int) (255 * gProp);
-            int bNew = (int) (255 * bProp);
+            int rNew = (int) (max * rProp);
+            int gNew = (int) (max * gProp);
+            int bNew = (int) (max * bProp);
             
             int newPixel = rgbToInt(rNew, gNew, bNew);
             result.set(i, newPixel);
         }
         return result;
+    	
+    }
+    
+    /**
+     * Rescale the image intensity to fill the 0-255 range
+     * @param ip the image to adjust
+     * @return a new ColorProcessor with rescaled values
+     */
+    public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip) {
+    	return rescaleRGBImageIntensity(ip, 0, 255);
+//    	if (ip == null)
+//            throw new IllegalArgumentException("Image cannot be null");
+//    	
+//    	double rMax = 0, gMax=0, bMax=0;
+//    	double rMin = 255, gMin=255, bMin=255;
+//        ImageProcessor result = new ColorProcessor(ip.getWidth(), ip.getHeight());
+//        
+//        for (int i = 0; i < ip.getPixelCount(); i++) {
+//            int pixel = ip.get(i);
+//            
+//            int[] rgb = intToRgb(pixel);
+//
+//            rMax = Math.max(rgb[0], rMax);
+//            gMax = Math.max(rgb[1], gMax);
+//            bMax = Math.max(rgb[2], bMax);
+//            
+//            rMin = Math.min(rgb[0], rMin);
+//            gMin = Math.min(rgb[1], gMin);
+//            bMin = Math.min(rgb[2], bMin);
+//        }
+//
+//
+//        double rRange = rMax - rMin;
+//        double gRange = gMax - gMin;
+//        double bRange = bMax - bMin;
+//
+//        // Adjust each pixel to the proportion in range 0-255
+//        for (int i = 0; i < ip.getPixelCount(); i++) {
+//            int pixel = ip.get(i);
+//            int[] rgb = intToRgb(pixel);
+//            
+//            double rProp = (rgb[0] - rMin) / rRange;
+//            double gProp = (rgb[1] - gMin) / gRange;
+//            double bProp = (rgb[2] - bMin) / bRange;
+//
+//            
+//            int rNew = (int) (255 * rProp);
+//            int gNew = (int) (255 * gProp);
+//            int bNew = (int) (255 * bProp);
+//            
+//            int newPixel = rgbToInt(rNew, gNew, bNew);
+//            result.set(i, newPixel);
+//        }
+//        return result;
     }
 
     /**
@@ -458,6 +545,9 @@ public abstract class AbstractImageFilterer implements Loggable {
 
         if (ip == null)
             throw new IllegalArgumentException("Image cannot be null");
+        
+        if (ip instanceof ColorProcessor)
+            return rescaleRGBImageIntensity(ip);
 
         double maxIntensity = 0;
         double minIntensity = 255;
@@ -474,11 +564,11 @@ public abstract class AbstractImageFilterer implements Loggable {
             minIntensity = Float.MAX_VALUE;
             result = new FloatProcessor(ip.getWidth(), ip.getHeight());
         }
-
-        if (ip instanceof ColorProcessor) {
+        
+        if (ip instanceof ShortProcessor) {
             maxIntensity = 0;
-            minIntensity = 255;
-            result = new ColorProcessor(ip.getWidth(), ip.getHeight());
+            minIntensity = Short.MAX_VALUE;
+            result = new ShortProcessor(ip.getWidth(), ip.getHeight());
         }
 
         if (result == null) {
@@ -525,31 +615,21 @@ public abstract class AbstractImageFilterer implements Loggable {
         // Check images are same dimensions
         int w = list.get(0).getWidth();
         int h = list.get(0).getHeight();
-
-        for (ImageProcessor ip : list) {
-            if (ip == null) {
-                continue;
-            }
-            if (w != ip.getWidth() || h != ip.getHeight()) {
-                throw new IllegalArgumentException("Dimensions do not match");
-            }
-        }
-        // Create an empty white processor of the correct dimensions
-        ImageProcessor mergeProcessor = ImageFilterer.createBlankByteProcessor(w, h);
-
         int nonNull = 0;
-
+     
         // check sizes match
         for (ImageProcessor ip : list) {
-            if (ip == null) {
+            if (ip == null)
                 continue;
-            }
+            if (w != ip.getWidth() || h != ip.getHeight())
+                throw new IllegalArgumentException("Dimensions do not match");
             nonNull++;
         }
+        // Create an empty white processor of the correct dimensions
+        ImageProcessor mergeProcessor = ImageFilterer.createBlackByteProcessor(w, h);
 
-        if (nonNull == 0) {
+        if (nonNull == 0)
             return mergeProcessor;
-        }
 
         // Average the pixels
         for (int x = 0; x < w; x++) {
@@ -565,13 +645,59 @@ public abstract class AbstractImageFilterer implements Loggable {
 
                 pixelTotal /= nonNull; // scale back down to 0-255;
 
-                if (pixelTotal < 255) {// Ignore anything that is not signal -
-                                       // the background is already white
+                // Ignore anything that is not signal -
+                // the background is already black
+                if (pixelTotal > 0) {
                     mergeProcessor.set(x, y, pixelTotal);
                 }
             }
         }
         return mergeProcessor;
+    }
+    
+    /**
+     * Create a new 16-bit image processor with the sum of all the non-null
+     * 8-bit images in the given list
+     * 
+     * @return
+     */
+    public static ImageProcessor addByteImages(@NonNull List<ImageProcessor> list) {
+    	 if (list == null || list.isEmpty())
+             throw new IllegalArgumentException("List null or empty");
+
+         // Check images are same dimensions
+         int w = list.get(0).getWidth();
+         int h = list.get(0).getHeight();
+         int nonNull = 0;
+      
+         // check sizes match
+         for (ImageProcessor ip : list) {
+             if (ip == null)
+                 continue;
+             if (w != ip.getWidth() || h != ip.getHeight())
+                 throw new IllegalArgumentException("Dimensions do not match");
+             nonNull++;
+         }
+         // Create an empty white processor of the correct dimensions
+         ImageProcessor mergeProcessor = new ShortProcessor (w, h);
+
+         if (nonNull == 0)
+             return mergeProcessor;
+
+         // Average the pixels
+         for (int x = 0; x < w; x++) {
+             for (int y = 0; y < h; y++) {
+
+                 int pixelTotal = 0;
+                 for (ImageProcessor ip : list) {
+                     if (ip == null)
+                         continue;
+                     pixelTotal+= ip.get(x, y);
+                 }
+                 mergeProcessor.set(x, y, pixelTotal);
+             }
+         }
+         return mergeProcessor;
     }
 
     /**
@@ -579,10 +705,8 @@ public abstract class AbstractImageFilterer implements Loggable {
      * ImageA is coloured red, imageB is coloured blue, and regions of
      * colocalisation will be purple
      * 
-     * @param imageA
-     *            the first image
-     * @param imageB
-     *            the second image
+     * @param imageA the first image
+     * @param imageB the second image
      * @return an image showing colocalisation of pixels
      */
     public static ImageProcessor cowarpalise(ImageProcessor imageA, ImageProcessor imageB) {
@@ -664,8 +788,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Express the given pixel intensity as a fraction of 255
      * 
-     * @param i
-     *            the pixel value
+     * @param i the pixel value
      * @return a value from 0-1
      */
     protected static float getSaturationFromIntensity(int i) {
@@ -690,10 +813,9 @@ public abstract class AbstractImageFilterer implements Loggable {
         for (ImageProcessor ip : list) {
 
             if (ip == null)
-                throw new IllegalArgumentException("Null image in list");
-
+                throw new IllegalArgumentException("Cannot average: a null warp image was encountered");
             if (w != ip.getWidth() || h != ip.getHeight())
-                throw new IllegalArgumentException("Dimensions do not match");
+                throw new IllegalArgumentException(String.format("Image dimensions %s by %s do not match expected dimensions %s by %s", w, h, ip.getWidth(), ip.getHeight()));
         }
 
         ImageProcessor cp = new ColorProcessor(w, h);

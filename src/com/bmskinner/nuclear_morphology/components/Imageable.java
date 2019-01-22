@@ -210,13 +210,6 @@ public interface Imageable {
     void setSourceFile(@NonNull File sourceFile);
 
     /**
-     * Set the RGB channel the component was detected in
-     * 
-     * @param channel the channel
-     */
-    void setChannel(int channel);
-
-    /**
      * Set the folder the source image file belongs to
      * 
      * @param sourceFolder the folder
@@ -227,12 +220,9 @@ public interface Imageable {
      * Translate the given coordinate from the template component image into the
      * equivalent coordinate in the target image.
      * 
-     * @param point
-     *            the point to convert
-     * @param template
-     *            the component image the point has come from
-     * @param target
-     *            the component image the point should be translated to
+     * @param point the point to convert
+     * @param template the component image the point has come from
+     * @param target the component image the point should be translated to
      * @return
      */
     static IPoint translateCoordinateToComponentImage(IPoint point, Imageable template, Imageable target) {

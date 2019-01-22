@@ -223,7 +223,7 @@ public class SignalManager implements Loggable {
 		} else { // the signal group does not exist, just copy the old group
 
 		    // the new group for the signals
-		    ISignalGroup newGroup = new SignalGroup(oldGroup);
+		    ISignalGroup newGroup = oldGroup.duplicate();
 		    collection.addSignalGroup(newID, newGroup);
 		}
 
@@ -321,7 +321,7 @@ public class SignalManager implements Loggable {
      */
     public List<INuclearSignal> getSignals(@NonNull final UUID signalGroupId) {
 
-        List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
+        List<INuclearSignal> result = new ArrayList<>();
         for (Nucleus n : collection.getNuclei()) {
             result.addAll(n.getSignalCollection().getSignals(signalGroupId));
         }
@@ -485,7 +485,7 @@ public class SignalManager implements Loggable {
 
         for (UUID id : collection.getSignalGroupIDs()) {
             ISignalGroup newGroup;
-            newGroup = new SignalGroup(collection.getSignalGroup(id).get());
+            newGroup = collection.getSignalGroup(id).get().duplicate();
 			target.addSignalGroup(id, newGroup);
         }
     }

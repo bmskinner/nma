@@ -16,6 +16,9 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.utility;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -53,34 +56,18 @@ public class AngleTools {
     }
 
     /**
-     * Rotate the given point about a centre
+     * Rotate the given point clockwise about a centre
      * 
      * @param p the point to be moved
      * @param centre the centre of rotation
      * @param angle the angle to rotate in degrees
      * @return
      */
-    public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double angle) {
-        // get the distance from the point to the centre of mass
-        double distance = p.getLengthTo(centre);
-
-        // get the angle between the centre of mass (C), the point (P) and a
-        // point directly under the centre of mass (V)
-
-        /*
-         * C |\ V P
-         * 
-         */
-        double oldAngle = centre.findSmallestAngle(p, IPoint.makeNew(centre.getX(), -10));
-
-        if (p.getX() < centre.getX()) {
-            oldAngle = 360 - oldAngle;
-        }
-
-        double newAngle = oldAngle + angle;
-        double newX = AngleTools.getXComponentOfAngle(distance, newAngle) + centre.getX();
-        double newY = AngleTools.getYComponentOfAngle(distance, newAngle) + centre.getY();
-        return IPoint.makeNew(newX, newY);
+    public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double degrees) {
+    	double rad = Math.toRadians(-degrees); // Negative since the AT is anti-clockwise rotation (+x towards +y)
+    	AffineTransform tf = AffineTransform.getRotateInstance(rad, centre.getX(), centre.getY());
+    	Point2D result = tf.transform(p.toPoint2D(), null);
+    	return IPoint.makeNew(result);
     }
 
     /**
@@ -103,5 +90,7 @@ public class AngleTools {
 
         return atanA - atanB;
     }
+    
+    
 
 }

@@ -14,7 +14,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSu
  */
 @RunWith(Suite.class)
 @SuiteClasses({ 
-	ImageFiltererTest.class, 
+//	ImageFiltererTest.class, 
 	MergeSourceExtracterTest.class, 
 	ProfileAggregateTest.class,
 	RuleSetTester.class,

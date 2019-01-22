@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
  * 
@@ -94,20 +95,13 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
     boolean contains(@NonNull IPoint p);
 
     /**
-     * Get the face containing the given point, or null if there is no face with
+     * Get the face containing the given cartesian point, or null if there is no face with
      * the point
      * 
-     * @param p the point to test
-     * @return the face with the point or null
+     * @param p the point
+     * @return the face containing the point or null
      */
     MeshFace getFace(@NonNull IPoint p);
-
-    /**
-     * Get the number of segments used to construct the mesh
-     * 
-     * @return
-     */
-    int getSegmentCount();
 
     /**
      * Get the index spacing between vertices
@@ -116,6 +110,10 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      */
     int getVertexSpacing();
 
+    /**
+     * Get the proportions of each peripheral vertex along each segment
+     * @return
+     */
     Map<Integer, List<Double>> getVertexProportions();
 
     /**
@@ -180,6 +178,13 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @return
      */
     Set<MeshFace> getFaces();
+    
+    /**
+     * Get the faces whose periperal vertices are within the given segment
+     * @param seg the segment
+     * @return
+     */
+    Set<MeshFace> getFaces(IBorderSegment seg);
 
     /**
      * Test if the given mesh can be compared to this mesh. That is,

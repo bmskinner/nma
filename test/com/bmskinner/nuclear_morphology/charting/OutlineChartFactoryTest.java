@@ -29,56 +29,14 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  */
 @Ignore
 public class OutlineChartFactoryTest extends ChartFactoryTest {
-		
-	private static final boolean IS_FIXED_ASPECT = true;
-	
-	/**
-	 * Create and display outline and profile charts for all cells in the dataset
-	 * @param dataset
-	 * @param title
-	 * @throws InterruptedException
-	 */
-	public static void generateOutlineChartsForAllCells(@NonNull IAnalysisDataset dataset, @Nullable String title) throws InterruptedException {
-		if(title==null)
-			title = new Exception().getStackTrace()[0].getMethodName();
-		
-		List<JPanel> panels = new ArrayList<>();
-		
-		
-		for(ICell cell : dataset.getCollection().getCells()) {
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(dataset)
-					.setCell(cell)
-					.build();
-			JPanel outline = makeChartPanel(new OutlineChartFactory(options).makeCellOutlineChart(), options, title, IS_FIXED_ASPECT);
-			
-			// show the profile corresponding to the chart
-			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset)
-					.setCell(cell)
-					.setTag(Tag.REFERENCE_POINT)
-					.setShowMarkers(true)
-					.setShowAnnotations(true)
-					.setProfileType(ProfileType.ANGLE)
-					.build();
-			JPanel profile = makeChartPanel(new ProfileChartFactory(profileOptions).createProfileChart(), profileOptions, "Profile", false);
-			
-			JPanel bothPanel = new JPanel();
-			bothPanel.add(outline);
-			bothPanel.add(profile);
 
-			panels.add(bothPanel);
-		}
-		
-		showCharts(panels, title);
-	}
-	
-		
 	@Test
 	public void testOutlineChartOfSingleCellNonSegmentedDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(1)
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
-		generateOutlineChartsForAllCells(d, null);
+		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -87,7 +45,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.segmented().build();
-		generateOutlineChartsForAllCells(d, null);
+		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -96,7 +54,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.baseHeight(40).baseWidth(40)
 				.ofType(NucleusType.ROUND)
 				.profiled().build();
-		generateOutlineChartsForAllCells(d, null);
+		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -106,7 +64,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.ofType(NucleusType.ROUND)
 				.withMaxSizeVariation(10)
 				.segmented().build();
-		generateOutlineChartsForAllCells(d, null);
+		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
 	
 	@Test
@@ -116,7 +74,9 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 				.ofType(NucleusType.ROUND)
 				.maxRotation(90)
 				.segmented().build();
-		generateOutlineChartsForAllCells(d, null);
+		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
+	
+	
 
 }

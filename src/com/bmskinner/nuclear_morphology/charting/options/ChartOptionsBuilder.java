@@ -174,6 +174,11 @@ public class ChartOptionsBuilder {
         options.setShowBounds(b);
         return this;
     }
+    
+    public ChartOptionsBuilder setShowMeshVertices(boolean b) {
+        options.setShowMeshVertices(b);
+        return this;
+    }
 
     public ChartOptionsBuilder setShowMeshEdges(boolean b) {
         options.setShowMeshEdges(b);

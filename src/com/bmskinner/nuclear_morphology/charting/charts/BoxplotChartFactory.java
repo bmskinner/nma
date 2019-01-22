@@ -31,6 +31,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalBoxAndWhiskerDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -58,20 +59,19 @@ public class BoxplotChartFactory extends AbstractChartFactory {
      * 
      * @return
      */
-    public static JFreeChart makeEmptyChart() {
-
-        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null,
-                new DefaultBoxAndWhiskerCategoryDataset(), false);
-
-        formatBoxplot(boxplot);
-        return boxplot;
-    }
+//    public static JFreeChart makeEmptyChart() {
+//
+//        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null,
+//                new DefaultBoxAndWhiskerCategoryDataset(), false);
+//
+//        formatBoxplot(boxplot);
+//        return boxplot;
+//    }
 
     public JFreeChart createStatisticBoxplot(String component) {
 
-        if (!options.hasDatasets()) {
-            return makeEmptyChart();
-        }
+        if (!options.hasDatasets())
+            return createEmptyChart();
 
         if (CellularComponent.NUCLEUS.equals(component)) {
             return createNucleusStatisticBoxplot();
@@ -85,7 +85,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
             return createSegmentBoxplot();
         }
 
-        return makeEmptyChart();
+        return createEmptyChart();
 
     }
 
@@ -103,7 +103,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
                 ds = new NucleusDatasetCreator(options).createBoxplotDataset();
             } catch (ChartDatasetCreationException e) {
                 fine("Error creating boxplot", e);
-                return makeErrorChart();
+                return createErrorChart();
             }
         }
 
@@ -131,7 +131,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
             ds = new NucleusDatasetCreator(options).createSegmentStatDataset();
         } catch (ChartDatasetCreationException e) {
             fine("Error creating boxplot", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
         JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null,
                 "Segment " + stat.label(options.getScale()), ds, false);
@@ -169,11 +169,11 @@ public class BoxplotChartFactory extends AbstractChartFactory {
      */
     private JFreeChart createSignalStatisticBoxplot() {
 
-        BoxAndWhiskerCategoryDataset ds;
+    	NuclearSignalBoxAndWhiskerDataset ds;
         try {
             ds = new NuclearSignalDatasetCreator(options).createSignalStatisticBoxplotDataset();
         } catch (ChartDatasetCreationException e) {
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null,
@@ -194,15 +194,13 @@ public class BoxplotChartFactory extends AbstractChartFactory {
         int series = 0;
         for (int column = 0; column < ds.getColumnCount(); column++) {
 
-            // The column is the dataset
-            // String datasetName = ds.getColumnKey(column).toString();
-            // log("Looking at dataset "+datasetName);
+        	String colKey = ds.getColumnKey(column).toString();
             IAnalysisDataset d = options.getDatasets().get(column);
 
             for (int row = 0; row < ds.getRowCount(); row++) {
-                String name = (String) ds.getRowKey(row);
-
-                UUID signalGroup = getSignalGroupFromLabel(name);
+                String rowKey = ds.getRowKey(row).toString();
+                
+                UUID signalGroup = ds.getSignalGroup(rowKey, colKey);
 
                 Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
                 if(g.isPresent()){

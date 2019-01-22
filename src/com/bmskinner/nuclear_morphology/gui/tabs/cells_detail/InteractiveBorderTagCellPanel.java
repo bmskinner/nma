@@ -106,7 +106,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				ip = component.getImage();
 				
 			} catch(UnloadableImageException e){
-				ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
+				ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
 			}
 
 			ImageAnnotator an = new ImageAnnotator(ip);
@@ -122,153 +122,180 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				an2.annotateTagsOnCroppedNucleus(n);
 			}    
 			
+			
+			if(isRotate) {
+				try {
+					ImageProcessor rot = rotateToVertical(cell, an2.toProcessor());
+					rot.flipVertical(); // Y axis needs inverting since images have 0 at top
+					if(cell.getNucleus().isClockwiseRP())
+						rot.flipHorizontal();
+					an2 = new ImageAnnotator(rot, getWidth(), getHeight());
+					
+				} catch (UnavailableBorderTagException e) {
+					stack(e);
+				}
+			}
+			
 			imageLabel.setIcon(an2.toImageIcon());
-			input = an2.toProcessor().getBufferedImage();
+			input = an2.toBufferedImage();
 			sourceWidth = an.toProcessor().getWidth();
 			sourceHeight = an.toProcessor().getHeight();
 			
-			for(MouseListener l : imageLabel.getMouseListeners()) {
+			for(MouseListener l : imageLabel.getMouseListeners())
 				imageLabel.removeMouseListener(l);
-			}
-			for(MouseMotionListener l : imageLabel.getMouseMotionListeners()) {
+
+			for(MouseMotionListener l : imageLabel.getMouseMotionListeners())
 				imageLabel.removeMouseMotionListener(l);
-			}
-			for(MouseWheelListener l : imageLabel.getMouseWheelListeners()) {
+
+			for(MouseWheelListener l : imageLabel.getMouseWheelListeners())
 				imageLabel.removeMouseWheelListener(l);
-			}
-			
-			imageLabel.addMouseWheelListener(new MouseAdapter() {
-				
-				@Override
-	            public synchronized void mouseWheelMoved(MouseWheelEvent e) {
-	                if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
-	                    InputEvent.CTRL_DOWN_MASK){
-	                	int temp = smallRadius +( 1*e.getWheelRotation());
-	                	temp = temp>100?100:temp;
-	                	temp = temp<5?5:temp;
-	                    smallRadius = temp;
-	                } else {
-	                	int temp = bigRadius +( 3 * e.getWheelRotation());
-	                	temp = temp>200?200:temp;
-	                	temp = temp<10?10:temp;
-	                	bigRadius = temp;
-	                }
-	                IPoint p = translatePanelLocationToRenderedImage(e); 
-					updateImage(p.getXAsInt(), p.getYAsInt());
-	            }
-			});
 			
 			
-			imageLabel.addMouseMotionListener(new MouseAdapter() {
-				@Override
-				public synchronized void mouseMoved(MouseEvent e){
-					IPoint p = translatePanelLocationToRenderedImage(e); 
-					if(p==null)
-						return;
-					updateImage(p.getXAsInt(), p.getYAsInt());
-				}
-			});
-
-			imageLabel.addMouseListener(new MouseAdapter() {
-				
-				private synchronized void updateTag(Tag tag, int newIndex) {
-
-					ThreadManager.getInstance().execute(()->{
-						boolean wasLocked = cell.getNucleus().isLocked();
-						cell.getNucleus().setLocked(false);
-
-						cell.getNucleus().setBorderTag(tag, newIndex);
-						cell.getNucleus().updateVerticallyRotatedNucleus();
-
-						if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
-							cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
-						}
-						cell.getNucleus().updateDependentStats();
-						cell.getNucleus().setLocked(wasLocked);
-						dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
-						cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
-						createImage();
-					});
-				}
-
-				private synchronized JPopupMenu createPopup(IBorderPoint point) {
-					List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
-					JPopupMenu popupMenu = new JPopupMenu("Popup");
-					Collections.sort(tags);
-
-					for (Tag tag : tags) {
-
-						if (tag.equals(Tag.INTERSECTION_POINT))
-							continue; // The IP is determined solely by the OP
-
-						JMenuItem item = new JMenuItem(tag.toString());
-
-						item.addActionListener(a -> {
-							int index = cell.getNucleus().getBorderIndex(point);
-							updateTag(tag, index);
-							repaint();
-						});
-						popupMenu.add(item);
-					}
-
-					// Find border tags with rulesets that have not been assigned in the median
-					List<Tag> unassignedTags = new ArrayList<Tag>();
-					for (Tag tag : BorderTagObject.values()) {
-						if (tag.equals(Tag.INTERSECTION_POINT))
-							continue;
-						if (!tags.contains(tag)) {
-							unassignedTags.add(tag);
-						}
-					}
-
-					if (!unassignedTags.isEmpty()) {
-						Collections.sort(unassignedTags);
-
-						popupMenu.addSeparator();
-
-						for (Tag tag : unassignedTags) {
-							JMenuItem item = new JMenuItem(tag.toString());
-							item.setForeground(Color.DARK_GRAY);
-
-							item.addActionListener(a -> {
-								int index = cell.getNucleus().getBorderIndex(point);
-								updateTag(tag, index);
-							});
-							popupMenu.add(item);
-						}
-					}
-					return popupMenu;
-				}
-
-				@Override
-				public synchronized void mouseClicked(MouseEvent e) {
-
-					IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
-//					System.out.println(String.format("Mouse clicked at %s - %s ", e.getX(), e.getY()));
-
-					Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
-							.stream().filter(p->{
-//								clickedPoint.overlaps(p)
-								return clickedPoint.getX()>=p.getX()-0.4 && 
-										clickedPoint.getX()<=p.getX()+0.4 &&
-										clickedPoint.getY()>=p.getY()-0.4 && 
-										clickedPoint.getY()<=p.getY()+0.4;
-								
-							})
-							.findFirst();
-
-					if(point.isPresent()) {
-//						System.out.println(String.format("Border point overlaps at %s ", point.get().toString()));
-						JPopupMenu popup = createPopup(point.get());
-						popup.show(imageLabel, e.getX(), e.getY());
-					}
-
-				}
-
-			});
+			CellImageMouseListener mouseListener = new CellImageMouseListener();
+			imageLabel.addMouseWheelListener(mouseListener);
+			imageLabel.addMouseMotionListener(mouseListener);
+			imageLabel.addMouseListener(mouseListener);
 
 		};
 		ThreadManager.getInstance().submit(u);
+	}
+	
+	/**
+	 * Listener for mouse interactions with the image on display
+	 * @author bms41
+	 * @since 1.15.0
+	 *
+	 */
+	private class CellImageMouseListener extends MouseAdapter {
+		public CellImageMouseListener() { super(); }
+		private static final int MAX_BIG_RADIUS = 200;
+		private static final int MIN_BIG_RADIUS = 10;
+		private static final int MAX_SMALL_RADIUS = 100;
+		private static final int MIN_SMALL_RADIUS = 5;
+		
+		
+		@Override
+        public synchronized void mouseWheelMoved(MouseWheelEvent e) {
+			// Modify the square size
+            if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
+                InputEvent.CTRL_DOWN_MASK){
+            	int temp = smallRadius +( 1*e.getWheelRotation());
+            	temp = temp>MAX_SMALL_RADIUS?MAX_SMALL_RADIUS:temp;
+            	temp = temp<MAX_SMALL_RADIUS?MAX_SMALL_RADIUS:temp;
+                smallRadius = temp;
+            } else {
+            	// Modify the zoom
+            	int temp = bigRadius +( 3 * e.getWheelRotation());
+            	temp = temp>MAX_BIG_RADIUS?MAX_BIG_RADIUS:temp;
+            	temp = temp<MIN_BIG_RADIUS?MIN_BIG_RADIUS:temp;
+            	bigRadius = temp;
+            }
+            IPoint p = translatePanelLocationToRenderedImage(e); 
+			updateImage(p.getXAsInt(), p.getYAsInt());
+        }
+		
+		@Override
+		public synchronized void mouseMoved(MouseEvent e){
+			IPoint p = translatePanelLocationToRenderedImage(e); 
+			if(p==null)
+				return;
+			updateImage(p.getXAsInt(), p.getYAsInt());
+		}
+		
+		private synchronized void updateTag(Tag tag, int newIndex) {
+
+			ThreadManager.getInstance().execute(()->{
+				boolean wasLocked = cell.getNucleus().isLocked();
+				cell.getNucleus().setLocked(false);
+
+				cell.getNucleus().setBorderTag(tag, newIndex);
+				cell.getNucleus().updateVerticallyRotatedNucleus();
+
+				if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
+					cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
+				}
+				cell.getNucleus().updateDependentStats();
+				cell.getNucleus().setLocked(wasLocked);
+				dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
+				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+				createImage();
+			});
+		}
+
+		private synchronized JPopupMenu createPopup(IBorderPoint point) {
+			List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+			JPopupMenu popupMenu = new JPopupMenu("Popup");
+			Collections.sort(tags);
+
+			for (Tag tag : tags) {
+
+				if (tag.equals(Tag.INTERSECTION_POINT))
+					continue; // The IP is determined solely by the OP
+
+				JMenuItem item = new JMenuItem(tag.toString());
+
+				item.addActionListener(a -> {
+					int index = cell.getNucleus().getBorderIndex(point);
+					updateTag(tag, index);
+					repaint();
+				});
+				popupMenu.add(item);
+			}
+
+			// Find border tags with rulesets that have not been assigned in the median
+			List<Tag> unassignedTags = new ArrayList<Tag>();
+			for (Tag tag : BorderTagObject.values()) {
+				if (tag.equals(Tag.INTERSECTION_POINT))
+					continue;
+				if (!tags.contains(tag)) {
+					unassignedTags.add(tag);
+				}
+			}
+
+			if (!unassignedTags.isEmpty()) {
+				Collections.sort(unassignedTags);
+
+				popupMenu.addSeparator();
+
+				for (Tag tag : unassignedTags) {
+					JMenuItem item = new JMenuItem(tag.toString());
+					item.setForeground(Color.DARK_GRAY);
+
+					item.addActionListener(a -> {
+						int index = cell.getNucleus().getBorderIndex(point);
+						updateTag(tag, index);
+					});
+					popupMenu.add(item);
+				}
+			}
+			return popupMenu;
+		}
+
+		@Override
+		public synchronized void mouseClicked(MouseEvent e) {
+
+			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
+//			System.out.println(String.format("Mouse clicked at %s - %s ", e.getX(), e.getY()));
+
+			Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
+					.stream().filter(p->{
+//						clickedPoint.overlaps(p)
+						return clickedPoint.getX()>=p.getX()-0.4 && 
+								clickedPoint.getX()<=p.getX()+0.4 &&
+								clickedPoint.getY()>=p.getY()-0.4 && 
+								clickedPoint.getY()<=p.getY()+0.4;
+						
+					})
+					.findFirst();
+
+			if(point.isPresent()) {
+//				System.out.println(String.format("Border point overlaps at %s ", point.get().toString()));
+				JPopupMenu popup = createPopup(point.get());
+				popup.show(imageLabel, e.getX(), e.getY());
+			}
+
+		}
+		
 	}
 	
 	private void createMeshImage() {
@@ -279,7 +306,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				try{
 					ip = component.getImage();
 				} catch(UnloadableImageException e){
-					ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
+					ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
 				}
 				ImageAnnotator an = new ImageAnnotator(ip);
 
@@ -314,7 +341,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				try{
 					ip = component.getImage();
 				} catch(UnloadableImageException e){
-					ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
+					ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
 				}
 				ImageAnnotator an = new ImageAnnotator(ip);
 

@@ -74,7 +74,7 @@ public class FluorescentNucleusFinder extends CellFinder {
             // Display passing and failing size nuclei
             if (hasDetectionListeners()) {
 
-                ImageProcessor original = new ImageImporter(imageFile).importImage(nuclOptions.getChannel())
+                ImageProcessor original = new ImageImporter(imageFile).importImageAndInvert(nuclOptions.getChannel())
                         .convertToRGB();
                 ImageAnnotator ann = new ImageAnnotator(original);
 
@@ -125,7 +125,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         ImageFilterer filt = new ImageFilterer(ip.duplicate());
         if (cannyOptions.isUseKuwahara()) {
-            filt.runKuwaharaFiltering(cannyOptions.getKuwaharaKernel());
+            filt.kuwaharaFilter(cannyOptions.getKuwaharaKernel());
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();
@@ -134,7 +134,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         }
 
         if (cannyOptions.isUseFlattenImage()) {
-            filt.squashChromocentres(cannyOptions.getFlattenThreshold());
+            filt.setMaximumPixelValue(cannyOptions.getFlattenThreshold());
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();
@@ -143,14 +143,14 @@ public class FluorescentNucleusFinder extends CellFinder {
         }
 
         if (cannyOptions.isUseCanny()) {
-            filt.runEdgeDetector(cannyOptions);
+            filt.cannyEdgeDetection(cannyOptions);
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();
             	fireDetectionEvent(ip.duplicate(), "Edge detection");
             }
 
-            filt.morphologyClose(cannyOptions.getClosingObjectRadius());
+            filt.close(cannyOptions.getClosingObjectRadius());
             if (hasDetectionListeners()) {
             	ip = filt.toProcessor().duplicate();
             	ip.invert();

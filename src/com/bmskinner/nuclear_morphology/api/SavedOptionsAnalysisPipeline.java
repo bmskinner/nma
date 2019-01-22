@@ -154,10 +154,15 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	private void createNucleusDetectionMethod(@NonNull IAnalysisOptions options) throws Exception {
 		options.getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(imageFolder);
 		datasets =  new NucleusDetectionMethod(outputFolder, options).call().getDatasets();
-		for(IAnalysisDataset dataset : datasets)
+		for(IAnalysisDataset dataset : datasets) {
 			methodsToRun.add(new DatasetProfilingMethod(dataset));
-		for(IAnalysisDataset dataset : datasets)
 			methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW));
+			
+			// Update the source folder in the options - if multiple folders were analysed, this may be wrong
+			File folder = dataset.getCollection().getFolder();
+			dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(folder);
+		}
+
 	}
 	
 	/**

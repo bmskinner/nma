@@ -40,6 +40,12 @@ public interface MeshEdge {
     double getLength();
 
     IPoint getMidpoint();
+    
+    /**
+     * Test if both vertices are peripheral
+     * @return true if both vertices are peripheral, false otherwise
+     */
+    boolean isPeripheral();
 
     boolean isLongerThan(MeshEdge e);
 
@@ -81,10 +87,6 @@ public interface MeshEdge {
      * @return
      */
     double getPositionProportion(IPoint p);
-
-    int hashCode();
-
-    boolean equals(Object obj);
 
     String getName();
 

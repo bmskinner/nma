@@ -115,69 +115,33 @@ public class DoubleEquation implements LineEquation {
         this.c = a.getY() - (m * aX);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#getX(double)
-     */
     @Override
     public double getX(double y) {
         // x = (y-c)/m
         return isVert?xf:(y - this.c) / this.m;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#getY(double)
-     */
     @Override
     public double getY(double x) {
-        return (this.m * x) + this.c;
+        return isVert?Double.NaN:(this.m * x) + this.c;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getM()
-     */
     @Override
     public double getM() {
         return this.m;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getC()
-     */
     @Override
     public double getC() {
         return this.c;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.generic.Equation#isOnLine(com
-     * .bmskinner.nuclear_morphology.components.generic.IPoint)
-     */
     @Override
     public boolean isOnLine(IPoint p) {     
         
         return isVert?Math.abs(p.getX()-xf)<0.0000001:Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#
-     * getPointOnLine(com.bmskinner.nuclear_morphology.components.generic.
-     * IPoint, double)
-     */
     @Override
     public IPoint getPointOnLine(IPoint p, double distance) {
         
@@ -201,13 +165,6 @@ public class DoubleEquation implements LineEquation {
         return IPoint.makeNew(newX, newY);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.components.generic.Equation#
-     * getPerpendicular(com.bmskinner.nuclear_morphology.components.generic.
-     * IPoint)
-     */
     @Override
     public LineEquation getPerpendicular(IPoint p) {
         

@@ -19,6 +19,7 @@ import org.jdom2.output.XMLOutputter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.Consensus;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
@@ -172,11 +173,12 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		Element signals = e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY);
 		readSignalGroups(signals, collection);		
 		
-		// Add consensus
+		// Add consensus if present
 		try {
-			Nucleus consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
-			collection.setConsensus(consensus);
-			consensus.alignVertically();
+			if(e.getChild(XMLCreator.CONSENSUS_KEY)!=null){
+				Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
+				collection.setConsensus(consensus);
+			}
 		} catch (UnprofilableObjectException e1) {
 			stack(e1);
 		}
@@ -237,15 +239,17 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		for(Element seg : segs.getChildren()) {			
 			UUID id = readUUID(seg);
 			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
-			if(prevStart!=-1) {
+			if(prevId!=null) {
 				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, profileLength, prevId);
 				newSegs.add(newSeg);
 			}
 			prevStart = startIndex;
 			prevId = id;
 		}
-		IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
-		newSegs.add(lastSeg);
+		if(prevId!=null) {
+			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
+			newSegs.add(lastSeg);
+		}
 		
 		collection.getProfileCollection().addSegments(newSegs);
 
@@ -260,7 +264,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		return cell;
 	}
 	
-	private Nucleus readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException {
+	private Consensus<Nucleus> readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException {
 		Nucleus template = readNucleus(e.getChild(XMLCreator.NUCLEUS_KEY));
 		return new DefaultConsensusNucleus(template, type);
 	}
@@ -404,18 +408,20 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		int prevStart = -1;
 		UUID prevId = null;
 		for(Element seg : segs.getChildren()) {			
-			UUID id = readUUID(seg);
-			int startIndex = Integer.valueOf(seg.getChildText(XMLCreator.INDEX_KEY));
-			if(prevStart!=-1) {
+			UUID id = readUUID(seg);				
+			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
+			if(prevId!=null) {
 				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, n.getBorderLength(), prevId);
 				newSegs.add(newSeg);
 			}
 			prevStart = startIndex;
 			prevId = id;
 		}
-		IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
-		newSegs.add(lastSeg);
-
+		
+		if(prevId!=null) {
+			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
+			newSegs.add(lastSeg);
+		}
 		try {			
 			for(ProfileType type : ProfileType.values()) { 
 				IProfile profile = n.getProfile(type);

@@ -573,7 +573,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
 
         String commonPath = "";
         for (int i = 0; i < common.size(); i++) {
-
             commonPath += common.get(i);
             if (i > 0 && i < common.size() - 1) { // don't add separator after
                                                   // root or at the end
@@ -592,6 +591,8 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      *         is a directory before using this.
      */
     static File commonPathOfFiles(@NonNull List<IAnalysisDataset> datasets) {
+    	if(datasets.size()==1)
+    		return datasets.get(0).getSavePath().getParentFile();
 
         List<File> files = new ArrayList<>(datasets.size());
         for (IAnalysisDataset d : datasets) {

@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 import java.awt.geom.Path2D;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.generic.FloatEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -107,90 +108,56 @@ public class DefaultMeshFace implements Loggable, MeshFace {
         this.value = f.getValue();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getValue()
-     */
     @Override
     public double getValue() {
         return value;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getLog2Ratio()
-     */
     @Override
     public double getLog2Ratio() {
         return Stats.calculateLog2Ratio(value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#setValue(double)
-     */
     @Override
     public void setValue(double value) {
         this.value = value;
     }
+    
+	@Override
+	public boolean isPeripheral() {
+		return edges.stream().anyMatch(e->e.isPeripheral());
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getEdges()
-     */
     @Override
     public Set<MeshEdge> getEdges() {
         return edges;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getVertices()
-     */
     @Override
     public Set<MeshVertex> getVertices() {
         return vertices;
     }
+    
+    @Override
+    public Set<MeshVertex> getPeripheralVertices() {
+        return vertices.stream().filter(v->v.isPeripheral()).collect(Collectors.toSet());
+    }
+    
+    @Override
+    public Set<MeshVertex> getInternalVertices() {
+    	return vertices.stream().filter(v->v.isInternal()).collect(Collectors.toSet());
+    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#contains(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.MeshEdge)
-     */
     @Override
     public boolean contains(MeshEdge e) {
         return edges.contains(e);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#contains(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.MeshVertex)
-     */
     @Override
     public boolean contains(MeshVertex v) {
         return vertices.contains(v);
     }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#contains(com.
-     * bmskinner.nuclear_morphology.components.generic.IPoint)
-     */
+
     @Override
     public boolean contains(IPoint p) {
 
@@ -198,11 +165,6 @@ public class DefaultMeshFace implements Loggable, MeshFace {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getArea()
-     */
     @Override
     public double getArea() {
         // Use Heron's formula:
@@ -225,23 +187,6 @@ public class DefaultMeshFace implements Loggable, MeshFace {
         return a;
 
     }
-
-    // /**
-    // * Get the vertex opposite the given edge. This is the vertex
-    // * that does not contain the edge.
-    // * @param e
-    // * @return
-    // */
-    // private MeshVertex getOppositeVertex(MeshEdge e){
-    //
-    // for(MeshVertex v : vertices){
-    // if( ! v.getEdges().contains(e)){
-    // return v;
-    // }
-    // }
-    //
-    // return null;
-    // }
 
     /**
      * Get the edge opposite the given vertex. This is the edge that does not
@@ -294,11 +239,6 @@ public class DefaultMeshFace implements Loggable, MeshFace {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getName()
-     */
     @Override
     public String getName() {
         StringBuilder b = new StringBuilder();
@@ -309,12 +249,6 @@ public class DefaultMeshFace implements Loggable, MeshFace {
         return b.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getMidpoint()
-     */
     @Override
     public IPoint getMidpoint() {
 
@@ -343,12 +277,6 @@ public class DefaultMeshFace implements Loggable, MeshFace {
         return b.toString();
     }
 
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#toPath()
-     */
     @Override
     public Path2D toPath() {
         Path2D path = new Path2D.Double();

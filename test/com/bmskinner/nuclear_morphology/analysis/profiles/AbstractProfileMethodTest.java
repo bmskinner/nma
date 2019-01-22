@@ -16,6 +16,7 @@ import com.bmskinner.nuclear_morphology.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.charting.OutlineChartFactoryTest;
+import com.bmskinner.nuclear_morphology.charting.OutlineTestChartFactory;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -98,7 +99,7 @@ public class AbstractProfileMethodTest extends ComponentTester {
 		
 		if(!ok) {
 			ChartFactoryTest.showProfiles(v.getErrorCells(), d);
-			OutlineChartFactoryTest.generateOutlineChartsForAllCells(d, "An error was found in segmentation of "+d.getName());
+			OutlineTestChartFactory.generateOutlineChartsForAllCells(d, "An error was found in segmentation of "+d.getName());
 		}
 				
 		assertTrue(ok);

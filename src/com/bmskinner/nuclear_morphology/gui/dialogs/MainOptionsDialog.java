@@ -56,6 +56,8 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
     private JCheckBox               convertDatasetsBox; // should opened
                                                         // datasets be converted
                                                         // to the latest version
+    
+    private JCheckBox               showDebugInterfaceBox;
 
     public MainOptionsDialog(final MainView mw) {
         super((Frame) mw, false);
@@ -147,6 +149,13 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 
         labels.add(convertDatasetsLabel);
         fields.add(convertDatasetsBox);
+        
+        JLabel showDebugInterfacLabel = new JLabel("Show debug UI");
+        showDebugInterfaceBox = new JCheckBox((String) null, GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY));
+        showDebugInterfaceBox.addActionListener(this);
+        
+        labels.add(showDebugInterfacLabel);
+        fields.add(showDebugInterfaceBox);
 
         this.addLabelTextRows(labels, fields, layout, panel);
         return panel;
@@ -180,6 +189,9 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         if (GlobalOptions.getInstance().isOverrideRefold() != overrideRefold) {
             GlobalOptions.getInstance().setOverrideRefold(overrideRefold);
         }
+        
+        boolean isShowDebug = showDebugInterfaceBox.isSelected();
+        GlobalOptions.getInstance().setBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY, isShowDebug);;
 
 
     }

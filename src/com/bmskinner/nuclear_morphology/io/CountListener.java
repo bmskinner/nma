@@ -23,5 +23,11 @@ package com.bmskinner.nuclear_morphology.io;
  *
  */
 public interface CountListener {
+	
+	
+	/**
+	 * Signal the listener that the count has changed
+	 * @param newCount the new count value
+	 */
 	void countChanged(long newCount);
 }

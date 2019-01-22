@@ -47,6 +47,7 @@ import mmorpho.StructureElement;
  * background removal and edge detection.
  * 
  * @author ben
+ * @since 1.11.0
  *
  */
 public class ImageFilterer extends AbstractImageFilterer {
@@ -60,42 +61,37 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Apply a thresholding on a greyscale processor. Has no effect if the
-     * processor is not greyscale
+     * Apply a binary thresholding to a greyscale processor. Has no effect if the
+     * processor is not greyscale.
      * 
-     * @param threshold
-     * @return
+     * @param threshold the threshold value.
+     * @return this filterer with the binary thresholded image.
+     * @see ImageProcessor#threshold(int)
      */
     public ImageFilterer threshold(int threshold) {
-        if (ip.isGrayscale()) {
+        if (ip.isGrayscale()) 
             ip.threshold(threshold);
-        }
         return this;
     }
 
     /**
      * Run a Kuwahara filter to enhance edges in the image
      * 
-     * @param stack
-     *            the image
-     * @param filterSize
-     *            the radius of the kernel
+     * @param stackNumber the image processor in the stack to filter (1-indexed)
+     * @param kernelRadius the radius of the kernel
      */
-    public ImageFilterer runKuwaharaFiltering(int stackNumber, int filterSize) {
-
+    public ImageFilterer kuwaharaFilter(int stackNumber, int kernelRadius) {
         ip = st.getProcessor(stackNumber).duplicate();
-
-        return runKuwaharaFiltering(filterSize);
+        return kuwaharaFilter(kernelRadius);
     }
 
     /**
      * Run a Kuwahara filter to enhance edges in the image
      * 
-     * @param filterSize
-     *            the radius of the kernel
+     * @param kernelRadius the radius of the kernel
      * @return a new ImageFilterer with the processed image
      */
-    public ImageFilterer runKuwaharaFiltering(int filterSize) {
+    public ImageFilterer kuwaharaFilter(int kernelRadius) {
 
         Kuwahara_Filter kw = new Kuwahara_Filter();
         ImagePlus img = new ImagePlus("", ip);
@@ -103,29 +99,79 @@ public class ImageFilterer extends AbstractImageFilterer {
 
         ImageProcessor result = ip.duplicate();
 
-        kw.filter(result, filterSize);
+        kw.filter(result, kernelRadius);
         ip = result;
         return this;
     }
-
+    
     /**
-     * The chromocentre can cause 'skipping' of the edge detection from the edge
-     * to the interior of the nucleus. Make any pixel over threshold equal
-     * threshold to remove internal structures
+     * Make any pixel below the threshold equal to zero. Removes background.
      * 
-     * @param stack
-     *            the stack to adjust
-     * @param stackNumber
-     *            the plane in the stack (starts at 1)
-     * @param threshold
-     *            the maximum intensity to allow
-     * @return a copy of the image processor, with flattening applied
+     * @param stackNumber the plane in the stack (1-indexed)
+     * @param threshold the minimum intensity to allow
+     * @return this filterer
      */
-    public ImageFilterer squashChromocentres(int stackNumber, int threshold) {
-
-        // fetch a copy of the int array
+    public ImageFilterer setBlackLevel(int stackNumber, int threshold) {
         ip = st.getProcessor(stackNumber);
-        ImageProcessor result = squashChromocentres(threshold).ip;
+        ip = setBlackLevel(threshold).ip;
+        return this;
+    }
+
+    /**
+     * Make any pixel below the threshold equal to zero. Removes background.
+     * 
+     * @param threshold the minimum intensity to allow
+     * @return this filterer
+     */
+    public ImageFilterer setBlackLevel(int threshold) {
+        ImageProcessor result = ip.duplicate();
+        for (int i = 0; i < result.getPixelCount(); i++) {
+            if (result.get(i) < threshold)
+                result.set(i, 0);
+        }
+        return new ImageFilterer(result);
+    }
+    
+    /**
+     * Make any pixel above the threshold equal to the maximum intensity.
+     * 
+     * @param stackNumber the plane in the stack (1-indexed)
+     * @param threshold the maximum intensity
+     * @return this filterer
+     */
+    public ImageFilterer setWhiteLevel(int stackNumber, int threshold) {
+        ip = st.getProcessor(stackNumber);
+        ip = setWhiteLevel(threshold).ip;
+        return this;
+    }
+
+    /**
+     * Make any pixel above the threshold equal to the maximum intensity.
+     * 
+     * @param threshold the maximum intensity
+     * @return this filterer
+     */
+    public ImageFilterer setWhiteLevel(int threshold) {
+        ImageProcessor result = ip.duplicate();
+        for (int i = 0; i < result.getPixelCount(); i++) {
+            if (result.get(i) > threshold)
+                result.set(i, BYTE_MAX);
+        }
+        return new ImageFilterer(result);
+    }
+
+    /**
+     * The chromocentre can cause 'skipping' of the edge detection from the edge
+     * to the interior of the nucleus. Make any pixel over threshold equal
+     * threshold to remove internal structures
+     * 
+     * @param stackNumber the plane in the stack (starts at 1)
+     * @param threshold the maximum intensity to allow
+     * @return this filterer
+     */
+    public ImageFilterer setMaximumPixelValue(int stackNumber, int threshold) {
+        ip = st.getProcessor(stackNumber);
+        ImageProcessor result = setMaximumPixelValue(threshold).ip;
         ip = result;
         return this;
     }
@@ -135,13 +181,10 @@ public class ImageFilterer extends AbstractImageFilterer {
      * to the interior of the nucleus. Make any pixel over threshold equal
      * threshold to remove internal structures
      * 
-     * @param ip
-     *            the image processor to flatten
-     * @param threshold
-     *            the maximum intensity to allow
-     * @return a copy of the image processor, with flattening applied
+     * @param threshold the maximum intensity to allow
+     * @return this filterer
      */
-    public ImageFilterer squashChromocentres(int threshold) {
+    public ImageFilterer setMaximumPixelValue(int threshold) {
 
         ImageProcessor result = ip.duplicate();
 
@@ -153,46 +196,44 @@ public class ImageFilterer extends AbstractImageFilterer {
         }
         ip = result;
         return this;
-        // return new ImageFilterer(result);
+    }
+    
+    /**
+     *  Make any pixel value below the threshold equal to the threshold.
+     * 
+     * @param stackNumber the plane in the stack (1-indexed)
+     * @param threshold the minimum pixel value
+     * @return this filterer
+     */
+    public ImageFilterer setMinimumPixelValue(int stackNumber, int threshold) {
+        ip = st.getProcessor(stackNumber);
+        ImageProcessor result = setMinimumPixelValue(threshold).ip;
+        ip = result;
+        return this;
     }
 
     /**
-     * Make any pixel below the threshold equal the threshold.
+     * Make any pixel value below the threshold equal to the threshold.
      * 
-     * @param ip
-     *            the image processor to raise
-     * @param threshold
-     *            the maximum intensity to allow
-     * @return a copy of the image processor, with raising applied
+     * @param threshold the minimum pixel value
+     * @return this filterer
      */
-    public ImageFilterer raise(int threshold) {
+    public ImageFilterer setMinimumPixelValue(int threshold) {
 
         ImageProcessor result = ip.duplicate();
 
         for (int i = 0; i < result.getPixelCount(); i++) {
-
-            if (result.get(i) < threshold) {
+            if (result.get(i) < threshold)
                 result.set(i, threshold);
-            }
         }
         ip = result;
         return this;
-        // return new ImageFilterer(result);
     }
-
-    // /**
-    // * Invert the processor
-    // * @return
-    // */
-    // public ImageFilterer invert(){
-    // ip.invert();
-    // return this;
-    // }
-
+    
     /**
      * Threshold based on HSV
      * 
-     * @return a copy of the image processor, with thresholding applied
+     * @return this filterer
      */
     public ImageFilterer colorThreshold(int minHue, int maxHue, int minSat, int maxSat, int minBri, int maxBri) {
 
@@ -205,7 +246,6 @@ public class ImageFilterer extends AbstractImageFilterer {
         ImageProcessor result = ct.threshold(ip);
         ip = result;
         return this;
-        // return new ImageFilterer(result);
     }
 
     /**
@@ -214,10 +254,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * 
      * 1 0 0 1 1 0 1 0 1 becomes 1 1 1 0 0 1 0 1 1
      * 
-     * @param ip
-     *            the image processor
-     * @param bridgeSize
-     *            the distance to search
+     * @param bridgeSize the distance to search
      * @return
      */
     public ImageFilterer bridgePixelGaps(int bridgeSize) {
@@ -244,15 +281,28 @@ public class ImageFilterer extends AbstractImageFilterer {
         result.setIntArray(array);
         ip = result;
         return this;
-        // return new ImageFilterer(result);
+    }
+    
+    /**
+     * Resize the image to fit on the screen. By default the width will be 80% of
+     * the screen width. If this would cause the height to become greater than the screen
+     * height, the image will be resized such that the height is 80% of the screen height.
+     * 
+     * @return the resized image, preserving aspect ratio
+     */
+    public ImageFilterer fitToScreen() {
+        if (ip == null)
+            throw new IllegalArgumentException("Image processor is null");
+        return fitToScreen(0.8);
     }
 
     /**
-     * Resize the image to fit on the screen with the given width.
+     * Resize the image to fit on the screen. By default the width will be the given fraction of
+     * the screen width. If this would cause the height to become greater than the screen
+     * height, the image will be resized such that the height is that fraction of the screen height.
      * 
-     * @param fraction
-     *            the fraction of the screen width to take up (0-1)
-     * @return
+     * @param fraction the fraction of the screen width to take up (0-1)
+     * @return the resized image, preserving aspect ratio
      */
     public ImageFilterer fitToScreen(double fraction) {
 
@@ -305,92 +355,16 @@ public class ImageFilterer extends AbstractImageFilterer {
         return this;
     }
 
-//    /**
-//     * Resize the image to fit the given dimensions, preserving aspect ratio
-//     * 
-//     * @param newWidth
-//     *            the new width of the image
-//     * @return
-//     */
-//    public ImageFilterer resize(int maxWidth, int maxHeight) {
-//
-//        if (ip == null) {
-//            throw new IllegalArgumentException("Image processor is null");
-//        }
-//
-//        int originalWidth = ip.getWidth();
-//        int originalHeight = ip.getHeight();
-//
-//        // keep the image aspect ratio
-//        double ratio = (double) originalWidth / (double) originalHeight;
-//
-//        double finalWidth = maxHeight * ratio; // fix height
-//        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
-//                                                                    // constrain
-//                                                                    // width too
-//
-//        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
-//        ip = result;
-//        return this;
-//        // return new ImageFilterer(result);
-//    }
-
-    /**
-     * Resize the image to fit on the screen. By default the width will be 80%,
-     * unless this causes the height to become too great. In this case the
-     * height will be set to 80%.
-     * 
-     * @return
-     */
-    public ImageFilterer fitToScreen() {
-
-        if (ip == null) {
-            throw new IllegalArgumentException("Image processor is null");
-        }
-
-        return fitToScreen(0.8);
-    }
-
-//    /**
-//     * Crop the image to the region covered by the given component
-//     * 
-//     * @return
-//     */
-//    public ImageFilterer crop(@NonNull CellularComponent c) {
-//
-//        if (ip == null) {
-//            throw new IllegalArgumentException("Image processor is null");
-//        }
-//        // Choose a clip for the image (an enlargement of the original nucleus
-//        // ROI
-//        int[] positions = c.getPosition();
-//        int wideW = (int) (positions[CellularComponent.WIDTH] + 20);
-//        int wideH = (int) (positions[CellularComponent.HEIGHT] + 20);
-//        int wideX = (int) (positions[CellularComponent.X_BASE] - 10);
-//        int wideY = (int) (positions[CellularComponent.Y_BASE] - 10);
-//
-//        wideX = wideX < 0 ? 0 : wideX;
-//        wideY = wideY < 0 ? 0 : wideY;
-//
-//        ip.setRoi(wideX, wideY, wideW, wideH);
-//        ImageProcessor result = ip.crop();
-//        ip = result;
-//        return this;
-//        // return new ImageFilterer(result);
-//    }
 
     /**
      * Fetch a 3x3 image kernel from within an int image array
      * 
-     * @param array
-     *            the input image
-     * @param x
-     *            the central x point
-     * @param y
-     *            the central y point
+     * @param array the input image
+     * @param x the central x point
+     * @param y the central y point
      * @return
      */
-    public int[][] getKernel(int[][] array, int x, int y) {
+    private int[][] getKernel(int[][] array, int x, int y) {
 
         /*
          * Create the kernel array, and zero it
@@ -429,11 +403,10 @@ public class ImageFilterer extends AbstractImageFilterer {
      * Should a pixel kernel be bridged? If two or more pixels in the array are
      * filled, and not connected, return true
      * 
-     * @param array
-     *            the 3x3 array of pixels
+     * @param array the 3x3 array of pixels
      * @return
      */
-    public boolean bridgePixel(int[][] array) {
+    private boolean bridgePixel(int[][] array) {
 
         /*
          * If the central pixel is filled, do nothing.
@@ -484,15 +457,13 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Close holes in the nuclear borders
+     * Close holes in the nuclear borders using a circular structure element
      * 
-     * @param ip
-     *            the image processor. It must be convertible to a ByteProcessor
-     * @param closingRadius
-     *            the radius of the circle
+     * @param ip the image processor. It must be convertible to a ByteProcessor
+     * @param closingRadius the radius of the circle
      * @return a new ByteProcessor containing the closed image
      */
-    public ImageFilterer morphologyClose(int closingRadius) {
+    public ImageFilterer close(int closingRadius) {
 
         ByteProcessor result = ip.convertToByteProcessor();
 
@@ -503,29 +474,21 @@ public class ImageFilterer extends AbstractImageFilterer {
         StructureElement se = new StructureElement(elType, shift, closingRadius, offset);
         MorphoProcessor mp = new MorphoProcessor(se);
 
-        /*
-         * Better way of closing. Dilate, fill, then erode
-         */
+        /* Better way of closing. Dilate, fill, then erode */
         mp.dilate(result);
-
-        // fill holes
         fill(result);
-
         mp.erode(result);
+        
         ip = result;
         return this;
-        // return new ImageFilterer(result);
-
     }
 
     /**
-     * Dilate by the given amount
+     * Dilate by the given amount using a circular stucture element
      * 
-     * @param ip
-     *            the image processor. It must be convertible to a ByteProcessor
-     * @param amount
-     *            the radius of the circle
-     * @return a new ByteProcessor containing the closed image
+     * @param ip the image processor. It must be convertible to a ByteProcessor
+     * @param amount the radius of the circle
+     * @return this filterer with a new ByteProcessor containing the closed image
      */
     public ImageFilterer dilate(int amount) {
 
@@ -538,22 +501,16 @@ public class ImageFilterer extends AbstractImageFilterer {
         StructureElement se = new StructureElement(elType, shift, amount, offset);
         MorphoProcessor mp = new MorphoProcessor(se);
 
-        /*
-         * Better way of closing. Dilate, fill, then erode
-         */
         mp.dilate(result);
         ip = result;
         return this;
-        // return new ImageFilterer(result);
-
     }
 
-    //
     /**
-     * Based on the ImageJ Fill holes command: Binary fill by Gabriel Landini,
-     * G.Landini at bham.ac.uk 21/May/2008
+     * Fill holes in the image. Based on the ImageJ Fill holes command: 
+     * Binary fill by Gabriel Landini, G.Landini at bham.ac.uk 21/May/2008
      * 
-     * @param ip
+     * @param ip the image to fill
      */
     private void fill(ImageProcessor ip) {
 
@@ -587,43 +544,12 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Use Canny edge detection to produce an image with potential edges
-     * highlighted for the detector. Also performs morphology closing
-     * 
-     * @param image
-     *            the stack to process
-     * @return a stack with edges highlighted
-     * @throws Exception
-     */
-    public ImageFilterer runEdgeDetector(int stackNumber, ICannyOptions options) {
-
-        ImageStack searchStack = null;
-        // Run the edge detection
-        ip = st.getProcessor(stackNumber);
-        // ByteProcessor searchImage = runEdgeDetector( options);
-        // ip = runEdgeDetector( options).getProcessor();
-
-        // ByteProcessor closed = (ByteProcessor) morphologyClose(
-        // options.getClosingObjectRadius()).getProcessor() ;
-
-        int closingRadius = options.getClosingObjectRadius();
-        ImageProcessor closed = runEdgeDetector(options).morphologyClose(closingRadius).toProcessor();
-
-        searchStack = ImageStack.create(st.getWidth(), st.getHeight(), 0, 8);
-        searchStack.addSlice("closed", closed, 0);
-        st = searchStack;
-        return this;
-        // return new ImageFilterer(searchStack);
-    }
-
-    /**
      * Perform a Canny edge detection on the given image
      * 
-     * @param ip
-     * @param options
-     * @return
+     * @param options the canny options
+     * @return this filterer with a new ByteProcessor containing the edge detected image
      */
-    public ImageFilterer runEdgeDetector(ICannyOptions options) {
+    public ImageFilterer cannyEdgeDetection(@NonNull ICannyOptions options) {
         ByteProcessor result = null;
 
         // // calculation of auto threshold
@@ -637,7 +563,7 @@ public class ImageFilterer extends AbstractImageFilterer {
         canny.process();
         BufferedImage edges = canny.getEdgesImage();
 
-        // convert to a TYPE_INT_GREY for use in a ByteProcessor
+        // convert to an unsigned byte processor
         BufferedImage converted = new BufferedImage(edges.getWidth(), edges.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
         converted.getGraphics().drawImage(edges, 0, 0, null);
 
@@ -646,17 +572,15 @@ public class ImageFilterer extends AbstractImageFilterer {
         converted = null;
         ip = result;
         return this;
-        // return new ImageFilterer(result);
     }
 
     /**
      * Run circle detection using given Hough transform options
      * 
-     * @param options
-     *            the detection options
-     * @return
+     * @param options the detection options
+     * @return the points at the centres of the detected circles
      */
-    public List<IPoint> runHoughCircleDetection(IHoughDetectionOptions options) {
+    public List<IPoint> houghCircleDetection(@NonNull IHoughDetectionOptions options) {
 
         fine("Running hough detection");
 
@@ -691,24 +615,20 @@ public class ImageFilterer extends AbstractImageFilterer {
      * Try to detect the optimal settings for the edge detector based on the
      * median image pixel intensity.
      * 
-     * @param nucleusCannyOptions
-     *            the options
-     * @param image
-     *            the image to analyse
-     * @throws Exception
+     * @param optons the canny options
+     * @param image the image to analyse
      */
     private void autoDetectCannyThresholds(ICannyOptions options, ImageProcessor image) {
         // calculation of auto threshold
 
         // find the median intensity of the image
-        double medianPixel = getMedianIntensity(image);
+        double medianPixel = findMedianIntensity(image);
 
         // if the median is >128, this is probably an inverted image.
         // invert it so the thresholds will work
         if (medianPixel > 128) {
-
             image.invert();
-            medianPixel = getMedianIntensity(image);
+            medianPixel = findMedianIntensity(image);
         }
 
         // set the thresholds either side of the median
@@ -725,29 +645,17 @@ public class ImageFilterer extends AbstractImageFilterer {
     }
 
     /**
-     * Get the median pixel intensity in the image. Used in auto-selection of
+     * Find the median pixel intensity in the image. Used in auto-selection of
      * Canny thresholds.
      * 
-     * @param image
-     *            the image to process
+     * @param image the image to process
      * @return the median pixel intensity
      */
-    private double getMedianIntensity(ImageProcessor image) {
-
-        double[] values = new double[image.getWidth() * image.getHeight()];
-
-        int i = 0;
-        for (int w = 0; w < image.getWidth(); w++) {
-            for (int h = 0; h < image.getHeight(); h++) {
-                values[i] = (double) image.get(w, h);
-
-                i++;
-            }
-        }
-        DescriptiveStatistics ds = new DescriptiveStatistics();
-        for(double d : values){
-        	ds.addValue(d);
-        }
-        return ds.getPercentile(Stats.MEDIAN);
+    private double findMedianIntensity(ImageProcessor image) {
+        int max = image.getPixelCount();
+        double[] values = new double[max];
+        for(int i=0; i<max; i++)
+        	values[i]=image.get(i);
+        return Stats.quartile(values, Stats.MEDIAN);
     }
 }

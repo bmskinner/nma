@@ -165,23 +165,62 @@ public class DefaultInputSupplier implements InputSupplier {
 			throw new RequestCancelledException();
 		return f;
 	}
+	
+	@Override
+	public int requestOption(String[] options, String message) throws RequestCancelledException {
+		return requestOption(options, 0, message);
+	}
+
+	@Override
+	public int requestOption(String[] options, String message, String title) throws RequestCancelledException {
+		return requestOption(options, 0, message, title);
+	}
 
 	@Override
 	public int requestOption(String[] options, int defaultOption, String message) throws RequestCancelledException {
-        return requestOption(options, defaultOption, message,message);
+        return requestOption(options, defaultOption, message, message);
 	}
 	
 	@Override
 	public int requestOption(String[] options, int defaultOption, String message, String title) throws RequestCancelledException {
+        
+        Object result = JOptionPane.showInputDialog(null, message , title,
+                                JOptionPane.QUESTION_MESSAGE, null, options, options[defaultOption]);
+
+        if(result==null)
+        	throw new RequestCancelledException();
+        
+        for(int i=0; i<options.length; i++)
+        	if(options[i].equals(result))
+        		return i;
+
+        throw new RequestCancelledException();
+        
+	}
+	
+	@Override
+	public int requestOptionAllVisible(String[] options, String message, String title)
+			throws RequestCancelledException {
+        return requestOptionAllVisible(options, 0, message, title);
+	}
+	
+	@Override
+	public int requestOptionAllVisible(String[] options, int defaultOption, String message, String title)
+			throws RequestCancelledException {
         int result = JOptionPane.showOptionDialog(null, message, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[defaultOption]);
         if(result<0)
         	throw new RequestCancelledException();
         return result;
-        
 	}
-	
-	
+
+	@Override
+	public boolean requestApproval(String message, String title) throws RequestCancelledException {
+		int result = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
+		if(result==2)
+			throw new RequestCancelledException();
+		return result==0;
+	}
 
 }

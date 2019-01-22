@@ -188,8 +188,8 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             JPanel header = createHeader();
             this.add(header, BorderLayout.NORTH);
 
-            JFreeChart empty1 = ConsensusNucleusChartFactory.makeEmptyChart();
-            JFreeChart empty2 = ConsensusNucleusChartFactory.makeEmptyChart();
+            JFreeChart empty1 = ConsensusNucleusChartFactory.createEmptyChart();
+            JFreeChart empty2 = ConsensusNucleusChartFactory.createEmptyChart();
 
             dualPanel = new CellBorderDualPanel();
 
@@ -517,7 +517,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
                 // workingCell.getNucleus().setBorderTag(tag, newIndex);
                 newMap.put(tag, newIndex);
             }
-            workingCell.getNucleus().replaceBorderTags(newMap);
+//            workingCell.getNucleus().replaceBorderTags(newMap);
 
         } catch (Exception e) {
             warn("Cannot calculate profiles for cell");

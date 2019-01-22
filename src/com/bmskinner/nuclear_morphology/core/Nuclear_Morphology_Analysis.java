@@ -61,8 +61,6 @@ public class Nuclear_Morphology_Analysis
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 
-	
-	
 	private Nuclear_Morphology_Analysis(String[] args){
 		loadLogger();
 	    this.parser = new CommandParser(args);

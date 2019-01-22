@@ -62,16 +62,15 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * Get the XY coordinates of a given signal centre of mass on a nuclear
      * outline
      * 
-     * @param n
-     *            the signal to plos
-     * @param outline
-     *            the outline to draw the signal on
+     * @param n the signal to plot
+     * @param outline the nucleus outline to draw the signal on
      * @return the point of the signal centre of mass
-     * @throws Exception
+     * @throws ChartDatasetCreationException
      */
     public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline) throws ChartDatasetCreationException {
-
-        double angle = n.getStatistic(PlottableStatistic.ANGLE);
+        
+    	// the anti-clockwise angle from the OP to the signal
+    	double angle = n.getStatistic(PlottableStatistic.ANGLE);
 
         double fractionalDistance = n.getStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM);
 
@@ -79,37 +78,52 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         double distanceToBorder = outline.getDistanceFromCoMToBorderAtAngle(angle);
 
         // convert to fractional distance to signal
-        double signalDistance = distanceToBorder * fractionalDistance;
+        double distanceFromCoM = distanceToBorder * fractionalDistance;
+        
+//        fine(String.format("Drawing signal with angle %s at distance %s", angle, distanceFromCoM));
 
-        // adjust X and Y because we are now counting angles from the vertical
-        // axis
-        double signalX = AngleTools.getXComponentOfAngle(signalDistance, angle - 90);
-        double signalY = AngleTools.getYComponentOfAngle(signalDistance, angle - 90);
+        // adjust X and Y because we are counting angles from the vertical axis
+        // but the angle tools returns angles against the x-axis
+        double signalX = AngleTools.getXComponentOfAngle(distanceFromCoM, angle - 90);
+        double signalY = AngleTools.getYComponentOfAngle(distanceFromCoM, angle - 90);
         return IPoint.makeNew(signalX, signalY);
     }
 
     /**
      * Create a chart dataset for the centres of mass of signals in the dataset
      * 
-     * @param dataset
-     *            the dataset
+     * @param dataset the dataset
      * @return
-     * @throws Exception
      */
-    public XYDataset createSignalCoMDataset(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
+    public XYDataset createSignalCoMDataset() throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
-        ICellCollection collection = dataset.getCollection();
+    	NuclearSignalXYDataset ds = new NuclearSignalXYDataset();
+        ICellCollection collection = options.firstDataset().getCollection();
 
         if (collection.getSignalManager().hasSignals()) {
             for (UUID uuid : collection.getSignalManager().getSignalGroupIDs()) {
 
-                if (dataset.getCollection().getSignalGroup(uuid).get().isVisible()) {
-				    double[] xpoints = new double[collection.getSignalManager().getSignals(uuid).size()];
-				    double[] ypoints = new double[collection.getSignalManager().getSignals(uuid).size()];
+                if (options.firstDataset().getCollection().getSignalGroup(uuid).get().isVisible()) {
+                	
+                	List<INuclearSignal> signals = collection.getSignalManager().getSignals(uuid);
+				    double[] xpoints = new double[signals.size()];
+				    double[] ypoints = new double[signals.size()];
 
 				    int signalCount = 0;
-				    for (INuclearSignal n : collection.getSignalManager().getSignals(uuid)) {
+				    
+				    List<INuclearSignal> signalList = new ArrayList<>();
+				    List<Nucleus> nucleusList = new ArrayList<>();
+				    for (Nucleus n : collection.getNuclei()) {
+				    	if(n.getSignalCollection().hasSignal(uuid)) {
+				    		for(INuclearSignal s : n.getSignalCollection().getSignals(uuid)) {
+				    			signalList.add(s);
+				    			nucleusList.add(n);
+				    		}
+				    	}
+			        }
+				    
+				    
+				    for (INuclearSignal n : signals) {
 
 				        IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
@@ -119,7 +133,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 				    }
 				    double[][] data = { xpoints, ypoints };
-				    ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data);
+				    
+				    ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data, signalList, nucleusList);
 				}
             }
         }
@@ -153,13 +168,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     /**
      * Create a boxplot dataset for signal statistics
      * 
-     * @param options
-     *            the chart options
      * @return a boxplot dataset
      * @throws Exception
      */
-    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset() throws ChartDatasetCreationException {
-
+    public NuclearSignalBoxAndWhiskerDataset createSignalStatisticBoxplotDataset() throws ChartDatasetCreationException {
         return createMultiDatasetSignalStatisticBoxplotDataset();
     }
 
@@ -167,15 +179,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * Create a boxplot dataset for signal statistics for a single analysis
      * dataset
      * 
-     * @param dataset
-     *            the AnalysisDataset to get signal info from
      * @return a boxplot dataset
      * @throws ChartDatasetCreationException
      */
-    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset()
+    private NuclearSignalBoxAndWhiskerDataset createMultiDatasetSignalStatisticBoxplotDataset()
             throws ChartDatasetCreationException {
 
-        ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
+    	NuclearSignalBoxAndWhiskerDataset result = new NuclearSignalBoxAndWhiskerDataset();
         PlottableStatistic stat = options.getStat();
 
         for (IAnalysisDataset d : options.getDatasets()) {
@@ -199,7 +209,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                     list.add(value);
                 }
 
-                result.add(list, CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup, collection.getName());
+                result.add(signalGroup, list, CellularComponent.NUCLEAR_SIGNAL, collection.getName());
             }
         }
         return result;

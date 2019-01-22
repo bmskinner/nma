@@ -152,6 +152,13 @@ public interface ChartOptions extends DisplayOptions {
      * @return
      */
     boolean isShowMesh();
+    
+    /**
+     * Check if a mesh chart should annotate the mesh vertices
+     * 
+     * @return
+     */
+    boolean isShowMeshVertices();
 
     /**
      * Check if a mesh chart should annotate the mesh edges
@@ -258,4 +265,5 @@ public interface ChartOptions extends DisplayOptions {
      * @return
      */
     boolean isShowSignals();
+
 }

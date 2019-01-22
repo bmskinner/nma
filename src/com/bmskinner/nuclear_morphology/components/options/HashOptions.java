@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The interface for all hash options classes
+ * The interface for options classes. Store options as key value pairs
  * @author bms41
  *
  */
@@ -91,8 +91,18 @@ public interface HashOptions extends Serializable {
      */
     void setFloat(String s, float f);
     
+    /**
+     * Get the string value with the given key
+     * @param s
+     * @return
+     */
     String getString(String s);
     
+    /**
+     * Set the string value with the given key
+     * @param k
+     * @param v
+     */
     void setString(String k, String v);
 
     /**

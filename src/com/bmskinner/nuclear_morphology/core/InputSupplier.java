@@ -22,8 +22,6 @@ import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-
 /**
  * Interface to allow different user interaction interfaces. Provides methods
  * to request user input.
@@ -161,12 +159,31 @@ public interface InputSupplier {
 	/**
 	 * Request a file to save to, with the default name and extension.
 	 * @param defaultFolder the default folder
-	 * 
-	 * @return
+	 * @param name the file name
+	 * @param extension the file extension, with no '.'
+	 * @return the selected file
 	 * @throws RequestCancelledException
 	 */
 	File requestFileSave(@Nullable File defaultFolder, String name, String extension) throws RequestCancelledException;
 	
+	/**
+	 * Request the user to choose between a set of options. The default option
+	 * will be the  first item in the options provided.
+	 * @param options the options to choose between
+	 * @param message the message to provide to the user
+	 * @return the chosen option
+	 */
+	int requestOption( String[] options, String message) throws RequestCancelledException;
+	
+	/**
+	 * Request the user to choose between a set of options. The default option
+	 * will be the  first item in the options provided.
+	 * @param options the options to choose between
+	 * @param message the message to provide to the user
+	 * @param title a title to provide on dialog boxes
+	 * @return the chosen option
+	 */
+	int requestOption( String[] options, String message, String title) throws RequestCancelledException;
 	
 	/**
 	 * Request the user to choose between a set of options
@@ -186,15 +203,43 @@ public interface InputSupplier {
 	 * @return the chosen option
 	 */
 	int requestOption( String[] options, int defaultOption, String message) throws RequestCancelledException;
+	
+	/**
+	 * Request the user to choose between a set of options. All the options will be on screen. The default option
+	 * will be the  first item in the options provided.
+	 * @param options the options to choose between
+	 * @param message the message to provide to the user
+	 * @param title a title to provide on dialog boxes
+	 * @return the chosen option
+	 */
+	int requestOptionAllVisible(String[] options, String message, String title) throws RequestCancelledException;
+	
+	/**
+	 * Request the user to choose between a set of options. All the options will be on screen.
+	 * @param options the options to choose between
+	 * @param defaultOption the index of the default option
+	 * @param message the message to provide to the user
+	 * @param title a title to provide on dialog boxes
+	 * @return the chosen option
+	 */
+	int requestOptionAllVisible( String[] options, int defaultOption, String message, String title) throws RequestCancelledException;
+	
+	/**
+	 * Request the user to approve an action. Responds yes (true), no (false) or 
+	 * excepts on cancel.
+	 * @param message the message to provide to the user
+	 * @param title a title to provide on dialog boxes
+	 * @return
+	 * @throws RequestCancelledException 
+	 */
+	boolean requestApproval(String message, String title) throws RequestCancelledException;
 		
 	/**
-	 * Exception thwown when the user cancels the input request
+	 * Exception thrown when the user cancels the input request
 	 * @author bms41
 	 * @since 1.14.0
 	 *
 	 */
 	public class RequestCancelledException extends Exception {	}
-
-	
 
 }

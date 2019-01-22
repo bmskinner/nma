@@ -32,6 +32,7 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
@@ -63,6 +64,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -157,6 +159,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 //        return ds;
 //    }
 
+    /**
+     * Create a dataset containing only the given bounds, starting at 0,0. 
+     * @param w
+     * @param h
+     * @return
+     */
     public FloatXYDataset createAnnotationRectangleDataset(int w, int h) {
         FloatXYDataset ds = new FloatXYDataset();
 
@@ -501,9 +509,36 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      */
     public XYDataset createBareNucleusOutline(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
-
         return createBareNucleusOutline(dataset.getCollection().getConsensus());
-
+    }
+    
+    /**
+     * Get the outline of the consensus nucleus with the OP drawn
+     * 
+     * @param dataset
+     * @return
+     */
+    public XYDataset createAnnotatedNucleusOutline() throws ChartDatasetCreationException {
+    	Nucleus consensus = options.firstDataset().getCollection().getConsensus();
+    	ComponentOutlineDataset ds = (ComponentOutlineDataset) createBareNucleusOutline(consensus);
+    	
+    	try {
+    		IBorderPoint p = consensus.getBorderPoint(Tag.ORIENTATION_POINT);
+			double[] xpoints = new double[1];
+	        double[] ypoints = new double[1];
+	        
+	        xpoints[0] = p.getX();
+	        ypoints[0] = p.getY();
+	        
+	        double[][] data = { xpoints, ypoints };
+	        
+	        ds.addSeries(Tag.ORIENTATION_POINT, data);
+			
+		} catch (UnavailableBorderTagException e) {
+			throw new ChartDatasetCreationException("Unable to get OP", e);
+		}
+    	return ds;
+    	
     }
 
     /**
@@ -591,6 +626,23 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         	stack("Error getting nucleus angle profile from " + Tag.REFERENCE_POINT, e);
         	throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
+        
+        // Add the TV, BV as a series only if the options are in debug mode
+        if(GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)) {
+        	try {
+        		IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
+        		IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+
+        		float[] xpoints = { (float) tv.getX(), (float) bv.getX() };
+        		float[] ypoints = { (float) tv.getY(), (float) bv.getY() };
+
+        		float[][] data = { xpoints, ypoints };
+        		ds.addSeries(TAG_PREFIX, data, ds.getSeriesCount());
+        	} catch (UnavailableBorderTagException e) {
+        		stack("Error getting border tags", e);
+        	}
+        }
+        
         return ds;
     }
 
@@ -764,8 +816,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public List<ComponentOutlineDataset> createSignalOutlines(@NonNull ICell cell, @NonNull IAnalysisDataset dataset)
             throws ChartDatasetCreationException {
 
-        List<ComponentOutlineDataset> result = new ArrayList<ComponentOutlineDataset>(0);
-        List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(0);
+        List<ComponentOutlineDataset> result = new ArrayList<>();
+        List<IAnalysisDataset> datasets = new ArrayList<>();
         datasets.add(dataset);
 
         if (cell == null) {
@@ -827,9 +879,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Given a list of analysis datasets, get the outlines of the consensus
      * nuclei they contain
-     * 
-     * @param list
-     *            the analysis datasets
+
      * @return a chartable dataset
      */
     public XYDataset createMultiNucleusOutline() throws ChartDatasetCreationException {
@@ -1107,6 +1157,36 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         return ds;
 
     }
+    
+    /**
+     * Create an XYDataset with the edges in a NucleusMesh comparison. Also
+     * stores the result edge length ratios.
+     * 
+     * @param mesh
+     * @return
+     * @throws Exception
+     */
+    public NucleusMeshXYDataset createNucleusMeshVertexDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
+        NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
+
+        for (MeshVertex v : mesh.getPeripheralVertices()) {
+
+            double[] yvalues = { v.getPosition().getY() };
+            double[] xvalues = { v.getPosition().getX() };
+            double[][] data = { xvalues, yvalues };
+            ds.addSeries(v.toString(), data);
+            ds.setRatio(v.toString(), 1);
+        }
+        
+        for (MeshVertex v : mesh.getInternalVertices()) {
+            double[] yvalues = { v.getPosition().getY() };
+            double[] xvalues = { v.getPosition().getX() };
+            double[][] data = { xvalues, yvalues };
+            ds.addSeries(v.toString(), data);
+            ds.setRatio(v.toString(), -1);
+        }
+        return ds;
+    }
 
     /**
      * Create an XYDataset with the edges in a NucleusMesh comparison. Also
@@ -1119,13 +1199,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
         NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
-        // log(mesh.toString());
-
-        // log("Building dataset");
 
         for (MeshEdge edge : mesh.getEdges()) {
-
-            // log(edge.getV1().toString());
 
             double[] yvalues = { edge.getV1().getPosition().getY(), edge.getV2().getPosition().getY() };
 

@@ -40,8 +40,8 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -92,7 +92,7 @@ public class VirtualCellCollection implements ICellCollection {
     private IProfileCollection profileCollection = new DefaultProfileCollection();
 
     /** the refolded consensus nucleus */
-    private Nucleus consensusNucleus;
+    private Consensus<Nucleus> consensusNucleus;
 
     /** Store signal groups separately to allow shell results to be kept */
     private Map<UUID, IShellResult> shellResults = new HashMap<>(0);
@@ -163,7 +163,7 @@ public class VirtualCellCollection implements ICellCollection {
 	public ICellCollection duplicate() {
 		VirtualCellCollection result = new VirtualCellCollection(parent, this);
 		
-		result.consensusNucleus = consensusNucleus.duplicate();
+		result.consensusNucleus = consensusNucleus.duplicateConsensus();
 		result.profileCollection = profileCollection.duplicate();
 		
 		return result;
@@ -386,18 +386,45 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public boolean hasConsensus() {
-        return this.consensusNucleus != null;
+        return consensusNucleus != null;
     }
 
-    @Override
-    public void setConsensus(@Nullable Nucleus n) {
-        consensusNucleus = n;
-    }
+	@Override
+	public void setConsensus(@Nullable Consensus<Nucleus> n) {
+		consensusNucleus = n;
+	}
+	
+	@Override
+	public Consensus<Nucleus> getRawConsensus() {
+		return consensusNucleus;
+	}
 
-    @Override
-    public Nucleus getConsensus() {
-        return consensusNucleus;
-    }
+	@Override
+	public Nucleus getConsensus() {
+		return consensusNucleus.component().getVerticallyRotatedNucleus();
+	}
+	
+	@Override
+	public void offsetConsensus(double xOffset, double yOffset) {
+		if(consensusNucleus!=null)
+			consensusNucleus.offset(xOffset, yOffset);
+	}
+
+	@Override
+	public void rotateConsensus(double degrees) {
+		if(consensusNucleus!=null)
+			consensusNucleus.addRotation(degrees);
+	}
+	
+	@Override
+	public IPoint currentConsensusOffset() {
+		return consensusNucleus.currentOffset();
+	}
+	
+	@Override
+	public double currentConsensusRotation() {
+		return consensusNucleus.currentRotation();
+	}
 
     @Override
     public boolean hasCells() {
@@ -502,7 +529,7 @@ public class VirtualCellCollection implements ICellCollection {
         // result
         // This SignalGroup is never saved to file, so does not need serialising
         @SuppressWarnings("serial")
-        ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup).get()) {
+        ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup).get(), true) {
 
             @Override
             public void setShellResult(@NonNull IShellResult result) {
@@ -562,8 +589,6 @@ public class VirtualCellCollection implements ICellCollection {
     @Override
     public void updateVerticalNuclei() {
         parent.getCollection().updateVerticalNuclei();
-        if(this.hasConsensus())
-			consensusNucleus.alignVertically();
     }
 
     @Override
@@ -571,73 +596,43 @@ public class VirtualCellCollection implements ICellCollection {
         parent.getCollection().setSourceFolder(expectedImageDirectory);
     }
 
-    @Override
-    public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
-            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
-        if (size() == 1) {
-            for (ICell c : getCells()) {
-                return c.getNucleus();
-            }
-        }
+	/**
+	 * Get the nucleus with the lowest difference score to the median profile
+	 * 
+	 * @param pointType the point to compare profiles from
+	 * @return the best nucleus
+	 * @throws UnavailableBorderTagException
+	 * @throws UnavailableProfileTypeException
+	 */
+	@Override
+	public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
+			throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
+		Set<Nucleus> list = this.getNuclei();
 
-        IProfile medianProfile = this.getProfileCollection()
-                .getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+		// No need to check profiles if there is only one nucleus
+		if (list.size() == 1) {
+			for (Nucleus p : list)
+				return p;
+		}
 
-        Nucleus n = null;
-        double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
-        for (Nucleus p : this.getNuclei()) {
-            IProfile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
-            double nDifference = angleProfile.absoluteSquareDifference(medianProfile);
-            if (nDifference < difference) {
-                difference = nDifference;
-                n = p;
-            }
-        }
+		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
 
-        if (n == null) {
-            throw new ProfileException("Error finding nucleus similar to median");
-        }
+		Nucleus n = null;
 
-        return n;
-    }
+		double difference = Arrays.stream(getNormalisedDifferencesToMedianFromPoint(pointType)).max().orElse(0);
+		for (Nucleus p : list) {
+			IProfile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
+			double nDifference = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
+			if (nDifference < difference) {
+				difference = nDifference;
+				n = p;
+			}
+		}
 
-    /**
-     * Get the differences to the median profile for each nucleus
-     * 
-     * @param pointType
-     *            the point to fetch profiles from
-     * @return an array of differences
-     */
-    private double[] getDifferencesToMedianFromPoint(Tag pointType) {
-
-        int count = this.size();
-        double[] result = new double[count];
-        int i = 0;
-
-        IProfile medianProfile;
-        try {
-            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            fine("Error getting median profile for collection", e);
-            for (int j = 0; i < result.length; j++) {
-                result[j] = 0;
-            }
-            return result;
-        }
-        for (Nucleus n : this.getNuclei()) {
-
-            try {
-                IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
-                result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-            } catch (ProfileException | UnavailableProfileTypeException | UnavailableBorderTagException e) {
-                fine("Error getting nucleus profile", e);
-                result[i] = Double.MAX_VALUE;
-            } finally {
-                i++;
-            }
-        }
-        return result;
-    }
+		if (n == null)
+			throw new ProfileException("Error finding nucleus similar to median");
+		return n;
+	}
 
     @Override
     public ProfileManager getProfileManager() {
@@ -1098,11 +1093,11 @@ public class VirtualCellCollection implements ICellCollection {
      * @param pointType the point to fetch profiles from
      * @return an array of normalised differences
      */
-    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
+    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Tag pointType) {
 
         IProfile medianProfile;
         try {
-            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             warn("Cannot get median profile for collection");
             fine("Error getting median profile", e);
@@ -1115,11 +1110,8 @@ public class VirtualCellCollection implements ICellCollection {
             try {
 
                 IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
-                double diff = angleProfile.absoluteSquareDifference(medianProfile);
-                
-                // normalise to the number of points in the perimeter
-                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
-                return Math.sqrt(diff); // differences in degrees, rather than square degrees
+                double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
+                return Math.sqrt(diff/FIXED_PROFILE_LENGTH); // differences in degrees, rather than square degrees
 
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
                 fine("Error getting nucleus profile", e);
@@ -1162,7 +1154,7 @@ public class VirtualCellCollection implements ICellCollection {
         }
 
         if (hasConsensus()) {
-        	consensusNucleus.setScale(scale);
+        	consensusNucleus.component().setScale(scale);
         }
 
     }
@@ -1171,21 +1163,17 @@ public class VirtualCellCollection implements ICellCollection {
     public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {
         IProfile medianProfile;
         try {
-            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting median profile for collection", e);
             return 0;
         }
-        IProfile angleProfile;
+        
         try {
-            angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
+        	IProfile angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
-            double diff = angleProfile.absoluteSquareDifference(medianProfile);
-            diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
-            double rootDiff = Math.sqrt(diff); // use the differences in
-                                               // degrees, rather than square
-                                               // degrees
-            return rootDiff;
+            double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
+            return Math.sqrt(diff/FIXED_PROFILE_LENGTH);
         } catch (ProfileException | UnavailableComponentException e) {
             fine("Error getting nucleus profile", e);
             return Double.NaN;
@@ -1206,9 +1194,9 @@ public class VirtualCellCollection implements ICellCollection {
         profileManager = new ProfileManager(this);
 
         if(this.hasConsensus()) {
-			this.getConsensus().getVerticallyRotatedNucleus();
-			this.getConsensus().alignVertically();
-		}
+			rotateConsensus(0);
+			offsetConsensus(0, 0);
+        }
         
         // Don't try to restore profile aggregates here - the parent collection has
         // not finished loading, and so calls to parent will be null. Do the restore in the

@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -31,11 +32,18 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.process.Blitter;
+import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
 
 /**
  * Base class for annotated cell images, allowing selection of tags
@@ -56,6 +64,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	protected CellularComponent component = null;
 	protected boolean isShowMesh;
 	protected boolean isWarpImage;
+	protected boolean isRotate;
 	
 	// the undistorted image
 	protected BufferedImage input;
@@ -85,7 +94,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	 * Set the panel to a null state with no cell showing
 	 */
 	public void setNull() {
-		setCell(null, null, null, false, false);
+		setCell(null, null, null, false, false, false);
 	}
 
 	/**
@@ -96,7 +105,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	 * @param isShowMesh should the comparison mesh with the consensus nucleus be drawn?
 	 * @param isWarpImage should the image be warped to fit the consensus nucleus? (cannot be true at the same time as isShowMesh)
 	 */
-	public void setCell(@Nullable IAnalysisDataset dataset, @Nullable ICell cell, @Nullable CellularComponent component, boolean isShowMesh, boolean isWarpImage) {
+	public void setCell(@Nullable IAnalysisDataset dataset, @Nullable ICell cell, @Nullable CellularComponent component, boolean isShowMesh, boolean isWarpImage, boolean isRotate) {
 		if(dataset==null || cell==null || component==null) {
 			imageLabel.setIcon(null);
 			return;
@@ -106,6 +115,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 		this.component   = component;
 		this.isShowMesh  = isShowMesh;
 		this.isWarpImage = isWarpImage;
+		this.isRotate    = isRotate; 
 		createImage();
 	}
 		
@@ -223,4 +233,116 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 		return IPoint.makeNew(xPositionInImage, yPositionInImage);
 	}
 
+	
+	protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
+        // Calculate angle for vertical rotation
+        Nucleus n = c.getNucleus();
+
+        IPoint topPoint;
+        IPoint btmPoint;
+
+        if (!n.hasBorderTag(Tag.TOP_VERTICAL) || !n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+            topPoint = n.getCentreOfMass();
+            btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
+
+        } else {
+
+            topPoint = n.getBorderPoint(Tag.TOP_VERTICAL);
+            btmPoint = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+
+            // Sometimes the points have been set to overlap in older datasets
+            if (topPoint.overlapsPerfectly(btmPoint)) {
+                topPoint = n.getCentreOfMass();
+                btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
+            }
+        }
+
+        // Find which point is higher in the image
+        IPoint upperPoint = topPoint.getY() > btmPoint.getY() ? topPoint : btmPoint;
+        IPoint lowerPoint = upperPoint == topPoint ? btmPoint : topPoint;
+
+        IPoint comp = IPoint.makeNew(lowerPoint.getX(), upperPoint.getY());
+
+        /*
+         * LA RA RB LB
+         * 
+         * T C C T B C C B \ | | / \ | | / B B T T
+         * 
+         * When Ux<Lx, angle describes the clockwise rotation around L needed to
+         * move U above it. When Ux>Lx, angle describes the anticlockwise
+         * rotation needed to move U above it.
+         * 
+         * If L is supposed to be on top, the clockwise rotation must be 180+a
+         * 
+         * However, the image coordinates have a reversed Y axis
+         */
+
+        double angleFromVertical = lowerPoint.findSmallestAngle(upperPoint, comp);
+
+        double angle = 0;
+        if (topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)) {
+            angle = 360 - angleFromVertical;
+            // log("LA: "+angleFromVertical+" to "+angle); // Tested working
+        }
+
+        if (topPoint.isRightOf(btmPoint) && topPoint.isAbove(btmPoint)) {
+            angle = angleFromVertical;
+            // log("RA: "+angleFromVertical+" to "+angle); // Tested working
+        }
+
+        if (topPoint.isLeftOf(btmPoint) && topPoint.isBelow(btmPoint)) {
+            angle = angleFromVertical + 180;
+            // angle = 180-angleFromVertical;
+            // log("LB: "+angleFromVertical+" to "+angle); // Tested working
+        }
+
+        if (topPoint.isRightOf(btmPoint) && topPoint.isBelow(btmPoint)) {
+            // angle = angleFromVertical+180;
+            angle = 180 - angleFromVertical;
+            // log("RB: "+angleFromVertical+" to "+angle); // Tested working
+        }
+
+        // Increase the canvas size so rotation does not crop the nucleus
+        finer("Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
+        ImageProcessor newIp = createEnlargedProcessor(ip, angle);
+
+        newIp.rotate(angle);
+        return newIp;
+    }
+	
+	protected ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees) {
+
+        double rad = Math.toRadians(degrees);
+
+        // Calculate the new width and height of the canvas
+        // new width is h sin(a) + w cos(a) and vice versa for height
+        double newWidth = Math.abs(Math.sin(rad) * ip.getHeight()) + Math.abs(Math.cos(rad) * ip.getWidth());
+        double newHeight = Math.abs(Math.sin(rad) * ip.getWidth()) + Math.abs(Math.cos(rad) * ip.getHeight());
+
+        int w = (int) Math.ceil(newWidth);
+        int h = (int) Math.ceil(newHeight);
+
+        // The new image may be narrower or shorter following rotation.
+        // To avoid clipping, ensure the image never gets smaller in either
+        // dimension.
+        w = w < ip.getWidth() ? ip.getWidth() : w;
+        h = h < ip.getHeight() ? ip.getHeight() : h;
+
+        // paste old image to centre of enlarged canvas
+        int xBase = (w - ip.getWidth()) >> 1;
+        int yBase = (h - ip.getHeight()) >> 1;
+
+        finer(String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
+
+        finest("Copy starting at " + xBase + ", " + yBase);
+
+        ImageProcessor newIp = new ColorProcessor(w, h);
+
+        newIp.setColor(Color.WHITE); // fill current space with white
+        newIp.fill();
+
+        newIp.setBackgroundValue(16777215); // fill on rotate is RGB int white
+        newIp.copyBits(ip, xBase, yBase, Blitter.COPY);
+        return newIp;
+    }
 }

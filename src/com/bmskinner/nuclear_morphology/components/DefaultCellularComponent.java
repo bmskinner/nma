@@ -19,12 +19,13 @@ package com.bmskinner.nuclear_morphology.components;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,9 +43,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -73,7 +72,13 @@ import ij.process.ImageProcessor;
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
 
-    private static final long serialVersionUID = 1L;
+	/** the distance from a point to allow for searching an opposite border point*/
+    private static final int OPPOSITE_BORDER_INTERVAL_PIXELS = 4;
+    
+    /** The pixel spacing between border points after roi interpolation */
+	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
+	
+	private static final long serialVersionUID = 1L;
     private final UUID        id;
 
     /**
@@ -105,7 +110,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private File sourceFile;
 
     /** The RGB channel in which this component was detected */
-    private int channel;
+    private final int channel;
 
     /**
      * The length of a micron in pixels. Allows conversion between pixels and SI
@@ -301,17 +306,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     /**
-     * Duplicate a component. The ID is kept consistent.
+     * Defensively dDuplicate a component. The ID is kept consistent.
      * 
      * @param a the template component
      */
     protected DefaultCellularComponent(CellularComponent a) {
     	finer("Constructing a new component from existing template component");
-        this.id = a.getID();
-        this.position = a.getPosition();
-        this.originalCentreOfMass = a.getOriginalCentreOfMass();
+        this.id = UUID.fromString(a.getID().toString());
+        this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);
+        this.originalCentreOfMass = IPoint.makeNew(a.getOriginalCentreOfMass());
         this.centreOfMass = IPoint.makeNew(a.getCentreOfMass());
-        this.sourceFile = a.getSourceFile();
+        this.sourceFile = new File(a.getSourceFile().getPath());
         this.channel = a.getChannel();
         this.scale = a.getScale();
 
@@ -320,7 +325,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
                 this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
             } catch (Exception e) {
                 stack("Error getting " + stat + " from template", e);
-                this.setStatistic(stat, 0);
+                this.setStatistic(stat, Statistical.ERROR_CALCULATING_STAT);
             }
         }
 
@@ -567,11 +572,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    @Override
 	public double getScale() {
         return this.scale;
     }
@@ -581,24 +581,22 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.scale = scale;
     }
 
-
-
     @Override
-	public synchronized boolean hasStatistic(PlottableStatistic stat) {
+	public synchronized boolean hasStatistic(final PlottableStatistic stat) {
         return this.statistics.containsKey(stat);
     }
 
     @Override
-    public synchronized double getStatistic(PlottableStatistic stat) {
+    public synchronized double getStatistic(final PlottableStatistic stat) {
         return this.getStatistic(stat, MeasurementScale.PIXELS);
     }
 
     @Override
-    public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
+    public synchronized double getStatistic(final PlottableStatistic stat, final MeasurementScale measurementScale) {
 
         if (this.statistics.containsKey(stat)) {
             double result = statistics.get(stat);
-            return stat.convert(result, this.scale, scale);
+            return stat.convert(result, this.scale, measurementScale);
         }
         
         double result = calculateStatistic(stat);
@@ -606,31 +604,31 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return result;
     }
 
-    protected double calculateStatistic(PlottableStatistic stat) {
-        double result = ERROR_CALCULATING_STAT;
+    protected double calculateStatistic(final PlottableStatistic stat) {
+        double result = Statistical.ERROR_CALCULATING_STAT;
 
         // Do not add getters for values added at creation time
         // or you'll get infinite loops when things break
         if (PlottableStatistic.CIRCULARITY.equals(stat))
-            return this.getCircularity();
+            return this.calculateCircularity();
         return result;
     }
-
+    
     /**
-     * 
+     * Calculate the circularity of the object
      * @return
      */
-    private double getCircularity() {
-        if (this.hasStatistic(PlottableStatistic.PERIMETER) && this.hasStatistic(PlottableStatistic.AREA)) {
-            double perim2 = Math.pow(this.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
-            return (4 * Math.PI) * (this.getStatistic(PlottableStatistic.AREA, MeasurementScale.PIXELS) / perim2);
-        }
-		return ERROR_CALCULATING_STAT;
-
+    private double calculateCircularity() {
+    	if (hasStatistic(PlottableStatistic.PERIMETER) && hasStatistic(PlottableStatistic.AREA)) {
+    		double p = getStatistic(PlottableStatistic.PERIMETER);
+    		double a = getStatistic(PlottableStatistic.AREA);
+    		return (Math.PI*4*a)/(p*p);
+    	}
+    	return ERROR_CALCULATING_STAT;
     }
 
     @Override
-    public synchronized void setStatistic(PlottableStatistic stat, double d) {
+    public synchronized void setStatistic(final PlottableStatistic stat, double d) {
         this.statistics.put(stat, d);
     }
 
@@ -639,13 +637,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return this.statistics.keySet().toArray(new PlottableStatistic[0]);
     }
 
-    /**
-     * If any stats are listed as uncalcualted, attempt to calculate them
-     */
     @Override
 	public void updateDependentStats() {
-        for (PlottableStatistic stat : this.getStatistics()) {
-            if (this.getStatistic(stat) == STAT_NOT_CALCULATED)
+        for (PlottableStatistic stat : statistics.keySet()) {
+            if (this.getStatistic(stat) == Statistical.STAT_NOT_CALCULATED)
                 this.setStatistic(stat, calculateStatistic(stat));
         }
 
@@ -803,9 +798,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public double getMinY() {
         return bounds.getMinY();
     }
+    
+    @Override
+	public void flipHorizontal() {
+    	flipHorizontal(centreOfMass);
+    }
 
     @Override
-	public void flipXAroundPoint(@NonNull IPoint p) {
+	public void flipHorizontal(final @NonNull IPoint p) {
 
         double xCentre = p.getX();
 
@@ -814,7 +814,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             double xNew = xCentre + dx;
             n.setX(xNew);
         }
-
     }
 
     @Override
@@ -1110,29 +1109,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) {
         // Find the point that is closest to 180 degrees across the CoM
     	double distToCom = p.getLengthTo(centreOfMass);
-    	double gateRadius = 3; // the distance from each point to allow for searching
     	
-    	// d1 = p1 to com
-    	// d2 = com to p2
-    	// d3 = p1 to p2
-    	
-    	// The distance d1 + d2 should be approximately d3 when we are directly opposite.
-    	// It won't be exact because the points will not be exactly opposite each other
-    	// We can filter for only points for which d1+d2 is between d3-gateRadius and d3+gateRadius
-    	// This saves an expensive atan2 check in the final step
-        return borderList.stream()
-        	.filter(point->{
-        		double d3 = point.getLengthTo(p);
-        		double d1d2 = distToCom+point.getLengthTo(centreOfMass);
-        		return d1d2>d3-gateRadius && d1d2>d3+gateRadius;
-        	})
-            .min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
-            .get();
+    	// Checking the angle of every point via atan2 is expensive.
+    	// We can filter out most of the points beforehand.
+    	return borderList.stream()
+    			.filter(point->point.getLengthTo(p)>distToCom)
+    			.min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
+    			.orElse(null); // TODO: backup solution?
     }
 
     @Override
     public IBorderPoint findOrthogonalBorderPoint(@NonNull IBorderPoint a) {
-        
         return borderList.stream()
                 .min(Comparator.comparing(point-> Math.abs(90-centreOfMass.findSmallestAngle(a, point)) ))
                 .get();
@@ -1140,7 +1127,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public IBorderPoint findClosestBorderPoint(@NonNull IPoint p) {
-        
         return borderList.stream()
                 .min(Comparator.comparing(point->point.getLengthTo(p) ))
                 .get();
@@ -1250,7 +1236,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         if(useSplineFitting)
         	roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
                 
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
+        FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, isSmooth);
 
         finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
@@ -1392,20 +1378,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public abstract void alignVertically();
 
+
+    
     @Override
     public void rotate(double angle) {
         if (angle != 0) {
-
-            for (IPoint p : borderList) {
-
-                IPoint newPoint = AngleTools.rotateAboutPoint(p, centreOfMass, angle);
-                // IPoint newPoint = getPositionAfterRotation(p, angle);
-                p.set(newPoint);
+        	double rad = Math.toRadians(-angle); 
+        	AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
+            for (IBorderPoint p : borderList) {
+            	Point2D result = tf.transform(p.toPoint2D(), null);
+                p.set(result);
             }
         }
         calculateBounds();
         shapeCache.clear();
-
     }
 
     /**

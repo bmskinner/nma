@@ -16,9 +16,12 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -27,6 +30,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -42,14 +46,13 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
-
+	
     /**
      * Construct with an options
      * 
-     * @param options
-     *            the chart options
+     * @param options the chart options
      */
-    public ScatterChartDatasetCreator(final ChartOptions options) {
+    public ScatterChartDatasetCreator(@NonNull final ChartOptions options) {
         super(options);
     }
 
@@ -74,18 +77,10 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
     }
 
-    /*
-     * 
-     * PRIVATE METHODS
-     * 
-     * 
-     */
-
     /**
      * Get a boxplot dataset for the given statistic for each collection
      * 
-     * @param options
-     *            the charting options
+     * @param options the charting options
      * @return
      * @throws ChartDatasetCreationException
      */
@@ -93,9 +88,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
         DefaultXYDataset ds = new DefaultXYDataset();
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return ds;
-        }
 
         List<IAnalysisDataset> datasets = options.getDatasets();
 
@@ -108,44 +102,41 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
             ICellCollection c = datasets.get(i).getCollection();
             
-            // to make charts more responsive, only take the first 2000 nuclei
-            int count = c.getNucleusCount()>2000?2000:c.getNucleusCount();
+            // to make charts more responsive, only take n nuclei
+            int count = Math.min(c.getNucleusCount(), MAX_SCATTER_CHART_ITEMS);
             double[] xpoints = new double[count];
             double[] ypoints = new double[count];
-
-            int j = 0;
-            for (Nucleus n : c.getNuclei()) {
-                if(j==MAX_SCATTER_CHART_ITEMS)
-                    break;
-
+            
+            List<Nucleus> nuclei = new ArrayList<>();
+            nuclei.addAll(c.getNuclei());
+            Collections.shuffle(nuclei);
+            
+            for(int j=0; j<count; j++) {
+            	Nucleus n = nuclei.get(j);
                 double statAValue;
                 double statBValue;
 
                 try {
 
-                    if (statA.equals(PlottableStatistic.VARIABILITY)) {
+                    if (statA.equals(PlottableStatistic.VARIABILITY))
                         statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
-                    } else {
+                    else
                         statAValue = n.getStatistic(statA, scale);
-                    }
+                    
 
-                    if (statB.equals(PlottableStatistic.VARIABILITY)) {
+                    if (statB.equals(PlottableStatistic.VARIABILITY))
                         statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
-                    } else {
+                    else
                         statBValue = n.getStatistic(statB, scale);
-                    }
+                    
                 } catch (UnavailableBorderTagException e) {
-                    warn("Cannot get stats for cell");
-                    fine("Tag not present in cell", e);
-                    statAValue = 0;
-                    statBValue = 0;
+                    stack("Tag not present in cell", e);
+                    statAValue = Statistical.ERROR_CALCULATING_STAT;
+                    statBValue = Statistical.ERROR_CALCULATING_STAT;
                 }
 
                 xpoints[j] = statAValue;
                 ypoints[j] = statBValue;
-
-                j++;
-
             }
 
             double[][] data = { xpoints, ypoints };
@@ -159,8 +150,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     /**
      * Get a boxplot dataset for the given statistic for each collection
      * 
-     * @param options
-     *            the charting options
+     * @param options the charting options
      * @return
      * @throws ChartDatasetCreationException
      * @throws Exception

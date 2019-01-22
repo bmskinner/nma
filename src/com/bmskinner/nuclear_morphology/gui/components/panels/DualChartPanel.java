@@ -60,7 +60,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();
 
-        JFreeChart profileChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
+        JFreeChart profileChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
         chartPanel = new ExportableChartPanel(profileChart);
         chartPanel.setFixedAspectRatio(isFixedAspect);
 
@@ -75,7 +75,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
          * A second chart panel at the south with a domain overlay crosshair to
          * define the centre of the zoomed range on the centre chart panel
          */
-        JFreeChart rangeChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
+        JFreeChart rangeChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
         rangePanel = new PositionSelectionChartPanel(rangeChart);
         rangePanel.setFixedAspectRatio(isFixedAspect);
         rangePanel.addSignalChangeListener(this);

@@ -216,10 +216,15 @@ public class DummyCellularComponent implements CellularComponent {
 	public double getMinY() {
 		return component.getMinY();
 	}
+	
+	@Override
+	public void flipHorizontal() {
+		component.flipHorizontal(component.getCentreOfMass());		
+	}
 
 	@Override
-	public void flipXAroundPoint(IPoint p) {
-		component.flipXAroundPoint(p);		
+	public void flipHorizontal(IPoint p) {
+		component.flipHorizontal(p);		
 	}
 	
 	@Override
@@ -325,11 +330,6 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public void setSourceFile(File sourceFile) {
 		component.setSourceFile(sourceFile);		
-	}
-
-	@Override
-	public void setChannel(int channel) {
-		component.setChannel(channel);
 	}
 
 	@Override

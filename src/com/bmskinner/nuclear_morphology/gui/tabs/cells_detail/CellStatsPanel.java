@@ -135,52 +135,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         new CellImageDialog(this.getCellModel().getCell());
     }
 
-    private void updateScale() {
-//        SpinnerNumberModel sModel = new SpinnerNumberModel(getCellModel().getCell().getNucleus().getScale(), 
-//                1, 100000, 1);
-//        
-//        JSpinner spinner = new JSpinner(sModel);
-//
-//        int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, JOptionPane.OK_CANCEL_OPTION,
-//                JOptionPane.QUESTION_MESSAGE, null, null, null);
-//        if (option == JOptionPane.OK_OPTION) {
-//
-//            Object[] options = { APPLY_SCALE_ALL_CELLS_LBL, APPLY_SCALE_ONE_CELLS_LBL, };
-//            int applyAllOption = JOptionPane.showOptionDialog(null, APPLY_SCALE_ALL_MESSAGE, APPLY_SCALE_ALL_HEADER,
-//
-//                    JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-//
-//                    null, options, options[1]);
-//
-//            double scale = (double) spinner.getModel().getValue();
-//
-//            if (scale > 0) { // don't allow a scale to cause divide by zero errors
-//
-//                if (applyAllOption == 0) { // button at index 1
-//
-//                	activeDataset().getCollection().setScale(scale);
-//                	Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
-//                	if(op.isPresent()){
-//                		Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-//                		if(nOp.isPresent())
-//                			nOp.get().setScale(scale);
-//                	}
-//
-//
-//                } else {
-//                    finest("Updating scale for single cell");
-//                    this.getCellModel().getCell().getNuclei().stream().forEach( n-> {  n.setScale(scale);  } );
-//
-//                }
-//                finest("Refreshing cache");
-//                this.refreshTableCache();
-//                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-//
-//            } else {
-//                warn("Cannot set a scale to zero");
-//            }
-//        }
-        
+    private void updateScale() {        
     	ch.changeDatasetScale(activeDataset());
         refreshTableCache();
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());

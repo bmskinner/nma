@@ -107,7 +107,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
         this.add(headerPanel, BorderLayout.NORTH);
 
-        JFreeChart chart = ScatterChartFactory.makeEmptyChart();
+        JFreeChart chart = ScatterChartFactory.createEmptyChart();
 
         chartPanel = new ExportableChartPanel(chart);
         chartPanel.getChartRenderingInfo().setEntityCollection(null);
@@ -242,7 +242,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
      	int result;
 		try {
 			String[] options = { "Do not filter", "Filter collection"};
-			result = this.getInputSupplier().requestOption(options, 0, "Filter selected datasets on visible values?", "Filter datasets?");
+			result = this.getInputSupplier().requestOptionAllVisible(options, "Filter selected datasets on visible values?", "Filter datasets?");
 		} catch (RequestCancelledException e2) {
 			return;
 		}

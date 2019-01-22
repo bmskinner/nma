@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -69,13 +70,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         return map.get(target);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage#meshToImage(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
-     */
+
     @Override
     public ImageProcessor drawImage(@NonNull Mesh<E> mesh) throws UncomparableMeshImageException {
 
@@ -93,10 +88,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         int xBase = (int) mesh.toPath().getBounds().getX();
         int yBase = (int) mesh.toPath().getBounds().getY();
 
-        // Create a blank image processor with an appropriate size
-        // to hold the new image. Note that if the height or width is
-        // not sufficient, the image will wrap
-        ImageProcessor ip = createWhiteProcessor(w, h);
+        ImageProcessor ip = ImageFilterer.createBlackByteProcessor(w, h);
 
         // Adjust from absolute position in original target image
         // Note that the consensus will have a position from its template
@@ -109,7 +101,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
             MeshFace targetFace = mesh.getFace(templateFace);
 
             if (targetFace == null) {
-                fine("Cannot find template face in target mesh");
+                finer("Cannot find template face in target mesh");
                 missingFaces++;
                 continue;
             }
@@ -118,8 +110,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         }
 
-        fine(missingFaces + " faces could not be found in the target mesh");
-        fine(missingPixels + " points lay outside the new image bounds");
+        finer(missingFaces + " faces could not be found in the target mesh");
+        finer(missingPixels + " points lay outside the new image bounds");
 
         interpolateMissingPixels(ip);
 
@@ -161,7 +153,6 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
             // This is because the consensus has -ve x and y positions
             try {
                 ip.set(x, y, pixelValue);
-                // finest("\tPixel set at "+x+", "+y);
             } catch (ArrayIndexOutOfBoundsException e) {
                 finer("\tPoint outside image bounds: " + x + ", " + y);
                 missingPixels++;
@@ -172,69 +163,45 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     }
 
     /**
-     * Make a ByteProcessor of the given dimensions with all pixels at 255
-     * 
-     * @param w
-     * @param h
-     * @return
-     */
-    private ImageProcessor createWhiteProcessor(int w, int h) {
-        ImageProcessor ip = new ByteProcessor(w, h);
-
-        for (int i = 0; i < ip.getPixelCount(); i++) {
-            ip.set(i, 255); // set all to white initially
-        }
-        return ip;
-    }
-
-    /**
-     * Find white pixels surrounded by filled pixels, and set them to the
-     * average value. Must have <=3 white pixels touching.
+     * Find black pixels surrounded by filled pixels, and set them to the
+     * average value. Must have <=3 black pixels touching.
      * 
      * @param ip
      */
     private void interpolateMissingPixels(ImageProcessor ip) {
 
         for (int x = 0; x < ip.getWidth(); x++) {
-
             for (int y = 0; y < ip.getHeight(); y++) {
 
-                if (ip.get(x, y) < 255) {
-                    continue; // skip non-white pixels
-                }
+                if (ip.get(x, y) > 0)
+                    continue; // skip non-black pixels
 
-                int white = countSurroundingWhitePixels(x, y, ip);
+                int black = countSurroundingBlackPixels(x, y, ip);
 
-                // We can't interpolate unless there are a decent number of
-                // valid pixels
-                if (white <= 3) {
-                    // log("Found "+white+" whites at "+x+", "+y);
-                    // interpolate from not white pixels
-
+                // We can't interpolate unless there are a decent number of valid pixels
+                if (black <= 3) {
+                    // interpolate from not black pixels
                     int pixelsToUse = 0;
                     int pixelValue = 0;
 
                     for (int i = x - 1; i <= x + 1; i++) {
-
                         for (int j = y - 1; j <= y + 1; j++) {
 
-                            int value = 255;
+                            int value = 0;
                             try {
                                 value = ip.get(i, j);
                             } catch (ArrayIndexOutOfBoundsException e) {
-                                // warn("Array out of bounds: "+i+", "+j);
                                 continue;
                             }
-                            if (value < 255) {
+                            if (value > 0) {
                                 pixelsToUse++;
                                 pixelValue += value;
                             }
                         }
                     }
-                    // log("\tUsable pixels: "+pixelsToUse);
+
                     if (pixelsToUse > 0) {
                         int newValue = pixelValue / pixelsToUse;
-                        // log("Interpolated to "+newValue);
                         ip.set(x, y, newValue);
                     }
 
@@ -246,36 +213,29 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     }
 
     /**
-     * Count the number of white pixels surrounding the given pixel
+     * Count the number of black pixels within the 8-connected pixels surrounding the given pixel
      * 
-     * @param x
-     * @param y
-     * @param ip
-     * @return
+     * @param x the x position
+     * @param y the y position
+     * @param ip the image
+     * @return the number of 8-connected pixels with value of zero
      */
-    private int countSurroundingWhitePixels(int x, int y, ImageProcessor ip) {
+    private int countSurroundingBlackPixels(int x, int y, ImageProcessor ip) {
 
-        int white = 0;
+        int black = 0;
         for (int i = x - 1; i <= x + 1; i++) {
-
             for (int j = y - 1; j <= y + 1; j++) {
-
-                if (i == x && j == y) {
+                if (i == x && j == y)
                     continue;
-                }
-
                 try {
-                    if (ip.get(i, j) == 255) {
-                        white++;
-                    }
+                    if (ip.get(i, j) == 0)
+                    	black++;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     continue;
                 }
-
             }
-
         }
-        return white;
+        return black;
     }
 
     @Override
@@ -301,18 +261,16 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
     /**
      * Given an image, find the pixels within the nucleus, and convert them to
-     * face coordinates. Return a map of the face coordinates and their pixel
-     * values
+     * face coordinates.
      * 
-     * @param ip
-     * @return
+     * @param ip the image
      * @throws MeshImageCreationException
      */
     private void makeFaceCoordinates(final ImageProcessor ip) throws MeshImageCreationException {
 
         int missedCount = 0;
 
-        fine("Creating MeshPixels for the template mesh based on the image processor");
+        finer("Creating MeshPixels for the template mesh based on the image processor");
 
         // Add an empty list of MeshPixels to each face
         for (MeshFace face : template.getFaces()) {
@@ -322,10 +280,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         Rectangle bounds = template.getComponent().toOriginalShape().getBounds();
 
         for (int x = 0; x < ip.getWidth(); x++) {
-
-            if (x < bounds.getMinX() || x > bounds.getMaxX()) {
+            if (x < bounds.getMinX() || x > bounds.getMaxX()) // skip pixels outside the object bounds
                 continue;
-            }
 
             for (int y = 0; y < ip.getHeight(); y++) {
 
@@ -335,17 +291,11 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
                 // The pixel
                 IPoint pixel = IPoint.makeNew(x, y);
-                // finer("Image pixel "+pixel);
-
-                if (!template.getComponent().containsOriginalPoint(pixel)) {
-                    // finer("\tTemplate component does not contain pixel
-                    // "+pixel);
+                if (!template.getComponent().containsOriginalPoint(pixel))
                     continue;
-                }
 
                 if (!template.contains(pixel)) {
                     missedCount++;
-                    // finer("\tTemplate mesh does not contain pixel "+pixel);
                     continue;
                 }
 
@@ -393,8 +343,29 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         }
 
         if (missedCount > 0) {
-            fine("Faces could not be found for " + missedCount + " points");
+            finer("Faces could not be found for " + missedCount + " points");
         }
     }
+
+    @Override
+    public double quantifySignalProportion(@NonNull MeshFace f) {
+    	long total = calculateTotalPixelIntensity();
+    	long faceTotal = 0;
+    	List<MeshPixel> faceMap = map.get(f);
+    	for (MeshPixel c : faceMap)
+    		faceTotal += c.getValue();
+
+    	double fraction = ((double)faceTotal/(double)total);
+    	fine("Face: "+fraction+" of "+total);
+    	return fraction;
+    }
+	
+	private long calculateTotalPixelIntensity() {
+		long total = 0;
+		for(MeshFace f : map.keySet())
+			for (MeshPixel c : map.get(f))
+				total += c.getValue();
+		return total;
+	}
 
 }

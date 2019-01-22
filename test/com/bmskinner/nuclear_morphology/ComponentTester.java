@@ -16,8 +16,10 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -47,6 +49,16 @@ public abstract class ComponentTester extends FloatArrayTester {
 		}
 		if(!hasHandler)
 			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+	}
+	
+	
+	
+	protected boolean areVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
+		double err = bottomPoint.getX()-topPoint.getX();
+		logger.fine("Error = "+err);
+		boolean xEqual = (Math.abs(bottomPoint.getX()- topPoint.getX())<0.0001);
+		boolean yAbove = topPoint.getY()>bottomPoint.getY();
+		return xEqual & yAbove;
 	}
 	
 	/**

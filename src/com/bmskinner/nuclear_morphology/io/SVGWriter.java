@@ -58,9 +58,10 @@ public class SVGWriter implements Exporter, Loggable {
     }
     
     /**
-     * Export the given component outlines to file
+     * Export the given component outlines to file. Also exports the dataset name
+     * and the number if cells in the dataset.
      * 
-     * @param c
+     * @param datasets the datasets to export
      */
     public void exportConsensusOutlines(@NonNull List<IAnalysisDataset> datasets) {
         List<Nucleus> consensi = datasets.stream()
@@ -88,6 +89,7 @@ public class SVGWriter implements Exporter, Loggable {
 
             export(s, g2, x, Imageable.COMPONENT_BUFFER+10);
             export(d.getName(), g2, (float) x, Imageable.COMPONENT_BUFFER);
+            export(String.valueOf(d.getCollection().size()), g2, (float)x, (float)(Imageable.COMPONENT_BUFFER+(r.getHeight()/2)));
             x+=r.getWidth()+Imageable.COMPONENT_BUFFER;
         }
 

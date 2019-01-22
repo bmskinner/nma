@@ -82,8 +82,6 @@ public class ImagesTabPanel extends DetailPanel {
     private JPanel imagePanel;
     private JLabel label;
     
-    private CosmeticHandler ch = new CosmeticHandler(this);
-
     private static final String IMAGES_LBL = "Images in dataset";
     private static final String PANEL_TITLE_LBL = "Images";
     private static final String HEADER_LBL = "Double click a folder to update image paths";
@@ -286,7 +284,7 @@ public class ImagesTabPanel extends DetailPanel {
     		InterfaceUpdater r = () -> {
     			try {
     				ImageProcessor ip = f.exists() ? new ImageImporter(f).importToColorProcessor()
-    						: ImageAnnotator.createBlankColorProcessor(1500, 1500); //TODO - check space needed by cells
+    						: ImageAnnotator.createWhiteColorProcessor(1500, 1500); //TODO - check space needed by cells
     				
     				// If an 8bit image was read in, make it colour greyscale
     				ImageConverter cn = new ImageConverter(ip);
@@ -298,7 +296,7 @@ public class ImagesTabPanel extends DetailPanel {
     				dataset.ifPresent( d -> d.getCollection().getCells(f).stream().forEach( c-> an.annotateCellBorders(c)) );
 
     				ImageFilterer ic = new ImageFilterer(an.toProcessor());
-    				ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
+    				ic.resizeKeepingAspect(imagePanel.getWidth(), imagePanel.getHeight());
     				label.setIcon(ic.toImageIcon());
 
     			} catch (Exception e1) {
@@ -345,6 +343,8 @@ public class ImagesTabPanel extends DetailPanel {
 
 
     	        try {
+    	        	
+    	        	oldFolder = getExistingParent(oldFolder);
     	        	File newFolder = getInputSupplier().requestFolder(oldFolder);
     	        	node.setFile(newFolder); // update node
 
@@ -359,7 +359,7 @@ public class ImagesTabPanel extends DetailPanel {
     	        		getDatasets().stream()
 	    	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
 	    	        		.flatMap(c->c.getNuclei().stream())
-	    	        		.forEach(n->n.setSourceFile(newFolder));
+	    	        		.forEach(n->n.setSourceFile(new File(newFolder, imageFile.getName())));
     	        		imageData.setFile( new File(newFolder, imageFile.getName()));
     	        	}
     	        } catch (RequestCancelledException e1) {
@@ -371,6 +371,21 @@ public class ImagesTabPanel extends DetailPanel {
 
     	};
     	return l;
+    }
+    
+    /**
+     * Fetch the first existing folder in the given path, or
+     * null if none of the path exists.
+     * @param folder the folder to check
+     * @return
+     */
+    private File getExistingParent(File folder) {
+    	if(folder==null)
+    		return null;
+    	if(folder.exists())
+    		return folder;
+    	return getExistingParent(folder.getParentFile());
+    	
     }
         
     private class ImageTreeNode extends DefaultMutableTreeNode {

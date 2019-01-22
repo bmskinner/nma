@@ -57,7 +57,8 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 	private PopupMenuItem saveCellsMenuItem;
 	private PopupMenuItem exportOptionsMenuItem;
 	private PopupMenuItem exportXMLDatasetItem;
-
+	private PopupMenuItem exportCellImagesItem;
+	
 	private PopupMenuItem saveMenuItem;
 	private PopupMenuItem relocateMenuItem;
 
@@ -190,17 +191,25 @@ public void createButtons() {
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
-//        exportXMLDatasetItem = fact.makeItem(Labels.Populations.EXPORT_XML_DATASET, 
-//        		SignalChangeEvent.EXPORT_XML_DATASET, 
-//        		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
-//				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+        exportCellImagesItem = fact.makeItem(Labels.Populations.EXPORT_CELL_IMAGES, 
+        		SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES, 
+        		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
+        		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
+        		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
+				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+        
+        exportXMLDatasetItem = fact.makeItem(Labels.Populations.EXPORT_XML_DATASET, 
+        		SignalChangeEvent.EXPORT_XML_DATASET, 
+        		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
+				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
         exportSubMenu.add(exportStatsMenuItem);
         exportSubMenu.add(exportSignalsItem);
         exportSubMenu.add(exportShellsItem);
         exportSubMenu.add(saveCellsMenuItem);
         exportSubMenu.add(exportOptionsMenuItem);
-
+        exportSubMenu.add(exportCellImagesItem);
+//        exportSubMenu.add(exportXMLDatasetItem);
         
         addNuclearSignalMenuItem = fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, 
         		SignalChangeEvent.ADD_NUCLEAR_SIGNAL, 

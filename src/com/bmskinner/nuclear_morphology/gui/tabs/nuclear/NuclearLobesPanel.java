@@ -26,6 +26,7 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
@@ -85,7 +86,7 @@ public class NuclearLobesPanel extends DetailPanel {
     }
 
     private ExportableChartPanel createMainPanel() {
-        JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
+    	JFreeChart chart = AbstractChartFactory.createEmptyChart();
         return new ViolinChartPanel(chart);
     }
 

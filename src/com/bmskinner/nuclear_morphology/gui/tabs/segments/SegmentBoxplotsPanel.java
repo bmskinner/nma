@@ -57,9 +57,9 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
     public SegmentBoxplotsPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
-        JFreeChart boxplot = BoxplotChartFactory.makeEmptyChart();
+        JFreeChart chart = AbstractChartFactory.createEmptyChart();
 
-        ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
+        ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
         chartPanel.setPreferredSize(preferredSize);
         chartPanels.put("null", chartPanel);
 
@@ -135,7 +135,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-        ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.makeEmptyChart());
+        ChartPanel chartPanel = new ChartPanel(AbstractChartFactory.createEmptyChart());
         mainPanel.add(chartPanel);
         mainPanel.revalidate();
         mainPanel.repaint();

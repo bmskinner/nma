@@ -238,7 +238,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         /*
          * Find the start point of the segment in the consensus nucleus
          */
-        Nucleus consensus = dataset.getCollection().getConsensus().getVerticallyRotatedNucleus();
+        Nucleus consensus = dataset.getCollection().getConsensus();
 
         // Get the segment start position XY coordinates
         IBorderSegment segment;

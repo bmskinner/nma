@@ -86,22 +86,27 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
 
     private final TabPanel parentPanel;
     private final List<TabPanel> subPanels = new ArrayList<>();
-
-    // The chart cache holds rendered charts for all selected options, until a
-    // change is made to a dataset
-    // The table cache does the same for table models
+    
+    /** Holds rendered charts for all selected options */
     protected final Cache chartCache = new ChartCache();
+    
+    /** Holds rendered tables for all selected options */
     protected final Cache tableCache = new TableCache();
     
     private static final String DEFAULT_TAB_TITLE = "Default";
     private final String panelTabTitleLbl;
 
+    /** Track if the panel is currently in the process of updating */
     volatile private AtomicBoolean isUpdating = new AtomicBoolean(false);
     
+    /** Event handlers for sending events */
     private final DatasetEventHandler       dh  = new DatasetEventHandler(this);
     private final InterfaceEventHandler     ih  = new InterfaceEventHandler(this);
     private final DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
     private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
+    
+    /** Perform cosmetic operations on datasets - renaming, changing colours etc. */
+    protected final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
     
     private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
 
@@ -463,7 +468,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
             } catch (Exception e) {
                 warn("Error creating chart: " + this.getClass().getSimpleName());
                 fine(this.getClass().getName() + ": Error creating chart", e);
-                return ScatterChartFactory.makeErrorChart();
+                return ScatterChartFactory.createErrorChart();
             }
         }
     }
@@ -726,6 +731,10 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
     @Override
     public void eventReceived(SignalChangeEvent event) {
         // Pass messages upwards
+    	if(parentPanel!=null)
+    		parentPanel.eventReceived(event);
+    	
+    	// Pass messages downwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
                 sh.fire(new SignalChangeEvent(this, event));

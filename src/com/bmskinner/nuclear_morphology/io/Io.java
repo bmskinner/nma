@@ -32,43 +32,46 @@ import ij.IJ;
  */
 public interface Io {
     
-    static final String TAB_FILE_EXTENSION = ".txt";
-    static final String SVG_FILE_EXTENSION = ".svg";
-    static final String PNG_FILE_EXTENSION = ".png";
+	String NEWLINE = System.getProperty("line.separator");
+	String TAB = "\t";
+	String DOT = ".";
+	
+	String TAB_FILE_EXTENSION = ".txt";
+		
+	String PNG_FILE_EXTENSION_NODOT = "png";
+	String PNG_FILE_EXTENSION       =  DOT+PNG_FILE_EXTENSION_NODOT;
+	
+	String SVG_FILE_EXTENSION_NODOT = "svg";
+	String SVG_FILE_EXTENSION       = DOT+SVG_FILE_EXTENSION_NODOT;
 
-    static final String NEWLINE = System.getProperty("line.separator");
-    
-    static final String TAB = "\t";
-    
-    static final String SAVE_FILE_EXTENSION_NODOT = "nmd";
-    static final String BACKUP_FILE_EXTENSION_NODOT = "bak";
-    static final String SAVE_FILE_EXTENSION       = "." + SAVE_FILE_EXTENSION_NODOT;
-    static final String BACKUP_FILE_EXTENSION = "." + BACKUP_FILE_EXTENSION_NODOT;
-    static final String LOG_FILE_EXTENSION        = ".log";
-    
-    
-    /**
-     * Locations of saved cells
-     */
-    static final String LOC_FILE_EXTENSION        = "cell";
-    
-    /**
-     * Backup files made in nmd conversions
-     */
-    static final String BAK_FILE_EXTENSION        = ".bak";
-    
-    /**
-     * Workspace file extension
-     */
-    static final String WRK_FILE_EXTENSION_NODOT  = "wrk";
-    static final String WRK_FILE_EXTENSION        = "."+WRK_FILE_EXTENSION_NODOT;
-    
-    static final String XML_FILE_EXTENSION_NODOT  = "xml";
-    static final String XML_FILE_EXTENSION        = "."+XML_FILE_EXTENSION_NODOT;
 
-    static final String INVALID_FILE_ERROR       = "File is not valid for importing";
-    static final String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
-    
+
+	String SAVE_FILE_EXTENSION_NODOT = "nmd";
+	String BACKUP_FILE_EXTENSION_NODOT = "bak";
+	String SAVE_FILE_EXTENSION       = DOT + SAVE_FILE_EXTENSION_NODOT;
+	String BACKUP_FILE_EXTENSION = DOT + BACKUP_FILE_EXTENSION_NODOT;
+	String LOG_FILE_EXTENSION        = ".log";
+
+
+	/** Locations of saved cells */
+	String LOC_FILE_EXTENSION        = "cell";
+
+	/** Backup files made in nmd conversions */
+	String BAK_FILE_EXTENSION        = ".bak";
+
+	/** Workspace file extension*/
+	String WRK_FILE_EXTENSION_NODOT  = "wrk";
+	String WRK_FILE_EXTENSION        = DOT+WRK_FILE_EXTENSION_NODOT;
+
+	String XML_FILE_EXTENSION_NODOT  = "xml";
+	String XML_FILE_EXTENSION        = DOT+XML_FILE_EXTENSION_NODOT;
+		
+	String TIFF_FILE_EXTENSION_NODOT = "tiff";
+	String TIFF_FILE_EXTENSION = DOT+TIFF_FILE_EXTENSION_NODOT;
+
+	String INVALID_FILE_ERROR       = "File is not valid for importing";
+	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
+
     /**
      * Interface for all export classes. Defines file extensions.
      * 

@@ -111,9 +111,8 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
                         return;
                     }
 
-                    for (TabPanel d : detailPanels) {
+                    for (TabPanel d : detailPanels)
                         d.updateSize();
-                    }
                 };
                 ThreadManager.getInstance().submit(r);
 

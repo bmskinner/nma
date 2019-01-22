@@ -37,6 +37,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
@@ -46,8 +47,9 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
+import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.ImagePlus;
@@ -104,59 +106,20 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         getContentPane().add(header, BorderLayout.NORTH);
         getContentPane().add(progressBar, BorderLayout.SOUTH);
 
-        TableModel model = createEmptyTableModel(rows, COLUMN_COUNT);
-
-        table = new JTable(model) {
-            // Returning the Class of each column will allow different
-            // renderers to be used based on Class
-            @Override
-			public Class<?> getColumnClass(int column) {
-                return JLabel.class;
-            }
-        };
-
-        for (int col = 0; col < COLUMN_COUNT; col++) {
-            table.getColumnModel().getColumn(col).setCellRenderer(new LabelInfoRenderer());
-        }
-
-        table.setRowHeight(180);
-        table.setCellSelectionEnabled(true);
-        table.setRowSelectionAllowed(false);
-        table.setColumnSelectionAllowed(false);
-        table.setTableHeader(null);
-
-        ListSelectionModel cellSelectionModel = table.getSelectionModel();
-        cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+        model = new CellCollectionOverviewModel(rows, COLUMN_COUNT);
+        
+        createTable();
+        
         table.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-
-                    // Get the data model for this table
-                    TableModel model = (TableModel) table.getModel();
-
-                    Point pnt = e.getPoint();
-                    int row = table.rowAtPoint(pnt);
-                    int col = table.columnAtPoint(pnt);
-
-                    LabelInfo selected = (LabelInfo) model.getValueAt(row, col);
-                    
-                    ICell c = selected.getCell();
-                    
-                    ImageProcessor full = renderFullImage(c);
-
-                    File folder = dataset.getCollection().getOutputFolder();
-                    File outputfile = new File(folder,  c.getNucleus().getNameAndNumber()+".tiff");
-
-                    FileSaver saver = new FileSaver(new ImagePlus("", full));
-                    saver.saveAsTiff(outputfile.getAbsolutePath());
-                }
-            }
-            
-            
-
+        	@Override
+        	public void mouseClicked(MouseEvent e) {
+        		if (e.getClickCount() == 2) {
+        			Point pnt = e.getPoint();
+        			int row = table.rowAtPoint(pnt);
+        			int col = table.columnAtPoint(pnt);                    
+        			export(model.getCell(rows,  col));
+        		}
+        	}
         });
 
         JScrollPane scrollPane = new JScrollPane();
@@ -165,6 +128,16 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         getContentPane().add(scrollPane, BorderLayout.CENTER);
 
     }
+	
+	private void export(ICell cell) {
+		ImageProcessor full = renderFullImage(cell);
+
+		File folder = dataset.getCollection().getOutputFolder();
+		File outputfile = new File(folder,  cell.getNucleus().getNameAndNumber()+Io.TIFF_FILE_EXTENSION);
+
+		FileSaver saver = new FileSaver(new ImagePlus("", full));
+		saver.saveAsTiff(outputfile.getAbsolutePath());
+	}
 	
 	private ImageProcessor renderFullImage(ICell c){
     	ImageProcessor ip;
@@ -227,7 +200,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	    }
 
 	    @Override
-	    protected ImageIcon importCellImage(ICell c) {
+	    protected SelectableCellIcon importCellImage(ICell c) {
 	        ImageProcessor ip = renderFullImage(c);
 
 	        if (rotate) {
@@ -239,10 +212,9 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	            ip.flipVertical(); // Y axis needs inverting
 	        }
 	        // Rescale the resulting image
-	        ip = scaleImage(ip);
+	        ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
 
-	        ImageIcon ic = new ImageIcon(ip.getBufferedImage());
-	        return ic;
+	        return new SelectableCellIcon(ip, c);
 	    }
 	}
 

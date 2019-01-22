@@ -68,12 +68,10 @@ public abstract class AbstractEditingPanel extends DetailPanel
             String[] options = { "Keep manual values", "Overwrite manual values" };
 
             try {
-            	int result = getInputSupplier().requestOption(options, 0, "Some cells have been manually segmented. Keep manual values?");
+            	int result = getInputSupplier().requestOptionAllVisible(options, 0, "Some cells have been manually segmented. Keep manual values?", "Keep manual values?");
             	if (result != 0)
             		collection.setCellsLocked(false);
-            } catch(RequestCancelledException e) {
-            	// no action
-            }
+            } catch(RequestCancelledException e) {} // no action
         }
     }
 

@@ -28,6 +28,14 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 public interface IPoint {
 
+	/**
+	 * Create a new point at the origin, 0,0
+	 * @return
+	 */
+	static IPoint atOrigin() {
+		return makeNew(0, 0);
+	}
+	
     /**
      * Create a new point of the default type
      * 
@@ -153,7 +161,7 @@ public interface IPoint {
     double findSmallestAngle(final @NonNull IPoint a, final @NonNull IPoint b);
     
     /**
-     * Measure the absolute angle between the two lines a-this and this-b
+     * Measure the absolute angle between the two lines {@code a-this} and {@code this-b}
      * connecting the three points. The measurement is made clockwise from the
      * start point to the end point.
      * <p>
@@ -161,14 +169,14 @@ public interface IPoint {
      * 
      * <pre>    a<br>    |<br>    o  135<br> 225 \<br>       b<br></pre>
      * 
-     * findAbsoluteAngle(b, a) will return 225<br>
-     * findAbsoluteAngle(a, b) will return 135<br>
-     * findSmallestAngle(b, a) will return 135<br>
-     * findSmallestAngle(a, b) will return 135<br>
+     * {@code o.findAbsoluteAngle(b, a)} will return 225<br>
+     * {@code o.findAbsoluteAngle(a, b)} will return 135<br>
+     * {@code o.findSmallestAngle(b, a)} will return 135<br>
+     * {@code o.findSmallestAngle(a, b)} will return 135<br>
      * 
-     * @param start the first line endpoint
-     * @param end the second line endpoint
-     * @return
+     * @param start the point from which measurement starts
+     * @param end the point at which measurement ends
+     * @return the angle measured clockwise from start to end about this point 
      */
     double findAbsoluteAngle(final @NonNull IPoint start, final @NonNull IPoint end);
 
@@ -225,34 +233,36 @@ public interface IPoint {
     /**
      * Set the x-value
      *
-     * @param x
-     *            the new x-value
+     * @param x  the new x-value
      */
     void setX(double x);
 
     /**
      * Set the y-value
      *
-     * @param y
-     *            the new x-value
+     * @param y the new y-value
      */
     void setY(double y);
 
     /**
      * Set the point to the position in the given point
      * 
-     * @param p
-     *            the position to move this point to
+     * @param p the position to move this point to
      */
     void set(@NonNull IPoint p);
+    
+    /**
+     * Set the point to the position in the given point
+     * 
+     * @param p the position to move this point to
+     */
+    void set(@NonNull Point2D p);
 
     /**
      * Offset the point by the given amounts
      * 
-     * @param x
-     *            the x offset
-     * @param y
-     *            the y offset
+     * @param x the x offset
+     * @param y the y offset
      */
     void offset(double x, double y);
     

@@ -123,7 +123,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         	 final ICell cell = getCellModel().getCell();
              final CellularComponent component = getCellModel().getComponent();
         	
-        	imagePanel.setCell(activeDataset(), cell, component, false, false);
+        	imagePanel.setCell(activeDataset(), cell, component, false, false, false);
 
         } catch (Exception e) {
             error("Error updating cell panel", e);

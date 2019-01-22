@@ -188,13 +188,25 @@ public class ImageImporter implements Loggable, Importer {
      * @param channel
      * @return
      */
+    public ImageProcessor importImageAndInvert(int channel) throws ImageImportException {
+    	ImageProcessor ip = importImage(channel);
+    	ip.invert();
+    	return ip;
+    }
+    
+    /**
+     * Import the image in the given file, and return an image processor for the
+     * channel requested.  
+     * @param channel
+     * @return
+     */
     public ImageProcessor importImage(int channel) throws ImageImportException {
         ImageStack s = importToStack();
         int stack = rgbToStack(channel);
         ImageProcessor ip = s.getProcessor(stack);
-        ip.invert();
         return ip;
     }
+    
 
     /**
      * Test if the given image can be read by this program

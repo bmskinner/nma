@@ -527,8 +527,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
                 setHorizontalAlignment(JLabel.CENTER);
                 setVerticalAlignment(JLabel.CENTER); // image has no offset
-                setBackground(Color.LIGHT_GRAY); // contrast to images with
-                                                 // white background
+                setBackground(Color.LIGHT_GRAY); // contrast to images with white background
                 setText("");
 
                 if (info == null) {
@@ -545,7 +544,9 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
                 }
 
             } catch (Exception e) {
-                error("Renderer error", e);
+                stack("Prober cell renderer error", e);
+                setIcon(null);
+                setText("");
             }
 
             return this;

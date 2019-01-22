@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -103,8 +105,8 @@ public class ProfileManager implements Loggable {
                 }
 
                 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-                    n.updateVerticallyRotatedNucleus();
                     n.updateDependentStats();
+                    setOpUsingTvBv(n);
                 }
             }
         });
@@ -241,38 +243,30 @@ public class ProfileManager implements Loggable {
         	if(index==existingTagIndex) {
         		updateProfileCollectionOffsets(tag, index);
         		// update nuclei
-        		collection.getNuclei().stream().forEach(n -> {
+        		
+        		for(Nucleus n : collection.getNuclei()) {
         			if(n.isLocked())
-        				return;
+        				continue;
         			
-        			int existingIndex;
         			try {
-        				existingIndex = n.getBorderIndex(existingTag);
+        				int existingIndex = n.getBorderIndex(existingTag);
+        				n.setBorderTag(tag, existingIndex);
+        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
+            				n.updateDependentStats();
+            				setOpUsingTvBv(n);
+        				}
         			} catch (UnavailableBorderTagException e) {
         				stack(e);
-        				return;
+        				continue;
         			}
-        			n.setBorderTag(tag, existingIndex);
-        			if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-        				n.updateVerticallyRotatedNucleus();
-        				n.updateDependentStats();
-        			}
-        			
-        		});
+        		}
         		
         		//Update consensus
         		if (collection.hasConsensus()) {
-        			Nucleus n = collection.getConsensus();
+        			Nucleus n = collection.getRawConsensus().component();
         			int existingIndex = n.getBorderIndex(existingTag);
         			n.setBorderTag(tag, existingIndex);
-
-        			if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-        				n.alignPointsOnVertical(n.getBorderPoint(Tag.TOP_VERTICAL), n.getBorderPoint(Tag.BOTTOM_VERTICAL));
-        				if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
-        					n.flipXAroundPoint(n.getCentreOfMass());
-        			} else {
-        				n.rotatePointToBottom(n.getBorderPoint(Tag.ORIENTATION_POINT));
-        			}
+        			setOpUsingTvBv(n);
         		}
 
         		// Update signals as needed
@@ -300,29 +294,36 @@ public class ProfileManager implements Loggable {
          * Set the border tag in the consensus median profile
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+            Nucleus n = collection.getRawConsensus().component();
             int oldNIndex = n.getBorderIndex(tag);
             int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
             n.setBorderTag(tag, newIndex);
-
-            if (n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-                n.alignPointsOnVertical(n.getBorderPoint(Tag.TOP_VERTICAL), n.getBorderPoint(Tag.BOTTOM_VERTICAL));
-
-                if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX()) {
-                    // need to flip about the CoM
-                    n.flipXAroundPoint(n.getCentreOfMass());
-                }
-
-            } else {
-                n.rotatePointToBottom(n.getBorderPoint(Tag.ORIENTATION_POINT));
-            }
-            //
-            finest("Set border tag in consensus to " + newIndex + " from " + oldNIndex);
+            setOpUsingTvBv(n);
         }
         
      // Update signals as needed
         collection.getSignalManager().recalculateSignalAngles();
 
+    }
+    
+    
+    /**
+     * If the TV and BV are present, move the OP to a more sensible 
+     * position for signal angle measurement: the border point directly
+     * below the centre of mass.
+     * @param n the nucleus to alter
+     */
+    private void setOpUsingTvBv(@NonNull final Nucleus n) {
+    	// also update the OP to be directly below the CoM in vertically oriented nucleus
+		if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+			finer("Updating OP due to TV or BV change");
+			Nucleus vertN = n.getVerticallyRotatedNucleus();
+			IBorderPoint bottom = vertN.getBorderList().stream()
+				.filter(p-> p.getY()<vertN.getCentreOfMass().getY())
+				.min(Comparator.comparing(p->Math.abs(p.getX()-vertN.getCentreOfMass().getX()))).get();
+			int newOp = vertN.getBorderIndex(bottom);
+			n.setBorderTag(Tag.ORIENTATION_POINT, newOp);
+		}
     }
 
     /**
@@ -575,7 +576,7 @@ public class ProfileManager implements Loggable {
         			}
         		}
 
-        		n.updateVerticallyRotatedNucleus();
+//        		n.updateVerticallyRotatedNucleus();
         		n.updateDependentStats();
 
         	} else {
@@ -761,7 +762,7 @@ public class ProfileManager implements Loggable {
          * Update the consensus if present
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+            Nucleus n = collection.getRawConsensus().component();
             mergeSegments(n, seg1, seg2, newID);
         }
 
@@ -901,7 +902,7 @@ public class ProfileManager implements Loggable {
          * Update the consensus if present
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+        	Nucleus n = collection.getRawConsensus().component();
             boolean wasLocked = n.isLocked();
             n.setLocked(false); // Merging segments is not destructive
             splitSegment(n, seg.getID(), proportion, newID1, newID2);
@@ -943,7 +944,7 @@ public class ProfileManager implements Loggable {
         
         // check consensus //TODO replace with remove consensus
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+        	Nucleus n = collection.getRawConsensus().component();
             if (!isSplittable(n, id, proportion)) {
                 fine("Consensus not splittable");
                 return false;
@@ -1049,7 +1050,7 @@ public class ProfileManager implements Loggable {
          * Update the consensus if present
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getConsensus();
+        	Nucleus n = collection.getRawConsensus().component();
             unmergeSegments(n, segId);
         }
 

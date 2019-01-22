@@ -46,10 +46,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
     private static final String PANEL_TITLE_LBL = "Outline";
             
-    private RotationSelectionSettingsPanel rotationPanel;
+//    private RotationSelectionSettingsPanel rotationPanel;
     
     private InteractiveBorderTagCellPanel imagePanel;
 
+    private GenericCheckboxPanel rotatePanel   = new GenericCheckboxPanel("Rotate vertical");
     private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus mesh");
     private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
     
@@ -74,9 +75,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     private JPanel makeHeader() {
     	JPanel panel = new JPanel(new FlowLayout());
 
-        rotationPanel = new RotationSelectionSettingsPanel();
-        rotationPanel.setEnabled(false);
-        rotationPanel.addActionListener(this);
+//        rotationPanel = new RotationSelectionSettingsPanel();
+    	rotatePanel.setEnabled(false);
+    	rotatePanel.addActionListener(this);
 
         makeMeshPanel.addActionListener(this);
         makeMeshPanel.setEnabled(false);
@@ -89,7 +90,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         JButton adjustBtn = new JButton("Adjust border");
         adjustBtn.addActionListener(e-> cellBorderAdjustmentDialog.load(getCellModel().getCell(), activeDataset()));
 
-
+        panel.add(rotatePanel);
         panel.add(makeMeshPanel);
         panel.add(warpMeshPanel);
         panel.add(Box.createHorizontalGlue());
@@ -102,19 +103,19 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     private synchronized void updateSettingsPanels() {
 
         if (this.isMultipleDatasets() || !this.hasDatasets()) {
-            rotationPanel.setEnabled(false);
+        	rotatePanel.setEnabled(false);
             makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
             return;
         }
 
         if (!this.getCellModel().hasCell()) {
-            rotationPanel.setEnabled(false);
+        	rotatePanel.setEnabled(false);
             makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
         } else {
             // Only allow one mesh activity to be active
-            rotationPanel.setEnabled(!warpMeshPanel.isSelected());
+        	rotatePanel.setEnabled(!warpMeshPanel.isSelected());
             makeMeshPanel.setEnabled(!warpMeshPanel.isSelected());
             warpMeshPanel.setEnabled(!makeMeshPanel.isSelected());
 
@@ -137,8 +138,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         final CellularComponent component = getCellModel().getComponent();
         
         boolean isShowMesh  = makeMeshPanel.isSelected();
-        boolean isWarpImage = warpMeshPanel.isSelected();        
-        imagePanel.setCell(activeDataset(), cell, component, isShowMesh, isWarpImage);
+        boolean isWarpImage = warpMeshPanel.isSelected();   
+        boolean isRotate    = rotatePanel.isSelected();
+        imagePanel.setCell(activeDataset(), cell, component, isShowMesh, isWarpImage, isRotate);
 
         updateSettingsPanels();
     }

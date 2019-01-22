@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
@@ -186,7 +187,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             if (profile.hasSegments()) { 
 
             	for(IBorderSegment seg : profile.getOrderedSegments()) {
-            		Paint color = ColourSelecter.getColor(seg.getPosition());
+            		Paint color = ColourSelecter.getColor(seg.getPosition(), GlobalOptions.getInstance().getSwatch());
             		Iterator<Integer> it = seg.iterator();
             		int lastIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getEndIndex());
             		while(it.hasNext()) {

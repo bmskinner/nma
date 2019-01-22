@@ -7,9 +7,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.swing.JPanel;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,11 +26,18 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
+import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Tests for implementations of the ICellCollection interface
@@ -71,7 +82,9 @@ public class ICellCollectionTest extends ComponentTester {
 		}
 		
 		if(source==VirtualCellCollection.class){
-			ICellCollection v = new VirtualCellCollection(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID);
+			ICellCollection v = new VirtualCellCollection(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID, d.getCollection());
+			v.createProfileCollection();
+			d.getCollection().getProfileManager().copyCollectionOffsets(v);
 			for(ICell c : d.getCollection().getCells()) {
 				v.addCell(c);
 			}
@@ -317,6 +330,39 @@ public class ICellCollectionTest extends ComponentTester {
 	@Test
 	public void testGetMedianArrayLength() {
 		assertEquals(178, collection.getMedianArrayLength());
+	}
+	
+	@Test
+	public void testGetConsensusOrientsVertically() throws Exception {
+		
+		ProfileManager m = collection.getProfileManager();
+		IProfile p = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		m.updateBorderTag(Tag.TOP_VERTICAL, 0);
+		m.updateBorderTag(Tag.BOTTOM_VERTICAL, 10);
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
+		new ConsensusAveragingMethod(d).call();
+		int bIndex=0;
+		for(int tIndex=0; tIndex<p.size(); tIndex++) {
+			if(tIndex==bIndex)
+				continue;
+			m.updateBorderTag(Tag.TOP_VERTICAL, tIndex);
+			m.updateBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
+
+			assertTrue(collection.hasConsensus());
+
+			List<JPanel> panels = new ArrayList<>();
+			panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
+
+			Nucleus n = collection.getConsensus(); // is aligned vertically
+			IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
+			IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+			
+			boolean areVertical = areVertical(tv, bv);
+			if(!areVertical)
+				ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
+			assertTrue(areVertical);
+		}
+		
 	}
 
 

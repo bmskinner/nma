@@ -17,27 +17,24 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
+import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 import ij.process.Blitter;
 import ij.process.ColorProcessor;
@@ -50,7 +47,7 @@ import ij.process.ImageProcessor;
  * @author ben
  *
  */
-public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implements Loggable {
+public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> implements Loggable {
 
 	protected final IAnalysisDataset dataset;
 	protected final TableModel       model;
@@ -68,13 +65,15 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
     @Override
     protected Boolean doInBackground() throws Exception {
 
-        for (ICell c : dataset.getCollection().getCells()) {
+    	List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
+    	
+    	cells.sort((c1, c2)-> c1.getNucleus().getNameAndNumber().compareTo(c2.getNucleus().getNameAndNumber()));
+        for (ICell c : cells) {
         	if(isCancelled())
         		return false;
             try {
-                ImageIcon ic = importCellImage(c);
-                LabelInfo inf = new LabelInfo(ic, c);
-                publish(inf);
+            	SelectableCellIcon ic = importCellImage(c);
+                publish(ic);
             } catch (Exception e) {
                 stack("Error importing cell image", e);
             }
@@ -102,62 +101,8 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
             firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         }
     }
-
-    protected ImageIcon importCellImage(ICell c) {
-        ImageProcessor ip;
-
-        try {
-            if (c.hasCytoplasm()) {
-                ip = c.getCytoplasm().getComponentRGBImage();
-            } else {
-                ip = c.getNucleus().getComponentImage();
-            }
-
-        } catch (UnloadableImageException e) {
-            stack("Cannot load image for component", e);
-            return new ImageIcon();
-        }
-
-        ImageAnnotator an = new ImageAnnotator(ip);
-        if (c.hasCytoplasm()) {
-
-            an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
-            for (Nucleus n : c.getNuclei()) {
-                an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
-
-                if (n instanceof LobedNucleus) {
-
-                    for (Lobe l : ((LobedNucleus) n).getLobes()) {
-                        an.annotateBorder(l, c.getCytoplasm(), Color.RED);
-                        an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
-                    }
-                }
-            }
-
-        } else {
-
-            for (Nucleus n : c.getNuclei()) {
-                an = an.annotateSegments(n, n);
-            }
-        }
-
-        ip = an.toProcessor();
-
-        if (rotate) {
-            try {
-                ip = rotateToVertical(c, ip);
-            } catch (UnavailableBorderTagException e) {
-                fine("Unable to rotate", e);
-            }
-            ip.flipVertical(); // Y axis needs inverting
-        }
-        // Rescale the resulting image
-        ip = scaleImage(ip);
-
-        ImageIcon ic = new ImageIcon(ip.getBufferedImage());
-        return ic;
-    }
-
+    protected abstract SelectableCellIcon importCellImage(ICell c);
+    
     protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
         // Calculate angle for vertical rotation
         Nucleus n = c.getNucleus();
@@ -180,12 +125,20 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
                 btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
             }
         }
+        
+        double angle = findVerticalRotationAngle(topPoint, btmPoint);
 
+        // Increase the canvas size so rotation does not crop the nucleus
+        finer("Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
+        ImageProcessor newIp = createEnlargedProcessor(ip, angle);
+
+        newIp.rotate(angle);
+        return newIp;
+    }
+    
+    private double findVerticalRotationAngle(IPoint top, IPoint bottom) {
         // Find which point is higher in the image
-        IPoint upperPoint = topPoint.getY() > btmPoint.getY() ? topPoint : btmPoint;
-        IPoint lowerPoint = upperPoint == topPoint ? btmPoint : topPoint;
-
-        IPoint comp = IPoint.makeNew(lowerPoint.getX(), upperPoint.getY());
+        IPoint comp = IPoint.makeNew(bottom.getX(), top.getY());
 
         /*
          * LA RA RB LB
@@ -201,38 +154,32 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
          * However, the image coordinates have a reversed Y axis
          */
 
-        double angleFromVertical = lowerPoint.findSmallestAngle(upperPoint, comp);
+        double angleFromVertical = bottom.findSmallestAngle(top, comp);
 
         double angle = 0;
-        if (topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)) {
+        if (top.isLeftOf(bottom) && top.isAbove(bottom)) {
             angle = 360 - angleFromVertical;
             // log("LA: "+angleFromVertical+" to "+angle); // Tested working
         }
 
-        if (topPoint.isRightOf(btmPoint) && topPoint.isAbove(btmPoint)) {
+        if (top.isRightOf(bottom) && top.isAbove(bottom)) {
             angle = angleFromVertical;
             // log("RA: "+angleFromVertical+" to "+angle); // Tested working
         }
 
-        if (topPoint.isLeftOf(btmPoint) && topPoint.isBelow(btmPoint)) {
+        if (top.isLeftOf(bottom) && top.isBelow(bottom)) {
             angle = angleFromVertical + 180;
             // angle = 180-angleFromVertical;
             // log("LB: "+angleFromVertical+" to "+angle); // Tested working
         }
 
-        if (topPoint.isRightOf(btmPoint) && topPoint.isBelow(btmPoint)) {
+        if (top.isRightOf(bottom) && top.isBelow(bottom)) {
             // angle = angleFromVertical+180;
             angle = 180 - angleFromVertical;
             // log("RB: "+angleFromVertical+" to "+angle); // Tested working
         }
-
-        // Increase the canvas size so rotation does not crop the nucleus
-        finer("Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
-        ImageProcessor newIp = createEnlargedProcessor(ip, angle);
-
-        newIp.rotate(angle);
-        return newIp;
-    }
+        return angle;
+      }
 
     protected ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees) {
 
@@ -256,7 +203,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         int xBase = (w - ip.getWidth()) >> 1;
         int yBase = (h - ip.getHeight()) >> 1;
 
-        finer("New image " + w + " x " + h + " from " + ip.getWidth() + " x " + ip.getHeight() + " : Rot: " + degrees);
+        finer(String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
 
         finest("Copy starting at " + xBase + ", " + yBase);
 
@@ -270,20 +217,10 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         return newIp;
     }
 
-    protected ImageProcessor scaleImage(ImageProcessor ip) {
-        double aspect = (double) ip.getWidth() / (double) ip.getHeight();
-        double finalWidth = 150 * aspect; // fix height
-        finalWidth = finalWidth > 150 ? 150 : finalWidth; // but constrain width
-                                                          // too
-
-        ip = ip.resize((int) finalWidth);
-        return ip;
-    }
-
     @Override
-    protected void process(List<LabelInfo> chunks) {
+    protected void process(List<SelectableCellIcon> chunks) {
 
-        for (LabelInfo im : chunks) {
+        for (SelectableCellIcon im : chunks) {
 
             int row = loaded / COLUMN_COUNT;
             int col = loaded % COLUMN_COUNT;

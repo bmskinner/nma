@@ -58,6 +58,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 
     // Options for nucleus mesh creation
     private boolean showMesh       = false;
+    private boolean showMeshVertices  = false;
     private boolean showMeshEdges  = true;
     private boolean showMeshFaces  = false;
     private boolean straightenMesh = false;
@@ -236,6 +237,15 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     @Override
     public boolean isShowMeshEdges() {
         return showMeshEdges;
+    }
+    
+    @Override
+    public boolean isShowMeshVertices() {
+        return showMeshVertices;
+    }
+    
+    public void setShowMeshVertices(boolean showMeshVertices) {
+        this.showMeshVertices = showMeshVertices;
     }
 
     public void setShowMeshEdges(boolean showMeshEdges) {

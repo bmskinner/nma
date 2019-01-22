@@ -10,6 +10,11 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 
+/**
+ * Tests for image filterer
+ * @author bms41
+ *
+ */
 public class ImageFiltererTest {
 	
 	
@@ -131,69 +136,7 @@ public class ImageFiltererTest {
 
 		return createProcessor(pixels);
 	}
-	
-	@Test
-	public void bridgePixelAcrossSquare(){
-		ByteProcessor bp = makeTestSquareProcessor();
-//		System.out.println("\n-------------\nSquare:");
-		bridgePixels(bp);
-	}
-	
-	@Test
-	public void bridgePixelAcrossVerticals(){
-		ByteProcessor bp = makeTestVerticalSidesProcessor();
-//		System.out.println("\n-------------\nVertical line:");
-		bridgePixels(bp);
-	}
-	
-	@Test
-	public void bridgePixelAcrossHorizontals(){
-		ByteProcessor bp = makeTestHorizontalSidesProcessor();
-//		System.out.println("\n-------------\nHorizontal line:");
-		bridgePixels(bp);
-	}
-	
-	@Test
-	public void bridgePixelAcrossEmpty(){
-		ByteProcessor bp = makeTestEmptyProcessor();
-//		System.out.println("\n-------------\nEmpty:");
-		bridgePixels(bp);
-	}
-	
-	@Test
-	public void bridgePixelAcrossFilled(){
-		ByteProcessor bp = makeTestFilledProcessor();
-//		System.out.println("\n-------------\nFilled:");
-		bridgePixels(bp);
-	}
-	
-	@Test
-	public void bridgePixelAcrossDiagonal(){
-		ByteProcessor bp = makeTestDiagonalProcessor();
-//		System.out.println("\n-------------\nDiagonal:");
-		bridgePixels(bp);
-	}
-	
-	/**
-	 * Bridge the pixels in the given processor
-	 * @param bp
-	 */
-	private void bridgePixels(ByteProcessor bp){
-		
-//		System.out.println("Input image:");
-		printPixelArray(bp);
-		
-//		System.out.println("\nKernel at 1, 1:");
-		int[][] kernel = new ImageFilterer(bp).getKernel(bp.getIntArray(), 1, 1);
-//		printPixelArray(kernel);
-		
-//		System.out.println("\nBridged image:");
-		ByteProcessor bridged = (ByteProcessor) new ImageFilterer(bp).bridgePixelGaps(3).toProcessor();
-//		printPixelArray(bridged);
-
-		
-	}
-		
+				
 	private void printPixelArray(ImageProcessor ip){
 		for(int x = 0; x<ip.getWidth(); x++){
 			

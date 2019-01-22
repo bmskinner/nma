@@ -49,6 +49,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -99,7 +100,7 @@ public class CellCollection implements ICellCollection {
     // this holds the mapping of tail indexes etc in the median profile arrays
     protected Map<ProfileType, ProfileCollection> profileCollections = new HashMap<ProfileType, ProfileCollection>();
 
-    private Nucleus consensusNucleus; // the refolded consensus nucleus
+    private Nucleus consensusNucleus; // the refolded consensus nucleus - old format, cannot be removed
 
     private Map<UUID, Cell> mappedCollection = new HashMap<UUID, Cell>(); // store
                                                                           // all
@@ -110,6 +111,8 @@ public class CellCollection implements ICellCollection {
     private Map<UUID, SignalGroup> signalGroups = new HashMap<UUID, SignalGroup>(0);
 
     private volatile transient boolean isRefolding = false;
+    
+    private transient Consensus<Nucleus> consensus; // new format consensus
 
     private RuleSetCollection ruleSets = new RuleSetCollection();
 
@@ -377,9 +380,8 @@ public class CellCollection implements ICellCollection {
 	public boolean hasCells() {
         if (this.mappedCollection.isEmpty()) {
             return false;
-        } else {
-            return true;
         }
+		return true;
     }
 
     @Override
@@ -410,9 +412,19 @@ public class CellCollection implements ICellCollection {
     }
 
     @Override
-	public void setConsensus(@Nullable Nucleus n) {
-        this.consensusNucleus = n;
+	public void setConsensus(@Nullable Consensus<Nucleus> n) {
+        this.consensus = n;
     }
+    
+    @Override
+	public void offsetConsensus(double xOffset, double yOffset) {
+    	consensus.offset(xOffset, yOffset);
+	}
+
+	@Override
+	public void rotateConsensus(double degrees) {
+		consensus.addRotation(degrees);
+	}
 
     /**
      * Get the cell with the given UUID
@@ -451,8 +463,13 @@ public class CellCollection implements ICellCollection {
 
     @Override
 	public Nucleus getConsensus() {
-        return this.consensusNucleus;
+        return this.consensus.component();
     }
+    
+    @Override
+	public Consensus<Nucleus> getRawConsensus() {
+		return consensus;
+	}
 
     /**
      * Get the profile collection of the given type
@@ -1565,17 +1582,9 @@ public class CellCollection implements ICellCollection {
         return newCollection;
     }
 
-    /**
-     * Invalidate the existing cached vertically rotated nuclei, and
-     * recalculate.
-     */
     @Override
 	public void updateVerticalNuclei() {
-
-        getNuclei().parallelStream().forEach(n -> {
-            n.updateVerticallyRotatedNucleus();
-        });
-
+        getNuclei().parallelStream().forEach(n ->  n.updateDependentStats());
     }
 
     @Override
@@ -1854,25 +1863,24 @@ public class CellCollection implements ICellCollection {
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("Writing cell collection");
         out.defaultWriteObject();
-        // finest("Wrote cell collection");
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("Reading cell collection");
-        in.defaultReadObject();
+
+
+    	in.defaultReadObject();
+    	
+    	consensus = null;
+
         isRefolding = false;
-        vennCache = new HashMap<UUID, Integer>(); // cache the number of shared
+        vennCache = new HashMap<>(); // cache the number of shared
                                                   // nuclei with other datasets
 
         if (ruleSets == null || ruleSets.isEmpty()) {
             log("Creating default ruleset for collection");
             ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
         }
-        // finest("Creating default ruleset for nucleus type "+nucleusType);
-        // ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
-        // finest("Read cell collection");
     }
 
     @Override
@@ -2076,6 +2084,18 @@ public class CellCollection implements ICellCollection {
         // TODO Auto-generated method stub
         return 0;
     }
+
+	@Override
+	public IPoint currentConsensusOffset() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public double currentConsensusRotation() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return 0;
+	}
 
 
 }

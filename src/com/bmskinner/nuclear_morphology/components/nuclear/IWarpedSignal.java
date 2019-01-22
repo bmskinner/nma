@@ -58,13 +58,6 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	static byte[] toByteArray(ByteProcessor ip) {
 		byte[] arr = new byte[ip.getWidth()*ip.getHeight()];
 		return (byte[])ip.getPixels();
-//		
-//		for(int w=0; w<ip.getWidth(); w++) {
-//			for(int h=0; h<ip.getHeight(); h++) {
-//				arr[w][h] = (byte) ip.get(w, h);
-//			}
-//		}
-//		return arr;
 	}
 	
 	/**
@@ -104,11 +97,19 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	/**
 	 * Add a warped signal image for the given template
 	 * @param template the template object signals were warped on to 
+	 * @param templateId the id of the dataset the signals came from
 	 * @param name the name of the template object
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset
 	 * @param image the warped image
 	 */	
-	void addWarpedImage(@NonNull CellularComponent template, @NonNull String name, boolean isCellWithSignalsOnly, @NonNull ByteProcessor image);
+	void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId, @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ByteProcessor image);
+	
+	
+	/**
+	 * Remove the given warped image
+	 * @param key the key to remove
+	 */
+	void removeWarpedImage(@NonNull WarpedSignalKey key);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 
@@ -117,7 +118,7 @@ public interface IWarpedSignal extends Serializable, Loggable {
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset, or just those with defined signals
 	 * @return
 	 */
-	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template, boolean isCellWithSignalsOnly);
+	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template,  @NonNull UUID templateId, boolean isCellWithSignalsOnly, int threshold);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 

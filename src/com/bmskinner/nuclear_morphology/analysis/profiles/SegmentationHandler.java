@@ -254,30 +254,16 @@ public class SegmentationHandler implements Loggable {
 
         if (tag == null)
             throw new IllegalArgumentException("Tag is null");
-        if (dataset.getCollection().isVirtual())
+        if (dataset.getCollection().isVirtual()) {
+        	fine("Cannot update tag in virtual collection");
             return;
+        }
         try {
 
-        	// If a tag is to be updated to an index with an existing tag, don't perform alignments; 
-        	// Just set the tag to the same index directly
-        	// The user is expecting the tags to become the same
-
-        	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
-        	for(Tag existingTag : tags) {
-        		if(existingTag.equals(tags))
-        			continue;
-        		int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
-        		if(index==existingTagIndex) {
-        			dataset.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
-        			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-        				child.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
-        			}
-        			return;
-        		}
-        	}
+        	if(couldUpdateTagToExistingTagIndex(tag, index))
+        		return;
 
         	// Otherwise, find the best fit for each child dataset
-
             double prop = dataset.getCollection().getProfileCollection()
                     .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
 
@@ -302,6 +288,35 @@ public class SegmentationHandler implements Loggable {
             stack(e);
             return;
         }
+    }
+    
+    /**
+     * If a tag is to be updated to an index with an existing tag, don't perform alignments;
+     * just set the tag to the same index directly. The user is expecting the tags to lie
+     * at the same index in every nucleus.
+     * @param tag the tag to update
+     * @param index the new index for the tag
+     * @return
+     * @throws UnavailableBorderTagException
+     * @throws IndexOutOfBoundsException
+     * @throws UnavailableProfileTypeException
+     * @throws ProfileException
+     */
+    private boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, IndexOutOfBoundsException, UnavailableProfileTypeException, ProfileException {
+    	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+    	for(Tag existingTag : tags) {
+    		if(existingTag.equals(tags))
+    			continue;
+    		int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
+    		if(index==existingTagIndex) {
+    			dataset.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+    			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+    				child.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+    			}
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 }

@@ -35,7 +35,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
     public ProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
         super(context, type);
 
-        JFreeChart chart = ProfileChartFactory.makeEmptyChart(type);
+        JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
         chartPanel.setChart(chart);
 
         if (this.type == ProfileType.FRANKEN) {
@@ -59,7 +59,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
     @Override
     protected void updateNull() {
         super.updateNull();
-        JFreeChart chart = ProfileChartFactory.makeEmptyChart(type);
+        JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
         chartPanel.setChart(chart);
 
     }

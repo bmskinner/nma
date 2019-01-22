@@ -38,8 +38,8 @@ public class Version implements Serializable {
      * version increments.
      */
     public static final int VERSION_MAJOR    = 1;
-    public static final int VERSION_MINOR    = 14;
-    public static final int VERSION_REVISION = 1;
+    public static final int VERSION_MINOR    = 15;
+    public static final int VERSION_REVISION = 0;
 
     private final int major;
     private final int minor;
@@ -58,6 +58,7 @@ public class Version implements Serializable {
     public static final Version v_1_13_7 = new Version(1, 13, 7);
     public static final Version v_1_13_8 = new Version(1, 13, 8);
     public static final Version v_1_14_0 = new Version(1, 14, 0);
+    public static final Version v_1_15_0 = new Version(1, 15, 0);
 
     public Version(final int major, final int minor, final int revision) {
         this.major = major;
@@ -72,6 +73,17 @@ public class Version implements Serializable {
      */
     public static Version currentVersion() {
         return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+    }
+    
+    /**
+     * Parse the given string to a version. The string should have three
+     * integers separated by dots - e.g. 1.11.5. Convenience method.
+     * 
+     * @param s the string to parse
+     * @return
+     */
+    public static Version fromString(@NonNull final String s) {
+    	return parseString(s);
     }
 
     /**

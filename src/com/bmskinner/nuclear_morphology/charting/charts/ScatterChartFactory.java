@@ -48,16 +48,6 @@ public class ScatterChartFactory extends AbstractChartFactory {
         super(o);
     }
 
-    /**
-     * Create a blank scatter chart
-     * 
-     * @return
-     */
-    public static JFreeChart makeEmptyChart() {
-        JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null);
-        chart.getXYPlot().setBackgroundPaint(Color.WHITE);
-        return chart;
-    }
 
     /**
      * Create a scatter plot of two nucleus statistics
@@ -66,50 +56,45 @@ public class ScatterChartFactory extends AbstractChartFactory {
      * @return
      */
     public JFreeChart createScatterChart(String component) {
+    	
+    	try {
 
-        if (!options.hasDatasets()) {
-            return makeEmptyChart();
-        }
+        if (!options.hasDatasets())
+            return createEmptyChart();
 
-        if (options.getStats().size() != 2) {
-            return makeEmptyChart();
-        }
+        if (options.getStats().size() != 2)
+            return createTextAnnotatedEmptyChart("Only one variable selected");
 
         PlottableStatistic firstStat = options.getStat();
 
         for (PlottableStatistic stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {
                 fine("Statistic classes are different");
-                return makeEmptyChart();
+                return createTextAnnotatedEmptyChart("Variable classes are different");
             }
         }
 
-        if (CellularComponent.NUCLEUS.equals(component)) {
+        if (CellularComponent.NUCLEUS.equals(component))
             return createNucleusStatisticScatterChart();
-        }
 
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
             return createSignalStatisticScatterChart();
-        }
+        
+    	} catch(ChartDatasetCreationException e) {
+    		stack(e.getMessage(), e);
+    		return createErrorChart();
+    	}
 
-        return makeEmptyChart();
+        return createEmptyChart();
     }
 
     /**
      * Create a scatter plot of two nucleus statistics
-     * 
-     * @param options
      * @return
      */
-    public JFreeChart createNucleusStatisticScatterChart() {
+    public JFreeChart createNucleusStatisticScatterChart() throws ChartDatasetCreationException {
 
-        XYDataset ds;
-        try {
-            ds = new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEUS);
-        } catch (ChartDatasetCreationException e) {
-            stack("Error creating scatter dataset", e);
-            return makeErrorChart();
-        }
+        XYDataset ds = new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEUS);
 
         String xLabel = options.getStat(0).label(options.getScale());
         String yLabel = options.getStat(1).label(options.getScale());
@@ -143,7 +128,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
                     .createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
         } catch (ChartDatasetCreationException e) {
             stack("Error creating scatter dataset", e);
-            return makeErrorChart();
+            return createErrorChart();
         }
 
         String xLabel = options.getStat(0).label(options.getScale());

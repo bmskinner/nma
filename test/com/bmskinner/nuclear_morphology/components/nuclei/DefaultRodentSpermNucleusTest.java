@@ -52,13 +52,6 @@ public class DefaultRodentSpermNucleusTest {
     }
 
     @Test
-    public void testSetChannel() {
-        int expected = 2;
-        testNucleus.setChannel(expected);
-        assertThat(testNucleus.getChannel(), is(expected));
-    }
-
-    @Test
     public void testGetScale() {
         double expected = 1;
         assertThat(testNucleus.getScale(), is(expected));

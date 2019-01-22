@@ -109,7 +109,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			try{
 				ip = component.getImage();
 			} catch(UnloadableImageException e){
-				ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
+				ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
 			}
 
 			ImageAnnotator an = new ImageAnnotator(ip);

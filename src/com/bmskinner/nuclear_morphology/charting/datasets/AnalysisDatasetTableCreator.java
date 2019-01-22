@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -418,7 +419,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
         return data;
     }
-
+    
     /**
      * Get an array of formatted info from a dataset analysis options
      * 
@@ -469,7 +470,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         			time = times[1];
         		}
         	}
-        	folder = nO.isPresent() ? nO.get().getFolder().getAbsolutePath() : "Missing data";
+        	File optionsFolder = nO.isPresent() ? nO.get().getFolder() : null;
+        	folder = optionsFolder!=null ? optionsFolder.getAbsolutePath() : "Missing data";
         }
 
         

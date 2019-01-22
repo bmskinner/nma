@@ -51,7 +51,10 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  */
 public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
-    private File saveFile;
+    /** Should warped signals be copied into new signal groups  */
+    private static final boolean COPY_WARPED = false;
+
+	private File saveFile;
 
     /** Describe which signal groups will be merged */
     private Map<UUID, Set<UUID>> pairedSignalGroups = null;
@@ -186,7 +189,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
             // All the existing signal groups before merging
             for (UUID signalGroupID : d.getCollection().getSignalGroupIDs()) {
                 newCollection.addSignalGroup(signalGroupID,
-                        new SignalGroup(d.getCollection().getSignalGroup(signalGroupID).get()));
+                        new SignalGroup(d.getCollection().getSignalGroup(signalGroupID).get(), COPY_WARPED));
             }
         }
         
@@ -379,7 +382,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
             newCollection.getSignalManager().updateSignalGroupID(oldID, newID);
         }
-
+        
     }
 
     //

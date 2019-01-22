@@ -74,7 +74,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
     /** cache the vertically rotated nucleus */
-    protected transient Nucleus verticalNucleus = null;
+//    protected transient Nucleus verticalNucleus = null;
 
     protected transient boolean canReverse = true;
     
@@ -226,7 +226,16 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         // These stats are specific to nuclei
                 
         if (PlottableStatistic.ELLIPTICITY.equals(stat))
-            return getAspectRatio();
+            return calculateEllipticity();
+        
+        if (PlottableStatistic.ASPECT.equals(stat))
+           return calculateAspect();
+        
+        if (PlottableStatistic.ELONGATION.equals(stat))
+            return calculateElongation();
+                
+        if (PlottableStatistic.REGULARITY.equals(stat))
+            return calculateRegularity();
 
         if (PlottableStatistic.BOUNDING_HEIGHT.equals(stat))
             return getVerticallyRotatedNucleus().getBounds().getHeight();
@@ -246,8 +255,42 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         return result;
     }
+    
+    /**
+     * Calculate the elongation of the object 
+     * @return
+     */
+    private double calculateElongation() {
+    	double h = getVerticallyRotatedNucleus().getBounds().getHeight();
+        double w = getVerticallyRotatedNucleus().getBounds().getWidth();
+        return (h-w)/(h+w);
+    }
 
-    private double getAspectRatio() {
+
+    /**
+     * Calculate the regularity of the object 
+     * @return
+     */
+    private double calculateRegularity() {
+    	double h = getVerticallyRotatedNucleus().getBounds().getHeight();
+        double w = getVerticallyRotatedNucleus().getBounds().getWidth();
+        double a = this.getStatistic(PlottableStatistic.AREA);
+        return (Math.PI*h*w)/(4*a);
+    }
+    
+    /**
+     * Calculate the aspect of the object 
+     * @return
+     */
+    private double calculateAspect() {
+    	 return 1d/calculateEllipticity();
+    }
+
+    /**
+     * Calculate the ellipticity of the object 
+     * @return
+     */
+    private double calculateEllipticity() {
         double h = getVerticallyRotatedNucleus().getBounds().getHeight();
         double w = getVerticallyRotatedNucleus().getBounds().getWidth();
 
@@ -276,16 +319,11 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     // RodentSpermNucleus
     @Override
 	public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
-
-    	//TODO - there is an issue with pigs. The smallest angle wrt the OP is not the correct angle to choose
     	
         for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
             if (signalCollection.hasSignal(signalGroup)) {
-
-                List<INuclearSignal> signals = signalCollection.getSignals(signalGroup);
-
-                for (INuclearSignal s : signals) {
+                for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
 
                     double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
                     s.setStatistic(PlottableStatistic.ANGLE, angle);
@@ -358,18 +396,15 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public void updateVerticallyRotatedNucleus() {
-    	verticalNucleus = null;
-        verticalNucleus = getVerticallyRotatedNucleus();
+//    	verticalNucleus = null;
+//        verticalNucleus = getVerticallyRotatedNucleus();
     }
 
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-        if (verticalNucleus != null)
-            return verticalNucleus;
-
         // Make an exact copy of the nucleus
         finer("Creating vertical nucleus");
-        verticalNucleus = this.duplicate();
+        Nucleus verticalNucleus = this.duplicate();
 
         // At this point the new nucleus was created at the original image
         // coordinates
@@ -394,7 +429,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     }
 
     @Override
-    public void moveCentreOfMass(IPoint point) {
+    public void moveCentreOfMass(@NonNull IPoint point) {
 
         double diffX = point.getX() - getCentreOfMass().getX();
         double diffY = point.getY() - getCentreOfMass().getY();
@@ -422,7 +457,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public void alignVertically() {
-
     	boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
 
     	if (useTVandBV) {
@@ -434,8 +468,12 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     				return;
     			}
 
-    			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
+    			IPoint[] points = getBorderPointsForVerticalAlignment();
+//    			System.out.println("Before rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
+//    			fine("Before rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
     			alignPointsOnVertical(points[0], points[1]);
+//    			System.out.println("After rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
+//    			fine("After rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
 
     		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
     			stack("Cannot get border tag or profile", e);
@@ -469,7 +507,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
      */
-    private IBorderPoint[] getBorderPointsForVerticalAlignment()
+    private IPoint[] getBorderPointsForVerticalAlignment()
             throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
         IBorderPoint topPoint;
@@ -477,55 +515,54 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         topPoint = this.getBorderPoint(Tag.TOP_VERTICAL);
         bottomPoint = this.getBorderPoint(Tag.BOTTOM_VERTICAL);
-
-        // Find the border points between the top and bottom verticals
-        List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();
-
-        int topIndex = this.getBorderIndex(Tag.TOP_VERTICAL);
-        int btmIndex = this.getBorderIndex(Tag.BOTTOM_VERTICAL);
-        int totalSize = this.getProfile(ProfileType.ANGLE).size();
-
-        // A segment has built in methods for iterating through just the points
-        // it contains
-        // TODO: This has problems if we have short regions. Replace.
         
-        for(int i= topIndex; i<=btmIndex; i++){
-            
-        }
-        IBorderSegment region = new OpenBorderSegment(topIndex, btmIndex, totalSize);
+        return new IPoint[] { topPoint, bottomPoint };
 
-        int index = topIndex;
-
-        Iterator<Integer> it = region.iterator();
-
-        while (it.hasNext()) {
-            index = it.next();
-            pointsInRegion.add(this.getBorderPoint(index));
-        }
-
-        // As an anti-bibble defence, get a best fit line acrosss the region
-        // Use the line of best fit to find appropriate top and bottom vertical
-        // points
-        LineEquation eq = DoubleEquation.calculateBestFitLine(pointsInRegion);
-
-        // Take values along the best fit line that are close to the original TV
-        // and BV
-
-        // What about when the TV or BV are in the bibble? TODO
-
-        IBorderPoint top = new DefaultBorderPoint(topPoint.getX(), eq.getY(topPoint.getX()));
-        IBorderPoint btm = new DefaultBorderPoint(eq.getX(bottomPoint.getY()), bottomPoint.getY());
-
-        return new IBorderPoint[] { top, btm };
+//        // Find the border points between the top and bottom verticals
+//        List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();
+//
+//        int topIndex = this.getBorderIndex(Tag.TOP_VERTICAL);
+//        int btmIndex = this.getBorderIndex(Tag.BOTTOM_VERTICAL);
+//        int totalSize = this.getProfile(ProfileType.ANGLE).size();
+//
+//        // A segment has built in methods for iterating through just the points
+//        // it contains
+//        // TODO: This has problems if we have short regions. Replace.
+//        IBorderSegment region = new OpenBorderSegment(topIndex, btmIndex, totalSize);
+//
+//        int index = topIndex;
+//
+//        Iterator<Integer> it = region.iterator();
+//
+//        while (it.hasNext()) {
+//            index = it.next();
+//            pointsInRegion.add(this.getBorderPoint(index));
+//        }
+//
+//        // As an anti-bibble defence, get a best fit line acrosss the region
+//        // Use the line of best fit to find appropriate top and bottom vertical
+//        // points
+//        LineEquation eq = DoubleEquation.calculateBestFitLine(pointsInRegion);
+////        System.out.println("Best fit: "+eq);
+//
+//        // Take values along the best fit line that are close to the original TV
+//        // and BV
+//
+//        IPoint top = IPoint.makeNew(topPoint.getX(), eq.getY(topPoint.getX()));
+//        IPoint btm = IPoint.makeNew(bottomPoint.getX(), eq.getY(bottomPoint.getX()));
+//        
+////        System.out.println("Alignment point top: "+top);
+////        System.out.println("Alignment point bottom: "+btm);
+//        return new IPoint[] { top, btm };
 
     }
-
+    
     @Override
-    public void flipXAroundPoint(IPoint p) {
-        super.flipXAroundPoint(p);
+    public void flipHorizontal(@NonNull IPoint p) {
+        super.flipHorizontal(p);
 
         for (UUID id : signalCollection.getSignalGroupIds()) {
-            signalCollection.getSignals(id).stream().forEach(s -> s.flipXAroundPoint(p));
+            signalCollection.getSignals(id).stream().forEach(s -> s.flipHorizontal(p));
         }
 
     }
@@ -543,8 +580,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
                     s.rotate(angle);
 
-                    // get the new signal centre of mass based on the nucleus
-                    // rotation
+                    // get the new signal centre of mass based on the nucleus rotation
 
                     IPoint p = AngleTools.rotateAboutPoint(s.getCentreOfMass(), getCentreOfMass(), angle);
                     s.moveCentreOfMass(p);
@@ -637,6 +673,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-        this.verticalNucleus = null;
+//        this.verticalNucleus = null;
     }
 }

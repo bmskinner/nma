@@ -56,8 +56,7 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
      * Create with the given Dialog as a parent. Use null to make this dialog
      * have a taskbar icon
      * 
-     * @param d
-     *            the parent. Can be null
+     * @param d the parent. Can be null
      */
     public MessagingDialog(Dialog d) {
         super(d);

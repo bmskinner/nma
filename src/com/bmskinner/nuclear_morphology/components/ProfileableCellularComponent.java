@@ -263,6 +263,30 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
         return result;
     }
+    
+    @Override
+	public Tag getBorderTag(@NonNull Tag reference, int index) throws UnavailableBorderTagException {
+        int newIndex = getOffsetBorderIndex(reference, index);
+        return this.getBorderTag(newIndex);
+    }
+
+    @Override
+	public Tag getBorderTag(int index) {
+
+        for (Tag b : this.borderTags.keySet()) {
+            if (this.borderTags.get(b) == index) {
+                return b;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+	public int getBorderIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
+        if (borderTags.containsKey(tag))
+            return borderTags.get(tag);
+        throw new UnavailableBorderTagException("Tag "+tag+" is not present");
+    }
 
     
     /**
@@ -275,13 +299,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         borderTags.clear();
         for(Tag t : m.keySet())
         	borderTags.put(t, m.get(t).intValue());
-    }
-
-    @Override
-	public int getBorderIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
-        if (borderTags.containsKey(tag))
-            return borderTags.get(tag);
-        throw new UnavailableBorderTagException("Tag "+tag+" is not present");
     }
 
     @Override
@@ -329,44 +346,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public void setBorderTag(@NonNull Tag reference, @NonNull Tag tag, int i) throws UnavailableBorderTagException {
         if (segsLocked)
             return;
-
         int newIndex = getOffsetBorderIndex(reference, i);
-        this.setBorderTag(tag, newIndex);
-    }
-
-    @Override
-	public void replaceBorderTags(@NonNull Map<Tag, Integer> tagMap) {
-
-        try {
-
-            int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
-            ISegmentedProfile p = getProfile(ProfileType.ANGLE);
-
-            this.borderTags = tagMap;
-
-            int newRP = getBorderIndex(Tag.REFERENCE_POINT);
-            int diff = newRP - oldRP;
-            try {
-                p.nudgeSegments(diff);
-            } catch (ProfileException e) {
-                warn("Cannot offset profile");
-                fine("Error moving segments", e);
-                return;
-            }
-            finest("Old RP at " + oldRP);
-            finest("New RP at " + newRP);
-            finest("Moving segments by" + diff);
-
-            setProfile(ProfileType.ANGLE, p);
-
-            int newOP = getBorderIndex(Tag.ORIENTATION_POINT);
-            int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(newOP)));
-            this.borderTags.put(Tag.INTERSECTION_POINT, intersectionIndex);
-
-        } catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
-            stack("Error replacing borser tags", e);
-        }
-
+        setBorderTag(tag, newIndex);
     }
 
     @Override
@@ -395,23 +376,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     @Override
 	public int getOffsetBorderIndex(@NonNull Tag reference, int index) throws UnavailableBorderTagException {
     	return wrapIndex(index + this.getBorderIndex(reference));
-    }
-
-    @Override
-	public Tag getBorderTag(@NonNull Tag reference, int index) throws UnavailableBorderTagException {
-        int newIndex = getOffsetBorderIndex(reference, index);
-        return this.getBorderTag(newIndex);
-    }
-
-    @Override
-	public Tag getBorderTag(int index) {
-
-        for (Tag b : this.borderTags.keySet()) {
-            if (this.borderTags.get(b) == index) {
-                return b;
-            }
-        }
-        return null;
     }
 
     /*

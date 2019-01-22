@@ -27,15 +27,13 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  * @since 1.13.3
  *
  */
-/**
- * @author bms41
- *
- */
-/**
- * @author bms41
- *
- */
 public interface MeshFace {
+	
+    /**
+     * Test if one edge is peripheral. An interior face have no peripheral edges
+     * @return true if one edge is peripheral, false otherwise
+     */
+	boolean isPeripheral();
 
     /**
      * Get the value stored with this face
@@ -61,6 +59,10 @@ public interface MeshFace {
     Set<MeshEdge> getEdges();
 
     Set<MeshVertex> getVertices();
+    
+    Set<MeshVertex> getPeripheralVertices();
+    
+    Set<MeshVertex> getInternalVertices();
 
     boolean contains(MeshEdge e);
 

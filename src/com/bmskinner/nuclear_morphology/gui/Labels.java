@@ -111,7 +111,8 @@ public class Labels {
         public static final String EXPORT_SHELLS          = "Nuclear signal shells";
         public static final String EXPORT_CELL_LOCS       = "Cell locations within images";
         public static final String EXPORT_OPTIONS         = "Dataset analysis options";
-        public static final String EXPORT_XML_DATASET     = "Dataset to XML";
+        public static final String EXPORT_XML_DATASET     = "XML format dataset";
+        public static final String EXPORT_CELL_IMAGES     = "Single cell images";
     }
     
     /**
@@ -132,6 +133,7 @@ public class Labels {
     	public static final String SIGNAL_SOURCE_LABEL     = "Source (double click to change)";
     	public static final String SIGNAL_CHANNEL_LABEL    = "Channel";
     	public static final String WARP_BTN_LBL            = "Warp signals";
+    	public static final String SHOW_SIGNAL_RADII_LBL   = "Show signal radii";
     	public static final String WARP_BTN_TOOLTIP        = "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments";
     	
         /*
@@ -182,6 +184,9 @@ public class Labels {
         	public static final String TABLE_HEADER_SIGNALS_ONLY   = "Only cells with signals?";
         	public static final String TABLE_HEADER_TARGET_SHAPE   = "Target shape";
         	public static final String TABLE_HEADER_KEY_COLUMN     = "Keys";
+        	public static final String TABLE_HEADER_N_CELLS        = "Cells";
+        	public static final String TABLE_HEADER_THRESHOLD      = "Threshold";
+        	public static final String TABLE_HEADER_COLOUR_COLUMN  = "Pseudocolour";
         	
         }
 

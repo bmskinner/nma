@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.UUID;
-import java.util.concurrent.ForkJoinPool;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
@@ -42,39 +41,46 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Base class for chart generation. Contains static methods to create loading and
+ * error charts. All chart factories should extend this class.
+ * @author bms41
+ *
+ */
 public abstract class AbstractChartFactory implements Loggable {
 
+	/** The X and Y axis positive & negative range magnitude for empty charts  */
     protected static final int DEFAULT_EMPTY_RANGE         = 10;
+    
+    /** The index profile charts begin at. Since the first index is 0, 
+     * this prevents the value at zero being hidden by the chart border  */
     protected static final int DEFAULT_PROFILE_START_INDEX = -1;
+    
+    private static final String CHART_LOADING_LBL       = "Loading...";
+    private static final String MULTI_DATASET_ERROR_LBL = "Cannot display multiple datasets";
+    private static final String GENERAL_ERROR_LBL       = "Error creating chart";
+    
+    protected static final boolean DEFAULT_CREATE_TOOLTIPS = false;
+    protected static final boolean DEFAULT_CREATE_LEGEND   = false;
+    protected static final boolean DEFAULT_CREATE_URLS     = false;
 
+    /** The options that will be used for chart generation */
     protected final ChartOptions options;
 
+    /**
+     * Create with options for the chart to be created
+     * @param o the options
+     */
     public AbstractChartFactory(@NonNull final ChartOptions o) {
         if (o == null)
             throw new IllegalArgumentException("Options cannot be null");
         options = o;
-
     }
 
-    public static JFreeChart createLoadingChart() {
-
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
-
-        plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-        plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-
-        plot.getDomainAxis().setVisible(false);
-        plot.getRangeAxis().setVisible(false);
-
-        XYTextAnnotation annotation = new XYTextAnnotation("Loading...", 0, 0);
-        annotation.setPaint(Color.BLACK);
-        plot.addAnnotation(annotation);
-
-        return chart;
-
-    }
-
+    /**
+     *  Creates an empty chart with the default range 
+     * @return an empty chart
+     */
     public static JFreeChart createEmptyChart() {
 
         JFreeChart chart = createBaseXYChart();
@@ -89,23 +95,53 @@ public abstract class AbstractChartFactory implements Loggable {
         return chart;
 
     }
+    
+    /**
+     * Creates an empty chart with a message in the centre
+     * @param labelText the text to display
+     * @return a chart with the given message
+     */
+    protected static JFreeChart createTextAnnotatedEmptyChart(String labelText) {
+    	JFreeChart chart = createEmptyChart();
+        XYTextAnnotation annotation = new XYTextAnnotation(labelText, 0, 0);
+        annotation.setPaint(Color.BLACK);
+        chart.getXYPlot().addAnnotation(annotation);
+        return chart;
+   }
+    
+    /**
+     * Creates an empty chart with a message that a further chart is loading
+     * @return
+     */
+    public static JFreeChart createLoadingChart() {
+    	return createTextAnnotatedEmptyChart(CHART_LOADING_LBL);
+    }
+    
 
     /**
-     * Create an empty chart appropriate for the factory chart type - e.g. a
-     * category chart for a boxplot factory, or an XY chart for a scatter
-     * factory
+     * Creates an empty chart with a message that multiple datasets cannot be displayed in
+     * this chart type.
+     * @return
+     */
+    public static JFreeChart createMultipleDatasetEmptyChart() {
+        return createTextAnnotatedEmptyChart(MULTI_DATASET_ERROR_LBL);
+    }
+    
+    /**
+     * Create a chart displaying an error message
      * 
      * @return
      */
-    // public static JFreeChart makeEmptyChart();
+    public static JFreeChart createErrorChart() {
+    	return createTextAnnotatedEmptyChart(GENERAL_ERROR_LBL);
+    }
 
     /**
      * Get a series or dataset index for colour selection when drawing charts.
      * The index is set in the DatasetCreator as part of the label. The format
      * is Name_index_other
      * 
-     * @param label
-     *            the label to extract the index from
+     * @param label the label to extract the index from
      * @return the index found
      */
     public static int getIndexFromLabel(String label) {
@@ -132,13 +168,13 @@ public abstract class AbstractChartFactory implements Loggable {
     }
 
     /**
-     * Draw domain markers for the given border tag at the given position
+     * Draw a domain marker - a vertical line - for the given border tag at the given position
      * 
-     * @param plot
-     * @param tag
-     * @param value
+     * @param plot the plot
+     * @param tag the tag to use for colour selection
+     * @param value the domain axis value to draw at
      */
-    protected void addMarkerToXYPlot(XYPlot plot, Tag tag, double value) {
+    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Tag tag, final double value) {
         Color colour = chooseTagColour(tag);
         plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
     }
@@ -146,11 +182,11 @@ public abstract class AbstractChartFactory implements Loggable {
     /**
      * Draw domain markers for the given border tag at the given position
      * 
-     * @param plot
-     * @param tag
-     * @param value
+     * @param plot the plot
+     * @param tag the tag to use for colour selection
+     * @param value the domain axis value to draw at
      */
-    protected void addMarkerToXYPlot(XYPlot plot, Tag tag, int value) {
+    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Tag tag, final int value) {
         Color colour = chooseTagColour(tag);
         plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
     }
@@ -158,67 +194,35 @@ public abstract class AbstractChartFactory implements Loggable {
     /**
      * Get the appropriate colour for rendering tag markers
      * 
-     * @param tag
-     *            the tag to be rendered
+     * @param tag the tag to be rendered
      * @return the colour for the tag, or black if the tag was null or unknown
      */
-    private Color chooseTagColour(Tag tag) {
+    private Color chooseTagColour(final Tag tag) {
         Color colour = Color.BLACK;
 
-        if (tag.equals(Tag.ORIENTATION_POINT)) {
+        if (tag.equals(Tag.ORIENTATION_POINT))
             colour = Color.BLUE;
-        }
-        if (tag.equals(Tag.REFERENCE_POINT)) {
+        if (tag.equals(Tag.REFERENCE_POINT))
             colour = Color.ORANGE;
-        }
-        if (tag.getName().equals(BorderTag.INTERSECTION_POINT.toString())) {
+        if (tag.getName().equals(BorderTag.INTERSECTION_POINT.toString()))
             colour = Color.CYAN;
-        }
-        if (tag.getName().equals(BorderTag.TOP_VERTICAL.toString())) {
+        if (tag.getName().equals(BorderTag.TOP_VERTICAL.toString()))
             colour = Color.GRAY;
-        }
-        if (tag.getName().equals(BorderTag.BOTTOM_VERTICAL.toString())) {
+        if (tag.getName().equals(BorderTag.BOTTOM_VERTICAL.toString()))
             colour = Color.GRAY;
-        }
         return colour;
     }
 
     /**
-     * Create a chart displaying an error message
+     * Create a new XY line Chart, with vertical orientation, and set the
+     * background to white.
      * 
-     * @return
-     */
-    public static JFreeChart makeErrorChart() {
-        JFreeChart chart = createBaseXYChart();
-        XYPlot plot = chart.getXYPlot();
-
-        plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-        plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
-
-        for (int i = -100; i <= 100; i += 20) {
-            for (int j = -100; j <= 100; j += 20) {
-                XYTextAnnotation annotation = new XYTextAnnotation("Error creating chart", i, j);
-                annotation.setPaint(Color.BLACK);
-                plot.addAnnotation(annotation);
-            }
-        }
-
-        return chart;
-    }
-
-    /**
-     * Create a new XY Line Chart, with vertical orientation, and set the
-     * background to white
-     * 
-     * @param xLabel
-     *            the x axis label
-     * @param yLabel
-     *            the y axis label
-     * @param ds
-     *            the charting dataset
+     * @param xLabel the x axis label
+     * @param yLabel the y axis label
+     * @param ds the charting dataset
      * @return a chart with default settings
      */
-    protected static JFreeChart createBaseXYChart(String xLabel, String yLabel, XYDataset ds) {
+    protected static JFreeChart createBaseXYChart(final String xLabel, final String yLabel, final XYDataset ds) {
         JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, yLabel, ds, PlotOrientation.VERTICAL, false,
                 false, false);
 
@@ -227,7 +231,8 @@ public abstract class AbstractChartFactory implements Loggable {
 
         plot.getRenderer().setBaseToolTipGenerator(null);
         plot.getRenderer().setURLGenerator(null);
-        chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias());
+//        chart.setAntiAlias(true);
+        chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias()); // disabled for performance testing
 
         return chart;
     }
@@ -236,13 +241,11 @@ public abstract class AbstractChartFactory implements Loggable {
      * Create a new XY Line Chart, with vertical orientation, and set the
      * background to white. The charting dataset is null.
      * 
-     * @param xLabel
-     *            the x axis label
-     * @param yLabel
-     *            the y axis label
+     * @param xLabel the x axis label
+     * @param yLabel the y axis label
      * @return a chart with default settings
      */
-    protected static JFreeChart createBaseXYChart(String xLabel, String yLabel) {
+    protected static JFreeChart createBaseXYChart(final String xLabel, final String yLabel) {
         return createBaseXYChart(xLabel, yLabel, null);
     }
 
@@ -260,8 +263,10 @@ public abstract class AbstractChartFactory implements Loggable {
      * Assuming there is a single XYDataset in the XYPlot of the chart, and a
      * single renderer, apply dataset colours based on position in the chart
      * options dataset list.
+     * 
+     * @param plot the plot to apply colours to 
      */
-    protected void applySingleXYDatasetColours(XYPlot plot) {
+    protected void applySingleXYDatasetColours(final XYPlot plot) {
         int seriesCount = plot.getDataset().getSeriesCount();
 
         XYItemRenderer renderer = plot.getRenderer();
@@ -279,7 +284,7 @@ public abstract class AbstractChartFactory implements Loggable {
      * @param chart
      * @param options
      */
-    protected void applyAxisOptions(JFreeChart chart) {
+    protected void applyDefaultAxisOptions(final JFreeChart chart) {
 
         Plot plot = chart.getPlot();
 

@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.components;
 
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
 /**
  * Provides methods relating to the abillity to refold consensus shapes for a
  * component
@@ -42,7 +44,7 @@ public interface Refoldable<E extends CellularComponent> {
      * 
      * @param n
      */
-    void setConsensus(@Nullable E component);
+    void setConsensus(@Nullable Consensus<E> component);
 
     /**
      * Get the consensus nucleus if set
@@ -50,4 +52,23 @@ public interface Refoldable<E extends CellularComponent> {
      * @return the consensus, or null if not present
      */
     E getConsensus();
+    
+    Consensus<E> getRawConsensus();
+    
+    /**
+     * Apply an offset to the consensus shape
+     * @param xOffset
+     * @param yOffset
+     */
+    void offsetConsensus(double xOffset, double yOffset); 
+    
+    /*
+     * Apply a rotation to the consensus shape;
+     * @param degrees
+     */
+    void rotateConsensus(double degrees);
+    
+    IPoint currentConsensusOffset();
+    
+    double currentConsensusRotation();
 }

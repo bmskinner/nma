@@ -157,12 +157,12 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         log("Creating cell collections");
 
-        List<IAnalysisDataset> result = new ArrayList<>();
+        List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
         for (final ICellCollection collection : folderCollection) {
 
             IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
-            dataset.setAnalysisOptions(analysisOptions);
+            dataset.setAnalysisOptions(analysisOptions.duplicate());
             dataset.setRoot(true);
             dataset.setSavePath(new File(outputFolder, dataset.getName()+Io.SAVE_FILE_EXTENSION));
 
@@ -179,14 +179,14 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
                 log("Found " + collection.size() + " nuclei");
                 log(SPACER);
 
-                result.add(dataset);
+                foundDatasets.add(dataset);
 
             } catch (Exception e) {
                 warn("Cannot create collection: " + e.getMessage());
                 stack("Error in nucleus detection", e);
             }
         }
-        return result;
+        return foundDatasets;
     }
 
     /**

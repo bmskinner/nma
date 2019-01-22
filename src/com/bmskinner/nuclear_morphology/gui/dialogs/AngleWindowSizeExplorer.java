@@ -94,7 +94,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
         this.add(createSettingsPanel(), BorderLayout.NORTH);
 
-        chartPanel = new ExportableChartPanel(ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
+        chartPanel = new ExportableChartPanel(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
         this.add(chartPanel, BorderLayout.CENTER);
 
     }
@@ -202,7 +202,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         setAnalysing(true);
 
         // Clear the old chart
-        chartPanel.setChart(ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
+        chartPanel.setChart(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
 
         log("Testing " + windowSizeMin + " - " + windowSizeMax);
 

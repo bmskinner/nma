@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 /**
- * Performs angle and distance profiling on Profileable objects
+ * Performs angle and distance profiling on Taggable objects
  * 
  * @author bms41
  * @since 1.13.2
@@ -236,22 +236,27 @@ public class ProfileCreator implements Loggable {
         	newProfile = new SegmentedFloatProfile(profile);
         }
         return newProfile;
-//        return new SegmentedFloatProfile(profile);
     }
 
     private ISegmentedProfile calculateDiameterProfile() throws UnavailableBorderPointException {
 
         float[] profile = new float[target.getBorderLength()];
-
-        int index = 0;
-        Iterator<IBorderPoint> it = target.getBorderList().iterator();
-        while (it.hasNext()) {
-
-            IBorderPoint point = it.next();
-            IBorderPoint opp = target.findOppositeBorder(point);
-
-            profile[index++] = (float) point.getLengthTo(opp);
-
+        
+        try {
+        	List<IBorderPoint> points = target.getBorderList();
+        	for(int index=0; index<points.size(); index++) {
+        		try {
+        			IBorderPoint point = points.get(index);
+        			IBorderPoint opp   = target.findOppositeBorder(point);
+        			profile[index] = (float) point.getLengthTo(opp);
+        		} catch(Exception e) {
+        			stack("Error finding opposite border in index "+index, e);
+        			profile[index] = 0;
+        		}
+        	}
+        } catch(Exception e) {
+        	stack("Error creating diameter profile", e);
+        	warn("profile length "+profile.length);
         }
 
      // Make a new profile. If possible, use the internal segmentation type of the component
@@ -262,7 +267,6 @@ public class ProfileCreator implements Loggable {
         	newProfile = new SegmentedFloatProfile(profile);
         }
         return newProfile;
-//        return new SegmentedFloatProfile(profile);
     }
 
     private ISegmentedProfile calculateRadiusProfile() throws UnavailableBorderPointException {

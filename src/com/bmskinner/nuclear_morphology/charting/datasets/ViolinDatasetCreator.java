@@ -117,8 +117,6 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             }
 
             ds.add(list, rowKey, colKey);
-
-//            addProbabilities(ds, list, rowKey, colKey);
         }
 
         return ds;
@@ -127,8 +125,6 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     /**
      * Get a boxplot dataset for the given statistic for each collection
      * 
-     * @param options
-     *            the charting options
      * @return
      * @throws Exception
      */

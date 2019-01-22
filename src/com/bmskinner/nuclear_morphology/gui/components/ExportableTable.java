@@ -39,7 +39,20 @@ import com.bmskinner.nuclear_morphology.io.Io.Exporter;
  */
 @SuppressWarnings("serial")
 public class ExportableTable extends JTable {
-
+	
+	private boolean isGlobalEditable = true;
+	
+    /**
+     * Create a table with a provided model. Specify a global editing override.
+     * @param model the table model
+     * @param isGlobalEditable true if some or all cells are to be editable, false otherwise
+     */
+    public ExportableTable(TableModel model, boolean isGlobalEditable) {
+        super(model);
+        setComponentPopupMenu(new TablePopupMenu());
+        this.isGlobalEditable = isGlobalEditable;
+    }
+    
     /**
      * Create an empty table
      */
@@ -53,10 +66,18 @@ public class ExportableTable extends JTable {
      * @param model the table model
      */
     public ExportableTable(TableModel model) {
-        super(model);
+        this(model, true);
         setComponentPopupMenu(new TablePopupMenu());
     }
-
+    
+    @Override
+    public boolean isCellEditable(int row, int column) {
+    	if(isGlobalEditable)
+    		return super.isCellEditable(row, column);
+    	else
+    		return false;
+    }
+    
     /**
      * The popup menu for the table
      * @author bms41
@@ -64,8 +85,8 @@ public class ExportableTable extends JTable {
      */
     private class TablePopupMenu extends JPopupMenu {
     	
-    	private static final String EXPORT_LBL = "Export";
-    	private static final String COPY_LBL   = "Copy";
+    	private static final String EXPORT_LBL = "Export to file";
+    	private static final String COPY_LBL   = "Copy to clipboard";
 
         public TablePopupMenu() {
             super("Popup");

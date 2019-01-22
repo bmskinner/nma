@@ -14,26 +14,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
+package com.bmskinner.nuclear_morphology.gui.components;
+
+import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
 
-public class LabelInfo {
-    private ImageIcon icon;
+import ij.process.ImageProcessor;
+
+/**
+ * Map a cell to a display image for use in curation dialogs
+ * and individual cell images
+ * @author bms41
+ *
+ */
+public class SelectableCellIcon extends ImageIcon {
     private boolean   isSelected = false;
     private ICell     cell;
 
-    public LabelInfo(ImageIcon icon, ICell cell) {
-        this.icon = icon;
+    /**
+     * Create with an image to display and the cell it came from
+     * @param ip the image to be displayed
+     * @param cell the cell the image has come from
+     */
+    public SelectableCellIcon(ImageProcessor ip, ICell cell) {
+    	this(ip.getBufferedImage(), cell);
+    }
+    
+    /**
+     * Create with an image to display and the cell it came from
+     * @param img the image to be displayed
+     * @param cell the cell the image has come from
+     */
+    public SelectableCellIcon(Image img, ICell cell) {
+    	super(img);
         this.cell = cell;
     }
-
-    public ImageIcon getIcon() {
-        return icon;
+    
+    public SelectableCellIcon() {
+    	super();
+        this.cell = null;
     }
-
+    
     public ICell getCell() {
         return cell;
     }

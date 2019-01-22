@@ -43,7 +43,7 @@ public class SegmentationDualChartPanel extends DualChartPanel {
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();
 
-        JFreeChart profileChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
+        JFreeChart profileChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
         chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
         ((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
     }

@@ -1,10 +1,21 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
+import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileManager;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Tests for the default nucleus class
@@ -15,6 +26,7 @@ import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 public class DefaultNucleusTest extends ComponentTester {
 
 	private Nucleus nucleus;	
+	@Override
 	@Before
 	public void setUp() throws Exception {
 		nucleus = TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20);
@@ -25,4 +37,5 @@ public class DefaultNucleusTest extends ComponentTester {
 		Nucleus dup = nucleus.duplicate();
 		testDuplicatesByField(dup.duplicate(), dup);
 	}
+	
 }

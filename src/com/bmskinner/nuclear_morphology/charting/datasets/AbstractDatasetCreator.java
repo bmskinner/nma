@@ -21,10 +21,17 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Base class for chart dataset creators
+ * @author bms41
+ *
+ * @param <E> the options type describing the chart to build
+ */
 public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {
 
     protected final E options;
     
+    public static final String TAG_PREFIX             = "Tag_";
 	public static final String SEGMENT_SERIES_PREFIX  = "Seg_";
 	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
 	public static final String QUARTILE_SERIES_PREFIX = "Q";
@@ -32,17 +39,23 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
 	public static final String MEDIAN_SERIES_PREFIX   = "Median_";
 
     protected static final String EMPTY_STRING = "";
+    
+    /** The maximum number of points from a single dataset that will be displayed in a chart */
     protected static final int MAX_SCATTER_CHART_ITEMS = 2000;
+    
+    /** The maximum number of nucleus profiles from a single dataset that will be displayed in a chart */
     protected static final int MAX_PROFILE_CHART_ITEMS = 500;
     
-    /**
-     * The standard formatter for datasets. At least one integer, and 2
-     * decimals: 0.00
-     */
+    /** Default format for numbers */
     public static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
     
+    /** Default format for p-values */
     public static final String DEFAULT_PROBABILITY_FORMAT = "#0.0000";
 
+    /**
+     * Construct with an options object describing the chart options
+     * @param options
+     */
     public AbstractDatasetCreator(@NonNull final E options) {
         this.options = options;
     }

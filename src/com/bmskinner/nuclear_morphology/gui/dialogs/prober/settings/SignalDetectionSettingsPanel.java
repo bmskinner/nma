@@ -43,6 +43,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
     private static final String SIZE_SETTINGS_LBL  = "Filtering";
     private static final String THRESHOLD_LBL      = "Thresholding";
     private static final String CHANNEL_LBL        = "Image";
+    private static final String COPY_LBL           = "Copy";
 
     public SignalDetectionSettingsPanel(INuclearSignalOptions options) {
 
@@ -59,22 +60,27 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
+        
+        
+        SettingsPanel copyPanel = new CopySignalDetectionSettingsFromOpenDatasetPanel(options);
         SettingsPanel sizePanel = new SignalSizeSettingsPanel(options);
         SettingsPanel threshPanel = new ThresholdSettingsPanel(options);
         SettingsPanel methodPanel = new SignalMethodSettingsPanel(options);
         SettingsPanel channelPanel = new ImageChannelSettingsPanel(options);
 
+        copyPanel.setBorder(BorderFactory.createTitledBorder(COPY_LBL));
         methodPanel.setBorder(BorderFactory.createTitledBorder(OBJECT_FINDING_LBL));
         sizePanel.setBorder(BorderFactory.createTitledBorder(SIZE_SETTINGS_LBL));
         threshPanel.setBorder(BorderFactory.createTitledBorder(THRESHOLD_LBL));
         channelPanel.setBorder(BorderFactory.createTitledBorder(CHANNEL_LBL));
 
+        this.addSubPanel(copyPanel);
         this.addSubPanel(methodPanel);
         this.addSubPanel(threshPanel);
         this.addSubPanel(sizePanel);
         this.addSubPanel(channelPanel);
 
+        panel.add(copyPanel);
         panel.add(channelPanel);
         panel.add(threshPanel);
         panel.add(methodPanel);

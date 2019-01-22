@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.Consensus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -40,29 +41,20 @@ import ij.process.FloatPolygon;
  * @since 1.13.3
  *
  */
-public class DefaultConsensusNucleus extends DefaultNucleus {
+public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implements Consensus<Nucleus>  {
 
     private static final long serialVersionUID = 1L;
 
     private NucleusType type;
+    
+    private double xOffset = 0;
+    private double yOffset = 0;
+    private double rotOffset = 0;
 
     public DefaultConsensusNucleus(Nucleus n, NucleusType type) throws UnprofilableObjectException {
 
         super(n);
         this.type = type;
-        // this.originalCoM = n.getCentreOfMass();
-
-        // At this point the new consensus has created its border list
-        // based on the int points from the template nucleus.
-
-        // The border list is no longer at zero.
-
-        // Update the int points as well, so the nucleus does not 'snap back'
-        // from 0, 0 after loading from file. Then recreate the border list
-
-        // The centre of mass will match the template nucleus, since this is
-        // copied directly.
-
         if (n instanceof DefaultConsensusNucleus) {
 
             // If a consensus nucleus is used as the template, the CoM is
@@ -117,6 +109,22 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
         assignProfile(ProfileType.ANGLE, profile);
 
     }
+    
+    @Override
+	public void offset(double xOffset, double yOffset) {
+    	this.xOffset = xOffset;
+    	this.yOffset = yOffset;
+    }
+    
+    @Override
+	public void addRotation(double angle) {
+    	this.rotOffset = angle;
+    }
+    
+    @Override
+	public double currentRotation() {
+    	return rotOffset;
+    }
 
     @Override
     public FloatPolygon toOriginalPolygon() {
@@ -143,6 +151,27 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
     }
     
     @Override
+	protected Nucleus createVerticallyRotatedNucleus() {
+    	Nucleus n = super.getVerticallyRotatedNucleus();
+    	
+    	
+    	try {
+    		if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
+    			n.flipHorizontal();
+    	} catch (UnavailableBorderTagException e) {
+    		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+    	}
+    	n.rotate(rotOffset);
+    	n.offset(xOffset, yOffset);
+    	return n;
+    }
+    
+    @Override
+    public Nucleus getVerticallyRotatedNucleus() {
+    	return createVerticallyRotatedNucleus();
+    }
+    
+    @Override
     public int hashCode() {
     	final int prime = 31;
         int result = super.hashCode();
@@ -152,17 +181,29 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
-        in.defaultReadObject();
-        try {
-        	alignVertically();
-        	this.getVerticallyRotatedNucleus().alignVertically();
-        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderPoint(Tag.REFERENCE_POINT).getX() > 0)
-        			flipXAroundPoint(getCentreOfMass());
-        } catch (UnavailableBorderTagException e1) {
-        	fine("Cannot get border tag", e1);
-        }
-
-
+    	in.defaultReadObject();
+    	alignVertically();
     }
+
+	@Override
+	public IPoint currentOffset() {
+		return IPoint.makeNew(xOffset, yOffset);
+	}
+	
+	@Override
+	public Consensus<Nucleus> duplicateConsensus() {
+		try {
+			return new DefaultConsensusNucleus(this, type);
+		} catch (UnprofilableObjectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	@Override
+	public Nucleus component() {
+		return this;
+	}
 
 }
