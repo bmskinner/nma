@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -66,6 +67,12 @@ public class DatasetXMLReaderTest extends ComponentTester {
 				assertTrue(read.getChildDataset(childId).getCollection().contains(c));
 				
 		}
+		
+		DatasetValidator dv = new DatasetValidator();
+		boolean isValid = dv.validate(read);
+		if(!isValid)
+			dv.getErrors().stream().forEach(s->System.out.println(s));
+		assertTrue(isValid);
 		
 //		TODO: Functionality is not fully enabled
 //		assertEquals(d.getCollection(), read.getCollection());
