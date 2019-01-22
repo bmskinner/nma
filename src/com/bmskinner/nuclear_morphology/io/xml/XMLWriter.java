@@ -56,6 +56,7 @@ public abstract class XMLWriter implements Loggable {
 				CountedOutputStream cos = new CountedOutputStream(os);
 			){
 			XMLOutputter xmlOutput = new XMLOutputter();
+			
 			xmlOutput.setFormat(Format.getPrettyFormat());
 //			xmlOutput.output(doc, System.out); 
 			xmlOutput.output(doc, cos);

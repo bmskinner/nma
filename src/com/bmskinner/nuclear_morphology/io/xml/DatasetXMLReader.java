@@ -212,11 +212,14 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 
 		for(Element childElement : children.getChildren(XMLCreator.CHILD_DATASET_KEY)) {			
 			String name = childElement.getChildText(XMLCreator.DATASET_NAME_KEY);
+
 			UUID id = UUID.fromString(childElement.getChildText(XMLCreator.DATASET_ID_KEY));
 			ICellCollection childCollection = new VirtualCellCollection(parent, name, id);
 			
-			for(Element cellElement : childElement.getChildren(XMLCreator.CELL_IDS_KEY)) {
-				UUID cellId = readUUID(cellElement);
+			Element childCells = childElement.getChild(XMLCreator.CELL_IDS_KEY);
+
+			for(Element cellElement : childCells.getChildren()) {
+				UUID cellId = UUID.fromString(cellElement.getText());
 				childCollection.add(parent.getCollection().getCell(cellId));
 			}
 			IAnalysisDataset child = new ChildAnalysisDataset(parent, childCollection);

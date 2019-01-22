@@ -1,7 +1,10 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 import java.util.UUID;
 

@@ -32,16 +32,19 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 public class DatasetXMLReaderTest extends ComponentTester {
 
 	private void testXMLRead(File f) throws Exception {
+		logger.fine("Opening serialised template dataset");
 		IAnalysisDataset d = SampleDatasetReader.openDataset(f.getAbsoluteFile());
 		DatasetXMLCreator dxc = new DatasetXMLCreator(d);
 		File xmlFile = new File(d.getSavePath().getParentFile(), d.getName()+".xml.nmd");
 		XMLWriter.writeXML(dxc.create(), xmlFile);
 
+		logger.fine("Opening XML dataset");
 		IAnalysisDataset read =  SampleDatasetReader.openXMLDataset(xmlFile);
 		
 		assertEquals(d.getName(), read.getName());
 		assertEquals(d.getId(), read.getId());
 		assertEquals(d.getDatasetColour(), read.getDatasetColour());
+		assertEquals("Cell count", d.getCollection().size(), read.getCollection().size());
 		
 		for(UUID cellId : d.getCollection().getCellIDs()) {
 			ICell wroteCell = d.getCollection().getCell(cellId);
@@ -53,6 +56,15 @@ public class DatasetXMLReaderTest extends ComponentTester {
 			skip.add("profileMap");
 			skip.add("signalCollection");
 //			testDuplicatesByField(wroteNucleus, readNucleus, skip); //TODO
+		}
+		
+		for(IAnalysisDataset child : d.getAllChildDatasets()) {
+			UUID childId = child.getId();
+			assertTrue(read.hasChild(childId));
+			assertEquals("Child cell count", child.getCollection().size(), read.getChildDataset(childId).getCollection().size());
+			for(ICell c : child.getCollection())
+				assertTrue(read.getChildDataset(childId).getCollection().contains(c));
+				
 		}
 		
 //		TODO: Functionality is not fully enabled

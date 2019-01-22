@@ -128,10 +128,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             try {
             	// Deserialise whatever is in the file
             	try {
+            		fine("Trying to read file as XML");
             		dataset = readXMLDataset(file);
             	}  catch (UnloadableDatasetException e) {  // not xml format, try to deserialise directly
             		fine("Dataset is not a readable XML format; deserialising directly");
             		dataset = readDataset(file);
+
             	}
             	fireIndeterminateState();
             } catch (UnsupportedVersionException e) {
@@ -298,11 +300,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     			throw new UnsupportedVersionException(d.getVersion());
     		return d;
     	} catch(XMLReadingException e) {
+    		fine("Error reading XML: "+e.getMessage());
     		throw new UnloadableDatasetException("Cannot read as XML dataset", e);
     	}
     }
     
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
+    	fine("Deserialising dataset");
         IAnalysisDataset dataset = null;
         FileInputStream fis = null;
         ObjectInputStream ois = null;
