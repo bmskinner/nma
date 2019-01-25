@@ -337,26 +337,41 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     		fine("Unknown error creating vertical nucleus");
     		return null;
     	}
-    	
-    	/* Check the orientation of the RP once vertical */
     	try {
-    		/* Get the X position of the reference point */
-    		double rpX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
-    		
-    		/*
-        	 * If the reference point X is greater than the centre of mass X, the nucleus is
-        	 * pointing to the right (i.e. anti-clockwise).
-        	 */
-    		clockwiseRP = rpX > verticalNucleus.getCentreOfMass().getX();
+    		// Calculate clockwise RP by angle of RP/OP
+    		IPoint rp = getBorderPoint(Tag.REFERENCE_POINT);
+    		IPoint op = getBorderPoint(Tag.ORIENTATION_POINT);
+    		double angle = getCentreOfMass().findAbsoluteAngle(rp, op);
+    		clockwiseRP = angle<180;
     		orientationChecked = true;
-           
-           if(clockwiseRP) 
-        	   verticalNucleus.flipHorizontal();
     		
     	} catch (UnavailableBorderTagException e) {
-    		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+    		stack("Cannot get RP or OP from nucleus; returning default orientation", e);
     		orientationChecked = false;
     	}
+    	
+    	if(clockwiseRP) 
+     	   verticalNucleus.flipHorizontal();
+    	
+    	/* Check the orientation of the RP once vertical */
+//    	try {
+//    		/* Get the X position of the reference point */
+//    		double rpX = verticalNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
+//    		
+//    		/*
+//        	 * If the reference point X is greater than the centre of mass X, the nucleus is
+//        	 * pointing to the right (i.e. anti-clockwise).
+//        	 */
+//    		clockwiseRP = rpX > verticalNucleus.getCentreOfMass().getX();
+//    		orientationChecked = true;
+//           
+//           if(clockwiseRP) 
+//        	   verticalNucleus.flipHorizontal();
+//    		
+//    	} catch (UnavailableBorderTagException e) {
+//    		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+//    		orientationChecked = false;
+//    	}
     	return verticalNucleus;
     }
     
