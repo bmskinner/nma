@@ -54,7 +54,15 @@ public class CommandParser implements Loggable {
 	    File folder = null; 
 	    File options = null;
 	    for(String s : arr){
-	    	log("Argument: "+s);
+	    	System.out.println("Argument: "+s);
+	    	
+	    	if(s.startsWith("-h")) {
+	    		System.out.println("Arguments:");
+	    		System.out.println("\t-folder <image_folder>");
+	    		System.out.println("\t-options <xml_options>");
+	    		System.exit(0);
+	    	}
+	    	
 	    	if(s.startsWith("-folder=")) {
 	    		headless=true;
 	    		String path = s.replace("-folder=", "");

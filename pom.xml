@@ -283,7 +283,7 @@
 							<goal>launch4j</goal>
 						</goals>
 						<configuration>
-							<headerType>gui</headerType>
+							<headerType>console</headerType>
 							<jar>${project.build.directory}/${jar.finalName}_standalone.jar</jar>
 							<outfile>${project.build.directory}/${jar.finalName}.exe</outfile>
 							<downloadUrl>http://java.com/download</downloadUrl>

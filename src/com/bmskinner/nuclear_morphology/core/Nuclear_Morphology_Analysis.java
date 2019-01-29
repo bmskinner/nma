@@ -100,6 +100,7 @@ public class Nuclear_Morphology_Analysis
 			File dir =  Importer.getProgramDir();
 			
 			File errorFile = new File(dir, "error.log");
+			errorFile.createNewFile();
 
 			LogFileHandler errorHandler = new LogFileHandler(errorFile, new LogFileFormatter());
 			Logger.getLogger(ERROR_LOGGER).addHandler(errorHandler);
