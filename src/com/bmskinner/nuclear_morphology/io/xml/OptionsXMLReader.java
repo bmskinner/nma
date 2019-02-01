@@ -56,25 +56,22 @@ import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
  * @since 1.14.0
  *
  */
-public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
+public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 	
 	/**
 	 * Create with a file to be read
 	 * @param f
+	 * @throws XMLReadingException 
 	 */
-	public OptionsXMLReader(@NonNull final File f) {
+	public OptionsXMLReader(@NonNull final File f) throws XMLReadingException {
 		super(f);
 	}
 
 	@Override
 	public IAnalysisOptions read() throws XMLReadingException {
 
-//		try {
-		Document document =  readDocument();
 
 		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-
-		Element rootElement = document.getRootElement();
 
 		if(!rootElement.getName().equals(XMLCreator.DETECTION_SETTINGS_KEY))
 			return op;
@@ -100,20 +97,12 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	public List<IClusteringOptions> readClusteringOptions(){
 		List<IClusteringOptions> result = new ArrayList<>();
 
-		try {
-			Document document =  readDocument();
-
-			Element rootElement = document.getRootElement();
-			Element clusters = rootElement.getChild(XMLCreator.CLUSTERS_SECTION_KEY);
-			if(clusters!=null) { // may not be present
-				for(Element component : clusters.getChildren(XMLCreator.CLUSTER_GROUP)) {
-					IClusteringOptions o = buildClusteringOptions(component);
-					result.add(o);
-				}
+		Element clusters = rootElement.getChild(XMLCreator.CLUSTERS_SECTION_KEY);
+		if(clusters!=null) { // may not be present
+			for(Element component : clusters.getChildren(XMLCreator.CLUSTER_GROUP)) {
+				IClusteringOptions o = buildClusteringOptions(component);
+				result.add(o);
 			}
-		} catch (XMLReadingException e) {
-			stack("Unable to read clustering options", e);
-			return result;
 		}
 		return result;
 	}
@@ -125,23 +114,15 @@ public class OptionsXMLReader extends XMLReader<IAnalysisOptions> {
 	 */
 	public Map<UUID, String> readSignalGroupNames(){
 		Map<UUID, String> result = new HashMap<>();
-		try {
-			Document document =  readDocument();
-
-			Element rootElement = document.getRootElement();
-			for(Element signal : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY)) {
-				if(signal.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
-					Element idElement = signal.getChild(XMLCreator.ID_KEY);
-					UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());		
-					
-					Element nameElement = signal.getChild(XMLCreator.NAME_KEY);
-					String name = nameElement.getText();
-					result.put(id, name);
-				}
+		for(Element signal : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY)) {
+			if(signal.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+				Element idElement = signal.getChild(XMLCreator.ID_KEY);
+				UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());		
+				
+				Element nameElement = signal.getChild(XMLCreator.NAME_KEY);
+				String name = nameElement.getText();
+				result.put(id, name);
 			}
-		} catch (XMLReadingException e) {
-			stack("Unable to read signal group names", e);
-			return result;
 		}
 		return result;
 	}

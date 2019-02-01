@@ -229,13 +229,21 @@ public abstract class XMLCreator<T> {
 	 */
 	protected Element create(ICellCollection collection) {
 		Element e = new Element(CELL_COLLECTION_KEY);
-		e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType().toString()));
-		e.addContent(createElement(OUTPUT_FOLDER_KEY, collection.getOutputFolder().getAbsolutePath()));
+		
+		if(collection.isReal()) {
+			e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType().toString()));
+			e.addContent(createElement(OUTPUT_FOLDER_KEY, collection.getOutputFolder().getAbsolutePath()));
 
-		Element cellsElement = new Element(CELLS_SECTION_KEY);
-		for(ICell cell : collection)
-			cellsElement.addContent(create(cell));
-		e.addContent(cellsElement);
+			Element cellsElement = new Element(CELLS_SECTION_KEY);
+			for(ICell cell : collection)
+				cellsElement.addContent(create(cell));
+			e.addContent(cellsElement);
+		} else {
+			Element cells = new Element(CELLS_SECTION_KEY);
+			for(ICell cell : collection)
+				cells.addContent(createElement(ID_KEY, cell.getId().toString()));
+			e.addContent(cells);
+		}
 		
 		// Add consensus
 		if(collection.hasConsensus()) {

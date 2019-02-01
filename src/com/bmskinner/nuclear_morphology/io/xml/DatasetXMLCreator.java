@@ -123,10 +123,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 		if(child.hasClusters())
 			e.addContent(createClusterGroups(child));
 		
-		Element cells = new Element(CELL_IDS_KEY);
-		for(ICell cell : child.getCollection())
-			cells.addContent(createElement(ID_KEY, cell.getId().toString()));
-		e.addContent(cells);
+		e.addContent(create(child.getCollection()));
 		
 		Element children = new Element(CHILD_DATASETS_SECTION_KEY);
 		for(IAnalysisDataset subChild : child.getChildDatasets())

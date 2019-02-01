@@ -44,7 +44,11 @@ public abstract class XMLReader<T> implements Loggable {
 	
 	public static final File EMPTY_FILE = new File("empty");
 	
-	protected final File file;
+	protected final Element rootElement;
+	
+	public XMLReader(@NonNull final Element e){
+		rootElement = e;
+	}
 	
 	
 	/**
@@ -65,19 +69,13 @@ public abstract class XMLReader<T> implements Loggable {
 	    public XMLReadingException(Throwable cause) { super(cause); }
 	}
 	
-	public XMLReader(@NonNull final File f) {
-		if(!f.exists())
-			throw new IllegalArgumentException("File "+f.getAbsolutePath()+" does not exist");
-		this.file = f;
-	}
-
 	/**
 	 * Read the XML representation and create the object
 	 * @return
 	 */
 	public abstract T read() throws XMLReadingException;
 	
-	public Document readDocument() throws XMLReadingException {
+	public static Document readDocument(File file) throws XMLReadingException {
 		SAXBuilder saxBuilder = new SAXBuilder();
 		try {
 			return saxBuilder.build(file);
@@ -189,7 +187,6 @@ public abstract class XMLReader<T> implements Loggable {
 
 			for(Element component : e.getChildren(OptionsXMLCreator.SUB_OPTION_KEY)) {
 				String subType = component.getAttribute(OptionsXMLCreator.SUB_TYPE_KEY).getValue();
-				System.out.println("Component: "+component.getName()+ ": "+subType);
 				
 				if(subType.equals(IDetectionSubOptions.BACKGROUND_OPTIONS)) {
 					IPreprocessingOptions pre = new PreprocessingOptions();

@@ -292,9 +292,10 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     
     private IAnalysisDataset readXMLDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
 
-    	DatasetXMLReader dxr = new DatasetXMLReader(inputFile);
+    	
 
     	try {
+    		DatasetXMLReader dxr = new DatasetXMLReader(inputFile);
     		IAnalysisDataset d =  dxr.read();
     		if(!Version.versionIsSupported(d.getVersion()))
     			throw new UnsupportedVersionException(d.getVersion());

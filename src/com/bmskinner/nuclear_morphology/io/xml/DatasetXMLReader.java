@@ -58,7 +58,7 @@ import ij.gui.Roi;
  * @since 1.14.0
  *
  */
-public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
+public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 
 	private NucleusFactory fact = null;
 	private double windowProportion = 0.05;
@@ -66,24 +66,23 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 	/**
 	 * Create with a file to be read
 	 * @param f
+	 * @throws XMLReadingException 
 	 */
-	public DatasetXMLReader(@NonNull final File f) {
+	public DatasetXMLReader(@NonNull final File f) throws XMLReadingException {
 		super(f);
 	}
+
 	
 	@Override
 	public IAnalysisDataset read() throws XMLReadingException {
 		
 		try {
-			Document document = readDocument();	
-			
-			Element rootElement = document.getRootElement();
 			Element analysisOptions = rootElement.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY);
 			NucleusType type = NucleusType.valueOf(analysisOptions.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
 			fact = new NucleusFactory(type);
 			windowProportion = readDouble(analysisOptions, XMLCreator.PROFILE_WINDOW_KEY);
 			
-			return readDataset(document.getRootElement(), type );
+			return readDataset(rootElement, type );
 			
 		} catch (ComponentCreationException e) {
 			throw new XMLReadingException("Could not create component from XML", e);
@@ -97,7 +96,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		}
 	}
 	
-	private IAnalysisDataset readDataset(Element e, NucleusType type) throws ComponentCreationException {
+	private IAnalysisDataset readDataset(Element e, NucleusType type) throws ComponentCreationException, XMLReadingException {
 		
 		Version created = Version.parseString(e.getChildText(XMLCreator.SOFTWARE_CREATION_VERSION_KEY));
 		Version saved   = Version.parseString(e.getChildText(XMLCreator.SOFTWARE_SERIALISE_VERSION_KEY));
@@ -109,7 +108,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		return readDataset_1_14_0(e, type);
 	}
 		
-	private IAnalysisDataset readDataset_1_14_0(Element e, NucleusType type) throws ComponentCreationException {
+	private IAnalysisDataset readDataset_1_14_0(Element e, NucleusType type) throws ComponentCreationException, XMLReadingException {
 		String name = e.getChildText(XMLCreator.DATASET_NAME_KEY);
 		UUID id = UUID.fromString(e.getChildText(XMLCreator.DATASET_ID_KEY));
 		ICellCollection c = readCollection(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, name, id);
@@ -142,15 +141,18 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 		return op;
 	}
 	
-	private ICellCollection readCollection(Element e, NucleusType type, String name, UUID id) throws ComponentCreationException {
+	private ICellCollection readCollection(Element e, NucleusType type, String name, UUID id) throws ComponentCreationException, XMLReadingException {
 
 		String outFolder = e.getChildText(XMLCreator.OUTPUT_FOLDER_KEY);
 
 		ICellCollection collection = new DefaultCellCollection(null,outFolder, name, type, id);
 		
 		Element cellsElement = e.getChild(XMLCreator.CELLS_SECTION_KEY);
-		for(Element cell : cellsElement.getChildren(XMLCreator.CELL_KEY))
-			collection.add(readCell(cell));
+		for(Element cell : cellsElement.getChildren(XMLCreator.CELL_KEY)) {
+			XMLReader<ICell> cellReader = new ICellXMLReader(cell, fact, windowProportion);
+			collection.add(cellReader.read());
+//			collection.add(readCell(cell));
+		}
 		
 		try {
 			collection.createProfileCollection();
@@ -183,10 +185,9 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 			stack(e1);
 		}
 
-		collection.updateVerticalNuclei();
 		return collection;
 	}
-	
+		
 	private void readSignalGroups(Element e, ICellCollection collection) {
 		if(e==null)
 			return;
@@ -203,7 +204,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 			collection.addSignalGroup(id, sg);
 		}
 	}
-	
+
 	private void readChildDatasets(Element children, IAnalysisDataset parent) {
 		if(children==null)
 			return;
@@ -216,7 +217,7 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 			UUID id = UUID.fromString(childElement.getChildText(XMLCreator.DATASET_ID_KEY));
 			ICellCollection childCollection = new VirtualCellCollection(parent, name, id);
 			
-			Element childCells = childElement.getChild(XMLCreator.CELL_IDS_KEY);
+			Element childCells = childElement.getChild(XMLCreator.CELLS_SECTION_KEY);
 
 			for(Element cellElement : childCells.getChildren()) {
 				UUID cellId = UUID.fromString(cellElement.getText());
@@ -258,186 +259,25 @@ public class DatasetXMLReader extends XMLReader<IAnalysisDataset> {
 
 	}
 	
-	private ICell readCell(Element e) throws ComponentCreationException {
-		UUID id = UUID.fromString(e.getChildText(XMLCreator.ID_KEY));
-		ICell cell = new DefaultCell(id);
-		
-		for(Element n : e.getChildren((XMLCreator.NUCLEUS_KEY)))
-			cell.addNucleus(readNucleus(n));
-		return cell;
-	}
+//	private ICell readCell(Element e) throws ComponentCreationException {
+//		UUID id = UUID.fromString(e.getChildText(XMLCreator.ID_KEY));
+//		ICell cell = new DefaultCell(id);
+//		
+//		for(Element n : e.getChildren((XMLCreator.NUCLEUS_KEY)))
+//			cell.addNucleus(readNucleus(n));
+//		return cell;
+//	}
 	
-	private Consensus<Nucleus> readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException {
-		Nucleus template = readNucleus(e.getChild(XMLCreator.NUCLEUS_KEY));
+	private Consensus<Nucleus> readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException, XMLReadingException {
+		XMLReader<Nucleus> nuclReader = new NucleusXMLReader(e.getChild(XMLCreator.NUCLEUS_KEY), fact, windowProportion);
+		Nucleus template = nuclReader.read();
 		return new DefaultConsensusNucleus(template, type);
 	}
 	
-	private Roi readRoi(Element e) {
-		Element border = e.getChild(XMLCreator.BORDER_POINTS_KEY);
-		// Make the int array border list
-		List<Element> points = border.getChildren();
-		int[] xpoints = new int[points.size()];
-		int[] ypoints = new int[points.size()];
-
-		for(int i=0; i<xpoints.length; i++) {
-			Element point = points.get(i);
-			xpoints[i] = readX(point);
-			ypoints[i] = readY(point);	
-		}
-
-		Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-		return roi;
-	}
-	
-	private int[] readOriginalPosition(Element e) {
-		Element base = e.getChild(XMLCreator.BASE_KEY);
-        int[] originalPosition = { readInt(base, XMLCreator.X_BASE_KEY), 
-        		readInt(base, XMLCreator.Y_BASE_KEY), 
-        		readInt(base, XMLCreator.W_BASE_KEY), 
-        		readInt(base, XMLCreator.H_BASE_KEY) };
-        return originalPosition;
-	}
-	
-	private Nucleus readNucleus(Element e) throws ComponentCreationException {
-
-		Roi roi = readRoi(e);
-
-		int[] originalPosition = readOriginalPosition(e);
-		
-		Element base = e.getChild(XMLCreator.BASE_KEY);
-		int xbase = readInt(base, XMLCreator.X_BASE_KEY);
-        int ybase = readInt(base, XMLCreator.Y_BASE_KEY);
-		
-		IPoint com = readPoint(e.getChild(XMLCreator.COM_KEY));
-		
-		File imageFile = readFile(e, XMLCreator.SOURCE_FILE_KEY);
-		
-		int channel = readInt(e, XMLCreator.SOURCE_CHANNEL_KEY);
-		
-		UUID id = readUUID(e);
-		
-		int nucleusNumber = readInt(e, XMLCreator.NUCLEUS_NUMBER_KEY);
-		
-		Nucleus n = fact.buildInstance(roi, imageFile, channel, originalPosition, com, id, nucleusNumber);
-		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
-        IPoint offsetCoM = IPoint.makeNew(com.getX() - xbase, com.getY() - ybase);
-        n.moveCentreOfMass(offsetCoM);
-		
-		
-		// Add stats
-		Element stats = e.getChild(XMLCreator.STATS_SECTION_KEY);
-		for(Element stat : stats.getChildren(XMLCreator.STAT_KEY)) {
-			PlottableStatistic s = readStat(stat);
-			double d = readDouble(stat, XMLCreator.VALUE_KEY);
-			n.setStatistic(s, d);
-		}
-		
-		n.setScale(readDouble(e, XMLCreator.SOURCE_SCALE_KEY));
-		
-		n.initialise(windowProportion);
-		
-		int actualLength = n.getBorderLength();
-		int expLength    = readInt(e, XMLCreator.BORDER_LENGTH_KEY);
-		if(actualLength!=expLength)
-			warn(String.format("Border interpolation to %s does not match saved value %s", actualLength, expLength));
-		
-		// Apply tags
-		readTags(e.getChild(XMLCreator.BORDER_TAGS_KEY), n);
-		
-		// Apply segments
-		readSegments(e.getChild(XMLCreator.BORDER_SEGS_KEY), n);
-		
-		
-		// Apply signals
-		readSignals(e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY), n);
-
-		n.getVerticallyRotatedNucleus();
-		
-		return n;
-	}
-	
-	private void readSignals(Element signals, Nucleus n) {
-		if(signals==null)
-			return;
-		for(Element groupElement : signals.getChildren(XMLCreator.SIGNAL_GROUP_KEY)) {	
-			UUID groupId = readUUID(groupElement);
-			for(Element signalElement : groupElement.getChildren(XMLCreator.NUCLEAR_SIGNAL_KEY)) {
-				Roi roi = readRoi(signalElement);
-
-				int[] originalPosition = readOriginalPosition(signalElement);
-				
-				Element base = signalElement.getChild(XMLCreator.BASE_KEY);
-				int xbase = readInt(base, XMLCreator.X_BASE_KEY);
-		        int ybase = readInt(base, XMLCreator.Y_BASE_KEY);
-				
-				IPoint com = readPoint(signalElement.getChild(XMLCreator.COM_KEY));
-				
-				File imageFile = readFile(signalElement, XMLCreator.SOURCE_FILE_KEY);
-				
-				int channel = readInt(signalElement, XMLCreator.SOURCE_CHANNEL_KEY);
-				
-				UUID id = readUUID(signalElement);
-				INuclearSignal s = new DefaultNuclearSignal(roi, com, imageFile, channel, originalPosition, id);
-				
-				// Add stats
-				Element stats = signalElement.getChild(XMLCreator.STATS_SECTION_KEY);
-				for(Element statElement : stats.getChildren(XMLCreator.STAT_KEY)) {
-					PlottableStatistic stat = readStat(statElement);
-					double d = readDouble(statElement, XMLCreator.VALUE_KEY);
-					s.setStatistic(stat, d);
-				}
-				
-				s.setScale(readDouble(signalElement, XMLCreator.SOURCE_SCALE_KEY));
-				
-				n.getSignalCollection().addSignal(s, groupId);
-			}
-			
-		}
-	}
 	
 	
-	private void readTags(Element tags, Nucleus n) {
-		for(Element tag : tags.getChildren()) {			
-			Tag t = readTag(tag);
-			int index = readInt(tag, XMLCreator.INDEX_KEY);
-			n.setBorderTag(t, index);
-		}
-	}
 	
 	
-	private void readSegments(Element segs, Nucleus n) {
-		
-		List<IBorderSegment> newSegs = new ArrayList<>();
-		int prevStart = -1;
-		UUID prevId = null;
-		for(Element seg : segs.getChildren()) {			
-			UUID id = readUUID(seg);				
-			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
-			if(prevId!=null) {
-				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, n.getBorderLength(), prevId);
-				newSegs.add(newSeg);
-			}
-			prevStart = startIndex;
-			prevId = id;
-		}
-		
-		if(prevId!=null) {
-			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
-			newSegs.add(lastSeg);
-		}
-		try {			
-			for(ProfileType type : ProfileType.values()) { 
-				IProfile profile = n.getProfile(type);
-				ISegmentedProfile segmented = new SegmentedFloatProfile(profile, newSegs);
-				n.setProfile(type, segmented);
-				
-				ISegmentedProfile p = n.getProfile(type, Tag.REFERENCE_POINT); // ensure all profiles are updated to RP
-				n.setProfile(type, Tag.REFERENCE_POINT, p);
-			}
-
-		} catch(Exception e1) {
-			stack(e1);
-		}
-	}
+	
 
 }
