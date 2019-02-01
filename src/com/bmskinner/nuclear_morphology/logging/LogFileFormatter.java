@@ -79,7 +79,7 @@ public class LogFileFormatter extends Formatter {
             .append(record.getMessage())
             .append(NEWLINE);
 
-        if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.TRACE) {
+        if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.STACK) {
 
             if (record.getThrown() != null) {
                 Throwable t = record.getThrown();

@@ -39,7 +39,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	
 	@Before
 	public void setUp() throws Exception{
-		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+		logger = Logger.getLogger(Loggable.ROOT_LOGGER);
 		logger.setLevel(Level.FINE);
 
 		boolean hasHandler = false;

@@ -88,10 +88,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
         DatasetListManager.getInstance().clear();
         GlobalOptions.getInstance().setDefaults();
 
-        for (Handler h : Logger.getLogger(Loggable.ERROR_LOGGER).getHandlers()) {
-            h.close();
-        }
-        for (Handler h : Logger.getLogger(Loggable.PROGRAM_LOGGER).getHandlers()) {
+        for (Handler h : Logger.getLogger(Loggable.ROOT_LOGGER).getHandlers()) {
             h.close();
         }
 

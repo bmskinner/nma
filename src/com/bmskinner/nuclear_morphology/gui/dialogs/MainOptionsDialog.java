@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +42,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainView;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
@@ -109,9 +112,14 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         List<Component> fields = new ArrayList<Component>();
 
         JLabel logLabel = new JLabel("Program log level");
-        Level[] levelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
+        Level[] levelArray = { Level.INFO, Loggable.STACK, Level.FINE, Level.FINER, Level.FINEST };
         programLevelBox = new JComboBox<Level>(levelArray);
-        programLevelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
+        
+        Handler[] handlers = Logger.getLogger(ROOT_LOGGER).getHandlers();
+        for(Handler h : handlers)
+        	if(h instanceof LogFileHandler)
+        		programLevelBox.setSelectedItem(h.getLevel());
+
         programLevelBox.addActionListener(this);
 
         labels.add(logLabel);
@@ -119,9 +127,11 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         
         
         JLabel consoleLogLabel = new JLabel("Console log level");
-        Level[] consoleLevelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
+        Level[] consoleLevelArray = { Level.INFO, Loggable.STACK, Level.FINE, Level.FINER, Level.FINEST };
         consoleLevelBox = new JComboBox<Level>(consoleLevelArray);
-        consoleLevelBox.setSelectedItem(Logger.getLogger(CONSOLE_LOGGER).getLevel());
+        for(Handler h : handlers)
+        	if(h instanceof ConsoleHandler)
+        		consoleLevelBox.setSelectedItem(h.getLevel());
         consoleLevelBox.addActionListener(this);
         if(System.console()!=null) { // if the gui is launched with not console, don't make the option
         	labels.add(consoleLogLabel);
@@ -163,16 +173,18 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 
     @Override
     public void actionPerformed(ActionEvent arg0) {
-
+    	
+    	Handler[] handlers = Logger.getLogger(ROOT_LOGGER).getHandlers();
+    	    	
         Level programLevel = (Level) programLevelBox.getSelectedItem();
-        if (!programLevel.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())) {
-            Logger.getLogger(PROGRAM_LOGGER).setLevel(programLevel);
-        }
-        
         Level consoleLevel = (Level) consoleLevelBox.getSelectedItem();
-        if (!consoleLevel.equals(Logger.getLogger(CONSOLE_LOGGER).getLevel())) {
-            Logger.getLogger(CONSOLE_LOGGER).setLevel(consoleLevel);
+        for(Handler h : handlers) {
+        	if(h instanceof LogFileHandler)
+        		h.setLevel(programLevel);
+        	if(h instanceof ConsoleHandler)
+        		h.setLevel(consoleLevel);
         }
+
 
         boolean antiAlias = antiAliasBox.isSelected();
         if (GlobalOptions.getInstance().isAntiAlias() != antiAlias) {

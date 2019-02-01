@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.core;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -55,9 +56,7 @@ public class Nuclear_Morphology_Analysis
 	 * Keep a strong reference to the logger so they can be accessed
 	 * by all other classes implementing the Loggable interface
 	 */
-	private static final Logger errorLogger = Logger.getLogger(Loggable.ERROR_LOGGER);
-	private static final Logger programLogger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
-	private static final Logger consoleLogger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+	private static final Logger errorLogger = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 
@@ -96,25 +95,25 @@ public class Nuclear_Morphology_Analysis
 	private void loadLogger(){
 		
 		try {
+			
+			Handler consoleHander = new ConsoleHandler(new LogPanelFormatter());
+			consoleHander.setLevel(Level.FINE);
+			Logger.getLogger(ROOT_LOGGER).addHandler(consoleHander);
+			
+
 			// Get the location of the jar file
 			File dir =  Importer.getProgramDir();
-			
 			File errorFile = new File(dir, "error.log");
+			fine("Attempting to create or find "+errorFile.getAbsolutePath());
 			errorFile.createNewFile();
 
 			LogFileHandler errorHandler = new LogFileHandler(errorFile, new LogFileFormatter());
-			Logger.getLogger(ERROR_LOGGER).addHandler(errorHandler);
-			Logger.getLogger(ERROR_LOGGER).setLevel(Loggable.TRACE);
+			errorHandler.setLevel(Loggable.STACK);
 			
-			Logger.getLogger(CONSOLE_LOGGER).addHandler(new ConsoleHandler(new LogPanelFormatter()));
-			Logger.getLogger(CONSOLE_LOGGER).setLevel(Level.FINE);
+			Logger.getLogger(ROOT_LOGGER).addHandler(errorHandler);
 			
-		} catch (SecurityException e) {
-			logToImageJ("Error initialising", e);
-			e.printStackTrace();
-		} catch (IOException e) {
-			logToImageJ("Error initialising", e);
-			e.printStackTrace();
+		} catch (SecurityException |IOException e ) {
+			stack("Error initialising logger: "+e.getMessage(), e);
 		}
 	}
 	

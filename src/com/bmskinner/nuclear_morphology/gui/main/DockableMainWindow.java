@@ -133,8 +133,8 @@ public class DockableMainWindow extends AbstractMainWindow {
             
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
-            Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
-            Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO);
+            textHandler.setLevel(Level.INFO);
+            Logger.getLogger(Loggable.ROOT_LOGGER).addHandler(textHandler);
     		
             // ---------------
             // Create the consensus chart

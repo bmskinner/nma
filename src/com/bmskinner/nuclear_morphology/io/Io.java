@@ -20,6 +20,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 
@@ -30,7 +34,7 @@ import ij.IJ;
  * @since 1.13.8
  *
  */
-public interface Io {
+public interface Io  {
     
 	String NEWLINE = System.getProperty("line.separator");
 	String TAB = "\t";
@@ -128,15 +132,16 @@ public interface Io {
                 // Get the location of the jar file
                 File dir = new File(Importer.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 
+                Logger.getLogger(Loggable.ROOT_LOGGER).fine("Program directory: "+dir.getAbsolutePath());
                 // Difference in path between standalone and jar
-                if (dir.getAbsolutePath().endsWith(".jar")) {
+                if (dir.getAbsolutePath().endsWith(".jar") || dir.getAbsolutePath().endsWith(".exe"))
                     dir = dir.getParentFile();
-                }
+                
+                
                 return dir;
             } catch (URISyntaxException e) {
-                System.err.println("Error getting program dir");
-                e.printStackTrace();
-                IJ.log("Error getting program dir");
+            	Logger.getLogger(Loggable.ROOT_LOGGER).log(Level.WARNING, "Error getting program dir");
+            	Logger.getLogger(Loggable.ROOT_LOGGER).log(Loggable.STACK, e.getMessage(), e);
                 return null;
             }
 

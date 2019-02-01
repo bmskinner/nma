@@ -29,6 +29,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 	})
 public class CreateAllTestFilesAndRunTests {
 	
-	static final Logger logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+	static final Logger logger = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 }

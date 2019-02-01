@@ -55,7 +55,7 @@ public class SegmentFitterTest {
 	
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+		Logger logger = Logger.getLogger(Loggable.ROOT_LOGGER);
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 

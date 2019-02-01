@@ -29,15 +29,11 @@ import ij.IJ;
  */
 public interface Loggable {
 
-    public static final String ROOT_LOGGER    = "";
-    public static final String PROGRAM_LOGGER = "ProgramLogger";
-    public static final String ERROR_LOGGER   = "ErrorLogger";
-    public static final String CONSOLE_LOGGER = "ConsoleLogger";
-
-    public static final Level TRACE = new ErrorLevel();
+    public static final String ROOT_LOGGER    = "ProgramLogger";
+    public static final Level STACK = new StackLevel();
 
     /**
-     * The TRACE error level has a level value of 600, so will display ahead of
+     * The STACK error level has a level value of 600, so will display ahead of
      * FINE. It is used for reporting errors whilst hiding uninformative
      * messages from users generally.
      * 
@@ -46,8 +42,8 @@ public interface Loggable {
      *
      */
     @SuppressWarnings("serial")
-    public class ErrorLevel extends Level {
-        public ErrorLevel() {
+    public class StackLevel extends Level {
+        public StackLevel() {
             super("ERROR", 600);
         }
     }
@@ -59,8 +55,7 @@ public interface Loggable {
      * @param message the message to log
      */
     default void log(Level level, String message) {
-        Logger.getLogger(PROGRAM_LOGGER).log(level, message);
-        Logger.getLogger(CONSOLE_LOGGER).log(level, message);
+        Logger.getLogger(ROOT_LOGGER).log(level, message);
     }
 
     /**
@@ -71,9 +66,7 @@ public interface Loggable {
      * @param t the exception
      */
     default void error(String message, Throwable t) {
-        Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
-        Logger.getLogger(ERROR_LOGGER).log(Level.SEVERE, message, t);
-        Logger.getLogger(CONSOLE_LOGGER).log(Level.SEVERE, message, t);
+        Logger.getLogger(ROOT_LOGGER).log(Level.SEVERE, message, t);
     }
     
     /**
@@ -85,23 +78,18 @@ public interface Loggable {
      * @param t the exception
      */
     default void stack(String message) {
-        Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message);
-        Logger.getLogger(ERROR_LOGGER).log(TRACE, message);
-        Logger.getLogger(CONSOLE_LOGGER).log(TRACE, message);
+        Logger.getLogger(ROOT_LOGGER).log(STACK, message);
     }
 
     /**
      * Log an error to the program log window and to the error log file with a
-     * stack trace. The TRACE error level has a level value of 600, so will
-     * display ahead of FINE.
+     * stack trace.
      * 
-     * @param message the error messsage
+     * @param message the error message
      * @param t the exception
      */
     default void stack(String message, Throwable t) {
-        Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
-        Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
-        Logger.getLogger(CONSOLE_LOGGER).log(TRACE, message, t);
+        Logger.getLogger(ROOT_LOGGER).log(STACK, message, t);
     }
 
     /**
@@ -122,8 +110,7 @@ public interface Loggable {
      * @param message the messsage
      */
     default void fine(String message) {
-        Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
-        Logger.getLogger(CONSOLE_LOGGER).log(Level.FINE, message);
+        Logger.getLogger(ROOT_LOGGER).log(Level.FINE, message);
     }
 
     /**
@@ -134,8 +121,7 @@ public interface Loggable {
      * @param t the throwable
      */
     default void fine(String message, Throwable t) {
-        Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
-        Logger.getLogger(CONSOLE_LOGGER).log(TRACE, message, t);
+        Logger.getLogger(ROOT_LOGGER).log(STACK, message, t);
     }
 
     /**
@@ -145,8 +131,7 @@ public interface Loggable {
      *            the error messsage
      */
     default void finer(String message) {
-        Logger.getLogger(PROGRAM_LOGGER).log(Level.FINER, message);
-        Logger.getLogger(CONSOLE_LOGGER).log(Level.FINER, message);
+        Logger.getLogger(ROOT_LOGGER).log(Level.FINER, message);
     }
 
     /**
@@ -155,8 +140,7 @@ public interface Loggable {
      * @param message the error messsage
      */
     default void finest(String message) {
-        Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
-        Logger.getLogger(CONSOLE_LOGGER).log(Level.FINEST, message);
+        Logger.getLogger(ROOT_LOGGER).log(Level.FINEST, message);
     }
 
     /**
@@ -165,8 +149,7 @@ public interface Loggable {
      * @param message the error messsage
      */
     default void warn(String message) {
-        Logger.getLogger(PROGRAM_LOGGER).log(Level.WARNING, message);
-        Logger.getLogger(CONSOLE_LOGGER).log(Level.WARNING, message);
+        Logger.getLogger(ROOT_LOGGER).log(Level.WARNING, message);
     }
 
     /**
@@ -186,8 +169,7 @@ public interface Loggable {
      * @param t the exception
      */
     default void log(Level level, String message, Throwable t) {
-        Logger.getLogger(PROGRAM_LOGGER).log(level, message, t);
-        Logger.getLogger(CONSOLE_LOGGER).log(level, message, t);
+        Logger.getLogger(ROOT_LOGGER).log(level, message, t);
     }
 
     /**

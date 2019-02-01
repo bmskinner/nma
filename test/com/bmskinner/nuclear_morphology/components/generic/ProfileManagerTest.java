@@ -42,7 +42,7 @@ public class ProfileManagerTest {
 	@Before
 	public void setUp() throws Exception {
 		
-		logger = Logger.getLogger(Loggable.CONSOLE_LOGGER);
+		logger = Logger.getLogger(Loggable.ROOT_LOGGER);
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 		
