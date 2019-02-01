@@ -73,8 +73,8 @@ public interface Taggable extends Profileable {
     /**
      * Check if the nucleus has the given border tag
      * 
-     * @param tag
-     * @return
+     * @param tag the tag to test
+     * @return true if the tag is present, false otherwise
      */
     boolean hasBorderTag(@NonNull Tag tag);
 
@@ -84,7 +84,7 @@ public interface Taggable extends Profileable {
      * 
      * @param tag the border tag with index zero
      * @param i the index to be tested
-     * @return true if a tag is present at the index
+     * @return true if a tag is present at the index, false otherwise
      */
     boolean hasBorderTag(@NonNull Tag tag, int i) throws IndexOutOfBoundsException;
 
@@ -93,15 +93,15 @@ public interface Taggable extends Profileable {
      * border list
      * 
      * @param i the index to be tested
-     * @return true if a tag is present at the index
+     * @return true if a tag is present at the index, false otherwise
      */
     boolean hasBorderTag(int index) throws IndexOutOfBoundsException;
 
     /**
      * Set the index of the given border tag
      * 
-     * @param tag the  tag
-     * @param i the index of the border point
+     * @param tag the tag
+     * @param i the index of the border point to set the tag at
      */
 
     void setBorderTag(@NonNull Tag tag, int i) throws IndexOutOfBoundsException;
@@ -153,8 +153,8 @@ public interface Taggable extends Profileable {
     /**
      * Get a copy of the border point mapped to the given tag
      * 
-     * @param tag
-     * @return
+     * @param tag the tag to fetch
+     * @return a copy of the border point at the tag
      * @throws IndexOutOfBoundsException
      * @throws UnavailableBorderTagException
      */

@@ -40,19 +40,22 @@ public abstract class ComponentTester extends FloatArrayTester {
 	@Before
 	public void setUp() throws Exception{
 		logger = Logger.getLogger(Loggable.ROOT_LOGGER);
-		logger.setLevel(Level.FINE);
+		for(Handler h : logger.getHandlers())
+			logger.removeHandler(h);
 
-		boolean hasHandler = false;
-		for(Handler h : logger.getHandlers()) {
-			if(h instanceof ConsoleHandler)
-				hasHandler = true;
-		}
-		if(!hasHandler)
-			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+		Handler h = new ConsoleHandler(new LogPanelFormatter());
+		h.setLevel(Level.FINE);
+		logger.addHandler(h);
 	}
 	
 	
 	
+	/**
+	 * Test if the two given points are vertically aligned
+	 * @param topPoint the top point
+	 * @param bottomPoint the bottom point
+	 * @return
+	 */
 	protected boolean areVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
 		double err = bottomPoint.getX()-topPoint.getX();
 		logger.fine("Error = "+err);

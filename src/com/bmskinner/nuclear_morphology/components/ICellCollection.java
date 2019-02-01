@@ -376,6 +376,7 @@ public interface ICellCollection
     /**
      * Force a recalculation of vertically oriented nuclei
      */
+    @Deprecated // since 1.15.0 vertical nuclei are calculated de novo on each call
     void updateVerticalNuclei();
 
     /**
