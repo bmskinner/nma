@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -54,11 +55,9 @@ import com.bmskinner.nuclear_morphology.io.Io;
  */
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
-    private static final String SPACER = "---------";
-
     private final File outputFolder;
 
-    private final IAnalysisOptions analysisOptions;
+    private final IAnalysisOptions templateOptions;
 
     private Map<File, ICellCollection> collectionGroup = new HashMap<>();
 
@@ -73,7 +72,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      */
     public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
         this.outputFolder = new File(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(),outputFolder);
-        this.analysisOptions = options;
+        this.templateOptions = options;
     }
     
     /**
@@ -85,7 +84,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      */
     public NucleusDetectionMethod(@NonNull File outputFolder, @NonNull IAnalysisOptions options) {
         this.outputFolder = outputFolder;
-        this.analysisOptions = options;
+        this.templateOptions = options;
     }
 
     @Override
@@ -102,7 +101,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
             log("Running nucleus detector");
             
-            Optional<? extends IDetectionOptions> op = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
             if(!op.isPresent()){
             	warn("No nucleus detection options present");
             	return;
@@ -134,7 +133,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     private int getTotalImagesToAnalyse() {
 
         log("Counting images to analyse");
-        Optional<? extends IDetectionOptions> op = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!op.isPresent())
         	return 0;
         
@@ -160,25 +159,24 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
         for (final ICellCollection collection : folderCollection) {
-
+        	
+        	File folder = collection.getFolder();
             IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
-            dataset.setAnalysisOptions(analysisOptions.duplicate());
+            
+            // Ensure the actual folder of images is set in the analysis options, not a root folder
+            IAnalysisOptions datasetOptions = templateOptions.duplicate();
+            datasetOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(folder);
+            dataset.setAnalysisOptions(datasetOptions);
+            
             dataset.setRoot(true);
             dataset.setSavePath(new File(outputFolder, dataset.getName()+Io.SAVE_FILE_EXTENSION));
 
-            File folder = collection.getFolder();
-            log("Analysing: " + folder.getName());
+            log("Analysing " + collection.getName());
 
             try {
                 collection.clear(MeasurementScale.PIXELS);
                 collection.clear(MeasurementScale.MICRONS);
-
-
-                log(SPACER);
-                log("Population: " + collection.getName());
                 log("Found " + collection.size() + " nuclei");
-                log(SPACER);
-
                 foundDatasets.add(dataset);
 
             } catch (Exception e) {
@@ -213,11 +211,11 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         	return;
 
         ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder.getName(), folder.getName(),
-                analysisOptions.getNucleusType());
+                templateOptions.getNucleusType());
 
         collectionGroup.put(folder, folderCollection);
 
-        final Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(analysisOptions);
+        final Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(templateOptions);
         finder.addProgressListener(this);
 
         try {
@@ -231,19 +229,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         }
 
     }
-
-//    /**
-//     * Create the output folder for the analysis if required. If the folder
-//     * cannot be created, returns the input parent folder
-//     *
-//     * @param folder the folder in which to create the analysis folder
-//     * @return a file containing the created folder
-//     */
-//    protected void makeFolder() {
-////        File output = new File(folder, outputFolder);
-//        if (!outputFolder.exists()) 
-//        	if(outputFolder.mkdir());
-//    }
     
     /**
      * Test if the given folder has any image files that can be analysed

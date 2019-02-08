@@ -92,7 +92,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * Build a pipeline covering all the options within the given file
 	 * @param imageFolder the image folder
 	 * @param xmlFile the options for analysis
-	 * @throws Exception
+	 * @param outputFolder the folder to store the resulting nmd files
 	 */
 	public SavedOptionsAnalysisPipeline(@NonNull final File imageFolder, @NonNull final File xmlFile, @NonNull final File outputFolder) {
 		this.xmlFile      = xmlFile;
