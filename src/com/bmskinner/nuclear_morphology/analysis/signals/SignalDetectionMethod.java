@@ -47,11 +47,11 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
-    protected INuclearSignalOptions options = null;
-    protected File                         folder;
-    protected int                          channel;
-    protected UUID                         signalGroup;
-    protected String                       channelName;
+    protected final INuclearSignalOptions options;
+    protected final File folder;
+    protected final int channel;
+    protected final UUID signalGroupId;
+    protected final String channelName;
 
     /**
      * For use when running on an existing dataset
@@ -59,10 +59,10 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
      * @param d the dataset to add signals to
      * @param options the analysis options
      * @param group the signal group to add signals to
-     * @throws UnavailableSignalGroupException
+     * @throws UnavailableSignalGroupException if the group is not present in the dataset
      */
 
-    public SignalDetectionMethod(@NonNull IAnalysisDataset d, @NonNull INuclearSignalOptions options, @NonNull UUID group)
+    public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final INuclearSignalOptions options, @NonNull final UUID group)
             throws UnavailableSignalGroupException {
         super(d);
         
@@ -73,9 +73,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         	throw new IllegalArgumentException("Signal group is not present in dataset");
 
         this.options = (INuclearSignalOptions) options.duplicate();
-        this.folder = options.getFolder();
+        this.folder = options.getFolder().getAbsoluteFile();
         this.channel = options.getChannel();
-        this.signalGroup = group;
+        this.signalGroupId = group;
         this.channelName = d.getCollection().getSignalGroup(group).get().getGroupName();
 
     }
@@ -113,10 +113,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     private void detectInCell(ICell c, SignalFinder finder, int originalMinThreshold){
         // reset the min threshold for each cell
         options.setThreshold(originalMinThreshold);
-
-        c.getNuclei().stream().forEach(n->{
-            detectInNucleus(n, finder);
-        });
+        
+        for(Nucleus n : c.getNuclei())
+        	detectInNucleus(n, finder);
 
         fireProgressEvent();
     }
@@ -129,17 +128,17 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
         // get the image in the folder with the same name as the
         // nucleus source image
-        File imageFile = new File(folder + File.separator + n.getSourceFileName());
+        File imageFile = new File(folder, n.getSourceFileName());
         finer("Source file: " + imageFile.getAbsolutePath());
 
         try {
 
             List<INuclearSignal> signals = finder.findInImage(imageFile, n);
-            finer("Creating signal collection");
 
             ISignalCollection signalCollection = n.getSignalCollection();
-            signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
+            signalCollection.addSignalGroup(signals, signalGroupId, imageFile, channel);
 
+            // Measure the detected signals in the nucleus
             SignalAnalyser s = new SignalAnalyser();
             s.calculateSignalDistancesFromCoM(n);
             s.calculateFractionalSignalDistancesFromCoM(n);
@@ -164,7 +163,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     
     private void postDetectionFilter() {
 
-        List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+        List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroupId);
 
         List<IAnalysisDataset> list = new ArrayList<>();
 
@@ -209,7 +208,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     private List<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
 
         List<ICellCollection> signalPopulations = new ArrayList<>();
-        log("Dividing population by signals...");
+        fine("Dividing population by signals...");
 
         Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
         
@@ -220,6 +219,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         group.setVisible(true);
 
 		Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
+		
 		if (!list.isEmpty()) {
 		    log("Signal group " + group.getGroupName() + ": found nuclei with signals");
 		    ICellCollection listCollection = new VirtualCellCollection(dataset,
@@ -233,20 +233,20 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		    // Only add a group of cells without signals if at least one
 		    // cell does have a signal
 
-		    Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
-		    if (!notList.isEmpty()) {
-		        log("Signal group " + group.getGroupName()
-		                + ": found nuclei without signals");
-
-		        ICellCollection notListCollection = new VirtualCellCollection(dataset,
-		                group.getGroupName() + "_without_signals");
-
-		        for (ICell c : notList) {
-		            notListCollection.addCell(c);
-		        }
-
-		        signalPopulations.add(notListCollection);
-		    }
+//		    Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
+//		    if (!notList.isEmpty()) {
+//		        log("Signal group " + group.getGroupName()
+//		                + ": found nuclei without signals");
+//
+//		        ICellCollection notListCollection = new VirtualCellCollection(dataset,
+//		                group.getGroupName() + "_without_signals");
+//
+//		        for (ICell c : notList) {
+//		            notListCollection.addCell(c);
+//		        }
+//
+//		        signalPopulations.add(notListCollection);
+//		    }
 
 		}
         return signalPopulations;
