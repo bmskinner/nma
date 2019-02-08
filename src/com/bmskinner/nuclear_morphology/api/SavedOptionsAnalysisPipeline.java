@@ -81,11 +81,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * Build a pipeline covering all the options within the given file
 	 * @param imageFolder the image folder
 	 * @param xmlFile the options for analysis
-	 * @throws Exception
 	 */
 	public SavedOptionsAnalysisPipeline(@NonNull final File imageFolder, @NonNull final File xmlFile) {
-		this.xmlFile     = xmlFile;
-		this.imageFolder = imageFolder;			
+		this(imageFolder, xmlFile, null);
 	}
 	
 	/**
@@ -250,10 +248,11 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	}
 		
 	private void run(@NonNull List<IAnalysisMethod> methods) throws Exception {
-		 fireUpdateProgressTotalLength(methods.size());
+//		 fireUpdateProgressTotalLength(methods.size());
 		 for(IAnalysisMethod method : methods) {
-			 System.out.println("Running "+method.getClass().getSimpleName());
+			 method.addProgressListener(this);
 			 method.call();
+			 method.removeProgressListener(this);
 			 fireProgressEvent();
 		 }
 	}

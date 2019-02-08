@@ -154,7 +154,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     private List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection) {
 
-        log("Creating cell collections");
+        fine("Creating cell collections");
 
         List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 

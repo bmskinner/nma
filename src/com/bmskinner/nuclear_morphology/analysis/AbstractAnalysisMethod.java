@@ -113,7 +113,7 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
 
     @Override
     public void progressEventReceived(ProgressEvent event) {
-        fireProgressEvent(); // pass upwards
+        fireProgressEvent(event); // pass upwards
     }
     
     /**
