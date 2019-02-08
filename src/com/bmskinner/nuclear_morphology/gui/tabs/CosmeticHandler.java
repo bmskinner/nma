@@ -226,8 +226,7 @@ public class CosmeticHandler implements Loggable {
     		File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
 
     		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, newFolder.getAbsoluteFile());
-    		finest("Updated signal source for signal group " + signalGroup + " to " + newFolder.getAbsolutePath());
-
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
     	} catch (RequestCancelledException e) {
     		return;
     	}           
@@ -249,7 +248,8 @@ public class CosmeticHandler implements Loggable {
     		for(ICell c : cells)
     			for(Nucleus n : c.getNuclei())
     				n.setSourceFolder(folder);
-    				
+    		
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);    				
     	} catch (RequestCancelledException e) {
     		return;
     	}           
@@ -267,7 +267,7 @@ public class CosmeticHandler implements Loggable {
     		File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
     		    		
     		d.getCollection().setSourceFolder(newFolder);
-
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
     	} catch (RequestCancelledException e) {
     		return;
     	}           
