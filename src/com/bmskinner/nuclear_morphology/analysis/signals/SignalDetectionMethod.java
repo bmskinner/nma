@@ -45,6 +45,12 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
+/**
+ * Method to detect nuclear signals in a dataset
+ * @author bms41
+ * @since 1.13.4
+ *
+ */
 public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
     protected final INuclearSignalOptions options;
@@ -73,11 +79,10 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         	throw new IllegalArgumentException("Signal group is not present in dataset");
 
         this.options = (INuclearSignalOptions) options.duplicate();
-        this.folder = options.getFolder().getAbsoluteFile();
+        this.folder  = options.getFolder().getAbsoluteFile();
         this.channel = options.getChannel();
         this.signalGroupId = group;
         this.channelName = d.getCollection().getSignalGroup(group).get().getGroupName();
-
     }
 
     @Override

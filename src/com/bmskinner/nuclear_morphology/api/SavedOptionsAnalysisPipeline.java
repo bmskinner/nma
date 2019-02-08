@@ -130,6 +130,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 
 		if(outputFolder==null)
 			outputFolder = createOutputFolder(options);
+		
     	if(options.hasDetectionOptions(IAnalysisOptions.NUCLEUS)) {
     		createNucleusDetectionMethod(options);
     		createRefoldingMethod(options);

@@ -54,8 +54,14 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     final private INuclearSignalOptions signalOptions;
     final private ICellCollection       collection;
 
-    public SignalFinder(@NonNull IAnalysisOptions op, @NonNull INuclearSignalOptions signalOptions, @NonNull ICellCollection collection) {
-        super(op);
+    /**
+     * Create a signal detector for a dataset using the given options
+     * @param analysisOptions the dataset analysis options
+     * @param signalOptions the signal group analysis options
+     * @param collection the cell collection to detect within
+     */
+    public SignalFinder(@NonNull IAnalysisOptions analysisOptions, @NonNull INuclearSignalOptions signalOptions, @NonNull ICellCollection collection) {
+        super(analysisOptions);
         this.signalOptions = signalOptions;
         this.collection = collection;
 
@@ -69,9 +75,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
     @Override
     public List<INuclearSignal> findInFolder(@NonNull File folder) throws ImageImportException {
 
-        if (folder == null) {
+        if (folder == null)
             throw new IllegalArgumentException("Folder cannot be null");
-        }
 
         List<INuclearSignal> list = new ArrayList<>();
 
