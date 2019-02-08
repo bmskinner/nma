@@ -70,6 +70,8 @@ import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
  */
 public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod implements AnalysisPipeline {
 	
+	private static final String DATE_FORMAT = "YYYY-MM-dd_HH-mm-ss";
+	
 	private File xmlFile;
 	private File imageFolder;
 	private File outputFolder = null;
@@ -158,8 +160,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW));
 			
 			// Update the source folder in the options - if multiple folders were analysed, this may be wrong
-			File folder = dataset.getCollection().getFolder();
-			dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(folder);
+//			File folder = dataset.getCollection().getFolder();
+//			dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(folder);
 		}
 
 	}
@@ -258,7 +260,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	private File createOutputFolder(@NonNull IAnalysisOptions options) {
 		Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
+		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
 		return new File(imageFolder, outputFolderName);
 	}
 		

@@ -292,6 +292,7 @@ public interface ICellCollection
      * folder name (such as a date) has been input, it will be included
      * 
      * @return the folder
+     * @deprecated because we should use the analysis dataset save path for this
      */
     File getOutputFolder();
 
