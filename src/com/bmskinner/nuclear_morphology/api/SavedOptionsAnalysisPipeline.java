@@ -194,6 +194,11 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		}
 	}
 	
+	/**
+	 * Create the methods to detect signals
+	 * @param options
+	 * @throws Exception
+	 */
 	private void createSignalDetectionMethods(@NonNull IAnalysisOptions options) throws Exception {
 		
 		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
@@ -203,28 +208,37 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			// Add signals
 			boolean checkShell = true;
 			IShellOptions shellOptions = null;
+			
+			IAnalysisOptions datasetOptions = dataset.getAnalysisOptions().get();
+			
 			for(UUID signalGroupId : options.getNuclearSignalGroups()) {
-				INuclearSignalOptions nop = options.getNuclearSignalOptions(signalGroupId);
-				nop.setFolder(dataset.getCollection().getFolder());
-				ISignalGroup group = new SignalGroup(signalNames.get(signalGroupId));
-				group.setGroupColour(ColourSelecter.getSignalColour(nop.getChannel()));
-				dataset.getCollection().addSignalGroup(signalGroupId, group);
-				methodsToRun.add(new SignalDetectionMethod(dataset, nop, signalGroupId));
+				
+				INuclearSignalOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
+				signalOptions.setFolder(datasetOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder());
+				
+				ISignalGroup signalGroup = new SignalGroup(signalNames.get(signalGroupId));
+				signalGroup.setGroupColour(ColourSelecter.getSignalColour(signalOptions.getChannel()));
+				
+				dataset.getCollection().addSignalGroup(signalGroupId, signalGroup);
+				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions, signalGroupId));
 				if(checkShell) {
-					if(nop.hasShellOptions())
-						shellOptions = nop.getShellOptions();
+					if(signalOptions.hasShellOptions())
+						shellOptions = signalOptions.getShellOptions();
 					checkShell = false;
 				}
 			}
+			
+			// Handle shell analysis setup
+			
 			if(shellOptions!=null) {
 				// filter the dataset for cells that can have a shell analysis applied - if all pass, does nothing
-				final int shellCount = shellOptions.getShellNumber();
-				Predicate<ICell> p = (c)->{
-					return c.getNuclei().stream().allMatch(n->{
-						return (n.getStatistic(PlottableStatistic.AREA) > shellCount*ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL
-								&& n.getStatistic(PlottableStatistic.CIRCULARITY)>ShellAnalysisMethod.MINIMUM_CIRCULARITY);
-					});
-				};
+//				final int shellCount = shellOptions.getShellNumber();
+//				Predicate<ICell> p = (c)->{
+//					return c.getNuclei().stream().allMatch(n->{
+//						return (n.getStatistic(PlottableStatistic.AREA) > shellCount*ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL
+//								&& n.getStatistic(PlottableStatistic.CIRCULARITY)>ShellAnalysisMethod.MINIMUM_CIRCULARITY);
+//					});
+//				};
 				methodsToRun.add(new ShellAnalysisMethod(dataset, shellOptions));
 				methodsToRun.add(new ShellReportMethod(dataset));
 			}

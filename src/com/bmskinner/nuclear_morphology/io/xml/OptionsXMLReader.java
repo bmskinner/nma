@@ -116,6 +116,8 @@ public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 		Map<UUID, String> result = new HashMap<>();
 		for(Element signal : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY)) {
 			if(signal.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+				
+				// A specific signal group id may have been specified
 				Element idElement = signal.getChild(XMLCreator.ID_KEY);
 				UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());		
 				

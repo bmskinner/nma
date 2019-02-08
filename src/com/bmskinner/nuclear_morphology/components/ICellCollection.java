@@ -276,6 +276,7 @@ public interface ICellCollection
      * Get the folder the nuclei in the collection were imaged from
      * 
      * @return
+     * @deprecated because we should be using the analysis options for this
      */
     File getFolder();
 
