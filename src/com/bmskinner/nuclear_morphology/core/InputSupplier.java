@@ -107,7 +107,7 @@ public interface InputSupplier {
 	File requestFile() throws RequestCancelledException;
 	
 	/**
-	 * Request a folder input.
+	 * Request a folder input. The starting directory will be the default system folder.
 	 * @return
 	 * @throws RequestCancelledException
 	 */

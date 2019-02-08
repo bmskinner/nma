@@ -25,10 +25,12 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
@@ -39,6 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
  * Handle cosmetic changes in datasets. Generates the dialogs
@@ -218,10 +221,12 @@ public class CosmeticHandler implements Loggable {
     	finest("Updating signal source for signal group " + signalGroup);
 
     	try {
-    		File folder = parent.getInputSupplier().requestFolder();
+    		
+    		File currentFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup).getFolder();
+    		File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
 
-    		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, folder);
-    		finest("Updated signal source for signal group " + signalGroup + " to " + folder.getAbsolutePath());
+    		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, newFolder.getAbsoluteFile());
+    		finest("Updated signal source for signal group " + signalGroup + " to " + newFolder.getAbsolutePath());
 
     	} catch (RequestCancelledException e) {
     		return;
@@ -231,22 +236,20 @@ public class CosmeticHandler implements Loggable {
     
     /**
      * Update the nucleus folder for nuclei in the given image
-     * @param d
-     * @param image
+     * @param d the dataset to update
+     * @param image the image to update cells within
      */
     public void updateNucleusSource(@NonNull IAnalysisDataset d, File image) {
 
     	try {
-    		File folder = parent.getInputSupplier().requestFolder();
-
+    		File folder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(image.getParentFile()));
 
     		Set<ICell> cells = d.getCollection().getCells(image);
-    		cells.stream().forEach(c->{
-    			c.getNuclei().stream().forEach(n->{
+    		
+    		for(ICell c : cells)
+    			for(Nucleus n : c.getNuclei())
     				n.setSourceFolder(folder);
-    			});
-    		});
-
+    				
     	} catch (RequestCancelledException e) {
     		return;
     	}           
@@ -260,9 +263,10 @@ public class CosmeticHandler implements Loggable {
     public void updateNucleusSource(@NonNull IAnalysisDataset d) {
 
     	try {
-    		File folder = parent.getInputSupplier().requestFolder();
+    		File currentFolder = d.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
+    		File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
     		    		
-    		d.getCollection().setSourceFolder(folder);
+    		d.getCollection().setSourceFolder(newFolder);
 
     	} catch (RequestCancelledException e) {
     		return;

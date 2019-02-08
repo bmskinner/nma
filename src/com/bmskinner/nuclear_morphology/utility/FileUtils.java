@@ -80,5 +80,21 @@ public class FileUtils {
 
         return new File(commonPath);
     }
+    
+    /**
+     * Given a file path, return the component that exists.
+     * If the file exists, the same file is returned. Otherwise, the most complete
+     * existing directory path is returned. If none of the path exists, the default system
+     * directory is returned. 
+     * @param file the path to test
+     * @return the most complete existing portion of the path
+     */
+    public static File extantComponent(File file) {
+    	if(file.exists())
+    		return file;
+    	if(file==null)
+    		return null;
+    	return extantComponent(file.getParentFile());
+    }
 
 }

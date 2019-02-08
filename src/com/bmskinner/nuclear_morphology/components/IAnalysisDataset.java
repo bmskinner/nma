@@ -417,7 +417,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param expectedImageDirectory
      * @param dataset
-     * @throws Exception
      */
     void updateSourceImageDirectory(@NonNull File expectedImageDirectory);
 
