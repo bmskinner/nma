@@ -32,7 +32,14 @@ import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
+import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
+/**
+ * Action to export workspaces
+ * @author bms41
+ * @since 1.13.4
+ *
+ */
 public class ExportWorkspaceAction extends VoidResultAction {
 
     private static final String PROGRESS_LBL = "Saving workspace";
@@ -56,7 +63,7 @@ public class ExportWorkspaceAction extends VoidResultAction {
     		log("Saving workspace "+w.getName()+"...");
             if(w.getSaveFile()==null) {
                 try {
-                	File defaultFolder = w.getFiles().size()>0 ? IAnalysisDataset.commonPathOfFiles(w.getFiles()) : null;
+                	File defaultFolder = w.getFiles().size()>0 ? FileUtils.commonPathOfFiles(w.getFiles()) : null;
                     File f = eh.getInputSupplier().requestFileSave(defaultFolder, w.getName(), Io.WRK_FILE_EXTENSION_NODOT);
                     w.setSaveFile(f);
                 } catch(RequestCancelledException e) {

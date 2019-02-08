@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
  * This describes an analysis dataset, which packages a collection of cells with
@@ -525,63 +526,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
         return NucleusType.ROUND;
     }
     
-    static File commonPathOfFiles(@NonNull Collection<File> files) {
-    	String[][] folders = new String[files.size()][];
 
-        int k = 0;
-
-        // Split out the path elements to an array
-        for (File f : files) {
-
-            Path p = f.toPath();
-            
-            if(p!=null){
-
-                Iterator<Path> it = p.iterator();
-                List<String> s = new ArrayList<>();
-                s.add(p.getRoot().toString());
-                while (it.hasNext()) {
-                    Path n = it.next();
-                    s.add(n.toString());
-
-                }
-                folders[k++] = s.toArray(new String[0]);
-            }
-
-        }
-
-        boolean breakLoop = false;
-        List<String> common = new ArrayList<String>();
-        for (int col = 0; col < folders[0].length; col++) {
-
-            if (breakLoop) {
-                break;
-            }
-            // Get first row
-            String s = folders[0][col];
-
-            for (int row = 1; row < files.size(); row++) {
-                if (!s.equals(folders[row][col])) {
-                    breakLoop = true;
-                    break;
-                }
-            }
-            if (breakLoop == false)
-                common.add(s);
-
-        }
-
-        String commonPath = "";
-        for (int i = 0; i < common.size(); i++) {
-            commonPath += common.get(i);
-            if (i > 0 && i < common.size() - 1) { // don't add separator after
-                                                  // root or at the end
-                commonPath += File.separator;
-            }
-        }
-
-        return new File(commonPath);
-    }
 
     /**
      * Get the most recent common ancestor of the dataset save file paths
@@ -598,7 +543,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
         for (IAnalysisDataset d : datasets) {
             files.add(d.getSavePath());
         }
-        return commonPathOfFiles(files);
+        return FileUtils.commonPathOfFiles(files);
         
     }
 

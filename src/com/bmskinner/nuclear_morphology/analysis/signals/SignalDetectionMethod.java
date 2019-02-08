@@ -221,7 +221,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 		
 		if (!list.isEmpty()) {
-		    log("Signal group " + group.getGroupName() + ": found nuclei with signals");
+		    fine("Signal group " + group.getGroupName() + ": found nuclei with signals");
 		    ICellCollection listCollection = new VirtualCellCollection(dataset,
 		            group.getGroupName() + "_with_signals");
 
