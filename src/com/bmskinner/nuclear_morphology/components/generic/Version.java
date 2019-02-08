@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * Hold version information, and parsing methods
  * 
  * @author bms41
+ * @since 1.12.0
  *
  */
 public class Version implements Serializable {
