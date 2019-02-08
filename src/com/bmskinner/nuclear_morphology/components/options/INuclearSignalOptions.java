@@ -104,10 +104,21 @@ public interface INuclearSignalOptions extends IDetectionOptions {
      */
     void setDetectionMode(SignalDetectionMode detectionMode);
     
-    void setShellOptions(@NonNull IShellOptions o);
+    /**
+     * Set shell analysis sub-options
+     * @param shellOptions the shell options
+     */
+    void setShellOptions(@NonNull IShellOptions shellOptions);
     
+    /**
+     * Test if shell analysis options are set
+     * @return true if there are shell options, false otherwise
+     */
     boolean hasShellOptions();
     
+    /**
+     * Get shell analysis sub-options
+     */
     IShellOptions getShellOptions();
 
 }

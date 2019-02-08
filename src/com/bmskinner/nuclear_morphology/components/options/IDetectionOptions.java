@@ -124,9 +124,9 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
     IDetectionOptions duplicate();
 
     /**
-     * Get the folder to be analysed
+     * Get the folder of images to be analysed
      * 
-     * @return
+     * @return the folder
      */
     File getFolder();
 

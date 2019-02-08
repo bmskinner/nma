@@ -255,8 +255,7 @@ public class CosmeticHandler implements Loggable {
     
     /**
      * Update the source image folder for the given signal group
-     * @param d
-     * @param signalGroup
+     * @param d the dataset to update
      */
     public void updateNucleusSource(@NonNull IAnalysisDataset d) {
 
