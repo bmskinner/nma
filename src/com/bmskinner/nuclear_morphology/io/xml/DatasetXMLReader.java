@@ -111,7 +111,8 @@ public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 	private IAnalysisDataset readDataset_1_14_0(Element e, NucleusType type) throws ComponentCreationException, XMLReadingException {
 		String name = e.getChildText(XMLCreator.DATASET_NAME_KEY);
 		UUID id = UUID.fromString(e.getChildText(XMLCreator.DATASET_ID_KEY));
-		ICellCollection c = readCollection(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, name, id);
+		XMLReader<ICellCollection> collectionReader = new ICellCollectionXMLReader(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, windowProportion, name, id);
+		ICellCollection c = collectionReader.read();
 		IAnalysisDataset d = new DefaultAnalysisDataset(c, file);
 		
 		Element colour = e.getChild(XMLCreator.COLOUR_KEY);
@@ -141,69 +142,7 @@ public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 		return op;
 	}
 	
-	private ICellCollection readCollection(Element e, NucleusType type, String name, UUID id) throws ComponentCreationException, XMLReadingException {
 
-		String outFolder = e.getChildText(XMLCreator.OUTPUT_FOLDER_KEY);
-
-		ICellCollection collection = new DefaultCellCollection(null,outFolder, name, type, id);
-		
-		Element cellsElement = e.getChild(XMLCreator.CELLS_SECTION_KEY);
-		for(Element cell : cellsElement.getChildren(XMLCreator.CELL_KEY)) {
-			XMLReader<ICell> cellReader = new ICellXMLReader(cell, fact, windowProportion);
-			collection.add(cellReader.read());
-//			collection.add(readCell(cell));
-		}
-		
-		try {
-			collection.createProfileCollection();
-		} catch (ProfileException e1) {
-			stack(e1);
-		}
-		
-		Element tags = e.getChild(XMLCreator.BORDER_TAGS_KEY);
-		for(Element tag : tags.getChildren()) {			
-			Tag t = readTag(tag);
-			int index = readInt(tag, XMLCreator.INDEX_KEY);
-			collection.getProfileCollection().addIndex(t, index);
-		}
-		
-		// Add stats
-		Element segs = e.getChild(XMLCreator.BORDER_SEGS_KEY);
-		readCollectionSegments(segs, collection);
-		
-		// Add signals
-		Element signals = e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY);
-		readSignalGroups(signals, collection);		
-		
-		// Add consensus if present
-		try {
-			if(e.getChild(XMLCreator.CONSENSUS_KEY)!=null){
-				Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
-				collection.setConsensus(consensus);
-			}
-		} catch (UnprofilableObjectException e1) {
-			stack(e1);
-		}
-
-		return collection;
-	}
-		
-	private void readSignalGroups(Element e, ICellCollection collection) {
-		if(e==null)
-			return;
-		
-		for(Element groupElement : e.getChildren(XMLCreator.SIGNAL_GROUP_KEY)) {
-			fine("Adding signal group to "+collection.getName());
-			String name = groupElement.getChildText(XMLCreator.NAME_KEY);
-			UUID id = readUUID(groupElement);
-			ISignalGroup sg = new SignalGroup(name);
-			Element colourElement = groupElement.getChild(XMLCreator.COLOUR_KEY);
-			if(colourElement!=null)
-				sg.setGroupColour(Color.decode(colourElement.getText()));
-			fine("Adding signal group "+sg.toString());
-			collection.addSignalGroup(id, sg);
-		}
-	}
 
 	private void readChildDatasets(Element children, IAnalysisDataset parent) {
 		if(children==null)
@@ -234,50 +173,5 @@ public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 	private void readClusterGroups(Element e, IAnalysisDataset dataset) {
 		//TODO
 	}
-	
-	private void readCollectionSegments(Element segs, ICellCollection collection) {
-		int profileLength = collection.getProfileCollection().length();
-		List<IBorderSegment> newSegs = new ArrayList<>();
-		int prevStart = -1;
-		UUID prevId = null;
-		for(Element seg : segs.getChildren()) {			
-			UUID id = readUUID(seg);
-			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
-			if(prevId!=null) {
-				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, profileLength, prevId);
-				newSegs.add(newSeg);
-			}
-			prevStart = startIndex;
-			prevId = id;
-		}
-		if(prevId!=null) {
-			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
-			newSegs.add(lastSeg);
-		}
-		
-		collection.getProfileCollection().addSegments(newSegs);
-
-	}
-	
-//	private ICell readCell(Element e) throws ComponentCreationException {
-//		UUID id = UUID.fromString(e.getChildText(XMLCreator.ID_KEY));
-//		ICell cell = new DefaultCell(id);
-//		
-//		for(Element n : e.getChildren((XMLCreator.NUCLEUS_KEY)))
-//			cell.addNucleus(readNucleus(n));
-//		return cell;
-//	}
-	
-	private Consensus<Nucleus> readConsensus(Element e, NucleusType type) throws UnprofilableObjectException, ComponentCreationException, XMLReadingException {
-		XMLReader<Nucleus> nuclReader = new NucleusXMLReader(e.getChild(XMLCreator.NUCLEUS_KEY), fact, windowProportion);
-		Nucleus template = nuclReader.read();
-		return new DefaultConsensusNucleus(template, type);
-	}
-	
-	
-	
-	
-	
-	
 
 }
