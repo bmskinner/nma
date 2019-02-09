@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -46,7 +45,6 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
@@ -54,7 +52,6 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
@@ -94,7 +91,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * @param xmlFile the options for analysis
 	 * @param outputFolder the folder to store the resulting nmd files
 	 */
-	public SavedOptionsAnalysisPipeline(@NonNull final File imageFolder, @NonNull final File xmlFile, @NonNull final File outputFolder) {
+	public SavedOptionsAnalysisPipeline(@NonNull final File imageFolder, @NonNull final File xmlFile, @Nullable final File outputFolder) {
 		this.xmlFile      = xmlFile;
 		this.imageFolder  = imageFolder;
 		this.outputFolder = outputFolder;
