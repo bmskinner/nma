@@ -31,5 +31,5 @@ public interface ProgressListener {
      * 
      * @param event
      */
-    public void progressEventReceived(ProgressEvent event);
+    void progressEventReceived(ProgressEvent event);
 }

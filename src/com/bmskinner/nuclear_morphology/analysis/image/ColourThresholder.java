@@ -37,7 +37,7 @@ import java.awt.image.IndexColorModel;
 public class ColourThresholder {
     private static final int HSB = 0, RGB = 1, LAB = 2, YUV = 3;
 
-    private boolean flag       = false;
+//    private boolean flag       = false;
     private int     colorSpace = HSB;
 
     private boolean useH = true, useS = true, useB = true;
@@ -51,7 +51,7 @@ public class ColourThresholder {
 
     private static int mode = BLACK_AND_WHITE;
 
-    private int        numSlices;
+//    private int        numSlices;
     private ImageStack stack;
     private int        width, height, numPixels;
 
@@ -112,8 +112,8 @@ public class ColourThresholder {
 
         ImageProcessor ip = imp.getProcessor();
 
-        flag = false; // if true, flags a change of colour model
-        numSlices = imp.getStackSize();
+//        flag = false; // if true, flags a change of colour model
+//        numSlices = imp.getStackSize();
         stack = imp.getStack();
         width = stack.getWidth();
         height = stack.getHeight();

@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -121,15 +120,13 @@ public class DatasetValidator {
 	
 	
 	private boolean checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
-		List<IAnalysisDataset> children = d.getAllChildDatasets();
 		boolean isOk = true;
 
 		for (ProfileType type : ProfileType.values()) {
 			for(ICell c : d.getCollection()) {
 				for (Nucleus n : c.getNuclei()) {
-
 					try {
-						IProfile profile = n.getProfile(type);
+						n.getProfile(type);
 					} catch (UnavailableProfileTypeException e) {
 						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
 						errorCells.add(c);

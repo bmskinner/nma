@@ -27,7 +27,6 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -138,13 +137,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	}
 
     	// check we are not merging a parent and child (would just get parent)
-    	if (datasets.size() == 2) {
-    		if (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0))) {
-    			warn("Merging parent and child would be silly.");
-    			return false;
-    		}
+    	if (datasets.size() == 2 && (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0)))) {
+    		warn("Merging parent and child would be silly.");
+    		return false;
+
     	}
-    	
+
     	// check all collections are of the same type
 		if (!nucleiHaveSameType()) {
 			warn("Cannot merge collections of different nucleus type");

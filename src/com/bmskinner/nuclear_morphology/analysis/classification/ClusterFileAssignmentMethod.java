@@ -68,7 +68,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 		
-		if(!isFileFormatValid(clusterFile))
+		if(!isFileFormatValid())
 			return null;
 		
 		log("Reading map file");
@@ -87,7 +87,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	 * @return true if the file meets the requirements for cluster assignment, false otherwise
 	 * @throws ClusteringMethodException 
 	 */
-	private boolean isFileFormatValid(@NonNull File file) throws ClusteringMethodException {		
+	private boolean isFileFormatValid() throws ClusteringMethodException {		
 		ICellCollection collection = dataset.getCollection();
 		int cells = 0;
 		List<UUID> found = new ArrayList<>(collection.size());
@@ -118,7 +118,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 				}
 
 				try {
-					int cluster = Integer.parseInt(arr[1]);
+					Integer.parseInt(arr[1]);
 				} catch(NumberFormatException e) {
 					numErrors.add(lineNo);
 				}
