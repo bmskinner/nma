@@ -29,9 +29,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * 
  * @author bms41
  * @since 1.12.0
+ * @deprecated since 1.15.1 because we're moving away from FJPs
  *
  */
 @SuppressWarnings("serial")
+@Deprecated
 public abstract class AbstractProgressAction extends RecursiveAction implements ProgressListener, Loggable {
 
     private final List<Object> listeners = new ArrayList<Object>();
@@ -44,7 +46,7 @@ public abstract class AbstractProgressAction extends RecursiveAction implements 
         listeners.remove(l);
     }
 
-    protected synchronized void fireProgressEvent() {
+    final protected synchronized void fireProgressEvent() {
 
         ProgressEvent event = new ProgressEvent(this);
         Iterator<Object> iterator = listeners.iterator();

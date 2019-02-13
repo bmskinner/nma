@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.Iterator;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -25,21 +27,25 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 /**
  * Calculate basic stats for cellular components. Used to fill in missing values
  * when objects were not created using a detector
- * 
+ *
  * @author ben
  * @since 1.13.5
  *
  */
-public class ComponentMeasurer {
+public final class ComponentMeasurer {
+	
+	/**
+	 * We only use static methods here. Don't allow a public constructor.
+	 */
+	private ComponentMeasurer() {}
 
     /**
-     * Calculate the perimeter of the shape based on the border list
+     * Calculate the perimeter of the shape based on the border list.
      * 
-     * @param c
-     *            the component to measure
-     * @return
+     * @param c the component to measure
+     * @return the perimeter of the component
      */
-    public static double calculatePerimeter(CellularComponent c) {
+    public static double calculatePerimeter(@NonNull final CellularComponent c) {
         double perimeter = 0;
         Iterator<IBorderPoint> it = c.getBorderList().iterator();
         while (it.hasNext()) {
@@ -50,12 +56,12 @@ public class ComponentMeasurer {
     }
 
     /**
-     * Calculate the area of the object
+     * Calculate the area of an object.
      * 
      * @param c the component to measure
-     * @return
+     * @return the area of the component
      */
-    public static double calculateArea(CellularComponent c) {
+    public static double calculateArea(@NonNull final CellularComponent c) {
         return Stats.area(c.toShape());
     }
 
