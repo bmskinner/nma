@@ -22,13 +22,9 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
-import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
-import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
 public class MeshAnnotator extends ImageAnnotator {

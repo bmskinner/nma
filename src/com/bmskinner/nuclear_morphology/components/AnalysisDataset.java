@@ -250,71 +250,36 @@ public class AnalysisDataset implements IAnalysisDataset {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getUUID()
-     */
     @Override
     public UUID getId() {
         return this.thisCollection.getID();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getName()
-     */
     @Override
     public String getName() {
         return this.thisCollection.getName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#setName(java.lang.String)
-     */
     @Override
     public void setName(String s) {
         this.thisCollection.setName(s);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getSavePath()
-     */
     @Override
     public File getSavePath() {
         return this.savePath;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#setSavePath(java.io.File)
-     */
     @Override
     public void setSavePath(File file) {
         this.savePath = file;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getChildUUIDs()
-     */
     @Override
     public Set<UUID> getChildUUIDs() {
         return this.childCollections.keySet();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getAllChildUUIDs()
-     */
     @Override
     public Set<UUID> getAllChildUUIDs() {
         Set<UUID> idlist = this.getChildUUIDs();
@@ -323,54 +288,31 @@ public class AnalysisDataset implements IAnalysisDataset {
 
         for (UUID id : idlist) {
             IAnalysisDataset d = getChildDataset(id);
-            // Set<UUID> childIdList = d.getAllChildUUIDs();
-            // for(UUID childId : childIdList){
-            // result.add(id);
-            // }
-
             result.addAll(d.getAllChildUUIDs());
         }
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getChildDataset(java.util.UUID)
-     */
     @Override
     public IAnalysisDataset getChildDataset(UUID id) {
-        if (this.hasChild(id)) {
+        if (this.hasChild(id))
             return this.childCollections.get(id);
-        } else {
-            for (IAnalysisDataset child : this.getAllChildDatasets()) {
-                if (child.getId().equals(id)) {
-                    return child;
-                }
-            }
-        }
+		for (IAnalysisDataset child : this.getAllChildDatasets()) {
+		    if (child.getId().equals(id)) {
+		        return child;
+		    }
+		}
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getMergeSource(java.util.UUID)
-     */
     @Override
     public IAnalysisDataset getMergeSource(UUID id) {
         if (this.mergeSources.contains(id)) {
             return this.getAssociatedDataset(id);
-        } else {
-            return null;
         }
+		return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getAllMergeSources()
-     */
     @Override
     public Set<IAnalysisDataset> getAllMergeSources() {
 

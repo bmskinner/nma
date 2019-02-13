@@ -27,13 +27,11 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
-import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;

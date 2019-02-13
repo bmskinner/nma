@@ -31,7 +31,6 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Setup a clustering of the given dataset.

@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 
@@ -47,8 +45,6 @@ import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public abstract class AbstractMainWindow extends JFrame implements Loggable, MainView, EventListener, DatasetSelectionListener, PopulationListUpdateListener {

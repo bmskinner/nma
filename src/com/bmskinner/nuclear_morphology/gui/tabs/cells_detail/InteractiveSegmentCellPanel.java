@@ -37,12 +37,9 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;

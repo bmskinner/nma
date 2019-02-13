@@ -18,19 +18,11 @@ package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
-import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

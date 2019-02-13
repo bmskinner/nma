@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
+import java.awt.Rectangle;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -23,8 +25,6 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-
-import java.awt.Rectangle;
 
 /*
 	Performs the Kuwahara Filter, a noise-reduction filter that preserves edges.

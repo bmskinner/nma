@@ -16,10 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.stats;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;

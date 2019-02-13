@@ -32,7 +32,6 @@ import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 @SuppressWarnings("serial")
 public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener {

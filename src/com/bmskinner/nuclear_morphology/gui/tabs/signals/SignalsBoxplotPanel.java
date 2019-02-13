@@ -21,8 +21,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 
-import javax.swing.JScrollPane;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 

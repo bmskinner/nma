@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.swing.JOptionPane;
-
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;

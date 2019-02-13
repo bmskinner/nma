@@ -17,9 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 

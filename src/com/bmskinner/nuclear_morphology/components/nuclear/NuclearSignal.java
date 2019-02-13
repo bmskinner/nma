@@ -16,9 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import ij.gui.Roi;
-import ij.process.ImageProcessor;
-
 import java.awt.Shape;
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +25,9 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.gui.Roi;
+import ij.process.ImageProcessor;
 
 /**
  * A NuclearSignal is a region within a nucleus of interest, such as a

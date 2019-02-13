@@ -307,7 +307,7 @@ public class EventHandler implements Loggable, EventListener {
             				.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
             		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
             				ws.remove(d);
-            		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
+            		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList<IAnalysisDataset>()));
             	};
             
         	if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
@@ -318,7 +318,7 @@ public class EventHandler implements Loggable, EventListener {
         			
         			for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
         				ws.add(d);
-        			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
+        			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList<IAnalysisDataset>()));
         		};
 
     		if (event.type().startsWith(SignalChangeEvent.NEW_BIOSAMPLE_PREFIX))

@@ -16,16 +16,16 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.image;
 
+import java.awt.Color;
+import java.awt.image.ColorModel;
+import java.awt.image.IndexColorModel;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-
-import java.awt.Color;
-import java.awt.image.ColorModel;
-import java.awt.image.IndexColorModel;
 
 /**
  * This is based on the ImageJ package ij.plugin.frame.ColorThresholder. It

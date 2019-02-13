@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import ij.process.ImageProcessor;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +35,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 /**
  * The default implementation of the {@link ISignalCollection} interface

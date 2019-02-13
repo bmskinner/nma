@@ -32,7 +32,6 @@ import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOption
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.HoughSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * The setup for lobe detection in neutrophils

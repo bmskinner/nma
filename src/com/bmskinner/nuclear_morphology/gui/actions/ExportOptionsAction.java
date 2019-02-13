@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;

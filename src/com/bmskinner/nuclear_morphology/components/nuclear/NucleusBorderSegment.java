@@ -34,9 +34,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 
 @Deprecated

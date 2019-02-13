@@ -1,12 +1,9 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;

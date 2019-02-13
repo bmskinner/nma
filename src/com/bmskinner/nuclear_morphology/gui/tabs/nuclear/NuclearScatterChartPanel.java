@@ -17,22 +17,9 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.data.Range;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer.CollectionFilteringException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
 
 @SuppressWarnings("serial")

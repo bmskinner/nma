@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
-import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 /**
  * Clustering optins using the hash options interface

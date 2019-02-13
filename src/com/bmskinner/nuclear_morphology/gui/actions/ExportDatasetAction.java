@@ -30,11 +30,8 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
-
-import ij.io.SaveDialog;
 
 public class ExportDatasetAction extends SingleDatasetResultAction {
 

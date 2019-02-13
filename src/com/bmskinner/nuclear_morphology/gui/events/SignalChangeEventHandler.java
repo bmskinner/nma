@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.events;
 
-import java.util.Iterator;
-
 /**
  * Handle selected signal change events
  * 

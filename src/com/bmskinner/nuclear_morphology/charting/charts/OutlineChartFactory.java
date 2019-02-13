@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
-import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
@@ -42,7 +41,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
-import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 

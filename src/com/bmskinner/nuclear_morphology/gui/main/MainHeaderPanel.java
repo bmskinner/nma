@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.main;
 
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -28,15 +27,14 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;

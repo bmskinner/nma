@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import ij.process.ImageProcessor;
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
@@ -30,6 +28,8 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.process.ImageProcessor;
 
 /**
  * The collection of nuclear signals that can be found within a single nucleus.

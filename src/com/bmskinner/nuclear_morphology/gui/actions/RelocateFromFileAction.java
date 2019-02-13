@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Creates child datasets from a .cell mapping file

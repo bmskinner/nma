@@ -18,23 +18,18 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Saves a workspace to a *.wrk file

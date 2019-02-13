@@ -17,11 +17,8 @@
 package com.bmskinner.nuclear_morphology.gui.events;
 
 import java.util.EventObject;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
  * Abstract holder for all event handlers

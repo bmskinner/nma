@@ -116,7 +116,7 @@ public class ThreadManager implements Loggable {
         return methodExecutorService.submit(t);
     }
 
-    public synchronized Future<?> submit(Callable r) {
+    public synchronized Future<?> submit(Callable<?> r) {
     	methodQueueLength.incrementAndGet();
         return methodExecutorService.submit(makeSubmitableCallable(r));
     }
@@ -144,7 +144,7 @@ public class ThreadManager implements Loggable {
     	}
     }
     
-    private synchronized Callable makeSubmitableCallable(Callable r){
+    private synchronized Callable<?> makeSubmitableCallable(Callable<?> r){
     	return () -> {
     		
     		Object o = null;

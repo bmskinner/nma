@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import ij.process.ImageProcessor;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +33,8 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+
+import ij.process.ImageProcessor;
 
 /**
  * This holds all the signals within a nucleus, within a hash. The hash key is

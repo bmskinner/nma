@@ -22,13 +22,11 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.Hough_Circles;
 import com.bmskinner.nuclear_morphology.analysis.detection.Kuwahara_Filter;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;

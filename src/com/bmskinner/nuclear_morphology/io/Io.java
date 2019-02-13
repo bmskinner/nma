@@ -25,8 +25,6 @@ import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import ij.IJ;
-
 /**
  * Top level interface for IO operations. Track the common file extensions
  * and provide access to the separate import and export operations.

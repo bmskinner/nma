@@ -18,9 +18,6 @@ package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;

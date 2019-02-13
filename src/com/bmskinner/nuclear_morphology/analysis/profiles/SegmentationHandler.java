@@ -305,7 +305,7 @@ public class SegmentationHandler implements Loggable {
     private boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, IndexOutOfBoundsException, UnavailableProfileTypeException, ProfileException {
     	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
     	for(Tag existingTag : tags) {
-    		if(existingTag.equals(tags))
+    		if(existingTag.equals(tag))
     			continue;
     		int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
     		if(index==existingTagIndex) {

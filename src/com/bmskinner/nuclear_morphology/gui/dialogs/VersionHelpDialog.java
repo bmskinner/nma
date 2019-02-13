@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 import javax.swing.JTextArea;

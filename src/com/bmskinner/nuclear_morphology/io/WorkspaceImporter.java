@@ -23,10 +23,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;

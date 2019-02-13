@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LobeDetectionSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 public class LobeDetectionAction extends SingleDatasetResultAction {
 

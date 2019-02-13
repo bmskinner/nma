@@ -47,9 +47,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 /**

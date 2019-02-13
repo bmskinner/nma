@@ -1,6 +1,5 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
-import java.awt.Color;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -9,7 +8,6 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.logging.Loggable;

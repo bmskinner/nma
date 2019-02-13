@@ -42,7 +42,6 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Allow a random subset of cells to be extracted as a child of the given dataset.

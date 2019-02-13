@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.Serializable;
 import java.util.Optional;
 

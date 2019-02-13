@@ -16,9 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.reports;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -34,8 +32,6 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.Marker;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
 
@@ -45,10 +41,10 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;

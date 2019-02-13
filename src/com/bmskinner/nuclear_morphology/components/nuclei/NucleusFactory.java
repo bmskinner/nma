@@ -18,8 +18,6 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import java.awt.Rectangle;
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
 

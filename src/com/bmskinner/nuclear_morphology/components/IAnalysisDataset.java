@@ -17,13 +17,10 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.io.File;
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

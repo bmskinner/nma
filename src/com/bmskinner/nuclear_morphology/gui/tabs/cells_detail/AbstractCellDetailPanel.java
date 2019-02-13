@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.AbstractEditingPanel;
 
 @SuppressWarnings("serial")

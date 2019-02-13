@@ -16,11 +16,10 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
+import java.util.Map;
+
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * A generic use of the detector with no filtering on size or shape by default

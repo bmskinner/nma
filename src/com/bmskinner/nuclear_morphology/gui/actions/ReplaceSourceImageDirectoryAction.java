@@ -25,9 +25,6 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
-
-import ij.io.DirectoryChooser;
 
 public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction {
 	

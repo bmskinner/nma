@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,30 +24,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultHoughOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 
 /**
  * Read options XML files into analysis options objects

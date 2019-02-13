@@ -41,8 +41,6 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 public class NeutrophilAnalysisAction extends VoidResultAction {
 

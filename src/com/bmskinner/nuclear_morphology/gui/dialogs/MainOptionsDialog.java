@@ -38,10 +38,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainView;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;

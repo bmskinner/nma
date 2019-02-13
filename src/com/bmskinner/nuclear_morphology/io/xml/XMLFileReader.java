@@ -3,9 +3,6 @@ package com.bmskinner.nuclear_morphology.io.xml;
 import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jdom2.Element;
-
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * Base class for XML readers that take files as an input

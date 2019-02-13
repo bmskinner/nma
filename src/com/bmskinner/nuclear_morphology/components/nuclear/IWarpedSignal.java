@@ -24,7 +24,6 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ByteProcessor;

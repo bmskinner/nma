@@ -28,7 +28,6 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * Compare morphology images with post-FISH images, and select nuclei into new

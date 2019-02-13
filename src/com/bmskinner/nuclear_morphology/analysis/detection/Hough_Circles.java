@@ -36,16 +36,16 @@
 
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
+import java.awt.Point;
+import java.awt.Rectangle;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-
-import java.awt.Point;
-import java.awt.Rectangle;
-
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Modified from the Hough_Circles plugin by Hemerson Pistori (pistori at

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 

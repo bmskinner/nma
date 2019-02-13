@@ -739,9 +739,9 @@ public class VirtualCellCollection implements ICellCollection {
     @Override
     public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
 
-        String name = "Filtered_" + predicate.toString();
+        String newName = "Filtered_" + predicate.toString();
 
-        ICellCollection subCollection = new DefaultCellCollection(this, name);
+        ICellCollection subCollection = new DefaultCellCollection(this, newName);
 
         List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
 

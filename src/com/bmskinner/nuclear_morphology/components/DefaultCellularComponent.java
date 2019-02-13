@@ -53,7 +53,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 import ij.ImageStack;
 import ij.gui.PolygonRoi;

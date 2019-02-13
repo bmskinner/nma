@@ -69,7 +69,7 @@ public class IBorderSegmentTester {
 	 * @param source the class to create
 	 * @return
 	 */
-	public static IBorderSegment createInstance(Class source) {
+	public static IBorderSegment createInstance(Class<?> source) {
 		
 		int middleSegmentStart = endIndex;
 		int middleSegmentEnd = endIndex+30;
@@ -143,7 +143,7 @@ public class IBorderSegmentTester {
 	
 	@SuppressWarnings("unchecked")
     @Parameters
-    public static Iterable<Class> arguments() {
+    public static Iterable<Class<?>> arguments() {
 
 		// Since the objects created here persist throughout all tests,
 		// we're making class references. The actual objects under test

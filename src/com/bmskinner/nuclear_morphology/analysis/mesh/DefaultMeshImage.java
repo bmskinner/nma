@@ -29,7 +29,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 /**

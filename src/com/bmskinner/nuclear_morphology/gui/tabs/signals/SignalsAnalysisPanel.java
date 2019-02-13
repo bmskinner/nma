@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -38,10 +37,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-
-import ij.io.DirectoryChooser;
 
 @SuppressWarnings("serial")
 public class SignalsAnalysisPanel extends DetailPanel {

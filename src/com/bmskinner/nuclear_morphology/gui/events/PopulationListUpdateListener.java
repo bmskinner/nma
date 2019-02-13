@@ -17,9 +17,6 @@
 package com.bmskinner.nuclear_morphology.gui.events;
 
 import java.util.EventObject;
-import java.util.List;
-
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
  * Signal that the populations list should be updated when datasets are added or removed

@@ -16,13 +16,13 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
-import ij.process.ImageProcessor;
-
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+
+import ij.process.ImageProcessor;
 
 /**
  * A mesh image converts the pixels within an image to coordinates within each

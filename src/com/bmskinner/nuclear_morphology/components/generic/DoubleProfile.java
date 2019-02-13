@@ -623,24 +623,21 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
          if(indexStart < 0 || indexEnd < 0)
              throw new IllegalArgumentException(String.format("Start (%d) or end index (%d) is below zero", indexStart, indexEnd));
 
-        if (indexStart < indexEnd) {
+        if (indexStart < indexEnd) 
             return new DoubleProfile(Arrays.copyOfRange(array, indexStart, indexEnd+1));
-
-        } else { // case when array wraps
-
-        	double[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
-        	double[] resultB = Arrays.copyOfRange(array, 0, indexEnd+1);
-        	double[] result = new double[resultA.length + resultB.length];
-            int index = 0;
-            for (double d : resultA) {
-                result[index++] = d;
-            }
-            
-            for (double d : resultB) {
-                result[index++] = d;
-            }
-            return new DoubleProfile(result);
-        }
+        
+		double[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
+		double[] resultB = Arrays.copyOfRange(array, 0, indexEnd+1);
+		double[] result = new double[resultA.length + resultB.length];
+		int index = 0;
+		for (double d : resultA) {
+		    result[index++] = d;
+		}
+		
+		for (double d : resultB) {
+		    result[index++] = d;
+		}
+		return new DoubleProfile(result);
     }
 
     @Override

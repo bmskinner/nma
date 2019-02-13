@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;

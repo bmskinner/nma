@@ -30,16 +30,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentFitter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
@@ -64,9 +60,9 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AngleWindowSizeExplorer;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
