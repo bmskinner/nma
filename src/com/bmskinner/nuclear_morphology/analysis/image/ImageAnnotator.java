@@ -16,12 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.image;
 
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.plugin.RoiScaler;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
@@ -55,7 +49,11 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
+
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 /**
  * Draw components and features on image processors.
@@ -65,21 +63,30 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  */
 public class ImageAnnotator extends AbstractImageFilterer {
     
-    protected double scale = 1;
+    private static final int BORDER_TAG_POINT_SIZE = 7;
+	private static final int RP_POINT_SIZE = 9;
+	/** Converts resized images to original image dimensions */
+    private double scale = 1;
 
-    public ImageAnnotator(ImageProcessor ip) {
+    public ImageAnnotator(final ImageProcessor ip) {
         super(ip);
     }
+    
+    /**
+     * Get the conversion scale between the annotated image width and the input image width
+     * @return the scale factor
+     */
+    protected double getScale() { return scale; }
     
     /**
      * Create using the given image, and rescale all annotations
      * such that the image fits the given dimensions preserving
      * aspect ratio
-     * @param ip
-     * @param maxWidth
-     * @param maxHeight
+     * @param ip the input image processor
+     * @param maxWidth the maximum width the output image can be
+     * @param maxHeight the maximum height the output image can be
      */
-    public ImageAnnotator(ImageProcessor ip, int maxWidth, int maxHeight) {
+    public ImageAnnotator(final ImageProcessor ip, final int maxWidth, final int maxHeight) {
         super(ip);
         int originalWidth = ip.getWidth();
         int originalHeight = ip.getHeight();
@@ -104,7 +111,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param cell
      * @return
      */
-    public ImageAnnotator annotateCellBorders(ICell cell) {
+    final public ImageAnnotator annotateCellBorders(final ICell cell) {
 
         if (cell.hasCytoplasm()) {
             annotateBorder(cell.getCytoplasm(), Color.CYAN);
@@ -119,7 +126,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
                 }
             }
         }
-
         return this;
     }
     
@@ -130,15 +136,15 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param n the nucleus to draw
      * @return this annotator
      */
-    public ImageAnnotator annotateTagsOnCroppedNucleus(Nucleus n) {
+    public ImageAnnotator annotateTagsOnCroppedNucleus(final Nucleus n) {
         
         try {
             for(IBorderPoint p : n.getBorderList()) {
             	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
             }
             
-            annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), Color.ORANGE, 9);
-            annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER), Color.BLUE, 7);
+            annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), Color.ORANGE, RP_POINT_SIZE);
+            annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER), Color.BLUE, BORDER_TAG_POINT_SIZE);
             
             
             annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
@@ -156,10 +162,10 @@ public class ImageAnnotator extends AbstractImageFilterer {
                         , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
                         , Color.GREEN, 3);
                 
-                annotatePoint(n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, 7);
-                annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, 7);
+                annotatePoint(n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, BORDER_TAG_POINT_SIZE);
+                annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, BORDER_TAG_POINT_SIZE);
             }
-            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, RP_POINT_SIZE);
             annotateSignals(n);
 
         } catch (Exception e) {
@@ -202,7 +208,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             	IPoint rp = n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER);
             	annotatePoint(rp, ColourSelecter.getColor(0), 3);
             }
-            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, 9);
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, RP_POINT_SIZE);
         } catch (Exception e) {
             error("Error annotating nucleus", e);
         }
@@ -378,8 +384,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * Draw the reference point of a nucleus in yellow. For other colours use
      * {@link ImageAnnotator#annotatePoint} directly
      * 
-     * @param n
-     *            the nucleus
+     * @param n the nucleus
      * @return the annotator
      */
     public ImageAnnotator annotateRP(Nucleus n) {
@@ -407,13 +412,11 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * Draw the outline of the component in the given colour at the original
      * position
      * 
-     * @param n
-     *            the component
-     * @param c
-     *            the colour
+     * @param n the component
+     * @param c the colour
      * @return the annotator
      */
-    public ImageAnnotator annotateBorder(CellularComponent n, Color c) {
+    public ImageAnnotator annotateBorder(final CellularComponent n, final Color c) {
         FloatPolygon p = n.toOriginalPolygon();
         PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
@@ -424,15 +427,12 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * Draw the border of the given component on the component image of the
      * template. These can be the same object.
      * 
-     * @param n
-     *            the component to draw
-     * @param template
-     *            the component to get the component image from
-     * @param c
-     *            the colour to draw the border
+     * @param n the component to draw
+     * @param template the component to get the component image from
+     * @param c the colour to draw the border
      * @return this annotator
      */
-    public ImageAnnotator annotateBorder(CellularComponent n, Imageable template, Color c) {
+    public ImageAnnotator annotateBorder(final CellularComponent n, final Imageable template, final Color c) {
         FloatPolygon p = n.toOriginalPolygon();
         PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
@@ -447,12 +447,9 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * Annotate the image with the given text. The text background is white and
      * the text colour is black
      * 
-     * @param x
-     *            the string x
-     * @param y
-     *            the string y
-     * @param s
-     *            the text
+     * @param x the string x
+     * @param y the string y
+     * @param s the text
      * @return
      */
     public ImageAnnotator annotateString(int x, int y, String s) {
@@ -462,14 +459,10 @@ public class ImageAnnotator extends AbstractImageFilterer {
     /**
      * Annotate the image with the given text. The text background is white.
      * 
-     * @param x
-     *            the string x
-     * @param y
-     *            the string y
-     * @param s
-     *            the text
-     * @param text
-     *            the text colour
+     * @param x the string x
+     * @param y the string y
+     * @param s the text
+     * @param text the text colour
      * @return
      */
     public ImageAnnotator annotateString(int x, int y, String s, Color text) {
@@ -479,16 +472,11 @@ public class ImageAnnotator extends AbstractImageFilterer {
     /**
      * Annotate the image with the given text.
      * 
-     * @param x
-     *            the string x
-     * @param y
-     *            the string y
-     * @param s
-     *            the text
-     * @param text
-     *            the text colour
-     * @param back
-     *            the backgound colour
+     * @param x the string x
+     * @param y the string y
+     * @param s the text
+     * @param text the text colour
+     * @param back the background colour
      * @return
      */
     public ImageAnnotator annotateString(int x, int y, String s, Color text, Color back) {
@@ -504,12 +492,9 @@ public class ImageAnnotator extends AbstractImageFilterer {
     /**
      * Draw the size and shape values over the CoM of the component.
      * 
-     * @param n
-     *            the component to draw
-     * @param text
-     *            the colour of the text
-     * @param back
-     *            the colour of the background
+     * @param n the component to draw
+     * @param text the colour of the text
+     * @param back the colour of the background
      * @return the annotator
      */
     public ImageAnnotator annotateStats(CellularComponent n, Color text, Color back) {
@@ -607,8 +592,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * Draw the segments of a profilable component in the global colour swatch
      * colours.
      * 
-     * @param n
-     *            the component
+     * @param n the component
      * @return the annotator
      */
     public ImageAnnotator annotateSegments(Profileable n) {
@@ -646,8 +630,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * colours. Draw the segments at their positions in the template component
      * image
      * 
-     * @param n
-     *            the component
+     * @param n the component
      * @return the annotator
      */
     public ImageAnnotator annotateSegments(Profileable n, Imageable template) {
@@ -747,25 +730,25 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param n
      * @param signalId
      * @param colour the signal colour
-     * @return
+     * @return this annotator
      */
-    public ImageAnnotator annotateSignal(Nucleus n, UUID signalId, Color colour) {
+    public ImageAnnotator annotateSignal(@NonNull final Nucleus n, @NonNull UUID signalId, @NonNull Color colour) {
 
         ISignalCollection signalCollection = n.getSignalCollection();
 
         if(signalCollection.hasSignal(signalId)){
 
-            List<INuclearSignal> signals = signalCollection.getSignals(signalId);
+        	List<INuclearSignal> signals = signalCollection.getSignals(signalId);
 
-            for (INuclearSignal s : signals) {;
-            IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
+        	for (INuclearSignal s : signals) {
+        		IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
 
-            FloatPolygon p = s.toPolygon();
-            PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+        		FloatPolygon p = s.toPolygon();
+        		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
-            roi.setLocation(base.getX(), base.getY());
-            annotatePolygon(roi, colour);
-            }
+        		roi.setLocation(base.getX(), base.getY());
+        		annotatePolygon(roi, colour);
+        	}
         }
 
         return this;

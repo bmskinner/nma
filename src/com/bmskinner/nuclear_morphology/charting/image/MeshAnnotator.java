@@ -67,10 +67,10 @@ public class MeshAnnotator extends ImageAnnotator {
         	Color c = getGradientColour(edge.getLog2Ratio(), maxRatio);
         	ip.setColor(c);
         	        	
-        	ip.drawLine( (int) ((edge.getV1().getPosition().getX() - xDiff)*scale),  
-        			(int) ((edge.getV1().getPosition().getY() - yDiff)*scale), 
-        			(int) ((edge.getV2().getPosition().getX() - xDiff)*scale), 
-        			(int) ((edge.getV2().getPosition().getY() - yDiff)*scale));        	
+        	ip.drawLine( (int) ((edge.getV1().getPosition().getX() - xDiff)*getScale()),  
+        			(int) ((edge.getV1().getPosition().getY() - yDiff)*getScale()), 
+        			(int) ((edge.getV2().getPosition().getX() - xDiff)*getScale()), 
+        			(int) ((edge.getV2().getPosition().getY() - yDiff)*getScale()));        	
 
         }
         return this;
