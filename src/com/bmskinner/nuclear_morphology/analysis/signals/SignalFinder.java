@@ -82,18 +82,15 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         if (folder.listFiles() == null)
             return list;
 
-        Stream.of(folder.listFiles()).forEach(f -> {
-            if (!f.isDirectory()) {
-
-                if (ImageImporter.fileIsImportable(f)) {
-                    try {
-                        list.addAll(findInImage(f));
-                    } catch (ImageImportException e) {
-                        stack("Error searching image", e);
-                    }
-                }
-            }
-        });
+        for(File f : folder.listFiles()) {
+        	if (ImageImporter.fileIsImportable(f)) {
+        		try {
+        			list.addAll(findInImage(f));
+        		} catch (ImageImportException e) {
+        			stack("Error searching image", e);
+        		}
+        	}
+        };
 
         return list;
     }

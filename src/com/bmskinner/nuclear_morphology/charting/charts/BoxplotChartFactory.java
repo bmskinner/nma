@@ -52,20 +52,6 @@ public class BoxplotChartFactory extends AbstractChartFactory {
         super(o);
     }
 
-    /**
-     * Create an empty boxplot
-     * 
-     * @return
-     */
-//    public static JFreeChart makeEmptyChart() {
-//
-//        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null,
-//                new DefaultBoxAndWhiskerCategoryDataset(), false);
-//
-//        formatBoxplot(boxplot);
-//        return boxplot;
-//    }
-
     public JFreeChart createStatisticBoxplot(String component) {
 
         if (!options.hasDatasets())
@@ -225,9 +211,6 @@ public class BoxplotChartFactory extends AbstractChartFactory {
         BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
 
         for (int i = 0; i < plot.getDataset().getRowCount(); i++) {
-
-            IAnalysisDataset d = list.get(i);
-
             Paint colour = options.getDatasets().get(i)
             		.getDatasetColour().orElse(ColourSelecter.getColor(i));
 

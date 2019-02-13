@@ -97,7 +97,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	
 	protected static final String NO_CONSENSUS_ERROR_LBL = "No consensus nucleus in dataset";
 
-    public OutlineChartFactory(ChartOptions o) {
+    public OutlineChartFactory(@NonNull ChartOptions o) {
         super(o);
     }
 
@@ -634,13 +634,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
         int i = 0;
         for (String key : cellDataset.getKeys()) {
 
-            // log("Dataset "+key);
-
             XYDataset ds = cellDataset.getDataset(key);
             plot.setDataset(i, ds);
 
-            boolean showLines = key.startsWith(CellularComponent.NUCLEAR_LOBE) ? true : options.isShowLines();
-            boolean showPoints = key.startsWith(CellularComponent.NUCLEAR_LOBE) ? false : options.isShowPoints();
+            boolean showLines = key.startsWith(CellularComponent.NUCLEAR_LOBE) || options.isShowLines();
+            boolean showPoints = !key.startsWith(CellularComponent.NUCLEAR_LOBE) && options.isShowPoints();
             XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer(showLines, showPoints);
             plot.setRenderer(i, rend);
 
@@ -655,11 +653,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 rend.setSeriesVisibleInLegend(series, true);
 
                 String name = ds.getSeriesKey(series).toString();
-                // log("\t"+name);
 
-                /*
-                 * Segmented nucleus outline
-                 */
+                /* Segmented nucleus outline  */
                 if (key.startsWith(CellularComponent.NUCLEUS)) {
                     int colourIndex = getIndexFromLabel(name);
                     Paint colour = ColourSelecter.getColor(colourIndex);

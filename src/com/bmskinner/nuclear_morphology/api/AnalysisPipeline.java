@@ -42,7 +42,7 @@ public interface AnalysisPipeline {
 	 * @since 1.14.0
 	 *
 	 */
-	public class AnalysisPipelineException extends Exception {
+	class AnalysisPipelineException extends Exception {
 		private static final long serialVersionUID = 1L;
 		
 		public AnalysisPipelineException(String message) {

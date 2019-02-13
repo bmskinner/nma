@@ -17,23 +17,19 @@
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
 import java.awt.Color;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -46,7 +42,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.KeyedShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.RandomShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -56,7 +51,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.ImageStack;
-import ij.process.ImageProcessor;
 
 /**
  * Detect signal proportions within concentric shells of a nucleus

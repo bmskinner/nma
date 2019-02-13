@@ -67,8 +67,8 @@ public class ShellDetector extends Detector {
     
     private final int nShells;
     private final ShrinkType type;
-    private static final int DEFAULT_SCALE_FACTOR = 4;
-    private boolean isScale = false;
+//    private static final int DEFAULT_SCALE_FACTOR = 4;
+//    private boolean isScale = false;
 
     /**
      * The shell ROIs within the template object. This list begins with the
@@ -100,7 +100,7 @@ public class ShellDetector extends Detector {
     public ShellDetector(@NonNull final CellularComponent component, int shellCount, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
         nShells = shellCount;
         this.type = type;
-        this.isScale = isScale;
+//        this.isScale = isScale;
         createShells(component);
     }
 
@@ -632,7 +632,7 @@ public class ShellDetector extends Detector {
             Prefs.blackBackground = bb;
             newIp.setThreshold(threshold, 255, ImageProcessor.NO_LUT_UPDATE);
 
-            Roi roi2 = (new ThresholdToSelection()).convert(newIp);
+            Roi roi2 = new ThresholdToSelection().convert(newIp);
             Rectangle bounds2 = roi2.getBounds();
             if (bounds2.width<=0 && bounds2.height<=0)
                 return roi;

@@ -64,9 +64,7 @@ public class RepresentativeMedianFinder implements Loggable {
 	 * @throws ProfileException
 	 */
 	public IProfile findMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-		fine("-------------------------");
     	fine("Beginning median finding");
-        fine("-------------------------");
 		float[][] differences  = buildDifferenceMatrix();
 		float[][] similarities = buildSimilarityMatrix(differences);
         
@@ -99,13 +97,11 @@ public class RepresentativeMedianFinder implements Loggable {
 					getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 			
 			float[] differences = calculateDistancesToTemplate(template);
-			
-			float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
-						
+									
 			// The column with the lowest stdev has the largest number of similar nuclei
 			int index = findIndexOfLowestValue(differences);
 			float lowest = differences[index];
-			fine("Lowest difference index is "+index+" with value "+lowest);
+			finer("Lowest difference index is "+index+" with value "+lowest);
 			
 			// Get this best profile
 			IProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);		

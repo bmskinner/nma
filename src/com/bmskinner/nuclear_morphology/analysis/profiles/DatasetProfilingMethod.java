@@ -41,8 +41,6 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
-	private static final Tag DEFAULT_BORDER_TAG = Tag.REFERENCE_POINT;
-
 	public static final int RECALCULATE_MEDIAN = 0;
 	
 	public static final int MAX_COERCION_ATTEMPTS = 50;
@@ -191,7 +189,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			// Update the offsets in the profile collection to the new RP
 			collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 			collection.getProfileManager().recalculateProfileAggregates();
-//			collection.createProfileCollection();
+
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
 			finer("Checking RP index again");

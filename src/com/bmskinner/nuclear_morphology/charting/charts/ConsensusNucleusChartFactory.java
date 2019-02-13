@@ -227,7 +227,6 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         plot.getDomainAxis().setRange(-max, max);
         plot.getRangeAxis().setRange(-max, max);
 
-        int seriesCount = plot.getSeriesCount();
         XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
         rend.setSeriesLinesVisible(0, true);
         rend.setSeriesShapesVisible(0, false);
@@ -242,12 +241,6 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         rend.setSeriesVisibleInLegend(1, Boolean.FALSE);
         rend.setSeriesPaint(1, Color.BLUE);
         plot.setRenderer(rend);
-        
-        
-
-//        for (int i = 0; i < seriesCount; i++) {
-//            
-//        }
         return chart;
     }
 
@@ -320,10 +313,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         plot.setDataset(0, ds);
         plot.getDomainAxis().setRange(-max, max);
         plot.getRangeAxis().setRange(-max, max);
-
-        ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
-
-        formatConsensusChartSeries(plot, true, swatch);
+        formatConsensusChartSeries(plot, true);
 
         return chart;
     }
@@ -335,7 +325,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * @param showIQR should the IQR be displayed
      * @param swatch the colour swatch
      */
-    private void formatConsensusChartSeries(XYPlot plot, boolean showIQR, ColourSwatch swatch) {
+    private void formatConsensusChartSeries(XYPlot plot, boolean showIQR) {
 
         XYDataset ds = plot.getDataset();
         int seriesCount = plot.getSeriesCount();
@@ -408,9 +398,6 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             plot.getRenderer().setSeriesVisibleInLegend(i, false);
             String name = (String) ds.getSeriesKey(i);
             plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-
-            int index = MorphologyChartFactory.getIndexFromLabel(name);
-            IAnalysisDataset d = options.getDatasets().get(index);
 
             // in this context, segment colour refers to the entire
             // dataset colour (they use the same pallates in ColourSelecter)

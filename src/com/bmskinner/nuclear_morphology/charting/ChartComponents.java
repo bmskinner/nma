@@ -47,36 +47,30 @@ public class ChartComponents {
     public static final BasicStroke QUARTILE_STROKE = new BasicStroke(1);
 
     /**
-     * A horizontal black line at y=180 with width 2
+     * A horizontal black line at y=180 with width 2. The marker does not signal to marker change listeners.
      */
     public static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE){
         
         @Override
-        public void addChangeListener(MarkerChangeListener listener){
-            return;
-        }
+        public void addChangeListener(MarkerChangeListener listener){}
     };
 
     /**
-     * A horizontal grey line at y=0 with width 1
+     * A horizontal grey line at y=0 with width 1. The marker does not signal to marker change listeners.
      */
     public static final ValueMarker CONSENSUS_ZERO_MARKER = new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)){
         
         @Override
-        public void addChangeListener(MarkerChangeListener listener){
-            return;
-        }
+        public void addChangeListener(MarkerChangeListener listener){}
     };
 
     /**
-     * A horizontal black line at y=0 with width 2
+     * A horizontal black line at y=0 with width 2. The marker does not signal to marker change listeners.
      */
     public static final ValueMarker ZERO_MARKER = new ValueMarker(0, Color.BLACK, MARKER_STROKE){
         
         @Override
-        public void addChangeListener(MarkerChangeListener listener){
-            return;
-        }
+        public void addChangeListener(MarkerChangeListener listener){}
     };
 
     public static final Shape DEFAULT_POINT_SHAPE = ShapeUtilities.createDiamond(5);

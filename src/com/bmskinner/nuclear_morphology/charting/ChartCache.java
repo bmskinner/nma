@@ -83,7 +83,7 @@ public class ChartCache implements Cache {
 
     @Override
     public synchronized void purge() {
-        chartMap.clear();;
+        chartMap.clear();
     }
 
     @Override
@@ -107,10 +107,8 @@ public class ChartCache implements Cache {
         // Find the options with the datasets
         for (IAnalysisDataset d : list) {
             for (ChartOptions op : chartMap.keySet()) {
-                if (op.hasDatasets()) {
-                    if (op.getDatasets().contains(d)) {
+                if (op.hasDatasets() && op.getDatasets().contains(d)) {
                         toRemove.add(op);
-                    }
                 }
             }
         }
@@ -128,14 +126,11 @@ public class ChartCache implements Cache {
 
         // Make a list of the options that need removed
         // These are the options that contain the datasets in the list
-        // Set<ChartOptions> toRemove = new HashSet<ChartOptions>();
-
         Iterator<ChartOptions> it = chartMap.keySet().iterator();
 
         while (it.hasNext()) {
             ChartOptions op = it.next();
             if (op.getCell() == cell) {
-
                 chartMap.remove(op);
             }
         }

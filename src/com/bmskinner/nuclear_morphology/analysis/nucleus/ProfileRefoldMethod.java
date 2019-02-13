@@ -132,16 +132,6 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             if (collection.size() > 1) 
                 refoldCurve(); // carry out the refolding
 
-            // orient refolded nucleus to put tail at the bottom
-//            refoldNucleus.component().alignVertically();
-
-            // if rodent sperm, put tip on left if needed
-//            if (collection.getNucleusType().equals(NucleusType.RODENT_SPERM)) {
-//                if (refoldNucleus.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > 0) {
-//                    refoldNucleus.component().flipXAroundPoint(refoldNucleus.component().getCentreOfMass());
-//                }
-//            }
-            //
             collection.setConsensus(refoldNucleus);
 
             fine("Updated " + pointUpdateCounter + " border points");
@@ -186,50 +176,50 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * 
      * @throws Exception
      */
-    private void smoothCurve(int offset) throws Exception {
-
-        // Get the median distance between each border point in the refold
-        // candidate nucleus.
-        // Use this to establish the max and min distances a point can migrate
-        // from its neighbours
-        double medianDistanceBetweenPoints = refoldNucleus.component().getMedianDistanceBetweenPoints();
-        double minDistance = medianDistanceBetweenPoints * 0.5;
-        double maxDistance = medianDistanceBetweenPoints * 1.2;
-
-        /*
-         * Draw a line between the next and previous point Move the point to the
-         * centre of the line Move ahead two points
-         * 
-         */
-        for (int i = offset; i < refoldNucleus.component().getBorderLength(); i += 2) {
-
-            IBorderPoint thisPoint = refoldNucleus.component().getBorderPoint(i);
-            IBorderPoint prevPoint = thisPoint.prevPoint();
-            IBorderPoint nextPoint = thisPoint.nextPoint();
-
-            /*
-             * get the point o, half way between the previous point p and next
-             * point n
-             */
-
-            LineEquation eq = new DoubleEquation(prevPoint, nextPoint);
-            double distance = prevPoint.getLengthTo(nextPoint) / 2;
-            IPoint newPoint = eq.getPointOnLine(prevPoint, distance);
-
-            /*
-             * get the point r, half way between o and this point x
-             * This should smooth the curve without completely blunting corners
-             */
-            LineEquation eq2 = new DoubleEquation(newPoint, thisPoint);
-            double distance2 = newPoint.getLengthTo(thisPoint) / 2;
-            IPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
-
-            boolean ok = checkPositionIsOK(newPoint, refoldNucleus.component(), i, minDistance, maxDistance);
-
-            if (ok) 
-                refoldNucleus.component().updateBorderPoint(i, replacementPoint.getX(), replacementPoint.getY());
-        }
-    }
+//    private void smoothCurve(int offset) throws Exception {
+//
+//        // Get the median distance between each border point in the refold
+//        // candidate nucleus.
+//        // Use this to establish the max and min distances a point can migrate
+//        // from its neighbours
+//        double medianDistanceBetweenPoints = refoldNucleus.component().getMedianDistanceBetweenPoints();
+//        double minDistance = medianDistanceBetweenPoints * 0.5;
+//        double maxDistance = medianDistanceBetweenPoints * 1.2;
+//
+//        /*
+//         * Draw a line between the next and previous point Move the point to the
+//         * centre of the line Move ahead two points
+//         * 
+//         */
+//        for (int i = offset; i < refoldNucleus.component().getBorderLength(); i += 2) {
+//
+//            IBorderPoint thisPoint = refoldNucleus.component().getBorderPoint(i);
+//            IBorderPoint prevPoint = thisPoint.prevPoint();
+//            IBorderPoint nextPoint = thisPoint.nextPoint();
+//
+//            /*
+//             * get the point o, half way between the previous point p and next
+//             * point n
+//             */
+//
+//            LineEquation eq = new DoubleEquation(prevPoint, nextPoint);
+//            double distance = prevPoint.getLengthTo(nextPoint) / 2;
+//            IPoint newPoint = eq.getPointOnLine(prevPoint, distance);
+//
+//            /*
+//             * get the point r, half way between o and this point x
+//             * This should smooth the curve without completely blunting corners
+//             */
+//            LineEquation eq2 = new DoubleEquation(newPoint, thisPoint);
+//            double distance2 = newPoint.getLengthTo(thisPoint) / 2;
+//            IPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
+//
+//            boolean ok = checkPositionIsOK(newPoint, refoldNucleus.component(), i, minDistance, maxDistance);
+//
+//            if (ok) 
+//                refoldNucleus.component().updateBorderPoint(i, replacementPoint.getX(), replacementPoint.getY());
+//        }
+//    }
 
     /*
      * Go over the target nucleus, adjusting each point. Keep the change if it

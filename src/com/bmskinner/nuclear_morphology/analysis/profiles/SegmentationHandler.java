@@ -145,12 +145,6 @@ public class SegmentationHandler implements Loggable {
 
             // Unmerge children
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-
-                ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-//                IBorderSegment childSeg = childProfile.getSegment(segID);
-
                 child.getCollection().getProfileManager().unmergeSegments(segID);
             }
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
@@ -179,8 +173,8 @@ public class SegmentationHandler implements Loggable {
 
             IBorderSegment seg = medianProfile.getSegment(segID);
 
-            UUID newID1 = java.util.UUID.randomUUID();
-            UUID newID2 = java.util.UUID.randomUUID();
+            UUID newID1 = UUID.randomUUID();
+            UUID newID2 = UUID.randomUUID();
 
             fine("Splitting segment in root dataset "+dataset.getName());
             boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);

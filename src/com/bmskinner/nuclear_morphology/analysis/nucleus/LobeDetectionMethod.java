@@ -146,48 +146,48 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
      * @throws UnloadableImageException
      * @throws MissingOptionException
      */
-    private void detectLobesViaHough(ICell cell) throws UnloadableImageException, MissingOptionException {
-
-    	Optional<IAnalysisOptions> an = dataset.getAnalysisOptions();
-        if(!an.isPresent())
-        	throw new MissingOptionException("Options not present in dataset "+dataset.getName());
-
-        Optional<IDetectionOptions> no = an.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-        
-        if(!no.isPresent())
-        	throw new MissingOptionException("Nucleus options not present in dataset "+dataset.getName());
-        
-        IDetectionOptions nucleusOptions = no.get();
-        
-        IPreprocessingOptions op = (IPreprocessingOptions) nucleusOptions
-                .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-
-        ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
-        if (op.isUseColourThreshold()) {
-
-            int minHue = op.getMinHue();
-            int maxHue = op.getMaxHue();
-            int minSat = op.getMinSaturation();
-            int maxSat = op.getMaxSaturation();
-            int minBri = 73;// op.getMinBrightness();
-            int maxBri = 255;// op.getMaxBrightness();
-
-            ImageProcessor test = new ImageFilterer(ip).colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
-                    .convertToByteProcessor().toProcessor();
-
-            //
-            // ICannyOptions canny = OptionsFactory.makeCannyOptions();
-
-            ImageFilterer imf = new ImageFilterer(test);
-            // .runEdgeDetector(canny);
-
-            // new ImagePlus(cell.getNucleus().getNameAndNumber()+": Canny",
-            // imf.toProcessor()).show();
-            List<IPoint> lobes = imf.houghCircleDetection(options);
-            addPointsToNuclei(cell, lobes);
-        }
-
-    }
+//    private void detectLobesViaHough(ICell cell) throws UnloadableImageException, MissingOptionException {
+//
+//    	Optional<IAnalysisOptions> an = dataset.getAnalysisOptions();
+//        if(!an.isPresent())
+//        	throw new MissingOptionException("Options not present in dataset "+dataset.getName());
+//
+//        Optional<IDetectionOptions> no = an.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//        
+//        if(!no.isPresent())
+//        	throw new MissingOptionException("Nucleus options not present in dataset "+dataset.getName());
+//        
+//        IDetectionOptions nucleusOptions = no.get();
+//        
+//        IPreprocessingOptions op = (IPreprocessingOptions) nucleusOptions
+//                .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+//
+//        ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
+//        if (op.isUseColourThreshold()) {
+//
+//            int minHue = op.getMinHue();
+//            int maxHue = op.getMaxHue();
+//            int minSat = op.getMinSaturation();
+//            int maxSat = op.getMaxSaturation();
+//            int minBri = 73;// op.getMinBrightness();
+//            int maxBri = 255;// op.getMaxBrightness();
+//
+//            ImageProcessor test = new ImageFilterer(ip).colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
+//                    .convertToByteProcessor().toProcessor();
+//
+//            //
+//            // ICannyOptions canny = OptionsFactory.makeCannyOptions();
+//
+//            ImageFilterer imf = new ImageFilterer(test);
+//            // .runEdgeDetector(canny);
+//
+//            // new ImagePlus(cell.getNucleus().getNameAndNumber()+": Canny",
+//            // imf.toProcessor()).show();
+//            List<IPoint> lobes = imf.houghCircleDetection(options);
+//            addPointsToNuclei(cell, lobes);
+//        }
+//
+//    }
 
     /**
      * Identify lobes based on watershed segmentation of nuclei within cytoplasm
@@ -302,7 +302,7 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 
             if (n instanceof LobedNucleus) {
                 LobedNucleus l = (LobedNucleus) n;
-                ImageProcessor ip = l.getImage();
+//                ImageProcessor ip = l.getImage();
 
                 // Add this to the roi centre of mass
 
@@ -384,7 +384,7 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
                         int oX = p.getXAsInt() + base.getXAsInt() - CellularComponent.COMPONENT_BUFFER;
                         int oY = p.getYAsInt() + base.getYAsInt() - CellularComponent.COMPONENT_BUFFER;
 
-                        IPoint oP = IPoint.makeNew(oX, oY);
+//                        IPoint oP = IPoint.makeNew(oX, oY);
 
                         bp.set(oX, oY, 255);
                     }

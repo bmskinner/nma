@@ -153,8 +153,6 @@ public class IterativeSegmentFitter implements Loggable {
         int segsRemaining = templateProfile.getSegmentCount()-templateSegment.getPosition();
         int maxEnd = profile.size() - (segsRemaining*IBorderSegment.MINIMUM_SEGMENT_LENGTH);
 
-        int stepSize   = 10;
-        int halfStep   = stepSize / 2;
         int bestEnd = findBestScoringSegmentEndpoint(profile, id, startIndex, minEnd, maxEnd, 1);
 
         // Create a new segment with the endpoint applied

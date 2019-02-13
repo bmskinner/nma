@@ -48,8 +48,7 @@ public class ComponentOverlay extends ShapeOverlay {
     /**
      * Adds a shape and a nucleus
      *
-     * @param shape
-     *            the shape.
+     * @param shape the shape.
      */
     public void addShape(ShapeOverlayObject shape, CellularComponent n) {
         if (shape == null || n == null) {
@@ -69,14 +68,10 @@ public class ComponentOverlay extends ShapeOverlay {
 
         int i = shapes.indexOf(shape);
         if (i > -1) {
-            ShapeOverlayObject s = shapes.get(i);
-            CellularComponent n = nuclei.get(i);
-
             shapes.remove(i);
             nuclei.remove(i);
             shape.removePropertyChangeListener(this);
             fireOverlayChanged();
-
         }
     }
 
@@ -90,10 +85,8 @@ public class ComponentOverlay extends ShapeOverlay {
     /**
      * Paints the crosshairs in the layer.
      *
-     * @param g2
-     *            the graphics target.
-     * @param chartPanel
-     *            the chart panel.
+     * @param g2 the graphics target.
+     * @param chartPanel the chart panel.
      */
     @Override
     public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
