@@ -91,7 +91,6 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
             return;
         }
 
-        int newSize = newDatasets.size();
         if (newDatasets.size() > 0) {
 
             try {

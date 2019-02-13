@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,8 +39,6 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
 	
-	private DecimalFormat df = new DecimalFormat("#.##");
-
     @Override
     public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta)
             throws CollectionFilteringException {
@@ -121,58 +118,7 @@ public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
     	op.addMinimumThreshold(stat, component, scale, lower);
     	op.addMaximumThreshold(stat, component, scale, upper);
     	
-    	Predicate<ICell> pred = op.getPredicate(collection);
-//    	 Predicate<ICell> pred = new Predicate<ICell>() {
-//    		 @Override
-//    		 public boolean test(ICell t) {
-//    			
-//    			 
-//    			 if(CellularComponent.NUCLEUS.equals(component))
-//    				 return t.getNuclei().stream().anyMatch(createNucleusFilter(collection, stat, lower, upper, scale));
-//    			 
-//    			 if(CellularComponent.NUCLEAR_SIGNAL.equals(component))
-//    				 return t.getNuclei().stream().anyMatch(createNuclearSignalFilter(stat, lower, upper, scale));
-//    			 return false;
-//    		 }
-//
-//             @Override
-//             public String toString() {
-//                 return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
-//             }
-//
-//         };
-         
+    	Predicate<ICell> pred = op.getPredicate(collection);         
         return filter(collection, pred);
     }
-    
-//    private Predicate<Nucleus> createNuclearSignalFilter(PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
-//    	return (n) ->{
-//    			return n.getSignalCollection().getAllSignals().stream().anyMatch(s->{
-//    				 double value = s.getStatistic(stat, scale);
-//					 if (value < lower)
-//						 return false;
-//					 if (value > upper)
-//						 return false;
-//					 return true;
-//    			});
-//    	};
-//    }
-//    
-//    private Predicate<Nucleus> createNucleusFilter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale){
-//    	
-//    	return (n) ->{
-//    		try {
-//				 double value = stat.equals(PlottableStatistic.VARIABILITY)
-//						 ? collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
-//						 if (value < lower)
-//							 return false;
-//						 if (value > upper)
-//							 return false;
-//			 } catch (UnavailableBorderTagException e) {
-//				 return false;
-//			 }
-//			 return true;
-//    	};
-//    }
-
 }

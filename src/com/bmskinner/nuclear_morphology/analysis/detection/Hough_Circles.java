@@ -87,15 +87,13 @@ public class Hough_Circles implements PlugInFilter, Loggable {
 
     public String imageName = ""; // Store the name of the image for debugging
 
-    public int setup(String arg, ImagePlus imp) {
-        if (arg.equals("about")) {
-            showAbout();
-            return DONE;
-        }
+    @Override
+	public int setup(String arg, ImagePlus imp) {
         return DOES_8G + DOES_STACKS + SUPPORTS_MASKING;
     }
 
-    public void run(ImageProcessor ip) {
+    @Override
+	public void run(ImageProcessor ip) {
 
         try {
             imageValues = (byte[]) ip.getPixels();
@@ -109,10 +107,6 @@ public class Hough_Circles implements PlugInFilter, Loggable {
 
             if (readParameters()) { // Replace the GUI parts
 
-                // if( readParameters() ) { // Show a Dialog Window for user
-                // input of
-                // // radius and maxCircles.
-
                 houghTransform();
 
                 // Create image View for Hough Transform.
@@ -120,22 +114,11 @@ public class Hough_Circles implements PlugInFilter, Loggable {
                 byte[] newpixels = (byte[]) newip.getPixels();
                 createHoughPixels(newpixels);
 
-                // Create image View for Marked Circles.
-                // ImageProcessor circlesip = new ByteProcessor(width, height);
-                // byte[] circlespixels = (byte[])circlesip.getPixels();
-
                 // Mark the center of the found circles in a new image
                 if (useThreshold)
                     getCenterPointsByThreshold(threshold);
                 else
                     getCenterPoints(maxCircles);
-                // drawCircles(circlespixels);
-                //
-                // new ImagePlus(imageName+" Hough Space [r="+radiusMin+"]",
-                // newip).show(); // Shows only the hough space for the minimun
-                // radius
-                // new ImagePlus(imageName+": "+maxCircles+" Circles Found",
-                // circlesip).show();
             }
         } catch (Exception e) {
             warn("Error in hough transform");
@@ -143,42 +126,16 @@ public class Hough_Circles implements PlugInFilter, Loggable {
         }
     }
 
-    void showAbout() {
-        IJ.showMessage("About Circles_...", "This plugin finds n circles\n" + "using a basic HoughTransform operator\n."
-                + "For better results apply an Edge Detector\n" + "filter and a binarizer before using this plugin\n"
-                + "\nAuthor: Hemerson Pistori (pistori@ec.ucdb.br)");
-    }
-
     boolean readParameters() {
 
-        // GenericDialog gd = new GenericDialog("Hough Parameters",
-        // IJ.getInstance());
-        // gd.addNumericField("Minimum radius (in pixels) :", 10, 0);
-        // gd.addNumericField("Maximum radius (in pixels)", 20, 0);
-        // gd.addNumericField("Increment radius (in pixels) :", 2, 0);
-        // gd.addNumericField("Number of Circles (NC): (enter 0 if using
-        // threshold)", 10, 0);
-        // gd.addNumericField("Threshold: (not used if NC > 0)", 60, 0);
-        //
-        // gd.showDialog();
-        //
-        // if (gd.wasCanceled()) {
-        // return(false);
-        // }
-
-        // radiusMin = (int) gd.getNextNumber();
-        // radiusMax = (int) gd.getNextNumber();
-        // radiusInc = (int) gd.getNextNumber();
         depth = ((radiusMax - radiusMin) / radiusInc) + 1;
-        // maxCircles = (int) gd.getNextNumber();
-        // threshold = (int) gd.getNextNumber();
+
         if (maxCircles > 0) {
             useThreshold = false;
             threshold = -1;
         } else {
             useThreshold = true;
             if (threshold < 0) {
-                // IJ.showMessage("Threshold must be greater than 0");
                 return (false);
             }
         }

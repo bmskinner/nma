@@ -17,21 +17,15 @@
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -47,7 +41,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     /**
      * Construct the finder using an options
      * 
-     * @param op
+     * @param op the options for cell detection
      */
     public CellFinder(@NonNull final IAnalysisOptions op) {
         super(op);

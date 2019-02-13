@@ -54,7 +54,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
  */
 public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
 
-    public static final int DEFAULT_VERTEX_SPACING = 10;
+    int DEFAULT_VERTEX_SPACING = 10;
 
     E getComponent();
 

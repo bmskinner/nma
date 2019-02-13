@@ -18,13 +18,11 @@ package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
 import java.util.EventObject;
-import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 import ij.process.ImageProcessor;
@@ -34,8 +32,7 @@ import ij.process.ImageProcessor;
  * classes.
  * 
  * @author bms41
- * @param <E>
- *            the type of element to find
+ * @param <E> the type of element to find
  * @since 1.13.5
  *
  */
@@ -45,10 +42,9 @@ public interface Finder<E> {
      * Find elements using the options given in the setup
      * 
      * @return the cells detected in the folder of images
-     * @throws Exception
-     *             if detection fails
+     * @throws Exception if detection fails
      */
-    public E find() throws Exception;
+    E find() throws Exception;
 
     /**
      * Find cells using the options given in the setup in the given folder
@@ -58,7 +54,7 @@ public interface Finder<E> {
      * @throws ImageImportException
      * @throws ComponentCreationException
      */
-    public E findInFolder(@NonNull File folder) throws ImageImportException;
+    E findInFolder(@NonNull File folder) throws ImageImportException;
 
     /**
      * Find cells using the options given in the setup in the given image
@@ -68,7 +64,7 @@ public interface Finder<E> {
      * @throws ImageImportException
      * @throws ComponentCreationException
      */
-    public E findInImage(@NonNull File imageFile) throws ImageImportException;
+    E findInImage(@NonNull File imageFile) throws ImageImportException;
 
     /**
      * Add a listener for progress through the detection.

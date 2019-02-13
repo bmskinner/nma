@@ -25,12 +25,10 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The filterer filters any collection implementing the Filterable interface.
- * Testing only. TODO: everything
  * 
  * @author bms41
- *
- * @param <E>
- *            the collection to be filtered
+ * @param <E> the collection to be filtered
+ * @since 1.13.5
  */
 public abstract class Filterer<E extends Filterable, K> implements Loggable {
 
@@ -41,15 +39,6 @@ public abstract class Filterer<E extends Filterable, K> implements Loggable {
     public static final int FAILURE_PERIM     = 16;
     public static final int FAILURE_OTHER     = 32;
     public static final int FAILURE_SIGNALS   = 64;
-
-    private static double maxDifferenceFromMedian = 1.6; // used to filter the
-                                                         // nuclei, and remove
-                                                         // those too small,
-                                                         // large or irregular
-                                                         // to be real
-    private static double maxWibblinessFromMedian = 1.4; // filter for the
-                                                         // irregular borders
-                                                         // more stringently
 
     /**
      * Create a collection without elements more than <i>delta</i> proportion

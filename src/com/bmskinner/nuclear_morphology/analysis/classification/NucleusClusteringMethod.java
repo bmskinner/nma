@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -44,6 +46,7 @@ import weka.core.Instances;
  * Run clustering of nuclei in a dataset based on a given set of options
  * 
  * @author ben
+ * @since 1.8.0
  *
  */
 public class NucleusClusteringMethod extends TreeBuildingMethod {
@@ -51,6 +54,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     public static final int EM           = 0; // expectation maximisation
     public static final int HIERARCHICAL = 1;
 
+    /* Map cluster numbers to collections of cells */
     private Map<Integer, ICellCollection> clusterMap = new HashMap<>();
 
     /**
@@ -59,7 +63,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * @param dataset the analysis dataset with nuclei to cluster
      * @param options the clustering options
      */
-    public NucleusClusteringMethod(IAnalysisDataset dataset, IClusteringOptions options) {
+    public NucleusClusteringMethod(@NonNull IAnalysisDataset dataset, @NonNull IClusteringOptions options) {
         super(dataset, options);
     }
 
@@ -71,10 +75,9 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         // Save the clusters to the dataset
         List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 
-        finest("Getting group number");
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-        finest("Cluster group number chosen: " + clusterNumber);
 
+        // Create a group to store the clustered cells
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
                 newickTree);
 
@@ -117,7 +120,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     }
 
     private void run() {
-        boolean ok = cluster(collection);
+        boolean ok = cluster();
         fine("Returning " + ok);
     }
 
@@ -127,7 +130,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * @param collection
      * @return success or fail
      */
-    public boolean cluster(ICellCollection collection) {
+    public boolean cluster() {
 
         try {
 
@@ -160,7 +163,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
                 clusterer.setNumClusters(options.getClusterNumber());
                 clusterer.buildClusterer(instances); // build the clusterer
-                assignClusters(clusterer, collection);
+                assignClusters(clusterer);
 
             }
 
@@ -168,11 +171,11 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 EM clusterer = new EM(); // new instance of clusterer
                 clusterer.setOptions(optionArray); // set the options
                 clusterer.buildClusterer(instances); // build the clusterer
-                assignClusters(clusterer, collection);
+                assignClusters(clusterer);
             }
 
         } catch (Exception e) {
-            error("Error in assignments", e);
+            error("Error in cluster assignments", e);
             return false;
         }
         return true;
@@ -182,12 +185,9 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * Given a trained clusterer, put each nucleus within the collection into a
      * cluster
      * 
-     * @param clusterer
-     *            the clusterer to use
-     * @param collection
-     *            the collection with nuclei to cluster
+     * @param clusterer the clusterer to use
      */
-    private void assignClusters(Clusterer clusterer, ICellCollection collection) {
+    private void assignClusters(Clusterer clusterer) {
         try {
 
             for (int i = 0; i < clusterer.numberOfClusters(); i++) {
@@ -197,19 +197,13 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 clusterMap.put(i, clusterCollection);
             }
 
-            int i = collection.size();
             for (Instance inst : cellToInstanceMap.keySet()) {
 
                 try {
 
                     UUID cellID = cellToInstanceMap.get(inst);
 
-                    int clusterNumber = clusterer.clusterInstance(inst); // #pass
-                                                                         // each
-                                                                         // instance
-                                                                         // through
-                                                                         // the
-                                                                         // model
+                    int clusterNumber = clusterer.clusterInstance(inst);
 
                     ICellCollection cluster = clusterMap.get(clusterNumber);
 
@@ -226,7 +220,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
             }
         } catch (Exception e) {
-            warn("Error making clusters");
+            warn("Unable to make clusters");
             fine("Error clustering", e);
         }
     }

@@ -73,7 +73,7 @@ public abstract class Detector implements Loggable {
 
     public static final String RESULT_TABLE_PERIM = "Perim.";
     
-    private static final String NO_IMG_ERR = "No image to analyse";
+//    private static final String NO_IMG_ERR = "No image to analyse";
     private static final String NO_DETECTION_PARAMS_ERR ="Detection parameters not set";
     private static final String SIZE_MISMATCH_ERR = "Minimum size >= maximum size";
     private static final String CIRC_MISMATCH_ERR = "Minimum circularity >= maximum circularity";
@@ -447,10 +447,10 @@ public abstract class Detector implements Loggable {
             ip.setValue(fillColor);
             ImageStatistics stats = getStatistics(ip, measurements);
             boolean include = true;
-            if (excludeEdgeParticles) {
-                if (r.x==minX||r.y==minY||r.x+r.width==maxX||r.y+r.height==maxY)
-                    include = false;
-            }
+            
+            if (excludeEdgeParticles && (r.x==minX||r.y==minY||r.x+r.width==maxX||r.y+r.height==maxY))
+            	include = false;
+            
             ImageProcessor mask = ip.getMask();
             if (minCirc>0.0 || maxCirc<1.0) {
                 double perimeter = roi.getLength();
@@ -459,6 +459,7 @@ public abstract class Detector implements Loggable {
 
                 if (circularity<minCirc || circularity>maxCirc) include = false;
             }
+            
             if (stats.pixelCount>=minSize && stats.pixelCount<=maxSize && include) {
                 stats.xstart=x; stats.ystart=y;
                 rois.add( (Roi) roi.clone());

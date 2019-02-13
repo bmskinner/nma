@@ -352,9 +352,9 @@ public class ImageAnnotator extends AbstractImageFilterer {
         return this;
     }
     
-    private ImageAnnotator annotateRoi(Roi p, Paint c) {
-        return annotateRoi(p, c, 2);
-    }
+//    private ImageAnnotator annotateRoi(Roi p, Paint c) {
+//        return annotateRoi(p, c, 2);
+//    }
     
     private ImageAnnotator annotateRoi(Roi p, Paint c, int width) {
         ip.setColor((Color) c);

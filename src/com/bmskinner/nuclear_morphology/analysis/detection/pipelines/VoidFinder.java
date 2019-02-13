@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 import java.io.File;
 import java.util.stream.Stream;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;

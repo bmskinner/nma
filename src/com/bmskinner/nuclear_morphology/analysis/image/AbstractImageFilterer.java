@@ -325,7 +325,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 
             float h = hsb[0];
             float s = hsb[1];
-            float b = hsb[2];
+//            float b = hsb[2];
 
             int pixel = ip.get(i);
 
@@ -347,17 +347,6 @@ public abstract class AbstractImageFilterer implements Loggable {
                 // A maximum of s and a minimum of 0
 
                 s *= f;
-
-                // Set the brightness to increase from b to a maximum of 1,
-                // scaled by the fractional intensity
-
-                // float bspace = 1- b; // the range to work in
-                //
-                // float badd = bspace * f; // the amount to add to existing b
-                //
-                // // scale this so we hit white faster as b gets closer to zero
-                //
-                // b += badd;
 
                 // Make the full pixel
 

@@ -191,16 +191,16 @@ public class DefaultFilteringOptions extends AbstractHashOptions implements Filt
 		
 		if(k.id==null) { // filter all signal groups
 			if(getBoolean(ALL_MATCH_KEY))
-				return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getAllSignals().stream()).allMatch(s->signalMatches(k, s, collection, isMin));
-			return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getAllSignals().stream()).anyMatch(s->signalMatches(k, s, collection, isMin));
+				return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getAllSignals().stream()).allMatch(s->signalMatches(k, s, isMin));
+			return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getAllSignals().stream()).anyMatch(s->signalMatches(k, s, isMin));
 		}
 		// filter specific signal group
 		if(getBoolean(ALL_MATCH_KEY))
-			return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getSignals(k.id).stream()).allMatch(s->signalMatches(k, s, collection, isMin));
-		return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getSignals(k.id).stream()).anyMatch(s->signalMatches(k, s, collection, isMin));
+			return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getSignals(k.id).stream()).allMatch(s->signalMatches(k, s, isMin));
+		return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getSignals(k.id).stream()).anyMatch(s->signalMatches(k, s, isMin));
 	}
 	
-	private boolean signalMatches(Key k, INuclearSignal s, ICellCollection collection, boolean isMin){
+	private boolean signalMatches(Key k, INuclearSignal s, boolean isMin){
 		double v = s.getStatistic(k.stat, k.scale);
 		return isMin ? v>=minima.get(k) : v<=maxima.get(k);
 	}
