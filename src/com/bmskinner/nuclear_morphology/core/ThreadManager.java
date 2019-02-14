@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.core;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,7 +36,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class ThreadManager implements Loggable {
-    private static volatile ThreadManager instance   = null;
+    private static ThreadManager instance   = null;
     
     /** Object to lock on for synchronisation */
     private static final Object lockObject = new Object();

@@ -21,6 +21,7 @@ import java.awt.Paint;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -54,96 +55,15 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
+/**
+ * Generate charts for various morphology profile parameters. 
+ * @author ben
+ *
+ */
 public class MorphologyChartFactory extends AbstractChartFactory {
 
-    public MorphologyChartFactory(ChartOptions o) {
+    public MorphologyChartFactory(@NonNull ChartOptions o) {
         super(o);
-    }
-
-    /**
-     * Create a segment start XY position chart for multiple analysis datasets
-     * 
-     * @param options
-     * @return
-     * @throws Exception
-     */
-    private JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) {
-        XYDataset positionDataset;
-        try {
-            positionDataset = new CellDatasetCreator(options).createPositionFeatureDataset();
-        } catch (ChartDatasetCreationException e) {
-            return createErrorChart();
-        }
-        XYDataset nuclearOutlines;
-        try {
-            nuclearOutlines = new NucleusDatasetCreator(options).createMultiNucleusOutline();
-        } catch (ChartDatasetCreationException e) {
-            return createErrorChart();
-        }
-        
-        if (positionDataset == null || nuclearOutlines == null) {
-            // a null dataset is returned if segment counts do not match
-            return ConsensusNucleusChartFactory.createEmptyChart();
-        }
-
-        JFreeChart chart = createBaseXYChart();
-
-        XYPlot plot = chart.getXYPlot();
-
-        plot.setDataset(0, positionDataset);
-
-        /*
-         * Points only for the segment positions
-         */
-        StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
-        XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer();
-        pointRenderer.setBaseShapesVisible(true);
-        pointRenderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
-        pointRenderer.setBaseLinesVisible(false);
-        pointRenderer.setBaseStroke(ChartComponents.QUARTILE_STROKE);
-        pointRenderer.setBaseSeriesVisibleInLegend(false);
-        pointRenderer.setBaseToolTipGenerator(tooltip);
-        plot.setRenderer(0, pointRenderer);
-
-        boolean hasConsensus = new ConsensusNucleusChartFactory(options).hasConsensusNucleus();
-        if (hasConsensus) {
-            // Find the bounds of the consensus nuclei in the options
-            double max = new ConsensusNucleusChartFactory(options).getconsensusChartRange();
-            plot.setDataset(1, nuclearOutlines);
-
-            plot.getDomainAxis().setRange(-max, max);
-            plot.getRangeAxis().setRange(-max, max);
-
-            /*
-             * Lines only for the consensus nuclei
-             */
-            XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
-            lineRenderer.setBaseShapesVisible(false);
-            lineRenderer.setBaseLinesVisible(true);
-            lineRenderer.setBaseStroke(ChartComponents.QUARTILE_STROKE);
-            lineRenderer.setBaseSeriesVisibleInLegend(false);
-            plot.setRenderer(1, lineRenderer);
-
-        } else {
-            plot.getDomainAxis().setAutoRange(true);
-            plot.getRangeAxis().setAutoRange(true);
-        }
-        plot.setBackgroundPaint(Color.WHITE);
-
-        for (int j = 0; j < positionDataset.getSeriesCount(); j++) {
-
-        	Paint profileColour = options.getDatasets().get(j).getDatasetColour().orElse(ColourSelecter.getColor(j));
-
-            pointRenderer.setSeriesPaint(j, profileColour);
-            pointRenderer.setSeriesShape(j, ChartComponents.DEFAULT_POINT_SHAPE);
-
-            if (hasConsensus) {
-                plot.getRenderer(1).setSeriesPaint(j, profileColour);
-            }
-        }
-        applyDefaultAxisOptions(chart);
-        return chart;
-
     }
 
     /**

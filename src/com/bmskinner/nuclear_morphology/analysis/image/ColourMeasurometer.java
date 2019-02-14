@@ -46,8 +46,6 @@ import ij.process.ImageProcessor;
  */
 public class ColourMeasurometer implements Loggable {
 
-    // public ColourMeasurometer(){}
-
     /**
      * Calculate the median greyscale intensity in the given component of a
      * cell.
@@ -66,8 +64,7 @@ public class ColourMeasurometer implements Loggable {
      * the area of the given component
      * 
      * @param component
-     * @param ip
-     *            the image processor to search
+     * @param ip the image processor to search
      * @return
      */
     public static int calculateAverageIntensity(CellularComponent component, ImageProcessor ip) {
@@ -79,8 +76,7 @@ public class ColourMeasurometer implements Loggable {
      * Get the average RGB values within the area.
      * 
      * @param a
-     * @param ip
-     *            a color immage processor
+     * @param ip a color immage processor
      * @return
      */
     private static int calculateAverageIntensity(Area a, ImageProcessor ip, double quartile) {
@@ -118,20 +114,15 @@ public class ColourMeasurometer implements Loggable {
         	ds.addValue(d);
         }
         return (int) ds.getPercentile(quartile);
-
-//        Quartile q = Quartile.quartile(grey, quartile);
-//        return q.intValue();
     }
 
     /**
      * Calculate the median greyscale intensity of the given processor within
      * the area of the given component
      * 
-     * @param component
-     * @param ip
-     *            the image processor to search
-     * @param quartile
-     *            the quartile to return, from 0-100
+     * @param component the component to measure
+     * @param ip the image processor to search
+     * @param quartile the quartile to return, from 0-100
      * @return
      */
     public static int calculateIntensity(CellularComponent component, ImageProcessor ip, double quartile) {
@@ -168,9 +159,9 @@ public class ColourMeasurometer implements Loggable {
             return calculateAverageCytoplasmRGB(c);
         }
 
-        if (CellularComponent.NUCLEUS.equals(component)) {
-            // TODO
-        }
+//        if (CellularComponent.NUCLEUS.equals(component)) {
+//            // TODO
+//        }
 
         return Color.BLACK; // default if nothing calculated
 
@@ -224,8 +215,7 @@ public class ColourMeasurometer implements Loggable {
      * Get the average RGB values within the area.
      * 
      * @param a
-     * @param ip
-     *            a color immage processor
+     * @param ip a color immage processor
      * @return
      */
     private static Color calculateAverageRGB(Area a, ImageProcessor ip) {
@@ -285,8 +275,6 @@ public class ColourMeasurometer implements Loggable {
         	ds.addValue(d);
         }
         return (int) ds.getPercentile(Stats.MEDIAN);
-//        Quartile q = new Quartile(list, Quartile.MEDIAN);
-//        return q.intValue();
     }
 
 }

@@ -39,7 +39,7 @@ public interface FilteringOptions {
 	 * or if any statistics of a type pass filters? For example, if a nuclear signal
 	 * filter is set, must all signals meet the criteria, or do we want the cell even if
 	 * it has signals that don't match? */
-	final static String ALL_MATCH_KEY = "All_match";
+	String ALL_MATCH_KEY = "All_match";
 	
 	/**
 	 * Add a minimum value for the given statistic. The measurement scale is assumed to be pixels.

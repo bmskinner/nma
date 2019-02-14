@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -48,7 +49,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.13.6
  *
  */
-public class DatasetValidator {
+public class DatasetValidator implements Loggable {
 
 	public static final List<String> errorList = new ArrayList<>();
 	public static final Set<ICell> errorCells  = new HashSet<>();
@@ -254,6 +255,7 @@ public class DatasetValidator {
 					}
 				} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					// allow isOk to fall through
+					fine("No border tag present");
 				}
 
 				if(!isOk) {

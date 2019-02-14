@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public abstract class MultipleDatasetAnalysisMethod extends AbstractAnalysisMethod {
     
-    final protected List<IAnalysisDataset> datasets = new ArrayList<>();
+    protected final List<IAnalysisDataset> datasets = new ArrayList<>();
     
     /**
      * Construct with a list of datasets to be analysed

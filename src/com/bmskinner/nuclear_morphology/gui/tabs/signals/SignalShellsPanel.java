@@ -49,7 +49,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer.ShellResultFilterOperation;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ShellChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
@@ -100,12 +99,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private static final String DAPI_NORM_TOOLTIP      = "Apply a correction for nuclear flattening based on the DNA counterstain";
     private static final String SHOW_RANDOM_TOOLTIP    = "Show a random distribution of signals in the consensus nucleus";
     private static final String SHOW_NUCLEI_TOOLTIP    = "Show nuclei in the dataset with shells annotated";
-
-    private static final int P_VALUE_COLUMN = 3;
-    private static final int PAIRWISE_P_VALUE_COLUMN = 4;
     
     private ExportableChartPanel chartPanel;
-//    private ExportableChartPanel consensusPanel;
 
     private JRadioButton withinSignalsBtn = new JRadioButton(WITHIN_SIGNALS_LBL);
     private JRadioButton withinNucleiBtn  = new JRadioButton(WITHIN_NUCLEI_LBL);
@@ -203,16 +198,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     }
 
-    private ExportableChartPanel createConsensusPanel() {
-
-        JFreeChart chart = ConsensusNucleusChartFactory.createEmptyChart();
-
-        ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
-        chartPanel.setFixedAspectRatio(true);
-
-        return chartPanel;
-    }
-
     /**
      * Create the header panel
      * 
@@ -271,7 +256,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         	try {
 				new DemoReportGenerator().generateShellReport(activeDataset());
 			} catch (IOException e1) {
-				
+				warn("Unable to generate report");
 			}
         });
 //        panel.add(reportBtn);
@@ -472,6 +457,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
             super(true);
             this.dataset = dataset;
             createUI();
+            setTitle(title);
             pack();
             setVisible(true);
         }
@@ -495,7 +481,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 			try {
 				log("Found "+filtered.size()+" cells");
 				ICellCollection virt = new VirtualCellCollection(dataset, "Filtered_on_shell");
-				filtered.getCells().forEach(c->virt.addCell(c));
+				filtered.getCells().forEach(virt::addCell);
 				dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
 				dataset.addChildCollection(virt);		
 				getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);

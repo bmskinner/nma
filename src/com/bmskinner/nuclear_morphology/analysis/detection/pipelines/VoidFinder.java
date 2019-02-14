@@ -17,14 +17,13 @@
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
-import java.util.stream.Stream;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 /**
- * An implementation of the Finder for analyses that don't return values For
+ * An implementation of the Finder for analyses that don't return values. For
  * example, FISH remapping and signal assignment
  * 
  * @author ben
@@ -40,24 +39,20 @@ public abstract class VoidFinder extends AbstractFinder<Void> {
     @Override
     public Void findInFolder(File folder) throws ImageImportException {
 
-        File[] arr = folder.listFiles();
-        if (arr == null) {
+        File[] files = folder.listFiles();
+        if (files == null)
             return null;
+
+        for(File f : files) {
+        	if (ImageImporter.fileIsImportable(f)) {
+        		try {
+        			findInImage(f);
+        		} catch (ImageImportException e) {
+        			stack("Error searching image", e);
+        		}
+        	}
+
         }
-
-        Stream.of(arr).parallel().forEach(f -> {
-            if (!f.isDirectory()) {
-
-                if (ImageImporter.fileIsImportable(f)) {
-                    try {
-                        findInImage(f);
-                    } catch (ImageImportException e) {
-                        stack("Error searching image", e);
-                    }
-                }
-            }
-        });
-
         return null;
     }
 

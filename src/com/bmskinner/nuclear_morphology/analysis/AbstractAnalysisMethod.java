@@ -40,8 +40,7 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 public abstract class AbstractAnalysisMethod implements IAnalysisMethod, ProgressListener {
 
-//    protected IAnalysisDataset dataset;
-    private List<Object>       listeners = new ArrayList<Object>();
+    private List<Object>       listeners = new ArrayList<>();
     protected IAnalysisResult  result    = null;
 
     public AbstractAnalysisMethod() {}
@@ -75,21 +74,21 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
      * listeners. For example, can set progress bar lengths 
      * @param totalProgress the total number of steps in the task
      */
-    final protected void fireUpdateProgressTotalLength(int totalProgress) {
+    protected final void fireUpdateProgressTotalLength(int totalProgress) {
     	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalProgress));
     }
     
     /**
      * Alert progress listeners that the task length has become indeterminate
      */
-    final protected void fireIndeterminateState() {
+    protected final void fireIndeterminateState() {
     	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0));
     }
 
     /**
      * Fire a progress event to listeners, indicating one step of the task has been completed
      */
-    final protected void fireProgressEvent() {
+    protected final void fireProgressEvent() {
         ProgressEvent e = new ProgressEvent(this);
         fireProgressEvent(e);
     }
@@ -99,12 +98,12 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
      * have been completed.
      * @param stepsNewlyCompleted the number of steps of the task completed
      */
-    final protected void fireProgressEvent(long stepsNewlyCompleted) {
+    protected final void fireProgressEvent(long stepsNewlyCompleted) {
         ProgressEvent e = new ProgressEvent(this, ProgressEvent.INCREASE_BY_VALUE, stepsNewlyCompleted);
         fireProgressEvent(e);
     }
 
-    final protected void fireProgressEvent(ProgressEvent e) {
+    protected final void fireProgressEvent(ProgressEvent e) {
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
             ((ProgressListener) iterator.next()).progressEventReceived(e);
@@ -122,13 +121,14 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
      * @param total the total number of steps
      * @param millisToSleep the number of milliseconds to sleep between each step
      */
-    final protected void spinWheels(final int total, final int millisToSleep) {
+     protected final void spinWheels(final int total, final int millisToSleep) {
         for (int i = 0; i < total; i++) {
             fireProgressEvent();
             try {
                 Thread.sleep(millisToSleep);
             } catch (InterruptedException e) {
                 error("Thread interrupted", e);
+                return;
             }
         }
     }

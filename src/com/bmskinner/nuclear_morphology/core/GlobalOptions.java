@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.core;
 
 import java.io.File;
-import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -34,7 +33,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 @SuppressWarnings("serial")
 public class GlobalOptions extends AbstractHashOptions {
 
-    private static volatile GlobalOptions instance;
+    private static GlobalOptions instance;
     private static final Object           lockObject = new Object(); // synchronisation
     
     public static final String DEFAULT_DIR_KEY              = "DEFAULT_DIR";
@@ -64,12 +63,9 @@ public class GlobalOptions extends AbstractHashOptions {
 
     private MeasurementScale scale;
 
-//    private Level programLogLevel;
-//    private Level conLogLevel;
-
     private ColourSwatch swatch;
 
-    private static double DEFAULT_SCALE = 1;
+    private static final double DEFAULT_SCALE = 1;
 
     private NucleusType defaultType;
     
@@ -99,7 +95,6 @@ public class GlobalOptions extends AbstractHashOptions {
     }
 
     public void setDefaults() {
-//        this.programLogLevel = Level.INFO;
         this.scale = MeasurementScale.PIXELS;
         this.swatch = ColourSwatch.REGULAR_SWATCH;
         setBoolean(IS_VIOLIN_KEY, true);
@@ -127,7 +122,7 @@ public class GlobalOptions extends AbstractHashOptions {
         return scale;
     }
 
-    public void setScale(MeasurementScale scale) {
+    public synchronized void setScale(MeasurementScale scale) {
         this.scale = scale;
     }
 
@@ -145,7 +140,7 @@ public class GlobalOptions extends AbstractHashOptions {
         return getDouble(DEFAULT_IMAGE_SCALE_KEY);
     }
 
-    public void setImageScale(double scale) {
+    public synchronized void setImageScale(double scale) {
         setDouble(DEFAULT_IMAGE_SCALE_KEY, scale);
     }
 
@@ -153,7 +148,7 @@ public class GlobalOptions extends AbstractHashOptions {
         return swatch;
     }
 
-    public void setSwatch(ColourSwatch swatch) {
+    public synchronized void setSwatch(ColourSwatch swatch) {
         this.swatch = swatch;
     }
 
@@ -161,7 +156,7 @@ public class GlobalOptions extends AbstractHashOptions {
         return getBoolean(IS_VIOLIN_KEY);
     }
 
-    public void setViolinPlots(boolean violinPlots) {
+    public synchronized void setViolinPlots(boolean violinPlots) {
         setBoolean(IS_VIOLIN_KEY, violinPlots);
     }
 
@@ -215,13 +210,51 @@ public class GlobalOptions extends AbstractHashOptions {
     public synchronized File getDefaultDir() {
         if (defaultDir.exists()) {
             return defaultDir;
-        } else {
-            return new File(System.getProperty("user.home"));
         }
+		return new File(System.getProperty("user.home"));
     }
 
     public synchronized void setDefaultDir(File f) {
         this.defaultDir = f;
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((datasetExportFormat == null) ? 0 : datasetExportFormat.hashCode());
+		result = prime * result + ((defaultDir == null) ? 0 : defaultDir.hashCode());
+		result = prime * result + ((defaultType == null) ? 0 : defaultType.hashCode());
+		result = prime * result + ((scale == null) ? 0 : scale.hashCode());
+		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GlobalOptions other = (GlobalOptions) obj;
+		if (datasetExportFormat != other.datasetExportFormat)
+			return false;
+		if (defaultDir == null) {
+			if (other.defaultDir != null)
+				return false;
+		} else if (!defaultDir.equals(other.defaultDir))
+			return false;
+		if (defaultType != other.defaultType)
+			return false;
+		if (scale != other.scale)
+			return false;
+		if (swatch != other.swatch)
+			return false;
+		return true;
+	}
+    
+    
 
 }

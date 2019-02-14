@@ -64,9 +64,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
         fireIndeterminate();
 
         // do the analysis and wait for the result
-        IAnalysisResult r=  method.call();
-//        fine("Method completed, returning");
-        return r;
+        return method.call();
     }
 
     @Override
@@ -104,17 +102,14 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     }
 
     private void fireIndeterminate() {
-//    	fine("Firing indeterminate");
         firePropertyChange(IAnalysisWorker.INDETERMINATE_MSG, getProgress(), IAnalysisWorker.INDETERMINATE);
     }
 
     @Override
     public void done() {
-//    	fine("Task is done");
         try {
 
             if (this.get() != null) {
-//                fine("Firing trigger for sucessful task");
                 firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
 
             } else {

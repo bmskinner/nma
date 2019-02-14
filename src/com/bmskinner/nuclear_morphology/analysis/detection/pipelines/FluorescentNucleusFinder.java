@@ -50,10 +50,10 @@ import ij.process.ImageProcessor;
 
 public class FluorescentNucleusFinder extends CellFinder {
 
-    final private ComponentFactory<Nucleus> nuclFactory;
+    private final ComponentFactory<Nucleus> nuclFactory;
     private final IDetectionOptions nuclOptions;
     
-    public FluorescentNucleusFinder(final IAnalysisOptions op) {
+    public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op) {
         super(op);
         nuclFactory = new NucleusFactory(op.getNucleusType());
         Optional<? extends IDetectionOptions> n = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
@@ -173,26 +173,21 @@ public class FluorescentNucleusFinder extends CellFinder {
         Map<Roi, StatsMap> rois = gd.getRois(img.duplicate());
         fine("Image: "+imageFile.getName()+": "+rois.size()+" rois");
         
-        int i=0;
-        for (Roi r: rois.keySet()) {
-            StatsMap s = rois.get(r);
+        for (Roi roi : rois.keySet()) {
+            StatsMap s = rois.get(roi);
 
             try {
-            	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, s);
+            	Nucleus n = makeNucleus(roi, imageFile, s);
             	list.add(n);
             } catch(ComponentCreationException e) {
             	stack("Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
-            } finally {
-            	i++;
             }
-            
-            
         }
         return list;
 
     }
 
-    private synchronized Nucleus makeNucleus(@NonNull final Roi roi, @NonNull final File f, @NonNull final IDetectionOptions nuclOptions, int objectNumber,
+    private synchronized Nucleus makeNucleus(final Roi roi, final File f,
             final StatsMap values) throws ComponentCreationException {
         
         fine("Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));

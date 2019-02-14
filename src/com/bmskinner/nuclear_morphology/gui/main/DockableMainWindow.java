@@ -73,11 +73,9 @@ import com.javadocking.model.FloatDockModel;
  *
  */
 public class DockableMainWindow extends AbstractMainWindow {
-	private JPanel contentPane;
 
     private LogPanel logPanel;
     private PopulationsPanel populationsPanel;
-    private ConsensusNucleusPanel consensusNucleusPanel;
     private TabDock tabDock; // bottom panel tabs
 
     /**
@@ -112,7 +110,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             Dimension preferredSize = new Dimension(1080, 804);
             this.setPreferredSize(preferredSize);
             setBounds(100, 100, 1012, 804);
-            contentPane = new JPanel();
+            JPanel contentPane = new JPanel();
             contentPane.setBorder(new EmptyBorder(2, 2, 2, 2));
             contentPane.setLayout(new BorderLayout(2, 2));
             setContentPane(contentPane);
@@ -138,7 +136,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             // Create the consensus chart
             // ---------------
             populationsPanel = new PopulationsPanel(eh.getInputSupplier());            
-            consensusNucleusPanel = new ConsensusNucleusPanel(eh.getInputSupplier());
+            ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel(eh.getInputSupplier());
             detailPanels.add(consensusNucleusPanel);
             
             
@@ -325,10 +323,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 		if(event.getSource().equals(eh)){
 			InterfaceMethod method = event.method();
 
-			switch(method) {
-	        case CLEAR_LOG_WINDOW: logPanel.clear();
-	            break;
-			}
+			if(method.equals(InterfaceMethod.CLEAR_LOG_WINDOW))
+				logPanel.clear();
 
 		}
 	}

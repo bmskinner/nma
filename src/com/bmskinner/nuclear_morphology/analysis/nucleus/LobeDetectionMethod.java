@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -41,12 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus.IncorrectNucleusTypeException;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -71,15 +65,12 @@ import inra.ijpb.watershed.Watershed;
  */
 public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 
-    private IHoughDetectionOptions options;
-
     private static final double DEFAULT_MIN_LOBE_AREA = 10;
 
     private final LobeFactory factory = new LobeFactory();
 
     public LobeDetectionMethod(IAnalysisDataset dataset, IHoughDetectionOptions op) {
         super(dataset);
-        options = op;
     }
 
     @Override

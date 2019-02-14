@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -52,7 +53,8 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  */
 public class CosmeticHandler implements Loggable {
     
-    private final TabPanel parent;
+    private static final String CHOOSE_A_NEW_NAME_LBL = "Choose a new name";
+	private final TabPanel parent;
     
     /**
      * Create the handler for a panel
@@ -127,12 +129,10 @@ public class CosmeticHandler implements Loggable {
         ICellCollection collection = dataset.getCollection();
         
         try {
-    		String newName = parent.getInputSupplier().requestString("Choose a new name", collection.getName());
+    		String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, collection.getName());
     		collection.setName(newName);
     		parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-    	} catch(RequestCancelledException e) {
-    		return;
-    	}
+    	} catch(RequestCancelledException e) {}
     }
     
     /**
@@ -143,7 +143,7 @@ public class CosmeticHandler implements Loggable {
     public void renameClusterGroup(@NonNull IClusterGroup group) {
 
     	try {
-    		String newName = parent.getInputSupplier().requestString("Choose a new name", group.getName());
+    		String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, group.getName());
     		group.setName(newName);
     		parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
     	} catch(RequestCancelledException e) {
@@ -159,7 +159,7 @@ public class CosmeticHandler implements Loggable {
     public void renameWorkspace(@NonNull IWorkspace workspace) {
         
     	try {
-    		String newName = parent.getInputSupplier().requestString("Choose a new name", workspace.getName());
+    		String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, workspace.getName());
     		workspace.setName(newName);
             parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
     	} catch(RequestCancelledException e) {
@@ -198,17 +198,17 @@ public class CosmeticHandler implements Loggable {
      * @param signalGroup
      */
     public void renameSignalGroup(@NonNull IAnalysisDataset d, @NonNull UUID signalGroup) {
-    	if(!d.getCollection().hasSignalGroup(signalGroup))
+    	Optional<ISignalGroup> groupValue = d.getCollection().getSignalGroup(signalGroup);
+    	if(!groupValue.isPresent())
     		return;
+    	ISignalGroup group = groupValue.get();
+    	String oldName = group.getGroupName();
     	
     	try {
-    		String oldName = d.getCollection().getSignalGroup(signalGroup).get().getGroupName();
-    		String newName = parent.getInputSupplier().requestString("Choose a new name", oldName);
-    		d.getCollection().getSignalGroup(signalGroup).get().setGroupName(newName);
+    		String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, oldName);
+    		group.setGroupName(newName);
     		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
-    	} catch(RequestCancelledException e) {
-    		return;
-    	}
+    	} catch(RequestCancelledException e) {}
     }
 
     /**
@@ -227,9 +227,7 @@ public class CosmeticHandler implements Loggable {
 
     		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, newFolder.getAbsoluteFile());
     		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
-    	} catch (RequestCancelledException e) {
-    		return;
-    	}           
+    	} catch (RequestCancelledException e) {}           
 
     }
     
@@ -250,9 +248,7 @@ public class CosmeticHandler implements Loggable {
     				n.setSourceFolder(folder);
     		
     		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);    				
-    	} catch (RequestCancelledException e) {
-    		return;
-    	}           
+    	} catch (RequestCancelledException e) {}           
 
     }
     
@@ -268,9 +264,7 @@ public class CosmeticHandler implements Loggable {
     		    		
     		d.getCollection().setSourceFolder(newFolder);
     		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
-    	} catch (RequestCancelledException e) {
-    		return;
-    	}           
+    	} catch (RequestCancelledException e) {}           
 
     }
 }
