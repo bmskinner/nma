@@ -19,7 +19,9 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -77,7 +80,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
 
     private IAnalysisDataset sourceDataset;
-    private Nucleus          target;
     private UUID             signalGroup;
     
     /** The options for the analysis */
@@ -95,8 +97,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
      * @param source the dataset with signals to be warped
      * @param target the nucleus to warp signals onto
      * @param signalGroup the signal group id to be warped
-     * @param cellsWithSignals if true, only cells with defined signals will be included
-     * @param straighten if true, the signals will be warped onto a straightened mesh
+     * @param warpingOptions the options to use for warping
      */
     public SignalWarper(@NonNull final IAnalysisDataset source, @NonNull final Nucleus target, @NonNull final UUID signalGroup, @NonNull HashOptions warpingOptions) {
 
@@ -108,7 +109,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
             throw new IllegalArgumentException("Must have options");
 
         this.sourceDataset = source;
-        this.target = target;
         this.signalGroup = signalGroup;
         this.warpingOptions = warpingOptions;
 
@@ -121,7 +121,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         
         try {
     		// Create the consensus mesh to warp each cell onto
-    		meshConsensus = new DefaultMesh<Nucleus>(target);
+    		meshConsensus = new DefaultMesh<>(target);
         } catch (MeshCreationException e2) {
     		stack("Error creating mesh", e2);
     		throw new IllegalArgumentException("Could not create mesh", e2);
@@ -150,10 +150,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
     public void done() {
         try {
             if (this.get() != null) {
-                finest("Firing trigger for sucessful task");
                 firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);
             } else {
-                finest("Firing trigger for failed task");
                 firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
             }
         } catch (InterruptedException e) {
@@ -171,22 +169,28 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
      */
     private List<ImageProcessor> generateImages() {
     	finer("Generating warped images for " + sourceDataset.getName());
-    	List<ImageProcessor> warpedImages = new ArrayList<>();
+    	final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
     	
     	Set<ICell> cells = getCells(warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY));
+    	
+    	cells.parallelStream().flatMap(c->c.getNuclei().stream()).forEach(n->{
+    		finer("Drawing signals for " + n.getNameAndNumber());
+			ImageProcessor nImage = generateNucleusImage(n);
+			warpedImages.add(nImage);
+			publish(warpedImages.size());
+    	});
 
-    	int cellNumber = 0;
-
-    	for (ICell cell : cells) {
-
-    		for (Nucleus n : cell.getNuclei()) {
-    			finer("Drawing signals for " + n.getNameAndNumber());
-
-    			ImageProcessor nImage = generateNucleusImage(n);
-    			warpedImages.add(nImage);
-    			publish(cellNumber++);
-    		}
-    	}
+//    	int cellNumber = 0;
+//    	for (ICell cell : cells) {
+//
+//    		for (Nucleus n : cell.getNuclei()) {
+//    			finer("Drawing signals for " + n.getNameAndNumber());
+//
+//    			ImageProcessor nImage = generateNucleusImage(n);
+//    			warpedImages.add(nImage);
+//    			publish(cellNumber++);
+//    		}
+//    	}
     	return warpedImages;
     }
     
@@ -221,10 +225,15 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    } else {
 		    	// We need to get the file in which no signals were detected
 		    	// This is not stored in a nucleus, so combine the expected file name with the source folder
-		    	INuclearSignalOptions signalOptions = sourceDataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup);
-		    	File imageFolder = signalOptions.getFolder();
-		    	File imageFile   = new File(imageFolder, n.getSourceFileName());
-		    	ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
+		    	Optional<IAnalysisOptions> analysisOptions = sourceDataset.getAnalysisOptions();
+		    	if(analysisOptions.isPresent()) {
+		    		INuclearSignalOptions signalOptions = analysisOptions.get().getNuclearSignalOptions(signalGroup);
+		    		File imageFolder = signalOptions.getFolder();
+		    		File imageFile   = new File(imageFolder, n.getSourceFileName());
+		    		ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
+		    	} else {
+		    		return createEmptyProcessor();
+		    	}
 		    }
 		    
 		    if(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)>0)
