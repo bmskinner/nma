@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
@@ -18,7 +17,7 @@ import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
  */
 public class CellCollectionOverviewModel extends DefaultTableModel {
 	
-	private List<Object> selected = new ArrayList<>();
+	private transient List<Object> selected = new ArrayList<>();
 	
 	/**
 	 * Create a model with a desired number of rows and columns

@@ -24,10 +24,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JButton;
@@ -50,8 +50,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -76,9 +74,10 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	private static final String SELECT_ALL_LBL = "Select all";
 	private static final String ROTATE_VERTICAL_LBL = "Rotate vertical";
 	private static final String NUCLEAR_SIGNAL_LBL = "Nuclear signal: ";
-	private static final int DEGREES_180 = 180;
-	private static final int DEGREES_360 = 360;
     public static final int ROW_IMAGE_HEIGHT   = 150;
+    
+    private JButton curateBtn;
+    private JCheckBox selectAllChkBox;
     
     /**
      * Map ids for e.g. signal groups to a display name.
@@ -88,8 +87,8 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
      *
      */
     private class ComponentSelectionItem {
-    	public UUID uuid;
-    	public String displayName;
+    	public final UUID uuid;
+    	public final String displayName;
     	
     	public ComponentSelectionItem(String s, UUID id) {
     		this.uuid = id;
@@ -110,8 +109,10 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	@Override
 	protected void createWorker(){
 		worker = new CellImportWorker(dataset, table.getModel(), true, CellularComponent.NUCLEUS);
-		worker.removePropertyChangeListener(this);
+		worker.removePropertyChangeListener(this); // clear any existing listeners
         worker.addPropertyChangeListener(this);
+        curateBtn.setEnabled(false);
+        selectAllChkBox.setEnabled(false);
         worker.execute();
         
         this.addWindowListener(new WindowAdapter() {
@@ -125,14 +126,17 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	@Override
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
+		
+		curateBtn = new JButton(MAKE_NEW_COLLECTION_LBL);
 
         JCheckBox rotateBtn = new JCheckBox(ROTATE_VERTICAL_LBL, true);
         
         List<Object> components = new ArrayList<>();
         
-        boolean hasCytoplasm = dataset.getCollection().getCells().stream().anyMatch(c->c.hasCytoplasm());
+        boolean hasCytoplasm = dataset.getCollection().getCells().stream().anyMatch(ICell::hasCytoplasm);
         if(hasCytoplasm) // Only add cytoplasm option if present in at least one cell
         	components.add(CellularComponent.CYTOPLASM);
+        
         components.add(CellularComponent.NUCLEUS);
         for(UUID signalGroupId : dataset.getCollection().getSignalGroupIDs()) {
         	ISignalGroup sg = dataset.getCollection().getSignalGroup(signalGroupId).get();
@@ -146,6 +150,8 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         	worker.removePropertyChangeListener(this);
             progressBar.setVisible(true);
             progressBar.setValue(0);
+            curateBtn.setEnabled(false);
+            selectAllChkBox.setEnabled(false);
             worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem());
             worker.addPropertyChangeListener(this);
             worker.execute();
@@ -157,6 +163,8 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         	worker.removePropertyChangeListener(this);
             progressBar.setVisible(true);
             progressBar.setValue(0);
+            curateBtn.setEnabled(false);
+            selectAllChkBox.setEnabled(false);
             worker = new CellImportWorker(dataset, table.getModel(), rotateBtn.isSelected(), componntBox.getSelectedItem());
             worker.addPropertyChangeListener(this);
             worker.execute();
@@ -167,14 +175,14 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         header.add(componntBox);
         header.add(rotateBtn);
 
-        JCheckBox selectAll = new JCheckBox(SELECT_ALL_LBL);
-        selectAll.addActionListener(e -> {
-            model.setAllSelected(selectAll.isSelected());
+        selectAllChkBox = new JCheckBox(SELECT_ALL_LBL);
+        selectAllChkBox.addActionListener(e -> {
+            model.setAllSelected(selectAllChkBox.isSelected());
             table.repaint();
         });
-        header.add(selectAll);
+        header.add(selectAllChkBox);
 
-        JButton curateBtn = new JButton(MAKE_NEW_COLLECTION_LBL);
+        
         curateBtn.addActionListener(e ->  makeNewCollection());
         header.add(curateBtn);
         return header;
@@ -248,6 +256,16 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         }
     }
     
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+    	super.propertyChange(evt);
+    	if (evt.getPropertyName().equals("Finished")) {
+    		curateBtn.setEnabled(true);
+    		selectAllChkBox.setEnabled(true);
+    	}
+    	
+    }
+    
     /**
      * Import the cell images for the curator
      * @author ben
@@ -284,8 +302,6 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    			stack("Unable to rotate", e);
 	    		}
 	    		ip.flipVertical(); // Y axis needs inverting
-	    		
-//	    		fine(String.format("Nucleus %s is clockwise: %s", c.getNucleus().getNameAndNumber(), c.getNucleus().isClockwiseRP()));
 	    		
 	    		if(c.getNucleus().isClockwiseRP())
 	    			ip.flipHorizontal();
@@ -327,7 +343,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    	return flipAndScaleImage(c, ip);
 	    }
 	    
-	    private ImageProcessor importSignal(UUID signal, ICell c) throws UnloadableImageException, ImageImportException {
+	    private ImageProcessor importSignal(UUID signal, ICell c) throws ImageImportException {
 	    	
 	    	INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal);
 	    	
