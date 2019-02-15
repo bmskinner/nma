@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 
@@ -44,6 +45,8 @@ import ij.process.TypeConverter;
  *
  */
 public abstract class AbstractImageFilterer implements Loggable {
+	
+	private static Logger logger = Logger.getLogger(ROOT_LOGGER);
 
     private static final int RGB_WHITE = 16777215;
     private static final int RGB_BLACK = 0;
@@ -620,7 +623,7 @@ public abstract class AbstractImageFilterer implements Loggable {
         if (nonNull == 0)
             return mergeProcessor;
 
-        // Average the pixels
+        // Average the pixels        
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
 
@@ -646,7 +649,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     
     /**
      * Create a new 16-bit image processor with the sum of all the non-null
-     * 8-bit images in the given list
+     * 8-bit images in the given list.
      * 
      * @return
      */
@@ -657,38 +660,70 @@ public abstract class AbstractImageFilterer implements Loggable {
          // Check images are same dimensions
          int w = list.get(0).getWidth();
          int h = list.get(0).getHeight();
-         int nonNull = 0;
       
          // check sizes match
          for (ImageProcessor ip : list) {
-             if (ip == null)
-                 continue;
+             if (ip == null) {
+            	 return new ShortProcessor(w, h);
+             }
+             
              if (w != ip.getWidth() || h != ip.getHeight())
                  throw new IllegalArgumentException("Dimensions do not match");
-             nonNull++;
+             
          }
-         // Create an empty white processor of the correct dimensions
-         ImageProcessor mergeProcessor = new ShortProcessor (w, h);
 
-         if (nonNull == 0)
-             return mergeProcessor;
-
-         // Average the pixels
+         // Average the pixels. Track the highest value to avoid short overflows
+         int maxPixelValue = 0;
+         int[][] imageTotals = new int[w][h];
+         
          for (int x = 0; x < w; x++) {
              for (int y = 0; y < h; y++) {
-
                  int pixelTotal = 0;
                  for (ImageProcessor ip : list) {
                      if (ip == null)
                          continue;
-                     pixelTotal+= ip.get(x, y);
+                     pixelTotal += ip.get(x, y);
                  }
-                 mergeProcessor.set(x, y, pixelTotal);
+                 maxPixelValue = Math.max(maxPixelValue, pixelTotal);
+                 imageTotals[x][y] = pixelTotal;
              }
          }
-         return mergeProcessor;
+         
+         // Return the scaled processor
+         return createScaledShortProcessor(imageTotals, maxPixelValue);
     }
+    
+    /**
+     * Given int pixel values, create a 16bit short processor, and scale the values if needed to
+     * avoid overflows
+     * @param pixelValues the pixel values for the image
+     * @param maxValue the maximum pixel value in the image
+     * @return
+     */
+    private static ImageProcessor createScaledShortProcessor(int[][] pixelValues, int maxValue) {
+    	int w = pixelValues.length;
+    	int h = pixelValues[0].length;
+    	
+    	ImageProcessor result = new ShortProcessor(w, h);
+    	
+    	if(maxValue > Short.MAX_VALUE) {
+    		logger.fine(String.format("Rescaling pixels with max value %s to fit short range", maxValue));
+    		for (int x = 0; x < w; x++) {
+    			for (int y = 0; y < h; y++) {
+    				pixelValues[x][y] = (int) ((((double)pixelValues[x][y])/(double)maxValue) * (double)Short.MAX_VALUE);
+    			}
+    		}
+    	}
 
+    	 for (int x = 0; x < w; x++) {
+             for (int y = 0; y < h; y++) {
+            	 result.set(x, y, pixelValues[x][y]);
+             }
+    	 }
+    	
+    	 return result;
+    }
+    
     /**
      * Calculate a measure of the colocalisation of values in the given images.
      * ImageA is coloured red, imageB is coloured blue, and regions of
