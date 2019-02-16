@@ -76,6 +76,10 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         finest("Created dataset merging dialog");
     }
 
+    /**
+     * Get any matched signal groups. Can be empty.
+     * @return
+     */
     public PairedSignalGroups getPairedSignalGroups() {
         return this.pairedSignalGroups;
     }

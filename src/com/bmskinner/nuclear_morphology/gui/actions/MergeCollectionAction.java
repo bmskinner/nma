@@ -48,6 +48,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 
     private static final String PROGRESS_BAR_LABEL   = "Merging";
     private static final String DEFAULT_DATASET_NAME = "Merge_of_datasets";
+    private static final int NUMBER_OF_STEPS = 100;
 
     public MergeCollectionAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
@@ -56,55 +57,53 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
     @Override
     public void run() {
 
-    	if (!datasetsAreMergeable(datasets)) {
+    	if (!datasetsAreMergeable()) {
     		cancel();
     		return;
     	}
 
-    	// Try to find a sensible ancestor dir of the datasets as the save
-    	// dir
+    	// Try to find a sensible ancestor dir of the datasets
     	// Otherwise default to the home dir
     	File dir = IAnalysisDataset.commonPathOfFiles(datasets);
-    	if (!dir.exists() || !dir.isDirectory()) {
+    	if (!dir.exists() || !dir.isDirectory())
     		dir = GlobalOptions.getInstance().getDefaultDir();
-    	}
 
     	try {
     		File saveFile = new DefaultInputSupplier().requestFileSave(dir, DEFAULT_DATASET_NAME, Io.SAVE_FILE_EXTENSION_NODOT);
 
-    		// Check for signals in >1 dataset
-    		int numSignals = 0;
-    		for (IAnalysisDataset d : datasets) {
-    			if (d.getCollection().getSignalManager().hasSignals())
-    				numSignals++;
-    		}
-
     		IAnalysisMethod m;
 
-    		if (numSignals > 1) {
+    		if (hasMoreThanOneSignalGroup()) {
 
     			DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
     			PairedSignalGroups pairs = dialog.getPairedSignalGroups();
+    			m = new DatasetMergeMethod(datasets, saveFile, pairs);
 
-    			if (!pairs.isEmpty()) {
-    				// User decided to merge signals
-    				m = new DatasetMergeMethod(datasets, saveFile, pairs);
-    			} else {
-    				m = new DatasetMergeMethod(datasets, saveFile);
-    			}
     		} else {
-    			finest("No signal groups to merge");
     			// no signals to merge
     			m = new DatasetMergeMethod(datasets, saveFile);
     		}
 
-    		worker = new DefaultAnalysisWorker(m, 100);
+    		worker = new DefaultAnalysisWorker(m, NUMBER_OF_STEPS);
     		worker.addPropertyChangeListener(this);
     		ThreadManager.getInstance().submit(worker);
 
     	} catch (RequestCancelledException e) {
     		cancel();
     	}
+    }
+    
+    /**
+     * Check for signals in >1 dataset
+     * @return
+     */
+    private boolean hasMoreThanOneSignalGroup() {
+		int numSignals = 0;
+		for (IAnalysisDataset d : datasets) {
+			if (d.getCollection().getSignalManager().hasSignals())
+				numSignals++;
+		}
+		return numSignals > 1;
     }
 
     /**
@@ -113,7 +112,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
      * @param datasets
      * @return
      */
-    private boolean datasetsAreMergeable(List<IAnalysisDataset> datasets) {
+    private boolean datasetsAreMergeable() {
 
     	if (datasets.size() == 2 && (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0)))) {
     		warn("No. Merging parent and child is silly.");

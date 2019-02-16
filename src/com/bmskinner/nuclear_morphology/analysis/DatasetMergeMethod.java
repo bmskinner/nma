@@ -339,7 +339,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     
 
     private void mergeSignalGroups(ICellCollection newCollection) {
-        if (pairedSignalGroups == null) {
+        if (pairedSignalGroups == null || pairedSignalGroups.isEmpty()) {
             finer("No signal groups to merge");
             return;
         }
