@@ -20,10 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,6 +33,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
+import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
@@ -64,7 +63,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
     private JButton setEqualButton;
 
     // Store the ids of signal groups that should be merged
-    private Map<UUID, Set<UUID>> pairedSignalGroups = new HashMap<UUID, Set<UUID>>();
+    private PairedSignalGroups pairedSignalGroups = new PairedSignalGroups();
 
     public DatasetMergingDialog(List<IAnalysisDataset> datasets) {
         this.datasets = datasets;
@@ -77,7 +76,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         finest("Created dataset merging dialog");
     }
 
-    public Map<UUID, Set<UUID>> getPairedSignalGroups() {
+    public PairedSignalGroups getPairedSignalGroups() {
         return this.pairedSignalGroups;
     }
 
@@ -164,19 +163,19 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 
         model.setColumnIdentifiers(columns);
 
-        for (UUID id1 : pairedSignalGroups.keySet()) {
+        for (DatasetSignalId id1 : pairedSignalGroups.keySet()) {
 		    String col1 = "";
 		    for (IAnalysisDataset d : datasets) {
-		        if (d.getCollection().getSignalManager().hasSignals(id1)) {
-		            col1 = d.getName() + " : " + d.getCollection().getSignalGroup(id1).get().getGroupName();
+		        if (d.getCollection().getSignalManager().hasSignals(id1.s)) {
+		            col1 = d.getName() + " : " + d.getCollection().getSignalGroup(id1.s).get().getGroupName();
 		        }
 		    }
-		    Set<UUID> idList = pairedSignalGroups.get(id1);
-		    for (UUID id2 : idList) {
+		    Set<DatasetSignalId> idList = pairedSignalGroups.get(id1);
+		    for (DatasetSignalId id2 : idList) {
 		        String col2 = "";
 		        for (IAnalysisDataset d : datasets) {
-		            if (d.getCollection().getSignalManager().hasSignals(id2)) {
-		                col2 = d.getName() + " : " + d.getCollection().getSignalGroup(id2).get().getGroupName();
+		            if (d.getCollection().getSignalManager().hasSignals(id2.s)) {
+		                col2 = d.getName() + " : " + d.getCollection().getSignalGroup(id2.s).get().getGroupName();
 		            }
 		        }
 
@@ -195,8 +194,11 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         IAnalysisDataset d1 = datasetBoxOne.getSelectedDataset();
         IAnalysisDataset d2 = datasetBoxTwo.getSelectedDataset();
 
-        UUID id1 = signalBoxOne.getSelectedID();
-        UUID id2 = signalBoxTwo.getSelectedID();
+        UUID s1 = signalBoxOne.getSelectedID();
+        UUID s2 = signalBoxTwo.getSelectedID();
+        
+        DatasetSignalId id1 = pairedSignalGroups.new DatasetSignalId(d1.getId(), s1);
+        DatasetSignalId id2 = pairedSignalGroups.new DatasetSignalId(d2.getId(), s2);
 
         if (e.getSource() == datasetBoxOne) {
             signalBoxOne.setDataset(d1);
@@ -206,12 +208,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         }
 
         if (e.getSource() == setEqualButton) {
-            Set<UUID> idSet = pairedSignalGroups.get(id1);
-            if (idSet == null) {
-                idSet = new HashSet<UUID>();
-                pairedSignalGroups.put(id1, idSet);
-            }
-            idSet.add(id2);
+        	pairedSignalGroups.add(id1, id2);
             updateTable();
         }
 

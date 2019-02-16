@@ -18,9 +18,6 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,16 +26,17 @@ import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
-
-import ij.io.SaveDialog;
+import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
  * Carry out a merge of datasets
@@ -48,9 +46,8 @@ import ij.io.SaveDialog;
  */
 public class MergeCollectionAction extends MultiDatasetResultAction {
 
-    private static final String PROGRESS_BAR_LABEL         = "Merging";
-    private final String        SAVE_DIALOG_TITLE    = "Save merged dataset as...";
-    private final String        DEFAULT_DATASET_NAME = "Merge_of_datasets";
+    private static final String PROGRESS_BAR_LABEL   = "Merging";
+    private static final String DEFAULT_DATASET_NAME = "Merge_of_datasets";
 
     public MergeCollectionAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
@@ -59,70 +56,55 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
     @Override
     public void run() {
 
-        if (!checkDatasetsMergable(datasets)) {
-            this.cancel();
+    	if (!datasetsAreMergeable(datasets)) {
+    		cancel();
+    		return;
+    	}
 
-        } else {
+    	// Try to find a sensible ancestor dir of the datasets as the save
+    	// dir
+    	// Otherwise default to the home dir
+    	File dir = IAnalysisDataset.commonPathOfFiles(datasets);
+    	if (!dir.exists() || !dir.isDirectory()) {
+    		dir = GlobalOptions.getInstance().getDefaultDir();
+    	}
 
-            // Try to find a sensible ancestor dir of the datasets as the save
-            // dir
-            // Otherwise default to the home dir
-            File dir = IAnalysisDataset.commonPathOfFiles(datasets);
-            if (!dir.exists() || !dir.isDirectory()) {
-                dir = GlobalOptions.getInstance().getDefaultDir();
-            }
+    	try {
+    		File saveFile = new DefaultInputSupplier().requestFileSave(dir, DEFAULT_DATASET_NAME, Io.SAVE_FILE_EXTENSION_NODOT);
 
-            SaveDialog saveDialog = new SaveDialog(SAVE_DIALOG_TITLE, dir.getAbsolutePath(), DEFAULT_DATASET_NAME,
-                    Importer.SAVE_FILE_EXTENSION);
+    		// Check for signals in >1 dataset
+    		int numSignals = 0;
+    		for (IAnalysisDataset d : datasets) {
+    			if (d.getCollection().getSignalManager().hasSignals())
+    				numSignals++;
+    		}
 
-            String fileName = saveDialog.getFileName();
-            String folderName = saveDialog.getDirectory();
+    		IAnalysisMethod m;
 
-            if (fileName != null && folderName != null) {
-                File saveFile = new File(folderName, fileName);
+    		if (numSignals > 1) {
 
-                // Check for signals in >1 dataset
-                int signals = 0;
-                for (IAnalysisDataset d : datasets) {
-                    if (d.getCollection().getSignalManager().hasSignals()) {
-                        signals++;
-                    }
-                }
+    			DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
+    			PairedSignalGroups pairs = dialog.getPairedSignalGroups();
 
-                IAnalysisMethod m;
+    			if (!pairs.isEmpty()) {
+    				// User decided to merge signals
+    				m = new DatasetMergeMethod(datasets, saveFile, pairs);
+    			} else {
+    				m = new DatasetMergeMethod(datasets, saveFile);
+    			}
+    		} else {
+    			finest("No signal groups to merge");
+    			// no signals to merge
+    			m = new DatasetMergeMethod(datasets, saveFile);
+    		}
 
-                if (signals > 1) {
+    		worker = new DefaultAnalysisWorker(m, 100);
+    		worker.addPropertyChangeListener(this);
+    		ThreadManager.getInstance().submit(worker);
 
-                    DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
-
-                    Map<UUID, Set<UUID>> pairs = dialog.getPairedSignalGroups();
-
-                    if (pairs.keySet().size() != 0) {
-                        finest("Found paired signal groups");
-                        // User decided to merge signals
-                        m = new DatasetMergeMethod(datasets, saveFile, pairs);
-
-                        // worker = new DatasetMerger(datasets, saveFile,
-                        // pairs);
-                    } else {
-                        finest("No paired signal groups");
-                        m = new DatasetMergeMethod(datasets, saveFile);
-                        // worker = new DatasetMerger(datasets, saveFile);
-                    }
-                } else {
-                    finest("No signal groups to merge");
-                    // no signals to merge
-                    // worker = new DatasetMerger(datasets, saveFile);
-                    m = new DatasetMergeMethod(datasets, saveFile);
-                }
-
-                worker = new DefaultAnalysisWorker(m, 100);
-                worker.addPropertyChangeListener(this);
-                ThreadManager.getInstance().submit(worker);
-            } else {
-                this.cancel();
-            }
-        }
+    	} catch (RequestCancelledException e) {
+    		cancel();
+    	}
     }
 
     /**
@@ -131,20 +113,13 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
      * @param datasets
      * @return
      */
-    private boolean checkDatasetsMergable(List<IAnalysisDataset> datasets) {
+    private boolean datasetsAreMergeable(List<IAnalysisDataset> datasets) {
 
-        if (datasets.size() == 2) {
-
-            if (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0))
-
-            ) {
-                warn("No. Merging parent and child is silly.");
-                return false;
-            }
-
-        }
-        return true;
-
+    	if (datasets.size() == 2 && (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0)))) {
+    		warn("No. Merging parent and child is silly.");
+    		return false;
+    	}
+    	return true;
     }
 
     @Override
@@ -161,7 +136,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
         }
         List<IAnalysisDataset> datasets = r.getDatasets();
 
-        if (datasets != null && datasets.size() > 0)
+        if (datasets != null && !datasets.isEmpty())
         	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets);
 
         super.finished();

@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,8 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
+import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -49,14 +52,14 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  *
  */
 public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
-
+	
     /** Should warped signals be copied into new signal groups  */
     private static final boolean COPY_WARPED = false;
 
 	private File saveFile;
 
     /** Describe which signal groups will be merged */
-    private Map<UUID, Set<UUID>> pairedSignalGroups = null;
+    private PairedSignalGroups pairedSignalGroups = null;
 
     private static final int MAX_PROGRESS = 100;
     private static final int MILLISECONDS_TO_SLEEP = 10;
@@ -70,8 +73,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * does not save out the file to the save path 
      */
     public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, File saveFile) {
-        super(datasets);
-        this.saveFile = saveFile;
+        this(datasets, saveFile, null);
     }
 
     /**
@@ -82,8 +84,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * does not save out the file to the save path 
      * @param pairedSignalGroups the signal groups which are to be merged
      */
-    public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, File saveFile, Map<UUID, Set<UUID>> pairedSignalGroups) {
-        this(datasets, saveFile);
+    public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, File saveFile, PairedSignalGroups pairedSignalGroups) {
+        super(datasets);
+        this.saveFile = saveFile;
         this.pairedSignalGroups = pairedSignalGroups;
     }
 
@@ -317,18 +320,18 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
 		
 		for(String s : t1.getSubOptionKeys()){
-			IDetectionSubOptions result = t1.getSubOptions(s);
+			IDetectionSubOptions mergedOptions = t1.getSubOptions(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
 				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
 				if(nOptions.hasSubOptions(s))
-					canAdd &= nOptions.getSubOptions(s).equals(result);
+					canAdd &= nOptions.getSubOptions(s).equals(mergedOptions);
 				else
-					canAdd=false;
+					canAdd = false;
 			}
 			if(canAdd)
-				merged.setSubOptions(s, result);
+				merged.setSubOptions(s, mergedOptions);
 		}
     	
     }
@@ -345,9 +348,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
         // Decide which signal groups get which new ids
         // Key is old signal group. Entry is new id
-        Map<UUID, UUID> mergedSignalGroups = new HashMap<>();
+        Map<DatasetSignalId, UUID> mergedSignalGroups = new HashMap<>();
 
-        for (UUID id1 : pairedSignalGroups.keySet()) {
+        for (DatasetSignalId id1 : pairedSignalGroups.keySet()) {
 
             // If this id is not encountered, make a new one
             if (!mergedSignalGroups.keySet().contains(id1)) {
@@ -358,8 +361,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
             UUID newID = mergedSignalGroups.get(id1);
 
             // All the set share this new id
-            Set<UUID> id2Set = pairedSignalGroups.get(id1);
-            for (UUID id2 : id2Set) {
+            Set<DatasetSignalId> id2Set = pairedSignalGroups.get(id1);
+            for (DatasetSignalId id2 : id2Set) {
                 finest("Adding " + id2 + " to " + newID);
                 mergedSignalGroups.put(id2, newID);
             }
@@ -371,14 +374,14 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         // Add the old signal groups to the new collection
 
         finer("Updating signal group ids");
-        for (UUID oldID : mergedSignalGroups.keySet()) {
+        for (DatasetSignalId oldID : mergedSignalGroups.keySet()) {
 
             finer("Old group id for signals  : " + oldID);
 
             UUID newID = mergedSignalGroups.get(oldID);
             finer("New group id to merge into: " + newID);
 
-            newCollection.getSignalManager().updateSignalGroupID(oldID, newID);
+            newCollection.getSignalManager().updateSignalGroupID(oldID.s, newID);
         }
         
     }
