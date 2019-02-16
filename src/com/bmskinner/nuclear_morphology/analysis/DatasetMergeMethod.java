@@ -19,9 +19,9 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -176,10 +177,11 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * @param newCollection
      * @param sources
      * @return the merged dataset
+     * @throws UnavailableProfileTypeException 
+     * @throws MissingOptionException 
      * @throws Exception
      */
-    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection)
-            throws Exception {
+    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws UnavailableProfileTypeException, MissingOptionException{
 
         for (IAnalysisDataset d : datasets) {
             
@@ -374,14 +376,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         // Add the old signal groups to the new collection
 
         finer("Updating signal group ids");
-        for (DatasetSignalId oldID : mergedSignalGroups.keySet()) {
-
-            finer("Old group id for signals  : " + oldID);
-
-            UUID newID = mergedSignalGroups.get(oldID);
+        for (Entry<DatasetSignalId, UUID> entry : mergedSignalGroups.entrySet()) {
+        	DatasetSignalId oldId = entry.getKey();
+            UUID newID = entry.getValue();
             finer("New group id to merge into: " + newID);
 
-            newCollection.getSignalManager().updateSignalGroupID(oldID.s, newID);
+            newCollection.getSignalManager().updateSignalGroupID(oldId.s, newID);
         }
         
     }
