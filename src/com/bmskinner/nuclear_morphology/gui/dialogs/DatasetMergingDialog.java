@@ -49,7 +49,9 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
 @SuppressWarnings("serial")
 public class DatasetMergingDialog extends LoadingIconDialog implements ActionListener {
 
-    private List<IAnalysisDataset> datasets;
+    private static final String SIGNAL_GROUP_COL_LBL = "Signal group";
+
+	private List<IAnalysisDataset> datasets;
 
     private DatasetSelectionPanel datasetBoxOne;
     private DatasetSelectionPanel datasetBoxTwo;
@@ -151,7 +153,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 
         DefaultTableModel model = new DefaultTableModel();
 
-        Object[] columns = { "Signal group", "Signal group" };
+        Object[] columns = { SIGNAL_GROUP_COL_LBL, SIGNAL_GROUP_COL_LBL };
 
         model.setColumnIdentifiers(columns);
 
@@ -163,14 +165,14 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 
         DefaultTableModel model = new DefaultTableModel();
 
-        Object[] columns = { "Signal group", "Signal group" };
+        Object[] columns = { SIGNAL_GROUP_COL_LBL, SIGNAL_GROUP_COL_LBL };
 
         model.setColumnIdentifiers(columns);
 
         for (DatasetSignalId id1 : pairedSignalGroups.keySet()) {
 		    String col1 = "";
 		    for (IAnalysisDataset d : datasets) {
-		        if (d.getCollection().getSignalManager().hasSignals(id1.s)) {
+		        if (d.getId().equals(id1.d) && d.getCollection().getSignalManager().hasSignals(id1.s)) {
 		            col1 = d.getName() + " : " + d.getCollection().getSignalGroup(id1.s).get().getGroupName();
 		        }
 		    }
@@ -178,7 +180,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 		    for (DatasetSignalId id2 : idList) {
 		        String col2 = "";
 		        for (IAnalysisDataset d : datasets) {
-		            if (d.getCollection().getSignalManager().hasSignals(id2.s)) {
+		        	if(d.getId().equals(id2.d) && d.getCollection().getSignalManager().hasSignals(id2.s)) {
 		                col2 = d.getName() + " : " + d.getCollection().getSignalGroup(id2.s).get().getGroupName();
 		            }
 		        }
