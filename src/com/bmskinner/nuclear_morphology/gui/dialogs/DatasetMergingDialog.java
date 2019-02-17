@@ -201,9 +201,6 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         UUID s1 = signalBoxOne.getSelectedID();
         UUID s2 = signalBoxTwo.getSelectedID();
         
-        DatasetSignalId id1 = pairedSignalGroups.new DatasetSignalId(d1.getId(), s1);
-        DatasetSignalId id2 = pairedSignalGroups.new DatasetSignalId(d2.getId(), s2);
-
         if (e.getSource() == datasetBoxOne) {
             signalBoxOne.setDataset(d1);
         }
@@ -212,7 +209,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         }
 
         if (e.getSource() == setEqualButton) {
-        	pairedSignalGroups.add(id1, id2);
+        	pairedSignalGroups.add(d1.getId(), s1, d2.getId(), s2);
             updateTable();
         }
 

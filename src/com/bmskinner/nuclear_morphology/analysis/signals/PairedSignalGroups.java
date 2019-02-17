@@ -17,6 +17,22 @@ import org.eclipse.jdt.annotation.NonNull;
 public class PairedSignalGroups {
 	private final Map<DatasetSignalId, Set<DatasetSignalId>> map = new HashMap<>();
 	
+	/**
+	 * Add a signal group pair
+	 * @param d1 the id of the first dataset
+	 * @param s1 the id of the first signal group
+	 * @param d2 the id of the second dataset
+	 * @param s2 the id of the second signal group
+	 */
+	public void add(@NonNull final UUID d1, @NonNull final UUID s1, @NonNull final UUID d2, @NonNull final UUID s2) {
+		add(new DatasetSignalId(d1, s1), new DatasetSignalId(d2, s2));
+	}
+
+	/**
+	 * Add a signal group pair
+	 * @param id1 the first dataset/signal group combined id
+	 * @param id2 the second dataset/signal group combined id
+	 */
 	public void add(@NonNull final DatasetSignalId id1, @NonNull final DatasetSignalId id2) {
 		if(map.containsKey(id1)) {
 			map.get(id1).add(id2);
