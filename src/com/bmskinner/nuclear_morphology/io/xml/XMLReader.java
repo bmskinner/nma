@@ -208,14 +208,12 @@ public abstract class XMLReader<T> implements Loggable {
 		
 		if(detectedObject.startsWith(IAnalysisOptions.NUCLEAR_SIGNAL) ) {
 			try {
-				
 				Element idElement = e.getChild(XMLCreator.ID_KEY);
-				UUID id =idElement==null?UUID.randomUUID(): UUID.fromString(idElement.getText());				
+				UUID id = idElement==null ? UUID.randomUUID() : UUID.fromString(idElement.getText());				
 				INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
 				addKeyedValues(e, n);				
 				for(Element component : e.getChildren(OptionsXMLCreator.SUB_OPTION_KEY)) {
 					String subType = component.getAttribute(OptionsXMLCreator.SUB_TYPE_KEY).getValue();
-					System.out.println("Component: "+component.getName()+ ": "+subType);
 					if(subType.equals(IDetectionSubOptions.SHELL_OPTIONS)) {
 						IShellOptions s = new DefaultShellOptions();
 						addKeyedValues(component, s);

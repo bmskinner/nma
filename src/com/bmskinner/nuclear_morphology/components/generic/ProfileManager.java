@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileManager implements Loggable {
-    final private ICellCollection collection;
+    private final ICellCollection collection;
 
     public ProfileManager(final ICellCollection collection) {
         this.collection = collection;
@@ -89,7 +89,7 @@ public class ProfileManager implements Loggable {
      */
     public void updateTagToMedianBestFit(@NonNull Tag tag, @NonNull ProfileType type, @NonNull IProfile median) {
 
-        collection.getNuclei().stream().forEach(n -> {
+        collection.getNuclei().parallelStream().forEach(n -> {
             if (!n.isLocked()) {
             	try {
             		// returns the positive offset index of this profile which best
@@ -110,7 +110,6 @@ public class ProfileManager implements Loggable {
                 }
             }
         });
-
     }
 
     /**
@@ -227,7 +226,6 @@ public class ProfileManager implements Loggable {
     private void updateExtendedBorderTagIndex(@NonNull Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
-    	int rpIndex  = collection.getProfileCollection().getIndex(Tag.REFERENCE_POINT);
         int oldIndex = collection.getProfileCollection().getIndex(tag);
 
         if (oldIndex == -1)
@@ -242,12 +240,10 @@ public class ProfileManager implements Loggable {
         	int existingTagIndex = collection.getProfileCollection().getIndex(existingTag);
         	if(index==existingTagIndex) {
         		updateProfileCollectionOffsets(tag, index);
-        		// update nuclei
         		
-        		for(Nucleus n : collection.getNuclei()) {
-        			if(n.isLocked())
-        				continue;
-        			
+        		// update nuclei - allow possible parallel processing
+        		collection.getNuclei().parallelStream().filter(n->!n.isLocked())
+        		.forEach(n->{
         			try {
         				int existingIndex = n.getBorderIndex(existingTag);
         				n.setBorderTag(tag, existingIndex);
@@ -257,9 +253,25 @@ public class ProfileManager implements Loggable {
         				}
         			} catch (UnavailableBorderTagException e) {
         				stack(e);
-        				continue;
         			}
-        		}
+        		});
+        		
+//        		for(Nucleus n : collection.getNuclei()) {
+//        			if(n.isLocked())
+//        				continue;
+//        			
+//        			try {
+//        				int existingIndex = n.getBorderIndex(existingTag);
+//        				n.setBorderTag(tag, existingIndex);
+//        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
+//            				n.updateDependentStats();
+//            				setOpUsingTvBv(n);
+//        				}
+//        			} catch (UnavailableBorderTagException e) {
+//        				stack(e);
+//        				continue;
+//        			}
+//        		}
         		
         		//Update consensus
         		if (collection.hasConsensus()) {
@@ -288,14 +300,11 @@ public class ProfileManager implements Loggable {
         finer("Updating tag in nuclei");
         updateTagToMedianBestFit(tag, ProfileType.ANGLE, median);
 
-        collection.updateVerticalNuclei();
-
         /*
          * Set the border tag in the consensus median profile
          */
         if (collection.hasConsensus()) {
             Nucleus n = collection.getRawConsensus().component();
-            int oldNIndex = n.getBorderIndex(tag);
             int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
             n.setBorderTag(tag, newIndex);
             setOpUsingTvBv(n);
@@ -667,7 +676,6 @@ public class ProfileManager implements Loggable {
     		return false;
     	
         // check the boundaries of the segment - we do not want to merge across the RP
-        int rpIndex = collection.getProfileCollection().getIndex(Tag.REFERENCE_POINT);
         for (Tag tag : BorderTagObject.values(BorderTagType.CORE)) {
 
              // Find the position of the border tag in the median profile

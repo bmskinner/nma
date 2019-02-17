@@ -20,9 +20,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements Loggable {
-	
-	
-	
+
 	public OptionsXMLCreator(@NonNull IAnalysisDataset dataset) {
 		super(dataset);
 	}
