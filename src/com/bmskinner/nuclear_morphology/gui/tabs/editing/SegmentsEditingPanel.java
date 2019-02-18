@@ -436,7 +436,10 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     	List<SegMergeItem> names = new ArrayList<>();
 
     	// Put the names of the mergable segments into a list
-    	for (IBorderSegment seg : medianProfile.getOrderedSegments()) {
+    	
+    	List<IBorderSegment> segList = medianProfile.getOrderedSegments();
+    	for (int i=0; i<segList.size()-1; i++) { // Do not allow merges across the RP
+    		IBorderSegment seg = segList.get(i); 
     		SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
     		names.add(item);
     	}
