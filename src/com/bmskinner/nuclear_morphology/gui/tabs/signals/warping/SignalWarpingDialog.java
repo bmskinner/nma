@@ -320,7 +320,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	if(!signalBox.hasSelection()) 
     	    		runButton.setEnabled(false);
     	    	
-    	    	progressBar.setVisible(false);
+    	    	progressBar.setEnabled(false);
     	    	
     	    	upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
     	    	upperPanel.add(datasetBoxOne);
@@ -502,7 +502,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	        	setSettingsEnabled(false);
 
     	            progressBar.setStringPainted(true);
-    	            progressBar.setVisible(true);
+    	            progressBar.setEnabled(true);
     	            
     	            HashOptions ho = new DefaultOptions();
     	            ho.setBoolean(SignalWarper.IS_STRAIGHTEN_MESH_KEY, SignalWarper.REGULAR_MESH);
@@ -606,7 +606,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
         if (IAnalysisWorker.FINISHED_MSG.equals(evt.getPropertyName())) {
             progressBar.setValue(0);
-            progressBar.setVisible(false);
+            progressBar.setEnabled(false);
             controller.warpingComplete(warper);
         }
 
