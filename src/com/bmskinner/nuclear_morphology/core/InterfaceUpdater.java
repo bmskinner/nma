@@ -23,5 +23,5 @@ package com.bmskinner.nuclear_morphology.core;
  *
  */
 public interface InterfaceUpdater extends Runnable {
-
+	
 }
