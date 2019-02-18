@@ -115,8 +115,10 @@ public class SegmentStatsPanel extends DetailPanel {
     private TableOptions makeOptions() {
 
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setTarget(table).setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
+                .setScale(GlobalOptions.getInstance().getScale())
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setTarget(table)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
                 .build();
         return options;
     }

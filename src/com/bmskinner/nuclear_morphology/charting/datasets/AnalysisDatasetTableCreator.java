@@ -222,10 +222,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     /**
      * Create a table of segment stats for median profile of the given dataset.
      * 
-     * @param dataset
-     *            the AnalysisDataset to include
+     * @param dataset the AnalysisDataset to include
      * @return a table model
-     * @throws Exception
      */
     private TableModel createMultiDatasetMedianProfileSegmentStatsTable() {
 
@@ -235,23 +233,20 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         DefaultTableModel model = new DefaultTableModel();
 
-        List<IAnalysisDataset> list = options.getDatasets();
         // If the datasets have different segment counts, show error message
-        if (!IBorderSegment.segmentCountsMatch(list)) {
+        if (!IBorderSegment.segmentCountsMatch(options.getDatasets())) {
             model.addColumn(Labels.INCONSISTENT_SEGMENT_NUMBER);
             return model;
         }
 
         MeasurementScale scale = options.getScale();
 
-        List<Object> fieldNames = new ArrayList<Object>(0);
-
-        BorderTagObject point = Tag.REFERENCE_POINT;// .ORIENTATION_POINT;
+        List<Object> fieldNames = new ArrayList<>();
 
         // assumes all datasets have the same number of segments
         List<IBorderSegment> segments;
         try {
-            segments = list.get(0).getCollection().getProfileCollection().getSegments(point);
+            segments = options.firstDataset().getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
         } catch (UnavailableBorderTagException | ProfileException e1) {
             fine("Error getting segments from profile collection", e1);
             return createBlankTable();
@@ -259,51 +254,49 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         // Add the dataset names column
         fieldNames.add(Labels.DATASET);
+        
+        List<Object> colours = new ArrayList<>();
+        colours.add(EMPTY_STRING);
+        
         for (IBorderSegment segment : segments) {
             fieldNames.add(segment.getName());
+            colours.add(EMPTY_STRING); // Add the segment colours columns
         }
+        
         model.setColumnIdentifiers(fieldNames.toArray());
-        ;
-
-        // Add the segment colours column
-        List<Object> colours = new ArrayList<Object>(0);
-        colours.add(EMPTY_STRING);
-
-        for (int i = 0; i < segments.size(); i++) {
-            colours.add(EMPTY_STRING);
-        }
         model.addRow(colours.toArray(new Object[0]));
 
         // Add the segment stats columns
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
-        for (IAnalysisDataset dataset : list) {
+        for (IAnalysisDataset dataset : options.getDatasets()) {
 
             ICellCollection collection = dataset.getCollection();
 
-            List<IBorderSegment> segs;
             try {
-                segs = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN)
+            	List<IBorderSegment> segs = collection.getProfileCollection()
+            			.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getOrderedSegments();
+            	
+            	List<Object> rowData = new ArrayList<>();
+                rowData.add(dataset.getName());
+                
+                for (IBorderSegment segment : segs) {
+
+                    double[] meanLengths = collection.getRawValues(PlottableStatistic.LENGTH,
+                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
+                    double mean = DoubleStream.of(meanLengths).average().orElse(0);
+
+                    ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
+                    rowData.add(df.format(mean) + " ± "
+                            + df.format(ci.getSize().doubleValue()));
+                }
+                model.addRow(rowData.toArray(new Object[0]));
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
-                fine("Error getting median profile", e);
+                stack("Error getting median profile", e);
                 return createBlankTable();
             }
-
-            List<Object> rowData = new ArrayList<Object>(0);
-            rowData.add(dataset.getName());
-            DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-            for (IBorderSegment segment : segs) {
-
-                double[] meanLengths = collection.getRawValues(PlottableStatistic.LENGTH,
-                        CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
-                double mean = DoubleStream.of(meanLengths).average().orElse(0);
-
-                ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
-                rowData.add(df.format(mean) + " ± "
-                        + df.format(ci.getSize().doubleValue()));
-            }
-            model.addRow(rowData.toArray(new Object[0]));
         }
 
         return model;
@@ -324,13 +317,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         TableOptions op = options;
 
-        if (op.getType().equals(TableType.ANALYSIS_PARAMETERS)) {
+        if (op.getType().equals(TableType.ANALYSIS_PARAMETERS))
             return createAnalysisParametersTable();
-        }
 
-        if (op.getType().equals(TableType.ANALYSIS_STATS)) {
+        if (op.getType().equals(TableType.ANALYSIS_STATS))
             return createStatsTable();
-        }
 
         return createBlankTable();
     }
