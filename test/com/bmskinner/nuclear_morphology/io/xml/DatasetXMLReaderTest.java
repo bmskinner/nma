@@ -14,6 +14,7 @@ import org.jdom2.Document;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
@@ -30,6 +31,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  * @since 1.14.0
  *
  */
+@Ignore // the XML format is not yet finalised
 public class DatasetXMLReaderTest extends ComponentTester {
 
 	private void testXMLRead(File f) throws Exception {
