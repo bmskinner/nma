@@ -54,9 +54,11 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
@@ -384,8 +386,18 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	return panel;
     	    }
     	    
-    	    public void setMSSIM(String s) {
-    	    	mssimScore.setText(s);
+    	    /**
+    	     * Set the MS-SSIM value to display. 
+    	     * @param nComparisons the number of comparisons made
+    	     * @param values the MS-SSIM value of a comparison
+    	     */
+    	    public void setMSSIM(int nComparisons, @Nullable MSSIMScore values) {
+    	    	if(values==null) {
+    	    		mssimScore.setText("");
+    	    	} else {
+    	    		mssimScore.setText(values.toString());
+    	    	}  
+    	    	showComparisonBtn.setEnabled(nComparisons==2);
     	    }
     	    
     	    
