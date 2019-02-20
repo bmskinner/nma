@@ -36,6 +36,8 @@ MS-SSIM index by Zhou Wang and MS-SSIM* Index by David Rouse and Sheila Hemami
  */
 package com.bmskinner.nuclear_morphology.analysis.image;
 
+import java.text.DecimalFormat;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import ij.process.ColorProcessor;
@@ -76,6 +78,12 @@ public class MultiScaleStructuralSimilarityIndex {
 			contrast = c;
 			structure = s;
 			msSsimIndex = m;
+		}
+		
+		@Override
+		public String toString() {
+			DecimalFormat df = new DecimalFormat("0.000");
+			return df.format(msSsimIndex);
 		}
 	}
 
