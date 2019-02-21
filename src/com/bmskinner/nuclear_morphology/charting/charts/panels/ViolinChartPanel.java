@@ -36,7 +36,6 @@ public class ViolinChartPanel extends ExportableChartPanel {
         Plot p = this.getChart().getPlot();
 
         if (!(p instanceof CategoryPlot)) {
-            finer("Not a category plot in volin panel");
             super.restoreAutoBounds();
             return;
         }
@@ -44,7 +43,6 @@ public class ViolinChartPanel extends ExportableChartPanel {
         CategoryPlot plot = (CategoryPlot) p;
 
         if (!(plot.getDataset(0) instanceof ViolinCategoryDataset)) {
-            finer("Not a violin dataset in volin panel");
             super.restoreAutoBounds();
             return;
         }
@@ -52,7 +50,6 @@ public class ViolinChartPanel extends ExportableChartPanel {
         ViolinCategoryDataset dataset = (ViolinCategoryDataset) plot.getDataset(0);
 
         if (!dataset.hasProbabilities()) {
-            finer("No probabilities in dataset in volin panel");
             super.restoreAutoBounds();
             return;
         }
@@ -64,8 +61,6 @@ public class ViolinChartPanel extends ExportableChartPanel {
             Range r = ds.getProbabiltyRange();
             result = Range.combine(result, r);
         }
-        finest("Probability range: " + result.toString());
-
         plot.getRangeAxis().setRange(result);
 
     }

@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -37,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 
 /**
  * Find cells from a .cell file and assign them to child datasets.
@@ -210,48 +212,35 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         return map.keySet();
     }
 
-    private ICell getCellFromLine(String line) {
-        fine("Processing line: " + line);
-
-        if (line.length() < 5) {
-            // not enough room for a path and number, skip
-            return null;
-        }
+    private ICell getCellFromLine(String line) throws CellRelocationException {
+        finest("Processing line: " + line);
 
         // Line format is FilePath\tPosition as x-y
+        // Build a file name based on the current image folder and the stored filename
+        // Note - we don't need the file to exist for the assignment to work
+        Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+        if(analysisOptions.isPresent()) {
+        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get().getDetectionOptions(CellularComponent.NUCLEUS);
+        	if(nucleusOptions.isPresent()) {
+        		File currentImageDirectory = nucleusOptions.get().getFolder();
 
-        // get file name
+        		File savedFile = getFile(line);
+        		// Get the image name and substitute the parent dataset path.
+        		savedFile = new File(currentImageDirectory, savedFile.getName());
 
-        File file = getFile(line);
-        if (!file.isFile() || !file.exists()) {
-
-            // Get the image name and substitute the parent dataset path.
-            File newFolder = dataset.getCollection().getFolder();
-            if (newFolder.exists()) {
-                fine("Updating folder to " + newFolder.getAbsolutePath());
-                file = new File(newFolder, file.getName());
-                fine("Updating path to " + file);
-            } else {
-                fine("File does not exist or is malformed: " + file.toString());
-                return null;
-            }
-
-            //
+        		// get position
+        		IPoint com = getPosition(line);
+        		return copyCellFromRoot(savedFile, com);
+        	} else {
+        		throw new CellRelocationException("No nuclear detection options - cannot check directory path");
+        	}
+        } else {
+        	throw new CellRelocationException("No analysis options - cannot check directory path");
         }
 
-        // get position
-        IPoint com;
+        
 
-        try {
-            com = getPosition(line);
-        } catch (Exception e) {
-            warn(line);
-            warn(file.getAbsolutePath());
-            stack("Cannot get position", e);
-            return null;
-        }
-
-        return copyCellFromRoot(file, com);
+       
 
     }
 
@@ -286,7 +275,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         return f;
     }
 
-    private IPoint getPosition(String line) throws Exception {
+    private IPoint getPosition(String line) {
         String[] array = line.split(TAB);
         String position = array[1];
 
