@@ -70,7 +70,7 @@ public class MultiScaleStructuralSimilarityIndex {
 	 * @since 1.15.0
 	 *
 	 */
-	public class MSSIMScore {
+	public final class MSSIMScore {
 		public final double luminance, contrast, structure, msSsimIndex;
 		
 		public MSSIMScore(double l, double c, double s, double m) {
