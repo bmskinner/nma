@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JPanel;
 
@@ -29,6 +30,8 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FishRemappingFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
@@ -47,35 +50,40 @@ public class FishRemappingProber extends IntegratedImageProber {
      * @param folder the folder of images
      */
     public FishRemappingProber(@NonNull final IAnalysisDataset dataset, @NonNull final File fishImageDir) {
-        this.dataset = dataset;
+    	this.dataset = dataset;
 
-        try {
 
-            // make the panel
-            Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(), fishImageDir);
+    	Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+    	if(analysisOptions.isPresent()) {
+    		// make the panel
+    		Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(), fishImageDir);
 
-            imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
-            
-            imageProberPanel.setSize(imageProberPanel.getPreferredSize());
+    		try {
+				imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
+			} catch (MissingOptionException e) {
+				warn("No options in dataset");
+				this.dispose();
+			}
 
-            JPanel footerPanel = createFooter();
-            this.setOkButtonText(PROCEED_LBL);
+    		imageProberPanel.setSize(imageProberPanel.getPreferredSize());
 
-            this.add(imageProberPanel, BorderLayout.CENTER);
-            this.add(footerPanel, BorderLayout.SOUTH);
+    		JPanel footerPanel = createFooter();
+    		this.setOkButtonText(PROCEED_LBL);
 
-            this.setTitle(DIALOG_TITLE_BAR_LBL);
+    		this.add(imageProberPanel, BorderLayout.CENTER);
+    		this.add(footerPanel, BorderLayout.SOUTH);
 
-        } catch (Exception e) {
-            warn("Error launching FISH remapping window");
-            stack(e.getMessage(), e);
-            this.dispose();
-        }
+    		this.setTitle(DIALOG_TITLE_BAR_LBL);
 
-        this.pack();
-        this.setModal(true);
-        this.setLocationRelativeTo(null); // centre on screen
-        this.setVisible(true);
+
+
+    		this.pack();
+    		this.setModal(true);
+    		this.setLocationRelativeTo(null); // centre on screen
+    		this.setVisible(true);
+    	} else {
+    		this.dispose();
+    	}
     }
 
     @Override

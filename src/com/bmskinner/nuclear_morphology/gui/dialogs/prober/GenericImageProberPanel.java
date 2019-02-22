@@ -232,9 +232,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
             openImage = imageFiles.get(fileIndex);
             run();
         } else {
-            warn("No images found in folder");
-            JOptionPane.showMessageDialog(GenericImageProberPanel.this, "No images found in folder.", "Nope.",
-                    JOptionPane.ERROR_MESSAGE);
+            warn("No images found in folder "+folder.getAbsolutePath());
         }
     }
 

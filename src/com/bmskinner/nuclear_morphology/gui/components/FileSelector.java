@@ -229,7 +229,7 @@ public class FileSelector {
         
     	if(defaultFolder!=null && !defaultFolder.exists())
     		defaultFolder=null;
-    	
+
         JFileChooser fc = new JFileChooser(defaultFolder); // if null, will be home
         fc.setDialogTitle(title);
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
