@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -87,12 +88,26 @@ public class CosmeticHandler implements Loggable {
 				return;
 
 			dataset.getCollection().setScale(scale);
-
+			
 			if(op.isPresent()){
 				Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
 				if(nOp.isPresent())
 					nOp.get().setScale(scale);
 			}
+			
+			for(IAnalysisDataset child : dataset.getAllChildDatasets()) {
+				child.getCollection().setScale(scale);
+				Optional<IAnalysisOptions> childOptions = child.getAnalysisOptions();
+				if(!childOptions.isPresent())
+					continue;
+				Optional<IDetectionOptions> childNucleusOptions = childOptions.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+				if(!childNucleusOptions.isPresent())
+					continue;
+				childNucleusOptions.get().setScale(scale);
+			}
+			
+
+			
 		} catch (RequestCancelledException e) {
 			return;
 		}

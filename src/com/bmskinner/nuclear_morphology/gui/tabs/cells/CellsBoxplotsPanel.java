@@ -92,9 +92,13 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
 
             ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-                    .setTarget(panel).build();
+            ChartOptions options = new ChartOptionsBuilder()
+            		.setDatasets(getDatasets())
+            		.addStatistic(stat)
+                    .setScale(GlobalOptions.getInstance().getScale())
+                    .setSwatch(GlobalOptions.getInstance().getSwatch())
+                    .setTarget(panel)
+                    .build();
 
             setChart(options);
         }
@@ -104,7 +108,6 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
     @Override
     protected synchronized void updateNull() {
         super.updateNull();
-        finest("Passing to update multiple in " + this.getClass().getName());
         updateMultiple();
     }
 

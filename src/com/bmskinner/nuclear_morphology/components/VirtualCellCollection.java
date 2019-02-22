@@ -1059,30 +1059,20 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     /**
-     * Get a list of the given statistic values for each nucleus in the
+     * Get the given statistic values for each cell in the
      * collection
      * 
-     * @param stat
-     *            the statistic to use
-     * @param scale
-     *            the measurement scale
+     * @param stat the statistic to fetch
+     * @param scale the measurement scale
      * @return a list of values
-     * @throws Exception
      */
     private double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
-
-        double[] result = null;
-
-        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
-            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
-
-        }
-		result = getCells().parallelStream().mapToDouble(n -> n.getStatistic(stat)).toArray();
-		Arrays.sort(result);
+    	double[] result = null;
+		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
+			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
+		result = getCells().parallelStream().mapToDouble(c -> c.getStatistic(stat, scale)).sorted().toArray();
 		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
-
-        return result;
-
+		return result;
     }
 
     /**
@@ -1147,16 +1137,14 @@ public class VirtualCellCollection implements ICellCollection {
     
     @Override
     public void setScale(double scale){
-    	clear(MeasurementScale.MICRONS);
-        
-        for (ICell c : getCells()) {
+    	
+        for (ICell c : getCells())
             c.setScale(scale);
-        }
 
-        if (hasConsensus()) {
+        if (hasConsensus())
         	consensusNucleus.component().setScale(scale);
-        }
 
+        clear(MeasurementScale.MICRONS);
     }
 
     @Override
