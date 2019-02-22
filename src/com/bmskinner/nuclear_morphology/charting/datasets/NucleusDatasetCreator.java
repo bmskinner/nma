@@ -759,7 +759,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             if (collection.hasConsensus()) {
                 Nucleus n = collection.getConsensus();
-
+                double consensusScale = n.getScale();
                 double[] xpoints = new double[n.getBorderLength()];
                 double[] ypoints = new double[n.getBorderLength()];
 
@@ -771,8 +771,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     double y = p.getY();
 
                     if (scale.equals(MeasurementScale.MICRONS)) {
-                        x = PlottableStatistic.micronLength(x, n.getScale());
-                        y = PlottableStatistic.micronLength(y, n.getScale());
+                    	
+                        x = PlottableStatistic.lengthToMicrons(x, consensusScale);
+                        y = PlottableStatistic.lengthToMicrons(y, consensusScale);
                     }
 
                     xpoints[j] = x;

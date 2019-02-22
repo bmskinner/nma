@@ -30,6 +30,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 
 /**
  * This is the virtual child dataset, which retains only the pointer to its
@@ -107,6 +108,28 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     @Override
     public void setSavePath(@NonNull File file) {}
 
+    @Override
+    public void setScale(double scale) {				
+		if(scale<=0) // don't allow a scale to cause divide by zero errors
+			return;
+		fine("Setting scale for "+getName()+" to "+scale);
+		getCollection().setScale(scale);
+		
+		Optional<IAnalysisOptions> op = getAnalysisOptions();
+		if(op.isPresent()){
+			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
+			for(String detectedComponent : detectionOptions) {
+				Optional<IDetectionOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				if(subOptions.isPresent())
+					subOptions.get().setScale(scale);
+			}
+		}
+		
+		for(IAnalysisDataset child : getChildDatasets()) {
+			child.setScale(scale);
+		}
+    }
+    
     @Override
     public Set<UUID> getChildUUIDs() {
         Set<UUID> result = new HashSet<UUID>(childDatasets.size());

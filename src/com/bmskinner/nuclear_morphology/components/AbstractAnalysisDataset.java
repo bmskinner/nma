@@ -32,6 +32,9 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -87,7 +90,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     public void setName(String s) {
         cellCollection.setName(s);
     }
-    
+        
     public void setDatasetColour(Color colour) {
         datasetColour = colour;
 

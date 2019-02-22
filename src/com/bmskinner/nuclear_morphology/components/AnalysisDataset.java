@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
@@ -273,6 +274,28 @@ public class AnalysisDataset implements IAnalysisDataset {
     @Override
     public void setSavePath(File file) {
         this.savePath = file;
+    }
+    
+    @Override
+    public void setScale(double scale) {				
+		if(scale<=0) // don't allow a scale to cause divide by zero errors
+			return;
+		fine("Setting scale for "+getName()+" to "+scale);
+		getCollection().setScale(scale);
+		
+		Optional<IAnalysisOptions> op = getAnalysisOptions();
+		if(op.isPresent()){
+			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
+			for(String detectedComponent : detectionOptions) {
+				Optional<IDetectionOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				if(subOptions.isPresent())
+					subOptions.get().setScale(scale);
+			}
+		}
+		
+		for(IAnalysisDataset child : getChildDatasets()) {
+			child.setScale(scale);
+		}
     }
 
     @Override

@@ -693,11 +693,10 @@ public class EventHandler implements Loggable, EventListener {
     private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
     	
     	try {
+    		
 			double scale = ic.requestDouble("Pixels per micron", 1d, 1d, 100000d, 1d);
-			
 			if (scale > 0) { // don't allow a scale to cause divide by zero errors
-				selectedDatasets.stream().forEach(d->d.getCollection().setScale(scale));
-				log("Updated scale to "+scale+" pixels per micron");
+				selectedDatasets.stream().forEach(d->d.setScale(scale));
 				eventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
 			}
 				

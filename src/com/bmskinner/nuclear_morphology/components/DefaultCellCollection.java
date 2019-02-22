@@ -1202,14 +1202,13 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public void setScale(double scale){
-		clear(MeasurementScale.MICRONS);
 
-		for (ICell c : cells) {
+		for (ICell c : cells)
 			c.setScale(scale);
-		}
 
-		if (hasConsensus())
+		if(hasConsensus())
 			consensusNucleus.component().setScale(scale);
+		clear(MeasurementScale.MICRONS);
 	}
 
 	@Override

@@ -384,12 +384,17 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @return
      */
     boolean hasChild(@NonNull UUID child);
-
+    
+    /**
+     * Update the image scale for all cells in the dataset
+     * @param scale
+     */
+    void setScale(double scale);
+    
     /**
      * Set the dataset colour (used in comparisons between datasets)
      * 
-     * @param colour
-     *            the new colour
+     * @param colour the new colour
      */
     void setDatasetColour(Color colour);
 

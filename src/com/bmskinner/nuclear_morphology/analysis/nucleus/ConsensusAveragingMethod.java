@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.Consensus;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -92,6 +93,9 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         IPoint com = IPoint.makeNew(0, 0);
         NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
         Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
+        
+        double scale = dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().getScale();
+        n.setScale(scale);
 
         // Calculate the stats for the new consensus
         // Required for angle window size calculation

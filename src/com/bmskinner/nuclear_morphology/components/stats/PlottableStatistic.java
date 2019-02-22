@@ -343,12 +343,9 @@ public interface PlottableStatistic extends Serializable {
      * Convert the input value (assumed to be pixels) using the given factor (
      * Nucleus.getScale() ) into the appropriate scale
      * 
-     * @param value
-     *            the pixel measure
-     * @param factor
-     *            the conversion factor to microns
-     * @param scale
-     *            the desired scale
+     * @param value the pixel measure
+     * @param factor the conversion factor to microns
+     * @param scale the desired scale
      * @return
      */
     double convert(double value, double factor, MeasurementScale scale);
@@ -366,30 +363,24 @@ public interface PlottableStatistic extends Serializable {
      * Convert the length in pixels into a length in microns. Assumes that the
      * scale is in pixels per micron
      * 
-     * @param pixels
-     *            the number of pixels
-     * @param scale
-     *            the size of a pixel in microns
+     * @param pixels the number of pixels
+     * @param scale the size of a pixel in microns
      * @return
      */
-    static double micronLength(double pixels, double scale) {
-        double microns = pixels / scale;
-        return microns;
+    static double lengthToMicrons(double pixels, double scale) {
+    	return pixels / scale;
     }
 
     /**
      * Convert the area in pixels into an area in microns. Assumes that the
      * scale is in pixels per micron
      * 
-     * @param pixels
-     *            the number of pixels
-     * @param scale
-     *            the size of a pixel in microns
+     * @param pixels the number of pixels
+     * @param scale the size of a pixel in microns
      * @return
      */
-    static double micronArea(double pixels, double scale) {
-        double microns = pixels / (scale * scale);
-        return microns;
+    static double areaToMicrons(double pixels, double scale) {
+    	return pixels / (scale * scale);
     }
 
     /**
@@ -406,8 +397,8 @@ public interface PlottableStatistic extends Serializable {
         switch (scale) {
 	        case MICRONS: {
 	            switch (dim) {
-		            case AREA:   return PlottableStatistic.micronArea(value, factor);
-		            case LENGTH: return PlottableStatistic.micronLength(value, factor);
+		            case AREA:   return PlottableStatistic.areaToMicrons(value, factor);
+		            case LENGTH: return PlottableStatistic.lengthToMicrons(value, factor);
 		            case DIMENSIONLESS:
 		            case ANGLE:
 		            default: return value;

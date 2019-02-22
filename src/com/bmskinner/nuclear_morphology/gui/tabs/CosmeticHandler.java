@@ -83,31 +83,7 @@ public class CosmeticHandler implements Loggable {
     		}
     		
 			double scale = parent.getInputSupplier().requestDouble(Labels.Cells.CHOOSE_NEW_SCALE_LBL, initialScale, 1, 100000, 1);
-			
-			if(scale<=0) // don't allow a scale to cause divide by zero errors
-				return;
-
-			dataset.getCollection().setScale(scale);
-			
-			if(op.isPresent()){
-				Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-				if(nOp.isPresent())
-					nOp.get().setScale(scale);
-			}
-			
-			for(IAnalysisDataset child : dataset.getAllChildDatasets()) {
-				child.getCollection().setScale(scale);
-				Optional<IAnalysisOptions> childOptions = child.getAnalysisOptions();
-				if(!childOptions.isPresent())
-					continue;
-				Optional<IDetectionOptions> childNucleusOptions = childOptions.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-				if(!childNucleusOptions.isPresent())
-					continue;
-				childNucleusOptions.get().setScale(scale);
-			}
-			
-
-			
+			dataset.setScale(scale);
 		} catch (RequestCancelledException e) {
 			return;
 		}
