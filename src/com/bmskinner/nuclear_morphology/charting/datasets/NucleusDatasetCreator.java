@@ -86,78 +86,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         return new FloatProfile(result);
     }
 
-//    /**
-//     * Add individual segments from a profile to a dataset. Offset them to the
-//     * given length
-//     * 
-//     * @param segments the list of segments to add
-//     * @param profile the profile against which to add them
-//     * @param ds the dataset the segments are to be added to
-//     * @param length the profile length
-//     * @param offset an offset to the x position. Used to align plots to the right
-//     * @param binSize the size of the ProfileAggregate bins, to adjust the offset of
-//     *            the median
-//     * @return the updated dataset
-//     * @throws ProfileException
-//     */
-//    private XYDataset addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, FloatXYDataset ds,
-//            int length, double offset) throws ProfileException {
-//
-//        IProfile xpoints = createXPositions(profile, length);
-//        xpoints = xpoints.add(offset);
-//        for (IBorderSegment seg : segments) {
-//
-//            if (seg.wraps()) { // case when array wraps. We need to plot the two
-//                               // ends as separate series
-//
-//                if (seg.getEndIndex() == 0) {
-//                    // no need to make two sections
-//                    IProfile subProfile = profile.getSubregion(seg.getStartIndex(), profile.size() - 1);
-//                    IProfile subPoints = xpoints.getSubregion(seg.getStartIndex(), profile.size() - 1);
-//
-//                    float[][] data = { subPoints.toFloatArray(), subProfile.toFloatArray() };
-//
-//                    // check if the series key is taken
-//                    String seriesName = checkSeriesName(ds, seg.getName());
-//
-//                    ds.addSeries(seriesName, data);
-//
-//                } else {
-//
-//                    int lowerIndex = Math.min(seg.getEndIndex(), seg.getStartIndex());
-//                    int upperIndex = Math.max(seg.getEndIndex(), seg.getStartIndex());
-//
-//                    // beginning of array
-//                    IProfile subProfileA = profile.getSubregion(0, lowerIndex);
-//                    IProfile subPointsA = xpoints.getSubregion(0, lowerIndex);
-//
-//                    float[][] dataA = { subPointsA.toFloatArray(), subProfileA.toFloatArray() };
-//                    ds.addSeries(seg.getName() + "_A", dataA);
-//
-//                    // end of array
-//                    IProfile subProfileB = profile.getSubregion(upperIndex, profile.size() - 1);
-//                    IProfile subPointsB = xpoints.getSubregion(upperIndex, profile.size() - 1);
-//
-//                    float[][] dataB = { subPointsB.toFloatArray(), subProfileB.toFloatArray() };
-//                    ds.addSeries(seg.getName() + "_B", dataB);
-//                }
-//
-//                continue; // move on to the next segment
-//
-//            }
-//            IProfile subProfile = profile.getSubregion(seg);
-//            IProfile subPoints = xpoints.getSubregion(seg);
-//
-//            float[][] data = { subPoints.toFloatArray(), subProfile.toFloatArray() };
-//
-//            // check if the series key is taken
-//            String seriesName = checkSeriesName(ds, seg.getName());
-//
-//            ds.addSeries(seriesName, data);
-//        }
-//        return ds;
-//    }
-
     /**
      * Create a dataset containing only the given bounds, starting at 0,0. 
      * @param w
@@ -174,54 +102,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         ds.addSeries("Bounds", data, 0);
         return ds;
     }
-
-    /**
-     * Create a line chart dataset for comparing segment lengths. Each
-     * normalised profile will be drawn in full, plus the given segment within
-     * each profile.
-     * 
-     * @param list
-     *            the datasets to draw
-     * @param segName
-     *            the segment to add in each dataset
-     * @return an XYDataset to plot
-     */
-//    public FloatXYDataset createMultiProfileSegmentDataset(List<IAnalysisDataset> list, String segName)
-//            throws ChartDatasetCreationException {
-//
-//        FloatXYDataset ds = new FloatXYDataset();
-//        for (int i = 0; i < list.size(); i++) {
-//
-//            ICellCollection collection = list.get(i).getCollection();
-//
-//            try {
-//                IProfile profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-//                        Stats.MEDIAN);
-//
-//                IProfile xpoints = createXPositions(profile, 100);
-//                float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
-//                ds.addSeries("Profile_" + i, data);
-//
-//                List<IBorderSegment> segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
-//                List<IBorderSegment> segmentsToAdd = new ArrayList<IBorderSegment>(0);
-//
-//                // add only the segment of interest
-//                for (IBorderSegment seg : segments) {
-//                    segmentsToAdd.add(seg);
-//                }
-//
-//                if (!segmentsToAdd.isEmpty()) {
-//                    addSegmentsFromProfile(segmentsToAdd, profile, ds, 100, 0);
-//                }
-//
-//            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-//                warn("Unable to add median profile from " + collection.getName());
-//                fine("Error getting median profile", e);
-//            }
-//
-//        }
-//        return ds;
-//    }
 
     /**
      * For offsetting a raw profile to the right. Find the maximum length of
@@ -731,23 +611,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         float[][] outer = { outerIQRX, outerIQRY };
         ds.addSeries(QUARTILE_SERIES_PREFIX+"75_" + segment.getName(), outer, 0);
     }
-
-    /**
-     * Get the position of a segment in the nucleus angle profile
-     * 
-     * @param n
-     * @param seg
-     * @return
-     */
-//    public int getSegmentPosition(@NonNull Nucleus n, @NonNull IBorderSegment seg) {
-//        int result = 0;
-//        if (seg.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT)) {
-//            return result;
-//        }
-//		result++;
-//		result += getSegmentPosition(n, seg.prevSegment());
-//        return result;
-//    }
 
     /**
      * Create a dataset with lines from each of the BorderTags within the
