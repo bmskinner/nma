@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 
 /**
  * This provides a virtual dataset view for merge sources.
@@ -64,7 +65,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         this.parent = merged;
         
         if(mergeSource.getAnalysisOptions().isPresent())
-        	analysisOptions = mergeSource.getAnalysisOptions().get();
+        	analysisOptions = mergeSource.getAnalysisOptions().get().duplicate();
 
         this.datasetColour = mergeSource.getDatasetColour().orElse(null);
 
@@ -100,17 +101,14 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         throw new Exception("Not yet implemented");
     }
 
-//    @Override
-//    public Handler getLogHandler() throws Exception {
-//        return parent.getLogHandler();
-//    }
-
     @Override
     public void addChildCollection(ICellCollection collection) {
+    	// cannot be changed here
     }
 
     @Override
     public void addChildDataset(IAnalysisDataset dataset) {
+    	// cannot be changed here
     }
 
     @Override
@@ -120,6 +118,29 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public void setSavePath(File file) {
+    	// cannot be changed here
+    }
+    
+    @Override
+    public void setScale(double scale) {				
+		if(scale<=0) // don't allow a scale to cause divide by zero errors
+			return;
+		fine("Setting scale for "+getName()+" to "+scale);
+		getCollection().setScale(scale);
+		
+		Optional<IAnalysisOptions> op = getAnalysisOptions();
+		if(op.isPresent()){
+			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
+			for(String detectedComponent : detectionOptions) {
+				Optional<IDetectionOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				if(subOptions.isPresent())
+					subOptions.get().setScale(scale);
+			}
+		}
+		
+		for(IAnalysisDataset child : getChildDatasets()) {
+			child.setScale(scale);
+		}
     }
 
     @Override
