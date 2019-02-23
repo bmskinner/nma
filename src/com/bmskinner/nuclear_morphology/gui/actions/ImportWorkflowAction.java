@@ -82,7 +82,6 @@ public class ImportWorkflowAction  extends VoidResultAction {
 
     		} catch (RequestCancelledException e) {
     			cancel();
-    			return;
     		}
     }
     

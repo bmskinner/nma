@@ -79,7 +79,6 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements E
             warn("The intended export folder does not exist");
 
             File folder = GlobalOptions.getInstance().getDefaultDir();
-            // warn("Defaulting to: "+folder.getAbsolutePath());
             exportFile = new File(folder, fileName);
         }
 

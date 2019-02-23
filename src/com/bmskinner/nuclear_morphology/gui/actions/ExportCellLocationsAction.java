@@ -30,15 +30,6 @@ public class ExportCellLocationsAction extends MultiDatasetResultAction {
 
     @Override
     public void run() {
-
-//    	File file = FileSelector.chooseStatsExportFile(datasets, "stats");
-//
-//    	if (file == null) {
-//    		cancel();
-//    		return;
-//    	}
-
-
     	IAnalysisMethod m = new CellFileExporter(datasets);
     	worker = new DefaultAnalysisWorker(m, datasets.size());
     	worker.addPropertyChangeListener(this);
