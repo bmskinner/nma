@@ -180,17 +180,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 			publish(warpedImages.size());
     	});
 
-//    	int cellNumber = 0;
-//    	for (ICell cell : cells) {
-//
-//    		for (Nucleus n : cell.getNuclei()) {
-//    			finer("Drawing signals for " + n.getNameAndNumber());
-//
-//    			ImageProcessor nImage = generateNucleusImage(n);
-//    			warpedImages.add(nImage);
-//    			publish(cellNumber++);
-//    		}
-//    	}
     	return warpedImages;
     }
     

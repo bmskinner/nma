@@ -24,8 +24,8 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 public class ConfidenceInterval {
 
-    Number ci;
-    Number mean;
+    private Number ci;
+    private Number mean;
 
     /**
      * Calculate the confidence interval about the data mean for the given

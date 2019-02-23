@@ -68,43 +68,44 @@ public class SignalAnalyser implements Loggable {
 
         for (List<INuclearSignal> signals : signalCollection.getSignals()) {
 
-            if (!signals.isEmpty()) {
+            if (signals.isEmpty())
+            	continue;
 
-                for (INuclearSignal signal : signals) {
+            for (INuclearSignal signal : signals) {
 
-                    // get the line equation
-                    LineEquation eq = new DoubleEquation(signal.getCentreOfMass(), n.getCentreOfMass());
+            	// get the line equation
+            	LineEquation eq = new DoubleEquation(signal.getCentreOfMass(), n.getCentreOfMass());
 
-                    // using the equation, get the y postion on the line for
-                    // each X point around the roi
-                    double minDeltaY = 100;
-                    int minDeltaYIndex = 0;
-                    double minDistanceToSignal = 1000;
+            	// using the equation, get the y postion on the line for
+            	// each X point around the roi
+            	double minDeltaY = 100;
+            	int minDeltaYIndex = 0;
+            	double minDistanceToSignal = 1000;
 
-                    for (int j = 0; j < n.getBorderLength(); j++) {
-                        double x = n.getBorderPoint(j).getX();
-                        double y = n.getBorderPoint(j).getY();
-                        double yOnLine = eq.getY(x);
-                        double distanceToSignal = n.getBorderPoint(j).getLengthTo(signal.getCentreOfMass()); // fetch
+            	for (int j = 0; j < n.getBorderLength(); j++) {
+            		double x = n.getBorderPoint(j).getX();
+            		double y = n.getBorderPoint(j).getY();
+            		double yOnLine = eq.getY(x);
+            		double distanceToSignal = n.getBorderPoint(j).getLengthTo(signal.getCentreOfMass()); // fetch
 
-                        double deltaY = Math.abs(y - yOnLine);
-                        // find the point closest to the line; this could find
-                        // either intersection
-                        // hence check it is as close as possible to the signal
-                        // CoM also
-                        if (deltaY < minDeltaY && distanceToSignal < minDistanceToSignal) {
-                            minDeltaY = deltaY;
-                            minDeltaYIndex = j;
-                            minDistanceToSignal = distanceToSignal;
-                        }
-                    }
-                    IBorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
-                    double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
-                    double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
-                    double fractionalDistance = Math.min(signalCoMToNucleusCoM / nucleusCoMToBorder, 1);
-                    signal.setStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
-                }
+            		double deltaY = Math.abs(y - yOnLine);
+            		// find the point closest to the line; this could find
+            		// either intersection
+            		// hence check it is as close as possible to the signal
+            		// CoM also
+            		if (deltaY < minDeltaY && distanceToSignal < minDistanceToSignal) {
+            			minDeltaY = deltaY;
+            			minDeltaYIndex = j;
+            			minDistanceToSignal = distanceToSignal;
+            		}
+            	}
+            	IBorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
+            	double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
+            	double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
+            	double fractionalDistance = Math.min(signalCoMToNucleusCoM / nucleusCoMToBorder, 1);
+            	signal.setStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
             }
+            
         }
     }
 

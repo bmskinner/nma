@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.AbstractFinder;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -49,8 +50,8 @@ import ij.process.ImageProcessor;
 public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
     private SignalDetector              detector;
-    final private INuclearSignalOptions signalOptions;
-    final private ICellCollection       collection;
+    private final INuclearSignalOptions signalOptions;
+    private final ICellCollection       collection;
 
     /**
      * Create a signal detector for a dataset using the given options
@@ -89,7 +90,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         			stack("Error searching image", e);
         		}
         	}
-        };
+        }
 
         return list;
     }
@@ -134,7 +135,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         // name
 
         String imageName = imageFile.getName();
-        File dapiFolder = collection.getFolder();
+        File dapiFolder = options.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
 
         File dapiFile = new File(dapiFolder, imageName);
 
@@ -227,11 +228,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      * @return
      */
     private boolean checkSignal(@NonNull INuclearSignal s, @NonNull Nucleus n) {
-        if (s.getStatistic(PlottableStatistic.AREA) < signalOptions.getMinSize())
-            return false;
-        if (s.getStatistic( PlottableStatistic.AREA) > (signalOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA)))
-            return false;
-        return true;
+        return (s.getStatistic(PlottableStatistic.AREA) >= signalOptions.getMinSize()
+        		&& s.getStatistic(PlottableStatistic.AREA) <= (signalOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA)));
     }
 
 }

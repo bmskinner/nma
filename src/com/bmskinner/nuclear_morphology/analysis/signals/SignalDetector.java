@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -59,7 +60,7 @@ import ij.process.ImageStatistics;
 public class SignalDetector extends Detector {
 
     private INuclearSignalOptions                  options;
-    final private ComponentFactory<INuclearSignal> factory = new SignalFactory();
+    private final ComponentFactory<INuclearSignal> factory = new SignalFactory();
     private int                                    channel;
     private int                                    minThreshold;
 
@@ -90,7 +91,7 @@ public class SignalDetector extends Detector {
      */
     public List<INuclearSignal> detectSignal(@NonNull File sourceFile, @NonNull ImageStack stack, @NonNull Nucleus n) {
 
-        options.setThreshold(minThreshold); // reset to default;
+        options.setThreshold(minThreshold); // reset to default
 
         if (options.getDetectionMode().equals(SignalDetectionMode.FORWARD)) {
             finest("Running forward detection");
@@ -107,7 +108,7 @@ public class SignalDetector extends Detector {
             return detectHistogramThresholdSignal(sourceFile, stack, n);
         }
         finest("No mode specified");
-        return null;
+        return new ArrayList<>();
     }
 
     /*
@@ -168,9 +169,9 @@ public class SignalDetector extends Detector {
 
         fine(roiList.size() + " signals in stack " + stackNumber);
 
-        for (Roi r : roiList.keySet()) {
-
-            StatsMap values = roiList.get(r);
+        for(Entry<Roi, StatsMap> entry : roiList.entrySet()) {
+        	Roi r = entry.getKey();
+            StatsMap values = entry.getValue();
 
             int xbase = (int) r.getXBase();
             int ybase = (int) r.getYBase();
@@ -208,7 +209,6 @@ public class SignalDetector extends Detector {
             } catch (IllegalArgumentException | ComponentCreationException e) {
                 warn("Cannot make signal for component "+n.getNameAndNumber());
                 fine("Error detecting or making signal: "+e.getMessage(), e);
-                continue;
             }
         }
         return signals;
@@ -232,7 +232,6 @@ public class SignalDetector extends Detector {
      */
     private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) {
 
-        // SignalCollection signalCollection = n.getSignalCollection();
         finest("Beginning reverse detection for nucleus");
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
@@ -241,7 +240,7 @@ public class SignalDetector extends Detector {
         FloatPolygon polygon = n.toOriginalPolygon();
 
         // map brightness to count
-        Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0);
+        Map<Integer, Integer> counts = new HashMap<>();
         for (int i = 0; i < 256; i++) {
             counts.put(i, 0);
         }
@@ -262,11 +261,6 @@ public class SignalDetector extends Detector {
 
             }
         }
-
-        // logger.log("Counts created", Logger.DEBUG);
-        // for(int i=0;i<256;i++){
-        // logger.log("Level "+i+": "+counts.get(i), Logger.DEBUG);
-        // }
 
         // find the threshold from the bins
         int area = (int) (n.getStatistic(PlottableStatistic.AREA) * options.getMaxFraction());
@@ -328,7 +322,7 @@ public class SignalDetector extends Detector {
          * to carry out the range based minima detection below
          */
         finest("Initial histo threshold: " + minThreshold);
-        // int trimValue = minThreshold;
+
         IProfile histogramProfile = new FloatProfile(d);
         IProfile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
 
@@ -348,10 +342,11 @@ public class SignalDetector extends Detector {
          */
         int maxIndex = minThreshold;
         for (int i = 0; i < minimaD.size(); i++) {
-            if (minimaD.get(i) == true) {
+            if (minimaD.get(i)) {
                 maxIndex = i + minThreshold;
             }
         }
+        
         /*
          * Add a bit more to the new threshold. This is because the minimum of
          * the delta profile is in middle of the background drop off; we

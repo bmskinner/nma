@@ -87,15 +87,12 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
     @Override
     public IAnalysisResult call() throws Exception {
-
         run();
         postDetectionFilter();
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
-
-        return r;
+        return new DefaultAnalysisResult(dataset);
     }
 
-    protected void run() throws Exception {
+    protected void run() {
 
         fine("Beginning signal detection in channel " + channel);
 
@@ -105,9 +102,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
             SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
 
-            dataset.getCollection().getCells().forEach(c->{
-                detectInCell(c, finder, originalMinThreshold);
-            });
+            dataset.getCollection().getCells().forEach(c-> detectInCell(c, finder, originalMinThreshold));
 
         } catch (Exception e) {
             stack("Error in signal detection", e);
@@ -234,25 +229,6 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		        listCollection.addCell(c);
 		    }
 		    signalPopulations.add(listCollection);
-
-		    // Only add a group of cells without signals if at least one
-		    // cell does have a signal
-
-//		    Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
-//		    if (!notList.isEmpty()) {
-//		        log("Signal group " + group.getGroupName()
-//		                + ": found nuclei without signals");
-//
-//		        ICellCollection notListCollection = new VirtualCellCollection(dataset,
-//		                group.getGroupName() + "_without_signals");
-//
-//		        for (ICell c : notList) {
-//		            notListCollection.addCell(c);
-//		        }
-//
-//		        signalPopulations.add(notListCollection);
-//		    }
-
 		}
         return signalPopulations;
     }

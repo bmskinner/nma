@@ -48,7 +48,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -113,8 +112,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         if (!options.hasDatasets()) {
             DefaultTableModel model = new DefaultTableModel();
 
-            Vector<Object> names = new Vector<Object>();
-            Vector<Object> nuclei = new Vector<Object>();
+            Vector<Object> names = new Vector<>();
+            Vector<Object> nuclei = new Vector<>();
 
             names.add(Labels.Merges.NO_MERGE_SOURCES);
             nuclei.add(EMPTY_STRING);
@@ -128,12 +127,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             DefaultTableModel model = new DefaultTableModel();
 
-            Vector<Object> names = new Vector<Object>();
-            Vector<Object> nuclei = new Vector<Object>();
+            Vector<Object> names = new Vector<>();
+            Vector<Object> nuclei = new Vector<>();
 
             for (IAnalysisDataset mergeSource : options.firstDataset().getMergeSources()) {
-                // AnalysisDataset mergeSource =
-                // options.firstDataset().getMergeSource(id);
                 names.add(mergeSource.getName());
                 nuclei.add(mergeSource.getCollection().size());
             }
@@ -186,7 +183,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IBorderSegment segment : segments) {
 
-                List<Object> rowData = new ArrayList<Object>(0);
+                List<Object> rowData = new ArrayList<>();
 
                 rowData.add("");
                 rowData.add(segment.length());
@@ -385,7 +382,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 // The options are the same in all merge sources
                 // Show the first options from the first source
 
-                List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
+                List<IAnalysisDataset> l = new ArrayList<>(dataset.getAllMergeSources());
 
                 Optional<IAnalysisOptions> o = l.get(0).getAnalysisOptions();
                 if(o.isPresent())
@@ -422,7 +419,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         
     	int rowCount = 20;
-    	Object[] collectionData = new Object[rowCount];
+
     	
     	Optional<IAnalysisOptions> o = dataset.getAnalysisOptions();
     	if(options == null && !o.isPresent())
@@ -488,10 +485,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         String chromocentreThreshold = nucleusCannyOptions.isUseFlattenImage()
                 ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : Labels.NA;
                 
-        if(nucleusCannyOptions.isUseCanny()) {
-        	
-        }
-
         String cannyAutoThreshold = nucleusCannyOptions.isUseCanny()
                 ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : Labels.NA;
         String cannyLowThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold()
@@ -506,7 +499,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : Labels.NA;
 
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        collectionData = new Object[] { 
+        return new Object[] { 
         		options.getProfileWindowProportion(), 
                 detectionMethod, 
                 nucleusThreshold,
@@ -527,7 +520,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 folder, 
                 options.getNucleusType().toString(), 
                 dataset.getVersion().toString() };
-        return collectionData;
     }
     
     private Object[] makeErrorArray(int rows){
@@ -550,7 +542,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
 
         final String NUCLEUS_LABEL = "Nuclei";
-        final String[] VALUE_LABELS = { " median", " mean", " S.E.M.", " coefficient of variation", " mean 95% CI", " p(unimodal)" };
+        final String[] valueLabels = { " median", " mean", " S.E.M.", " coefficient of variation", " mean 95% CI", " p(unimodal)" };
 
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets()); // default,
                                                                                            // applies
@@ -561,10 +553,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         List<IAnalysisDataset> list = options.getDatasets();
 
-        List<Object> columnData = new ArrayList<Object>();
+        List<Object> columnData = new ArrayList<>();
         columnData.add(NUCLEUS_LABEL);
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
-            for (String value : VALUE_LABELS) {
+            for (String value : valueLabels) {
                 columnData.add(stat.toString() + value);
             }
         }
@@ -586,7 +578,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         ICellCollection collection = dataset.getCollection();
 
-        List<Object> datasetData = new ArrayList<Object>();
+        List<Object> datasetData = new ArrayList<>();
 
         datasetData.add(collection.size());
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
@@ -707,13 +699,13 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         List<IAnalysisDataset> list = options.getDatasets();
         // Track the pairwase comparisons performed to avoid duplicates
-        Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
+        Map<UUID, List<UUID>> existingMatches = new HashMap<>();
 
         // add columns
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (IAnalysisDataset dataset1 : list) {
 
-            ArrayList<UUID> set1List = new ArrayList<UUID>();
+            List<UUID> set1List = new ArrayList<>();
             existingMatches.put(dataset1.getId(), set1List);
 
             for (IAnalysisDataset dataset2 : list) {
@@ -723,10 +715,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                     set1List.add(dataset2.getId());
 
-                    if (existingMatches.get(dataset2.getId()) != null) {
-                        if (existingMatches.get(dataset2.getId()).contains(dataset1.getId())) {
-                            continue;
-                        }
+                    if (existingMatches.get(dataset2.getId()) != null && existingMatches.get(dataset2.getId()).contains(dataset1.getId())) {
+                    	continue;
                     }
 
                     Object[] popData = new Object[9];
@@ -1068,11 +1058,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 fine("Error getting median profile", e);
                 return createBlankTable();
             }
-
-//            double value1 = new Quartile(
-//                    dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
-//                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()),
-//                    Quartile.MEDIAN).doubleValue();
             
             DescriptiveStatistics ds = new DescriptiveStatistics(
                     dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
@@ -1107,11 +1092,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()));
                     double value2 = ss.getPercentile(Stats.MEDIAN);
-                    
-//                    double value2 = new Quartile(dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
-//                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()),
-//                            Quartile.MEDIAN).doubleValue();
-
                     double magnitude = value2 / value1;
                     popData[i] = df.format(magnitude);
                 }
@@ -1180,7 +1160,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IClusterGroup g : clusterGroups) {
                 Optional<IClusteringOptions> opn = g.getOptions();
-                List<Object> dataList = new ArrayList<Object>();
+                List<Object> dataList = new ArrayList<>();
                 if(!opn.isPresent()){
                 	dataList.add(g.getName());
                     dataList.add(g.size());

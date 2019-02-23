@@ -390,7 +390,7 @@ public class SignalManager implements Loggable {
             .flatMap(  n->n.getSignalCollection()
                     .getStatistics(stat, scale, signalGroupId)
                     .stream()  )
-            .mapToDouble(d->d.doubleValue()).toArray();
+            .mapToDouble(Double::doubleValue).toArray();
     }
 
     /**
@@ -580,7 +580,7 @@ public class SignalManager implements Loggable {
             throw new IllegalArgumentException("Signal IDs are the same");
         }
 
-        List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
+        List<Colocalisation<INuclearSignal>> result = new ArrayList<>();
 
         for (Nucleus n : collection.getNuclei()) {
             result.addAll(n.getSignalCollection().calculateColocalisation(signalGroup1, signalGroup2));
