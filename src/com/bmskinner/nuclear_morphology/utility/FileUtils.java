@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -16,6 +17,12 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public class FileUtils {
+	
+	
+	/**
+	 * Private constructor, all methods are static
+	 */
+	private FileUtils() {}
 	
     /**
      * Given a list of files, find the component of their paths that
@@ -49,7 +56,7 @@ public class FileUtils {
         }
 
         boolean breakLoop = false;
-        List<String> common = new ArrayList<String>();
+        List<String> common = new ArrayList<>();
         for (int col = 0; col < folders[0].length; col++) {
 
             if (breakLoop) {
@@ -64,21 +71,19 @@ public class FileUtils {
                     break;
                 }
             }
-            if (breakLoop == false)
+            if (!breakLoop)
                 common.add(s);
-
         }
 
-        String commonPath = "";
+        StringBuilder commonPath = new StringBuilder();
         for (int i = 0; i < common.size(); i++) {
-            commonPath += common.get(i);
-            if (i > 0 && i < common.size() - 1) { // don't add separator after
-                                                  // root or at the end
-                commonPath += File.separator;
+            commonPath.append(common.get(i));
+            if (i > 0 && i < common.size() - 1) { // don't add separator after root or at the end
+                commonPath.append(File.separator);
             }
         }
 
-        return new File(commonPath);
+        return new File(commonPath.toString());
     }
     
     /**
@@ -90,10 +95,10 @@ public class FileUtils {
      * @return the most complete existing portion of the path
      */
     public static File extantComponent(File file) {
-    	if(file.exists())
-    		return file;
     	if(file==null)
     		return null;
+    	if(file.exists())
+    		return file;
     	return extantComponent(file.getParentFile());
     }
 

@@ -28,6 +28,12 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  *
  */
 public class AngleTools {
+	
+	
+	/**
+	 * Private constructor. All methods are static.
+	 */
+	private AngleTools() {}
 
     /**
      * Find the length on the x-axis of a line at a given angle
@@ -39,8 +45,7 @@ public class AngleTools {
     public static double getXComponentOfAngle(double length, double angle) {
         // cos(angle) = x / h
         // x = cos(a)*h
-        double x = length * Math.cos(Math.toRadians(angle));
-        return x;
+    	return length * Math.cos(Math.toRadians(angle));
     }
 
     /**
@@ -51,8 +56,7 @@ public class AngleTools {
      * @return the y distance
      */
     public static double getYComponentOfAngle(double length, double angle) {
-        double y = length * Math.sin(Math.toRadians(angle));
-        return y;
+        return length * Math.sin(Math.toRadians(angle));
     }
 
     /**
