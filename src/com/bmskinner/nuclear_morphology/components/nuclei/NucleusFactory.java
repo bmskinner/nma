@@ -41,7 +41,10 @@ import ij.process.FloatPolygon;
  */
 public class NucleusFactory implements ComponentFactory<Nucleus> {
 
-    private int nucleusCount = 0; // store the number of nuclei  created by this factory
+    private static final String NULL_NUCLEUS_ERROR = "Error making nucleus; constructed object is null";
+	private static final String NULL_COM_ERROR = "Centre of mass cannot be null in nucleus factory";
+	private static final String NULL_ROI_ERROR = "Roi cannot be null in nucleus factory";
+	private int nucleusCount = 0; // store the number of nuclei  created by this factory
     private final NucleusType type;
 
     /**
@@ -117,9 +120,9 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
             throws ComponentCreationException {
     	if (roi == null)
-    		throw new IllegalArgumentException("Roi cannot be null in nucleus factory");
+    		throw new IllegalArgumentException(NULL_ROI_ERROR);
         if (centreOfMass == null)
-            throw new IllegalArgumentException("Centre of mass cannot be null in nucleus factory");
+            throw new IllegalArgumentException(NULL_COM_ERROR);
         
         Nucleus n = null;
 
@@ -137,7 +140,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 
         nucleusCount++;
         if (n == null)
-            throw new ComponentCreationException("Error making nucleus; contstucted object is null");
+            throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
         finer("Created nucleus with border length "+n.getBorderLength());
         return n;
     }
@@ -146,9 +149,9 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id)
             throws ComponentCreationException {
     	if (roi == null)
-    		throw new IllegalArgumentException("Roi cannot be null in nucleus factory");
+    		throw new IllegalArgumentException(NULL_ROI_ERROR);
         if (centreOfMass == null)
-            throw new IllegalArgumentException("Centre of mass cannot be null in nucleus factory");
+            throw new IllegalArgumentException(NULL_COM_ERROR);
         
         Nucleus n = null;
 
@@ -166,7 +169,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 
         nucleusCount++;
         if (n == null)
-            throw new ComponentCreationException("Error making nucleus; contstucted object is null");
+            throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
         finer("Created nucleus with border length "+n.getBorderLength());
         return n;
     }
@@ -174,9 +177,9 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id, int nucleusNumber)
             throws ComponentCreationException {
     	if (roi == null)
-    		throw new IllegalArgumentException("Roi cannot be null in nucleus factory");
+    		throw new IllegalArgumentException(NULL_ROI_ERROR);
         if (centreOfMass == null)
-            throw new IllegalArgumentException("Centre of mass cannot be null in nucleus factory");
+            throw new IllegalArgumentException(NULL_COM_ERROR);
         
         Nucleus n = null;
 
@@ -192,7 +195,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         			nucleusNumber, id);
         }
         if (n == null)
-            throw new ComponentCreationException("Error making nucleus; contstucted object is null");
+            throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
         finer("Created nucleus with border length "+n.getBorderLength());
         return n;
     }
