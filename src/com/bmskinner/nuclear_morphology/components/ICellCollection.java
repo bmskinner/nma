@@ -201,7 +201,8 @@ public interface ICellCollection
      * 
      * @return
      */
-    int size();
+    @Override
+	int size();
 
     /**
      * Get the number of nuclei in the collection

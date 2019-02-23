@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     private final IAnalysisOptions templateOptions;
 
+    /** Map a folder of images to the detected cell collection */
     private Map<File, ICellCollection> collectionGroup = new HashMap<>();
 
     private final List<IAnalysisDataset> datasets = new ArrayList<>();
@@ -70,8 +72,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param options the options to detect with
      */
     public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
-        this.outputFolder = new File(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(),outputFolder);
-        this.templateOptions = options;
+        this(new File(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(), outputFolder), options);
     }
     
     /**
@@ -114,13 +115,9 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             if(Thread.interrupted())
                 return;
 
-            // Get the collections containing nuclei
-            List<ICellCollection> folderCollection = collectionGroup.entrySet().stream()
-            		.filter(e->e.getValue().size()>0)
-            		.map(e->e.getValue())
-            		.collect(Collectors.toList());
-
-            datasets.addAll(analysePopulations(folderCollection));
+            List<IAnalysisDataset> analysedDatasets = analysePopulations();
+            
+            datasets.addAll(analysedDatasets);
 
             fine("Analysis complete; return collections");
 
@@ -151,15 +148,18 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         return this.datasets;
     }
 
-    private List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection) {
+    private List<IAnalysisDataset> analysePopulations() {
 
         fine("Creating cell collections");
-
         List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
-        for (final ICellCollection collection : folderCollection) {
-        	
-        	File folder = collection.getFolder();
+        for (final Entry<File, ICellCollection> entry : collectionGroup.entrySet()) {
+        	// Only keep collections containing nuclei
+        	ICellCollection collection = entry.getValue();
+        	if(collection.isEmpty())
+        		continue;
+
+        	File folder = entry.getKey();
             IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
             
             // Ensure the actual folder of images is set in the analysis options, not a root folder
