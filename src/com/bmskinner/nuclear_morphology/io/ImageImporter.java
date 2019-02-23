@@ -42,13 +42,13 @@ public class ImageImporter implements Loggable, Importer {
     private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 
     // The file types that the program will try to open
-    public static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg" };
+    protected static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg" };
 
     // The prefix to use when exporting images
     public static final String IMAGE_PREFIX = "export.";
 
     // Images with these prefixes are ignored by the image importer
-    public static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot", "._" };
+    protected static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot", "._" };
 
     // RGB colour channels
     public static final int RGB_RED   = 0;
@@ -163,7 +163,7 @@ public class ImageImporter implements Loggable, Importer {
      * 
      * @return the processor
      */
-    public ImageProcessor importToColorProcessor() throws ImageImportException {
+    public ImageProcessor importToColorProcessor() {
 
         ImagePlus image = new ImagePlus(f.getAbsolutePath());
         return image.getProcessor();
@@ -203,8 +203,7 @@ public class ImageImporter implements Loggable, Importer {
     public ImageProcessor importImage(int channel) throws ImageImportException {
         ImageStack s = importToStack();
         int stack = rgbToStack(channel);
-        ImageProcessor ip = s.getProcessor(stack);
-        return ip;
+        return s.getProcessor(stack);
     }
     
 
@@ -214,7 +213,7 @@ public class ImageImporter implements Loggable, Importer {
      * @param image
      * @return
      */
-    private boolean canImport(@NonNull ImagePlus image) {
+    private boolean isImportable(@NonNull ImagePlus image) {
         for (int i : IMAGE_TYPES_PROCESSED)
             if (i == image.getType())
                 return true;
@@ -230,7 +229,7 @@ public class ImageImporter implements Loggable, Importer {
     private ImageStack convert(@NonNull ImagePlus image) throws ImageImportException {
         if (image == null)
             throw new ImageImportException("Input image is null");
-        if (!canImport(image))
+        if (!isImportable(image))
             throw new ImageImportException("Cannot handle image type: " + image.getType());
 
         switch (image.getType()) {
@@ -238,7 +237,7 @@ public class ImageImporter implements Loggable, Importer {
 	        case ImagePlus.COLOR_RGB: return convertRGB(image);
 	        case ImagePlus.GRAY16:    return convert16bitGrey(image);
 	
-	        default: { // Should never occur given the test in canImport(), but shows intent
+	        default: { // Should never occur given the test in isImportable(), but shows intent
 	            throw new ImageImportException("Unsupported image type: " + image.getType());
 	        }
         }
@@ -292,7 +291,7 @@ public class ImageImporter implements Loggable, Importer {
      * @param image the 16 bit image to convert
      * @return the stack
      */
-    private ImageStack convert16bitGrey(ImagePlus image) throws ImageImportException {
+    private ImageStack convert16bitGrey(ImagePlus image) {
         // this is the ij.process.ImageConverter, not my
         // analysis.image.ImageConverter
         ImageConverter converter = new ImageConverter(image);

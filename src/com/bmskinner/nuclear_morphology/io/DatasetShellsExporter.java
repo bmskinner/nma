@@ -48,10 +48,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetShellsExporter extends StatsExporter implements Loggable {
 
-//    private static final String EXPORT_MESSAGE          = "Exporting shells...";
-//    private static final String DEFAULT_MULTI_FILE_NAME = "Shell_stats_export" + Exporter.TAB_FILE_EXTENSION;
-//    private File exportFile;
-
     /**
      * Create specifying the folder stats will be exported into
      * 
@@ -192,7 +188,6 @@ public class DatasetShellsExporter extends StatsExporter implements Loggable {
                     .append(Aggregation.BY_NUCLEUS + TAB);
 
                     long[] signalByNucleus = shellResult.getPixelValues(CountType.SIGNAL, cell, n, null);
-//                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
 
                     for(int i=0; i<shellResult.getNumberOfShells(); i++){
                         outLine.append(signalByNucleus[i]+TAB);

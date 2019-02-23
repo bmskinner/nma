@@ -496,17 +496,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public ImageProcessor getRGBImage() throws UnloadableImageException {
-
         if (!getSourceFile().exists())
             throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
-
-        try {
-        	return new ImageImporter(getSourceFile()).importToColorProcessor();
-        } catch (ImageImportException e) {
-        	stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
-        	throw new UnloadableImageException("Source image is not available");
-        }
-
+        return new ImageImporter(getSourceFile()).importToColorProcessor();
     }
 
     @Override
