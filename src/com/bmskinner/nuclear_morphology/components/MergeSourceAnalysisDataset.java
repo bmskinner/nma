@@ -26,6 +26,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -102,12 +104,12 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public void addChildCollection(ICellCollection collection) {
+    public void addChildCollection(@NonNull ICellCollection collection) {
     	// cannot be changed here
     }
 
     @Override
-    public void addChildDataset(IAnalysisDataset dataset) {
+    public void addChildDataset(@NonNull IAnalysisDataset dataset) {
     	// cannot be changed here
     }
 
@@ -117,7 +119,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public void setSavePath(File file) {
+    public void setSavePath(@NonNull File file) {
     	// cannot be changed here
     }
     
@@ -145,16 +147,16 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public Set<UUID> getAllChildUUIDs() {
-        return new HashSet<UUID>(0);
+        return new HashSet<>(0);
     }
 
     @Override
-    public IAnalysisDataset getChildDataset(UUID id) {
+    public IAnalysisDataset getChildDataset(@NonNull UUID id) {
         return null;
     }
 
     @Override
-    public IAnalysisDataset getMergeSource(UUID id) {
+    public IAnalysisDataset getMergeSource(@NonNull UUID id) {
         if (this.hasMergeSource(id)) {
 
             for (IAnalysisDataset c : childDatasets) {
@@ -175,10 +177,9 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public Set<IAnalysisDataset> getAllMergeSources() {
-        Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>(childDatasets.size());
+        Set<IAnalysisDataset> result = new HashSet<>(childDatasets.size());
 
         if (!childDatasets.isEmpty()) {
-
             for (IAnalysisDataset d : childDatasets) {
                 result.add(d);
                 result.addAll(d.getAllChildDatasets());
@@ -188,7 +189,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public void addMergeSource(IAnalysisDataset dataset) {
+    public void addMergeSource(@NonNull IAnalysisDataset dataset) {
         childDatasets.add(new MergeSourceAnalysisDataset(this, dataset));
     }
 
@@ -209,7 +210,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public Set<UUID> getAllMergeSourceIDs() {
-        Set<UUID> result = new HashSet<UUID>();
+        Set<UUID> result = new HashSet<>();
 
         Set<UUID> idlist = getMergeSourceIDs();
         result.addAll(idlist);
@@ -223,7 +224,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public boolean hasMergeSource(UUID id) {
+    public boolean hasMergeSource(@NonNull UUID id) {
         for (IAnalysisDataset child : childDatasets) {
             if (child.getId().equals(id)) {
                 return true;
@@ -233,7 +234,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public boolean hasMergeSource(IAnalysisDataset dataset) {
+    public boolean hasMergeSource(@NonNull IAnalysisDataset dataset) {
         return childDatasets.contains(dataset);
     }
 
@@ -254,12 +255,12 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public Collection<IAnalysisDataset> getChildDatasets() {
-        return new ArrayList<IAnalysisDataset>(0);
+        return new ArrayList<>(0);
     }
 
     @Override
     public List<IAnalysisDataset> getAllChildDatasets() {
-        return new ArrayList<IAnalysisDataset>(0);
+        return new ArrayList<>(0);
     }
 
     @Override
@@ -285,6 +286,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public void refreshClusterGroups() {
+    	// impossible
     }
 
     @Override
@@ -294,14 +296,15 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public void setRoot(boolean b) {
+    	// impossible
     }
 
     @Override
-    public void deleteChild(UUID id) {
+    public void deleteChild(@NonNull UUID id) {
     }
 
     @Override
-    public void deleteMergeSource(UUID id) {
+    public void deleteMergeSource(@NonNull UUID id) {
 
         Iterator<IAnalysisDataset> it = childDatasets.iterator();
 
@@ -314,16 +317,16 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public void updateSourceImageDirectory(File expectedImageDirectory) {
+    public void updateSourceImageDirectory(@NonNull File expectedImageDirectory) {
     }
 
     @Override
     public Set<UUID> getChildUUIDs() {
-        return new HashSet<UUID>(0);
+        return new HashSet<>(0);
     }
 
     @Override
-    public void deleteClusterGroup(IClusterGroup group) {
+    public void deleteClusterGroup(@NonNull IClusterGroup group) {
     }
 
 	@Override
