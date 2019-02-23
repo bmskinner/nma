@@ -33,7 +33,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     private long progressTotal;     // the maximum value for the progress bar
     private long progressCount = 0; // the current value for the progress bar
 
-    protected IAnalysisMethod method;
+    protected final IAnalysisMethod method;
 
     /**
      * Construct with a method. The progress bar total will be set to -1 - i.e.
@@ -41,7 +41,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
      * 
      * @param m the method to run
      */
-    public DefaultAnalysisWorker(IAnalysisMethod m) {
+    public DefaultAnalysisWorker(final IAnalysisMethod m) {
         this(m, -1);
     }
 
@@ -49,16 +49,16 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
      * Construct with a method and a total for the progress bar.
      * 
      * @param m the method to run
-     * @param progress the length of the progress bar
+     * @param progress the length of the progress bar. If negative, the bar will be indeterminate.
      */
-    public DefaultAnalysisWorker(IAnalysisMethod m, long progress) {
+    public DefaultAnalysisWorker(final IAnalysisMethod m, final long progress) {
         method = m;
         method.addProgressListener(this);
         progressTotal = progress;
     }
 
     @Override
-    protected IAnalysisResult doInBackground() throws Exception {
+    protected final IAnalysisResult doInBackground() throws Exception {
 
         // Set the bar
         fireIndeterminate();
@@ -68,7 +68,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     }
 
     @Override
-    public void progressEventReceived(ProgressEvent event) {
+    public final void progressEventReceived(final ProgressEvent event) {
 
         if(this.isCancelled())
             method.cancel();
@@ -83,8 +83,8 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
         	return;
         }
 
-        if(event.getMessage()==ProgressEvent.INCREASE_BY_VALUE)
-        	progressCount=event.getValue();
+        if(event.getMessage() == ProgressEvent.INCREASE_BY_VALUE)
+        	progressCount = event.getValue();
         else
         	progressCount++;
 
@@ -93,7 +93,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     }
 
     @Override
-    protected void process(List<Long> integers) {
+    protected final void process(List<Long> integers) {
         long amount = integers.get(integers.size() - 1);
         int percent = (int) ((double) amount / (double) progressTotal * 100);
         if (percent >= 0 && percent <= 100) {
@@ -121,14 +121,14 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
             stack("Stack overflow in worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
-            warn("Interruption to swing worker: "+e.getMessage());
+            warn("Interruption to swing worker: " + e.getMessage());
             stack("Interruption to swing worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-            warn("Execution error in swing worker: "+e.getMessage());
+            warn("Execution error in swing worker: " + e.getMessage());
             stack("Execution error in swing worker", e);
             Throwable cause = e.getCause();
-            warn("Causing error: "+cause.getMessage());
+            warn("Causing error: " + cause.getMessage());
             stack("Causing error: ", cause);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         }
