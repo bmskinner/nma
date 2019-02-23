@@ -27,8 +27,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  * @author bms41
  * @since 1.13.4
  *
- * @param <E>
- *            the component that can be refolded
+ * @param <E> the component that can be refolded
  */
 public interface Refoldable<E extends CellularComponent> {
 
@@ -62,13 +61,21 @@ public interface Refoldable<E extends CellularComponent> {
      */
     void offsetConsensus(double xOffset, double yOffset); 
     
-    /*
+    /**
      * Apply a rotation to the consensus shape;
      * @param degrees
      */
     void rotateConsensus(double degrees);
     
+    /**
+     * Get the current x and y offset as a point
+     * @return
+     */
     IPoint currentConsensusOffset();
     
+    /**
+     * Get the current rotation offset
+     * @return
+     */
     double currentConsensusRotation();
 }

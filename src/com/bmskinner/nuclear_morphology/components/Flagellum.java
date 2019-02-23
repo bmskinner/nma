@@ -45,6 +45,7 @@ public interface Flagellum extends CellularComponent {
 
     double getLength();
 
-    Flagellum duplicate();
+    @Override
+	Flagellum duplicate();
 
 }

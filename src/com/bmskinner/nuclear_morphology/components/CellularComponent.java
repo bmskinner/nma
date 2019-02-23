@@ -44,14 +44,14 @@ import ij.process.FloatPolygon;
 public interface CellularComponent extends Imageable, Serializable, Loggable, Rotatable, Statistical {
 
     // Standard components
-    static final String WHOLE_CELL             = "Cell";
-    static final String ACROSOME               = "Acrosome";
-    static final String NUCLEUS                = "Nucleus";
-    static final String CYTOPLASM              = "Cytoplasm";
-    static final String SPERM_TAIL             = "SpermTail";
-    static final String NUCLEAR_SIGNAL         = "NuclearSignal";
-    static final String NUCLEAR_LOBE           = "NuclearLobe";
-    static final String NUCLEAR_BORDER_SEGMENT = "NuclearBorderSegment";
+    String WHOLE_CELL             = "Cell";
+    String ACROSOME               = "Acrosome";
+    String NUCLEUS                = "Nucleus";
+    String CYTOPLASM              = "Cytoplasm";
+    String SPERM_TAIL             = "SpermTail";
+    String NUCLEAR_SIGNAL         = "NuclearSignal";
+    String NUCLEAR_LOBE           = "NuclearLobe";
+    String NUCLEAR_BORDER_SEGMENT = "NuclearBorderSegment";
     
     /**
      * Get the UUID of the object
@@ -139,8 +139,6 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      */
     int getBorderIndex(@NonNull IBorderPoint p);
 
-    // public double getDistance(int index);
-
     /**
      * Update the border point at the given index to the given x y coordinates
      * 
@@ -172,13 +170,6 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
      * @return
      */
     public List<IBorderPoint> getBorderList();
-
-    /**
-     * Set the border points in the object border
-     * 
-     * @param list
-     */
-    // public void setBorderList(List<IBorderPoint> list);
 
     /**
      * Get a copy of the nucleus border points in the border list offset to

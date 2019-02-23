@@ -25,8 +25,10 @@ package com.bmskinner.nuclear_morphology.components;
  */
 public interface IAcrosome extends CellularComponent, Comparable<IAcrosome> {
 
-    void alignVertically();
+    @Override
+	void alignVertically();
 
-    IAcrosome duplicate();
+    @Override
+	IAcrosome duplicate();
 
 }
