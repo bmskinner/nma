@@ -196,13 +196,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 dataset.getCollection().setOutputFolder(exportFolder);
                 fine("Updated output folder to " + exportFolder);
             }
-
-//            File logFile = null;
-//            if(file.getName().endsWith(SAVE_FILE_EXTENSION))
-//                logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
             
             if(file.getName().endsWith(BACKUP_FILE_EXTENSION)){
-//                logFile = Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, LOG_FILE_EXTENSION);
                 dataset.setSavePath(Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, SAVE_FILE_EXTENSION));
             }
 
@@ -266,22 +261,16 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      * @param dir the directory to clean
      */
     private void cleanLockFilesInDir(File dir) {
-
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                String lowercaseName = name.toLowerCase();
-                return (lowercaseName.endsWith(".lck"));
-            }
-        };
+        
+        FilenameFilter filter = (folder, name) -> name.toLowerCase().endsWith(Io.LOCK_FILE_EXTENSION);
 
         File[] files = dir.listFiles(filter);
 
         if (files == null)
             return;
 
-        for (File lockFile : files){
+        for (File lockFile : files)
             lockFile.delete();
-        }
     }
 
     
@@ -304,21 +293,17 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
     	fine("Deserialising dataset");
         IAnalysisDataset dataset = null;
-        FileInputStream fis = null;
-        ObjectInputStream ois = null;
 
-        try {
-            fis = new FileInputStream(inputFile.getAbsolutePath());
+        try(FileInputStream fis = new FileInputStream(inputFile.getAbsolutePath());
+        	CountedInputStream cis = new CountedInputStream(fis);
+        	BufferedInputStream bis = new BufferedInputStream(cis);
+        	ObjectInputStream ois = new PackageReplacementObjectInputStream(bis);
+        		) {            
             
-            CountedInputStream cis = new CountedInputStream(fis);
-            BufferedInputStream bis = new BufferedInputStream(cis);
-            
-            cis.addCountListener( (l) ->{
-            	fireProgressEvent(l);
-            });
+            cis.addCountListener(this::fireProgressEvent);
             
             // This was needed when classes changed packages between versions
-            ois = new PackageReplacementObjectInputStream(bis);
+            
             dataset = (IAnalysisDataset) ois.readObject();
 
 
@@ -373,19 +358,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             // From when a recursive loop was entered building segments.
             throw new UnloadableDatasetException("Stack overflow loading '" + file.getAbsolutePath() + "'", e);
 
-        } finally {
-
-            try {
-            	if(ois!=null)
-            		ois.close();
-            	
-            	if(fis!=null)
-            		fis.close();
-            } catch (Exception e) {
-                stack("Error closing file stream", e);
-                throw new UnloadableDatasetException(
-                        "Cannot load '" + file.getAbsolutePath() + "' due to " + e.getClass().getSimpleName(), e);
-            }
         }
         return dataset;
     }

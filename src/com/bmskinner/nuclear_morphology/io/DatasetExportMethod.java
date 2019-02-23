@@ -80,8 +80,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     @Override
 	public IAnalysisResult call() {
         run();
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
-        return r;
+        return new DefaultAnalysisResult(dataset);
     }
 
     protected void run() {
@@ -129,7 +128,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  		if(saveFile.isDirectory())
  			throw new IllegalArgumentException(String.format("File %s is a directory", saveFile.getName()));
  		if(saveFile.getParentFile()==null)
- 			throw new IllegalArgumentException(String.format("Parent directory is null", saveFile.getAbsolutePath()));
+ 			throw new IllegalArgumentException(String.format("Parent directory %s is null", saveFile.getAbsolutePath()));
  		if(!saveFile.getParentFile().canWrite())
  			throw new IllegalArgumentException(String.format("Parent directory %s is not writable", saveFile.getParentFile().getName()));
 
@@ -137,7 +136,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  				OutputStream os = new FileOutputStream(saveFile);
  				CountedOutputStream cos = new CountedOutputStream(os);
  				){
- 			cos.addCountListener( (l) -> fireProgressEvent(l));
+ 			cos.addCountListener(this::fireProgressEvent);
  			Document doc = new DatasetXMLCreator(dataset).create();
  			XMLOutputter xmlOutput = new XMLOutputter();
  			xmlOutput.setFormat(Format.getPrettyFormat());
@@ -176,7 +175,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 		    ObjectOutputStream output = new ObjectOutputStream(buffer);
 		   ) {
 			
-			 cos.addCountListener( (l) -> fireProgressEvent(l));
+			 cos.addCountListener(this::fireProgressEvent);
 
 		    output.writeObject(dataset);
 
@@ -235,24 +234,12 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
      * @throws IOException
      */
     public static void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!destFile.exists()) {
+        if (!destFile.exists())
             destFile.createNewFile();
-        }
 
-        FileChannel source = null;
-        FileChannel destination = null;
-
-        try {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
+        try( FileChannel source = new FileInputStream(sourceFile).getChannel();
+        	 FileChannel destination = new FileOutputStream(destFile).getChannel();) {
             destination.transferFrom(source, 0, source.size());
-        } finally {
-            if (source != null) {
-                source.close();
-            }
-            if (destination != null) {
-                destination.close();
-            }
         }
     }
 

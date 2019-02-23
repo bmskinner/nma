@@ -53,8 +53,8 @@ public interface Io  {
 	String SAVE_FILE_EXTENSION       = DOT + SAVE_FILE_EXTENSION_NODOT;
 	String BACKUP_FILE_EXTENSION = DOT + BACKUP_FILE_EXTENSION_NODOT;
 	String LOG_FILE_EXTENSION        = ".log";
-
-
+	String LOCK_FILE_EXTENSION        = ".lck";
+	
 	/** Locations of saved cells */
 	String LOC_FILE_EXTENSION        = "cell";
 
