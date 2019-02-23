@@ -35,34 +35,20 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 public class ClusterGroup implements IClusterGroup {
 
     private static final long  serialVersionUID = 1L;
-    private List<UUID>         ids              = new ArrayList<UUID>(0); // hold
-                                                                          // the
-                                                                          // ids
-                                                                          // of
-                                                                          // datasets
-                                                                          // in
-                                                                          // a
-                                                                          // cluster
-    private IClusteringOptions options = null;                              // store
-                                                                          // the
-                                                                          // options
-                                                                          // that
-                                                                          // were
-                                                                          // used
-                                                                          // to
-                                                                          // generate
-                                                                          // the
-                                                                          // cluster
+    
+    /** Dataset IDs in the cluster */
+    private List<UUID> ids = new ArrayList<>();
+    
+    /** Options used to generate the cluster */
+    private IClusteringOptions options = null;
     private String             name;
     private String             newickTree       = null;
 
     /**
      * Create a new cluster group
      * 
-     * @param name
-     *            the group name (informal)
-     * @param options
-     *            the options used to create the cluster
+     * @param name the group name (informal)
+     * @param options the options used to create the cluster
      */
     public ClusterGroup(@NonNull String name, @NonNull IClusteringOptions options) {
         this.name = name;
@@ -72,12 +58,9 @@ public class ClusterGroup implements IClusterGroup {
     /**
      * Create a new cluster group with a tree
      * 
-     * @param name
-     *            the group name (informal)
-     * @param options
-     *            the options used to create the cluster
-     * @param tree
-     *            the Newick tree for the cluster as a String
+     * @param name the group name (informal)
+     * @param options the options used to create the cluster
+     * @param tree the Newick tree for the cluster as a String
      */
     public ClusterGroup(@NonNull String name, @NonNull IClusteringOptions options, @NonNull String tree) {
         this(name, options);
@@ -96,11 +79,6 @@ public class ClusterGroup implements IClusterGroup {
         this.ids = template.getUUIDs();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#getName()
-     */
     @Override
     public String getName() {
         return this.name;
@@ -111,111 +89,56 @@ public class ClusterGroup implements IClusterGroup {
         name = s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#size()
-     */
     @Override
     public int size() {
         return this.ids.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#getTree()
-     */
     @Override
     public String getTree() {
         return this.newickTree;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#getUUIDs()
-     */
     @Override
     public List<UUID> getUUIDs() {
         return this.ids;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#addDataset(analysis.IAnalysisDataset)
-     */
     @Override
     public void addDataset(IAnalysisDataset dataset) {
         this.ids.add(dataset.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#addDataset(components.ICellCollection)
-     */
     @Override
     public void addDataset(ICellCollection collection) {
         this.ids.add(collection.getID());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#removeDataset(analysis.IAnalysisDataset)
-     */
     @Override
     public void removeDataset(IAnalysisDataset dataset) {
         removeDataset(dataset.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#removeDataset(java.util.UUID)
-     */
     @Override
     public void removeDataset(UUID id) {
         this.ids.remove(id);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#getOptions()
-     */
     @Override
     public Optional<IClusteringOptions> getOptions() {
         return Optional.ofNullable(options);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#hasDataset(java.util.UUID)
-     */
     @Override
     public boolean hasDataset(UUID id) {
         return ids.contains(id);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#hasTree()
-     */
     @Override
     public boolean hasTree() {
         return newickTree != null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.IClusterGroup#toString()
-     */
     @Override
     public String toString() {
         return this.name;
