@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**
@@ -89,6 +90,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     public Set<String> getDetectionOptionTypes() {
         return detectionOptions.keySet();
     }
+    
+	@Override
+	public Optional<IDetectionOptions> getNuclusDetectionOptions() {
+		return getDetectionOptions(CellularComponent.NUCLEUS);
+	}
 
     @Override
     public boolean hasDetectionOptions(String type) {
@@ -272,9 +278,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
         b.append(IDetectionOptions.NEWLINE+type);
         return b.toString();
-    }
-
-	
-    
+    }    
 
 }

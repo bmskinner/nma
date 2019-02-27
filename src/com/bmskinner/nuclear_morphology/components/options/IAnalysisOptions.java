@@ -53,8 +53,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
     /**
      * Get the detection options for the given component
      * 
-     * @param key
-     *            the component to detect
+     * @param key the component to detect
      * @return the detection options for the component
      */
     Optional<IDetectionOptions> getDetectionOptions(String key);
@@ -74,6 +73,13 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * @return present or not
      */
     boolean hasDetectionOptions(String type);
+    
+    /**
+     * Fetch the options used to detect the nucleus, if present.
+     * This is a shortcut for {@code IAnalysisOptions::getDetectionOptions(CellularComponent.NUCLEUS)}
+     * @return
+     */
+    Optional<IDetectionOptions> getNuclusDetectionOptions();
 
     /**
      * Get the proportion of the nucleus perimeter to use for shape profiling
