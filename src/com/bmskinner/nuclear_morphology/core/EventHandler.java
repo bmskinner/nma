@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.core;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -26,6 +27,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
@@ -691,10 +694,40 @@ public class EventHandler implements Loggable, EventListener {
 
     
     private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
+    	if(selectedDatasets.isEmpty())
+    		return;
     	
     	try {
+    		double d0scale = 1; 
+    		double currentScale = 1; 
     		
-			double scale = ic.requestDouble("Pixels per micron", 1d, 1d, 100000d, 1d);
+    		// is there a common scale in the datasets already?
+    		// Get the first dataset scale
+    		Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
+    		if(d0Options.isPresent()) {
+    			Optional<IDetectionOptions> d0NucleusOptions = d0Options.get().getNuclusDetectionOptions();
+    			if(d0NucleusOptions.isPresent()) {
+    				d0scale = d0NucleusOptions.get().getScale();
+    			}
+    		}
+    		
+    		// check any other datasets match
+    		final double d0scaleFinal = d0scale;
+    		boolean allMatch = selectedDatasets.stream().allMatch(d->{
+    			Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
+    			if(dOptions.isPresent()) {
+    				Optional<IDetectionOptions> dNucleusOptions = dOptions.get().getNuclusDetectionOptions();
+    				if(dNucleusOptions.isPresent()) {
+    					return dNucleusOptions.get().getScale()==d0scaleFinal;
+    				}
+    			}
+    			return false;
+    		});
+    		if(allMatch)
+    			currentScale = d0scale;
+    		
+    		// request the new scale
+			double scale = ic.requestDouble("Pixels per micron", currentScale, 1d, 100000d, 1d);
 			if (scale > 0) { // don't allow a scale to cause divide by zero errors
 				selectedDatasets.stream().forEach(d->d.setScale(scale));
 				eventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
