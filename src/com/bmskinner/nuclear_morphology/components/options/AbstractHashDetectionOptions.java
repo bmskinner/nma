@@ -249,7 +249,8 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
     @Override
     public void set(@NonNull IDetectionOptions template) {
     	super.set(template);
-    	folder = new File(template.getFolder().getAbsolutePath());
+    	if(template.getFolder()!=null)
+    		folder = new File(template.getFolder().getAbsolutePath());
     	try {
         	for(String subKey : template.getSubOptionKeys())
         		subMap.put(subKey, template.getSubOptions(subKey).duplicate());
