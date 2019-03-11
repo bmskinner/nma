@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -66,6 +67,41 @@ public class DatasetValidator implements Loggable {
 		return errorCells;
 	}
 
+	/**
+	 * Run validation on a single collection. This will test the consistency
+	 * of all cells in the collection, but has no child testing.
+	 * @param collection
+	 * @return
+	 */
+	public boolean validate(final @NonNull ICellCollection collection) {
+		errorList.clear();
+		errorCells.clear();
+		
+		int errors = 0;
+		
+		if (!checkAllNucleiHaveProfiles(collection)) {
+			errorList.add("Error in nucleus profiling");
+			errors++;
+		}
+		
+		if (!checkSegmentsAreConsistentInAllCells(collection)) {
+			errorList.add("Error in segmentation between cells");
+			errors++;
+		}
+		
+		if (!checkNucleiHaveRPOnASegmentBoundary(collection)) {
+			errorList.add("Error in RP placement between cells");
+			errors++;
+		}
+
+		if (errors == 0) {
+			errorList.add("Collection OK");
+			return true;
+		}
+		errorList.add(String.format("collection failed validation: %s out of %s cells have errors", errorCells.size(), collection.getCells().size()));
+		return false;
+	}
+	
 	/**
 	 * Run validation on the given dataset
 	 * 
@@ -118,12 +154,15 @@ public class DatasetValidator implements Loggable {
 
 	}
 	
-	
 	private boolean checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
+		return checkAllNucleiHaveProfiles(d.getCollection());
+	}
+	
+	private boolean checkAllNucleiHaveProfiles(@NonNull ICellCollection collection) {
 		boolean isOk = true;
 
 		for (ProfileType type : ProfileType.values()) {
-			for(ICell c : d.getCollection()) {
+			for(ICell c : collection) {
 				for (Nucleus n : c.getNuclei()) {
 					try {
 						n.getProfile(type);
@@ -235,14 +274,19 @@ public class DatasetValidator implements Loggable {
 		return isOk;	
 	}
 	
+	
+	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull IAnalysisDataset d) {
+		return checkNucleiHaveRPOnASegmentBoundary(d.getCollection());
+	}
+	
 	/**
 	 * Check if the RP is at a segment boundary in all cells
 	 * @param d
 	 * @return
 	 */
-	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull IAnalysisDataset d) {
+	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull ICellCollection collection) {
 		boolean allOk = true;
-		for(ICell c : d.getCollection()) {
+		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				boolean isOk = false;
 				
@@ -314,21 +358,43 @@ public class DatasetValidator implements Loggable {
 
 	/**
 	 * Check if all cells in the dataset have the same segmentation pattern, 
-	 * including the consensus nucleus
+	 * including the consensus nucleus.
 	 * 
-	 * @param d
+	 * @param d the dataset collection to test
 	 * @return
 	 */
 	private boolean checkSegmentsAreConsistentInAllCells(@NonNull IAnalysisDataset d) {
+		return checkSegmentsAreConsistentInAllCells(d.getCollection());
+	}
+	
+	/**
+	 * Check if all cells in the collection have the same segmentation pattern, 
+	 * including the consensus nucleus
+	 * 
+	 * @param collection the cell collection to test
+	 * @return
+	 */
+	private boolean checkSegmentsAreConsistentInAllCells(@NonNull ICellCollection collection) {
+		
+		ISegmentedProfile medianProfile;
+		try {
+			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+					Tag.REFERENCE_POINT, Stats.MEDIAN);
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
+				| UnsegmentedProfileException e) {
+			errorList.add("Unable to fetch median profile for collection");
+			return false;
+		}
 
-		List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
+		
+		List<UUID> idList = collection.getProfileCollection().getSegmentIDs();
 
 		int errorCount = 0;
 
-		for(ICell c : d.getCollection().getCells()){
+		for(ICell c : collection.getCells()){
 			int cellErrors = 0;
 			for (Nucleus n :c.getNuclei()) {
-				cellErrors += checkSegmentation(n, idList);
+				cellErrors += checkSegmentation(n, idList, medianProfile);
 			}
 			
 			if(cellErrors>0)
@@ -336,8 +402,10 @@ public class DatasetValidator implements Loggable {
 			errorCount+=cellErrors;
 		}
 
-		if(d.getCollection().hasConsensus())
-			errorCount += checkSegmentation(d.getCollection().getConsensus(), idList);
+		if(collection.hasConsensus())
+			errorCount += checkSegmentation(collection.getConsensus(), idList, medianProfile);
+		
+		
 
 		return errorCount==0;
 	}
@@ -349,7 +417,7 @@ public class DatasetValidator implements Loggable {
 	 * @param expectedSegments the expected segment ids
 	 * @return the number of errors found
 	 */
-	private int checkSegmentation(Taggable n, List<UUID> expectedSegments) {
+	private int checkSegmentation(Taggable n, List<UUID> expectedSegments, ISegmentedProfile medianProfile) {
 		
 		int errorCount = 0;
 		boolean hasSegments = expectedSegments.size()>0;
@@ -376,7 +444,6 @@ public class DatasetValidator implements Loggable {
 				}
 			}
 
-
 			// Check all root dataset segments are in nucleus
 
 			for (UUID id : expectedSegments) {
@@ -402,6 +469,24 @@ public class DatasetValidator implements Loggable {
 
 				}
 			}
+			
+
+				
+			for(UUID id : medianProfile.getSegmentIDs()){
+				IBorderSegment medianSeg = medianProfile.getSegment(id);
+				IBorderSegment objectSeg = p.getSegment(id);
+				if(medianSeg.hasMergeSources()!=objectSeg.hasMergeSources())
+					errorCount++;
+				for(IBorderSegment mge : medianSeg.getMergeSources()) {
+					if(!objectSeg.hasMergeSource(mge.getID()))
+						errorCount++;
+				}
+				for(IBorderSegment obj : objectSeg.getMergeSources()) {
+					if(!medianSeg.hasMergeSource(obj.getID()))
+						errorCount++;
+				}
+			}
+
 
 
 		} catch (ProfileException | UnavailableComponentException e) {

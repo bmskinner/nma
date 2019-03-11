@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
@@ -636,16 +637,6 @@ public class ProfileManager implements Loggable {
         // Move the appropriate segment endpoint
         try {
             if (oldProfile.update(seg, newStart, newEnd)) {
-
-                // programLogger.log(Level.FINEST, "Segment position update
-                // succeeded");
-                // Replace the old segments in the median
-                // programLogger.log(Level.FINEST, "Updated profile:
-                // "+oldProfile.toString());
-
-                // programLogger.log(Level.FINEST, "Adding segments to profile
-                // collection");
-
                 collection.getProfileCollection().addSegments(Tag.REFERENCE_POINT, oldProfile.getSegments());
 
                 finest("Segments added, refresh the charts");
@@ -687,27 +678,6 @@ public class ProfileManager implements Loggable {
     }
     
     /**
-     * Count the number of nuclei in the collection that do not have segments matching the median profile
-     * @return
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
-     * @throws ProfileException
-     * @throws UnsegmentedProfileException
-     */
-    public int countNucleiNotMatchingMedianSegmentation() throws UnavailableComponentException, ProfileException, UnsegmentedProfileException{
-     // Check that the state of all nuclei in the collection is consistent
-        ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Stats.MEDIAN);
-        int error = 0;
-        for (Nucleus n : collection.getNuclei()) {
-            if(!hasSegmentsMatchingMedian(n, medianProfile)){
-                error++;
-            }
-        }
-        return error;
-    }
-
-    /**
      * Merge the given segments from the median profile, and update each 
      * nucleus in the collection.
      * 
@@ -735,12 +705,12 @@ public class ProfileManager implements Loggable {
             throw new IllegalArgumentException("Median profile does not have segment 2 ID");
 
         if(collection.isReal()){
-            int error = countNucleiNotMatchingMedianSegmentation();
-            if(error>0){
-                warn(String.format("Segments are out of sync with median for %d nuclei", error));
-                warn("Canceling merge");
-                return;
-            }
+        	DatasetValidator dv = new DatasetValidator();
+        	if (!dv.validate(collection)) {
+        		 warn(String.format("Segments are out of sync with median"));
+                 warn("Canceling merge");
+                 return;
+        	}
         }
     
         // merge the two segments in the median
@@ -773,44 +743,8 @@ public class ProfileManager implements Loggable {
             Nucleus n = collection.getRawConsensus().component();
             mergeSegments(n, seg1, seg2, newID);
         }
-
-        // Ensure the vertical nuclei have the same segment pattern
-        collection.updateVerticalNuclei();
     }
     
-    /**
-     * Test if the segments in teh given Taggable match the segments in the median profile
-     * of the collection
-     * @param t
-     * @return true if the segment ids match
-     * @throws ProfileException 
-     * @throws UnavailableComponentException 
-     */
-    private boolean hasSegmentsMatchingMedian(@NonNull Taggable t, @NonNull ISegmentedProfile median) throws ProfileException, UnavailableComponentException{
-        ISegmentedProfile test = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        
-        if(test.getSegmentCount() != median.getSegmentCount())
-            return false;
-        
-        for(UUID id : median.getSegmentIDs()){
-            if(!test.hasSegment(id))
-                return false;
-            
-            IBorderSegment medianSeg = median.getSegment(id);
-            IBorderSegment objectSeg = test.getSegment(id);
-            if(medianSeg.hasMergeSources()!=objectSeg.hasMergeSources())
-            	return false;
-            for(IBorderSegment mge : medianSeg.getMergeSources()) {
-            	if(!objectSeg.hasMergeSource(mge.getID()))
-            		return false;
-            }
-            for(IBorderSegment obj : objectSeg.getMergeSources()) {
-            	if(!medianSeg.hasMergeSource(obj.getID()))
-            		return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Merge the segments with the given IDs into a new segment with the given
@@ -916,10 +850,6 @@ public class ProfileManager implements Loggable {
             splitSegment(n, seg.getID(), proportion, newID1, newID2);
             n.setLocked(wasLocked);
         }
-
-        // Ensure the vertical nuclei have the same segment pattern
-        collection.updateVerticalNuclei();
-
         return true;
 
     }
@@ -1014,25 +944,15 @@ public class ProfileManager implements Loggable {
         }
         
         if(collection.isReal()){
-            // Check that the state of all nuclei in the collection is consistent
-            int error = 0;
-            for (Nucleus n : collection.getNuclei()) {
-                if(!hasSegmentsMatchingMedian(n, medianProfile)){
-                    error++;
-                }
-            }
-
-            if(error>0){
-                warn(String.format("Segments are out of sync with median for %d nuclei", error));
-                warn("Canceling unmerge");
-                return;
-            }
+        	DatasetValidator dv = new DatasetValidator();
+        	if (!dv.validate(collection)) {
+        		 warn(String.format("Segments are out of sync with median"));
+                 warn("Canceling unmerge");
+                 return;
+        	}
         }
-        
-//        fine("Unmerging segment "+segId);
 
-        // unmerge the two segments in the median - this is only a copy of the
-        // profile collection
+        // unmerge the two segments in the median - this is only a copy of the profile collection
         medianProfile.unmergeSegment(segId);
 
         // put the new segment pattern back with the appropriate offset
@@ -1044,7 +964,6 @@ public class ProfileManager implements Loggable {
          */
         
         if(collection.isReal()){
-//        	fine("Unmerging individual nuclei for "+segId);
             for (Nucleus n : collection.getNuclei()) {
                 boolean wasLocked = n.isLocked();
                 n.setLocked(false);
@@ -1054,16 +973,11 @@ public class ProfileManager implements Loggable {
         }
 
 
-        /*
-         * Update the consensus if present
-         */
+        /* Update the consensus if present */
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();
             unmergeSegments(n, segId);
         }
-
-        // Ensure the vertical nuclei have the same segment pattern
-        collection.updateVerticalNuclei();
     }
 
     private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
