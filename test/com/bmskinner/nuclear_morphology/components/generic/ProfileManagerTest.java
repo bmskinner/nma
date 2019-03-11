@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -140,7 +141,9 @@ public class ProfileManagerTest {
 
 	@Test
 	public void testCountNucleiNotMatchingMedianSegmentation() throws Exception {
-		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
+		DatasetValidator dv = new DatasetValidator();
+		assertTrue(dv.validate(collection));
+//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
 		
 		// Merge on one nucleus will take it out of sync
 		Nucleus n = collection.streamCells().findFirst().get().getNucleus();
@@ -149,8 +152,8 @@ public class ProfileManagerTest {
 		UUID segId2 = profile.getSegmentAt(2).getID();
 		profile.mergeSegments(segId1, segId2, UUID.randomUUID());
 		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-		
-		assertEquals(1, manager.countNucleiNotMatchingMedianSegmentation());
+		assertFalse(dv.validate(collection));
+//		assertEquals(1, manager.countNucleiNotMatchingMedianSegmentation());
 	}
 
 	@Test
@@ -164,8 +167,10 @@ public class ProfileManagerTest {
 		IBorderSegment seg1 = profile.getSegmentAt(1);
 		IBorderSegment seg2 = profile.getSegmentAt(2);
 				
+		DatasetValidator dv = new DatasetValidator();
+		assertTrue(dv.validate(collection));
 		manager.mergeSegments(seg1, seg2, newId);
-		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
+//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 		assertEquals(segIds.size()-1, newIds.size());
 		assertTrue(newIds.contains(newId));
@@ -203,7 +208,9 @@ public class ProfileManagerTest {
 		IBorderSegment seg2 = profile.getSegmentAt(2);
 
 		manager.mergeSegments(seg1, seg2, newId);
-		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
+		DatasetValidator dv = new DatasetValidator();
+		assertTrue(dv.validate(collection));
+//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
 		
 		manager.unmergeSegments(newId);
 		
@@ -213,7 +220,8 @@ public class ProfileManagerTest {
 		assertTrue(newIds.contains(segId1));
 		assertTrue(newIds.contains(segId2));
 		
-		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
+		assertTrue(dv.validate(collection));
+//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
 		
 		for(Nucleus n : collection.getNuclei()) {
 			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
