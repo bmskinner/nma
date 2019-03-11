@@ -82,8 +82,6 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	 * The valid file format for this mapping is a tab separated file,
 	 * with two values per line: a cell UUID, and a cluster integer.
 	 * e.g. 00000000-0000-0000-0000-000000000001	1
-	 * All the cells in the dataset should be represented in the file.
-	 * @param file
 	 * @return true if the file meets the requirements for cluster assignment, false otherwise
 	 * @throws ClusteringMethodException 
 	 */
@@ -93,12 +91,11 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		List<UUID> found = new ArrayList<>(collection.size());
 		Map<Integer, UUID> notInDataset = new HashMap<>();
 		
-		List<Integer> idErrors = new ArrayList<>();
+		List<Integer> idErrors  = new ArrayList<>();
 		List<Integer> numErrors = new ArrayList<>();
 		int lineNo = 0;
 		try(FileInputStream fstream = new FileInputStream(clusterFile);
-				BufferedReader br = new BufferedReader(
-						new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));) {
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));) {
 			
 
 			String strLine;
@@ -138,44 +135,23 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		boolean ok = true;
 		
 		if(idErrors.size()!=0) {
-			ok=false;
+			ok = false;
 			warn("Mapping file has errors in the cell id column");
-			for(Integer line : idErrors) {
+//			for(Integer line : idErrors) {
 //				warn(String.format("Line %d does not have a cell id in column 1", line));
-			}
+//			}
 		}
 		
 		if(numErrors.size()!=0) {
 			ok=false;
 			warn("Mapping file has errors in the cluster number column");
-			for(Integer line : numErrors) {
+//			for(Integer line : numErrors) {
 //				warn(String.format("Line %d does not have a readable number in column 2", line));
-			}
+//			}
 		}
-		
-		// Check there are no cells not within the dataset
-//		if(notInDataset.size()!=0) {
-//			warn(String.format("Mapping file (%d cells) has cells not in the dataset (%d cells)", cells, collection.size()));
-//			for(Integer line : notInDataset.keySet()) {
-//				if(notInDataset.get(line)!=null)
-//					warn(String.format("Line %d: Cell with id %s is not in dataset", line, notInDataset.get(line) ));
-//			}
-//			ok = false;
-//		}
-		
-		// Check that all cells are represented
-//		if(collection.size()>cells) {
-//			List<UUID> missing = collection.getCellIDs().stream().filter(id->!found.contains(id)).collect(Collectors.toList());
-//			warn(String.format("Mapping file (%d cells) does not contain all the dataset cells (%d cells)", cells, collection.size()));
-//			for(UUID id : missing) {
-//				warn(String.format("Cell with id %s is not in the mapping file", id ));
-//			}
-//			ok = false;
-//		}
-		
+				
 		if(!ok)
 			warn("Unable to assign clusters; the mapping file is invalid. Please correct and try again.");
-		
 		return ok;
 	}
 	
@@ -189,7 +165,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
             int lineNo = 0;
             while (( strLine = br.readLine()) != null) {
             	lineNo++;
-            	if(skipFirstLine && lineNo==1) {
+            	if(lineNo==1 && skipFirstLine) {
             		continue;
             	}
             	String[] arr = strLine.split(DELIMITER);
