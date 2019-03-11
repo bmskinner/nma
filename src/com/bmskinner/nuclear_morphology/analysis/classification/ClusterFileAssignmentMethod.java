@@ -91,15 +91,15 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		ICellCollection collection = dataset.getCollection();
 		int cells = 0;
 		List<UUID> found = new ArrayList<>(collection.size());
-		Map<Integer, UUID> notInDataset = new HashMap<>(0);
+		Map<Integer, UUID> notInDataset = new HashMap<>();
 		
 		List<Integer> idErrors = new ArrayList<>();
 		List<Integer> numErrors = new ArrayList<>();
 		int lineNo = 0;
-		try {
-			FileInputStream fstream = new FileInputStream(clusterFile);
-			BufferedReader br = new BufferedReader(
-					new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));
+		try(FileInputStream fstream = new FileInputStream(clusterFile);
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));) {
+			
 
 			String strLine;
 			while (( strLine = br.readLine()) != null) {
@@ -128,11 +128,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 				} else {
 					notInDataset.put(lineNo, id);
 				}
-
-
-
 			}
-			fstream.close();
 		}
 		catch (Exception e) {
 			warn("Parsing error reading mapping file");
@@ -145,7 +141,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 			ok=false;
 			warn("Mapping file has errors in the cell id column");
 			for(Integer line : idErrors) {
-				warn(String.format("Line %d does not have a cell id", line));
+//				warn(String.format("Line %d does not have a cell id in column 1", line));
 			}
 		}
 		
@@ -153,27 +149,29 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 			ok=false;
 			warn("Mapping file has errors in the cluster number column");
 			for(Integer line : numErrors) {
-				warn(String.format("Line %d does not have a readable number", line));
+//				warn(String.format("Line %d does not have a readable number in column 2", line));
 			}
 		}
 		
-		if(notInDataset.size()!=0) {
-			warn(String.format("Mapping file (%d cells) has cells not in the dataset (%d cells)", cells, collection.size()));
-			for(Integer line : notInDataset.keySet()) {
-				if(notInDataset.get(line)!=null)
-					warn(String.format("Line %d: Cell with id %s is not in dataset", line, notInDataset.get(line) ));
-			}
-			ok = false;
-		}
+		// Check there are no cells not within the dataset
+//		if(notInDataset.size()!=0) {
+//			warn(String.format("Mapping file (%d cells) has cells not in the dataset (%d cells)", cells, collection.size()));
+//			for(Integer line : notInDataset.keySet()) {
+//				if(notInDataset.get(line)!=null)
+//					warn(String.format("Line %d: Cell with id %s is not in dataset", line, notInDataset.get(line) ));
+//			}
+//			ok = false;
+//		}
 		
-		if(collection.size()>cells) {
-			List<UUID> missing = collection.getCellIDs().stream().filter(id->!found.contains(id)).collect(Collectors.toList());
-			warn(String.format("Mapping file (%d cells) does not contain all the dataset cells (%d cells)", cells, collection.size()));
-			for(UUID id : missing) {
-				warn(String.format("Cell with id %s is not in the mapping file", id ));
-			}
-			ok = false;
-		}
+		// Check that all cells are represented
+//		if(collection.size()>cells) {
+//			List<UUID> missing = collection.getCellIDs().stream().filter(id->!found.contains(id)).collect(Collectors.toList());
+//			warn(String.format("Mapping file (%d cells) does not contain all the dataset cells (%d cells)", cells, collection.size()));
+//			for(UUID id : missing) {
+//				warn(String.format("Cell with id %s is not in the mapping file", id ));
+//			}
+//			ok = false;
+//		}
 		
 		if(!ok)
 			warn("Unable to assign clusters; the mapping file is invalid. Please correct and try again.");
@@ -183,10 +181,9 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	
 	private void readMapFile() throws ClusteringMethodException {
 
-        try {
-            FileInputStream fstream = new FileInputStream(clusterFile);
+        try(FileInputStream fstream = new FileInputStream(clusterFile);
             BufferedReader br = new BufferedReader(
-                    new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));
+                        new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));) {
 
             String strLine;
             int lineNo = 0;
@@ -201,7 +198,6 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
             	cellMap.put(id, cluster);
             	fireProgressEvent();
             }
-            fstream.close();
         }
         catch (Exception e) {
         	stack("Error parsing mapping file", e);
@@ -219,7 +215,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, OptionsFactory.makeClusteringOptions());
 
-        
+        // Make collections for the new clusters
         long nClusters = cellMap.values().stream().distinct().count();
         fine("Creating "+nClusters+" child datasets");
         for (int i = 1; i <= nClusters; i++) {
@@ -240,7 +236,16 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
             clusterMap.get(cluster).addCell(cell);
         }
         
+       // Get dataset cells not in the map file
+        List<ICell> unmappedCells = dataset.getCollection().stream().filter(c->!cellMap.keySet().contains(c.getId())).collect(Collectors.toList());
+        // Add unmapped cells to a final cluster
+        ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Unmapped");
+        clusterCollection.setName("Unmapped");
+        clusterCollection.addAll(unmappedCells);
+        clusterMap.put( (int)nClusters+1, clusterCollection);
         
+
+        // Assign profiles to the new cluster collections
         int cellsInClusters = 0;
         for (int i = 1; i <= clusterMap.size(); i++) {
 
