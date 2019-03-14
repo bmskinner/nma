@@ -92,6 +92,7 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
             fireProgressEvent();
         }
 
+        fireIndeterminateState();
         IJ.append(outLine.toString(), exportFile.getAbsolutePath());
     }
     
