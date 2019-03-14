@@ -402,10 +402,16 @@ public class DatasetValidator implements Loggable {
 			errorCount+=cellErrors;
 		}
 
-		if(collection.hasConsensus())
-			errorCount += checkSegmentation(collection.getConsensus(), idList, medianProfile);
+		if(collection.hasConsensus()) {
+			int consensusErrors = checkSegmentation(collection.getConsensus(), idList, medianProfile);
+			if(consensusErrors>0)
+				errorList.add("Segmentation error in consensus");
+			errorCount += consensusErrors;
+		}
 		
-		
+		if(errorCount>0) {
+			errorList.add(String.format("Segments are not consistent in all cells"));
+		}
 
 		return errorCount==0;
 	}
@@ -478,12 +484,17 @@ public class DatasetValidator implements Loggable {
 				if(medianSeg.hasMergeSources()!=objectSeg.hasMergeSources())
 					errorCount++;
 				for(IBorderSegment mge : medianSeg.getMergeSources()) {
-					if(!objectSeg.hasMergeSource(mge.getID()))
+					if(!objectSeg.hasMergeSource(mge.getID())) {
+						errorList.add(String.format("Object segment %s does not have expected median merge source in object %s", mge.getName(), n.getID()));
 						errorCount++;
+					}
 				}
 				for(IBorderSegment obj : objectSeg.getMergeSources()) {
-					if(!medianSeg.hasMergeSource(obj.getID()))
+					if(!medianSeg.hasMergeSource(obj.getID())) {
+						errorList.add(String.format("Median segment %s does not have object merge source in object %s", medianSeg.getName(), n.getID()));
 						errorCount++;
+					}
+						
 				}
 			}
 
