@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -123,6 +124,8 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
             for (int i = 0; i < segCount; i++) { 
                 outLine.append(label + i +"_pixels" + TAB);
                 outLine.append(label + i +"_microns" + TAB);
+                outLine.append(label + i +"_start" + TAB);
+                outLine.append(label + i +"_end" + TAB);
             }
         }
         
@@ -143,11 +146,11 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
     private boolean hasComponent(IAnalysisDataset d, String component) {
 
         if (CellularComponent.CYTOPLASM.equals(component)) {
-            return d.getCollection().getCells().stream().allMatch(c -> c.hasCytoplasm());
+            return d.getCollection().getCells().stream().allMatch(ICell::hasCytoplasm);
         }
 
         if (CellularComponent.NUCLEUS.equals(component)) {
-            return d.getCollection().getCells().stream().allMatch(c -> c.hasNucleus());
+            return d.getCollection().getCells().stream().allMatch(ICell::hasNucleus);
         }
 
         return false;
@@ -250,17 +253,30 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
         double varM = 0;
                 
         ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        ISegmentedProfile normalisedProfile = p.interpolate(1000); // Allows point indexes
         List<IBorderSegment> segs = p.getOrderedSegments();
         
         for(IBorderSegment segment : segs){
-            double perimeterLength = 0;
             if (segment != null) {
+            	// Add the length of the segment
                 int indexLength = segment.length();
                 double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
                 varP = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
                 varM = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.MICRONS);
                 outLine.append(varP + TAB);
                 outLine.append(varM + TAB);
+                
+                // Add the index of the segment start and end in the normalised profile.
+                try {
+                	IBorderSegment normalisedSeg = normalisedProfile.getSegment(segment.getID());
+                	int start = normalisedSeg.getStartIndex();
+                	int end   = normalisedSeg.getEndIndex();
+                	outLine.append(start + TAB);
+                    outLine.append(end + TAB);
+				} catch (UnavailableComponentException e) {
+					outLine.append("NA" + TAB);
+                    outLine.append("NA" + TAB);
+				}
             }
         }
     }
