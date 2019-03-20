@@ -78,8 +78,7 @@ public enum ProfileType {
      * @return
      */
     public static ProfileType[] exportValues() {
-        ProfileType[] array = { ANGLE, DIAMETER, RADIUS };
-        return array;
+    	return new ProfileType[] { ANGLE, DIAMETER, RADIUS };
     }
 
     /**
@@ -88,7 +87,6 @@ public enum ProfileType {
      * @return
      */
     public static ProfileType[] displayValues() {
-        ProfileType[] array = { ANGLE, DIAMETER, RADIUS };
-        return array;
+    	return new ProfileType[] { ANGLE, DIAMETER, RADIUS };
     }
 }

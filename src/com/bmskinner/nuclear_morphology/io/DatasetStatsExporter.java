@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Export all the stats from a dataset to a text file for downstream analysis
@@ -108,13 +109,14 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
 
         if (includeProfiles) {
             for (ProfileType type : ProfileType.exportValues()) {
-
                 String label = type.toString().replaceAll(" ", "_");
                 for (int i = 0; i < 100; i++) {
-
                     outLine.append(label + "_" + i + TAB);
                 }
-
+            }
+            // Frankenprofile separately
+            for (int i = 0; i < 100; i++) {
+                outLine.append("Franken_profile_" + i + TAB);
             }
         }
         
@@ -167,7 +169,7 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
      */
     @Override
 	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
-
+    	ISegmentedProfile medianProfile = d.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN); 
         for (ICell cell : d.getCollection().getCells()) {
 
             if (cell.hasNucleus()) {
@@ -184,6 +186,7 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
 
                     if (includeProfiles) {
                         appendProfiles(outLine, n);
+                        appendFrankenProfiles(outLine, n, medianProfile);
                     }
                     
                     if(includeSegments){
@@ -230,6 +233,15 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
         }
     }
 
+    
+    /**
+     * Generate and append profiles for a component
+     * @param outLine the string builder to append to
+     * @param c the component to export
+     * @throws UnavailableBorderTagException
+     * @throws UnavailableProfileTypeException
+     * @throws ProfileException
+     */
     private void appendProfiles(StringBuilder outLine, Taggable c)
             throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
         for (ProfileType type : ProfileType.exportValues()) {
@@ -242,8 +254,30 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
                 double value = p.get(idx);
                 outLine.append(value + TAB);
             }
-
         }
+    }
+    
+    /**
+     * Generate and append a franken profile for the given median
+     * @param outLine the string builder to append to
+     * @param c the component to export
+     * @param median the dataset median profile from which the component came
+     * @throws UnavailableBorderTagException
+     * @throws UnavailableProfileTypeException
+     * @throws ProfileException
+     */
+    private void appendFrankenProfiles(StringBuilder outLine, Taggable c, ISegmentedProfile median)
+            throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+
+            ISegmentedProfile s = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            ISegmentedProfile f = s.frankenNormaliseToProfile(median);
+            
+            for (int i = 0; i < 100; i++) {
+                double idx = ((double) i) / 100d;
+
+                double value = f.get(idx);
+                outLine.append(value + TAB);
+            }
     }
     
     private void appendSegments(StringBuilder outLine, Taggable c)
