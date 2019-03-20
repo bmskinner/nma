@@ -126,8 +126,8 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
             for (int i = 0; i < segCount; i++) { 
                 outLine.append(label + i +"_pixels" + TAB);
                 outLine.append(label + i +"_microns" + TAB);
-                outLine.append(label + i +"_start" + TAB);
-                outLine.append(label + i +"_end" + TAB);
+                outLine.append("Seg_" + i +"_start" + TAB);
+                outLine.append("Seg_" + i +"_end" + TAB);
             }
         }
         
