@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -48,6 +49,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -94,8 +97,18 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
         Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
         
-        double scale = dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().getScale();
-        n.setScale(scale);
+        Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
+        if(analysisOptions.isPresent()) {
+        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get().getNuclusDetectionOptions();
+        	if(nucleusOptions.isPresent()) {
+        		double scale = nucleusOptions.get().getScale();
+        		n.setScale(scale);
+        	} else {
+        		fine("No nucleus detection options present, unable to find pixel scale for consensus");
+        	}
+        } else {
+        	fine("No analysis options present, unable to find pixel scale for consensus");
+        }
 
         // Calculate the stats for the new consensus
         // Required for angle window size calculation

@@ -88,8 +88,6 @@ public class ICellCollectionTest extends ComponentTester {
 			for(ICell c : d.getCollection().getCells()) {
 				v.addCell(c);
 			}
-			
-//			d.addChildCollection(v);
 			return v;
 		}
 
@@ -335,11 +333,16 @@ public class ICellCollectionTest extends ComponentTester {
 	@Test
 	public void testGetConsensusOrientsVertically() throws Exception {
 		
+		// Ensure TV and BV are set
 		ProfileManager m = collection.getProfileManager();
 		IProfile p = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 		m.updateBorderTag(Tag.TOP_VERTICAL, 0);
 		m.updateBorderTag(Tag.BOTTOM_VERTICAL, 10);
+		
+		// Run consensus averaging on the collection. Wrap in a new dataset. 
+		// Analysis options will not be copied!
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
+		
 		new ConsensusAveragingMethod(d).call();
 		int bIndex=0;
 		for(int tIndex=0; tIndex<p.size(); tIndex++) {

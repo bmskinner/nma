@@ -77,6 +77,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /** The pixel spacing between border points after roi interpolation */
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
 	
+	/** The default pixel scale */
+	private static final double DEFAULT_SCALE = 1;
+	
 	private static final long serialVersionUID = 1L;
     private final UUID        id;
 
@@ -117,7 +120,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * 
      * @see AbstractCellularComponent#setScale()
      */
-    private double scale = 1;
+    private double scale = DEFAULT_SCALE;
 
     /** The points within the Roi from which the object was detected  */
     private int[] xpoints, ypoints;

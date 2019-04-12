@@ -323,8 +323,8 @@ public class TestDatasetBuilder {
 		ICellCollection collection = new DefaultCellCollection(new File(TEST_DATASET_IMAGE_FOLDER), TEST_DATASET_NAME, TEST_DATASET_NAME, type, TEST_DATASET_UUID);
 		
 		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(collection.getFolder());
-		o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setMinSize( (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
-		o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().setMaxSize( (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
+		o.getNuclusDetectionOptions().get().setMinSize( (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
+		o.getNuclusDetectionOptions().get().setMaxSize( (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
 		if(redSignals) {
 			ISignalGroup g = new SignalGroup(RED_SIGNAL_GROUP_NAME);

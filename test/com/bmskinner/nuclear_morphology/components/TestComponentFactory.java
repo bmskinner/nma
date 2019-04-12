@@ -106,7 +106,7 @@ public class TestComponentFactory {
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		Nucleus n = createNucleus(roi, com, f, 0, position, 0);
 		n.rotate(rotation);
-		
+				
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 		n.findPointsAroundBorder();		
