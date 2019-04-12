@@ -50,7 +50,7 @@ public class Nuclear_Morphology_Analysis
 	implements Loggable {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
-	private CommandParser parser;
+	private CommandParser parser; // parse command line arguments and launch the UI
 	
 	/*
 	 * Keep a strong reference to the logger so they can be accessed
@@ -60,11 +60,20 @@ public class Nuclear_Morphology_Analysis
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 
+	/**
+	 * Private constructor used when launching as a standalone program
+	 * @param args
+	 */
 	private Nuclear_Morphology_Analysis(String[] args){
 		loadLogger();
 	    this.parser = new CommandParser(args);
 	}
 	
+	
+	/**
+	 * Public constructor used when launching within ImageJ.
+	 * Invokes the private constructor with no arguments.
+	 */
 	public Nuclear_Morphology_Analysis(){
 	    String[] arr = new String[1];
         arr[0] = "";

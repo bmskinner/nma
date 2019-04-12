@@ -386,7 +386,6 @@ public class DatasetValidator implements Loggable {
 			return false;
 		}
 
-		
 		List<UUID> idList = collection.getProfileCollection().getSegmentIDs();
 
 		int errorCount = 0;

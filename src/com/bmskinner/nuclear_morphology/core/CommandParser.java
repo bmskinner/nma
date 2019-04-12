@@ -80,24 +80,40 @@ public class CommandParser implements Loggable {
 	    new ConfigFileReader();
 
 	    if(headless){
-
-	    	if(folder!=null) {
-	    		log("Running on folder: "+folder.getAbsolutePath());
-	    		try {
-	    			if(options!=null) {
-	    				new SavedOptionsAnalysisPipeline(folder, options).call();
-	    			} else {
-	    				new BasicAnalysisPipeline(folder);
-	    			}
-
-	    		} catch (Exception e) {
-	    			error("Error in pipeline", e);
-	    		}
-	    	}
+	    	runHeadless(folder, options);
 	    } else {
 	        runWithGUI();
 	    }
 	    		
+	}
+	
+	/**
+	 * Run in headless mode, specifying a folder of images, and 
+	 * a file of options
+	 * @param folder the folder of images
+	 * @param options
+	 */
+	private void runHeadless(final File folder, final File options) {
+		if(folder!=null) {
+    		log("Running on folder: "+folder.getAbsolutePath());
+    		
+    		if(!folder.isDirectory()) {
+    			warn("A directory is required in the '-folder' argument");
+    			return;
+    		}
+    		try {
+    			if(options!=null) {
+    				log("Running with saved options: "+options.getAbsolutePath());
+    				new SavedOptionsAnalysisPipeline(folder, options).call();
+    			} else {
+    				log("No analysis options provided, using defaults");
+    				new BasicAnalysisPipeline(folder);
+    			}
+
+    		} catch (Exception e) {
+    			error("Error in pipeline", e);
+    		}
+    	}
 	}
 		
 	/**
@@ -123,7 +139,7 @@ public class CommandParser implements Loggable {
 
                 boolean useDockable = GlobalOptions.getInstance().isUseDockableInterface();
                 
-                System.out.println("Dockable: "+useDockable);
+                finest("Dockable: "+useDockable);
                 
                 if(useDockable) {
                 	DockableMainWindow mw = new DockableMainWindow(useStandalone,eh);

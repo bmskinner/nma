@@ -125,7 +125,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         }
         return false;
     }
-
+    
     public abstract void deleteClusterGroup(@NonNull IClusterGroup group);
 
     public void addClusterGroup(IClusterGroup group) {
