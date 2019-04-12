@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
@@ -206,6 +207,17 @@ public class OptionsFactory {
      */
     public static IClusteringOptions makeClusteringOptions(IClusteringOptions template) {
         return new DefaultClusteringOptions(template);
+    }
+    
+    /**
+     * Create an instance of the default profile tSNE options
+     * @return
+     */
+    public static HashOptions makeDefaultTsneOptions() {
+    	HashOptions options = new DefaultOptions();
+    	options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, 50);
+    	options.setInt(ProfileTsneMethod.MAX_ITERATIONS_KEY, 1000);
+    	return options;
     }
 
     /**

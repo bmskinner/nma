@@ -74,6 +74,7 @@ public class ClusterDetailPanel extends DetailPanel {
     private static final String SHOW_TREE_LBL   = "Show tree";
     private static final String NO_CLUSTERS_LBL = "No clusters present";
     private static final String MAN_CLUSTER_LBL = "Manual cluster";
+    private static final String TSNE_LBL        = "Profile t-SNE";
     private static final String FILE_CLUSTER_LBL = "Add cluster from file";
 
     private JButton clusterButton        = new JButton(NEW_CLUSTER_LBL);
@@ -81,6 +82,7 @@ public class ClusterDetailPanel extends DetailPanel {
     private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
     private JButton manualClusterBtn     = new JButton(MAN_CLUSTER_LBL);
     private JButton fileClusterBtn       = new JButton(FILE_CLUSTER_LBL);
+    private JButton tSneBtn              = new JButton(TSNE_LBL);
 
     private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
     private JPanel statusPanel = new JPanel(new BorderLayout());
@@ -89,8 +91,6 @@ public class ClusterDetailPanel extends DetailPanel {
 
     private JPanel          mainPanel;
     private ExportableTable clusterDetailsTable;
-
-    // private ClustersPanel clusterPanel;
 
     public ClusterDetailPanel(@NonNull InputSupplier context) {
         super(context);
@@ -195,15 +195,21 @@ public class ClusterDetailPanel extends DetailPanel {
         fileClusterBtn.addActionListener(e -> {
             this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER_FROM_FILE, getDatasets());
         });
+        
+        tSneBtn.addActionListener(e -> {
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_TSNE, getDatasets());
+        });
 
         saveClassifierButton.setEnabled(false);
         buildTreeButton.setEnabled(true);
         manualClusterBtn.setEnabled(true);
         fileClusterBtn.setEnabled(true);
+        tSneBtn.setEnabled(true);
         buttonPanel.add(manualClusterBtn);
         buttonPanel.add(buildTreeButton);
         buttonPanel.add(clusterButton);
         buttonPanel.add(fileClusterBtn);
+        buttonPanel.add(tSneBtn);
         
         // buttonPanel.add(saveClassifierButton);
 
@@ -296,6 +302,7 @@ public class ClusterDetailPanel extends DetailPanel {
         buildTreeButton.setEnabled(b);
         manualClusterBtn.setEnabled(b);
         fileClusterBtn.setEnabled(b);
+        tSneBtn.setEnabled(b);
         // saveClassifierButton.setEnabled(b); // not yet enabled
     }
 

@@ -60,6 +60,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
+import com.bmskinner.nuclear_morphology.gui.actions.RunTsneAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
@@ -534,9 +535,13 @@ public class EventHandler implements Loggable, EventListener {
             if (event.method().equals(DatasetEvent.CLUSTER)) {
                 log("Clustering dataset");
                 return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
-
             }
             
+            if (event.method().equals(DatasetEvent.RUN_TSNE)) {
+                log("Running t-SNE");
+                return new RunTsneAction(event.firstDataset(), acceptor, EventHandler.this);
+            }
+
             if (event.method().equals(DatasetEvent.CLUSTER_FROM_FILE))
                 return new ClusterFileAssignmentAction(event.firstDataset(), acceptor, EventHandler.this);
 
