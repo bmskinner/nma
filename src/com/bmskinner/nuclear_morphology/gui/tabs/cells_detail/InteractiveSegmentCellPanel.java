@@ -61,6 +61,10 @@ import ij.process.ImageProcessor;
 
 public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 	
+	/** When a clicking a feature in an image, allow the clicked point to be 
+	 * this many pixels away from the true point */
+	private static final double POINT_CLICK_RADIUS_PIXELS = 0.4;
+	
 	protected List<SegmentEventListener> listeners = new ArrayList<>();
 	
 	public InteractiveSegmentCellPanel(CellUpdatedEventListener parent){
@@ -206,6 +210,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 						nextItem.setBorderPainted(true);
 						
 						nextItem.addActionListener(e->{
+							fine(String.format("Updating segment %s start to %d", next.getID(), index));
 							fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
 							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 							createImage();
@@ -220,14 +225,16 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 				@Override
 				public synchronized void mouseClicked(MouseEvent e) {
-
+					
 					IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
+					
+					// Not a circle around the valid point to click, but close enough
 					Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
 							.stream().filter(p->{
-								return clickedPoint.getX()>=p.getX()-0.4 && 
-										clickedPoint.getX()<=p.getX()+0.4 &&
-										clickedPoint.getY()>=p.getY()-0.4 && 
-										clickedPoint.getY()<=p.getY()+0.4;
+								return clickedPoint.getX()>=p.getX()-POINT_CLICK_RADIUS_PIXELS && 
+										clickedPoint.getX()<=p.getX()+POINT_CLICK_RADIUS_PIXELS &&
+										clickedPoint.getY()>=p.getY()-POINT_CLICK_RADIUS_PIXELS && 
+										clickedPoint.getY()<=p.getY()+POINT_CLICK_RADIUS_PIXELS;
 								
 							})
 							.findFirst();
