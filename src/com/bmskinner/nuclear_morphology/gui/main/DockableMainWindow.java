@@ -77,6 +77,8 @@ public class DockableMainWindow extends AbstractMainWindow {
     private LogPanel logPanel;
     private PopulationsPanel populationsPanel;
     private TabDock tabDock; // bottom panel tabs
+    
+    private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * Create the frame.
@@ -128,9 +130,11 @@ public class DockableMainWindow extends AbstractMainWindow {
             logPanel = new LogPanel(eh.getInputSupplier(), eh);
             
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
-            textHandler.setFormatter(new LogPanelFormatter());
             textHandler.setLevel(Level.INFO);
-            Logger.getLogger(Loggable.ROOT_LOGGER).addHandler(textHandler);
+            textHandler.setFormatter(new LogPanelFormatter());
+            LOGGER.addHandler(textHandler);
+            
+            
     		
             // ---------------
             // Create the consensus chart
@@ -179,7 +183,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             consensusNucleusPanel.restoreAutoBounds();
 
         } catch (Exception e) {
-            logToImageJ("Error initialising Main: " + e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, "Error initialising main view: " + e.getMessage(), e);
         }
     }
 
@@ -292,7 +296,7 @@ public class DockableMainWindow extends AbstractMainWindow {
     private synchronized void addDataset(final Collection<IAnalysisDataset> datasets) {
     	IAnalysisDataset last = null;
     	for(IAnalysisDataset dataset : datasets) {
-    		fine("Adding dataset "+dataset.getName()+": "+dataset.hashCode());
+    		LOGGER.fine("Adding dataset "+dataset.getName()+": "+dataset.hashCode());
     		DatasetListManager.getInstance().addDataset(dataset);
     		getPopulationsPanel().addDataset(dataset);
     		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {

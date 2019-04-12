@@ -69,6 +69,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class MainWindow extends AbstractMainWindow {
 
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
     private JPanel contentPane;
 
     private LogPanel logPanel;
@@ -178,7 +180,7 @@ public class MainWindow extends AbstractMainWindow {
             consensusNucleusPanel.restoreAutoBounds();
 
         } catch (Exception e) {
-            logToImageJ("Error initialising Main: " + e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, "Error initialising Main: " + e.getMessage(), e);
         }
     }
 

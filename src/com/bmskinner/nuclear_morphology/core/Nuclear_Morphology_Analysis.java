@@ -56,7 +56,7 @@ public class Nuclear_Morphology_Analysis
 	 * Keep a strong reference to the logger so they can be accessed
 	 * by all other classes implementing the Loggable interface
 	 */
-	private static final Logger errorLogger = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 
@@ -96,10 +96,11 @@ public class Nuclear_Morphology_Analysis
 		
 		try {
 			
-			Handler consoleHander = new ConsoleHandler(new LogPanelFormatter());
-			consoleHander.setLevel(Level.FINE);
-			Logger.getLogger(ROOT_LOGGER).addHandler(consoleHander);
+			LOGGER.setLevel(Level.FINE);
 			
+			Handler consoleHander = new ConsoleHandler(new LogPanelFormatter());
+			LOGGER.addHandler(consoleHander);
+			consoleHander.setLevel(Level.FINE);
 
 			// Get the location of the jar file
 			File dir =  Importer.getProgramDir();
@@ -107,10 +108,9 @@ public class Nuclear_Morphology_Analysis
 			fine("Attempting to create or find "+errorFile.getAbsolutePath());
 			errorFile.createNewFile();
 
-			LogFileHandler errorHandler = new LogFileHandler(errorFile, new LogFileFormatter());
-			errorHandler.setLevel(Loggable.STACK);
-			
-			Logger.getLogger(ROOT_LOGGER).addHandler(errorHandler);
+			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
+			LOGGER.addHandler(fileHandler);
+			fileHandler.setLevel(Loggable.STACK);
 			
 		} catch (SecurityException |IOException e ) {
 			stack("Error initialising logger: "+e.getMessage(), e);

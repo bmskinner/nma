@@ -21,26 +21,28 @@ import java.util.logging.StreamHandler;
 
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 
+/**
+ * Handle publishing of log messages to the log panel
+ * @author bms41
+ *
+ */
 public class LogPanelHandler extends StreamHandler {
 
-    // JTextArea textArea = null;
-    LogPanel logPanel; // the log panel to log to
+    private final LogPanel logPanel; // the log panel to log to
 
     public LogPanelHandler(LogPanel logPanel) {
-        this.logPanel = logPanel;
-    }
-
-    public void setTextArea(LogPanel logPanel) {
         this.logPanel = logPanel;
     }
 
     @Override
     public void publish(LogRecord record) {
         super.publish(record);
+        if(logPanel == null)
+        	return;
         flush();
-
-        if (logPanel != null) {
-            logPanel.println(getFormatter().format(record));
+        
+        if(record.getLevel().intValue()>=this.getLevel().intValue()) {
+        	 logPanel.println(getFormatter().format(record));
         }
     }
 }

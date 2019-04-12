@@ -75,7 +75,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
- * bars from actions,
+ * bars from actions. For historical reasons, it also houses the console and contains
+ * the console code.
  * 
  * @author ben
  *

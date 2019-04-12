@@ -197,6 +197,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 						prevItem.setBorderPainted(true);
 
 						prevItem.addActionListener(e->{
+							fine(String.format("Updating segment %s start to %d", next.getID(), index));
 							fireSegmentEvent(seg.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
 							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 							createImage();

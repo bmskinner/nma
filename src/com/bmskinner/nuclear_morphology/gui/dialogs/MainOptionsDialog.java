@@ -41,13 +41,15 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainView;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class MainOptionsDialog extends SettingsDialog implements ActionListener {
 
     private static final String DIALOG_TITLE = "Options";
+    
+    private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private JComboBox<Level>        programLevelBox;
     private JComboBox<Level>        consoleLevelBox;
@@ -106,16 +108,16 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         panel.setLayout(layout);
         panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        List<JLabel> labels = new ArrayList<JLabel>();
-        List<Component> fields = new ArrayList<Component>();
+        List<JLabel> labels = new ArrayList<>();
+        List<Component> fields = new ArrayList<>();
 
         JLabel logLabel = new JLabel("Program log level");
         Level[] levelArray = { Level.INFO, Loggable.STACK, Level.FINE, Level.FINER, Level.FINEST };
-        programLevelBox = new JComboBox<Level>(levelArray);
+        programLevelBox = new JComboBox<>(levelArray);
         
-        Handler[] handlers = Logger.getLogger(ROOT_LOGGER).getHandlers();
+        Handler[] handlers = LOGGER.getHandlers();
         for(Handler h : handlers)
-        	if(h instanceof LogFileHandler)
+        	if(h instanceof LogPanelHandler)
         		programLevelBox.setSelectedItem(h.getLevel());
 
         programLevelBox.addActionListener(this);
@@ -126,7 +128,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         
         JLabel consoleLogLabel = new JLabel("Console log level");
         Level[] consoleLevelArray = { Level.INFO, Loggable.STACK, Level.FINE, Level.FINER, Level.FINEST };
-        consoleLevelBox = new JComboBox<Level>(consoleLevelArray);
+        consoleLevelBox = new JComboBox<>(consoleLevelArray);
         for(Handler h : handlers)
         	if(h instanceof ConsoleHandler)
         		consoleLevelBox.setSelectedItem(h.getLevel());
@@ -172,15 +174,15 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
     @Override
     public void actionPerformed(ActionEvent arg0) {
     	
-    	Handler[] handlers = Logger.getLogger(ROOT_LOGGER).getHandlers();
+    	Handler[] handlers = LOGGER.getHandlers();
     	    	
         Level programLevel = (Level) programLevelBox.getSelectedItem();
         Level consoleLevel = (Level) consoleLevelBox.getSelectedItem();
         for(Handler h : handlers) {
-        	if(h instanceof LogFileHandler)
-        		h.setLevel(programLevel);
         	if(h instanceof ConsoleHandler)
         		h.setLevel(consoleLevel);
+        	if(h instanceof LogPanelHandler)
+        		h.setLevel(programLevel);
         }
 
 

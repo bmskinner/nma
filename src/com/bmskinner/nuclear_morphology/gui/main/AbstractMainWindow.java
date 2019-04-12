@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 
@@ -47,7 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public abstract class AbstractMainWindow extends JFrame implements Loggable, MainView, EventListener, DatasetSelectionListener, PopulationListUpdateListener {
+public abstract class AbstractMainWindow extends JFrame implements MainView, EventListener, DatasetSelectionListener, PopulationListUpdateListener {
 	
 	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
             + Version.currentVersion().toString();
@@ -63,6 +65,8 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 	protected final EventHandler eh;
 
 	protected boolean isStandalone = false;
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	/**
      * Create the frame.
@@ -172,7 +176,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
     protected synchronized void clearChartCache(final List<IAnalysisDataset> list) {
 
         if (list == null || list.isEmpty()) {
-            warn("A cache clear was requested for a specific list, which was null or empty");
+            LOGGER.log(Level.WARNING, "A cache clear was requested for a specific list, which was null or empty");
             clearChartCache();
             return;
         }
