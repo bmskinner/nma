@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
 /**
  * Analysis setup dialog for tSNE method
  * @author bms41
- * @since 1.15.3
+ * @since 1.16.0
  *
  */
 public class TsneSetupDialog extends SubAnalysisSetupDialog implements ChangeListener {

@@ -32,6 +32,12 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.jujutsu.utils.MatrixOps;
 
+/**
+ * Run tSNE on datasets
+ * @author bms41
+ * @since 1.16.0
+ *
+ */
 public class RunTsneAction  extends SingleDatasetResultAction
 implements EventListener {
 

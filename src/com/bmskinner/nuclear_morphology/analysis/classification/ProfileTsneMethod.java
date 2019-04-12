@@ -34,7 +34,7 @@ import com.jujutsu.utils.TSneUtils;
  * This method takes a dataset and generates a t-SNE
  * from the desired profiles.
  * @author bms41
- * @since 1.15.3
+ * @since 1.16.0
  *
  */
 public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
@@ -51,7 +51,7 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 	 * Analysis result for tSNE data. Contains the raw tSNE output
 	 * and the map of which cell is in each row 
 	 * @author bms41
-	 * @since 1.15.3
+	 * @since 1.16.0
 	 *
 	 */
 	public class TsneResult extends DefaultAnalysisResult {
