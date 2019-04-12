@@ -225,7 +225,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public Set<UUID> getChildUUIDs() {
-    	return childDatasets.stream().map(d->d.getId()).collect(Collectors.toSet());
+    	return childDatasets.stream().map(IAnalysisDataset::getId).collect(Collectors.toSet());
     }
 
     @Override
