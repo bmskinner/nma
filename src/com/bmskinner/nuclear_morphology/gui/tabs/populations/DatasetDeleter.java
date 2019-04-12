@@ -114,7 +114,8 @@ public class DatasetDeleter implements Loggable {
         IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
 
         if (d.hasChildren()) {
-        	 ids.addLast(id); // put at the end of the deque to be handled last
+        	finer("Dataset "+d.getName()+" still has children");
+        	ids.addLast(id); // put at the end of the deque to be handled last
         } else {
         	deleteDataset(d);
         }
