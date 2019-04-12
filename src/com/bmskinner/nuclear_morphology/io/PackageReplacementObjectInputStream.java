@@ -209,12 +209,9 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
     protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
         ObjectStreamClass resultClassDescriptor = super.readClassDescriptor();
 
-        // log("Testing descriptor for "+resultClassDescriptor.getName());
-
         for (final String oldName : MIGRATION_MAP.keySet()) {
             if (resultClassDescriptor.getName().equals(oldName)) {
 
-                finest("Replacing class " + oldName);
                 String replacement = MIGRATION_MAP.get(oldName).getName();
 
                 try {
@@ -222,10 +219,9 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
                     f.setAccessible(true);
                     f.set(resultClassDescriptor, replacement);  
                 } catch (Exception e) {
-
                     error("Error while replacing class name: " + e.getMessage(), e);
+                    throw new ClassNotFoundException("Package replacement of class "+oldName+" was unsuccessful", e);
                 }
-
             }
         }
 
