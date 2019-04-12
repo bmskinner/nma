@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -83,9 +84,9 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
      * Fire a segmentation event
      * @param id the segment to be altered
      * @param index the index to be altered
-     * @param type the update type
+     * @param type the update type. Types are specified as static ints in SegmentEvent
      */
-    protected synchronized void fireSegmentEvent(UUID id, int index, int type) {
+    protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
         SegmentEvent e = new SegmentEvent(this, id, index, type);
 
         for (SegmentEventListener l : listeners) {
@@ -192,7 +193,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 						prevItem.setBorderPainted(true);
 
 						prevItem.addActionListener(e->{
-							fireSegmentEvent(seg.getID(), index, SegmentEvent.MOVE_START_INDEX);
+							fireSegmentEvent(seg.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
 							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 							createImage();
 						});
@@ -205,7 +206,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 						nextItem.setBorderPainted(true);
 						
 						nextItem.addActionListener(e->{
-							fireSegmentEvent(next.getID(), index, SegmentEvent.MOVE_START_INDEX);
+							fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
 							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 							createImage();
 						});

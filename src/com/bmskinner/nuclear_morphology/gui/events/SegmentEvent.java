@@ -19,49 +19,41 @@ package com.bmskinner.nuclear_morphology.gui.events;
 import java.util.EventObject;
 import java.util.UUID;
 
+/**
+ * Sends update requests for segments
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class SegmentEvent extends EventObject {
 
-    private UUID id;
-    private int  index;
-    private int  type;
+	public final UUID id;
+    public final int  index;
+    public final SegmentUpdateType  type;
 
-    public static final int MOVE_START_INDEX = 0;
+    
+    /**
+     * The types of update that can be applied to a segment
+     * @author bms41
+     * @since 1.15.2
+     *
+     */
+    public enum SegmentUpdateType {
+    	MOVE_START_INDEX;
+    }
 
     /**
      * Create an event from a source, with the given message
      * 
-     * @param source
-     *            the source of the datasets
-     * @param message
-     *            the instruction on what to do with the datasets
-     * @param sourceName
-     *            the name of the object or component generating the datasets
-     * @param list
-     *            the datasets to carry
+     * @param source the source of the datasets
+     * @param id the the segment to be updated
+     * @param index the new index to apply via the update type
+     * @param type the type of segment update to perform
      */
-    public SegmentEvent(Object source, UUID id, int index, int type) {
+    public SegmentEvent(final Object source, final UUID id, final int index, final SegmentUpdateType type) {
         super(source);
         this.id = id;
         this.index = index;
         this.type = type;
     }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    /**
-     * The type of action to take - see the static ints of SegmentEvent
-     * 
-     * @return
-     */
-    public int getType() {
-        return type;
-    }
-
 }

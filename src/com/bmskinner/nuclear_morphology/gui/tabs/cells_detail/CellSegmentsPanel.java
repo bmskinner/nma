@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 
 @SuppressWarnings("serial")
 public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartSetEventListener {
@@ -148,23 +149,24 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     @Override
     public void segmentEventReceived(SegmentEvent event) {
 
-        if (event.getType() == SegmentEvent.MOVE_START_INDEX) {
+        if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
             try {
 
-            	fine("Updating segment start index to "+event.getIndex());
+            	fine("Updating segment start index to "+event.index);
                 // This is a manual change, so disable any lock
                 getCellModel().getCell().getNucleus().setLocked(false);
 
                 // Carry out the update
                 activeDataset().getCollection().getProfileManager()
-                        .updateCellSegmentStartIndex(getCellModel().getCell(), event.getId(), event.getIndex());
+                        .updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
 
                 // even if no lock was previously set, there should be one now a manual adjustment was made
                 getCellModel().getCell().getNucleus().setLocked(true);
 
-                // Recache necessary charts
+                // Recache necessary charts within this panel at once
                 refreshChartCache();
 
+                // Request a refresh of other panels
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
             } catch (Exception e) {
                 error("Error updating segment", e);

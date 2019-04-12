@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
@@ -228,7 +229,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
                 // Trigger the update
                 if (seg != null) {
-                    fireSegmentEvent(seg.getID(), intXValue, SegmentEvent.MOVE_START_INDEX);
+                    fireSegmentEvent(seg.getID(), intXValue, SegmentUpdateType.MOVE_START_INDEX);
                 }
             }
         }
@@ -308,14 +309,11 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
     /**
      * Fire a segment event
      * 
-     * @param id
-     *            the segment ID
-     * @param index
-     *            the new index
-     * @param type
-     *            the type of change to make
+     * @param id the segment ID
+     * @param index the new index
+     * @param type the type of change to make
      */
-    protected synchronized void fireSegmentEvent(UUID id, int index, int type) {
+    protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
         SegmentEvent e = new SegmentEvent(this, id, index, type);
 
         for (Object l : listeners) {

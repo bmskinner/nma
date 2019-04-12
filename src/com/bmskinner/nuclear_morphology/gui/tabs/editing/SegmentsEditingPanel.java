@@ -62,6 +62,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.AngleWindowSizeExplorer;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -537,17 +538,11 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
     @Override
     public void segmentEventReceived(SegmentEvent event) {
-        if (event.getType() == SegmentEvent.MOVE_START_INDEX) {
+        if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
             finest("Heard update segment request");
             try {
-
                 setAnalysing(true);
-
-                UUID segID = event.getId();
-
-                int index = event.getIndex();
-
-                updateSegmentStartIndexAction(segID, index);
+                updateSegmentStartIndexAction(event.id, event.index);
 
             } catch (Exception e) {
                 error("Error updating segment", e);

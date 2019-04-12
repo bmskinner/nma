@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
@@ -221,7 +222,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
         }
     }
 
-    protected synchronized void fireSegmentEvent(UUID id, int index, int type) {
+    protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
         SegmentEvent e = new SegmentEvent(this, id, index, type);
 
         for (Object l : listeners) {
