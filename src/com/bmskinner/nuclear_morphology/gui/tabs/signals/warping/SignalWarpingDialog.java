@@ -397,7 +397,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	} else {
     	    		mssimScore.setText(values.toString());
     	    	}  
-    	    	showComparisonBtn.setEnabled(nComparisons==2);
+    	    	showComparisonBtn.setEnabled(nComparisons>=1);
     	    }
     	    
     	    
