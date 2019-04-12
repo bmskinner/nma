@@ -102,12 +102,16 @@ public class Nuclear_Morphology_Analysis
 			LOGGER.addHandler(consoleHander);
 			consoleHander.setLevel(Level.FINE);
 
-			// Get the location of the jar file
+			/* Get the location of the jar file
+			 * and create a log file in the same
+			 * directory if not present
+			 */
 			File dir =  Importer.getProgramDir();
 			File errorFile = new File(dir, "error.log");
 			fine("Attempting to create or find "+errorFile.getAbsolutePath());
 			errorFile.createNewFile();
 
+			// Log stack traces to the log file for debugging
 			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
 			LOGGER.addHandler(fileHandler);
 			fileHandler.setLevel(Loggable.STACK);
