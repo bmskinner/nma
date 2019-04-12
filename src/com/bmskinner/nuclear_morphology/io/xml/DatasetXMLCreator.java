@@ -30,10 +30,10 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	public Document create() {
 		Element rootElement = new Element(ANALYSIS_DATASET_KEY);
 		
-		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, template.getVersion().toString()));
-		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion().toString()));
+		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, template.getVersion()));
+		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion()));
 		rootElement.addContent(createElement(DATASET_NAME_KEY, template.getName()));
-		rootElement.addContent(createElement(DATASET_ID_KEY, template.getId().toString()));
+		rootElement.addContent(createElement(DATASET_ID_KEY, template.getId()));
 		rootElement.addContent(createElement(DATASET_ROOT_KEY, String.valueOf(template.isRoot())));
 		if(template.hasDatasetColour())
 			rootElement.addContent(createElement(COLOUR_KEY, toHex(template.getDatasetColour().get())));
@@ -65,7 +65,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 				
 				Element datasets = new Element(DATASET_IDS_KEY);
 				for(UUID id : g.getUUIDs())
-					datasets.addContent(createElement(ID_KEY, id.toString()));
+					datasets.addContent(createElement(ID_KEY, id));
 				cluster.addContent(datasets);
 				
 				clusters.addContent(cluster);
@@ -84,11 +84,11 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	private void addMergeSource(Element element, IAnalysisDataset mge) {
 		Element e = new Element(MERGE_SOURCE_KEY);
 		e.addContent(createElement(DATASET_NAME_KEY, mge.getName()));
-		e.addContent(createElement(DATASET_ID_KEY, mge.getId().toString()));
+		e.addContent(createElement(DATASET_ID_KEY, mge.getId()));
 		
 		Element cells = new Element(CELL_IDS_KEY);
 		for(ICell cell : mge.getCollection())
-			cells.addContent(createElement(ID_KEY, cell.getId().toString()));
+			cells.addContent(createElement(ID_KEY, cell.getId()));
 		e.addContent(cells);
 		e.addContent(create(mge.getAnalysisOptions().get()));
 		
@@ -113,7 +113,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	private void addChildDataset(Element element, IAnalysisDataset child) {
 		Element e = new Element(CHILD_DATASET_KEY);
 		e.addContent(createElement(DATASET_NAME_KEY, child.getName()));
-		e.addContent(createElement(DATASET_ID_KEY, child.getId().toString()));
+		e.addContent(createElement(DATASET_ID_KEY, child.getId()));
 		
 		if(child.hasDatasetColour())
 			e.addContent(createElement(COLOUR_KEY, toHex(child.getDatasetColour().get())));

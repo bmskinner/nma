@@ -164,6 +164,23 @@ public abstract class XMLCreator<T> {
 	 */
 	public abstract Document create();
 	
+	
+	/**
+	 * Create an XML key-value element from an arbitrary object
+	 * @param key the key
+	 * @param value the value. This will use the toString() method of the value
+	 * @return
+	 */
+	protected static Element createElement(String key, Object value) {
+		return createElement(key, value.toString());
+	}
+	
+	/**
+	 * Create an XML key-value element  
+	 * @param key the key
+	 * @param value the value
+	 * @return
+	 */
 	protected static Element createElement(String key, String value) {
 		Element e = new Element(key);
 		e.setText(value);
@@ -209,7 +226,7 @@ public abstract class XMLCreator<T> {
 			// add signal group names
 			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
 				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
-				element.addContent(createElement(ID_KEY, signalGroup.toString()));
+				element.addContent(createElement(ID_KEY, signalGroup));
 			}
 			
 			appendElement(element, options.getDetectionOptions(key).get());
@@ -229,7 +246,7 @@ public abstract class XMLCreator<T> {
 		Element e = new Element(CELL_COLLECTION_KEY);
 		
 		if(collection.isReal()) {
-			e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType().toString()));
+			e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType()));
 			e.addContent(createElement(OUTPUT_FOLDER_KEY, collection.getOutputFolder().getAbsolutePath()));
 
 			Element cellsElement = new Element(CELLS_SECTION_KEY);
@@ -239,7 +256,7 @@ public abstract class XMLCreator<T> {
 		} else {
 			Element cells = new Element(CELLS_SECTION_KEY);
 			for(ICell cell : collection)
-				cells.addContent(createElement(ID_KEY, cell.getId().toString()));
+				cells.addContent(createElement(ID_KEY, cell.getId()));
 			e.addContent(cells);
 		}
 		
@@ -274,7 +291,7 @@ public abstract class XMLCreator<T> {
 
 			for(IBorderSegment s : profile.getSegments()) {
 				Element seg = new Element(BORDER_SEG_KEY);
-				seg.addContent(createElement(ID_KEY, s.getID().toString()));
+				seg.addContent(createElement(ID_KEY, s.getID()));
 				seg.addContent(createElement(INDEX_KEY, String.valueOf(s.getStartIndex())));
 				segs.addContent(seg);
 			}
@@ -297,7 +314,7 @@ public abstract class XMLCreator<T> {
 	protected Element create(ISignalGroup signalGroup, UUID signalGroupId) {
 		Element e = new Element(SIGNAL_GROUP_KEY);
 		
-		e.addContent(createElement(ID_KEY, signalGroupId.toString()));
+		e.addContent(createElement(ID_KEY, signalGroupId));
 		e.addContent(createElement(NAME_KEY, signalGroup.getGroupName()));
 		if(signalGroup.hasColour())
 			e.addContent(createElement(COLOUR_KEY, toHex(signalGroup.getGroupColour().get())));
@@ -321,7 +338,7 @@ public abstract class XMLCreator<T> {
 		
 		for(WarpedSignalKey key : warpedSignal.getWarpedSignalKeys()) {
 			Element warp = new Element(WARPED_SIGNAL_KEY);	
-			warp.addContent(createElement(ID_KEY, warpedSignal.getSignalGroupId().toString()));
+			warp.addContent(createElement(ID_KEY, warpedSignal.getSignalGroupId()));
 			warp.addContent(createElement(NAME_KEY, warpedSignal.getTargetName(key)));
 			
 			Element target = new Element(WARPED_TARGET_KEY);
@@ -346,7 +363,7 @@ public abstract class XMLCreator<T> {
 	
 	protected Element create(ICell cell) {
 		Element e = new Element(CELL_KEY);
-		e.addContent(createElement(ID_KEY, cell.getId().toString()));
+		e.addContent(createElement(ID_KEY, cell.getId()));
 		if(cell.hasCytoplasm())
 			e.addContent(create(cell.getCytoplasm()));
 		
@@ -379,7 +396,7 @@ public abstract class XMLCreator<T> {
 			for(UUID signalGroupId : sc.getSignalGroupIds()) {
 				
 				Element group = new Element(SIGNAL_GROUP_KEY);
-				group.addContent(createElement(ID_KEY, signalGroupId.toString()));
+				group.addContent(createElement(ID_KEY, signalGroupId));
 				
 				List<INuclearSignal> sigList = sc.getSignals(signalGroupId);
 				for(INuclearSignal s : sigList) {
@@ -420,7 +437,7 @@ public abstract class XMLCreator<T> {
 			
 			for(IBorderSegment s : profile.getSegments()) {
 				Element seg = new Element(BORDER_SEG_KEY);
-				seg.addContent(createElement(ID_KEY, s.getID().toString()));
+				seg.addContent(createElement(ID_KEY, s.getID()));
 				seg.addContent(createElement(INDEX_KEY, String.valueOf(s.getStartIndex())));
 				segs.addContent(seg);
 			}
@@ -441,7 +458,7 @@ public abstract class XMLCreator<T> {
 	 * @return
 	 */
 	private Element create(Element e, CellularComponent component) {
-		e.addContent(createElement(ID_KEY, component.getID().toString()));
+		e.addContent(createElement(ID_KEY, component.getID()));
 		
 		e.addContent(create(COM_KEY, component.getOriginalCentreOfMass()));
 		e.addContent(createElement(SOURCE_FILE_KEY, component.getSourceFile().getAbsolutePath()));
@@ -473,7 +490,7 @@ public abstract class XMLCreator<T> {
 		Element stats = new Element(STATS_SECTION_KEY);
 		for(PlottableStatistic s : component.getStatistics()) {
 			Element stat = new Element(STAT_KEY);
-			stat.addContent(createElement(NAME_KEY, s.toString()));
+			stat.addContent(createElement(NAME_KEY, s));
 			stat.addContent(createElement(VALUE_KEY, String.valueOf(component.getStatistic(s))));
 			stats.addContent(stat);
 		}

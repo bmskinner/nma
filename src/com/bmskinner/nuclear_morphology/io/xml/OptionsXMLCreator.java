@@ -59,8 +59,8 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> implements L
 	
 	private static void appendElement(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options, Element rootElement) {
 		
-		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, dataset.getVersion().toString())); 
-		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion().toString()));
+		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, dataset.getVersion())); 
+		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion()));
 		
 		for(String key : options.getDetectionOptionTypes()){
 			Element element = new Element(DETECTION_METHOD_KEY);
