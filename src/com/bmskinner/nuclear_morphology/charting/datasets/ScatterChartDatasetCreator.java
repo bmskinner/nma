@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod.TsneResult;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -205,4 +206,26 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
         return ds;
     }
 
+    /**
+     * A temporary method to create tSNE plots
+     * @param r
+     * @return
+     * @throws ChartDatasetCreationException
+     */
+    public static XYDataset createTsneScatterDataset(TsneResult r) throws ChartDatasetCreationException {
+    	DefaultXYDataset ds = new DefaultXYDataset();
+    	double[] xpoints = new double[r.tSneOutput.length];
+        double[] ypoints = new double[r.tSneOutput.length];
+    	// need to transpose the matrix
+    	for(int i=0; i<r.tSneOutput.length; i++) {
+    		xpoints[i] = r.tSneOutput[i][0];
+    		ypoints[i] = r.tSneOutput[i][1];
+    	}
+    	
+    	double[][] data = { xpoints, ypoints };
+    	
+    	ds.addSeries("tSNE", data);
+    	return ds;
+    }
+    
 }

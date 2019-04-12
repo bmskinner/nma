@@ -28,6 +28,7 @@ import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod.TsneResult;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.ScatterChartDatasetCreator;
@@ -160,6 +161,30 @@ public class ScatterChartFactory extends AbstractChartFactory {
         return chart;
     }
 
+   
+    /**
+     * Temporary method to create tSNE plots
+     * @param r
+     * @return
+     * @throws ChartDatasetCreationException
+     */
+    public static JFreeChart createTsneChart(TsneResult r) throws ChartDatasetCreationException {
+    	 XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(r);
+    	 String xLabel = "tSNE 1";
+         String yLabel = "tSNE 2";
+
+         JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+
+         XYPlot plot = chart.getXYPlot();
+
+         NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+         yAxis.setAutoRangeIncludesZero(false);
+
+         XYItemRenderer renderer = new ScatterChartRenderer();
+         plot.setRenderer(renderer);
+         return chart;
+    }
+    
     /**
      * Overrides the methods of the DefaultXYItemRenderer to use a consistent
      * point shape and not display lines.
@@ -168,7 +193,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
      * @since 1.13.4
      *
      */
-    private class ScatterChartRenderer extends DefaultXYItemRenderer {
+    private static class ScatterChartRenderer extends DefaultXYItemRenderer {
 
         private static final long serialVersionUID = 1L;
 

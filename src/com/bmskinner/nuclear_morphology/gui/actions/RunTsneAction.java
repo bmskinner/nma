@@ -1,13 +1,21 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.awt.BorderLayout;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+
 import org.eclipse.jdt.annotation.NonNull;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod.TsneResult;
+import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
+import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -22,6 +30,7 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.jujutsu.utils.MatrixOps;
 
 public class RunTsneAction  extends SingleDatasetResultAction
 implements EventListener {
@@ -54,8 +63,22 @@ implements EventListener {
 
         try {
         	TsneResult r = (TsneResult) worker.get();
-        	
+//        	System.out.println(MatrixOps.doubleArrayToPrintString(r.tSneOutput, ", ", 5,5));
         	// make a basic plot and display
+        	try {
+				JFreeChart chart = ScatterChartFactory.createTsneChart(r);
+				ChartPanel panel = new ChartPanel(chart);
+				
+				JDialog d = new JDialog();
+				d.setLayout(new BorderLayout());
+				d.add(panel, BorderLayout.CENTER);
+				d.setTitle("tSNE for "+r.getFirstDataset().getName());
+				d.pack();
+				d.setVisible(true);				
+				
+			} catch (ChartDatasetCreationException e) {
+				error("Unable to make tSNE chart", e);
+			}
 
             cleanup(); // do not cancel, we need the MainWindow listener to
                        // remain attached

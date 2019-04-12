@@ -12,8 +12,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.tsne.barneshut.BHTSne;
@@ -76,6 +83,8 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 		int maxIterations = tSneOptions.getInt(MAX_ITERATIONS_KEY);
 		double perplexity = tSneOptions.getDouble(PERPLEXITY_KEY);
 		
+		log("Running tSNE with p"+perplexity+" and i"+maxIterations);
+		
 		// We can calculate initial dimensions from the profile - it's 100
 		int initialDims   = 100;
 		
@@ -86,9 +95,7 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 			cellIds.put(i, cells.get(i).getId());
 		
 		double[][] profileMatrix = makeProfileMatrix(cells);
-		
-		
-		
+
 //	    double [][] X = MatrixUtils.simpleRead2DMatrix(new File("src/main/resources/datasets/mnist2500_X.txt"), "   ");
 //	    System.out.println(MatrixOps.doubleArrayToPrintString(X, ", ", 50,10));
 		
@@ -107,9 +114,21 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 	    
 		return new TsneResult(dataset, tSneResult, cellIds);
 	}
-	
-	private double[][] makeProfileMatrix(List<ICell> cells){
-		return null;
+
+	private double[][] makeProfileMatrix(List<ICell> cells) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+		double[][] matrix = new double[cells.size()][100];
+
+		for(int i=0; i<cells.size(); i++) {
+			ICell c = cells.get(i);	
+			Nucleus n = c.getNucleus();
+			IProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+
+			for (int j = 0; j < 100; j++) {
+				double idx = ((double) j) / 100d;
+				matrix[i][j] = p.get(idx);
+			}
+		}
+		return matrix;
 	}
 
 }

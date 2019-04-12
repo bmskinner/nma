@@ -126,7 +126,8 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog implements ChangeLis
 
         iterationsSpinner = new JSpinner(iterationsModel);
         iterationsSpinner.setEnabled(true);
-
+        iterationsSpinner.addChangeListener(this);
+        
         
         labels.add(new JLabel(ProfileTsneMethod.MAX_ITERATIONS_KEY));
         fields.add(iterationsSpinner);
@@ -141,6 +142,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog implements ChangeLis
 
         labels.add(new JLabel(ProfileTsneMethod.PERPLEXITY_KEY));
         fields.add(perplexitySpinner);
+        perplexitySpinner.addChangeListener(this);
         
         addLabelTextRows(labels, fields, layout, optionsPanel);
         

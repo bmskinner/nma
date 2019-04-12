@@ -215,7 +215,7 @@ public class OptionsFactory {
      */
     public static HashOptions makeDefaultTsneOptions() {
     	HashOptions options = new DefaultOptions();
-    	options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, 50);
+    	options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, 5);
     	options.setInt(ProfileTsneMethod.MAX_ITERATIONS_KEY, 1000);
     	return options;
     }
