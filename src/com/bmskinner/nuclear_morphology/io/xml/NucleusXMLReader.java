@@ -86,7 +86,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 			n.setStatistic(s, d);
 		}
 		
-		n.setScale(readDouble(e, XMLCreator.SOURCE_SCALE_KEY));
+		n.setScale(readDouble(e, XMLCreator.SOURCE_SCALE_X_KEY)); // fallback until X and Y are handled separately
 		
 		n.initialise(windowProportion);
 		
@@ -165,7 +165,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 					s.setStatistic(stat, d);
 				}
 				
-				s.setScale(readDouble(signalElement, XMLCreator.SOURCE_SCALE_KEY));
+				s.setScale(readDouble(signalElement, XMLCreator.SOURCE_SCALE_X_KEY));
 				
 				n.getSignalCollection().addSignal(s, groupId);
 			}

@@ -132,7 +132,8 @@ public abstract class XMLCreator<T> {
 	
 	public static final String SOURCE_FILE_KEY                = "SourceFile";
 	public static final String SOURCE_CHANNEL_KEY             = "SourceChannel";
-	public static final String SOURCE_SCALE_KEY               = "SourceScale";
+	public static final String SOURCE_SCALE_X_KEY             = "SourceScaleX";
+	public static final String SOURCE_SCALE_Y_KEY             = "SourceScaleY";
 	
 	public static final String CYTOPLASM_KEY                  = CellularComponent.CYTOPLASM;
 	public static final String NUCLEUS_KEY                    = CellularComponent.NUCLEUS;
@@ -445,7 +446,8 @@ public abstract class XMLCreator<T> {
 		e.addContent(create(COM_KEY, component.getOriginalCentreOfMass()));
 		e.addContent(createElement(SOURCE_FILE_KEY, component.getSourceFile().getAbsolutePath()));
 		e.addContent(createElement(SOURCE_CHANNEL_KEY, String.valueOf(component.getChannel())));
-		e.addContent(createElement(SOURCE_SCALE_KEY, String.valueOf(component.getScale())));
+		e.addContent(createElement(SOURCE_SCALE_X_KEY, String.valueOf(component.getScale())));
+		e.addContent(createElement(SOURCE_SCALE_Y_KEY, String.valueOf(component.getScale())));
 		e.addContent(createElement(BORDER_LENGTH_KEY, String.valueOf(component.getBorderLength())));
 		
 		// add base
