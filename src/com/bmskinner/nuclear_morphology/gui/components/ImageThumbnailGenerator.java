@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.Rectangle2D;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -11,6 +12,7 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.entity.XYItemEntity;
+import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentXYDataset;
@@ -33,6 +35,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private final ChartPanel chartPanel;
+	private XYItemEntity currentEntity = null; // allow chart to repaint whenever entity changes
 	
 	public ImageThumbnailGenerator(final @NonNull ChartPanel chartPanel) {
 		this.chartPanel = chartPanel;
@@ -46,21 +49,33 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 	@Override
 	public void chartMouseMoved(ChartMouseEvent event) { // display thumbnail of nucleus
-
+		
 		if( !(event.getEntity() instanceof XYItemEntity) ) {
 			chartPanel.repaint(); // clear the chart
 			return;
 		}
 		XYItemEntity entity = (XYItemEntity) event.getEntity();
 		
+		if(entity==currentEntity)
+			return;
+
+		currentEntity = entity;
+		
 		if(!(entity.getDataset() instanceof ComponentXYDataset)) // only use datasets of the desired class 
 			return;
 		
 		ComponentXYDataset<? extends CellularComponent> ds = (ComponentXYDataset<? extends CellularComponent>) entity.getDataset();
 
-		String key = entity.getDataset().getSeriesKey(entity.getSeriesIndex()).toString();
+		String key = ds.getSeriesKey(entity.getSeriesIndex()).toString();
 		CellularComponent n = ds.getComponent(key, entity.getItem());
 		
+		// Draw at the entity coordinates, not the mouse position
+		double entityX = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
+		double entityY = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
+		Rectangle2D dataArea = chartPanel.getScreenDataArea();
+		int screenX = (int) chartPanel.getChart().getXYPlot().getDomainAxis().valueToJava2D(entityX, dataArea, RectangleEdge.BOTTOM);
+		int screenY = (int) chartPanel.getChart().getXYPlot().getRangeAxis().valueToJava2D(entityY, dataArea, RectangleEdge.LEFT);
+
 		if(n==null)
 			return;
 		
@@ -69,11 +84,10 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 			ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
 
 			Graphics2D g2  = (Graphics2D) chartPanel.getGraphics();
-			Point pnt = event.getTrigger().getPoint();
 			
 			// ensure the image is positioned within the bounds of the chart panel
-			int topStart = pnt.y+ip.getHeight()>chartPanel.getHeight() ? pnt.y-ip.getHeight() : pnt.y;
-			int leftStart = pnt.x+ip.getWidth()>chartPanel.getWidth() ? pnt.x-ip.getWidth() : pnt.x;
+			int topStart = screenY+ip.getHeight()>chartPanel.getHeight() ? screenY-ip.getHeight() : screenY;
+			int leftStart = screenX+ip.getWidth()>chartPanel.getWidth() ? screenX-ip.getWidth() : screenX;
 			
 			g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
 			Color c = g2.getColor();
@@ -86,7 +100,6 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		} catch(UnloadableImageException e) {
 			LOGGER.log(Loggable.STACK, "Error making image thumbnail", e);
 		}
-		
 	}
 
 }
