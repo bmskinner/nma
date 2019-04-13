@@ -223,7 +223,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     		for(IAnalysisDataset mergeSource : d.getMergeSources()) {
     			List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
     			double[][] data = createTsneValues(nuclei);
-    	    	ds.addSeries(mergeSource.getName()+" tSNE", data, nuclei);
+    	    	ds.addSeries(mergeSource.getName(), data, nuclei);
     		}
     		return ds;
     	}
@@ -231,7 +231,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	if(type.equals(ColourByType.NONE)) {
     		List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
     		double[][] data = createTsneValues(nuclei);
-    		ds.addSeries("tSNE", data, nuclei);
+    		ds.addSeries("All nuclei", data, nuclei);
     		return ds;
     	}
     	
@@ -240,7 +240,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     			IAnalysisDataset childDataset = d.getChildDataset(childId);
     			List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
     			double[][] data = createTsneValues(nuclei);
-    	    	ds.addSeries(childDataset.getName()+" tSNE", data, nuclei);
+    	    	ds.addSeries(childDataset.getName(), data, nuclei);
     		}
     		return ds;
     	}
