@@ -1,29 +1,18 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import java.awt.BorderLayout;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod.TsneResult;
-import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
-import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
-import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
-import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneSetupDialog;
@@ -33,7 +22,6 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
-import com.jujutsu.utils.MatrixOps;
 
 /**
  * Run tSNE on datasets
@@ -52,19 +40,32 @@ implements EventListener {
 
 	@Override
 	public void run() {
+		
+		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		 if(!analysisOptions.isPresent()) {
+			 warn("Unable to run tSNE, no analysis options in dataset");
+			 return;
+		 }
+		 
+		 if(analysisOptions.get().hasSecondaryOptions(IAnalysisOptions.TSNE)) {
+			 // tSNE has already be run for this dataset. Display directly
+			 cancel();
+			 new TsneDialog(dataset);
+		 } else {
+			 // No existing tSNE. Run.
+			 SubAnalysisSetupDialog tsneSetup = new TsneSetupDialog(dataset);
 
-		SubAnalysisSetupDialog tsneSetup = new TsneSetupDialog(dataset);
+			 if (tsneSetup.isReadyToRun()) { // if dialog was cancelled, skip
+				 IAnalysisMethod m = tsneSetup.getMethod();
+				 worker = new DefaultAnalysisWorker(m);
+				 worker.addPropertyChangeListener(this);
+				 ThreadManager.getInstance().submit(worker);
 
-		if (tsneSetup.isReadyToRun()) { // if dialog was cancelled, skip
-			IAnalysisMethod m = tsneSetup.getMethod();
-			worker = new DefaultAnalysisWorker(m);
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-
-		} else {
-			this.cancel();
-		}
-		tsneSetup.dispose();
+			 } else {
+				 this.cancel();
+			 }
+			 tsneSetup.dispose();
+		 }
 	}
 	
     @Override
