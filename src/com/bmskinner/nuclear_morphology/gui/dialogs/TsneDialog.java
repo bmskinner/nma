@@ -108,18 +108,15 @@ public class TsneDialog extends LoadingIconDialog {
 		panel.add(byNoneBtn);
 		panel.add(byClusterBtn);
 		panel.add(clustersBox);
-		panel.add(byMergeSourceBtn);
-
-		
+		panel.add(byMergeSourceBtn);		
 		return panel;
 	}
-	
-	
 
 	private void runNewTsne() {
 		SubAnalysisSetupDialog tsneSetup = new TsneSetupDialog(dataset);
 		if (tsneSetup.isReadyToRun()) {
 			try {
+				chartPanel.setChart(ScatterChartFactory.createLoadingChart());
 				tsneSetup.getMethod().call();
 				updateChart(ColourByType.NONE, null);
 			} catch (Exception e) {
