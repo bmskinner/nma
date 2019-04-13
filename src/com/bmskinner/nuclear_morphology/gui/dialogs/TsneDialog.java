@@ -9,11 +9,9 @@ import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
-import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -25,12 +23,14 @@ import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
  * @since 1.16.0
  *
  */
+
 public class TsneDialog extends LoadingIconDialog {
 
 	private final IAnalysisDataset dataset;
-	private ChartPanel chartPanel;
-	
+	private final ChartPanel chartPanel = new ChartPanel(ScatterChartFactory.createEmptyChart());
+
 	private final JButton runTsneBtn = new JButton("Run new t-SNE");
+
 
 	public TsneDialog(final @NonNull IAnalysisDataset dataset) {
 		this.dataset = dataset;
@@ -47,9 +47,6 @@ public class TsneDialog extends LoadingIconDialog {
 			return;
 		}
 
-		// make a basic plot and display
-		JFreeChart chart = ScatterChartFactory.createEmptyChart();
-		chartPanel = new ChartPanel(chart);
 		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
 
 		updateChart();
@@ -65,16 +62,14 @@ public class TsneDialog extends LoadingIconDialog {
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);				
-
-
-
 	}
-	
+
+
 	private JPanel createHeader() {
 		JPanel panel = new JPanel(new FlowLayout());
 		runTsneBtn.addActionListener( l->runNewTsne());
 		panel.add(runTsneBtn);
-		
+
 		return panel;
 	}
 
@@ -90,16 +85,9 @@ public class TsneDialog extends LoadingIconDialog {
 		}
 		tsneSetup.dispose();
 	}
-	
-	private void updateChart() {
 
-		try {
-			JFreeChart chart = ScatterChartFactory.createTsneChart(dataset);
-			chartPanel.setChart(chart);
-		} catch (ChartDatasetCreationException e) {
-			error("Error setting t-SNE chart", e);
-		}
-		
+	private void updateChart() {
+		chartPanel.setChart(ScatterChartFactory.createTsneChart(dataset));
 	}
 
 

@@ -167,21 +167,26 @@ public class ScatterChartFactory extends AbstractChartFactory {
      * @return
      * @throws ChartDatasetCreationException
      */
-    public static JFreeChart createTsneChart(IAnalysisDataset d) throws ChartDatasetCreationException {
-    	 XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d);
-    	 String xLabel = "tSNE 1";
-         String yLabel = "tSNE 2";
+    public static JFreeChart createTsneChart(IAnalysisDataset d)  {
+    	
+    	try {
+    		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d);
+    		String xLabel = "tSNE 1";
+    		String yLabel = "tSNE 2";
 
-         JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+    		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 
-         XYPlot plot = chart.getXYPlot();
+    		XYPlot plot = chart.getXYPlot();
 
-         NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-         yAxis.setAutoRangeIncludesZero(false);
+    		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+    		yAxis.setAutoRangeIncludesZero(false);
 
-         XYItemRenderer renderer = new ScatterChartRenderer();
-         plot.setRenderer(renderer);
-         return chart;
+    		XYItemRenderer renderer = new ScatterChartRenderer();
+    		plot.setRenderer(renderer);
+    		return chart;
+    	} catch(ChartDatasetCreationException e) {
+    		return createErrorChart();
+    	}
     }
     
     /**
