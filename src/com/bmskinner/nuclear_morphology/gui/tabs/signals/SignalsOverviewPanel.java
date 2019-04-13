@@ -65,6 +65,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
@@ -134,7 +135,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
         panel.add(chartPanel, BorderLayout.CENTER);
         chartPanel.setFillConsensus(false);
         
-        chartPanel.addChartMouseListener(new ImageThumbnailGenerator());
+        chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
 
         checkboxPanel = createSignalCheckboxPanel();
 
@@ -143,65 +144,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
         return panel;
     }
     
-    /**
-     * Display an image thumbnail when the appropriate point in the the chart
-     * is hovered over
-     * @author bms41
-     * @since 1.15.0
-     *
-     */
-    private class ImageThumbnailGenerator implements ChartMouseListener {
-    	
-    	public ImageThumbnailGenerator() {}
-
-    	@Override
-    	public void chartMouseClicked(ChartMouseEvent event) {
-    		//do something on mouse click
-//    		System.out.println("Entity clicked: " + event.getEntity());
-    	}
-
-    	@Override
-    	public void chartMouseMoved(ChartMouseEvent event) { // display thumbnail of nucleus
-
-    		if( !(event.getEntity() instanceof XYItemEntity) ) {
-    			chartPanel.repaint(); // clear the chart
-    			return;
-    		}
-    		XYItemEntity entity = (XYItemEntity) event.getEntity();
-    		if(entity.getDataset() instanceof ComponentOutlineDataset) // ComponentOutlineDataset is the nucleus outline 
-    			return;
-
-    		NuclearSignalXYDataset ds = (NuclearSignalXYDataset) entity.getDataset();
-    		String key = entity.getDataset().getSeriesKey(entity.getSeriesIndex()).toString();
-    		Nucleus n = ds.getNucleus(key, entity.getItem());
-    		
-    		try {
-    			ImageProcessor ip = n.getComponentRGBImage();
-    			ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
-
-    			Graphics2D g2  = (Graphics2D) chartPanel.getGraphics();
-    			Point pnt = event.getTrigger().getPoint();
-    			
-    			// ensure the image is positioned within the bounds of the chart panel
-    			int topStart = pnt.y+ip.getHeight()>chartPanel.getHeight() ? pnt.y-ip.getHeight() : pnt.y;
-    			int leftStart = pnt.x+ip.getWidth()>chartPanel.getWidth() ? pnt.x-ip.getWidth() : pnt.x;
-    			
-    			g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
-    			Color c = g2.getColor();
-    			g2.setColor(Color.WHITE);
-    			g2.drawString(n.getNameAndNumber(), leftStart+4, topStart+ip.getHeight()-4);
-    			g2.setColor(Color.DARK_GRAY);
-    			g2.setStroke(new BasicStroke(3));
-    			g2.drawRect(leftStart, topStart, ip.getWidth(), ip.getHeight());
-    			g2.setColor(c);
-    		} catch(UnloadableImageException e) {
-    			stack(e);
-    		}
-    		
-    	}
-
-    }
-
     private JScrollPane createStatsPane() {
 
         TableModel tableModel = AbstractTableCreator.createBlankTable();
