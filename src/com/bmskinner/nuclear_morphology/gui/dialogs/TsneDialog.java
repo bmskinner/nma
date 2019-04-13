@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -103,6 +104,7 @@ public class TsneDialog extends LoadingIconDialog {
 		byClusterBtn.addActionListener(colourListener);
 		byMergeSourceBtn.addActionListener(colourListener);
 		
+		panel.add(new JLabel("Colour by:"));
 		panel.add(byNoneBtn);
 		panel.add(byClusterBtn);
 		panel.add(clustersBox);

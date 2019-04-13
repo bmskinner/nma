@@ -216,6 +216,9 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     public static XYDataset createTsneScatterDataset(IAnalysisDataset d, ColourByType type, IClusterGroup group) throws ChartDatasetCreationException {
     	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
     	
+    	if(type.equals(ColourByType.CLUSTER) && group==null)
+    		type = ColourByType.NONE;
+    	
     	if(type.equals(ColourByType.MERGE_SOURCE)) {
     		for(IAnalysisDataset mergeSource : d.getMergeSources()) {
     			List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());

@@ -26,6 +26,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
@@ -190,6 +191,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
     			Paint colour = ColourSelecter.getColor(i);
     			renderer.setSeriesPaint(i, colour);
     		}
+
+    		// Add a legend
+    		chart.addLegend(new LegendTitle(plot));
 
     		return chart;
     	} catch(ChartDatasetCreationException e) {
