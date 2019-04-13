@@ -39,34 +39,20 @@ public class TsneDialog extends LoadingIconDialog {
 	private final ChartPanel chartPanel = new ChartPanel(ScatterChartFactory.createEmptyChart());
 
 	private final JButton runTsneBtn = new JButton("Run new t-SNE");
-
+	
 	public TsneDialog(final @NonNull IAnalysisDataset dataset) {
 		this.dataset = dataset;
 
-		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
-		if(!analysisOptions.isPresent()) {
-			warn("Unable to create dialog, no analysis options in dataset");
-			return;
-		}
-
-		Optional<HashOptions> tSNEOptions = analysisOptions.get().getSecondaryOptions(IAnalysisOptions.TSNE);
-		if(!tSNEOptions.isPresent()) {
-			warn("Unable to create dialog, no t-SNE options in dataset");
-			return;
-		}
-
 		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
 
+		updateTitle();
 		updateChart(ColourByType.NONE, null);
 		setLayout(new BorderLayout());
 
 		add(createHeader(), BorderLayout.NORTH);
 
 		add(chartPanel, BorderLayout.CENTER);
-		setTitle("tSNE for "+dataset.getName()+": Perplexity "+
-				tSNEOptions.get().getDouble(ProfileTsneMethod.PERPLEXITY_KEY)+
-				" max_iter "+
-				tSNEOptions.get().getInt(ProfileTsneMethod.MAX_ITERATIONS_KEY));
+		
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);				
@@ -122,8 +108,10 @@ public class TsneDialog extends LoadingIconDialog {
 				chartPanel.setChart(ScatterChartFactory.createLoadingChart());
 				IAnalysisWorker w = new DefaultAnalysisWorker(tsneSetup.getMethod());
 				w.addPropertyChangeListener(e->{
-					if (e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG))
+					if (e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
+						updateTitle();
 						updateChart(ColourByType.NONE, null);
+					}
 				});
 				ThreadManager.getInstance().submit(w);	
 			} catch (Exception e) {
@@ -135,6 +123,27 @@ public class TsneDialog extends LoadingIconDialog {
 
 	private void updateChart(ColourByType type, IClusterGroup group) {
 		chartPanel.setChart(ScatterChartFactory.createTsneChart(dataset, type, group));
+	}
+	
+	private void updateTitle() {
+		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		if(!analysisOptions.isPresent()) {
+			warn("Unable to create dialog, no analysis options in dataset");
+			setTitle("");
+		}
+
+		Optional<HashOptions> tSNEOptions = analysisOptions.get().getSecondaryOptions(IAnalysisOptions.TSNE);
+		if(!tSNEOptions.isPresent()) {
+			warn("Unable to create dialog, no t-SNE options in dataset");
+			setTitle("");
+		}
+		
+		setTitle("tSNE for "+dataset.getName()+
+				": "+tSNEOptions.get().getString(ProfileTsneMethod.PROFILE_TYPE_KEY)+
+				", Perplexity "+
+				tSNEOptions.get().getDouble(ProfileTsneMethod.PERPLEXITY_KEY)+
+				", Max iterations "+
+				tSNEOptions.get().getInt(ProfileTsneMethod.MAX_ITERATIONS_KEY));
 	}
 
 
