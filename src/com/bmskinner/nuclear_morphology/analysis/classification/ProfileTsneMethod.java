@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.tsne.barneshut.BHTSne;
 import com.jujutsu.tsne.barneshut.BarnesHutTSne;
@@ -96,12 +97,12 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 		int initialDims   = 100;
 		
 		// Create the matrix for profile values with consistent cell order
-		List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
-		Map<Integer, UUID> cellIds = new HashMap<>();
-		for(int i=0; i<cells.size(); i++)
-			cellIds.put(i, cells.get(i).getId());
+		List<Nucleus> nuclei = new ArrayList<>(dataset.getCollection().getNuclei());
+		Map<Integer, UUID>  nucleusIds = new HashMap<>();
+		for(int i=0; i<nuclei.size(); i++)
+			nucleusIds.put(i, nuclei.get(i).getID());
 		
-		double[][] profileMatrix = makeProfileMatrix(cells);
+		double[][] profileMatrix = makeProfileMatrix(nuclei);
 
 //	    double [][] X = MatrixUtils.simpleRead2DMatrix(new File("src/main/resources/datasets/mnist2500_X.txt"), "   ");
 //	    System.out.println(MatrixOps.doubleArrayToPrintString(X, ", ", 50,10));
@@ -110,7 +111,16 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 	    BarnesHutTSne tsne = new ParallelBHTsne(); // may not play well with the thread manager
 		double [][] tSneResult = tsne.tsne(config); 
 		
+		for(int i=0; i<nuclei.size(); i++) {
+			Nucleus n = nuclei.get(i);	
+			n.setStatistic(PlottableStatistic.TSNE_X, tSneResult[i][0]);
+			n.setStatistic(PlottableStatistic.TSNE_Y, tSneResult[i][1]);
+		}
+		
 		// Do we store this in the cell collection, attached to each cell, or return the matrix directly?
+		
+		
+		// Attach the tSNE results to each nucleus
 		
 //	    boolean parallel = false;
 //		if(parallel) {			
@@ -119,15 +129,15 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 //			tsne = new BHTSne();
 //		}
 	    
-		return new TsneResult(dataset, tSneResult, cellIds);
+		return new DefaultAnalysisResult(dataset);
+//		return new TsneResult(dataset, tSneResult, nucleusIds);
 	}
 
-	private double[][] makeProfileMatrix(List<ICell> cells) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
-		double[][] matrix = new double[cells.size()][100];
+	private double[][] makeProfileMatrix(List<Nucleus> nuclei) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+		double[][] matrix = new double[nuclei.size()][100];
 
-		for(int i=0; i<cells.size(); i++) {
-			ICell c = cells.get(i);	
-			Nucleus n = c.getNucleus();
+		for(int i=0; i<nuclei.size(); i++) {
+			Nucleus n = nuclei.get(i);	
 			IProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
 			for (int j = 0; j < 100; j++) {
