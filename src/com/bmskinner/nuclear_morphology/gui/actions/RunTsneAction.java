@@ -44,6 +44,7 @@ implements EventListener {
 		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
 		 if(!analysisOptions.isPresent()) {
 			 warn("Unable to run tSNE, no analysis options in dataset");
+			 cancel();
 			 return;
 		 }
 		 

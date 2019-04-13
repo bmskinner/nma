@@ -2,10 +2,13 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
 import java.util.Optional;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
@@ -13,9 +16,11 @@ import org.jfree.chart.ChartPanel;
 import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelectionPanel;
 
 /**
  * Display tSNE results. This is a temporary class for testing.
@@ -48,7 +53,7 @@ public class TsneDialog extends LoadingIconDialog {
 
 		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
 
-		updateChart();
+		updateChart(ColourByType.NONE, null);
 		setLayout(new BorderLayout());
 
 		add(createHeader(), BorderLayout.NORTH);
@@ -62,22 +67,59 @@ public class TsneDialog extends LoadingIconDialog {
 		setLocationRelativeTo(null);
 		setVisible(true);				
 	}
+	
+	public enum ColourByType {
+		NONE, CLUSTER, MERGE_SOURCE;
+	}
 
 
 	private JPanel createHeader() {
 		JPanel panel = new JPanel(new FlowLayout());
 		runTsneBtn.addActionListener( l->runNewTsne());
 		panel.add(runTsneBtn);
+		
+		// How should cells be coloured?
+		
+		final ButtonGroup colourGroup = new ButtonGroup();
+		JRadioButton byNoneBtn = new JRadioButton("None");
+		JRadioButton byClusterBtn = new JRadioButton("Clusters");
+		JRadioButton byMergeSourceBtn = new JRadioButton("Merge source");
+		colourGroup.add(byNoneBtn);
+		colourGroup.add(byClusterBtn);
+		colourGroup.add(byMergeSourceBtn);
+		
+		byNoneBtn.setSelected(true);
+		
+		ClusterGroupSelectionPanel clustersBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
+		clustersBox.setEnabled(false);
+		
+		ActionListener colourListener = e ->{
+			ColourByType type = byNoneBtn.isSelected() ? ColourByType.NONE : byClusterBtn.isSelected() ? ColourByType.CLUSTER : ColourByType.MERGE_SOURCE;
+			clustersBox.setEnabled(byClusterBtn.isSelected());
+			updateChart(type, clustersBox.getSelectedItem());
+		};
 
+		byNoneBtn.addActionListener(colourListener);
+		byClusterBtn.addActionListener(colourListener);
+		byMergeSourceBtn.addActionListener(colourListener);
+		
+		panel.add(byNoneBtn);
+		panel.add(byClusterBtn);
+		panel.add(clustersBox);
+		panel.add(byMergeSourceBtn);
+
+		
 		return panel;
 	}
+	
+	
 
 	private void runNewTsne() {
 		SubAnalysisSetupDialog tsneSetup = new TsneSetupDialog(dataset);
 		if (tsneSetup.isReadyToRun()) {
 			try {
 				tsneSetup.getMethod().call();
-				updateChart();
+				updateChart(ColourByType.NONE, null);
 			} catch (Exception e) {
 				error("Error running new t-SNE", e);
 			}
@@ -85,8 +127,8 @@ public class TsneDialog extends LoadingIconDialog {
 		tsneSetup.dispose();
 	}
 
-	private void updateChart() {
-		chartPanel.setChart(ScatterChartFactory.createTsneChart(dataset));
+	private void updateChart(ColourByType type, IClusterGroup group) {
+		chartPanel.setChart(ScatterChartFactory.createTsneChart(dataset, type, group));
 	}
 
 

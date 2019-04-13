@@ -35,9 +35,11 @@ import com.bmskinner.nuclear_morphology.charting.datasets.SignalXYDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
 
 public class ScatterChartFactory extends AbstractChartFactory {
 
@@ -167,10 +169,10 @@ public class ScatterChartFactory extends AbstractChartFactory {
      * @return
      * @throws ChartDatasetCreationException
      */
-    public static JFreeChart createTsneChart(IAnalysisDataset d)  {
+    public static JFreeChart createTsneChart(IAnalysisDataset d, ColourByType type, IClusterGroup group)  {
     	
     	try {
-    		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d);
+    		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d, type, group);
     		String xLabel = "tSNE 1";
     		String yLabel = "tSNE 2";
 
@@ -183,6 +185,12 @@ public class ScatterChartFactory extends AbstractChartFactory {
 
     		XYItemRenderer renderer = new ScatterChartRenderer();
     		plot.setRenderer(renderer);
+    		
+    		for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+    			Paint colour = ColourSelecter.getColor(i);
+    			renderer.setSeriesPaint(i, colour);
+    		}
+
     		return chart;
     	} catch(ChartDatasetCreationException e) {
     		return createErrorChart();

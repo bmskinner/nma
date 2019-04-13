@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -38,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
 
 /**
  * Create scatter chart datasets
@@ -211,11 +213,38 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
      * @return
      * @throws ChartDatasetCreationException
      */
-    public static XYDataset createTsneScatterDataset(IAnalysisDataset d) throws ChartDatasetCreationException {
+    public static XYDataset createTsneScatterDataset(IAnalysisDataset d, ColourByType type, IClusterGroup group) throws ChartDatasetCreationException {
     	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
-    	    	
-    	List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
     	
+    	if(type.equals(ColourByType.MERGE_SOURCE)) {
+    		for(IAnalysisDataset mergeSource : d.getMergeSources()) {
+    			List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
+    			double[][] data = createTsneValues(nuclei);
+    	    	ds.addSeries(mergeSource.getName()+" tSNE", data, nuclei);
+    		}
+    		return ds;
+    	}
+    	
+    	if(type.equals(ColourByType.NONE)) {
+    		List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
+    		double[][] data = createTsneValues(nuclei);
+    		ds.addSeries("tSNE", data, nuclei);
+    		return ds;
+    	}
+    	
+    	if(type.equals(ColourByType.CLUSTER)) {
+    		for(UUID childId : group.getUUIDs()) {
+    			IAnalysisDataset childDataset = d.getChildDataset(childId);
+    			List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
+    			double[][] data = createTsneValues(nuclei);
+    	    	ds.addSeries(childDataset.getName()+" tSNE", data, nuclei);
+    		}
+    		return ds;
+    	}
+    	return ds;
+    }
+    
+    private static double[][] createTsneValues(List<Nucleus> nuclei ){
     	double[] xpoints = new double[nuclei.size()];
         double[] ypoints = new double[nuclei.size()];
     	// need to transpose the matrix
@@ -226,9 +255,6 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	}
     	
     	double[][] data = { xpoints, ypoints };
-    	
-    	ds.addSeries("tSNE", data, nuclei);
-    	return ds;
+    	return data;
     }
-    
 }
