@@ -14,12 +14,15 @@ import javax.swing.JRadioButton;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelectionPanel;
 
@@ -117,8 +120,12 @@ public class TsneDialog extends LoadingIconDialog {
 		if (tsneSetup.isReadyToRun()) {
 			try {
 				chartPanel.setChart(ScatterChartFactory.createLoadingChart());
-				tsneSetup.getMethod().call();
-				updateChart(ColourByType.NONE, null);
+				IAnalysisWorker w = new DefaultAnalysisWorker(tsneSetup.getMethod());
+				w.addPropertyChangeListener(e->{
+					if (e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG))
+						updateChart(ColourByType.NONE, null);
+				});
+				ThreadManager.getInstance().submit(w);	
 			} catch (Exception e) {
 				error("Error running new t-SNE", e);
 			}
