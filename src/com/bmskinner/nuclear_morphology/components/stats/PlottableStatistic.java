@@ -67,6 +67,8 @@ public interface PlottableStatistic extends Serializable {
 		static final String RADIUS                   = "Radius";
 		static final String LENGTH                   = "Length";
 		static final String DISPLACEMENT             = "Displacement";
+		static final String TSNE_X             = "t-SNE 1";
+		static final String TSNE_Y             = "t-SNE 2";
 		
 	}
 
@@ -104,6 +106,10 @@ public interface PlottableStatistic extends Serializable {
     static final PlottableStatistic RADIUS                  = new GenericStatistic(Names.RADIUS,                  StatisticDimension.LENGTH);
     static final PlottableStatistic LENGTH                  = new GenericStatistic(Names.LENGTH,                  StatisticDimension.LENGTH);
     static final PlottableStatistic DISPLACEMENT            = new GenericStatistic(Names.DISPLACEMENT,            StatisticDimension.ANGLE);    
+    
+    // Special stats. These should not be included in default charts - they are used as hidden data stores
+    static final PlottableStatistic TSNE_X = new GenericStatistic(Names.TSNE_X, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic TSNE_Y = new GenericStatistic(Names.TSNE_Y, StatisticDimension.DIMENSIONLESS);
     
 
     /**
