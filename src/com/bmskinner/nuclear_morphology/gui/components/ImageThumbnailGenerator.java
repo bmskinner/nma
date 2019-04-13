@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.gui.components;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.geom.Rectangle2D;
 import java.util.logging.Logger;
 
@@ -43,8 +42,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 	@Override
 	public void chartMouseClicked(ChartMouseEvent event) {
-		//do something on mouse click
-//		System.out.println("Entity clicked: " + event.getEntity());
+		// do nothing
 	}
 
 	@Override
@@ -52,11 +50,12 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		
 		if( !(event.getEntity() instanceof XYItemEntity) ) {
 			chartPanel.repaint(); // clear the chart
+			currentEntity=null;
 			return;
 		}
 		XYItemEntity entity = (XYItemEntity) event.getEntity();
 		
-		if(entity==currentEntity)
+		if(entity==currentEntity) // no unnecessary updates needed
 			return;
 
 		currentEntity = entity;
@@ -69,12 +68,16 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		String key = ds.getSeriesKey(entity.getSeriesIndex()).toString();
 		CellularComponent n = ds.getComponent(key, entity.getItem());
 		
-		// Draw at the entity coordinates, not the mouse position
-		double entityX = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
-		double entityY = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
-		Rectangle2D dataArea = chartPanel.getScreenDataArea();
-		int screenX = (int) chartPanel.getChart().getXYPlot().getDomainAxis().valueToJava2D(entityX, dataArea, RectangleEdge.BOTTOM);
-		int screenY = (int) chartPanel.getChart().getXYPlot().getRangeAxis().valueToJava2D(entityY, dataArea, RectangleEdge.LEFT);
+		// Draw at the entity coordinates, not the mouse position //TODO: there is an offset
+//		double entityX = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
+//		double entityY = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
+//		Rectangle2D dataArea = chartPanel.getScreenDataArea();
+//		int screenX = (int) chartPanel.getChart().getXYPlot().getDomainAxis().valueToJava2D(entityX, dataArea, RectangleEdge.BOTTOM);
+//		int screenY = (int) chartPanel.getChart().getXYPlot().getRangeAxis().valueToJava2D(entityY, dataArea, RectangleEdge.LEFT);
+		
+		// Draw at mouse position
+		int screenX = event.getTrigger().getX();
+		int screenY = event.getTrigger().getY();
 
 		if(n==null)
 			return;
