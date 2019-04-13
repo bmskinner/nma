@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     private final long analysisTime; 
     
     /* Store options that are not detection options. For example, clustering or tSNE options */
-     private final Map<String, HashOptions> secondaryOptions = new HashMap<>();
+     private Map<String, HashOptions> secondaryOptions = new HashMap<>();
 
 
     /**
@@ -307,5 +308,13 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         b.append(IDetectionOptions.NEWLINE+type);
         return b.toString();
     }  
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        
+        //  Changes from 1.15.2 to 1.16.0
+        if(secondaryOptions==null)
+        	secondaryOptions = new HashMap<>();
+    }
 
 }

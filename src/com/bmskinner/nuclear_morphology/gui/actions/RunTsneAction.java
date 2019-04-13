@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -71,24 +72,7 @@ implements EventListener {
 
         try {
         	IAnalysisResult r = worker.get();
-        	
-        	// make a basic plot and display
-        	try {
-				JFreeChart chart = ScatterChartFactory.createTsneChart(r.getFirstDataset());
-				ChartPanel panel = new ChartPanel(chart);
-				panel.addChartMouseListener(new ImageThumbnailGenerator(panel));
-				
-				JDialog d = new JDialog();
-				d.setLayout(new BorderLayout());
-				d.add(panel, BorderLayout.CENTER);
-				d.setTitle("tSNE for "+r.getFirstDataset().getName());
-				d.pack();
-				d.setVisible(true);				
-				
-			} catch (ChartDatasetCreationException e) {
-				error("Unable to make tSNE chart", e);
-			}
-
+        	new TsneDialog(r.getFirstDataset());
             cleanup(); // do not cancel, we need the MainWindow listener to
                        // remain attached
 
