@@ -1269,4 +1269,28 @@ public class AnalysisOptions implements IAnalysisOptions {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Optional<HashOptions> getSecondaryOptions(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getSecondaryOptionKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean hasSecondaryOptions(String key) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setSecondaryOptions(String key, HashOptions options) {
+		// TODO Auto-generated method stub
+		
+	}
 }

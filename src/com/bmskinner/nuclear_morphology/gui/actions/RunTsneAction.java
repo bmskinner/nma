@@ -71,8 +71,7 @@ implements EventListener {
 
         try {
         	IAnalysisResult r = worker.get();
-//        	TsneResult r = (TsneResult) worker.get();
-//        	System.out.println(MatrixOps.doubleArrayToPrintString(r.tSneOutput, ", ", 5,5));
+        	
         	// make a basic plot and display
         	try {
 				JFreeChart chart = ScatterChartFactory.createTsneChart(r.getFirstDataset());

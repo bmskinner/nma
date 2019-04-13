@@ -49,6 +49,10 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     private boolean isRefoldNucleus, isKeepFailed;
     
     private final long analysisTime; 
+    
+    /* Store options that are not detection options. For example, clustering or tSNE options */
+     private final Map<String, HashOptions> secondaryOptions = new HashMap<>();
+
 
     /**
      * The default constructor, which sets default options specified in
@@ -100,6 +104,26 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     public boolean hasDetectionOptions(String type) {
         return detectionOptions.containsKey(type);
     }
+    
+
+	@Override
+	public Optional<HashOptions> getSecondaryOptions(String key) {
+		if (secondaryOptions.containsKey(key)) {
+            return Optional.of(secondaryOptions.get(key));
+        }
+		return Optional.empty();
+	}
+
+	@Override
+	public Set<String> getSecondaryOptionKeys() {
+		return secondaryOptions.keySet();
+	}
+
+	@Override
+	public boolean hasSecondaryOptions(String key) {
+		return secondaryOptions.containsKey(key);
+	} 
+    
 
     @Override
     public double getProfileWindowProportion() {
@@ -155,7 +179,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     @Override
     public void setDetectionOptions(String key, IDetectionOptions options) {
         detectionOptions.put(key, options);
-
+    }
+    
+    @Override
+    public void setSecondaryOptions(String key, HashOptions options) {
+    	secondaryOptions.put(key, options);
     }
 
     @Override
@@ -278,6 +306,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
         b.append(IDetectionOptions.NEWLINE+type);
         return b.toString();
-    }    
+    }  
 
 }

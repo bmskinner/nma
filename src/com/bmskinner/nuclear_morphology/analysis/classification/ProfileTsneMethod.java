@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.tsne.barneshut.BHTSne;
@@ -91,7 +92,7 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 		int maxIterations = tSneOptions.getInt(MAX_ITERATIONS_KEY);
 		double perplexity = tSneOptions.getDouble(PERPLEXITY_KEY);
 		
-		log("Running tSNE with p"+perplexity+" and i"+maxIterations);
+		fine("Running tSNE with p"+perplexity+" and i"+maxIterations);
 		
 		// We can calculate initial dimensions from the profile - it's 100
 		int initialDims   = 100;
@@ -111,16 +112,12 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 	    BarnesHutTSne tsne = new ParallelBHTsne(); // may not play well with the thread manager
 		double [][] tSneResult = tsne.tsne(config); 
 		
+		// store this in the cell collection, attached to each cell
 		for(int i=0; i<nuclei.size(); i++) {
 			Nucleus n = nuclei.get(i);	
 			n.setStatistic(PlottableStatistic.TSNE_X, tSneResult[i][0]);
 			n.setStatistic(PlottableStatistic.TSNE_Y, tSneResult[i][1]);
 		}
-		
-		// Do we store this in the cell collection, attached to each cell, or return the matrix directly?
-		
-		
-		// Attach the tSNE results to each nucleus
 		
 //	    boolean parallel = false;
 //		if(parallel) {			
@@ -128,7 +125,10 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 //		} else {
 //			tsne = new BHTSne();
 //		}
-	    
+		
+		if(dataset.hasAnalysisOptions())
+			dataset.getAnalysisOptions().get().setSecondaryOptions(IAnalysisOptions.TSNE, tSneOptions);
+		
 		return new DefaultAnalysisResult(dataset);
 //		return new TsneResult(dataset, tSneResult, nucleusIds);
 	}

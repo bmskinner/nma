@@ -37,16 +37,19 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public interface IAnalysisOptions extends Serializable, Loggable {
 
     // Standard detection keys
-    static final String NUCLEUS        = "Nucleus";
-    static final String CYTOPLASM      = "Cytoplasm";
-    static final String SPERM_TAIL     = "SpermTail";
-    static final String SIGNAL_GROUP   = "SignalGroup_";
-    static final String NUCLEAR_SIGNAL = "NuclearSignal";
+    String NUCLEUS        = "Nucleus";
+    String CYTOPLASM      = "Cytoplasm";
+    String SPERM_TAIL     = "SpermTail";
+    String SIGNAL_GROUP   = "SignalGroup_";
+    String NUCLEAR_SIGNAL = "NuclearSignal";
+    
+    // Standard secondary options
+    String TSNE = "t-SNE";
 
-    static final boolean     DEFAULT_REFOLD            = true;
-    static final boolean     DEFAULT_KEEP_FAILED       = false;
-    static final double      DEFAULT_WINDOW_PROPORTION = 0.05;
-    static final NucleusType DEFAULT_TYPE              = GlobalOptions.getInstance().getDefaultType();
+    boolean     DEFAULT_REFOLD            = true;
+    boolean     DEFAULT_KEEP_FAILED       = false;
+    double      DEFAULT_WINDOW_PROPORTION = 0.05;
+    NucleusType DEFAULT_TYPE              = GlobalOptions.getInstance().getDefaultType();
 
     IAnalysisOptions duplicate();
     
@@ -68,9 +71,8 @@ public interface IAnalysisOptions extends Serializable, Loggable {
     /**
      * Check if the given type name is already present
      * 
-     * @param type
-     *            the name to check
-     * @return present or not
+     * @param type the name to check
+     * @return true if present, false otherwise
      */
     boolean hasDetectionOptions(String type);
     
@@ -80,6 +82,29 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * @return
      */
     Optional<IDetectionOptions> getNuclusDetectionOptions();
+    
+    /**
+     * Get secondary options for a given key
+     * 
+     * @param key the type of options
+     * @return the  options
+     */
+    Optional<HashOptions> getSecondaryOptions(String key);
+    
+    /**
+     * Get the types of secondary options stored
+     * 
+     * @return
+     */
+    Set<String> getSecondaryOptionKeys();
+
+    /**
+     * Check if the given type name is already present
+     * 
+     * @param key the key to check
+     * @return true if present, false otherwise
+     */
+    boolean hasSecondaryOptions(String key);
 
     /**
      * Get the proportion of the nucleus perimeter to use for shape profiling
@@ -144,6 +169,14 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * @param options
      */
     void setDetectionOptions(String key, IDetectionOptions options);
+    
+    /**
+     * Set the secondary options for the given key
+     * 
+     * @param key the options key
+     * @param options the options
+     */
+    void setSecondaryOptions(String key, HashOptions options);
 
     /**
      * Set the proportion of the perimeter to use when profiling nuclei
