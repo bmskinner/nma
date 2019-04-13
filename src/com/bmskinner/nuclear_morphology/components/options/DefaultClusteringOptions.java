@@ -48,6 +48,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 		setBoolean(USE_SIMILARITY_MATRIX_KEY, DEFAULT_USE_SIMILARITY_MATRIX);
 		setBoolean(INCLUDE_PROFILE_KEY, DEFAULT_INCLUDE_PROFILE);
 		setBoolean(INCLUDE_MESH_KEY, DEFAULT_INCLUDE_MESH);
+		setBoolean(USE_TSNE_KEY, DEFAULT_USE_TSNE);
 
 		setInt(EM_ITERATIONS_KEY, DEFAULT_EM_ITERATIONS);
 		setInt(MANUAL_CLUSTER_NUMBER_KEY, DEFAULT_MANUAL_CLUSTER_NUMBER);
@@ -64,6 +65,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 		setBoolean(USE_SIMILARITY_MATRIX_KEY, oldOptions.isUseSimilarityMatrix());
 		setBoolean(INCLUDE_PROFILE_KEY, oldOptions.isIncludeProfile());
 		setBoolean(INCLUDE_MESH_KEY, oldOptions.isIncludeMesh());
+		setBoolean(USE_TSNE_KEY, oldOptions.getBoolean(USE_TSNE_KEY));
 
 		setInt(EM_ITERATIONS_KEY, oldOptions.getIterations());
 		setInt(MANUAL_CLUSTER_NUMBER_KEY, oldOptions.getClusterNumber());

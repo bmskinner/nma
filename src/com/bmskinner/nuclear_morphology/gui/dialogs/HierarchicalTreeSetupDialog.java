@@ -66,6 +66,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
     private static final String DIALOG_TITLE        = "Tree building options";
     private static final String CLUSTER_METHOD_LBL  = "Cluster method";
+    private static final String INCLUDE_TSNE_LBL    = "Include tSNE";
     private static final String INCLUDE_PROFILE_LBL = "Include profiles";
     private static final String INCLUDE_MESH_LBL    = "Include mesh faces";
     private static final String P_VALUE_LBL         = "  p(uni) = ";
@@ -80,6 +81,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
     protected JComboBox<HierarchicalClusterMethod> clusterMethodBox;
 
+    protected JCheckBox includeTsneCheckBox;
+    
     protected JCheckBox includeProfilesCheckBox;
 
     protected JCheckBox includeMeshCheckBox;
@@ -118,8 +121,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
     /**
      * Set the default options
      */
-    protected void setDefaults() {
-        // options = OptionsFactory.makeClusteringOptions();
+    @Override
+	protected void setDefaults() {
         options.setClusterNumber(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
         options.setHierarchicalMethod(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
         options.setIterations(IClusteringOptions.DEFAULT_EM_ITERATIONS);
@@ -127,6 +130,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         options.setIncludeProfile(IClusteringOptions.DEFAULT_INCLUDE_PROFILE);
         options.setProfileType(DEFAULT_PROFILE_TYPE);
         options.setIncludeMesh(IClusteringOptions.DEFAULT_INCLUDE_MESH);
+        options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
     }
 
     protected JPanel createHeader() {
@@ -138,8 +142,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
     @Override
     public IAnalysisMethod getMethod() {
-        IAnalysisMethod m = new TreeBuildingMethod(dataset, options);
-        return m;
+    	return new TreeBuildingMethod(dataset, options);
     }
 
     @Override
@@ -150,8 +153,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         setContentPane(contentPanel);
 
         profileButtonGroup = new ButtonGroup();
-        statBoxMap = new HashMap<PlottableStatistic, JCheckBox>();
-        segmentBoxMap = new HashMap<UUID, JCheckBox>();
+        statBoxMap = new HashMap<>();
+        segmentBoxMap = new HashMap<>();
         // ---------------
         // panel for text labels
         // ---------------
@@ -225,9 +228,18 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         GridBagLayout layout = new GridBagLayout();
         panel.setLayout(layout);
 
-        List<JLabel> labels = new ArrayList<JLabel>();
-        List<Component> fields = new ArrayList<Component>();
-
+        List<JLabel> labels = new ArrayList<>();
+        List<Component> fields = new ArrayList<>();
+        
+        // Only show the tSNE option if it has been calculated
+    	includeTsneCheckBox = new JCheckBox(EMPTY_STRING);
+    	includeTsneCheckBox.setSelected(IClusteringOptions.DEFAULT_USE_TSNE);
+    	includeTsneCheckBox.addChangeListener(this);
+        if(dataset.getCollection().getNuclei().stream().allMatch(n->n.hasStatistic(PlottableStatistic.TSNE_X))) {
+            labels.add(new JLabel(INCLUDE_TSNE_LBL));
+            fields.add(includeTsneCheckBox);
+        }
+        
         includeProfilesCheckBox = new JCheckBox(EMPTY_STRING);
         includeProfilesCheckBox.setSelected(IClusteringOptions.DEFAULT_INCLUDE_PROFILE);
         includeProfilesCheckBox.addChangeListener(this);
@@ -335,6 +347,10 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
             }
         }
+        
+        if (e.getSource() == includeTsneCheckBox)
+            options.setBoolean(IClusteringOptions.USE_TSNE_KEY, includeTsneCheckBox.isSelected());
+
 
         try {
 

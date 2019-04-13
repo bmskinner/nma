@@ -32,27 +32,29 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 public interface IClusteringOptions extends Serializable, HashOptions {
 	
-	static final String USE_SIMILARITY_MATRIX_KEY = "USE_SIMILARITY_MATRIX";
-	static final String MANUAL_CLUSTER_NUMBER_KEY = "MANUAL_CLUSTER_NUMBER";
-	static final String CLUSTER_METHOD_KEY        = "CLUSTER_METHOD";
-	static final String HIERARCHICAL_METHOD_KEY   = "HIERARCHICAL_METHOD";
-	static final String EM_ITERATIONS_KEY         = "EM_ITERATIONS";
-	static final String MODALITY_REGIONS_KEY      = "MODALITY_REGIONS";
-	static final String USE_MODALITY_KEY          = "USE_MODALITY";
-	static final String INCLUDE_PROFILE_KEY       = "INCLUDE_PROFILE";
-	static final String INCLUDE_MESH_KEY          = "INCLUDE_MESH";
-	static final String PROFILE_TYPE_KEY          = "PROFILE_TYPE";
+	String USE_SIMILARITY_MATRIX_KEY = "USE_SIMILARITY_MATRIX";
+	String MANUAL_CLUSTER_NUMBER_KEY = "MANUAL_CLUSTER_NUMBER";
+	String CLUSTER_METHOD_KEY        = "CLUSTER_METHOD";
+	String HIERARCHICAL_METHOD_KEY   = "HIERARCHICAL_METHOD";
+	String EM_ITERATIONS_KEY         = "EM_ITERATIONS";
+	String MODALITY_REGIONS_KEY      = "MODALITY_REGIONS";
+	String USE_MODALITY_KEY          = "USE_MODALITY";
+	String INCLUDE_PROFILE_KEY       = "INCLUDE_PROFILE";
+	String INCLUDE_MESH_KEY          = "INCLUDE_MESH";
+	String PROFILE_TYPE_KEY          = "PROFILE_TYPE";
+	String USE_TSNE_KEY              = "Use t-SNE";
 
-    static final int                       DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
-    static final ClusteringMethod          DEFAULT_CLUSTER_METHOD        = ClusteringMethod.HIERARCHICAL;
-    static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD   = HierarchicalClusterMethod.WARD;
-    static final ProfileType               DEFAULT_PROFILE_TYPE          = ProfileType.ANGLE;
-    static final int                       DEFAULT_EM_ITERATIONS         = 100;
-    static final int                       DEFAULT_MODALITY_REGIONS      = 2;
-    static final boolean                   DEFAULT_USE_MODALITY          = true;
-    static final boolean                   DEFAULT_USE_SIMILARITY_MATRIX = false;
-    static final boolean                   DEFAULT_INCLUDE_PROFILE       = true;
-    static final boolean                   DEFAULT_INCLUDE_MESH          = false;
+    int                       DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
+    ClusteringMethod          DEFAULT_CLUSTER_METHOD        = ClusteringMethod.HIERARCHICAL;
+    HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD   = HierarchicalClusterMethod.WARD;
+    ProfileType               DEFAULT_PROFILE_TYPE          = ProfileType.ANGLE;
+    int                       DEFAULT_EM_ITERATIONS         = 100;
+    int                       DEFAULT_MODALITY_REGIONS      = 2;
+    boolean                   DEFAULT_USE_MODALITY          = true;
+    boolean                   DEFAULT_USE_SIMILARITY_MATRIX = false;
+    boolean                   DEFAULT_INCLUDE_PROFILE       = true;
+    boolean                   DEFAULT_INCLUDE_MESH          = false;
+    boolean                   DEFAULT_USE_TSNE              = false;
 
     /**
      * The available types of hierarchical clustering for the Weka clusterer
@@ -122,8 +124,6 @@ public interface IClusteringOptions extends Serializable, HashOptions {
      */
     boolean isIncludeSegment(UUID i);
 
-//    boolean useSegments();
-
     /**
      * Get all the segments that are saved in this options object
      * 
@@ -138,13 +138,6 @@ public interface IClusteringOptions extends Serializable, HashOptions {
      * @return
      */
     boolean isIncludeStatistic(PlottableStatistic stat);
-
-    /**
-     * Get all the statistics that are saved in this options object
-     * 
-     * @return
-     */
-//    Set<PlottableStatistic> getSavedStatistics();
 
     boolean isIncludeProfile();
 

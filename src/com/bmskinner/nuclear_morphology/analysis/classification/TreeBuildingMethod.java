@@ -180,6 +180,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
             attributeCount++;
         }
+        
+        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY))
+        	attributeCount+=2;
 
         // Create the attributes
 
@@ -197,7 +200,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             if (options.isIncludeStatistic(stat)) {
                 Attribute a = new Attribute(stat.toString());
                 attributes.addElement(a);
-
             }
         }
 
@@ -221,6 +223,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
             Attribute name = new Attribute("name", (FastVector) null);
             attributes.addElement(name);
+        }
+        
+        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	attributes.addElement(new Attribute("tSNE_X"));
+        	attributes.addElement(new Attribute("tSNE_Y"));
         }
 
         return attributes;
@@ -330,6 +337,13 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             String uniqueName = c.getId().toString();
             Attribute att = (Attribute) attributes.elementAt(attNumber++);
             inst.setValue(att, uniqueName);
+        }
+        
+        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	Attribute attX = (Attribute) attributes.elementAt(attNumber++);
+        	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_X));
+        	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
+        	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_Y));
         }
 
         instances.add(inst);

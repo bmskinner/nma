@@ -83,6 +83,7 @@ public class TsneDialog extends LoadingIconDialog {
 		ClusterGroupSelectionPanel clustersBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
 		clustersBox.setEnabled(false);
 		
+		
 		ActionListener colourListener = e ->{
 			ColourByType type = byNoneBtn.isSelected() ? ColourByType.NONE : byClusterBtn.isSelected() ? ColourByType.CLUSTER : ColourByType.MERGE_SOURCE;
 			clustersBox.setEnabled(byClusterBtn.isSelected());
@@ -92,6 +93,7 @@ public class TsneDialog extends LoadingIconDialog {
 		byNoneBtn.addActionListener(colourListener);
 		byClusterBtn.addActionListener(colourListener);
 		byMergeSourceBtn.addActionListener(colourListener);
+		clustersBox.addActionListener(colourListener);
 		
 		panel.add(new JLabel("Colour by:"));
 		panel.add(byNoneBtn);
