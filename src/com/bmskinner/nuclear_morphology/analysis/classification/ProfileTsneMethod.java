@@ -1,11 +1,8 @@
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -14,7 +11,6 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -25,11 +21,8 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.jujutsu.tsne.TSneConfiguration;
-import com.jujutsu.tsne.barneshut.BHTSne;
 import com.jujutsu.tsne.barneshut.BarnesHutTSne;
 import com.jujutsu.tsne.barneshut.ParallelBHTsne;
-import com.jujutsu.utils.MatrixOps;
-import com.jujutsu.utils.MatrixUtils;
 import com.jujutsu.utils.TSneUtils;
 
 /**
@@ -57,26 +50,6 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 	private final HashOptions tSneOptions;
 	
 	/**
-	 * Analysis result for tSNE data. Contains the raw tSNE output
-	 * and the map of which cell is in each row 
-	 * @author bms41
-	 * @since 1.16.0
-	 *
-	 */
-	public class TsneResult extends DefaultAnalysisResult {
-		
-		public final double[][] tSneOutput;
-		public final Map<Integer, UUID> cellIds;
-
-		public TsneResult(IAnalysisDataset d, double[][] matrix, Map<Integer, UUID> ids) {
-			super(d);
-			tSneOutput = matrix;
-			cellIds = ids;
-		}
-		
-	}
-
-	/**
 	 * Create the t-SNE method with a dataset to analyse, and appropriate options
 	 * @param dataset the dataset which tSNE should be run on 
 	 * @param tSneOptions the tSNE options
@@ -94,22 +67,16 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 		
 		fine("Running tSNE with p"+perplexity+" and i"+maxIterations);
 		
-		// We can calculate initial dimensions from the profile - it's 100
-		int initialDims   = 100;
+		// We know initial dimensions from the profile - it's 100
+		int initialDims = 100;
 		
 		// Create the matrix for profile values with consistent cell order
 		List<Nucleus> nuclei = new ArrayList<>(dataset.getCollection().getNuclei());
-		Map<Integer, UUID>  nucleusIds = new HashMap<>();
-		for(int i=0; i<nuclei.size(); i++)
-			nucleusIds.put(i, nuclei.get(i).getID());
 		
 		double[][] profileMatrix = makeProfileMatrix(nuclei);
 
-//	    double [][] X = MatrixUtils.simpleRead2DMatrix(new File("src/main/resources/datasets/mnist2500_X.txt"), "   ");
-//	    System.out.println(MatrixOps.doubleArrayToPrintString(X, ", ", 50,10));
-		
 	    TSneConfiguration config = TSneUtils.buildConfig(profileMatrix, OUTPUT_DIMENSIONS, initialDims, perplexity, maxIterations);
-	    BarnesHutTSne tsne = new ParallelBHTsne(); // may not play well with the thread manager
+	    BarnesHutTSne tsne = new ParallelBHTsne(); // may not play well with the thread manager. If single thread, use BHTSne()
 		double [][] tSneResult = tsne.tsne(config); 
 		
 		// store this in the cell collection, attached to each cell
@@ -119,18 +86,11 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 			n.setStatistic(PlottableStatistic.TSNE_Y, tSneResult[i][1]);
 		}
 		
-//	    boolean parallel = false;
-//		if(parallel) {			
-//			tsne = new ParallelBHTsne();
-//		} else {
-//			tsne = new BHTSne();
-//		}
-		
-		if(dataset.hasAnalysisOptions())
-			dataset.getAnalysisOptions().get().setSecondaryOptions(IAnalysisOptions.TSNE, tSneOptions);
+		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		if(analysisOptions.isPresent())
+			analysisOptions.get().setSecondaryOptions(IAnalysisOptions.TSNE, tSneOptions);
 		
 		return new DefaultAnalysisResult(dataset);
-//		return new TsneResult(dataset, tSneResult, nucleusIds);
 	}
 
 	private double[][] makeProfileMatrix(List<Nucleus> nuclei) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
