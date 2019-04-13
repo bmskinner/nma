@@ -212,19 +212,23 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
      * @return
      * @throws ChartDatasetCreationException
      */
-    public static XYDataset createTsneScatterDataset(TsneResult r) throws ChartDatasetCreationException {
-    	DefaultXYDataset ds = new DefaultXYDataset();
-    	double[] xpoints = new double[r.tSneOutput.length];
-        double[] ypoints = new double[r.tSneOutput.length];
+    public static XYDataset createTsneScatterDataset(IAnalysisDataset d) throws ChartDatasetCreationException {
+    	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
+    	    	
+    	List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
+    	
+    	double[] xpoints = new double[nuclei.size()];
+        double[] ypoints = new double[nuclei.size()];
     	// need to transpose the matrix
-    	for(int i=0; i<r.tSneOutput.length; i++) {
-    		xpoints[i] = r.tSneOutput[i][0];
-    		ypoints[i] = r.tSneOutput[i][1];
+    	for(int i=0; i<nuclei.size(); i++) {
+    		Nucleus n = nuclei.get(i);
+    		xpoints[i] =n.getStatistic(PlottableStatistic.TSNE_X);
+    		ypoints[i] =n.getStatistic(PlottableStatistic.TSNE_Y);
     	}
     	
     	double[][] data = { xpoints, ypoints };
     	
-    	ds.addSeries("tSNE", data);
+    	ds.addSeries("tSNE", data, nuclei);
     	return ds;
     }
     

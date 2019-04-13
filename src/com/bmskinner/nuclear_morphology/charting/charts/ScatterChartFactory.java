@@ -168,8 +168,8 @@ public class ScatterChartFactory extends AbstractChartFactory {
      * @return
      * @throws ChartDatasetCreationException
      */
-    public static JFreeChart createTsneChart(TsneResult r) throws ChartDatasetCreationException {
-    	 XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(r);
+    public static JFreeChart createTsneChart(IAnalysisDataset d) throws ChartDatasetCreationException {
+    	 XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d);
     	 String xLabel = "tSNE 1";
          String yLabel = "tSNE 2";
 

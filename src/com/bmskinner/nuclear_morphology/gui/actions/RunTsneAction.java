@@ -13,6 +13,7 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod.TsneResult;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
@@ -20,6 +21,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
@@ -68,12 +70,14 @@ implements EventListener {
     public void finished() {
 
         try {
-        	TsneResult r = (TsneResult) worker.get();
+        	IAnalysisResult r = worker.get();
+//        	TsneResult r = (TsneResult) worker.get();
 //        	System.out.println(MatrixOps.doubleArrayToPrintString(r.tSneOutput, ", ", 5,5));
         	// make a basic plot and display
         	try {
-				JFreeChart chart = ScatterChartFactory.createTsneChart(r);
+				JFreeChart chart = ScatterChartFactory.createTsneChart(r.getFirstDataset());
 				ChartPanel panel = new ChartPanel(chart);
+				panel.addChartMouseListener(new ImageThumbnailGenerator(panel));
 				
 				JDialog d = new JDialog();
 				d.setLayout(new BorderLayout());
