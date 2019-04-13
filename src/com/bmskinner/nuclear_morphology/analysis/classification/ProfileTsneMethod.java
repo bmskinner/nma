@@ -43,6 +43,7 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 	
 	private static final int OUTPUT_DIMENSIONS = 2;
 	
+	public static final String PROFILE_TYPE_KEY   = "Profile type";
 	public static final String MAX_ITERATIONS_KEY = "Max iterations";
 	public static final String PERPLEXITY_KEY     = "Perplexity";
 	public static final String INITIAL_DIMS_KEY   = "Initial dimensions";
@@ -93,12 +94,16 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private double[][] makeProfileMatrix(List<Nucleus> nuclei) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+	private double[][] makeProfileMatrix(List<Nucleus> nuclei) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		double[][] matrix = new double[nuclei.size()][100];
-
+		
+		ProfileType profileType = ProfileType.fromString(tSneOptions.getString(PROFILE_TYPE_KEY));
+		if(profileType==null)
+			throw new UnavailableProfileTypeException("Cannot find profile type "+profileType);
+		
 		for(int i=0; i<nuclei.size(); i++) {
 			Nucleus n = nuclei.get(i);	
-			IProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			IProfile p = n.getProfile(profileType, Tag.REFERENCE_POINT);
 
 			for (int j = 0; j < 100; j++) {
 				double idx = ((double) j) / 100d;

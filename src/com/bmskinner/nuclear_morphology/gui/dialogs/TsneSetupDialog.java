@@ -1,48 +1,27 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagLayout;
-import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
-import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
-import com.bmskinner.nuclear_morphology.analysis.classification.TreeBuildingMethod;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.stats.DipTester;
 
 /**
  * Analysis setup dialog for tSNE method
@@ -50,17 +29,13 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
  * @since 1.16.0
  *
  */
-public class TsneSetupDialog extends SubAnalysisSetupDialog implements ChangeListener {
+public class TsneSetupDialog extends SubAnalysisSetupDialog {
 
     private static final String DIALOG_TITLE = "t-SNE options";
 
     protected JPanel headingPanel;
-    protected JPanel optionsPanel;
     protected JPanel footerPanel;
     
-    private JSpinner perplexitySpinner;
-    private JSpinner iterationsSpinner;
-
     protected final HashOptions options;
 
     public TsneSetupDialog(final IAnalysisDataset dataset) {
@@ -105,28 +80,49 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog implements ChangeLis
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPanel);
 
-
         headingPanel = createHeader();
         contentPanel.add(headingPanel, BorderLayout.NORTH);
 
         footerPanel = createFooter();
         contentPanel.add(footerPanel, BorderLayout.SOUTH);
 
-        optionsPanel = new JPanel();
+        JPanel optionsPanel = createOptionsPanel();
+        contentPanel.add(optionsPanel, BorderLayout.CENTER);
+    }
+    
+    protected JPanel createOptionsPanel() {
+
+        JPanel panel = new JPanel();
         GridBagLayout layout = new GridBagLayout();
-        optionsPanel.setLayout(layout);
+        panel.setLayout(layout);
         
         List<JLabel> labels = new ArrayList<>();
         List<Component> fields = new ArrayList<>();
+        
+        JComboBox<ProfileType> profileBox = new JComboBox<>(ProfileType.displayValues());
+        profileBox.setSelectedItem(ProfileType.ANGLE);
+        profileBox.setEnabled(true);
+        profileBox.addActionListener(l->options.setString(ProfileTsneMethod.PROFILE_TYPE_KEY,profileBox.getSelectedItem().toString()));
+        
+        labels.add(new JLabel(ProfileTsneMethod.PROFILE_TYPE_KEY));
+        fields.add(profileBox);
 
         SpinnerModel iterationsModel = new SpinnerNumberModel(options.getInt(ProfileTsneMethod.MAX_ITERATIONS_KEY), // initial                                                                           // value
                 500, // min
                 5000, // max
                 25); // step
 
-        iterationsSpinner = new JSpinner(iterationsModel);
+        JSpinner iterationsSpinner = new JSpinner(iterationsModel);
         iterationsSpinner.setEnabled(true);
-        iterationsSpinner.addChangeListener(this);
+        iterationsSpinner.addChangeListener(l->{
+        	try {
+				iterationsSpinner.commitEdit();
+				options.setInt(ProfileTsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
+			} catch (ParseException e) {
+				error("Parse error in spinner", e);
+			}
+        	
+        });
         
         
         labels.add(new JLabel(ProfileTsneMethod.MAX_ITERATIONS_KEY));
@@ -137,29 +133,21 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog implements ChangeLis
                 10000, // max
                 1); // step
 
-        perplexitySpinner = new JSpinner(perplexityModel);
+        JSpinner perplexitySpinner = new JSpinner(perplexityModel);
         perplexitySpinner.setEnabled(true);
 
         labels.add(new JLabel(ProfileTsneMethod.PERPLEXITY_KEY));
         fields.add(perplexitySpinner);
-        perplexitySpinner.addChangeListener(this);
-        
-        addLabelTextRows(labels, fields, layout, optionsPanel);
-        
-
-        contentPanel.add(optionsPanel, BorderLayout.CENTER);
+        perplexitySpinner.addChangeListener(l->{
+        	try {
+				iterationsSpinner.commitEdit();
+				options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
+			} catch (ParseException e) {
+				error("Parse error in spinner", e);
+			}
+        	
+        });        
+        addLabelTextRows(labels, fields, layout, panel);
+        return panel;
     }
-
-    @Override
-    public void stateChanged(ChangeEvent e) {
-
-        if (e.getSource() == iterationsSpinner) {
-            options.setInt(ProfileTsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
-        }
-        
-        if (e.getSource() == perplexitySpinner) {
-            options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
-        }
-    }
-
 }

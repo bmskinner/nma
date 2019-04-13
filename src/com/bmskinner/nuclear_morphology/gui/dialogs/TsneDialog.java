@@ -31,7 +31,6 @@ public class TsneDialog extends LoadingIconDialog {
 
 	private final JButton runTsneBtn = new JButton("Run new t-SNE");
 
-
 	public TsneDialog(final @NonNull IAnalysisDataset dataset) {
 		this.dataset = dataset;
 
