@@ -219,6 +219,9 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	if(type.equals(ColourByType.CLUSTER) && group==null)
     		type = ColourByType.NONE;
     	
+    	if(type.equals(ColourByType.MERGE_SOURCE) && !d.hasMergeSources())
+    		type = ColourByType.NONE;
+    	
     	if(type.equals(ColourByType.MERGE_SOURCE)) {
     		for(IAnalysisDataset mergeSource : d.getMergeSources()) {
     			List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
