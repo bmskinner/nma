@@ -43,7 +43,7 @@ public class TsneDialog extends LoadingIconDialog {
 	public TsneDialog(final @NonNull IAnalysisDataset dataset) {
 		this.dataset = dataset;
 
-		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
+		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel, ImageThumbnailGenerator.COLOUR_GREYSCALE));
 
 		updateTitle();
 		updateChart(ColourByType.NONE, null);
@@ -132,12 +132,14 @@ public class TsneDialog extends LoadingIconDialog {
 		if(!analysisOptions.isPresent()) {
 			warn("Unable to create dialog, no analysis options in dataset");
 			setTitle("");
+			return;
 		}
 
 		Optional<HashOptions> tSNEOptions = analysisOptions.get().getSecondaryOptions(IAnalysisOptions.TSNE);
 		if(!tSNEOptions.isPresent()) {
 			warn("Unable to create dialog, no t-SNE options in dataset");
 			setTitle("");
+			return;
 		}
 		
 		setTitle("tSNE for "+dataset.getName()+

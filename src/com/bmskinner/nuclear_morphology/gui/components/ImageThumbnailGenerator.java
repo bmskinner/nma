@@ -11,9 +11,11 @@ import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.entity.XYItemEntity;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentXYDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -31,11 +33,22 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 	
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
+	public static final boolean COLOUR_RGB = true;
+	public static final boolean COLOUR_GREYSCALE = false;
+	
 	private final ChartPanel chartPanel;
 	private XYItemEntity currentEntity = null; // allow chart to repaint whenever entity changes
+	private boolean isRgb = COLOUR_GREYSCALE; // should we draw the RGB image or greyscale?
 	
-	public ImageThumbnailGenerator(final @NonNull ChartPanel chartPanel) {
+	/**
+	 * Create a thumbnail generator for the given chart panel. Specify if the 
+	 * thumbnails should be greyscale or RGB colour.
+	 * @param chartPanel the chart panel to draw on
+	 * @param isRgb true if the thumbnails should be RGB, false otherwise
+	 */
+	public ImageThumbnailGenerator(final @NonNull ChartPanel chartPanel, boolean isRgb) {
 		this.chartPanel = chartPanel;
+		this.isRgb = isRgb;
 	}
 
 	@Override
@@ -65,14 +78,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 		String key = ds.getSeriesKey(entity.getSeriesIndex()).toString();
 		CellularComponent n = ds.getComponent(key, entity.getItem());
-		
-		// Draw at the entity coordinates, not the mouse position //TODO: there is an offset
-//		double entityX = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
-//		double entityY = ds.getXValue(entity.getSeriesIndex(), entity.getItem());
-//		Rectangle2D dataArea = chartPanel.getScreenDataArea();
-//		int screenX = (int) chartPanel.getChart().getXYPlot().getDomainAxis().valueToJava2D(entityX, dataArea, RectangleEdge.BOTTOM);
-//		int screenY = (int) chartPanel.getChart().getXYPlot().getRangeAxis().valueToJava2D(entityY, dataArea, RectangleEdge.LEFT);
-		
+
 		// Draw at mouse position
 		int screenX = event.getTrigger().getX();
 		int screenY = event.getTrigger().getY();
@@ -81,8 +87,16 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 			return;
 		
 		try {
-			ImageProcessor ip = n.getComponentRGBImage();
-			ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+			
+			Color annotationColour = isRgb ? Color.WHITE : Color.ORANGE;
+			ImageProcessor ip = isRgb ? n.getComponentRGBImage() : n.getComponentImage();
+//			ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
+			
+			ImageAnnotator an = new ImageAnnotator(ip)
+					.annotateOutlineOnCroppedComponent(n, annotationColour, 3);
+			an.resizeKeepingAspect(150, 150);
+			ip = an.toProcessor();
+			
 
 			Graphics2D g2  = (Graphics2D) chartPanel.getGraphics();
 			
@@ -92,7 +106,9 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 			
 			g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
 			Color c = g2.getColor();
-			g2.setColor(Color.WHITE);
+			
+			Color textColour = isRgb ? Color.WHITE : Color.BLACK;
+			g2.setColor(textColour);
 			g2.drawString(n.getSourceFileName(), leftStart+4, topStart+ip.getHeight()-4);
 			g2.setColor(Color.DARK_GRAY);
 			g2.setStroke(new BasicStroke(3));

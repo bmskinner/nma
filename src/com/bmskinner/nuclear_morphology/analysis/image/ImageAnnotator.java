@@ -129,6 +129,12 @@ public class ImageAnnotator extends AbstractImageFilterer {
         return this;
     }
     
+    public ImageAnnotator annotateOutlineOnCroppedComponent(final CellularComponent n, Color outlineColour, int strokeWeight) {
+    	 for(IBorderPoint p : n.getBorderList()) 
+         	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), outlineColour, strokeWeight);
+         return this;
+    }
+    
     /**
      * Draw the outline of the given nucleus and any signals marked.
      * The image is assumed to be cropped to the nuclear border.
@@ -139,9 +145,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotateTagsOnCroppedNucleus(final Nucleus n) {
         
         try {
-            for(IBorderPoint p : n.getBorderList()) {
-            	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
-            }
+        	annotateOutlineOnCroppedComponent(n, Color.BLACK, 3);
             
             annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), Color.ORANGE, RP_POINT_SIZE);
             annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER), Color.BLUE, BORDER_TAG_POINT_SIZE);

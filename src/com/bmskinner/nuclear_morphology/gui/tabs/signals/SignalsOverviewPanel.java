@@ -135,7 +135,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
         panel.add(chartPanel, BorderLayout.CENTER);
         chartPanel.setFillConsensus(false);
         
-        chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
+        chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel, ImageThumbnailGenerator.COLOUR_RGB));
 
         checkboxPanel = createSignalCheckboxPanel();
 
