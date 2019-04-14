@@ -12,12 +12,12 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.ChartPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelect
 public class TsneDialog extends LoadingIconDialog {
 
 	private final IAnalysisDataset dataset;
-	private final ChartPanel chartPanel = new ChartPanel(ScatterChartFactory.createEmptyChart());
+	private final ExportableChartPanel chartPanel = new ExportableChartPanel(ScatterChartFactory.createEmptyChart());
 
 	private final JButton runTsneBtn = new JButton("Run new t-SNE");
 	
