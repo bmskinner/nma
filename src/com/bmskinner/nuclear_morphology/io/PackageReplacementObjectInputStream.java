@@ -151,6 +151,16 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("utility.Version", com.bmskinner.nuclear_morphology.components.generic.Version.class);
 
         /*
+         * Changes from ?1.13.2 to ?1.13.3 - bugfix in 1.15.2
+         */
+        MIGRATION_MAP.put("analysis.ClusteringOptions",
+        		com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.class);
+        MIGRATION_MAP.put("analysis.ClusteringOptions$ClusteringMethod",
+        		com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod.class); 
+        MIGRATION_MAP.put("analysis.ClusteringOptions$HierarchicalClusterMethod",
+        		com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod.class); 
+        
+        /*
          * Changes from 1.13.4 to 1.13.5
          */
 
@@ -190,7 +200,7 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         
         MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.ClusteringOptions$HierarchicalClusterMethod",
         		com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod.class); 
-        
+
         
     }
 
