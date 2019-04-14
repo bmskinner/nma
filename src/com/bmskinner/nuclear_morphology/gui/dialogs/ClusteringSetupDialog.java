@@ -52,8 +52,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
     private static final String DIALOG_TITLE = "Clustering options";
 
-    private static final String CLUSTER_METHOD_LBL = "Cluster method";
-    private static final String CLUSTER_NUMBER_LBL = "Cluster number";
+    private static final String CLUSTER_NUMBER_LBL = "Number of clusters";
     private static final String EM_ITERATIONS_LBL  = "Iterations";
     private static final String EM_CLUSTERING_LBL  = "Expectation maximisation";
     private static final String HC_CLUSTERING_LBL  = "Hierarchical";
@@ -63,13 +62,13 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
     private JPanel   cardPanel;
     private JSpinner clusterNumberSpinner;
+    
+    private JComboBox<HierarchicalClusterMethod> clusterMethodBox;
 
     private JRadioButton clusterHierarchicalButton;
     private JRadioButton clusterEMButton;
 
     private JSpinner iterationsSpinner;
-
-    // private final IMutableClusteringOptions options;
 
     public ClusteringSetupDialog(IAnalysisDataset dataset) {
 
@@ -90,10 +89,10 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         GridBagLayout layout = new GridBagLayout();
         panel.setLayout(layout);
 
-        List<JLabel> labels = new ArrayList<JLabel>();
-        List<Component> fields = new ArrayList<Component>();
+        List<JLabel> labels = new ArrayList<>();
+        List<Component> fields = new ArrayList<>();
 
-        clusterMethodBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
+        clusterMethodBox = new JComboBox<>(HierarchicalClusterMethod.values());
         clusterMethodBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
         clusterMethodBox.addActionListener(this);
 
@@ -124,7 +123,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
             }
         });
 
-        this.addLabelTextRows(labels, fields, layout, panel);
+        addLabelTextRows(labels, fields, layout, panel);
         return panel;
     }
 
@@ -135,8 +134,8 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         GridBagLayout layout = new GridBagLayout();
         panel.setLayout(layout);
 
-        List<JLabel> labels = new ArrayList<JLabel>();
-        List<Component> fields = new ArrayList<Component>();
+        List<JLabel> labels = new ArrayList<>();
+        List<Component> fields = new ArrayList<>();
 
         SpinnerModel model = new SpinnerNumberModel(IClusteringOptions.DEFAULT_EM_ITERATIONS, // initial
                                                                                               // value
@@ -171,7 +170,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPanel);
 
-        profileButtonGroup = new ButtonGroup();
+//        profileButtonGroup = new ButtonGroup();
         statBoxMap = new HashMap<PlottableStatistic, JCheckBox>();
         segmentBoxMap = new HashMap<UUID, JCheckBox>();
 

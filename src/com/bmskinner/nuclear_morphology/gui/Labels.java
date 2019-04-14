@@ -212,7 +212,7 @@ public class Labels {
         /*
          * Clustering and tree building
          */
-        public static final String HIERARCHICAL_CLUSTER_METHOD = "The hierarchical clustering algorithm to run";
+        public static final String HIERARCHICAL_CLUSTER_METHOD = "The distance measure to use";
         public static final String USE_MODALITY_REGIONS        = "Should profile angles with the lowest dip-test p-values "
                 + "be used in the clustering";
         public static final String NUMBER_MODALITY_REGIONS     = "The number of dip-test p-values to "

@@ -65,10 +65,9 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
 public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implements ChangeListener {
 
     private static final String DIALOG_TITLE        = "Tree building options";
-    private static final String CLUSTER_METHOD_LBL  = "Cluster method";
+    protected static final String CLUSTER_METHOD_LBL  = "Distance method";
     private static final String INCLUDE_TSNE_LBL    = "Include tSNE";
     private static final String INCLUDE_PROFILE_LBL = "Include profiles";
-    private static final String INCLUDE_MESH_LBL    = "Include mesh faces";
     private static final String P_VALUE_LBL         = "  p(uni) = ";
 
     protected static final ProfileType DEFAULT_PROFILE_TYPE = ProfileType.ANGLE;
@@ -77,16 +76,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
     protected JPanel optionsPanel;
     protected JPanel footerPanel;
 
-    protected ButtonGroup profileButtonGroup;
-
-    protected JComboBox<HierarchicalClusterMethod> clusterMethodBox;
-
-    protected JCheckBox includeTsneCheckBox;
+//    protected JComboBox<HierarchicalClusterMethod> clusterMethodBox;
     
-    protected JCheckBox includeProfilesCheckBox;
-
-    protected JCheckBox includeMeshCheckBox;
-
     protected Map<PlottableStatistic, JCheckBox> statBoxMap;
 
     protected Map<UUID, JCheckBox> segmentBoxMap;
@@ -152,7 +143,6 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPanel);
 
-        profileButtonGroup = new ButtonGroup();
         statBoxMap = new HashMap<>();
         segmentBoxMap = new HashMap<>();
         // ---------------
@@ -176,7 +166,6 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         try {
             optionsPanel = createOptionsPanel();
         } catch (Exception e) {
-
             error("Error making options panel", e);
         }
 
@@ -204,14 +193,13 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         GridBagLayout layout = new GridBagLayout();
         panel.setLayout(layout);
 
-        List<JLabel> labels = new ArrayList<JLabel>();
-        List<Component> fields = new ArrayList<Component>();
+        List<JLabel> labels = new ArrayList<>();
+        List<Component> fields = new ArrayList<>();
 
-        clusterMethodBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
+        JComboBox<HierarchicalClusterMethod> clusterMethodBox = new JComboBox<>(HierarchicalClusterMethod.values());
         clusterMethodBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
         clusterMethodBox.addActionListener(e -> {
-            HierarchicalClusterMethod m = (HierarchicalClusterMethod) clusterMethodBox.getSelectedItem();
-            options.setHierarchicalMethod(m);
+            options.setHierarchicalMethod( (HierarchicalClusterMethod) clusterMethodBox.getSelectedItem());
         });
 
         JLabel clusterLabel = new JLabel(CLUSTER_METHOD_LBL);
@@ -219,7 +207,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         labels.add(clusterLabel);
         fields.add(clusterMethodBox);
 
-        this.addLabelTextRows(labels, fields, layout, panel);
+        addLabelTextRows(labels, fields, layout, panel);
         return panel;
     }
 
@@ -231,49 +219,41 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         List<JLabel> labels = new ArrayList<>();
         List<Component> fields = new ArrayList<>();
         
-        // Only show the tSNE option if it has been calculated
-    	includeTsneCheckBox = new JCheckBox(EMPTY_STRING);
-    	includeTsneCheckBox.setSelected(IClusteringOptions.DEFAULT_USE_TSNE);
-    	includeTsneCheckBox.addChangeListener(this);
-        if(dataset.getCollection().getNuclei().stream().allMatch(n->n.hasStatistic(PlottableStatistic.TSNE_X))) {
-            labels.add(new JLabel(INCLUDE_TSNE_LBL));
-            fields.add(includeTsneCheckBox);
-        }
+        // Only allow the tSNE option if it has been calculated
+        boolean hasTsne = dataset.getCollection().getNuclei().stream().allMatch(n->n.hasStatistic(PlottableStatistic.TSNE_X));
+        String includeTsneString = hasTsne ? EMPTY_STRING : "  N/A";
+        JCheckBox includeTsneCheckBox = new JCheckBox(includeTsneString);
+        includeTsneCheckBox.setSelected(hasTsne);
+        includeTsneCheckBox.setEnabled(hasTsne);
+        includeTsneCheckBox.addChangeListener(e->{
+        	options.setBoolean(IClusteringOptions.USE_TSNE_KEY, includeTsneCheckBox.isSelected());
+        });
+        labels.add(new JLabel(INCLUDE_TSNE_LBL));
+        fields.add(includeTsneCheckBox); 
         
-        includeProfilesCheckBox = new JCheckBox(EMPTY_STRING);
-        includeProfilesCheckBox.setSelected(IClusteringOptions.DEFAULT_INCLUDE_PROFILE);
-        includeProfilesCheckBox.addChangeListener(this);
-
+        // Only set as default if there are no tSNE results
+        JCheckBox includeProfilesCheckBox = new JCheckBox(EMPTY_STRING);
+        includeProfilesCheckBox.setSelected(!hasTsne);
+        
         labels.add(new JLabel(INCLUDE_PROFILE_LBL));
         fields.add(includeProfilesCheckBox);
 
         // Add selection of profile type
-        for (ProfileType type : ProfileType.values()) {
-            JRadioButton button = new JRadioButton(EMPTY_STRING, type.equals(ProfileType.ANGLE)); // set
-                                                                                                  // angle
-                                                                                                  // selected
-            JLabel label = new JLabel(type.toString());
-            profileButtonGroup.add(button);
-            button.addActionListener(e -> {
-                options.setProfileType(type);
-            });
-
-            labels.add(label);
-            fields.add(button);
-        }
-
-        includeMeshCheckBox = new JCheckBox(EMPTY_STRING);
-        includeMeshCheckBox.setSelected(IClusteringOptions.DEFAULT_INCLUDE_MESH);
-        includeMeshCheckBox.addChangeListener(e -> {
-            options.setIncludeMesh(includeMeshCheckBox.isSelected());
+        JComboBox<ProfileType> profileBox = new JComboBox<>(ProfileType.displayValues());
+        profileBox.setSelectedItem(ProfileType.ANGLE);
+        profileBox.setEnabled(!hasTsne);
+        
+        profileBox.addActionListener(e->options.setProfileType( (ProfileType) profileBox.getSelectedItem()));
+        labels.add(new JLabel("Profile type"));
+        fields.add(profileBox);
+        
+        includeProfilesCheckBox.addChangeListener(e->{
+        	options.setIncludeProfile(includeProfilesCheckBox.isSelected());
+        	profileBox.setEnabled(includeProfilesCheckBox.isSelected());
         });
-        includeMeshCheckBox.setToolTipText(Labels.REQUIRES_CONSENSUS_LBL);
 
-        JLabel meshLabel = new JLabel(INCLUDE_MESH_LBL);
-        meshLabel.setToolTipText(Labels.REQUIRES_CONSENSUS_LBL);
-        labels.add(meshLabel);
-        fields.add(includeMeshCheckBox);
-
+        
+        // Add the individual stats
         DecimalFormat pf = new DecimalFormat("#0.000");
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(dataset.getCollection().getNucleusType())) {
 
@@ -322,35 +302,12 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
             segmentBoxMap.put(s.getID(), box);
         }
 
-        this.addLabelTextRows(labels, fields, layout, panel);
-
-        boolean hasConsensus = dataset.getCollection().hasConsensus();
-        includeMeshCheckBox.setEnabled(hasConsensus); // using consensus for
-                                                      // building attributes and
-                                                      // template mesh
-        meshLabel.setEnabled(hasConsensus);
-
+        addLabelTextRows(labels, fields, layout, panel);
         return panel;
-
     }
 
     @Override
     public void stateChanged(ChangeEvent e) {
-
-        if (e.getSource() == includeProfilesCheckBox) {
-            options.setIncludeProfile(includeProfilesCheckBox.isSelected());
-
-            Enumeration<AbstractButton> buttons = profileButtonGroup.getElements();
-            while (buttons.hasMoreElements()) {
-                AbstractButton b = buttons.nextElement();
-                b.setEnabled(includeProfilesCheckBox.isSelected());
-
-            }
-        }
-        
-        if (e.getSource() == includeTsneCheckBox)
-            options.setBoolean(IClusteringOptions.USE_TSNE_KEY, includeTsneCheckBox.isSelected());
-
 
         try {
 
