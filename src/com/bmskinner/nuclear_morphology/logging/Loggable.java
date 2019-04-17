@@ -31,7 +31,7 @@ public interface Loggable {
 
     public static final String ROOT_LOGGER    = "ProgramLogger";
     public static final Level STACK = new StackLevel();
-
+    
     /**
      * The STACK error level has a level value of 600, so will display ahead of
      * FINE. It is used for reporting errors whilst hiding uninformative
@@ -47,7 +47,7 @@ public interface Loggable {
             super("ERROR", 600);
         }
     }
-
+    
     /**
      * Log the given message to the program log window.
      * 
@@ -101,7 +101,7 @@ public interface Loggable {
      * @param t the exception
      */
     default void stack(Throwable t) {
-        stack(t.getMessage(), t);
+    	Logger.getLogger(ROOT_LOGGER).log(STACK, t.getMessage(), t);
     }
 
     /**
@@ -127,8 +127,7 @@ public interface Loggable {
     /**
      * Log a message to the program log window with Level.FINER
      * 
-     * @param message
-     *            the error messsage
+     * @param message the error message
      */
     default void finer(String message) {
         Logger.getLogger(ROOT_LOGGER).log(Level.FINER, message);
@@ -137,7 +136,7 @@ public interface Loggable {
     /**
      * Log a message to the program log window with Level.FINEST
      * 
-     * @param message the error messsage
+     * @param message the error message
      */
     default void finest(String message) {
         Logger.getLogger(ROOT_LOGGER).log(Level.FINEST, message);
@@ -146,7 +145,7 @@ public interface Loggable {
     /**
      * Log an error to the program log window with Level.WARNING
      * 
-     * @param message the error messsage
+     * @param message the message
      */
     default void warn(String message) {
         Logger.getLogger(ROOT_LOGGER).log(Level.WARNING, message);
@@ -155,10 +154,10 @@ public interface Loggable {
     /**
      * Log a message to the program log window with Level.INFO
      * 
-     * @param message the error messsage
+     * @param message the message
      */
     default void log(String message) {
-        log(Level.INFO, message);
+    	Logger.getLogger(ROOT_LOGGER).log(Level.INFO, message);
     }
 
     /**
@@ -170,6 +169,24 @@ public interface Loggable {
      */
     default void log(Level level, String message, Throwable t) {
         Logger.getLogger(ROOT_LOGGER).log(level, message, t);
+    }
+    
+    /**
+     * Log a message with Level.CONFIG
+     * 
+     * @param message the message
+     */
+    default void debug(String message) {
+    	Logger.getLogger(ROOT_LOGGER).log(Level.CONFIG, message);
+    }
+    
+    /**
+     * Log a message with Level.CONFIG
+     * 
+     * @param message the message
+     */
+    default void config(String message) {
+    	Logger.getLogger(ROOT_LOGGER).log(Level.CONFIG, message);
     }
 
     /**
