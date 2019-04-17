@@ -58,7 +58,7 @@ public class Nuclear_Morphology_Analysis
 	 */
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
-	private static final ThreadManager threadManager = ThreadManager.getInstance();		
+//	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 
 	/**
 	 * Private constructor used when launching as a standalone program
@@ -124,6 +124,9 @@ public class Nuclear_Morphology_Analysis
 			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
 			LOGGER.addHandler(fileHandler);
 			fileHandler.setLevel(Loggable.STACK);
+			config("Program startup");
+			
+			ThreadManager.getInstance();
 			
 		} catch (SecurityException |IOException e ) {
 			stack("Error initialising logger: "+e.getMessage(), e);

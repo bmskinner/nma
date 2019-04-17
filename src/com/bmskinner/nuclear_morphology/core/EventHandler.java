@@ -64,6 +64,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
@@ -295,10 +296,13 @@ public class EventHandler implements Loggable, EventListener {
                 
                 
             if (event.type().equals(SignalChangeEvent.CURATE_DATASET))
-            	return () ->{
-	                CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
-	                d.addDatasetEventListener(EventHandler.this);
-	            };
+            	return () -> {
+            		Runnable r = () -> {
+            			CollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
+            			d.addDatasetEventListener(EventHandler.this);
+            		};
+            		ThreadManager.getInstance().submit(r); // separate from the UI update threads, even though this is a UI window
+            	};
                             
             if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
             	return new ExportCellLocationsAction(selectedDatasets, acceptor, EventHandler.this);
@@ -314,7 +318,7 @@ public class EventHandler implements Loggable, EventListener {
             	};
             
         	if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
-        		return () ->{
+        		return () -> {
         			String workspaceName = event.type().replace(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX, "");
         			IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
         					.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
