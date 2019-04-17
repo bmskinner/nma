@@ -63,19 +63,26 @@ public class ThreadManager implements Loggable {
      */
     private ThreadManager() {
     	int maxThreads = Runtime.getRuntime().availableProcessors();
-    	if(maxThreads>1)
-    		maxThreads-=1; // leave something for the OS, EDT etc.
+    	if(maxThreads>2) // if this is a dual core machine, we can't afford to be nice
+    		maxThreads-=1; // otherwise, leave something for the OS, EDT etc.
     	
-    	int uiThreads = Math.max(1, maxThreads-1);
+    	    	
+    	int maxUiThreads = Math.max(1, maxThreads-1);
+    	int maxMethodThreads = Math.max(1, maxThreads-maxUiThreads);
     	
-    	int maxForkJoinThreads =  Math.max(1, uiThreads-1); // ensure FJPs don't block the ui
-    	
+    	int maxForkJoinThreads =  Math.max(1, maxUiThreads-1); // ensure FJPs don't block the ui
     	System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", String.valueOf(maxForkJoinThreads));
     	
-    	methodExecutorService = new ThreadPoolExecutor(2, 2, keepAliveTime,
+    	// Create the thread pools
+    	methodExecutorService = new ThreadPoolExecutor(maxMethodThreads, maxMethodThreads, keepAliveTime,
                 TimeUnit.MILLISECONDS, methodQueue);
-    	uiExecutorService = new ThreadPoolExecutor(uiThreads, uiThreads, keepAliveTime,
+    	uiExecutorService = new ThreadPoolExecutor(maxUiThreads, maxUiThreads, keepAliveTime,
                 TimeUnit.MILLISECONDS, uiQueue);
+    	
+    	config("Creating thread manager");
+    	config(String.format("Allowed processors: %s", maxThreads));
+    	config(String.format("UI threads: %s", maxUiThreads));
+    	config(String.format("Method threads: %s", maxMethodThreads));
     }
         
     /**
