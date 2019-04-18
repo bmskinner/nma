@@ -55,10 +55,6 @@ public class ImageFilterer extends AbstractImageFilterer {
         super(ip);
     }
 
-    public ImageFilterer(ImageStack st) {
-        super(st);
-    }
-
     /**
      * Apply a binary thresholding to a greyscale processor. Has no effect if the
      * processor is not greyscale.
@@ -73,16 +69,6 @@ public class ImageFilterer extends AbstractImageFilterer {
         return this;
     }
 
-    /**
-     * Run a Kuwahara filter to enhance edges in the image
-     * 
-     * @param stackNumber the image processor in the stack to filter (1-indexed)
-     * @param kernelRadius the radius of the kernel
-     */
-    public ImageFilterer kuwaharaFilter(int stackNumber, int kernelRadius) {
-        ip = st.getProcessor(stackNumber).duplicate();
-        return kuwaharaFilter(kernelRadius);
-    }
 
     /**
      * Run a Kuwahara filter to enhance edges in the image
@@ -102,19 +88,7 @@ public class ImageFilterer extends AbstractImageFilterer {
         ip = result;
         return this;
     }
-    
-    /**
-     * Make any pixel below the threshold equal to zero. Removes background.
-     * 
-     * @param stackNumber the plane in the stack (1-indexed)
-     * @param threshold the minimum intensity to allow
-     * @return this filterer
-     */
-    public ImageFilterer setBlackLevel(int stackNumber, int threshold) {
-        ip = st.getProcessor(stackNumber);
-        ip = setBlackLevel(threshold).ip;
-        return this;
-    }
+
 
     /**
      * Make any pixel below the threshold equal to zero. Removes background.
@@ -134,19 +108,6 @@ public class ImageFilterer extends AbstractImageFilterer {
     /**
      * Make any pixel above the threshold equal to the maximum intensity.
      * 
-     * @param stackNumber the plane in the stack (1-indexed)
-     * @param threshold the maximum intensity
-     * @return this filterer
-     */
-    public ImageFilterer setWhiteLevel(int stackNumber, int threshold) {
-        ip = st.getProcessor(stackNumber);
-        ip = setWhiteLevel(threshold).ip;
-        return this;
-    }
-
-    /**
-     * Make any pixel above the threshold equal to the maximum intensity.
-     * 
      * @param threshold the maximum intensity
      * @return this filterer
      */
@@ -159,21 +120,6 @@ public class ImageFilterer extends AbstractImageFilterer {
         return new ImageFilterer(result);
     }
 
-    /**
-     * The chromocentre can cause 'skipping' of the edge detection from the edge
-     * to the interior of the nucleus. Make any pixel over threshold equal
-     * threshold to remove internal structures
-     * 
-     * @param stackNumber the plane in the stack (starts at 1)
-     * @param threshold the maximum intensity to allow
-     * @return this filterer
-     */
-    public ImageFilterer setMaximumPixelValue(int stackNumber, int threshold) {
-        ip = st.getProcessor(stackNumber);
-        ImageProcessor result = setMaximumPixelValue(threshold).ip;
-        ip = result;
-        return this;
-    }
 
     /**
      * The chromocentre can cause 'skipping' of the edge detection from the edge
@@ -196,20 +142,7 @@ public class ImageFilterer extends AbstractImageFilterer {
         ip = result;
         return this;
     }
-    
-    /**
-     *  Make any pixel value below the threshold equal to the threshold.
-     * 
-     * @param stackNumber the plane in the stack (1-indexed)
-     * @param threshold the minimum pixel value
-     * @return this filterer
-     */
-    public ImageFilterer setMinimumPixelValue(int stackNumber, int threshold) {
-        ip = st.getProcessor(stackNumber);
-        ImageProcessor result = setMinimumPixelValue(threshold).ip;
-        ip = result;
-        return this;
-    }
+
 
     /**
      * Make any pixel value below the threshold equal to the threshold.

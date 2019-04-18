@@ -52,19 +52,15 @@ public class FishRemappingFinder extends VoidFinder {
     @Override
     public Void findInImage(File imageFile) throws ImageImportException {
 
-        ImageStack stack;
-        try {
-            stack = new ImageImporter(imageFile).importToStack();
-        } catch (ImageImportException e) {
-            error("Error importing file " + imageFile.getAbsolutePath(), e);
-            return null;
-        }
-
         // Import the image as a stack
         String imageName = imageFile.getName();
 
         finest("Converting image");
-        ImageProcessor openProcessor = new ImageConverter(stack).convertToRGBGreyscale().invert().toProcessor();
+        ImageProcessor openProcessor = new ImageImporter(imageFile).toConverter()
+        		.convertToRGBGreyscale()
+        		.invert()
+        		.convertToColorProcessor()
+        		.toProcessor();
 
         fireDetectionEvent(openProcessor.duplicate(), "Original image");
 
@@ -81,15 +77,7 @@ public class FishRemappingFinder extends VoidFinder {
             return null;
         }
 
-        ImageStack fishStack;
-        try {
-            fishStack = new ImageImporter(fishImageFile).importToStack();
-        } catch (ImageImportException e) {
-            error("Error importing FISH image file " + fishImageFile.getAbsolutePath(), e);
-            return null;
-        }
-
-        ImageProcessor fp = new ImageConverter(fishStack).convertToRGB().toProcessor();
+        ImageProcessor fp = new ImageImporter(fishImageFile).importToColorProcessor();
         fireDetectionEvent(fp.duplicate(), "FISH image");
 
         fireProgressEvent();

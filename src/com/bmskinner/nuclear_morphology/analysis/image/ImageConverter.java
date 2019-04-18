@@ -43,10 +43,6 @@ public class ImageConverter extends AbstractImageFilterer {
         super(ip);
     }
 
-    public ImageConverter(@NonNull ImageStack st) {
-        super(st);
-    }
-
     /**
      * Create a blank byte processor image of the specified dimensions
      * 
@@ -79,15 +75,6 @@ public class ImageConverter extends AbstractImageFilterer {
      * @return an ImageConverter containing the converted image
      */
     public ImageConverter convertToRGB() {
-
-        // Handle stacks first
-        if (st != null) {
-            if (st.getSize() == 1)
-                return makeGreyScaleImage();
-            if (st.getSize() > 1)
-                return mergeStack();
-        }
-
         if (ip != null)
             return convertToRGBGreyscale(ip);
         return this;
@@ -99,14 +86,6 @@ public class ImageConverter extends AbstractImageFilterer {
      * @return
      */
     public ImageConverter convertToRGBGreyscale() {
-        // Handle stacks first
-        if (st != null) {
-            if (st.getSize() == 1)
-                return makeGreyScaleImage();
-            if (st.getSize() > 1) 
-                return makeGreyRGBImage(ImageImporter.COUNTERSTAIN); 
-        }
-
         if (ip != null) {
         	
         	if(ip instanceof ColorProcessor)
@@ -117,17 +96,6 @@ public class ImageConverter extends AbstractImageFilterer {
         return this;
     }
 
-    /**
-     * Create a greyscale RGB image from a single processor in a stack
-     * 
-     * @param stackNumber the stack of the image to convert
-     * @return
-     */
-    public ImageConverter convertToGreyscale(int stackNumber) {
-        if (st != null)
-            return makeGreyRGBImage(stackNumber);
-        return this;
-    }
 
     /**
      * Invert the stored image. If a stack is present, invert slice 1
@@ -137,11 +105,6 @@ public class ImageConverter extends AbstractImageFilterer {
      */
     @Override
 	public ImageConverter invert() {
-        // Handle stacks first
-        if (st != null) {
-            ip = st.getProcessor(ImageImporter.COUNTERSTAIN);
-        }
-
         if (ip != null) {
             ip.invert();
         }
@@ -149,51 +112,16 @@ public class ImageConverter extends AbstractImageFilterer {
     }
 
     /**
-     * Invert the stored stack image slice
-     * 
-     * @param stack
-     * @return
-     */
-    public ImageConverter invert(int stackNumber) {
-        // Handle stacks first
-        if (st != null) {
-            ip = st.getProcessor(stackNumber);
-            ip.invert();
-        }
-
-        return this;
-    }
-
-    /**
      * Add a border of pixels to the image. The image will be centred in the new
      * image. The border will be filled with the background fill of the original
      * image
      * 
-     * @param borderWidth
-     *            the number of pixels to add to each side of the image
+     * @param borderWidth the number of pixels to add to each side of the image
      * @return the converter
      */
     public ImageConverter addBorder(int borderWidth) {
-
-        if (st == null) {
-            ip = addBorder(ip, borderWidth);
-        } else {
-
-            int newW = st.getWidth() + (2 * borderWidth);
-            int newH = st.getHeight() + (2 * borderWidth);
-
-            ImageStack newSt = new ImageStack(newW, newH);
-            for (int i = 1; i <= st.getSize(); i++) {
-                ImageProcessor p = st.getProcessor(i);
-
-                p = addBorder(p, borderWidth);
-                newSt.addSlice(p);
-            }
-            st = newSt;
-
-        }
-
-        return this;
+    	ip = addBorder(ip, borderWidth);
+    	return this;
     }
 
     /**
@@ -201,10 +129,8 @@ public class ImageConverter extends AbstractImageFilterer {
      * image. The border will be filled with the background fill of the original
      * image
      * 
-     * @param ip
-     *            the image processor to add the border to
-     * @param borderWidth
-     *            the number of pixels to add to each side of the image
+     * @param ip the image processor to add the border to
+     * @param borderWidth the number of pixels to add to each side of the image
      * @return the converter
      */
     private ImageProcessor addBorder(ImageProcessor ip, int borderWidth) {
@@ -242,47 +168,4 @@ public class ImageConverter extends AbstractImageFilterer {
 
         return new ImageConverter(result.getProcessor());
     }
-
-    /**
-     * Given a stack, make an RGB greyscale image from the given stack
-     * 
-     * @param stack
-     * @return a new ImagePlus, or null if the stack was null
-     */
-    private ImageConverter makeGreyRGBImage(int stackNumber) {
-        if (st != null)
-        	return convertToRGBGreyscale(st.getProcessor(stackNumber));
-		return this;
-    }
-
-    /**
-     * Convert a single-plane stack to RGB.
-     * 
-     * @param stack
-     * @return the image
-     */
-    private ImageConverter makeGreyScaleImage() {
-        return makeGreyRGBImage(ImageImporter.COUNTERSTAIN);
-    }
-
-    /**
-     * Convert a multi-plane stack to RGB. Only the first two signal channels
-     * are used.
-     * 
-     * @param stack the stack
-     * @return an RGB image
-     */
-    private ImageConverter mergeStack() {
-
-        ImagePlus[] images = new ImagePlus[3];
-        images[ImageImporter.RGB_RED] = new ImagePlus("red", st.getProcessor(ImageImporter.FIRST_SIGNAL_CHANNEL));
-        images[ImageImporter.RGB_GREEN] = new ImagePlus("green", st.getProcessor(3));
-        images[ImageImporter.RGB_BLUE] = new ImagePlus("blue", st.getProcessor(ImageImporter.COUNTERSTAIN));
-
-        ImagePlus result = RGBStackMerge.mergeChannels(images, false);
-
-        result = result.flatten();
-        return new ImageConverter(result.getProcessor());
-    }
-
 }

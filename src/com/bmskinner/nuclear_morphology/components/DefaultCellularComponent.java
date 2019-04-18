@@ -465,12 +465,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         int stack = ImageImporter.rgbToStack(getChannel());
 
         try {
-        	ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
-        	ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
-        	ip.invert();
+//        	ImageStack imageStack = new ImageImporter(getSourceFile()).importImage(getChannel());
+//        	ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
+//        	ip.invert();
 
+        	ip = new ImageImporter(getSourceFile()).importImage(getChannel());
+        	ip = new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
+
+        	
         	imageRef = new WeakReference <>(ip);
         	return ip;
+        	
+        	 
 
         } catch (ImageImportException e) {
         	stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);

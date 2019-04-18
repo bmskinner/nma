@@ -111,16 +111,14 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         ICannyOptions cannyOptions = nuclOptions.getCannyOptions();
 
-        int stackNumber = ImageImporter.rgbToStack(nuclOptions.getChannel());
-
         ImageImporter importer = new ImageImporter(imageFile);
-
+        
         ImageProcessor original = importer.toConverter()
-                .convertToGreyscale(stackNumber)
+        		.convertToRGBGreyscale()
                 .invert()
                 .toProcessor();
 
-        ImageProcessor ip = importer.importToStack().getProcessor(stackNumber);
+        ImageProcessor ip = importer.importImage(nuclOptions.getChannel());
 
         ImageFilterer filt = new ImageFilterer(ip.duplicate());
         if (cannyOptions.isUseKuwahara()) {

@@ -321,9 +321,12 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             int stack = ImageImporter.rgbToStack(getChannel());
 
             try {
-                ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
-                ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
-                ip.invert();
+//                ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
+//                ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
+//                ip.invert();
+            	
+            	ip = new ImageImporter(getSourceFile()).importImage(getChannel());
+            	ip = new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
 
                 imageRef = new SoftReference<ImageProcessor>(ip);
 

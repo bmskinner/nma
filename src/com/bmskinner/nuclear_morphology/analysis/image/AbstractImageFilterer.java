@@ -52,7 +52,6 @@ public abstract class AbstractImageFilterer implements Loggable {
     private static final int RGB_BLACK = 0;
     protected static final int BYTE_MAX  = 255;
     protected ImageProcessor ip        = null;
-    protected ImageStack     st        = null;
 
     /**
      * Construct with an image processor
@@ -73,22 +72,12 @@ public abstract class AbstractImageFilterer implements Loggable {
     }
 
     /**
-     * Construct from a stack
-     * 
-     * @param st the image stack
-     */
-    public AbstractImageFilterer(final ImageStack st) {
-        this.st = st;
-    }
-
-    /**
      * Duplicate the filterer - use the template processor and stack
      * 
      * @param f the template filterer
      */
     public AbstractImageFilterer(final AbstractImageFilterer f) {
         this.ip = f.ip;
-        this.st = f.st;
     }
 
     /**
@@ -209,17 +198,6 @@ public abstract class AbstractImageFilterer implements Loggable {
     }
 
     /**
-     * Get the current image stack
-     * 
-     * @return
-     */
-    public ImageStack toStack() {
-        if (st == null)
-            throw new NullPointerException("Filterer does not contain an image stack");
-        return st;
-    }
-
-    /**
      * Create an image icon from the current processor
      * 
      * @return
@@ -236,11 +214,9 @@ public abstract class AbstractImageFilterer implements Loggable {
      * @return
      */
     public BufferedImage toBufferedImage() {
-    	if (ip==null && st==null)
+    	if (ip==null) // && st==null
             throw new NullPointerException("Filterer does not contain an image processor");
-    	if(ip!=null)
-    		return ip.getBufferedImage();
-    	return st.getProcessor(1).getBufferedImage();
+    	return ip.getBufferedImage();
     }
     
     /**
@@ -480,50 +456,6 @@ public abstract class AbstractImageFilterer implements Loggable {
      */
     public static ImageProcessor rescaleRGBImageIntensity(final ImageProcessor ip) {
     	return rescaleRGBImageIntensity(ip, 0, 255);
-//    	if (ip == null)
-//            throw new IllegalArgumentException("Image cannot be null");
-//    	
-//    	double rMax = 0, gMax=0, bMax=0;
-//    	double rMin = 255, gMin=255, bMin=255;
-//        ImageProcessor result = new ColorProcessor(ip.getWidth(), ip.getHeight());
-//        
-//        for (int i = 0; i < ip.getPixelCount(); i++) {
-//            int pixel = ip.get(i);
-//            
-//            int[] rgb = intToRgb(pixel);
-//
-//            rMax = Math.max(rgb[0], rMax);
-//            gMax = Math.max(rgb[1], gMax);
-//            bMax = Math.max(rgb[2], bMax);
-//            
-//            rMin = Math.min(rgb[0], rMin);
-//            gMin = Math.min(rgb[1], gMin);
-//            bMin = Math.min(rgb[2], bMin);
-//        }
-//
-//
-//        double rRange = rMax - rMin;
-//        double gRange = gMax - gMin;
-//        double bRange = bMax - bMin;
-//
-//        // Adjust each pixel to the proportion in range 0-255
-//        for (int i = 0; i < ip.getPixelCount(); i++) {
-//            int pixel = ip.get(i);
-//            int[] rgb = intToRgb(pixel);
-//            
-//            double rProp = (rgb[0] - rMin) / rRange;
-//            double gProp = (rgb[1] - gMin) / gRange;
-//            double bProp = (rgb[2] - bMin) / bRange;
-//
-//            
-//            int rNew = (int) (255 * rProp);
-//            int gNew = (int) (255 * gProp);
-//            int bNew = (int) (255 * bProp);
-//            
-//            int newPixel = rgbToInt(rNew, gNew, bNew);
-//            result.set(i, newPixel);
-//        }
-//        return result;
     }
 
     /**

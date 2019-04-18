@@ -20,13 +20,13 @@ import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
-import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 
 /**
@@ -176,8 +176,9 @@ public class ImageImporter implements Loggable, Importer {
      * @return
      * @throws ImageImportException
      */
-    public com.bmskinner.nuclear_morphology.analysis.image.ImageConverter toConverter() throws ImageImportException {
-        return new com.bmskinner.nuclear_morphology.analysis.image.ImageConverter(importToStack());
+    public ImageConverter toConverter() throws ImageImportException {
+    	ImageProcessor ip = importToColorProcessor();
+        return new ImageConverter(ip);
     }
 
     /**
@@ -294,7 +295,7 @@ public class ImageImporter implements Loggable, Importer {
     private ImageStack convert16bitGrey(ImagePlus image) {
         // this is the ij.process.ImageConverter, not my
         // analysis.image.ImageConverter
-        ImageConverter converter = new ImageConverter(image);
+    	ij.process.ImageConverter converter = new ij.process.ImageConverter(image);
         converter.convertToGray8();
         return convertGreyscale(image);
     }

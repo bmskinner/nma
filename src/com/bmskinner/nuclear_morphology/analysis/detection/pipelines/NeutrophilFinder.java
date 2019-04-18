@@ -236,7 +236,7 @@ public class NeutrophilFinder extends CellFinder {
     private ImageProcessor detectCytoplasmByWatershed(File imageFile)
             throws ImageImportException {
 
-        ImageProcessor ip = new ImageImporter(imageFile).toConverter().convertToGreyscale(1).toProcessor();
+        ImageProcessor ip = new ImageImporter(imageFile).toConverter().convertToRGBGreyscale().toProcessor();
         // fireDetectionEvent(ip.duplicate(), "Input");
 
         int dilationRadius = 3;
