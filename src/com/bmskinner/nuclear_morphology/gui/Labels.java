@@ -101,10 +101,12 @@ public class Labels {
         public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
         public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
         public static final String POST_FISH_MAPPING_LBL  = "Post-FISH mapping";
+        public static final String ADD_CHILD_CELLS_LBL    = "Child collection from file";
+        public static final String ADD_CLUSTER_FILE_LBL   = "Cluster group from file";
+        
         
         public static final String CHANGE_SCALE_LBL       = "Set scale";
-        public static final String RELOCATE_CELLS_LBL     = "Relocate cells";
-        
+             
         public static final String EXPORT                 = "Export...";
         public static final String EXPORT_STATS           = "Nuclear statistics";
         public static final String EXPORT_SIGNALS         = "Nuclear signal statistics";

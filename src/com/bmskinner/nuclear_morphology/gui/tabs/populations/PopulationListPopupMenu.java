@@ -60,13 +60,15 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 	private PopupMenuItem exportCellImagesItem;
 	
 	private PopupMenuItem saveMenuItem;
-	private PopupMenuItem relocateMenuItem;
+
 
 	private PopupMenuItem replaceFolderMenuItem;
 
 	private PopupMenu addSubMenu;
 	private PopupMenuItem addNuclearSignalMenuItem;
 	private PopupMenuItem fishRemappinglMenuItem;
+	private PopupMenuItem relocateMenuItem;
+	private PopupMenuItem clusterFileMenuItem;
 	
     public PopulationListPopupMenu() {
         super();
@@ -148,7 +150,7 @@ public void createButtons() {
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
-        relocateMenuItem = fact.makeItem(Labels.Populations.RELOCATE_CELLS_LBL, 
+        relocateMenuItem = fact.makeItem(Labels.Populations.ADD_CHILD_CELLS_LBL, 
         		SignalChangeEvent.RELOCATE_CELLS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
@@ -222,11 +224,19 @@ public void createButtons() {
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
+        clusterFileMenuItem = fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL, 
+        		SignalChangeEvent.CLUSTER_FROM_FILE, 
+        		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
+        		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
+				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+        
         addSubMenu = fact.makeMenu(Labels.Populations.ADD, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         addSubMenu.add(addNuclearSignalMenuItem);
         addSubMenu.add(fishRemappinglMenuItem);
+        addSubMenu.add(relocateMenuItem);
+        addSubMenu.add(clusterFileMenuItem);
         
         replaceFolderMenuItem = fact.makeItem(Labels.Populations.CHANGE_FOLDER_LBL, 
         		SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER, 
@@ -255,10 +265,6 @@ public void createButtons() {
     	addSeparator();
 
     	add(saveMenuItem);
-
-    	addSeparator();
-
-    	add(relocateMenuItem);
 
     	addSeparator();
 

@@ -52,6 +52,8 @@ public class SignalChangeEvent extends EventObject {
     public static final String NEW_WORKSPACE               = "NewWorkspace";
     
     public static final String ADD_NUCLEAR_SIGNAL          = "AddNuclearSignalAction";
+    public static final String CLUSTER_FROM_FILE           = "AddClusterFromFileAction";
+
     public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";
     public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
     public static final String EXTRACT_SUBSET              = "Extract subset";

@@ -251,6 +251,9 @@ public class EventHandler implements Loggable, EventListener {
 
             if (event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL))
                 return new AddNuclearSignalAction(selectedDataset, acceptor, EventHandler.this);
+            
+            if (event.type().equals(SignalChangeEvent.CLUSTER_FROM_FILE))
+                return new ClusterFileAssignmentAction(selectedDataset, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.POST_FISH_MAPPING))
                 return new FishRemappingAction(selectedDatasets, acceptor, EventHandler.this);
@@ -541,9 +544,6 @@ public class EventHandler implements Loggable, EventListener {
                 log("Running t-SNE");
                 return new RunTsneAction(event.firstDataset(), acceptor, EventHandler.this);
             }
-
-            if (event.method().equals(DatasetEvent.CLUSTER_FROM_FILE))
-                return new ClusterFileAssignmentAction(event.firstDataset(), acceptor, EventHandler.this);
 
             if (event.method().equals(DatasetEvent.BUILD_TREE)) {
                 log("Building a tree from dataset");
