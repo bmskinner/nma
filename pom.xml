@@ -388,16 +388,8 @@
 			<artifactId>jebl</artifactId>
 			<version>0.4</version>
 		</dependency>
-		<dependency>
-			<groupId>skeleton_analysis</groupId>
-			<artifactId>skeleton_analysis</artifactId>
-			<version>2.0.4</version>
-		</dependency>
-		<dependency>
-			<groupId>mmorpho</groupId>
-			<artifactId>mmorpho</artifactId>
-			<version>1.0</version>
-		</dependency>
+
+
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>

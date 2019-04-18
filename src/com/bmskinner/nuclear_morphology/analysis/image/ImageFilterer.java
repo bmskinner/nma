@@ -37,8 +37,9 @@ import ij.ImageStack;
 import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
-import mmorpho.MorphoProcessor;
-import mmorpho.StructureElement;
+import inra.ijpb.morphology.Morphology;
+import inra.ijpb.morphology.Strel;
+import inra.ijpb.morphology.strel.DiskStrel;
 
 /**
  * Provides easy access to the filters used for nucleus detection, such as
@@ -463,20 +464,14 @@ public class ImageFilterer extends AbstractImageFilterer {
      */
     public ImageFilterer close(int closingRadius) {
 
-        ByteProcessor result = ip.convertToByteProcessor();
-
-        int shift = 1;
-        int[] offset = { 0, 0 }; // no offsets to the structure element
-        int elType = StructureElement.CIRCLE; // circle
-
-        StructureElement se = new StructureElement(elType, shift, closingRadius, offset);
-        MorphoProcessor mp = new MorphoProcessor(se);
-
-        /* Better way of closing. Dilate, fill, then erode */
-        mp.dilate(result);
-        fill(result);
-        mp.erode(result);
+    	// using the MorphoLibJ library
+        ImageProcessor result = ip.convertToByteProcessor();
         
+        Strel strel = DiskStrel.fromRadius(closingRadius);
+        
+        result = Morphology.dilation(result, strel);
+        fill(result);
+        result = Morphology.erosion(result, strel);
         ip = result;
         return this;
     }
@@ -489,17 +484,12 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return this filterer with a new ByteProcessor containing the closed image
      */
     public ImageFilterer dilate(int amount) {
-
-        ByteProcessor result = ip.convertToByteProcessor();
-
-        int shift = 1;
-        int[] offset = { 0, 0 }; // no offsets to the structure element
-        int elType = StructureElement.CIRCLE; // circle
-
-        StructureElement se = new StructureElement(elType, shift, amount, offset);
-        MorphoProcessor mp = new MorphoProcessor(se);
-
-        mp.dilate(result);
+    	// using the MorphoLibJ library
+        ImageProcessor result = ip.convertToByteProcessor();
+        
+        Strel strel = DiskStrel.fromRadius(amount);
+        
+        result = Morphology.dilation(result, strel);
         ip = result;
         return this;
     }
