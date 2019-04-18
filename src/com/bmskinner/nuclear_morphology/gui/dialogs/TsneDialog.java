@@ -55,7 +55,8 @@ public class TsneDialog extends LoadingIconDialog {
 		
 		pack();
 		setLocationRelativeTo(null);
-		setVisible(true);				
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setVisible(true);	
 	}
 	
 	public enum ColourByType {

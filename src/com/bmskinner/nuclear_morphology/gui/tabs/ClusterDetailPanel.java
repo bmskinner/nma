@@ -262,7 +262,7 @@ public class ClusterDetailPanel extends DetailPanel {
         if (!hasDatasets())
             return null;
 
-        List<JComponent> result = new ArrayList<JComponent>();
+        List<JComponent> result = new ArrayList<>();
         Dimension fillerSize = new Dimension(10, 5);
 
         for (final IAnalysisDataset d : getDatasets()) {
@@ -272,14 +272,13 @@ public class ClusterDetailPanel extends DetailPanel {
                 if (g.hasTree()) {
                     JButton button = new JButton(SHOW_TREE_LBL);
                     button.addActionListener(e -> {
-                        Thread thr = new Thread() {
-                            public void run() {
-                                ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, g);
-                                clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
-                                clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
-                            }
-                        };
-                        thr.start();
+                    	
+                    	Runnable r = () ->{
+                    		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, g);
+                            clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
+                            clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
+                    	};
+                        new Thread(r).start();;
                     });
                     result.add(button);
                 } else {
@@ -327,8 +326,11 @@ public class ClusterDetailPanel extends DetailPanel {
     protected void updateMultiple() {
         setEnabled(true);
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(clusterDetailsTable)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new ClusterTableCellRenderer()).build();
+        TableOptions options = new TableOptionsBuilder()
+        		.setDatasets(getDatasets())
+        		.setTarget(clusterDetailsTable)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new ClusterTableCellRenderer())
+                .build();
 
         setTable(options);
 
