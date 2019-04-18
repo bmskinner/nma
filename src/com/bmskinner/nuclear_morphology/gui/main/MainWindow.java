@@ -67,6 +67,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class MainWindow extends AbstractMainWindow {
 
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
