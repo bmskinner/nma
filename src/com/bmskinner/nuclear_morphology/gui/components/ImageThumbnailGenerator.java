@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentXYDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -85,38 +86,42 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 		if(n==null)
 			return;
-		
-		try {
-			
-			Color annotationColour = isRgb ? Color.WHITE : Color.ORANGE;
-			ImageProcessor ip = isRgb ? n.getComponentRGBImage() : n.getComponentImage();
-//			ip = new ImageFilterer(ip).resizeKeepingAspect(150, 150).toProcessor();
-			
-			ImageAnnotator an = new ImageAnnotator(ip)
-					.annotateOutlineOnCroppedComponent(n, annotationColour, 3);
-			an.resizeKeepingAspect(150, 150);
-			ip = an.toProcessor();
-			
 
-			Graphics2D g2  = (Graphics2D) chartPanel.getGraphics();
-			
-			// ensure the image is positioned within the bounds of the chart panel
-			int topStart = screenY+ip.getHeight()>chartPanel.getHeight() ? screenY-ip.getHeight() : screenY;
-			int leftStart = screenX+ip.getWidth()>chartPanel.getWidth() ? screenX-ip.getWidth() : screenX;
-			
-			g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
-			Color c = g2.getColor();
-			
-			Color textColour = isRgb ? Color.WHITE : Color.BLACK;
-			g2.setColor(textColour);
-			g2.drawString(n.getSourceFileName(), leftStart+4, topStart+ip.getHeight()-4);
-			g2.setColor(Color.DARK_GRAY);
-			g2.setStroke(new BasicStroke(3));
-			g2.drawRect(leftStart, topStart, ip.getWidth(), ip.getHeight());
-			g2.setColor(c);
+		Color annotationColour = isRgb ? Color.WHITE : Color.ORANGE;
+		ImageProcessor ip;
+		try {
+			ip = isRgb ? n.getComponentRGBImage() : n.getComponentImage();
 		} catch(UnloadableImageException e) {
-			LOGGER.log(Loggable.STACK, "Error making image thumbnail", e);
+			// No image, but we can still draw the outline
+			ip = isRgb ? ImageAnnotator.createBlackColorProcessor(n.getPosition()[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER*2, 
+					n.getPosition()[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER*2) :
+						ImageAnnotator.createWhiteColorProcessor(n.getPosition()[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER*2, 
+								n.getPosition()[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER*2);
 		}
+
+
+		ImageAnnotator an = new ImageAnnotator(ip)
+				.annotateOutlineOnCroppedComponent(n, annotationColour, 3);
+		an.resizeKeepingAspect(150, 150);
+		ip = an.toProcessor();
+
+
+		Graphics2D g2  = (Graphics2D) chartPanel.getGraphics();
+
+		// ensure the image is positioned within the bounds of the chart panel
+		int topStart = screenY+ip.getHeight()>chartPanel.getHeight() ? screenY-ip.getHeight() : screenY;
+		int leftStart = screenX+ip.getWidth()>chartPanel.getWidth() ? screenX-ip.getWidth() : screenX;
+
+		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
+		Color c = g2.getColor();
+
+		Color textColour = isRgb ? Color.WHITE : Color.BLACK;
+		g2.setColor(textColour);
+		g2.drawString(n.getSourceFileName(), leftStart+4, topStart+ip.getHeight()-4);
+		g2.setColor(Color.DARK_GRAY);
+		g2.setStroke(new BasicStroke(3));
+		g2.drawRect(leftStart, topStart, ip.getWidth(), ip.getHeight());
+		g2.setColor(c);
 	}
 
 }
