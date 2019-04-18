@@ -301,7 +301,7 @@ public class EventHandler implements Loggable, EventListener {
             			CollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
             			d.addDatasetEventListener(EventHandler.this);
             		};
-            		ThreadManager.getInstance().submit(r); // separate from the UI update threads, even though this is a UI window
+            		new Thread(r).start();// separate from the UI and method threads - we must not block them
             	};
                             
             if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
