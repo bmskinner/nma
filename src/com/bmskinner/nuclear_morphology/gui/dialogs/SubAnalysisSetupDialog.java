@@ -16,10 +16,13 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
+import java.awt.Frame;
+
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
@@ -39,15 +42,14 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
     protected final IAnalysisDataset dataset;
 
     /**
-     * Construct with a main program window to listen for actions, and a dataset
+     * Construct with a program window to listen for actions, and a dataset
      * to operate on
      * 
      * @param mw
      * @param dataset
      */
-    public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
-        super(mw, true);
-        fine("Making sub-analysis setup dialog");
+    public SubAnalysisSetupDialog(final Frame owner, final IAnalysisDataset dataset, final String title) {
+        super(owner, true);
         this.dataset = dataset;
         this.setTitle(title);
         this.setModal(true);
