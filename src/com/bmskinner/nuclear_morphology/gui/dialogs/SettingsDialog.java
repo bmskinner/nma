@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -88,9 +89,19 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
         super(owner, modal);
         this.setLocationRelativeTo(null);
     }
+    
+    /**
+     * Create an empty header panel
+     * @return
+     */
+    protected JPanel createHeader() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        return panel;
+    }
 
     /**
-     * Create the panel footer, with OK and Cancel option buttons
+     * Create a panel footer, with OK and Cancel option buttons
      * 
      * @return
      */

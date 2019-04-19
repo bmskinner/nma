@@ -72,10 +72,6 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
     protected static final ProfileType DEFAULT_PROFILE_TYPE = ProfileType.ANGLE;
 
-    protected JPanel headingPanel;
-    protected JPanel optionsPanel;
-    protected JPanel footerPanel;
-
 //    protected JComboBox<HierarchicalClusterMethod> clusterMethodBox;
     
     protected Map<PlottableStatistic, JCheckBox> statBoxMap;
@@ -124,13 +120,6 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
     }
 
-    protected JPanel createHeader() {
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        return panel;
-    }
-
     @Override
     public IAnalysisMethod getMethod() {
     	return new TreeBuildingMethod(dataset, options);
@@ -138,38 +127,25 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
     @Override
     protected void createUI() {
-
-        contentPanel.setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPanel);
-
         statBoxMap = new HashMap<>();
         segmentBoxMap = new HashMap<>();
-        // ---------------
-        // panel for text labels
-        // ---------------
-        headingPanel = createHeader();
-        contentPanel.add(headingPanel, BorderLayout.NORTH);
-        // ---------------
-        // buttons at bottom
-        // ---------------
-        footerPanel = createFooter();
-        contentPanel.add(footerPanel, BorderLayout.SOUTH);
+
+        getContentPane().add(createHeader(), BorderLayout.NORTH);
+    	getContentPane().add(createFooter(), BorderLayout.SOUTH);
 
         // ---------------
         // options in middle
         // ---------------
-        optionsPanel = new JPanel();
+        JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BorderLayout());
 
-        JPanel optionsPanel = null;
         try {
             optionsPanel = createOptionsPanel();
         } catch (Exception e) {
             error("Error making options panel", e);
         }
 
-        contentPanel.add(optionsPanel, BorderLayout.CENTER);
+        getContentPane().add(optionsPanel, BorderLayout.CENTER);
     }
 
     private JPanel createOptionsPanel() {

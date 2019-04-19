@@ -166,12 +166,6 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             packAndDisplay();
         }
 
-        protected JPanel createHeader() {
-            JPanel panel = new JPanel();
-            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            return panel;
-        }
-
         @Override
         public IAnalysisMethod getMethod() {
         	return new ShellAnalysisMethod(dataset, o);
@@ -180,17 +174,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
         @Override
         protected void createUI() {
 
-            contentPanel.setLayout(new BorderLayout());
-            contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            setContentPane(contentPanel);
-
-
-            headingPanel = createHeader();
-            contentPanel.add(headingPanel, BorderLayout.NORTH);
-
-            footerPanel = createFooter();
-            contentPanel.add(footerPanel, BorderLayout.SOUTH);
-
+        	getContentPane().add(createHeader(), BorderLayout.NORTH);
+        	getContentPane().add(createFooter(), BorderLayout.SOUTH);
 
             optionsPanel = new JPanel();
             GridBagLayout layout = new GridBagLayout();
@@ -217,7 +202,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             this.addLabelTextRows(labels, fields, layout, optionsPanel);
             
 
-            contentPanel.add(optionsPanel, BorderLayout.CENTER);
+            getContentPane().add(optionsPanel, BorderLayout.CENTER);
         }
 
 		@Override

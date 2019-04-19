@@ -16,11 +16,16 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
+import java.awt.BorderLayout;
+import java.awt.Frame;
+
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * A base class for the sub analyses setup options. It contains a reference to
@@ -34,23 +39,25 @@ import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 @SuppressWarnings("serial")
 public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 
-    protected final JPanel contentPanel = new JPanel();
-
-    protected final IAnalysisDataset dataset;
+    protected final @NonNull IAnalysisDataset dataset;
 
     /**
      * Construct with a main program window to listen for actions, and a dataset
      * to operate on
      * 
-     * @param mw
+     * @param parent
      * @param dataset
      */
-    public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
-        super(mw, true);
-        fine("Making sub-analysis setup dialog");
+    public SubAnalysisSetupDialog(final Frame parent, final @NonNull IAnalysisDataset dataset, final String title) {
+        super(parent, true);
         this.dataset = dataset;
         this.setTitle(title);
         this.setModal(true);
+        
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPanel);
     }
     
     /**
@@ -60,10 +67,15 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
      * @param mw
      * @param dataset
      */
-    public SubAnalysisSetupDialog(final IAnalysisDataset dataset, final String title) {
+    public SubAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
         super(true);
         this.dataset = dataset;
         this.setTitle(title);
+        
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPanel);
     }
 
     protected void packAndDisplay() {

@@ -165,30 +165,17 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
     @Override
     protected void createUI() {
 
-        setBounds(100, 100, 450, 300);
-        contentPanel.setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPanel);
-
-//        profileButtonGroup = new ButtonGroup();
+        
         statBoxMap = new HashMap<PlottableStatistic, JCheckBox>();
         segmentBoxMap = new HashMap<UUID, JCheckBox>();
 
-        // ---------------
-        // panel for text labels
-        // ---------------
-        headingPanel = createHeader();
-        contentPanel.add(headingPanel, BorderLayout.NORTH);
-        // ---------------
-        // buttons at bottom
-        // ---------------
-        footerPanel = createFooter();
-        contentPanel.add(footerPanel, BorderLayout.SOUTH);
+        getContentPane().add(createHeader(), BorderLayout.NORTH);
+    	getContentPane().add(createFooter(), BorderLayout.SOUTH);
 
-        // ---------------
+    	// ---------------
         // options in middle
         // ---------------
-        optionsPanel = new JPanel();
+        JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BorderLayout());
 
         JPanel methodPanel = new JPanel(new FlowLayout());
@@ -227,7 +214,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         optionsPanel.add(cardPanel, BorderLayout.CENTER);
         optionsPanel.add(includePanel, BorderLayout.SOUTH);
 
-        contentPanel.add(optionsPanel, BorderLayout.CENTER);
+        getContentPane().add(optionsPanel, BorderLayout.CENTER);
     }
 
     @Override

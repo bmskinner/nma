@@ -51,11 +51,10 @@ public class RulesetSaveDialog extends SettingsDialog {
         this.setVisible(true);
     }
 
-    private JPanel createHeader() {
+    @Override
+    protected JPanel createHeader() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
         panel.add(new JLabel("Select and name custom rulesets to retain"));
-
         return panel;
     }
 
@@ -72,13 +71,9 @@ public class RulesetSaveDialog extends SettingsDialog {
             main.add(p);
         }
 
-        JPanel header = createHeader();
-        JPanel footer = createFooter();
-
-        this.add(header, BorderLayout.NORTH);
-        this.add(main, BorderLayout.CENTER);
-        this.add(footer, BorderLayout.SOUTH);
-
+        add(createHeader(), BorderLayout.NORTH);
+        add(main, BorderLayout.CENTER);
+        add(createFooter(), BorderLayout.SOUTH);
     }
 
     public RuleSetCollection getSelected() {
@@ -88,10 +83,9 @@ public class RulesetSaveDialog extends SettingsDialog {
             if (c instanceof CollectionPanel) {
                 RuleSetCollection r = ((CollectionPanel) c).getCollection();
 
-                BorderTagObject o = new BorderTagObject(((CollectionPanel) c).getText(), BorderTag.CUSTOM);
+                Tag o = new BorderTagObject(((CollectionPanel) c).getText(), BorderTag.CUSTOM);
 
                 result.setRuleSets(o, r.getRuleSets(Tag.CUSTOM_POINT));
-                // log("Added custom point: "+o.toString());
             }
 
         }
