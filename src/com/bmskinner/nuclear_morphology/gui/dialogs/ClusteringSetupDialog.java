@@ -23,13 +23,11 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,7 +35,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
@@ -45,8 +44,13 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
+/**
+ * Setup for clustering. It inherits the parameters for inclusion from the hierarchical tree
+ * setup, and adds panels for clustering method
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
 public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener {
 
@@ -68,9 +72,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
     private JRadioButton clusterHierarchicalButton;
     private JRadioButton clusterEMButton;
 
-    private JSpinner iterationsSpinner;
-
-    public ClusteringSetupDialog(IAnalysisDataset dataset) {
+    public ClusteringSetupDialog(final @NonNull IAnalysisDataset dataset) {
 
         super(dataset, DIALOG_TITLE);
         setDefaults();
@@ -80,8 +82,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
     @Override
     public IAnalysisMethod getMethod() {
-        IAnalysisMethod m = new NucleusClusteringMethod(dataset, options);
-        return m;
+    	return new NucleusClusteringMethod(dataset, options);
     }
 
     private JPanel createHierarchicalPanel() {
@@ -143,15 +144,13 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
                 1000, // max
                 1); // step
 
-        iterationsSpinner = new JSpinner(model);
+        JSpinner iterationsSpinner = new JSpinner(model);
         iterationsSpinner.addChangeListener(e -> {
-            JSpinner j = (JSpinner) e.getSource();
             try {
-                j.commitEdit();
-                options.setIterations((Integer) j.getValue());
-            } catch (Exception e1) {
-                warn("Error reading value in iterations field");
-                stack(e1.getMessage(), e1);
+            	iterationsSpinner.commitEdit();
+                options.setIterations((Integer) iterationsSpinner.getValue());
+            } catch (ParseException e1) {
+            	stack("Error reading value in iterations field", e1);
             }
         });
 
@@ -164,11 +163,6 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
     @Override
     protected void createUI() {
-
-        
-        statBoxMap = new HashMap<PlottableStatistic, JCheckBox>();
-        segmentBoxMap = new HashMap<UUID, JCheckBox>();
-
         getContentPane().add(createHeader(), BorderLayout.NORTH);
     	getContentPane().add(createFooter(), BorderLayout.SOUTH);
 
@@ -203,16 +197,9 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         methodPanel.add(clusterHierarchicalButton);
         methodPanel.add(clusterEMButton);
 
-        JPanel includePanel = null;
-        try {
-            includePanel = createIncludePanel();
-        } catch (Exception e) {
-            error("Error making incluude panel", e);
-        }
-
         optionsPanel.add(methodPanel, BorderLayout.NORTH);
         optionsPanel.add(cardPanel, BorderLayout.CENTER);
-        optionsPanel.add(includePanel, BorderLayout.SOUTH);
+        optionsPanel.add(createIncludePanel(), BorderLayout.SOUTH);
 
         getContentPane().add(optionsPanel, BorderLayout.CENTER);
     }
@@ -239,9 +226,6 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
             cl.show(cardPanel, EM_PANEL_KEY);
 
             options.setType(ClusteringMethod.EM);
-
         }
-
     }
-
 }

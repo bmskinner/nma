@@ -22,14 +22,12 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -104,7 +102,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 					.getMin(PlottableStatistic.AREA, 
 							CellularComponent.NUCLEUS, 
 							MeasurementScale.PIXELS);
-			double minArea = ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL * shells;
+			double minArea = ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL * (double)shells;
 			if(area < minArea){
 				JOptionPane.showMessageDialog(null, AREA_ERROR_MESSAGE);
 				return false;
@@ -140,30 +138,25 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
         
         IShellOptions o = new DefaultShellOptions();
 
-
-        protected JPanel headingPanel;
-        protected JPanel optionsPanel;
-        protected JPanel footerPanel;
-
-        public ShellAnalysisSetupDialog(final IAnalysisDataset dataset) {
+        public ShellAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset) {
             this(dataset, DIALOG_TITLE);
-        }
-        
-        public IShellOptions getOptions() {
-        	return o;
         }
         
         /**
          * Constructor that does not make panel visible
-         * 
-         * @param mw
+         * @param dataset the dataset
          * @param title
          */
-        protected ShellAnalysisSetupDialog(final IAnalysisDataset dataset, final String title) {
+        protected ShellAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
             super(dataset, title);
             setDefaults();
             createUI();
             packAndDisplay();
+        }
+        
+        
+        public IShellOptions getOptions() {
+        	return o;
         }
 
         @Override
@@ -177,7 +170,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
         	getContentPane().add(createHeader(), BorderLayout.NORTH);
         	getContentPane().add(createFooter(), BorderLayout.SOUTH);
 
-            optionsPanel = new JPanel();
+            JPanel optionsPanel = new JPanel();
             GridBagLayout layout = new GridBagLayout();
             optionsPanel.setLayout(layout);
             
@@ -208,7 +201,6 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 		@Override
 		protected void setDefaults() {
 			// TODO Auto-generated method stub
-			
 		}
     }
 }
