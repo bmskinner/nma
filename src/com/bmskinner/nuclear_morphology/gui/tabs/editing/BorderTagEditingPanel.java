@@ -165,8 +165,11 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     }
 
     @Override
-    protected void updateMultiple() {
-        updateNull();
+    protected synchronized void updateMultiple() {
+        JFreeChart mainChart = ProfileChartFactory.createMultipleDatasetEmptyChart();
+        JFreeChart rangeChart = ProfileChartFactory.createMultipleDatasetEmptyChart();
+        dualPanel.setCharts(mainChart, rangeChart);
+        setButtonsEnabled(false);
     }
 
     @Override

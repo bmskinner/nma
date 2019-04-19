@@ -27,9 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -41,7 +42,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -72,8 +72,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     private static final String PANEL_TITLE_LBL = "Segmentation";
     
     private SegmentationDualChartPanel dualPanel;
+    
+    private JLabel buttonStateLbl = new JLabel(" ", JLabel.CENTER);
 
-    private JPanel  buttonsPanel;
     private JButton segmentButton;
     private JButton mergeButton;
     private JButton unmergeButton;
@@ -116,8 +117,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         this.add(chartPanel, BorderLayout.CENTER);
 
-        buttonsPanel = makeButtonPanel();
-        this.add(buttonsPanel, BorderLayout.NORTH);
+        this.add(createHeader(), BorderLayout.NORTH);
 
         setButtonsEnabled(false);
 
@@ -132,8 +132,15 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         dualPanel.setAnalysing(b);
     }
 
-    private JPanel makeButtonPanel() {
+    private JPanel createHeader() {
 
+    	JPanel headerPanel = new JPanel();
+    	headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+    	JPanel txtPanel = new JPanel(new FlowLayout());
+    	txtPanel.add(buttonStateLbl);
+    	headerPanel.add(txtPanel);
+    	
+    	
         JPanel panel = new JPanel(new FlowLayout()) {
             @Override
             public void setEnabled(boolean b) {
@@ -168,14 +175,16 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         panel.add(splitButton);
 
         windowSizeButton = new JButton(STR_SHOW_WINDOW_SIZES);
-        windowSizeButton.addActionListener(this);
+        windowSizeButton.addActionListener(e->new AngleWindowSizeExplorer(activeDataset()));
         panel.add(windowSizeButton);
 
         updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
         updatewindowButton.addActionListener(this);
         panel.add(updatewindowButton);
 
-        return panel;
+        
+        headerPanel.add(panel);
+        return headerPanel;
 
     }
 
@@ -229,20 +238,20 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
     @Override
     protected synchronized void updateMultiple() {
-        updateNull();
-
+        JFreeChart mainChart = ProfileChartFactory.createMultipleDatasetEmptyChart();
+        JFreeChart rangeChart = ProfileChartFactory.createMultipleDatasetEmptyChart();
+        dualPanel.setCharts(mainChart, rangeChart);
+        setButtonsEnabled(false);
+        buttonStateLbl.setText("Cannot update segments across multiple datasets");
     }
 
     @Override
     protected synchronized void updateNull() {
-
-        ChartOptions options = new ChartOptionsBuilder().setShowXAxis(false).setShowYAxis(false).build();
-
         JFreeChart mainChart = ProfileChartFactory.createEmptyChart(null);
         JFreeChart rangeChart = ProfileChartFactory.createEmptyChart(null);
-
         dualPanel.setCharts(mainChart, rangeChart);
         setButtonsEnabled(false);
+        buttonStateLbl.setText("No dataset selected");
     }
 
     @Override
@@ -301,11 +310,14 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 
     	// set child dataset options
-    	if (options.firstDataset() instanceof ChildAnalysisDataset) {
+    	if (!options.firstDataset().isRoot()) {
     		mergeButton.setEnabled(false);
     		unmergeButton.setEnabled(false);
     		splitButton.setEnabled(false);
     		updatewindowButton.setEnabled(false);
+    		buttonStateLbl.setText("Cannot alter child dataset segments - try the root dataset");
+    	} else {
+    		buttonStateLbl.setText(" ");
     	}
     }
 
@@ -352,30 +364,6 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
 
-        ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Stats.MEDIAN);
-
-        // Does nothing, but needed to access segment fitter
-        // DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(),
-        // MorphologyAnalysisMode.NEW, programLogger);
-
-        // Make a fitter
-//        SegmentFitter fitter = new SegmentFitter(medianProfile);
-
-//        for (Nucleus n : activeDataset().getCollection().getNuclei()) {
-//
-//            // recombine the segments at the lengths of the median profile
-//            // segments
-//            ISegmentedProfile frankenProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
-//
-//            n.setProfile(ProfileType.FRANKEN, frankenProfile.copy());
-//
-//        }
-
-        pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
-
-//        fitter = null; // clean up
-
         Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
         if(op.isPresent())
         	op.get().setAngleWindowProportion(windowSize);
@@ -384,10 +372,6 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        if (e.getSource() == windowSizeButton) {
-            new AngleWindowSizeExplorer(activeDataset());
-        }
 
         try {
             ICellCollection collection = activeDataset().getCollection();
@@ -489,19 +473,17 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
     	IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
 
-    	String[] options = Arrays.stream(nameArray).map(s->s.getName()).toArray(String[]::new);
+    	String[] options = Arrays.stream(nameArray).map(IBorderSegment::getName).toArray(String[]::new);
 
     	try {
-    		int option = getInputSupplier().requestOptionAllVisible(options, "Choose segment to split", "Split segment");
+    		int option = getInputSupplier().requestOptionAllVisible(options, "Choose segment to split", STR_SPLIT_SEGMENT);
 
     		setAnalysing(true);
     		SegmentationHandler sh = new SegmentationHandler(activeDataset());
     		sh.splitSegment(nameArray[option].getID());
     		refreshEditingPanelCharts();
     		setAnalysing(false);
-    	} catch (RequestCancelledException e) {
-    		return;
-    	}
+    	} catch (RequestCancelledException e) {}
     }
 
     /**
