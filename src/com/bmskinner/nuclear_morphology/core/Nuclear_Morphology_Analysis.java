@@ -22,8 +22,6 @@ import java.net.URL;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -50,7 +48,7 @@ public class Nuclear_Morphology_Analysis
 	implements Loggable {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
-	private CommandParser parser; // parse command line arguments and launch the UI
+//	private CommandLineParser parser; // parse command line arguments and launch the UI
 	
 	/*
 	 * Keep a strong reference to the logger so they can be accessed
@@ -66,7 +64,7 @@ public class Nuclear_Morphology_Analysis
 	 */
 	private Nuclear_Morphology_Analysis(String[] args){
 		loadLogger();
-	    this.parser = new CommandParser(args);
+	    new CommandLineParser(args);
 	}
 	
 	
@@ -117,8 +115,10 @@ public class Nuclear_Morphology_Analysis
 			 */
 			File dir =  Importer.getProgramDir();
 			File errorFile = new File(dir, "error.log");
-			fine("Attempting to create or find "+errorFile.getAbsolutePath());
-			errorFile.createNewFile();
+			LOGGER.fine("Attempting to create or find "+errorFile.getAbsolutePath());
+			if(errorFile.createNewFile()) {
+				LOGGER.fine("Created new log file");
+			}
 
 			// Log stack traces to the log file for debugging
 			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
@@ -126,7 +126,7 @@ public class Nuclear_Morphology_Analysis
 			fileHandler.setLevel(Loggable.STACK);
 			
 		} catch (SecurityException |IOException e ) {
-			stack("Error initialising logger: "+e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, "Error initialising logger: "+e.getMessage(), e);
 		}
 	}
 	

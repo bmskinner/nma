@@ -1,4 +1,4 @@
-# Nuclear Morphology Analysis version 1.15.2 #
+# Nuclear Morphology Analysis version 1.16.0 #
 
 Copyright (C) Ben Skinner 2015-2019
 
