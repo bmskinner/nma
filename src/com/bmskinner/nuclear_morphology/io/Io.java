@@ -129,13 +129,9 @@ public interface Io  {
             try {
                 // Get the location of the jar file
                 File dir = new File(Importer.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-
-                Logger.getLogger(Loggable.ROOT_LOGGER).fine("Program directory: "+dir.getAbsolutePath());
                 // Difference in path between standalone and jar
                 if (dir.getAbsolutePath().endsWith(".jar") || dir.getAbsolutePath().endsWith(".exe"))
                     dir = dir.getParentFile();
-                
-                
                 return dir;
             } catch (URISyntaxException e) {
             	Logger.getLogger(Loggable.ROOT_LOGGER).log(Level.WARNING, "Error getting program dir");

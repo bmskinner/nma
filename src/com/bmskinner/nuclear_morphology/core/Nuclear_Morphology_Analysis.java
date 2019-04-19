@@ -29,6 +29,7 @@ import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
@@ -103,9 +104,13 @@ public class Nuclear_Morphology_Analysis
 		
 		try {
 			
-			LOGGER.setLevel(Level.FINE);
+			// Remove existing handlers
+			for(Handler h : LOGGER.getHandlers())
+				LOGGER.removeHandler(h);
 			
-			Handler consoleHander = new ConsoleHandler(new LogPanelFormatter());
+			LOGGER.setLevel(Level.FINE);
+
+			Handler consoleHander = new ConsoleHandler(new ConsoleFormatter());
 			LOGGER.addHandler(consoleHander);
 			consoleHander.setLevel(Level.FINE);
 
@@ -114,8 +119,9 @@ public class Nuclear_Morphology_Analysis
 			 * directory if not present
 			 */
 			File dir =  Importer.getProgramDir();
+			LOGGER.fine("Program dir: "+dir.getAbsolutePath());
 			File errorFile = new File(dir, "error.log");
-			LOGGER.fine("Attempting to create or find "+errorFile.getAbsolutePath());
+			LOGGER.fine("Log file: "+errorFile.getAbsolutePath());
 			if(errorFile.createNewFile()) {
 				LOGGER.fine("Created new log file");
 			}

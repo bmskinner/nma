@@ -31,7 +31,6 @@ public class ConsoleHandler extends StreamHandler {
 	@Override
 	public void publish(LogRecord record) {
 		System.out.println(getFormatter().format(record));
-
 	}
 
 }

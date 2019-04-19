@@ -66,21 +66,21 @@ public class CommandLineParser {
 			System.out.println("Argument: "+s);
 
 			if(s.startsWith("-h")) {
-				LOGGER.info("Arguments:");
-				LOGGER.info("\t-folder <image_folder>");
-				LOGGER.info("\t-options <xml_options>");
+				System.out.println("Arguments:");
+				System.out.println("\t-folder=<image_folder>");
+				System.out.println("\t-options=<xml_options>");
 				System.exit(0);
 			}
 
 			if(s.startsWith("-folder=")) {
 				headless=true;
-				String path = s.replace("-folder=", "");
+				String path = s.replace("-folder=", "").replace("\"", "");
 				folder = new File(path); 
 			}
 
 			if(s.startsWith("-options=")) {
 				headless=true;
-				String path = s.replace("-options=", "");
+				String path = s.replace("-options=", "").replace("\"", "");
 				options = new File(path); 
 			}
 
@@ -89,10 +89,10 @@ public class CommandLineParser {
 		new ConfigFileReader();
 
 		if(headless){
-			LOGGER.info("Running headless");
+			LOGGER.fine("Running headless");
 			runHeadless(folder, options);
 		} else {
-			LOGGER.info("Running GUI");
+			LOGGER.fine("Running GUI");
 			runWithGUI();
 		}
 
@@ -137,7 +137,7 @@ public class CommandLineParser {
 				IJ.setBackgroundColor(0, 0, 0);  // default background is black
 				try {
 					String lAndF = UIManager.getSystemLookAndFeelClassName();
-					LOGGER.info("Setting look and feel to "+lAndF);
+					LOGGER.fine("Setting look and feel to "+lAndF);
 					UIManager.setLookAndFeel(lAndF);
 				} catch (Exception e) {
 					LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
