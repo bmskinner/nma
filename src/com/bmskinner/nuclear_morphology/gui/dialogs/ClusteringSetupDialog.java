@@ -61,9 +61,6 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
     private static final String EM_CLUSTERING_LBL  = "Expectation maximisation";
     private static final String HC_CLUSTERING_LBL  = "Hierarchical";
 
-    private static final String HC_PANEL_KEY = "HierarchicalPanel";
-    private static final String EM_PANEL_KEY = "EMPanel";
-
     private JPanel   cardPanel;
     private JSpinner clusterNumberSpinner;
     
@@ -189,10 +186,10 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         clusterEMButton.addActionListener(this);
 
         cardPanel = new JPanel(new CardLayout());
-        cardPanel.add(createHierarchicalPanel(), HC_PANEL_KEY);
-        cardPanel.add(createEMPanel(), EM_PANEL_KEY);
+        cardPanel.add(createHierarchicalPanel(), HC_CLUSTERING_LBL);
+        cardPanel.add(createEMPanel(), EM_CLUSTERING_LBL);
         CardLayout cl = (CardLayout) (cardPanel.getLayout());
-        cl.show(cardPanel, HC_PANEL_KEY);
+        cl.show(cardPanel, HC_CLUSTERING_LBL);
 
         methodPanel.add(clusterHierarchicalButton);
         methodPanel.add(clusterEMButton);
@@ -211,7 +208,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         if (clusterHierarchicalButton.isSelected()) {
 
             CardLayout cl = (CardLayout) (cardPanel.getLayout());
-            cl.show(cardPanel, HC_PANEL_KEY);
+            cl.show(cardPanel, HC_CLUSTERING_LBL);
 
             options.setType(ClusteringMethod.HIERARCHICAL);
 
@@ -223,7 +220,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
         if (clusterEMButton.isSelected()) {
 
             CardLayout cl = (CardLayout) (cardPanel.getLayout());
-            cl.show(cardPanel, EM_PANEL_KEY);
+            cl.show(cardPanel, EM_CLUSTERING_LBL);
 
             options.setType(ClusteringMethod.EM);
         }

@@ -134,7 +134,7 @@ public interface HashOptions extends Serializable {
     List<String> getFloatKeys();
     
     /**
-     * Get the keys to all the straing values in this options.
+     * Get the keys to all the string values in this options.
      * 
      * @return
      */
@@ -166,5 +166,4 @@ public interface HashOptions extends Serializable {
      * @param o
      */
     void set(HashOptions o);
-
 }

@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -36,7 +37,7 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 public abstract class AbstractHashOptions implements Serializable, HashOptions {
 
-    private static final long      serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     protected Map<String, Integer> intMap    = new HashMap<>();
     protected Map<String, Double>  dblMap    = new HashMap<>();
     protected Map<String, Float>   fltMap    = new HashMap<>();
@@ -186,7 +187,7 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
 
     @Override
 	public List<String> getKeys() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         
         list.addAll(getBooleanKeys());
         list.addAll(getIntegerKeys());
@@ -226,9 +227,8 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
     }
     
     private void addEntries(Map<String, ?> source, Map<String, Object> target){
-    	for (String s : source.keySet()) {
-            target.put(s, source.get(s));
-        }
+    	for(Entry<String, ?> e : source.entrySet())
+    		target.put(e.getKey(), e.getValue());
     }
     
     @Override
@@ -288,8 +288,8 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         Map<String, Object> map = getEntries();
-        for (String s : map.keySet())
-            sb.append("\t" + s + ": " + map.get(s) + IDetectionOptions.NEWLINE);
+        for(Entry<String, Object> e : map.entrySet())
+            sb.append("\t" + e.getKey() + ": " + e.getValue() + IDetectionOptions.NEWLINE);
         return sb.toString();
     }
     
