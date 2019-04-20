@@ -791,6 +791,10 @@ public class ProfileManager implements Loggable {
      */
     public boolean splitSegment(@NonNull IBorderSegment seg, @Nullable UUID newID1, @Nullable UUID newID2)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+    	if(!collection.isReal()) {
+    		fine("Cannot split segments in a virtual collection");
+            return false;
+    	}
 
         if (seg == null)
             throw new IllegalArgumentException("Segment cannot be null");
@@ -810,7 +814,7 @@ public class ProfileManager implements Loggable {
 
         // Validate that all nuclei have segments long enough to be split
         fine("Testing splittability of collection");
-        if (collection.isReal() && !isCollectionSplittable(seg.getID(), proportion)) {
+        if (!isCollectionSplittable(seg.getID(), proportion)) {
             warn("Segment cannot be split: profile failed testing");
             return false;
         }
@@ -828,16 +832,13 @@ public class ProfileManager implements Loggable {
          * With the median profile segments unmerged, also split the segments in
          * the individual nuclei. Requires proportional alignment
          */
-        if (collection.isReal()) { // do not handle nuclei in virtual
-                                   // collections
-            for (Nucleus n : collection.getNuclei()) {
-                boolean wasLocked = n.isLocked();
-                n.setLocked(false); // Merging segments is not destructive
-                splitSegment(n, seg.getID(), proportion, newID1, newID2);
-                n.setLocked(wasLocked);
-            }
+        for (Nucleus n : collection.getNuclei()) {
+        	boolean wasLocked = n.isLocked();
+        	n.setLocked(false); // Merging segments is not destructive
+        	splitSegment(n, seg.getID(), proportion, newID1, newID2);
+        	n.setLocked(wasLocked);
         }
-
+        
         /*
          * Update the consensus if present
          */
@@ -856,9 +857,9 @@ public class ProfileManager implements Loggable {
      * Test all the nuclei of the collection to see if all segments can be split
      * before we carry out the split.
      * 
-     * @param seg
-     * @param proportion
-     * @return
+     * @param id the segment to test
+     * @param proportion the proportion of the segment at which to split, from 0-1
+     * @return true if the segment can be split at the index equivalent to the proportion, false otherwise
      * @throws ProfileException
      * @throws UnavailableComponentException
      * @throws UnsegmentedProfileException
@@ -887,7 +888,7 @@ public class ProfileManager implements Loggable {
             }
         }
 
-        return collection.isReal() && collection.getNuclei().parallelStream().allMatch(  n->isSplittable(n, id, proportion)  );
+        return collection.isReal() && collection.getNuclei().parallelStream().allMatch( n->isSplittable(n, id, proportion) );
     }
 
     private boolean isSplittable(Taggable t, UUID id, double proportion) {
