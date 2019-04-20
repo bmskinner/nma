@@ -636,6 +636,10 @@ public class ProfileManager implements Loggable {
      */
     public void mergeSegments(@NonNull IBorderSegment seg1, @NonNull IBorderSegment seg2, @NonNull UUID newID)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+    	if(collection.isVirtual()) {
+    		fine("Cannot merge segments in a virtual collection");
+    		return;
+    	}
 
         if (seg1 == null || seg2 == null || newID == null)
             throw new IllegalArgumentException("Segment ids cannot be null");
@@ -876,6 +880,10 @@ public class ProfileManager implements Loggable {
      */
     public void unmergeSegments(@NonNull UUID segId)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+    	if(collection.isVirtual()) {
+    		fine("Cannot unmerge segments in a virtual collection");
+    		return;
+    	}
                 
         if(segId==null)
             throw new IllegalArgumentException("Segment to unmerge cannot be null");
@@ -889,16 +897,14 @@ public class ProfileManager implements Loggable {
             fine("Segment has no merge sources - cannot unmerge");
             return;
         }
-        
-        if(collection.isReal()){
-        	DatasetValidator dv = new DatasetValidator();
-        	if (!dv.validate(collection)) {
-        		 warn("Segments are out of sync with median");
-                 warn("Canceling unmerge");
-                 return;
-        	}
-        }
 
+        DatasetValidator dv = new DatasetValidator();
+        if (!dv.validate(collection)) {
+        	warn("Segments are out of sync with median");
+        	warn("Canceling unmerge");
+        	return;
+        }
+        
         // unmerge the two segments in the median - this is only a copy of the profile collection
         medianProfile.unmergeSegment(segId);
 
@@ -909,17 +915,13 @@ public class ProfileManager implements Loggable {
          * With the median profile segments unmerged, also unmerge the segments
          * in the individual nuclei
          */
-        
-        if(collection.isReal()){
-            for (Nucleus n : collection.getNuclei()) {
-                boolean wasLocked = n.isLocked();
-                n.setLocked(false);
-                unmergeSegments(n, segId);
-                n.setLocked(wasLocked);
-            }
+        for (Nucleus n : collection.getNuclei()) {
+        	boolean wasLocked = n.isLocked();
+        	n.setLocked(false);
+        	unmergeSegments(n, segId);
+        	n.setLocked(wasLocked);
         }
-
-
+        
         /* Update the consensus if present */
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();
