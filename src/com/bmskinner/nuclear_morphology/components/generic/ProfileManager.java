@@ -60,27 +60,6 @@ public class ProfileManager implements Loggable {
     }
 
     /**
-     * Get the average profile window size in the population.
-     * 
-     * @param type
-     * @return
-     * @deprecated since 1.14.0; no need for this any more
-     */
-    @Deprecated
-    public int getProfileWindowSize(ProfileType type) {
-
-        int total = 0;
-        Set<Nucleus> nuclei = collection.getNuclei();
-
-        for (Nucleus n : nuclei) {
-            total += n.getWindowSize(type); // use the first window size found
-                                            // for now
-        }
-
-        return total / nuclei.size();
-    }
-
-    /**
      * Update the given tag in each nucleus of the collection to the index with
      * a best fit of the profile to the given median profile
      * 
@@ -181,10 +160,7 @@ public class ProfileManager implements Loggable {
         }
 
         updateTagToMedianBestFit(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
-
         updateTagToMedianBestFit(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
-
-        collection.updateVerticalNuclei();
 
         fine("Updated nuclei");
     }
@@ -199,7 +175,7 @@ public class ProfileManager implements Loggable {
      * @throws ProfileException
      * @throws UnavailableProfileTypeException
      */
-    public void updateBorderTag(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
+    public void updateBorderTag(Tag tag, int index) throws ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
         finer("Updating border tag " + tag);
@@ -219,12 +195,11 @@ public class ProfileManager implements Loggable {
      * 
      * @param tag the extended tag to be updated
      * @param index the new index of the tag in the median, relative to the current RP
-     * @throws IndexOutOfBoundsException
      * @throws ProfileException
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
      */
-    private void updateExtendedBorderTagIndex(@NonNull Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
+    private void updateExtendedBorderTagIndex(@NonNull Tag tag, int index) throws ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
         int oldIndex = collection.getProfileCollection().getIndex(tag);
@@ -256,23 +231,6 @@ public class ProfileManager implements Loggable {
         				stack(e);
         			}
         		});
-        		
-//        		for(Nucleus n : collection.getNuclei()) {
-//        			if(n.isLocked())
-//        				continue;
-//        			
-//        			try {
-//        				int existingIndex = n.getBorderIndex(existingTag);
-//        				n.setBorderTag(tag, existingIndex);
-//        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-//            				n.updateDependentStats();
-//            				setOpUsingTvBv(n);
-//        				}
-//        			} catch (UnavailableBorderTagException e) {
-//        				stack(e);
-//        				continue;
-//        			}
-//        		}
         		
         		//Update consensus
         		if (collection.hasConsensus()) {
@@ -360,7 +318,6 @@ public class ProfileManager implements Loggable {
 
         // Update signals as needed
         collection.getSignalManager().recalculateSignalAngles();
-        collection.updateVerticalNuclei();  
     }
     
     /**
@@ -369,10 +326,8 @@ public class ProfileManager implements Loggable {
      * @param newRpIndex the new index for the RP relative to the old RP
      * @param oldMedian the old median profile zeroed on the old RP
      * @throws ProfileException 
-     * @throws SegmentUpdateException 
-     * @throws UnavailableBorderTagException 
      */
-    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException, SegmentUpdateException, UnavailableBorderTagException {
+    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException {
     	// This is the median we will use to update individual nuclei
     	ISegmentedProfile newMedian = oldMedian.offset(newRpIndex);
 
@@ -380,8 +335,6 @@ public class ProfileManager implements Loggable {
     	
     	// Rebuild the profile aggregate in the collection
     	collection.getProfileCollection().createProfileAggregate(collection, collection.getMedianArrayLength());
-    	
-    	// Resegment the new dataset - call after this returns
     }
     
     /**
@@ -521,13 +474,8 @@ public class ProfileManager implements Loggable {
      * @param b the segment lock state for all segments
      */
     public void setLockOnAllNucleusSegments(boolean b) {
-
         List<UUID> ids = collection.getProfileCollection().getSegmentIDs();
-
-        collection.getNuclei().forEach(n -> {
-            ids.forEach(segID -> n.setSegmentStartLock(b, segID));
-        });
-
+        collection.getNuclei().forEach(n -> ids.forEach(segID -> n.setSegmentStartLock(b, segID)));
     }
 
     /**
@@ -705,7 +653,7 @@ public class ProfileManager implements Loggable {
         if(collection.isReal()){
         	DatasetValidator dv = new DatasetValidator();
         	if (!dv.validate(collection)) {
-        		 warn(String.format("Segments are out of sync with median"));
+        		 warn("Segments are out of sync with median");
                  warn("Canceling merge");
                  return;
         	}
@@ -945,7 +893,7 @@ public class ProfileManager implements Loggable {
         if(collection.isReal()){
         	DatasetValidator dv = new DatasetValidator();
         	if (!dv.validate(collection)) {
-        		 warn(String.format("Segments are out of sync with median"));
+        		 warn("Segments are out of sync with median");
                  warn("Canceling unmerge");
                  return;
         	}
