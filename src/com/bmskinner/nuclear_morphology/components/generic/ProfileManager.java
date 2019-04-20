@@ -542,9 +542,8 @@ public class ProfileManager implements Loggable {
      */
     public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws ProfileException, UnavailableComponentException {
 
-        if (collection.isVirtual())
-            return;
-
+    	fine("Updating segment start index");
+    	
         Nucleus n = cell.getNucleus();
         ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
@@ -557,10 +556,9 @@ public class ProfileManager implements Loggable {
         int rawOldIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, startPos);
 
         try {
-        	fine(profile.toString());
         	if (profile.update(seg, newStart, newEnd)) {
-        		fine(String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
-        		fine("Profile now: "+profile.toString());
+        		finer(String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
+        		finer("Profile now: "+profile.toString());
         		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         		finest("Updated nucleus profile with new segment boundaries");
 
