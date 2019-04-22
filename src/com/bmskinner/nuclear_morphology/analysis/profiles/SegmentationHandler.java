@@ -45,7 +45,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class SegmentationHandler implements Loggable {
 
-    private final IAnalysisDataset dataset;
+    private static final String SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL = "Segments are out of sync with median";
+	private final IAnalysisDataset dataset;
 
     public SegmentationHandler(final IAnalysisDataset d) {
         dataset = d;
@@ -71,7 +72,7 @@ public class SegmentationHandler implements Loggable {
         // Don't mess with a broken dataset 
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
-        	warn("Segments are out of sync with median");
+        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
         	warn("Canceling merge");
         	return;
         }
@@ -142,7 +143,7 @@ public class SegmentationHandler implements Loggable {
         // Don't mess with a broken dataset 
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
-        	warn("Segments are out of sync with median");
+        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
         	warn("Canceling unmerge");
         	return;
         }
@@ -194,7 +195,7 @@ public class SegmentationHandler implements Loggable {
     	// Don't mess with a broken dataset 
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
-        	warn("Segments are out of sync with median");
+        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
         	warn("Canceling segment split");
         	return;
         }
@@ -314,11 +315,9 @@ public class SegmentationHandler implements Loggable {
                 | UnavailableProfileTypeException e) {
             warn("Unable to update border tag index");
             stack("Profiling error", e);
-            return;
         } catch (Exception e) {
             warn("Unexpected error");
             stack(e);
-            return;
         }
     }
     
@@ -334,7 +333,7 @@ public class SegmentationHandler implements Loggable {
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, IndexOutOfBoundsException, UnavailableProfileTypeException, ProfileException {
+    private boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
     	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
     	for(Tag existingTag : tags) {
     		if(existingTag.equals(tag))

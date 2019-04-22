@@ -18,13 +18,11 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
@@ -182,7 +180,7 @@ public class ProfileManager implements Loggable {
         if (tag.type().equals(BorderTagType.CORE)) {
             try {
 				updateCoreBorderTagIndex(tag, index);
-			} catch (UnsegmentedProfileException | SegmentUpdateException e) {
+			} catch (UnsegmentedProfileException e) {
 				stack(e);
 			}
             return;
@@ -307,7 +305,7 @@ public class ProfileManager implements Loggable {
      * @throws SegmentUpdateException 
      */
     private void updateCoreBorderTagIndex(@NonNull Tag tag, int index)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException, SegmentUpdateException {
+            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException {
 
         fine("Updating core border tag index");
 
@@ -531,8 +529,6 @@ public class ProfileManager implements Loggable {
         						n.getBorderIndex(n.findOppositeBorder(n.getBorderPoint(Tag.ORIENTATION_POINT))));
         			}
         		}
-
-//        		n.updateVerticallyRotatedNucleus();
         		n.updateDependentStats();
 
         	} else {
@@ -710,9 +706,12 @@ public class ProfileManager implements Loggable {
      * 
      * @param segName
      * @return
+     * @throws UnavailableComponentException 
+     * @throws UnsegmentedProfileException 
+     * @throws ProfileException 
      * @throws Exception
      */
-    public boolean splitSegment(IBorderSegment seg) throws Exception {
+    public boolean splitSegment(IBorderSegment seg) throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
         return splitSegment(seg, null, null);
     }
 
@@ -783,6 +782,16 @@ public class ProfileManager implements Loggable {
         return true;
     }
     
+    /**
+     * Split the segment in the given nucleus, preserving lock state
+     * @param n the nucleus
+     * @param segId the segment to split
+     * @param proportion the proportion of the segment to split at (0-1)
+     * @param newId1 the first new segment id
+     * @param newId2 the second new segment id
+     * @throws ProfileException
+     * @throws UnavailableComponentException
+     */
     private void splitNucleusSegment(Nucleus n, UUID segId, double proportion, UUID newId1, UUID newId2) throws ProfileException, UnavailableComponentException {
     	boolean wasLocked = n.isLocked();
 		n.setLocked(false); // not destructive
