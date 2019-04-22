@@ -636,10 +636,8 @@ public class ProfileManager implements Loggable {
      */
     public void mergeSegments(@NonNull IBorderSegment seg1, @NonNull IBorderSegment seg2, @NonNull UUID newID)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
-    	if(collection.isVirtual()) {
-    		fine("Cannot merge segments in a virtual collection");
-    		return;
-    	}
+    	// Note - we can't do the root check here. It must be at the segmentation handler level
+    	// otherwise updating child datasets to match a root will fail
 
         if (seg1 == null || seg2 == null || newID == null)
             throw new IllegalArgumentException("Segment ids cannot be null");
@@ -654,14 +652,7 @@ public class ProfileManager implements Loggable {
         if (!medianProfile.hasSegment(seg2.getID()))
             throw new IllegalArgumentException("Median profile does not have segment 2 ID");
 
-        if(collection.isReal()){
-        	DatasetValidator dv = new DatasetValidator();
-        	if (!dv.validate(collection)) {
-        		 warn("Segments are out of sync with median");
-                 warn("Canceling merge");
-                 return;
-        	}
-        }
+        // Note - validation is run in segmentation handler
     
         // merge the two segments in the median
         try {
@@ -686,9 +677,7 @@ public class ProfileManager implements Loggable {
             }
         }
 
-        /*
-         * Update the consensus if present
-         */
+        /* Update the consensus if present */
         if (collection.hasConsensus()) {
             Nucleus n = collection.getRawConsensus().component();
             mergeSegments(n, seg1, seg2, newID);
@@ -743,10 +732,6 @@ public class ProfileManager implements Loggable {
      */
     public boolean splitSegment(@NonNull IBorderSegment seg, @Nullable UUID newID1, @Nullable UUID newID2)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
-    	if(!collection.isReal()) {
-    		fine("Cannot split segments in a virtual collection");
-            return false;
-    	}
 
         if (seg == null)
             throw new IllegalArgumentException("Segment cannot be null");
@@ -784,25 +769,25 @@ public class ProfileManager implements Loggable {
          * With the median profile segments unmerged, also split the segments in
          * the individual nuclei. Requires proportional alignment
          */
-        for (Nucleus n : collection.getNuclei()) {
-        	boolean wasLocked = n.isLocked();
-        	n.setLocked(false); // Merging segments is not destructive
-        	splitSegment(n, seg.getID(), proportion, newID1, newID2);
-        	n.setLocked(wasLocked);
+        if(collection.isReal()) {
+        	for (Nucleus n : collection.getNuclei()) {
+        		splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
+        	}
         }
         
-        /*
-         * Update the consensus if present
-         */
+        /*  Update the consensus if present */
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();
-            boolean wasLocked = n.isLocked();
-            n.setLocked(false); // Merging segments is not destructive
-            splitSegment(n, seg.getID(), proportion, newID1, newID2);
-            n.setLocked(wasLocked);
+        	splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
         }
         return true;
-
+    }
+    
+    private void splitNucleusSegment(Nucleus n, UUID segId, double proportion, UUID newId1, UUID newId2) throws ProfileException, UnavailableComponentException {
+    	boolean wasLocked = n.isLocked();
+		n.setLocked(false); // not destructive
+		splitSegment(n, segId, proportion, newId1, newId2);
+		n.setLocked(wasLocked);
     }
 
     /**
@@ -818,9 +803,6 @@ public class ProfileManager implements Loggable {
      */
     private boolean isCollectionSplittable(@NonNull UUID id, double proportion)
             throws ProfileException, UnavailableComponentException, UnsegmentedProfileException {
-        
-        if(!collection.isReal())
-            return false;
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Tag.REFERENCE_POINT, Stats.MEDIAN);
@@ -828,9 +810,10 @@ public class ProfileManager implements Loggable {
         int index = medianProfile.getSegment(id).getProportionalIndex(proportion);
 
         if (!medianProfile.isSplittable(id, index)) {
-            return false;
+        	fine("Median profile in "+collection.getName()+" is not splittable");
+        	return false;
         }
-        
+            
         // check consensus //TODO replace with remove consensus
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();
@@ -840,7 +823,13 @@ public class ProfileManager implements Loggable {
             }
         }
 
-        return collection.isReal() && collection.getNuclei().parallelStream().allMatch( n->isSplittable(n, id, proportion) );
+        if(collection.isReal()) {
+        	boolean allNucleiSplittable = collection.getNuclei().parallelStream().allMatch( n->isSplittable(n, id, proportion) );
+        	if(!allNucleiSplittable)
+        		fine("At least one nucleus in "+collection.getName()+" is not splittable");
+        	return allNucleiSplittable;
+        }
+        return true;
     }
 
     private boolean isSplittable(Taggable t, UUID id, double proportion) {
@@ -880,11 +869,7 @@ public class ProfileManager implements Loggable {
      */
     public void unmergeSegments(@NonNull UUID segId)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
-    	if(collection.isVirtual()) {
-    		fine("Cannot unmerge segments in a virtual collection");
-    		return;
-    	}
-                
+    	
         if(segId==null)
             throw new IllegalArgumentException("Segment to unmerge cannot be null");
 
@@ -897,13 +882,6 @@ public class ProfileManager implements Loggable {
             fine("Segment has no merge sources - cannot unmerge");
             return;
         }
-
-        DatasetValidator dv = new DatasetValidator();
-        if (!dv.validate(collection)) {
-        	warn("Segments are out of sync with median");
-        	warn("Canceling unmerge");
-        	return;
-        }
         
         // unmerge the two segments in the median - this is only a copy of the profile collection
         medianProfile.unmergeSegment(segId);
@@ -915,11 +893,13 @@ public class ProfileManager implements Loggable {
          * With the median profile segments unmerged, also unmerge the segments
          * in the individual nuclei
          */
-        for (Nucleus n : collection.getNuclei()) {
-        	boolean wasLocked = n.isLocked();
-        	n.setLocked(false);
-        	unmergeSegments(n, segId);
-        	n.setLocked(wasLocked);
+        if(collection.isReal()) {
+        	for (Nucleus n : collection.getNuclei()) {
+        		boolean wasLocked = n.isLocked();
+        		n.setLocked(false);
+        		unmergeSegments(n, segId);
+        		n.setLocked(wasLocked);
+        	}
         }
         
         /* Update the consensus if present */
