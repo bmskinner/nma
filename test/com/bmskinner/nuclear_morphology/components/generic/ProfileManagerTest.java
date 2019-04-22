@@ -210,17 +210,16 @@ public class ProfileManagerTest {
 		
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 		
+		assertEquals(segIds.size()-1, newIds.size());
+		assertTrue(newIds.contains(newId));
+		assertFalse(newIds.contains(segId1));
+		assertFalse(newIds.contains(segId2));
+		IBorderSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
+		assertTrue(mergedSegment.hasMergeSources());
+		assertTrue(mergedSegment.hasMergeSource(segId1));
+		assertTrue(mergedSegment.hasMergeSource(segId2));
+		
 		if(collection.isReal()) {
-			assertEquals(segIds.size()-1, newIds.size());
-			assertTrue(newIds.contains(newId));
-			assertFalse(newIds.contains(segId1));
-			assertFalse(newIds.contains(segId2));
-			IBorderSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
-			assertTrue(mergedSegment.hasMergeSources());
-			assertTrue(mergedSegment.hasMergeSource(segId1));
-			assertTrue(mergedSegment.hasMergeSource(segId2));
-
-
 			for(Nucleus n : collection.getNuclei()) {
 				ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
@@ -232,20 +231,6 @@ public class ProfileManagerTest {
 				assertTrue(mergedSeg.hasMergeSources());
 				assertTrue(mergedSeg.hasMergeSource(segId1));
 				assertTrue(mergedSeg.hasMergeSource(segId2));
-			}
-		} else {
-			assertEquals(segIds.size(), newIds.size());
-			assertFalse(newIds.contains(newId));
-			assertTrue(newIds.contains(segId1));
-			assertTrue(newIds.contains(segId2));
-
-			for(Nucleus n : collection.getNuclei()) {
-				ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-				List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
-				assertEquals(newIds.size(), nucleusIds.size());
-				assertFalse(newIds.contains(newId));
-				assertTrue(newIds.contains(segId1));
-				assertTrue(newIds.contains(segId2));
 			}
 		}
 	}
@@ -260,7 +245,10 @@ public class ProfileManagerTest {
 		UUID segId2 = profile.getSegmentAt(2).getID();
 		IBorderSegment seg1 = profile.getSegmentAt(1);
 		IBorderSegment seg2 = profile.getSegmentAt(2);
-
+		
+		if(collection.isVirtual())
+			return;
+		
 		manager.mergeSegments(seg1, seg2, newId);
 		DatasetValidator dv = new DatasetValidator();
 		assertTrue(dv.validate(collection));
