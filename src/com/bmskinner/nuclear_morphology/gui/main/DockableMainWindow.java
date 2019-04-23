@@ -181,7 +181,6 @@ public class DockableMainWindow extends AbstractMainWindow {
            
             this.pack();
             consensusNucleusPanel.restoreAutoBounds();
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error initialising main view: " + e.getMessage(), e);
         }

@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -20,6 +22,7 @@ import com.google.gson.JsonParser;
  */
 public class UpdateChecker {
 	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	private static final String DOWNLOAD_URL = "https://api.bitbucket.org/2.0/repositories/bmskinner/nuclear_morphology/downloads/";
 	private static final String NAME_PATTERN = "Nuclear_Morphology_Analysis_(\\d+\\.\\d+\\.\\d+)";
 	
@@ -28,7 +31,7 @@ public class UpdateChecker {
 	 * @return the latest version found. Will be the current version on error.
 	 */
 	public static Version fetchLatestVersion() {
-		Version latestVersion = Version.currentVersion();
+		Version latestVersion = Version.v_1_13_0;
 		try {
 
 			Pattern p = Pattern.compile(NAME_PATTERN);
@@ -53,8 +56,7 @@ public class UpdateChecker {
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.fine("Unable to fetch latest version from website; using current version");
 		}
 		return latestVersion;
 	}
@@ -72,10 +74,9 @@ public class UpdateChecker {
 		isLaterVersion = latestVersion.isNewerThan(Version.currentVersion());
 
 		if(isLaterVersion)
-			System.out.println("Found later version: " +latestVersion );
+			LOGGER.fine("Found later version: " +latestVersion);
 		else
-			System.out.println("Up to date: " +latestVersion );
-
+			LOGGER.fine("Up to date: " +latestVersion);
 		return isLaterVersion;
 	}
 	

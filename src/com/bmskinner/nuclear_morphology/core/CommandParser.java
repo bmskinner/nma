@@ -22,10 +22,12 @@ import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.api.SavedOptionsAnalysisPipeline;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
+import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
@@ -128,8 +130,7 @@ public class CommandParser implements Loggable {
                     UIManager.setLookAndFeel(
                             UIManager.getSystemLookAndFeelClassName());
                 } catch (Exception e) {
-                	System.err.println("Error setting UI look and feel");
-                    e.printStackTrace();
+                	error("Error setting UI look and feel", e);
                 }
                 
                 boolean useStandalone = true;
@@ -149,7 +150,16 @@ public class CommandParser implements Loggable {
                     mw.setVisible(true);
                 }
                 
-                
+                // Check quietly for updates
+                Runnable r1 = () -> {
+    				Version v = UpdateChecker.fetchLatestVersion();
+    				fine("Latest online version is "+v.toString());
+    				if(v.isNewerThan(Version.currentVersion())) {
+    					log("A new version - "+v+" - is available");
+    					log("Get it at https://bitbucket.org/bmskinner/nuclear_morphology/downloads/");
+    				}
+    			};
+    			ThreadManager.getInstance().submit(r1);
         };
         java.awt.EventQueue.invokeLater( r );
         } catch(Exception e){
