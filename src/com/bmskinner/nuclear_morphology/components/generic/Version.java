@@ -17,9 +17,14 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Hold version information, and parsing methods
@@ -29,6 +34,8 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public class Version implements Serializable {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -77,9 +84,21 @@ public class Version implements Serializable {
      * @return
      */
     public static Version currentVersion() {
-        return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+//        return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+        try {
+        	LOGGER.fine("Reading properties file: "+"project.properties");
+        	InputStream is = Version.class.getResourceAsStream("project.properties");
+            Properties p = new Properties();
+			p.load(is);
+	        String version = p.getProperty("version");
+	        return fromString(version);
+		} catch (IOException | NullPointerException e) {
+			LOGGER.fine("Cannot read properties file: "+e.getMessage());
+			LOGGER.config("Using default version");
+			return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+		}
     }
-    
+        
     /**
      * Parse the given string to a version. The string should have three
      * integers separated by dots - e.g. 1.11.5. Convenience method.
