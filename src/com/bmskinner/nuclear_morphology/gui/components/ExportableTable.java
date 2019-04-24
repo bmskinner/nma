@@ -68,7 +68,7 @@ public class ExportableTable extends JTable {
 
             @Override
             public void columnResized(int column, int newWidth) {
-                updateRowHeights(column, newWidth, ExportableTable.this);
+                updateRowHeights();
             }
 
         };
@@ -103,13 +103,7 @@ public class ExportableTable extends JTable {
     	else
     		return false;
     }
-    
-    public void updateRowHeights() {
-    	for(int i=0; i<this.getColumnCount(); i++) {
-    		updateRowHeights(i, this.getColumnModel().getColumn(i).getWidth(), this);
-    	}
-    }
-    
+       
     
     /**
      * Ensure rows are high enough to fill all text
@@ -117,15 +111,17 @@ public class ExportableTable extends JTable {
      * @param width the column width
      * @param table the table
      */
-    private static void updateRowHeights(int column, int width, JTable table){
-        for (int row = 0; row < table.getRowCount(); row++) {
-            int rowHeight = table.getRowHeight();
-            Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
-            Dimension d = comp.getPreferredSize();
-            comp.setSize(new Dimension(width, d.height));
-            d = comp.getPreferredSize();
-            rowHeight = Math.max(rowHeight, d.height);
-            table.setRowHeight(row, rowHeight);
+    public void updateRowHeights(){
+        for (int row = 0; row < getRowCount(); row++) {
+            int rowHeight = 0;
+            for(int col=0; col<getColumnCount(); col++) {
+            	 Component comp = prepareRenderer(getCellRenderer(row, col), row, col);
+                 Dimension d = comp.getPreferredSize();
+                 comp.setSize(new Dimension(this.getColumnModel().getColumn(col).getWidth(), d.height));
+                 d = comp.getPreferredSize();
+                 rowHeight = Math.max(rowHeight, d.height);
+            }
+            setRowHeight(row, rowHeight);
         }
     }
         
