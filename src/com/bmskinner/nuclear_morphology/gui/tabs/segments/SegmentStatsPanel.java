@@ -118,7 +118,7 @@ public class SegmentStatsPanel extends DetailPanel {
                 .setScale(GlobalOptions.getInstance().getScale())
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setTarget(table)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
+                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
                 .build();
         return options;
     }

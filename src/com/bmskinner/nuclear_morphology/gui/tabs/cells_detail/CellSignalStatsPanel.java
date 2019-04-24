@@ -94,7 +94,7 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
                 .setCell(this.getCellModel().getCell()).setScale(GlobalOptions.getInstance().getScale())
                 .setTarget(table)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new CellSignalColocalisationRenderer()).build();
+                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new CellSignalColocalisationRenderer()).build();
 
         try {
 

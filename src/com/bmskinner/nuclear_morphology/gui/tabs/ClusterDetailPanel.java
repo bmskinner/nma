@@ -18,22 +18,30 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -127,6 +135,7 @@ public class ClusterDetailPanel extends DetailPanel {
                 return false;
             }
         };
+        clusterDetailsTable.setRowHeight(80);
 
         setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
 
@@ -329,7 +338,7 @@ public class ClusterDetailPanel extends DetailPanel {
         TableOptions options = new TableOptionsBuilder()
         		.setDatasets(getDatasets())
         		.setTarget(clusterDetailsTable)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new ClusterTableCellRenderer())
+                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new JTextAreaColumn()) //new ClusterTableCellRenderer()
                 .build();
 
         setTable(options);
@@ -396,7 +405,7 @@ public class ClusterDetailPanel extends DetailPanel {
     /**
      * Colour analysis parameter table cell background. If parameters are false
      * or N/A, make the text colour grey
-     */
+     */    
     public class ClusterTableCellRenderer extends DefaultTableCellRenderer {
 
         public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
@@ -415,6 +424,43 @@ public class ClusterDetailPanel extends DetailPanel {
 
             setForeground(colour);
             return this;
+        }
+
+    }
+    
+    private static class JTextAreaColumn extends AbstractCellEditor implements TableCellRenderer,TableCellEditor {
+
+        private JTextArea area = new JTextArea();
+        private JScrollPane pane = new JScrollPane(area);
+        private static final Font DEFAULT_FONT = new Font("Dialog", Font.PLAIN, 12);
+
+        @Override
+        public Object getCellEditorValue() {
+            return area.getText();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table,
+                Object value, boolean isSelected, int row, int column) {
+            area.setText(value == null ? "" : value.toString());        
+            return pane;
+        }
+
+        private void setColor(boolean isSelected, JTable table) {
+            area.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+            area.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table,
+                Object value, boolean isSelected, boolean hasFocus, int row,
+                int column) {
+            area.setText(value == null ? "" : value.toString());
+            setColor(isSelected,table);
+            area.setFont(DEFAULT_FONT);
+            area.setBorder(null);
+            pane.setBorder(null);
+            return pane;
         }
 
     }

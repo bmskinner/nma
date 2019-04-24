@@ -222,7 +222,7 @@ public class MergesDetailPanel extends DetailPanel {
         TableOptions options = new TableOptionsBuilder().setDatasets(mergeSources)
                 .setType(TableType.ANALYSIS_PARAMETERS)
                 .setTarget(sourceParametersTable)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
+                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
                 .build();
 
         setTable(options);

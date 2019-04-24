@@ -225,6 +225,9 @@ public class Labels {
     	public static final String CLUSTER_GROUP    = "Cluster group";
     	public static final String CLUSTER_FOUND    = "Clusters found";
     	public static final String CLUSTER_METHOD   = "Method";
+    	public static final String CLUSTER_PARAMS   = "Parameters";
+    	public static final String CLUSTER_DIM_RED  = "Dimensional reduction";
+    	
     	public static final String HC_ITERATIONS    = "Iterations";
     	public static final String HC_METHOD        = "Hierarchical method";
     	public static final String TARGET_CLUSTERS  = "Target cluster number";

@@ -108,7 +108,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
     protected void updateSingle() {
 
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalDetectionSettingsTableCellRenderer())
+                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalDetectionSettingsTableCellRenderer())
                 .build();
 
         setTable(options);

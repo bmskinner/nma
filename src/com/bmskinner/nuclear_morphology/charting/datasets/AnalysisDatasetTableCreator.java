@@ -65,6 +65,7 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -1110,21 +1111,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      */
     public TableModel createClusterOptionsTable() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return createBlankTable();
-        }
 
-        // Check that there are some cluster groups to render
-        boolean hasClusters = false;
-        for (IAnalysisDataset d : options.getDatasets()) {
-            if (d.hasClusters()) {
-                hasClusters = true;
-            }
-        }
-
-        if (!hasClusters) {
-            return createBlankTable();
-        }
+        // Check that there are some cluster groups to render        
+        if(options.getDatasets().stream().noneMatch(IAnalysisDataset::hasClusters))
+        	return createBlankTable();
 
         // Make the table model
 
@@ -1134,20 +1126,25 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         columnList.add(Labels.Clusters.CLUSTER_GROUP);
         columnList.add(Labels.Clusters.CLUSTER_FOUND);
         columnList.add(Labels.Clusters.CLUSTER_METHOD);
-        columnList.add(Labels.Clusters.HC_ITERATIONS);
-        columnList.add(Labels.Clusters.HC_METHOD);
-        columnList.add(Labels.Clusters.TARGET_CLUSTERS);
-        columnList.add(Labels.Clusters.INCLUDE_PROFILE);
-        columnList.add(Labels.Clusters.PROFILE_TYPE);
-        columnList.add(Labels.Clusters.INCLUDE_MESH);
+        columnList.add(Labels.Clusters.CLUSTER_DIM_RED);
+        columnList.add(Labels.Clusters.CLUSTER_PARAMS);
+        
+        
+        
+        
+//        columnList.add(Labels.Clusters.HC_ITERATIONS);
+//        columnList.add(Labels.Clusters.HC_METHOD);
+//        columnList.add(Labels.Clusters.TARGET_CLUSTERS);
+//        columnList.add(Labels.Clusters.INCLUDE_PROFILE);
+//        columnList.add(Labels.Clusters.PROFILE_TYPE);
+//        columnList.add(Labels.Clusters.INCLUDE_MESH);
+        
+//        NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
+//        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
+//            columnList.add("Include " + stat.toString());
+//        }
 
-        NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
-
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
-            columnList.add("Include " + stat.toString());
-        }
-
-        columnList.add(Labels.Clusters.INCLUDE_SEGMENTS);
+//        columnList.add(Labels.Clusters.INCLUDE_SEGMENTS);
         columnList.add(Labels.Clusters.TREE);
 
         model.addColumn(EMPTY_STRING, columnList.toArray());
@@ -1159,84 +1156,94 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
 
             for (IClusterGroup g : clusterGroups) {
-                Optional<IClusteringOptions> opn = g.getOptions();
-                List<Object> dataList = new ArrayList<>();
-                if(!opn.isPresent()){
-                	dataList.add(g.getName());
-                    dataList.add(g.size());
-                	for(int i=0; i<26; i++){
-                		dataList.add(Labels.NA);
-                	}
-                	model.addColumn(dataset.getName(), dataList.toArray());
-                	continue;
-                }
-                IClusteringOptions op = opn.get();
-
-                dataList.add(g.getName());
-                dataList.add(g.size());
-                String tree = g.hasTree() ? g.getTree() : Labels.NA;
-                try {
-
-                	Object iterationString = ClusteringMethod.EM.equals(op.getType()) ? op.getIterations() : Labels.NA;
-
-                	Object hierarchicalMethodString = ClusteringMethod.HIERARCHICAL.equals(op.getType())
-                			? op.getHierarchicalMethod().toString() : Labels.NA;
-
-                			Object hierarchicalClusterString = ClusteringMethod.HIERARCHICAL.equals(op.getType())
-                					? op.getClusterNumber() : Labels.NA;
-
-                        
-
-                        
-                        dataList.add(op.getType().toString());
-                        dataList.add(iterationString);
-
-                        dataList.add(hierarchicalMethodString);
-                        dataList.add(hierarchicalClusterString);
-                        
-                } catch (NullPointerException e) {
-                    dataList.add(Labels.NA);
-                    dataList.add(Labels.NA);
-                    dataList.add(Labels.NA);
-                    dataList.add(Labels.NA);
-                }  
-
-                try {
+            	
+            	List<String> dataList = new ArrayList<>();
+            	dataList.add(g.getName());
+                dataList.add(String.valueOf(g.size()));
+            	
+                String dimRed = createDimensionalReductionString(g);
                 
-                	dataList.add(op.isIncludeProfile());
-
-                	String profileTypeString = op.isIncludeProfile() ? op.getProfileType().toString() : "N/A";
-                	dataList.add(profileTypeString);
-
-                	dataList.add(op.isIncludeMesh());
-                } catch (NullPointerException e) {
-                    dataList.add(Labels.NA);
-                }
-                
-
-                for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
-                    try {
-                        dataList.add(op.isIncludeStatistic(stat));
-                    } catch (NullPointerException e) {
-                        dataList.add(Labels.NA);
-                    }
-                }
-
-                boolean seg = false;
-
-                for (UUID id : op.getSegments()) {
-                	seg |= op.isIncludeSegment(id);
-                }
-                dataList.add(seg);
-
-                
-                dataList.add(tree);
-
+                String cluterMethod = createClusterMethodString(g);
+            	String params = createClusterParameterString(g);
+            	
+            	dataList.add(cluterMethod);
+            	dataList.add(dimRed);
+            	dataList.add(params);
+                	
+                if(g.hasTree())
+                	dataList.add(g.getTree());
+                else
+                	dataList.add(EMPTY_STRING);
+   
                 model.addColumn(dataset.getName(), dataList.toArray());
             }
         }
 
         return model;
     }
+    
+    private String createClusterParameterString(IClusterGroup group) {
+    	StringBuilder builder = new StringBuilder();
+    	Optional<IClusteringOptions> opn = group.getOptions();
+    	
+    	if(!opn.isPresent()) {
+    		builder.append(Labels.NA);
+    		return builder.toString();
+    	}
 
+        IClusteringOptions op = opn.get();
+
+        if(op.isIncludeProfile())
+        	builder.append(op.getProfileType()+Io.NEWLINE);
+ 
+        NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
+        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type))
+        	if(op.isIncludeStatistic(stat))
+        		builder.append(stat.toString()+Io.NEWLINE);
+
+        for (UUID id : op.getSegments())
+        	if(op.isIncludeSegment(id))
+        		builder.append("Segment_"+id.toString()+Io.NEWLINE);
+        return builder.toString();
+    }
+
+    
+    private String createDimensionalReductionString(IClusterGroup group) {
+    	StringBuilder builder = new StringBuilder();
+    	Optional<IClusteringOptions> opn = group.getOptions();
+    	
+    	if(!opn.isPresent()) {
+    		builder.append(Labels.NA);
+    		return builder.toString();
+    	}
+
+        IClusteringOptions op = opn.get();
+        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY))
+        	builder.append("t-SNE");
+        
+        return builder.toString();
+    }
+    
+    private String createClusterMethodString(IClusterGroup group) {
+    	StringBuilder builder = new StringBuilder();
+    	Optional<IClusteringOptions> opn = group.getOptions();
+    	
+    	if(!opn.isPresent()) {
+    		builder.append(Labels.NA);
+    		return builder.toString();
+    	}
+    	
+    	IClusteringOptions op = opn.get();
+    	
+    	ClusteringMethod method = op.getType();
+    	builder.append(method+Io.NEWLINE);
+    	if(method.equals(ClusteringMethod.EM)) {
+    		builder.append(op.getIterations()+Io.NEWLINE);
+    	}
+    	
+    	if(method.equals(ClusteringMethod.HIERARCHICAL)) {
+    		builder.append(op.getHierarchicalMethod()+Io.NEWLINE);
+    	}
+        return builder.toString();
+    }
 }

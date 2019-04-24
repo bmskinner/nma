@@ -109,7 +109,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
 
                     TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
                             .setSegPosition(seg.getPosition()).setTarget(table)
-                            .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new PairwiseTableCellRenderer()).build();
+                            .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new PairwiseTableCellRenderer()).build();
 
                     addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
                     scrollPane.setColumnHeaderView(table.getTableHeader());

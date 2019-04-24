@@ -301,7 +301,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
                 .setType(TableType.SIGNAL_STATS_TABLE)
                 .setTarget(statsTable)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer())
+                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer())
                 .build();
 
         setTable(options);

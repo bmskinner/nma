@@ -96,7 +96,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 
                     TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
                             .setSegPosition(seg.getPosition()).setTarget(table)
-                            .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer()).build();
+                            .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer()).build();
 
                     addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
                     setTable(options);

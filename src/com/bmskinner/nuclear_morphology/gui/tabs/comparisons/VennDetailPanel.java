@@ -91,7 +91,7 @@ public class VennDetailPanel extends DetailPanel {
     @Override
     protected void updateMultiple() {
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.VENN)
-                .setTarget(vennTable).setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer())
+                .setTarget(vennTable).setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer())
                 .build();
 
         setTable(options);

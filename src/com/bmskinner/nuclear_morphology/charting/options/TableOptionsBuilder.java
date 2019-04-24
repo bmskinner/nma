@@ -97,17 +97,15 @@ public class TableOptionsBuilder {
     /**
      * Set the table renderer to use
      * 
-     * @param column
-     *            the column to apply the renderer to
-     * @param r
-     *            the renderer
+     * @param column the column to apply the renderer to
+     * @param r the renderer
      * @return
      */
-    public TableOptionsBuilder setRenderer(int column, TableCellRenderer r) {
+    public TableOptionsBuilder setColumnRenderer(int column, TableCellRenderer r) {
         options.setRenderer(column, r);
         return this;
     }
-
+    
     public TableOptionsBuilder setAggregation(Aggregation c) {
         options.setAggregation(c);
         return this;

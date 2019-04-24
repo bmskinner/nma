@@ -75,7 +75,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
             		.setDatasets(getDatasets())
             		.addStatistic(stat)
                     .setTarget(table)
-                    .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
+                    .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
                     .build();
 
             addWilconxonTable(tablePanel, table, stat.toString());

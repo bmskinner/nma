@@ -161,7 +161,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
                 .setCell(this.getCellModel().getCell())
                 .setScale(GlobalOptions.getInstance().getScale())
                 .setTarget(table)
-                .setRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer())
+                .setColumnRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer())
                 .build();
 
         try {

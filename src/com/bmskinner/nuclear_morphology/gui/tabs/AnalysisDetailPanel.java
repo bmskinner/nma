@@ -96,7 +96,7 @@ public class AnalysisDetailPanel extends DetailPanel {
         		.setDatasets(getDatasets())
                 .setType(TableType.ANALYSIS_PARAMETERS)
                 .setTarget(tableAnalysisParameters)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
+                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
                 .build();
 
         setTable(options);

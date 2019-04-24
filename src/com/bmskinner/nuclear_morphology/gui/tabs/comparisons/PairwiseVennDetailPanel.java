@@ -96,7 +96,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
     protected void updateMultiple() {
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.PAIRWISE_VENN)
                 .setTarget(pairwiseVennTable)
-                .setRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets())).build();
+                .setColumnRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets())).build();
 
         setTable(options);
     }
