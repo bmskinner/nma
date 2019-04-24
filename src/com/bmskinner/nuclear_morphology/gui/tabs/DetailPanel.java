@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +52,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
+import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEventListener;
@@ -821,7 +823,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
 
         public TableFactoryWorker(@NonNull final TableOptions o) {
             options = o;
-
         }
 
         @Override
@@ -847,11 +848,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
         public synchronized void done() {
 
             try {
-                if (options.getTarget() != null) {
+            	JTable table = options.getTarget();
+                if (table != null) {
                     TableModel model = get();
                     if (model != null) {
-                        options.getTarget().setModel(model);
+                    	table.setModel(model);
                         setRenderers();
+                        if(table instanceof ExportableTable)
+                        	((ExportableTable) table).updateRowHeights();
                     }
 
                     options.getTarget().setCursor(Cursor.getDefaultCursor());
@@ -870,8 +874,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
             log("Cancelling detail panel table update");
             this.cancel(true);
         }
-        
-        
+                
         private synchronized void setRenderers() {
             JTable table = options.getTarget();
             

@@ -16,14 +16,24 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -49,7 +59,25 @@ public class ExportableTable extends JTable {
         super(model);
         setComponentPopupMenu(new TablePopupMenu());
         this.isGlobalEditable = isGlobalEditable;
+        
+        ColumnListener cl = new ColumnListener(){
+
+            @Override
+            public void columnMoved(int oldLocation, int newLocation) {
+            }
+
+            @Override
+            public void columnResized(int column, int newWidth) {
+                updateRowHeights(column, newWidth, ExportableTable.this);
+            }
+
+        };
+        
+        getColumnModel().addColumnModelListener(cl);
+        getTableHeader().addMouseListener(cl);
     }
+    
+    
     
     /**
      * Create an empty table
@@ -75,6 +103,125 @@ public class ExportableTable extends JTable {
     	else
     		return false;
     }
+    
+    public void updateRowHeights() {
+    	for(int i=0; i<this.getColumnCount(); i++) {
+    		updateRowHeights(i, this.getColumnModel().getColumn(i).getWidth(), this);
+    	}
+    }
+    
+    
+    /**
+     * Ensure rows are high enough to fill all text
+     * @param column the column to check
+     * @param width the column width
+     * @param table the table
+     */
+    private static void updateRowHeights(int column, int width, JTable table){
+        for (int row = 0; row < table.getRowCount(); row++) {
+            int rowHeight = table.getRowHeight();
+            Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+            Dimension d = comp.getPreferredSize();
+            comp.setSize(new Dimension(width, d.height));
+            d = comp.getPreferredSize();
+            rowHeight = Math.max(rowHeight, d.height);
+            table.setRowHeight(row, rowHeight);
+        }
+    }
+        
+    /**
+     * Allow row heights to be resized when column widths change
+     * @author bms41
+     * @since 1.16.0
+     *
+     */
+    private abstract class ColumnListener extends MouseAdapter implements TableColumnModelListener {
+
+        private int oldIndex = -1;
+        private int newIndex = -1;
+        private boolean dragging = false;
+
+        private boolean resizing = false;
+        private int resizingColumn = -1;
+        private int oldWidth = -1;
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            // capture start of resize
+            if(e.getSource() instanceof JTableHeader) {
+                JTableHeader header = (JTableHeader)e.getSource();
+                TableColumn tc = header.getResizingColumn();
+                if(tc != null) {
+                    resizing = true;
+                    JTable table = header.getTable();
+                    resizingColumn = table.convertColumnIndexToView( tc.getModelIndex());
+                    oldWidth = tc.getPreferredWidth();
+                } else {
+                    resizingColumn = -1;
+                    oldWidth = -1;
+                }
+            }   
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            // column moved
+            if(dragging && oldIndex != newIndex) {
+                columnMoved(oldIndex, newIndex);
+            }
+            dragging = false;
+            oldIndex = -1;
+            newIndex = -1;
+
+            // column resized
+            if(resizing) {
+                if(e.getSource() instanceof JTableHeader) {
+                    JTableHeader header = (JTableHeader)e.getSource();
+                    TableColumn tc = header.getColumnModel().getColumn(resizingColumn);
+                    if(tc != null) {
+                        int newWidth = tc.getPreferredWidth();
+                        if(newWidth != oldWidth) {
+                            columnResized(resizingColumn, newWidth);
+                        }
+                    }
+                }   
+            }
+            resizing = false;
+            resizingColumn = -1;
+            oldWidth = -1;
+        }
+
+        @Override
+        public void columnAdded(TableColumnModelEvent e) {      
+        }
+
+        @Override
+        public void columnRemoved(TableColumnModelEvent e) {        
+        }
+
+        @Override
+        public void columnMoved(TableColumnModelEvent e) {
+            // capture dragging
+            dragging = true;
+            if(oldIndex == -1){
+                oldIndex = e.getFromIndex();
+            }
+
+            newIndex = e.getToIndex();  
+        }
+
+        @Override
+        public void columnMarginChanged(ChangeEvent e) {
+        }
+
+        @Override
+        public void columnSelectionChanged(ListSelectionEvent e) {
+        }
+
+        public abstract void columnMoved(int oldLocation, int newLocation);
+        public abstract void columnResized(int column, int newWidth);
+    }
+    
     
     /**
      * The popup menu for the table
