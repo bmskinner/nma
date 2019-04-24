@@ -256,8 +256,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	// need to transpose the matrix
     	for(int i=0; i<nuclei.size(); i++) {
     		Nucleus n = nuclei.get(i);
-    		xpoints[i] =n.getStatistic(PlottableStatistic.TSNE_X);
-    		ypoints[i] =n.getStatistic(PlottableStatistic.TSNE_Y);
+    		xpoints[i] =n.getStatistic(PlottableStatistic.TSNE_1);
+    		ypoints[i] =n.getStatistic(PlottableStatistic.TSNE_2);
     	}
     	
     	double[][] data = { xpoints, ypoints };

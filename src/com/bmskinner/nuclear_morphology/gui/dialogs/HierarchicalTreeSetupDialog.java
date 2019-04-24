@@ -163,7 +163,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 		Map<UUID, JCheckBox> segmentBoxMap = new HashMap<>();
 
 		// Only allow the tSNE option if it has been calculated
-		boolean hasTsne = dataset.getCollection().getNuclei().stream().allMatch(n->n.hasStatistic(PlottableStatistic.TSNE_X));
+		boolean hasTsne = dataset.getCollection().getNuclei().stream().allMatch(n->n.hasStatistic(PlottableStatistic.TSNE_1));
 		String includeTsneString = hasTsne ? EMPTY_STRING : "  N/A";
 		JCheckBox includeTsneCheckBox = new JCheckBox(includeTsneString);
 		includeTsneCheckBox.setSelected(hasTsne);

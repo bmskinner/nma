@@ -83,8 +83,8 @@ public class ProfileTsneMethod  extends SingleDatasetAnalysisMethod {
 		// store this in the cell collection, attached to each cell
 		for(int i=0; i<nuclei.size(); i++) {
 			Nucleus n = nuclei.get(i);	
-			n.setStatistic(PlottableStatistic.TSNE_X, tSneResult[i][0]);
-			n.setStatistic(PlottableStatistic.TSNE_Y, tSneResult[i][1]);
+			n.setStatistic(PlottableStatistic.TSNE_1, tSneResult[i][0]);
+			n.setStatistic(PlottableStatistic.TSNE_2, tSneResult[i][1]);
 		}
 		
 		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();

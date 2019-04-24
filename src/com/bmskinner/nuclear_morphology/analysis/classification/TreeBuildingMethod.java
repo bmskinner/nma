@@ -341,9 +341,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         
         if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
         	Attribute attX = (Attribute) attributes.elementAt(attNumber++);
-        	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_X));
+        	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_1));
         	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
-        	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_Y));
+        	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
         }
 
         instances.add(inst);
