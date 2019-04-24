@@ -203,11 +203,11 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         // Clear the old chart
         chartPanel.setChart(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
 
-        log("Testing " + windowSizeMin + " - " + windowSizeMax);
+        fine("Testing " + windowSizeMin + " - " + windowSizeMax);
 
         try {
         	for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {
-        		fine("Calculating " + i+"...");
+        		finest("Calculating " + i+"...");
         	    final double j = i;
         		// make a duplicate collection
         		final ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
@@ -242,7 +242,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         	stack(e.getMessage(), e);
         }
         setAnalysing(false);
-        log("Profiling complete");
+        fine("Profiling complete");
     }
 
     private void updateChart(@NonNull IProfile profile, double windowSize) {

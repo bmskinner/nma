@@ -541,22 +541,22 @@ public class EventHandler implements Loggable, EventListener {
             }
 
             if (event.method().equals(DatasetEvent.CLUSTER)) {
-                log("Clustering dataset");
+            	fine("Clustering dataset");
                 return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
             }
             
             if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
-                log("Maunally clustering dataset");
+                fine("Manually clustering dataset");
                 return new ManualClusterAction(event.firstDataset(), acceptor, EventHandler.this);
             }
             
             if (event.method().equals(DatasetEvent.RUN_TSNE)) {
-                log("Running t-SNE");
+            	fine("Running t-SNE");
                 return new RunTsneAction(event.firstDataset(), acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.BUILD_TREE)) {
-                log("Building a tree from dataset");
+            	fine("Building a tree from dataset");
                 return new BuildHierarchicalTreeAction(event.firstDataset(), acceptor, EventHandler.this);
             }
 
