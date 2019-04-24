@@ -99,6 +99,8 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
      */
     @Override
 	public boolean getBoolean(String s) {
+    	if(!boolMap.containsKey(s))
+    		return false;
         return boolMap.get(s).booleanValue();
     }
 

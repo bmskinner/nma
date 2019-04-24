@@ -50,6 +50,7 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.Hi
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.components.panels.DimensionalReductionSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ParameterSelectionPanel;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 
@@ -126,6 +127,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.add(createClusterMethodPanel());
+		panel.add(new DimensionalReductionSelectionPanel(dataset, options));
+		
 		panel.add(createIncludePanel());
 		return panel;
 	}

@@ -49,6 +49,7 @@ public class ParameterSelectionPanel extends JPanel {
 		super();
 		this.dataset = dataset;
 		this.options = options;
+//		setDefaults();
 		add(createUI());
 	}
 	
@@ -62,6 +63,23 @@ public class ParameterSelectionPanel extends JPanel {
 		panel.add(createSsegmentsPanel());
 		
 		return panel;
+	}
+	
+	private void setDefaults() {
+		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats((dataset.getCollection().getNucleusType())))
+			options.setBoolean(stat.toString(), false);
+
+		for(ProfileType t : ProfileType.displayValues())
+			options.setBoolean(t.toString(), false);
+		
+		options.setBoolean(ProfileType.ANGLE.toString(), true);
+
+		try {
+			for (IBorderSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT))
+				options.setBoolean(s.getID().toString(), false);
+		} catch(ProfileException | UnavailableBorderTagException e) {
+			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
+		}
 	}
 	
 	
@@ -79,7 +97,7 @@ public class ParameterSelectionPanel extends JPanel {
 			JCheckBox box = new JCheckBox();
 			box.addChangeListener(e ->  options.setBoolean(stat.toString(), box.isSelected()));
 			box.setForeground(Color.DARK_GRAY);
-
+			box.setSelected(options.getBoolean(stat.toString()));
 			JLabel label = new JLabel(stat.toString());
 			labels.add(label);
 			fields.add(box);
@@ -102,7 +120,7 @@ public class ParameterSelectionPanel extends JPanel {
 			JCheckBox box = new JCheckBox();
 			box.addChangeListener(e ->  options.setBoolean(t.toString(), box.isSelected()));
 			box.setForeground(Color.DARK_GRAY);
-
+			box.setSelected(options.getBoolean(t.toString()));
 			JLabel label = new JLabel(t.toString());
 			labels.add(label);
 			fields.add(box);
@@ -114,7 +132,7 @@ public class ParameterSelectionPanel extends JPanel {
 			JCheckBox box = new JCheckBox();
 			box.addChangeListener(e ->  options.setBoolean(stat.toString(), box.isSelected()));
 			box.setForeground(Color.DARK_GRAY);
-
+			box.setSelected(options.getBoolean(stat.toString()));
 			JLabel label = new JLabel(stat.toString());
 			labels.add(label);
 			fields.add(box);
@@ -138,6 +156,7 @@ public class ParameterSelectionPanel extends JPanel {
 				JCheckBox box = new JCheckBox();
 				box.setForeground(Color.DARK_GRAY);
 				box.addChangeListener(e->options.setBoolean(s.getID().toString(), box.isSelected()));
+				box.setSelected(options.getBoolean(s.getID().toString()));
 				JLabel label = new JLabel("Length of " + s.getName());
 				labels.add(label);
 				fields.add(box);
