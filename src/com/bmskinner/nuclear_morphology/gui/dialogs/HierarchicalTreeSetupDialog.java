@@ -50,6 +50,7 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.Hi
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ParameterSelectionPanel;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 
 /**
@@ -151,94 +152,97 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 	}
 
 	protected JPanel createIncludePanel() {
-		JPanel panel = new JPanel();
-		GridBagLayout layout = new GridBagLayout();
-		panel.setLayout(layout);
-
-		List<JLabel> labels = new ArrayList<>();
-		List<Component> fields = new ArrayList<>();
-
-
-		Map<PlottableStatistic, JCheckBox> statBoxMap = new HashMap<>();
-		Map<UUID, JCheckBox> segmentBoxMap = new HashMap<>();
-
-		// Only allow the tSNE option if it has been calculated
-		boolean hasTsne = dataset.getCollection().getNuclei().stream().allMatch(n->n.hasStatistic(PlottableStatistic.TSNE_1));
-		String includeTsneString = hasTsne ? EMPTY_STRING : "  N/A";
-		JCheckBox includeTsneCheckBox = new JCheckBox(includeTsneString);
-		includeTsneCheckBox.setSelected(hasTsne);
-		includeTsneCheckBox.setEnabled(hasTsne);
-		includeTsneCheckBox.addChangeListener(e-> options.setBoolean(IClusteringOptions.USE_TSNE_KEY, includeTsneCheckBox.isSelected()));
-		labels.add(new JLabel(INCLUDE_TSNE_LBL));
-		fields.add(includeTsneCheckBox); 
-
-		// Only set as default if there are no tSNE results
-		JCheckBox includeProfilesCheckBox = new JCheckBox(EMPTY_STRING);
-		includeProfilesCheckBox.setSelected(!hasTsne);
-
-		labels.add(new JLabel(INCLUDE_PROFILE_LBL));
-		fields.add(includeProfilesCheckBox);
-
-		// Add selection of profile type
-		JComboBox<ProfileType> profileBox = new JComboBox<>(ProfileType.displayValues());
-		profileBox.setSelectedItem(ProfileType.ANGLE);
-		profileBox.setEnabled(!hasTsne);
-
-		profileBox.addActionListener(e->options.setProfileType( (ProfileType) profileBox.getSelectedItem()));
-		labels.add(new JLabel("Profile type"));
-		fields.add(profileBox);
-
-		includeProfilesCheckBox.addChangeListener(e->{
-			options.setIncludeProfile(includeProfilesCheckBox.isSelected());
-			profileBox.setEnabled(includeProfilesCheckBox.isSelected());
-		});
-
-
-		// Add the individual stats
-		DecimalFormat pf = new DecimalFormat("#0.000");
-		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(dataset.getCollection().getNucleusType())) {
-
-			String pval = "";
-			double[] stats = dataset.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
-					MeasurementScale.PIXELS);
-			double diptest = DipTester.getDipTestPValue(stats);
-			pval = pf.format(diptest);
-
-			JCheckBox box = new JCheckBox(P_VALUE_LBL + pval, false);
-			box.addChangeListener(e ->  options.setIncludeStatistic(stat, box.isSelected()));
-			box.setForeground(Color.DARK_GRAY);
-
-			JLabel label = new JLabel(stat.toString());
-			labels.add(label);
-			fields.add(box);
-			statBoxMap.put(stat, box);
-		}
-
-		// Add the individual segments
-		try {
-			for (IBorderSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
-
-				String pval = "";
-
-				double[] stats = dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
-						CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, s.getID());
-				double diptest = DipTester.getDipTestPValue(stats);
-				pval = pf.format(diptest);
-
-				JCheckBox box = new JCheckBox(P_VALUE_LBL + pval);
-				box.setForeground(Color.DARK_GRAY);
-				box.setSelected(false);
-				box.addChangeListener(e->options.setIncludeSegment(s.getID(), box.isSelected()));
-				JLabel label = new JLabel("Length of " + s.getName());
-				labels.add(label);
-				fields.add(box);
-				segmentBoxMap.put(s.getID(), box);
-			}
-		} catch(ProfileException | UnavailableBorderTagException e) {
-			stack("Unable to get segments", e);
-		}
-
-		addLabelTextRows(labels, fields, layout, panel);
-		return panel;
+		
+		return new ParameterSelectionPanel(dataset, options);
+		
+//		JPanel panel = new JPanel();
+//		GridBagLayout layout = new GridBagLayout();
+//		panel.setLayout(layout);
+//
+//		List<JLabel> labels = new ArrayList<>();
+//		List<Component> fields = new ArrayList<>();
+//
+//
+////		Map<PlottableStatistic, JCheckBox> statBoxMap = new HashMap<>();
+////		Map<UUID, JCheckBox> segmentBoxMap = new HashMap<>();
+//
+//		// Only allow the tSNE option if it has been calculated
+//		boolean hasTsne = dataset.getCollection().getNuclei().stream().allMatch(n->n.hasStatistic(PlottableStatistic.TSNE_1));
+//		String includeTsneString = hasTsne ? EMPTY_STRING : "  N/A";
+//		JCheckBox includeTsneCheckBox = new JCheckBox(includeTsneString);
+//		includeTsneCheckBox.setSelected(hasTsne);
+//		includeTsneCheckBox.setEnabled(hasTsne);
+//		includeTsneCheckBox.addChangeListener(e-> options.setBoolean(IClusteringOptions.USE_TSNE_KEY, includeTsneCheckBox.isSelected()));
+//		labels.add(new JLabel(INCLUDE_TSNE_LBL));
+//		fields.add(includeTsneCheckBox); 
+//
+//		// Only set as default if there are no tSNE results
+//		JCheckBox includeProfilesCheckBox = new JCheckBox(EMPTY_STRING);
+//		includeProfilesCheckBox.setSelected(!hasTsne);
+//
+//		labels.add(new JLabel(INCLUDE_PROFILE_LBL));
+//		fields.add(includeProfilesCheckBox);
+//
+//		// Add selection of profile type
+//		JComboBox<ProfileType> profileBox = new JComboBox<>(ProfileType.displayValues());
+//		profileBox.setSelectedItem(ProfileType.ANGLE);
+//		profileBox.setEnabled(!hasTsne);
+//
+//		profileBox.addActionListener(e->options.setProfileType( (ProfileType) profileBox.getSelectedItem()));
+//		labels.add(new JLabel("Profile type"));
+//		fields.add(profileBox);
+//
+//		includeProfilesCheckBox.addChangeListener(e->{
+//			options.setIncludeProfile(includeProfilesCheckBox.isSelected());
+//			profileBox.setEnabled(includeProfilesCheckBox.isSelected());
+//		});
+//
+//
+//		// Add the individual stats
+//		DecimalFormat pf = new DecimalFormat("#0.000");
+//		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(dataset.getCollection().getNucleusType())) {
+//
+//			String pval = "";
+//			double[] stats = dataset.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
+//					MeasurementScale.PIXELS);
+//			double diptest = DipTester.getDipTestPValue(stats);
+//			pval = pf.format(diptest);
+//
+//			JCheckBox box = new JCheckBox(P_VALUE_LBL + pval, false);
+//			box.addChangeListener(e ->  options.setIncludeStatistic(stat, box.isSelected()));
+//			box.setForeground(Color.DARK_GRAY);
+//
+//			JLabel label = new JLabel(stat.toString());
+//			labels.add(label);
+//			fields.add(box);
+////			statBoxMap.put(stat, box);
+//		}
+//
+//		// Add the individual segments
+//		try {
+//			for (IBorderSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
+//
+//				String pval = "";
+//
+//				double[] stats = dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
+//						CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, s.getID());
+//				double diptest = DipTester.getDipTestPValue(stats);
+//				pval = pf.format(diptest);
+//
+//				JCheckBox box = new JCheckBox(P_VALUE_LBL + pval);
+//				box.setForeground(Color.DARK_GRAY);
+//				box.setSelected(false);
+//				box.addChangeListener(e->options.setIncludeSegment(s.getID(), box.isSelected()));
+//				JLabel label = new JLabel("Length of " + s.getName());
+//				labels.add(label);
+//				fields.add(box);
+////				segmentBoxMap.put(s.getID(), box);
+//			}
+//		} catch(ProfileException | UnavailableBorderTagException e) {
+//			stack("Unable to get segments", e);
+//		}
+//
+//		addLabelTextRows(labels, fields, layout, panel);
+//		return panel;
 	}
 }

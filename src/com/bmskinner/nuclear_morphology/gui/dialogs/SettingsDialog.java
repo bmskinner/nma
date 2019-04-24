@@ -140,7 +140,6 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
         JLabel[] labelArray = labels.toArray(new JLabel[0]);
         Component[] fieldArray = fields.toArray(new Component[0]);
         addLabelTextRows(labelArray, fieldArray, gridbag, container);
-
     }
 
     /**
