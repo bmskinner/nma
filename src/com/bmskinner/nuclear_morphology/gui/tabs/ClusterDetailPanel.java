@@ -83,8 +83,6 @@ public class ClusterDetailPanel extends DetailPanel {
     private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
     private JPanel statusPanel = new JPanel(new BorderLayout());
 
-    private JPanel showTreeButtonPanel;
-
     private JPanel          mainPanel;
     private ExportableTable clusterDetailsTable;
 
@@ -124,25 +122,31 @@ public class ClusterDetailPanel extends DetailPanel {
         TableCellRenderer textRenderer = new JTextAreaColumnRenderer();
         
         clusterDetailsTable = new ExportableTable(optionsModel) {
-            @Override
+           
+        	@Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return false;
             }
             
+            @Override
             public TableCellRenderer getCellRenderer(int row, int column) {
             	if(this.getValueAt(row, 0).equals(Labels.Clusters.TREE) && column>0 && this.getValueAt(row, column) instanceof IClusterGroup) {
             		return buttonRenderer;
             	}
             	return textRenderer;
             }
+            
+            @Override
+            public void validate() {
+            	updateRowHeights();
+            	super.validate();
+            }
         };
-        
         
         MouseListener mouseListener = new MouseListener() {
 
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				
+			public void mouseClicked(MouseEvent e) {				
 				int row = clusterDetailsTable.rowAtPoint(e.getPoint());
 				int col = clusterDetailsTable.columnAtPoint(e.getPoint());
 				Object value = clusterDetailsTable.getValueAt(row, col);
@@ -154,7 +158,7 @@ public class ClusterDetailPanel extends DetailPanel {
 	                    clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
 	                    clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
 	            	};
-	                new Thread(r).start();;
+	                new Thread(r).start();
 	        	}
 			}
 
@@ -264,13 +268,13 @@ public class ClusterDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateMultiple();
 
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         setEnabled(true);
 
         TableOptions options = new TableOptionsBuilder()
@@ -306,7 +310,7 @@ public class ClusterDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         updateMultiple();
 
     }
@@ -381,7 +385,7 @@ public class ClusterDetailPanel extends DetailPanel {
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
-            setText(value == null ? "" : "Show tree");
+            setText(value == null ? "" : SHOW_TREE_LBL);
             setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             return this;
         }

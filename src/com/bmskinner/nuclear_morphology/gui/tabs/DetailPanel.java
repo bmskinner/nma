@@ -854,11 +854,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
                     if (model != null) {
                     	table.setModel(model);
                         setRenderers();
-                        if(table instanceof ExportableTable)
+                        if(table instanceof ExportableTable) {
                         	((ExportableTable) table).updateRowHeights();
+                        }
                     }
-
-                    options.getTarget().setCursor(Cursor.getDefaultCursor());
+                    table.setCursor(Cursor.getDefaultCursor());
                 }
             } catch (InterruptedException e) {
                 warn("Interruption to table creation in " + DetailPanel.this.getClass().getName());
