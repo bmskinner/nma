@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -43,11 +44,17 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		JPanel panel = new JPanel();
 		BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
 		panel.setLayout(layout);
+				
+		JPanel shape = createShapePanel();
+		shape.setAlignmentY(Component.TOP_ALIGNMENT);
 		
-		panel.add(createShapePanel());
-		panel.add(createStatsPanel());
-//		panel.add(createSegmentsPanel());
+		JPanel stats = createStatsPanel();
+		stats.setAlignmentY(Component.TOP_ALIGNMENT);
 		
+		panel.add(shape);
+		panel.add(Box.createHorizontalGlue());
+		panel.add(stats);
+
 		panel.setBorder(BorderFactory.createTitledBorder("Parameters"));
 		return panel;
 	}
@@ -91,8 +98,6 @@ public class ParameterSelectionPanel extends OptionsPanel {
 			fields.add(box);
 		}
 		addLabelTextRows(labels, fields, layout, panel);
-		
-//		panel.setBorder(BorderFactory.createTitledBorder("Size"));
 		return panel;
 	}
 	
