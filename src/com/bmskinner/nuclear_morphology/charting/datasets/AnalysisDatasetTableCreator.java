@@ -1128,24 +1128,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         columnList.add(Labels.Clusters.CLUSTER_METHOD);
         columnList.add(Labels.Clusters.CLUSTER_DIM_RED);
         columnList.add(Labels.Clusters.CLUSTER_PARAMS);
-        
-        
-        
-        
-//        columnList.add(Labels.Clusters.HC_ITERATIONS);
-//        columnList.add(Labels.Clusters.HC_METHOD);
-//        columnList.add(Labels.Clusters.TARGET_CLUSTERS);
-//        columnList.add(Labels.Clusters.INCLUDE_PROFILE);
-//        columnList.add(Labels.Clusters.PROFILE_TYPE);
-//        columnList.add(Labels.Clusters.INCLUDE_MESH);
-        
-//        NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
-//        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
-//            columnList.add("Include " + stat.toString());
-//        }
 
-//        columnList.add(Labels.Clusters.INCLUDE_SEGMENTS);
-        columnList.add(Labels.Clusters.TREE);
+//        columnList.add(Labels.Clusters.TREE);
 
         model.addColumn(EMPTY_STRING, columnList.toArray());
 
@@ -1170,10 +1154,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             	dataList.add(dimRed);
             	dataList.add(params);
                 	
-                if(g.hasTree())
-                	dataList.add(g.getTree());
-                else
-                	dataList.add(Labels.NA);
+//                if(g.hasTree())
+//                	dataList.add(g.getTree());
+//                else
+//                	dataList.add(Labels.NA);
    
                 model.addColumn(dataset.getName(), dataList.toArray());
             }

@@ -23,6 +23,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Paint;
 import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
@@ -84,6 +87,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
     private static final String ANALYSE_LBL = "Analyse new clusters";
     private static final String SHOW_MGE_SRC_LBL = "Show merge sources";
     private static final String EXTRACT_LBL = "Extract selected as cluster";
+    private static final String COPY_NEWICK_LBL = "Copy Newick";
 
     private JPanel              buttonPanel;
     private DraggableTreeViewer viewer;
@@ -280,6 +284,16 @@ public class ClusterTreeDialog extends LoadingIconDialog {
             colourTreeNodesByClusterGroup(selectedClusterGroupBox.getSelectedItem());
         });
         panel.add(selectedClusterGroupBox);
+       
+        JButton copyNewickButton = new JButton(COPY_NEWICK_LBL);
+        copyNewickButton.addActionListener(a -> {
+        	StringSelection stringSelection = new StringSelection(group.getTree());
+        	Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        	clipboard.setContents(stringSelection, null);
+        	log("Copied Newick tree for cluster "+group.getName());
+        });
+        panel.add(copyNewickButton);
+        
 
         panel.add(this.getLoadingLabel());
 
