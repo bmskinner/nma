@@ -273,13 +273,16 @@ public class ExportableTable extends JTable {
             TableModel model = getModel();
             for (int col = 0; col < model.getColumnCount(); col++) {
                 builder.append(model.getColumnName(col) + Io.TAB);
-                ;
             }
             builder.append(Io.NEWLINE);
             for (int row = 0; row < model.getRowCount(); row++) {
 
                 for (int col = 0; col < model.getColumnCount(); col++) {
                     Object value = model.getValueAt(row, col);
+                    if(value!=null) {
+                    	value = value.toString().replaceAll(Io.NEWLINE, ", ");
+                    	value = value.toString().replaceAll(", $", ""); // trailing comma
+                    }
                     builder.append(value + Io.TAB);
                 }
                 builder.append(Io.NEWLINE);
