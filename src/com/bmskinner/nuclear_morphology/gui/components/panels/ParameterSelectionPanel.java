@@ -39,21 +39,16 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
  * @since 1.16.0
  *
  */
-public class ParameterSelectionPanel extends JPanel {
+public class ParameterSelectionPanel extends OptionsPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
-	private final IAnalysisDataset dataset;
-	private final HashOptions options;
 	
 	public ParameterSelectionPanel(IAnalysisDataset dataset, HashOptions options) {
-		super();
-		this.dataset = dataset;
-		this.options = options;
-//		setDefaults();
-		add(createUI());
+		super(dataset, options);
 	}
 	
-	private JPanel createUI() {
+	@Override
+	protected JPanel createUI() {
 		JPanel panel = new JPanel();
 		BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
 		panel.setLayout(layout);
@@ -65,7 +60,8 @@ public class ParameterSelectionPanel extends JPanel {
 		return panel;
 	}
 	
-	private void setDefaults() {
+	@Override
+	protected void setDefaults() {
 		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats((dataset.getCollection().getNucleusType())))
 			options.setBoolean(stat.toString(), false);
 
@@ -168,54 +164,5 @@ public class ParameterSelectionPanel extends JPanel {
 		panel.setBorder(BorderFactory.createTitledBorder("Segments"));
 		return panel;
 	}
-		
-    /**
-     * Add components to a container via a list
-     * 
-     * @param labels the list of labels
-     * @param fields the list of components
-     * @param gridbag the layout
-     * @param container the container to add the labels and fields to
-     */
-    protected void addLabelTextRows(List<JLabel> labels, List<Component> fields, GridBagLayout gridbag,
-            Container container) {
-        JLabel[] labelArray = labels.toArray(new JLabel[0]);
-        Component[] fieldArray = fields.toArray(new Component[0]);
-        addLabelTextRows(labelArray, fieldArray, gridbag, container);
-    }
-
-    /**
-     * Add components to a container via arrays
-     * 
-     * @param labels the list of labels
-     * @param fields the list of components
-     * @param gridbag the layout
-     * @param container the container to add the labels and fields to
-     */
-    protected void addLabelTextRows(JLabel[] labels, Component[] fields, GridBagLayout gridbag, Container container) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHEAST;
-        int numLabels = labels.length;
-
-        for (int i = 0; i < numLabels; i++) {
-            c.gridwidth = 1; // next-to-last
-            c.fill = GridBagConstraints.NONE; // reset to default
-            c.weightx = 0.0; // reset to default
-            container.add(labels[i], c);
-
-            Dimension minSize = new Dimension(10, 5);
-            Dimension prefSize = new Dimension(10, 5);
-            Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
-            c.gridwidth = GridBagConstraints.RELATIVE; // next-to-last
-            c.fill = GridBagConstraints.NONE; // reset to default
-            c.weightx = 0.0; // reset to default
-            container.add(new Box.Filler(minSize, prefSize, maxSize), c);
-
-            c.gridwidth = GridBagConstraints.REMAINDER; // end row
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.weightx = 1.0;
-            container.add(fields[i], c);
-        }
-    }
 
 }
