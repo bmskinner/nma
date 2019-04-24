@@ -243,15 +243,15 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         }
         log("Added " + cells.size() + " cells to new collection");
 
-        // We don;t want to run a new profiling because this will bugger up the
-        // segment patterns of
-        // the original cells. We need to copy the segments over as with FISH
-        // remapping
+        /* We don;t want to run a new profiling because this will bugger up the
+         * segment patterns of the original cells. We need to copy the segments
+         *  over as with FISH remapping */
 
         if (cells.size() > 0) {
             dataset.addChildCollection(newCollection);
             List<IAnalysisDataset> list = new ArrayList<>();
             list.add(dataset.getChildDataset(newCollection.getID()));
+            fine("Firing request for profile segmentation");
             fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, list, dataset);
         }
     }

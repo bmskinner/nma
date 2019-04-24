@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class SettingsDialog extends JDialog implements Loggable {
 
-    protected boolean          readyToRun         = false;
+    protected boolean readyToRun = false;
     private final List<EventListener> interfaceListeners = new ArrayList<>();
 
     protected static final String EMPTY_STRING = "";
@@ -130,21 +130,15 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
     /**
      * Add components to a container via a list
      * 
-     * @param labels
-     *            the list of labels
-     * @param fields
-     *            the list of components
-     * @param gridbag
-     *            the layout
-     * @param container
-     *            the container to add the labels and fields to
+     * @param labels the list of labels
+     * @param fields the list of components
+     * @param gridbag the layout
+     * @param container the container to add the labels and fields to
      */
     protected void addLabelTextRows(List<JLabel> labels, List<Component> fields, GridBagLayout gridbag,
             Container container) {
-
         JLabel[] labelArray = labels.toArray(new JLabel[0]);
         Component[] fieldArray = fields.toArray(new Component[0]);
-
         addLabelTextRows(labelArray, fieldArray, gridbag, container);
 
     }
@@ -152,14 +146,10 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
     /**
      * Add components to a container via arrays
      * 
-     * @param labels
-     *            the list of labels
-     * @param fields
-     *            the list of components
-     * @param gridbag
-     *            the layout
-     * @param container
-     *            the container to add the labels and fields to
+     * @param labels the list of labels
+     * @param fields the list of components
+     * @param gridbag the layout
+     * @param container the container to add the labels and fields to
      */
     protected void addLabelTextRows(JLabel[] labels, Component[] fields, GridBagLayout gridbag, Container container) {
         GridBagConstraints c = new GridBagConstraints();

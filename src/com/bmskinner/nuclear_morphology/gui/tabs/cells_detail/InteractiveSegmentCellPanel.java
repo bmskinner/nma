@@ -73,6 +73,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 	@Override
 	protected void createImage() {
+		finer("Redrawing cell image");
 		createCellImage();
 	}
 	

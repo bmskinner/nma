@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -11,13 +12,19 @@ import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -33,26 +40,59 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.14.0
  *
  */
+@RunWith(Parameterized.class)
 public class ProfileManagerTest {
 	
-	private Logger logger;
-	private static final long RNG_SEED = 1234;
+	private static final Logger logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final long RNG_SEED = 42;
 	private ProfileManager manager;
 	private ICellCollection collection;
+	
+	@Parameter(0)
+	public Class<? extends ICellCollection> source;
 
 	@Before
 	public void setUp() throws Exception {
-		
-		logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-		
+		collection = createInstance(source);
+		manager = collection.getProfileManager();
+	}
+	
+	/**
+	 * Create an instance of the class under test
+	 * @param source the class to create
+	 * @return
+	 * @throws Exception 
+	 */
+	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
 				.ofType(NucleusType.ROUND)
 				.randomOffsetProfiles(true)
 				.segmented().build();
-		collection = d.getCollection();
-		manager = collection.getProfileManager();
+		if(source==DefaultCellCollection.class){
+			return d.getCollection();
+		}
+		
+		if(source==VirtualCellCollection.class){
+			ICellCollection v = new VirtualCellCollection(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID, d.getCollection());
+			v.createProfileCollection();
+			d.getCollection().getProfileManager().copyCollectionOffsets(v);
+			for(ICell c : d.getCollection().getCells()) {
+				v.addCell(c);
+			}
+			return v;
+		}
+
+		throw new Exception("Unable to create instance of "+source);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Parameters
+	public static Iterable<Class<? extends ICellCollection>> arguments() {
+		return Arrays.asList(DefaultCellCollection.class,
+				VirtualCellCollection.class);
 	}
 
 	@Test
@@ -142,9 +182,7 @@ public class ProfileManagerTest {
 	@Test
 	public void testCountNucleiNotMatchingMedianSegmentation() throws Exception {
 		DatasetValidator dv = new DatasetValidator();
-		assertTrue(dv.validate(collection));
-//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
-		
+		assertTrue(dv.validate(collection));		
 		// Merge on one nucleus will take it out of sync
 		Nucleus n = collection.streamCells().findFirst().get().getNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
@@ -153,7 +191,6 @@ public class ProfileManagerTest {
 		profile.mergeSegments(segId1, segId2, UUID.randomUUID());
 		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
 		assertFalse(dv.validate(collection));
-//		assertEquals(1, manager.countNucleiNotMatchingMedianSegmentation());
 	}
 
 	@Test
@@ -170,8 +207,9 @@ public class ProfileManagerTest {
 		DatasetValidator dv = new DatasetValidator();
 		assertTrue(dv.validate(collection));
 		manager.mergeSegments(seg1, seg2, newId);
-//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
+		
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
+		
 		assertEquals(segIds.size()-1, newIds.size());
 		assertTrue(newIds.contains(newId));
 		assertFalse(newIds.contains(segId1));
@@ -181,18 +219,19 @@ public class ProfileManagerTest {
 		assertTrue(mergedSegment.hasMergeSource(segId1));
 		assertTrue(mergedSegment.hasMergeSource(segId2));
 		
-
-		for(Nucleus n : collection.getNuclei()) {
-			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
-			assertEquals(newIds.size(), nucleusIds.size());
-			assertTrue(newIds.contains(newId));
-			assertFalse(newIds.contains(segId1));
-			assertFalse(newIds.contains(segId2));
-			IBorderSegment mergedSeg = nucleusProfile.getSegment(newId);
-			assertTrue(mergedSeg.hasMergeSources());
-			assertTrue(mergedSeg.hasMergeSource(segId1));
-			assertTrue(mergedSeg.hasMergeSource(segId2));
+		if(collection.isReal()) {
+			for(Nucleus n : collection.getNuclei()) {
+				ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
+				assertEquals(newIds.size(), nucleusIds.size());
+				assertTrue(newIds.contains(newId));
+				assertFalse(newIds.contains(segId1));
+				assertFalse(newIds.contains(segId2));
+				IBorderSegment mergedSeg = nucleusProfile.getSegment(newId);
+				assertTrue(mergedSeg.hasMergeSources());
+				assertTrue(mergedSeg.hasMergeSource(segId1));
+				assertTrue(mergedSeg.hasMergeSource(segId2));
+			}
 		}
 	}
 
@@ -206,13 +245,15 @@ public class ProfileManagerTest {
 		UUID segId2 = profile.getSegmentAt(2).getID();
 		IBorderSegment seg1 = profile.getSegmentAt(1);
 		IBorderSegment seg2 = profile.getSegmentAt(2);
-
+		
+		if(collection.isVirtual())
+			return;
+		
 		manager.mergeSegments(seg1, seg2, newId);
 		DatasetValidator dv = new DatasetValidator();
 		assertTrue(dv.validate(collection));
-//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
 		
-		manager.unmergeSegments(newId);
+		manager.unmergeSegments(newId); // only testable for real collection here, because merging is a noop
 		
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 		assertEquals(segIds.size(), newIds.size());
@@ -221,7 +262,6 @@ public class ProfileManagerTest {
 		assertTrue(newIds.contains(segId2));
 		
 		assertTrue(dv.validate(collection));
-//		assertEquals(0, manager.countNucleiNotMatchingMedianSegmentation());
 		
 		for(Nucleus n : collection.getNuclei()) {
 			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
@@ -233,5 +273,4 @@ public class ProfileManagerTest {
 		}
 		
 	}
-
 }

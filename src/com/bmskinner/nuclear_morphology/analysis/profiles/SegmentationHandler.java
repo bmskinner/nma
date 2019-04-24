@@ -45,7 +45,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class SegmentationHandler implements Loggable {
 
-    private final IAnalysisDataset dataset;
+    private static final String SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL = "Segments are out of sync with median";
+	private final IAnalysisDataset dataset;
 
     public SegmentationHandler(final IAnalysisDataset d) {
         dataset = d;
@@ -63,9 +64,19 @@ public class SegmentationHandler implements Loggable {
         if (segID1 == null || segID2 == null)
             throw new IllegalArgumentException("Segment IDs cannot be null");
 
-        if(!dataset.isRoot())
-            return;
-
+        if(!dataset.isRoot()) {
+        	fine("Cannot merge segments in a virtual collection");
+        	return;
+        }
+        
+        // Don't mess with a broken dataset 
+        DatasetValidator dv = new DatasetValidator();
+        if (!dv.validate(dataset)) {
+        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
+        	warn("Canceling merge");
+        	return;
+        }
+        
         // Give the new merged segment a new ID
         final UUID newID = UUID.randomUUID();
         
@@ -98,7 +109,6 @@ public class SegmentationHandler implements Loggable {
                 warn("Segments are not mergable");
             }
             
-            DatasetValidator dv = new DatasetValidator();
 			if(!dv.validate(dataset)) {
 				warn("Merging failed; resulting dataset did not validate");
 				for(String s : dv.getErrors())
@@ -125,8 +135,18 @@ public class SegmentationHandler implements Loggable {
      */
     public void unmergeSegments(@NonNull final UUID segID) {
 
-        if (dataset.getCollection().isVirtual())
-            return;
+        if(!dataset.isRoot()) {
+        	fine("Cannot unmerge segments in a virtual collection");
+        	return;
+        }
+        
+        // Don't mess with a broken dataset 
+        DatasetValidator dv = new DatasetValidator();
+        if (!dv.validate(dataset)) {
+        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
+        	warn("Canceling unmerge");
+        	return;
+        }
 
         try {
 
@@ -147,6 +167,13 @@ public class SegmentationHandler implements Loggable {
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
                 child.getCollection().getProfileManager().unmergeSegments(segID);
             }
+            
+            if(!dv.validate(dataset)) {
+				warn("Unmerging failed; resulting dataset did not validate");
+				for(String s : dv.getErrors())
+					warn(s);
+			}
+            
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
             stack("Error unmerging segments", e);
         }
@@ -156,16 +183,23 @@ public class SegmentationHandler implements Loggable {
      * Split the segment with the given ID in this collection and its children,
      * as long as the collection is real.
      * 
-     * @param segID
-     *            the segment ID to be split
+     * @param segID the segment ID to be split
      */
     public void splitSegment(@NonNull UUID segID) {
 
-        if (dataset.getCollection().isVirtual())
-            return;
+    	if(!dataset.isRoot()) {
+        	fine("Cannot split segments in a virtual collection");
+        	return;
+        }
+    	
+    	// Don't mess with a broken dataset 
+        DatasetValidator dv = new DatasetValidator();
+        if (!dv.validate(dataset)) {
+        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
+        	warn("Canceling segment split");
+        	return;
+        }
         
-        fine("Dataset is not virtual: "+dataset.getName());
-
         try {
 
             ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
@@ -180,7 +214,6 @@ public class SegmentationHandler implements Loggable {
             boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
 
             if (ok) {
-
                 // Child datasets should all be virtual
                 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
                     fine("Splitting segment in "+child.getName());
@@ -189,6 +222,12 @@ public class SegmentationHandler implements Loggable {
             } else {
                 warn("Splitting segment cancelled");
             }
+            
+            if(!dv.validate(dataset)) {
+				warn("Splitting segment failed; resulting dataset did not validate");
+				for(String s : dv.getErrors())
+					warn(s);
+			}
 
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
             warn("Error splitting segments");
@@ -276,11 +315,9 @@ public class SegmentationHandler implements Loggable {
                 | UnavailableProfileTypeException e) {
             warn("Unable to update border tag index");
             stack("Profiling error", e);
-            return;
         } catch (Exception e) {
             warn("Unexpected error");
             stack(e);
-            return;
         }
     }
     
@@ -296,7 +333,7 @@ public class SegmentationHandler implements Loggable {
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, IndexOutOfBoundsException, UnavailableProfileTypeException, ProfileException {
+    private boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
     	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
     	for(Tag existingTag : tags) {
     		if(existingTag.equals(tag))

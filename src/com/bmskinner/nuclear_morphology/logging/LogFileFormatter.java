@@ -43,7 +43,8 @@ public class LogFileFormatter extends Formatter {
 
         if (sourceMethod.equals("log") 
                 || sourceMethod.startsWith("stack") 
-                || sourceMethod.startsWith("error")) {
+                || sourceMethod.startsWith("error")
+                || sourceMethod.startsWith("config")) {
             // work back to the actual calling method
             // this should be before the Loggable call
 

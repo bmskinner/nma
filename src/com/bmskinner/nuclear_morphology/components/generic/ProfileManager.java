@@ -18,13 +18,11 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
@@ -57,27 +55,6 @@ public class ProfileManager implements Loggable {
 
     public int getProfileLength() {
         return collection.getProfileCollection().length();
-    }
-
-    /**
-     * Get the average profile window size in the population.
-     * 
-     * @param type
-     * @return
-     * @deprecated since 1.14.0; no need for this any more
-     */
-    @Deprecated
-    public int getProfileWindowSize(ProfileType type) {
-
-        int total = 0;
-        Set<Nucleus> nuclei = collection.getNuclei();
-
-        for (Nucleus n : nuclei) {
-            total += n.getWindowSize(type); // use the first window size found
-                                            // for now
-        }
-
-        return total / nuclei.size();
     }
 
     /**
@@ -181,10 +158,7 @@ public class ProfileManager implements Loggable {
         }
 
         updateTagToMedianBestFit(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
-
         updateTagToMedianBestFit(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
-
-        collection.updateVerticalNuclei();
 
         fine("Updated nuclei");
     }
@@ -199,14 +173,14 @@ public class ProfileManager implements Loggable {
      * @throws ProfileException
      * @throws UnavailableProfileTypeException
      */
-    public void updateBorderTag(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
+    public void updateBorderTag(Tag tag, int index) throws ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
         finer("Updating border tag " + tag);
         if (tag.type().equals(BorderTagType.CORE)) {
             try {
 				updateCoreBorderTagIndex(tag, index);
-			} catch (UnsegmentedProfileException | SegmentUpdateException e) {
+			} catch (UnsegmentedProfileException e) {
 				stack(e);
 			}
             return;
@@ -219,12 +193,11 @@ public class ProfileManager implements Loggable {
      * 
      * @param tag the extended tag to be updated
      * @param index the new index of the tag in the median, relative to the current RP
-     * @throws IndexOutOfBoundsException
      * @throws ProfileException
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
      */
-    private void updateExtendedBorderTagIndex(@NonNull Tag tag, int index) throws IndexOutOfBoundsException, ProfileException,
+    private void updateExtendedBorderTagIndex(@NonNull Tag tag, int index) throws ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
         int oldIndex = collection.getProfileCollection().getIndex(tag);
@@ -256,23 +229,6 @@ public class ProfileManager implements Loggable {
         				stack(e);
         			}
         		});
-        		
-//        		for(Nucleus n : collection.getNuclei()) {
-//        			if(n.isLocked())
-//        				continue;
-//        			
-//        			try {
-//        				int existingIndex = n.getBorderIndex(existingTag);
-//        				n.setBorderTag(tag, existingIndex);
-//        				if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-//            				n.updateDependentStats();
-//            				setOpUsingTvBv(n);
-//        				}
-//        			} catch (UnavailableBorderTagException e) {
-//        				stack(e);
-//        				continue;
-//        			}
-//        		}
         		
         		//Update consensus
         		if (collection.hasConsensus()) {
@@ -349,7 +305,7 @@ public class ProfileManager implements Loggable {
      * @throws SegmentUpdateException 
      */
     private void updateCoreBorderTagIndex(@NonNull Tag tag, int index)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException, SegmentUpdateException {
+            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException {
 
         fine("Updating core border tag index");
 
@@ -360,7 +316,6 @@ public class ProfileManager implements Loggable {
 
         // Update signals as needed
         collection.getSignalManager().recalculateSignalAngles();
-        collection.updateVerticalNuclei();  
     }
     
     /**
@@ -369,10 +324,8 @@ public class ProfileManager implements Loggable {
      * @param newRpIndex the new index for the RP relative to the old RP
      * @param oldMedian the old median profile zeroed on the old RP
      * @throws ProfileException 
-     * @throws SegmentUpdateException 
-     * @throws UnavailableBorderTagException 
      */
-    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException, SegmentUpdateException, UnavailableBorderTagException {
+    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException {
     	// This is the median we will use to update individual nuclei
     	ISegmentedProfile newMedian = oldMedian.offset(newRpIndex);
 
@@ -380,8 +333,6 @@ public class ProfileManager implements Loggable {
     	
     	// Rebuild the profile aggregate in the collection
     	collection.getProfileCollection().createProfileAggregate(collection, collection.getMedianArrayLength());
-    	
-    	// Resegment the new dataset - call after this returns
     }
     
     /**
@@ -521,13 +472,8 @@ public class ProfileManager implements Loggable {
      * @param b the segment lock state for all segments
      */
     public void setLockOnAllNucleusSegments(boolean b) {
-
         List<UUID> ids = collection.getProfileCollection().getSegmentIDs();
-
-        collection.getNuclei().forEach(n -> {
-            ids.forEach(segID -> n.setSegmentStartLock(b, segID));
-        });
-
+        collection.getNuclei().forEach(n -> ids.forEach(segID -> n.setSegmentStartLock(b, segID)));
     }
 
     /**
@@ -542,9 +488,8 @@ public class ProfileManager implements Loggable {
      */
     public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws ProfileException, UnavailableComponentException {
 
-        if (collection.isVirtual())
-            return;
-
+    	fine("Updating segment start index");
+    	
         Nucleus n = cell.getNucleus();
         ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
@@ -557,10 +502,9 @@ public class ProfileManager implements Loggable {
         int rawOldIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, startPos);
 
         try {
-        	fine(profile.toString());
         	if (profile.update(seg, newStart, newEnd)) {
-        		fine(String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
-        		fine("Profile now: "+profile.toString());
+        		finer(String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
+        		finer("Profile now: "+profile.toString());
         		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         		finest("Updated nucleus profile with new segment boundaries");
 
@@ -585,8 +529,6 @@ public class ProfileManager implements Loggable {
         						n.getBorderIndex(n.findOppositeBorder(n.getBorderPoint(Tag.ORIENTATION_POINT))));
         			}
         		}
-
-//        		n.updateVerticallyRotatedNucleus();
         		n.updateDependentStats();
 
         	} else {
@@ -690,6 +632,8 @@ public class ProfileManager implements Loggable {
      */
     public void mergeSegments(@NonNull IBorderSegment seg1, @NonNull IBorderSegment seg2, @NonNull UUID newID)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+    	// Note - we can't do the root check here. It must be at the segmentation handler level
+    	// otherwise updating child datasets to match a root will fail
 
         if (seg1 == null || seg2 == null || newID == null)
             throw new IllegalArgumentException("Segment ids cannot be null");
@@ -704,14 +648,7 @@ public class ProfileManager implements Loggable {
         if (!medianProfile.hasSegment(seg2.getID()))
             throw new IllegalArgumentException("Median profile does not have segment 2 ID");
 
-        if(collection.isReal()){
-        	DatasetValidator dv = new DatasetValidator();
-        	if (!dv.validate(collection)) {
-        		 warn(String.format("Segments are out of sync with median"));
-                 warn("Canceling merge");
-                 return;
-        	}
-        }
+        // Note - validation is run in segmentation handler
     
         // merge the two segments in the median
         try {
@@ -736,9 +673,7 @@ public class ProfileManager implements Loggable {
             }
         }
 
-        /*
-         * Update the consensus if present
-         */
+        /* Update the consensus if present */
         if (collection.hasConsensus()) {
             Nucleus n = collection.getRawConsensus().component();
             mergeSegments(n, seg1, seg2, newID);
@@ -771,9 +706,12 @@ public class ProfileManager implements Loggable {
      * 
      * @param segName
      * @return
+     * @throws UnavailableComponentException 
+     * @throws UnsegmentedProfileException 
+     * @throws ProfileException 
      * @throws Exception
      */
-    public boolean splitSegment(IBorderSegment seg) throws Exception {
+    public boolean splitSegment(IBorderSegment seg) throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
         return splitSegment(seg, null, null);
     }
 
@@ -812,7 +750,7 @@ public class ProfileManager implements Loggable {
 
         // Validate that all nuclei have segments long enough to be split
         fine("Testing splittability of collection");
-        if (collection.isReal() && !isCollectionSplittable(seg.getID(), proportion)) {
+        if (!isCollectionSplittable(seg.getID(), proportion)) {
             warn("Segment cannot be split: profile failed testing");
             return false;
         }
@@ -830,46 +768,50 @@ public class ProfileManager implements Loggable {
          * With the median profile segments unmerged, also split the segments in
          * the individual nuclei. Requires proportional alignment
          */
-        if (collection.isReal()) { // do not handle nuclei in virtual
-                                   // collections
-            for (Nucleus n : collection.getNuclei()) {
-                boolean wasLocked = n.isLocked();
-                n.setLocked(false); // Merging segments is not destructive
-                splitSegment(n, seg.getID(), proportion, newID1, newID2);
-                n.setLocked(wasLocked);
-            }
+        if(collection.isReal()) {
+        	for (Nucleus n : collection.getNuclei()) {
+        		splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
+        	}
         }
-
-        /*
-         * Update the consensus if present
-         */
+        
+        /*  Update the consensus if present */
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();
-            boolean wasLocked = n.isLocked();
-            n.setLocked(false); // Merging segments is not destructive
-            splitSegment(n, seg.getID(), proportion, newID1, newID2);
-            n.setLocked(wasLocked);
+        	splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
         }
         return true;
-
+    }
+    
+    /**
+     * Split the segment in the given nucleus, preserving lock state
+     * @param n the nucleus
+     * @param segId the segment to split
+     * @param proportion the proportion of the segment to split at (0-1)
+     * @param newId1 the first new segment id
+     * @param newId2 the second new segment id
+     * @throws ProfileException
+     * @throws UnavailableComponentException
+     */
+    private void splitNucleusSegment(Nucleus n, UUID segId, double proportion, UUID newId1, UUID newId2) throws ProfileException, UnavailableComponentException {
+    	boolean wasLocked = n.isLocked();
+		n.setLocked(false); // not destructive
+		splitSegment(n, segId, proportion, newId1, newId2);
+		n.setLocked(wasLocked);
     }
 
     /**
      * Test all the nuclei of the collection to see if all segments can be split
      * before we carry out the split.
      * 
-     * @param seg
-     * @param proportion
-     * @return
+     * @param id the segment to test
+     * @param proportion the proportion of the segment at which to split, from 0-1
+     * @return true if the segment can be split at the index equivalent to the proportion, false otherwise
      * @throws ProfileException
      * @throws UnavailableComponentException
      * @throws UnsegmentedProfileException
      */
     private boolean isCollectionSplittable(@NonNull UUID id, double proportion)
             throws ProfileException, UnavailableComponentException, UnsegmentedProfileException {
-        
-        if(!collection.isReal())
-            return false;
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Tag.REFERENCE_POINT, Stats.MEDIAN);
@@ -877,9 +819,10 @@ public class ProfileManager implements Loggable {
         int index = medianProfile.getSegment(id).getProportionalIndex(proportion);
 
         if (!medianProfile.isSplittable(id, index)) {
-            return false;
+        	fine("Median profile in "+collection.getName()+" is not splittable");
+        	return false;
         }
-        
+            
         // check consensus //TODO replace with remove consensus
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();
@@ -889,7 +832,13 @@ public class ProfileManager implements Loggable {
             }
         }
 
-        return collection.isReal() && collection.getNuclei().parallelStream().allMatch(  n->isSplittable(n, id, proportion)  );
+        if(collection.isReal()) {
+        	boolean allNucleiSplittable = collection.getNuclei().parallelStream().allMatch( n->isSplittable(n, id, proportion) );
+        	if(!allNucleiSplittable)
+        		fine("At least one nucleus in "+collection.getName()+" is not splittable");
+        	return allNucleiSplittable;
+        }
+        return true;
     }
 
     private boolean isSplittable(Taggable t, UUID id, double proportion) {
@@ -929,7 +878,7 @@ public class ProfileManager implements Loggable {
      */
     public void unmergeSegments(@NonNull UUID segId)
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
-                
+    	
         if(segId==null)
             throw new IllegalArgumentException("Segment to unmerge cannot be null");
 
@@ -943,15 +892,6 @@ public class ProfileManager implements Loggable {
             return;
         }
         
-        if(collection.isReal()){
-        	DatasetValidator dv = new DatasetValidator();
-        	if (!dv.validate(collection)) {
-        		 warn(String.format("Segments are out of sync with median"));
-                 warn("Canceling unmerge");
-                 return;
-        	}
-        }
-
         // unmerge the two segments in the median - this is only a copy of the profile collection
         medianProfile.unmergeSegment(segId);
 
@@ -962,17 +902,15 @@ public class ProfileManager implements Loggable {
          * With the median profile segments unmerged, also unmerge the segments
          * in the individual nuclei
          */
-        
-        if(collection.isReal()){
-            for (Nucleus n : collection.getNuclei()) {
-                boolean wasLocked = n.isLocked();
-                n.setLocked(false);
-                unmergeSegments(n, segId);
-                n.setLocked(wasLocked);
-            }
+        if(collection.isReal()) {
+        	for (Nucleus n : collection.getNuclei()) {
+        		boolean wasLocked = n.isLocked();
+        		n.setLocked(false);
+        		unmergeSegments(n, segId);
+        		n.setLocked(wasLocked);
+        	}
         }
-
-
+        
         /* Update the consensus if present */
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();

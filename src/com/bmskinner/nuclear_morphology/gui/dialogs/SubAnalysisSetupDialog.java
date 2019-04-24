@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
+
 import java.awt.Frame;
 
 import javax.swing.JPanel;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+
 
 /**
  * A base class for the sub analyses setup options. It contains a reference to
@@ -42,7 +44,7 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
     protected final @NonNull IAnalysisDataset dataset;
 
     /**
-     * Construct with a main program window to listen for actions, and a dataset
+     * Construct with a program window to listen for actions, and a dataset
      * to operate on
      * 
      * @param parent
