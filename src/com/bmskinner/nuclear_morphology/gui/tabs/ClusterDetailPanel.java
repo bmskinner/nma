@@ -19,40 +19,22 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableColumnModelEvent;
-import javax.swing.event.TableColumnModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -66,14 +48,11 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
-import com.bmskinner.nuclear_morphology.gui.dialogs.ManualClusteringDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 /**
  * This panel shows any cluster groups that have been created, and the
@@ -245,25 +224,7 @@ public class ClusterDetailPanel extends DetailPanel {
         });
         
         manualClusterBtn.addActionListener(e -> {
-        	try {
-        		int maxGroups = activeDataset().getCollection().getCells().size()-1; // more would be silly, fewer restrictive
-        		int groups = getInputSupplier().requestInt("Number of groups", 2,2,maxGroups,1);
-
-        		List<String> groupNames = new ArrayList<>();
-
-        		for(int i=1; i<=groups; i++){
-        			String name = getInputSupplier().requestString("Name for group "+i);
-        			groupNames.add(name); 
-        		}
-
-        		ManualClusteringDialog mc = new ManualClusteringDialog(activeDataset(), groupNames);
-        		mc.addInterfaceEventListener(this);
-        		mc.run();
-        		getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-
-        	} catch (RequestCancelledException e1) {
-        		return;
-        	}
+        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets());
         });
                 
         tSneBtn.addActionListener(e -> {
@@ -371,7 +332,7 @@ public class ClusterDetailPanel extends DetailPanel {
 
     public void interfaceEventReceived(InterfaceEvent event) {
     	 super.eventReceived(event);
-        if (event.getSource() instanceof ClusterTreeDialog || event.getSource() instanceof ManualClusteringDialog) {
+        if (event.getSource() instanceof ClusterTreeDialog) {
             getInterfaceEventHandler().fire(event);
         }
     }

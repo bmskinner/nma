@@ -505,7 +505,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
     }
 
     private void analyseClusters() {
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
 
         for (ICellCollection c : clusterList) {
             if (c.hasCells()) {

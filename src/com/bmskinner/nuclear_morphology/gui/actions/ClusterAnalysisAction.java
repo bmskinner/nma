@@ -65,12 +65,6 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         clusterSetup.dispose();
     }
 
-    /*
-     * (non-Javadoc) Overrides because we need to carry out the morphology
-     * reprofiling on each cluster
-     * 
-     * @see no.gui.MainWindow.ProgressableAction#finished()
-     */
     @Override
     public void finished() {
 
@@ -88,6 +82,5 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         super.finished();
-
     }
 }

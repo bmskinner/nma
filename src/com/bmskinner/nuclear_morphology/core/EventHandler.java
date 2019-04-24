@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ManualClusterAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
@@ -538,6 +539,11 @@ public class EventHandler implements Loggable, EventListener {
             if (event.method().equals(DatasetEvent.CLUSTER)) {
                 log("Clustering dataset");
                 return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
+            }
+            
+            if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
+                log("Maunally clustering dataset");
+                return new ManualClusterAction(event.firstDataset(), acceptor, EventHandler.this);
             }
             
             if (event.method().equals(DatasetEvent.RUN_TSNE)) {

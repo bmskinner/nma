@@ -1188,7 +1188,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         for (UUID id : op.getSegments())
         	if(op.isIncludeSegment(id))
         		builder.append("Segment_"+id.toString()+Io.NEWLINE);
-        return builder.toString();
+        
+        String s = builder.toString();
+        if(s.equals(EMPTY_STRING))
+        	return Labels.NA;
+        return s;
     }
 
     
