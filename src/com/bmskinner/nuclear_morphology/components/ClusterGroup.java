@@ -41,8 +41,9 @@ public class ClusterGroup implements IClusterGroup {
     
     /** Options used to generate the cluster */
     private IClusteringOptions options = null;
-    private String             name;
-    private String             newickTree       = null;
+    private String name;
+    private String newickTree = null;
+    private UUID id;
 
     /**
      * Create a new cluster group
@@ -53,6 +54,7 @@ public class ClusterGroup implements IClusterGroup {
     public ClusterGroup(@NonNull String name, @NonNull IClusteringOptions options) {
         this.name = name;
         this.options = options;
+        this.id = UUID.randomUUID();
     }
 
     /**
@@ -67,6 +69,10 @@ public class ClusterGroup implements IClusterGroup {
         this.newickTree = tree;
     }
 
+    /**
+     * Create a cluster group from a template
+     * @param template
+     */
     public ClusterGroup(@NonNull IClusterGroup template) {
     	if(template.getOptions().isPresent()){
     		options = OptionsFactory.makeClusteringOptions(template.getOptions().get());
@@ -77,6 +83,12 @@ public class ClusterGroup implements IClusterGroup {
         this.name = template.getName();
         this.newickTree = template.getTree();
         this.ids = template.getUUIDs();
+        this.id = template.getId();
+    }
+    
+    @Override
+    public UUID getId() {
+    	return id;
     }
 
     @Override
@@ -105,22 +117,22 @@ public class ClusterGroup implements IClusterGroup {
     }
 
     @Override
-    public void addDataset(IAnalysisDataset dataset) {
+    public void addDataset(final IAnalysisDataset dataset) {
         this.ids.add(dataset.getId());
     }
 
     @Override
-    public void addDataset(ICellCollection collection) {
+    public void addDataset(final ICellCollection collection) {
         this.ids.add(collection.getID());
     }
 
     @Override
-    public void removeDataset(IAnalysisDataset dataset) {
+    public void removeDataset(final IAnalysisDataset dataset) {
         removeDataset(dataset.getId());
     }
 
     @Override
-    public void removeDataset(UUID id) {
+    public void removeDataset(final UUID id) {
         this.ids.remove(id);
     }
 
@@ -130,7 +142,7 @@ public class ClusterGroup implements IClusterGroup {
     }
 
     @Override
-    public boolean hasDataset(UUID id) {
+    public boolean hasDataset(final UUID id) {
         return ids.contains(id);
     }
 
@@ -146,6 +158,8 @@ public class ClusterGroup implements IClusterGroup {
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+        if(id==null)
+        	id = UUID.randomUUID();
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {

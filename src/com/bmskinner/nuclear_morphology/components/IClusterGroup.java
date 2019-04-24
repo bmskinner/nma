@@ -33,7 +33,13 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface IClusterGroup extends Serializable, Loggable {
 
-    static final String CLUSTER_GROUP_PREFIX = "Group";
+    String CLUSTER_GROUP_PREFIX = "Group";
+    
+    /**
+     * Get the ID of the group
+     * @return
+     */
+    UUID getId();
 
     /**
      * Get the public name of the cluster groups
