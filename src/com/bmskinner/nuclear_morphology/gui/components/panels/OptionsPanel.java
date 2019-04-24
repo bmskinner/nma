@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -32,7 +33,8 @@ public abstract class OptionsPanel extends JPanel {
 		this.dataset = dataset;
 		this.options = options;
 		setDefaults();
-		add(createUI());
+		this.setLayout(new BorderLayout());
+		add(createUI(), BorderLayout.CENTER);
 	}
 
 	protected abstract void setDefaults();

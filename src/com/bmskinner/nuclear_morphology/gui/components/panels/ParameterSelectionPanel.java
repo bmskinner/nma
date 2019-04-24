@@ -2,36 +2,27 @@ package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.DipTester;
 
 /**
  * Panel to set parameter options for clustering
@@ -53,10 +44,11 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
 		panel.setLayout(layout);
 		
-		panel.add(createStatsPanel());
 		panel.add(createShapePanel());
-		panel.add(createSsegmentsPanel());
+		panel.add(createStatsPanel());
+//		panel.add(createSegmentsPanel());
 		
+		panel.setBorder(BorderFactory.createTitledBorder("Parameters"));
 		return panel;
 	}
 	
@@ -100,7 +92,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		}
 		addLabelTextRows(labels, fields, layout, panel);
 		
-		panel.setBorder(BorderFactory.createTitledBorder("Size"));
+//		panel.setBorder(BorderFactory.createTitledBorder("Size"));
 		return panel;
 	}
 	
@@ -135,11 +127,11 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		}
 		
 		addLabelTextRows(labels, fields, layout, panel);
-		panel.setBorder(BorderFactory.createTitledBorder("Shape"));
+//		panel.setBorder(BorderFactory.createTitledBorder("Shape"));
 		return panel;
 	}
 	
-	private JPanel createSsegmentsPanel() {
+	private JPanel createSegmentsPanel() {
 		JPanel panel = new JPanel();
 		GridBagLayout layout = new GridBagLayout();
 		panel.setLayout(layout);
@@ -161,7 +153,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
 		}
 		addLabelTextRows(labels, fields, layout, panel);
-		panel.setBorder(BorderFactory.createTitledBorder("Segments"));
+//		panel.setBorder(BorderFactory.createTitledBorder("Segments"));
 		return panel;
 	}
 

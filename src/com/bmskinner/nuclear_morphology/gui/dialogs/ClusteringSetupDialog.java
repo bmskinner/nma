@@ -27,6 +27,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -44,6 +46,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
+import com.bmskinner.nuclear_morphology.gui.components.panels.DimensionalReductionSelectionPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ParameterSelectionPanel;
 
 /**
  * Setup for clustering. It inherits the parameters for inclusion from the hierarchical tree
@@ -162,14 +166,29 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
     protected void createUI() {
         getContentPane().add(createHeader(), BorderLayout.NORTH);
     	getContentPane().add(createFooter(), BorderLayout.SOUTH);
-
-    	// ---------------
-        // options in middle
-        // ---------------
-        JPanel optionsPanel = new JPanel();
-        optionsPanel.setLayout(new BorderLayout());
-
-        JPanel methodPanel = new JPanel(new FlowLayout());
+        getContentPane().add(createOptionsPanel(), BorderLayout.CENTER);
+    }
+    
+    private JPanel createOptionsPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		panel.add(new ParameterSelectionPanel(dataset, options));
+		panel.add(new DimensionalReductionSelectionPanel(dataset, options));
+		panel.add(createClusterPanel());
+		return panel;
+	}
+    
+    private JPanel createClusterPanel() {
+    	JPanel panel = new JPanel();
+    	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    	panel.add(createClusterMethodPanel(), BorderLayout.NORTH);
+    	panel.add(cardPanel, BorderLayout.CENTER);
+    	panel.setBorder(BorderFactory.createTitledBorder("Clustering method"));
+    	return panel;
+    }
+    
+    private JPanel createClusterMethodPanel() {
+    	JPanel methodPanel = new JPanel(new FlowLayout());
 
         // Create the radio buttons.
         clusterHierarchicalButton = new JRadioButton(HC_CLUSTERING_LBL);
@@ -193,12 +212,8 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
         methodPanel.add(clusterHierarchicalButton);
         methodPanel.add(clusterEMButton);
-
-        optionsPanel.add(methodPanel, BorderLayout.NORTH);
-        optionsPanel.add(cardPanel, BorderLayout.CENTER);
-        optionsPanel.add(createIncludePanel(), BorderLayout.SOUTH);
-
-        getContentPane().add(optionsPanel, BorderLayout.CENTER);
+        
+        return methodPanel;
     }
 
     @Override

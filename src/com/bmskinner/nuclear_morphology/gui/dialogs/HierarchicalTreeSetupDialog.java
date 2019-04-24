@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -125,11 +126,10 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 
 	private JPanel createOptionsPanel() {
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		panel.add(createClusterMethodPanel());
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		panel.add(new ParameterSelectionPanel(dataset, options));
 		panel.add(new DimensionalReductionSelectionPanel(dataset, options));
-		
-		panel.add(createIncludePanel());
+		panel.add(createClusterMethodPanel());
 		return panel;
 	}
 
@@ -151,12 +151,13 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 		fields.add(clusterMethodBox);
 
 		addLabelTextRows(labels, fields, layout, panel);
+		panel.setBorder(BorderFactory.createTitledBorder("Clustering"));
+		
 		return panel;
 	}
 
-	protected JPanel createIncludePanel() {
+//	protected JPanel createIncludePanel() {
 		
-		return new ParameterSelectionPanel(dataset, options);
 		
 //		JPanel panel = new JPanel();
 //		GridBagLayout layout = new GridBagLayout();
@@ -247,5 +248,5 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 //
 //		addLabelTextRows(labels, fields, layout, panel);
 //		return panel;
-	}
+//	}
 }

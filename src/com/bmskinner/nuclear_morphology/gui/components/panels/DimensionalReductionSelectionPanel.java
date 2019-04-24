@@ -2,9 +2,6 @@ package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -12,7 +9,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -26,8 +22,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class DimensionalReductionSelectionPanel extends OptionsPanel {
