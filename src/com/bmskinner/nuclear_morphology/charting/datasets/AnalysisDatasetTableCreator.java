@@ -1129,7 +1129,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         columnList.add(Labels.Clusters.CLUSTER_DIM_RED);
         columnList.add(Labels.Clusters.CLUSTER_PARAMS);
 
-//        columnList.add(Labels.Clusters.TREE);
+        columnList.add(Labels.Clusters.TREE);
 
         model.addColumn(EMPTY_STRING, columnList.toArray());
 
@@ -1141,23 +1141,23 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IClusterGroup g : clusterGroups) {
             	
-            	List<String> dataList = new ArrayList<>();
+            	List<Object> dataList = new ArrayList<>();
             	dataList.add(g.getName());
                 dataList.add(String.valueOf(g.size()));
             	
                 String dimRed = createDimensionalReductionString(g);
                 
-                String cluterMethod = createClusterMethodString(g);
+                String clusterMethod = createClusterMethodString(g);
             	String params = createClusterParameterString(g);
             	
-            	dataList.add(cluterMethod);
+            	dataList.add(clusterMethod);
             	dataList.add(dimRed);
             	dataList.add(params);
                 	
-//                if(g.hasTree())
-//                	dataList.add(g.getTree());
-//                else
-//                	dataList.add(Labels.NA);
+                if(g.hasTree())
+                	dataList.add(g);
+                else
+                	dataList.add(Labels.NA);
    
                 model.addColumn(dataset.getName(), dataList.toArray());
             }

@@ -26,6 +26,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,17 +140,74 @@ public class ClusterDetailPanel extends DetailPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         TableModel optionsModel = AbstractTableCreator.createBlankTable();
+        
+        TableCellRenderer buttonRenderer = new JButtonRenderer();
+        TableCellRenderer textRenderer = new JTextAreaColumnRenderer();
+        
         clusterDetailsTable = new ExportableTable(optionsModel) {
             @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return false;
             }
+            
+            public TableCellRenderer getCellRenderer(int row, int column) {
+            	if(this.getValueAt(row, 0).equals(Labels.Clusters.TREE) && column>0 && this.getValueAt(row, column) instanceof IClusterGroup) {
+            		return buttonRenderer;
+            	}
+            	return textRenderer;
+            }
         };
         
-        clusterDetailsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS); 
-        clusterDetailsTable.setRowSelectionAllowed(false);
+        
+        MouseListener mouseListener = new MouseListener() {
 
-        setRenderer(clusterDetailsTable, new JTextAreaColumn());
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				int row = clusterDetailsTable.rowAtPoint(e.getPoint());
+				int col = clusterDetailsTable.columnAtPoint(e.getPoint());
+				Object value = clusterDetailsTable.getValueAt(row, col);
+	        	if(value instanceof IClusterGroup) {
+	        		Runnable r = () ->{
+	        			// find the dataset with this cluster group
+	        			IAnalysisDataset d = getDatasets().stream().filter(t->t.getClusterGroups().stream().anyMatch(c->c.getId().equals(((IClusterGroup) value).getId()))).findFirst().orElse(null);
+	            		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, (IClusterGroup) value);
+	                    clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
+	                    clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
+	            	};
+	                new Thread(r).start();;
+	        	}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+        	
+        };
+        
+        clusterDetailsTable.addMouseListener(mouseListener);
+
+        clusterDetailsTable.setRowSelectionAllowed(false);
 
         JScrollPane scrollPane = new JScrollPane(clusterDetailsTable);
 
@@ -159,9 +217,6 @@ public class ClusterDetailPanel extends DetailPanel {
         tablePanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
 
         panel.add(tablePanel);
-
-        showTreeButtonPanel = createTreeButtonPanel(null);
-        panel.add(showTreeButtonPanel);
         return panel;
 
     }
@@ -237,80 +292,6 @@ public class ClusterDetailPanel extends DetailPanel {
         return panel;
     }
 
-    /**
-     * Create the panel holding 'Show tree' buttons
-     * 
-     * @param buttons the buttons to be drawn
-     * @return
-     */
-    private JPanel createTreeButtonPanel(List<JComponent> buttons) {
-        JPanel panel = new JPanel();
-
-        GridBagLayout gbl = new GridBagLayout();
-        panel.setLayout(gbl);
-
-        GridBagConstraints c = new GridBagConstraints();
-
-        c.anchor = GridBagConstraints.CENTER; // place the buttons in the middle
-                                              // of their grid
-        c.gridwidth = buttons == null ? 1 : buttons.size() + 1; // one button
-                                                                // per column,
-                                                                // plus a blank
-        c.gridheight = 1;
-        c.fill = GridBagConstraints.NONE; // don't resize the buttons
-        c.weightx = 1.0; // buttons have padding between them
-
-        Dimension fillerSize = new Dimension(10, 5);
-        panel.add(new Box.Filler(fillerSize, fillerSize, fillerSize), c);
-        if (buttons != null) {
-            for (JComponent button : buttons) {
-                panel.add(button, c);
-            }
-        }
-
-        return panel;
-    }
-
-    /**
-     * Create the appropriate number of 'Show tree' buttons for the selected
-     * datasets, and return them as a list
-     * 
-     * @return
-     */
-    private List<JComponent> createShowTreeButtons() {
-
-        if (!hasDatasets())
-            return null;
-
-        List<JComponent> result = new ArrayList<>();
-        Dimension fillerSize = new Dimension(10, 5);
-
-        for (final IAnalysisDataset d : getDatasets()) {
-
-            for (final IClusterGroup g : d.getClusterGroups()) {
-
-                if (g.hasTree()) {
-                    JButton button = new JButton(SHOW_TREE_LBL);
-                    button.addActionListener(e -> {
-                    	
-                    	Runnable r = () ->{
-                    		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, g);
-                            clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
-                            clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
-                    	};
-                        new Thread(r).start();;
-                    });
-                    result.add(button);
-                } else {
-                    result.add(new Box.Filler(fillerSize, fillerSize, fillerSize));
-                }
-
-            }
-        }
-
-        return result;
-    }
-
     @Override
     public void setEnabled(boolean b) {
         super.setEnabled(b);
@@ -319,21 +300,6 @@ public class ClusterDetailPanel extends DetailPanel {
         manualClusterBtn.setEnabled(b);
         tSneBtn.setEnabled(b);
         // saveClassifierButton.setEnabled(b); // not yet enabled
-    }
-
-    private void updateTreeButtonsPanel() {
-
-        mainPanel.remove(showTreeButtonPanel);
-
-        List<JComponent> buttons = createShowTreeButtons();
-
-        showTreeButtonPanel = createTreeButtonPanel(buttons);
-
-        // add this new panel
-        mainPanel.add(showTreeButtonPanel);
-        mainPanel.revalidate();
-        mainPanel.repaint();
-        mainPanel.setVisible(true);
     }
 
     @Override
@@ -349,12 +315,9 @@ public class ClusterDetailPanel extends DetailPanel {
         TableOptions options = new TableOptionsBuilder()
         		.setDatasets(getDatasets())
         		.setTarget(clusterDetailsTable)
-                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new JTextAreaColumn()) //new ClusterTableCellRenderer()
                 .build();
 
         setTable(options);
-
-        updateTreeButtonsPanel();
 
         if (!hasDatasets()) {
             statusLabel.setText(Labels.NULL_DATASETS);
@@ -412,37 +375,9 @@ public class ClusterDetailPanel extends DetailPanel {
             getInterfaceEventHandler().fire(event);
         }
     }
-    
-    /**
-     * Colour analysis parameter table cell background. If parameters are false
-     * or N/A, make the text colour grey
-     */    
-    public static class ClusterTableCellRenderer extends DefaultTableCellRenderer {
+        
+    private static class JTextAreaColumnRenderer extends JTextArea  implements TableCellRenderer {
 
-        @Override
-    	public Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-            Color colour = Color.BLACK;
-
-            if (value != null && !value.toString().equals("")) {
-
-                if(value.toString().equals("false") || value.toString().equals(Labels.NA)) {
-                    colour = Color.GRAY;
-                }
-            }
-
-            setForeground(colour);
-            return this;
-        }
-
-    }
-    
-    private static class JTextAreaColumn extends JTextArea  implements TableCellRenderer {
-
-//        private static final Font DEFAULT_FONT = new Font("Dialog", Font.PLAIN, 11);
         private static final Font DEFAULT_FONT = UIManager.getFont("Label.font");
 
         private void setColor(boolean isSelected, JTable table) {
@@ -459,7 +394,7 @@ public class ClusterDetailPanel extends DetailPanel {
             setFont(DEFAULT_FONT);
             setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             setLineWrap(true);
-            setWrapStyleWord(false);
+            setWrapStyleWord(true);
             Color colour = Color.BLACK;
             if (value != null && !value.toString().equals("")) {
                 if(value.toString().equals("false") || value.toString().equals(Labels.NA)) {
@@ -472,4 +407,24 @@ public class ClusterDetailPanel extends DetailPanel {
         }
 
     }
+    
+    /**
+     * Render a button in a cell. Note, this is non-functional - it just paints 
+     * a button shape. Use a mouse listener on the table for functionality
+     * @author bms41
+     * @since 1.16.0
+     *
+     */
+    private class JButtonRenderer extends JButton  implements TableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table,
+                Object value, boolean isSelected, boolean hasFocus, int row,
+                int column) {
+            setText(value == null ? "" : "Show tree");
+            setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            return this;
+        }
+    }
+    
+    
 }

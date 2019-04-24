@@ -223,7 +223,7 @@ public class Labels {
                 + "and every other nucleus for clustering.<br>Otherwise, use area, circularity and aspect ratio</html>";
     	
     	public static final String CLUSTER_GROUP    = "Cluster group";
-    	public static final String CLUSTER_FOUND    = "Clusters found";
+    	public static final String CLUSTER_FOUND    = "Number of clusters";
     	public static final String CLUSTER_METHOD   = "Method";
     	public static final String CLUSTER_PARAMS   = "Parameters";
     	public static final String CLUSTER_DIM_RED  = "Dimensional reduction";
