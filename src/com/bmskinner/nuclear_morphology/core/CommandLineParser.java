@@ -92,7 +92,7 @@ public class CommandLineParser {
 			LOGGER.fine("Running headless");
 			runHeadless(folder, options);
 		} else {
-			LOGGER.fine("Running GUI");
+			LOGGER.fine("Launching GUI");
 			runWithGUI();
 		}
 
@@ -137,7 +137,7 @@ public class CommandLineParser {
 				IJ.setBackgroundColor(0, 0, 0);  // default background is black
 				try {
 					String lAndF = UIManager.getSystemLookAndFeelClassName();
-					LOGGER.fine("Setting look and feel to "+lAndF);
+					LOGGER.config("Setting look and feel to "+lAndF);
 					UIManager.setLookAndFeel(lAndF);
 				} catch (Exception e) {
 					LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);

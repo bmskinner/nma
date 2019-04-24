@@ -119,9 +119,9 @@ public class Nuclear_Morphology_Analysis
 			 * directory if not present
 			 */
 			File dir =  Importer.getProgramDir();
-			LOGGER.fine("Program dir: "+dir.getAbsolutePath());
+			LOGGER.config("Program dir: "+dir.getAbsolutePath());
 			File errorFile = new File(dir, "error.log");
-			LOGGER.fine("Log file: "+errorFile.getAbsolutePath());
+			LOGGER.config("Log file: "+errorFile.getAbsolutePath());
 			if(errorFile.createNewFile()) {
 				LOGGER.fine("Created new log file");
 			}
@@ -129,9 +129,7 @@ public class Nuclear_Morphology_Analysis
 			// Log stack traces to the log file for debugging
 			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
 			LOGGER.addHandler(fileHandler);
-			fileHandler.setLevel(Loggable.STACK);
-			config("Program startup");
-			
+			fileHandler.setLevel(Loggable.STACK);			
 			ThreadManager.getInstance();
 			
 		} catch (SecurityException |IOException e ) {

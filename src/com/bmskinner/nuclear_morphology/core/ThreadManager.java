@@ -24,6 +24,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -35,7 +37,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.0
  *
  */
-public class ThreadManager implements Loggable {
+public class ThreadManager {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     private static ThreadManager instance   = null;
     
     /** Object to lock on for synchronisation */
@@ -78,11 +82,10 @@ public class ThreadManager implements Loggable {
                 TimeUnit.MILLISECONDS, methodQueue);
     	uiExecutorService = new ThreadPoolExecutor(maxUiThreads, maxUiThreads, keepAliveTime,
                 TimeUnit.MILLISECONDS, uiQueue);
-    	
-    	config("Creating thread manager");
-    	config(String.format("Allowed processors: %s", maxThreads));
-    	config(String.format("UI threads: %s", maxUiThreads));
-    	config(String.format("Method threads: %s", maxMethodThreads));
+
+    	LOGGER.config(String.format("Thread manager: Allowed processors: %s", maxThreads));
+    	LOGGER.config(String.format("Thread manager: UI threads: %s", maxUiThreads));
+    	LOGGER.config(String.format("Thread manager: Method threads: %s", maxMethodThreads));
     }
         
     /**
@@ -157,7 +160,7 @@ public class ThreadManager implements Loggable {
     		try {
 				o = r.call();
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "Error calling submittable callable", e);
 				return null;
 			}
     		finally {

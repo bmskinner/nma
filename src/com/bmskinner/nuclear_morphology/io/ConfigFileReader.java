@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -38,6 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ConfigFileReader implements Loggable {
 
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     public static final String INI_FILE = "config.ini";
 
     public ConfigFileReader() {
@@ -47,7 +49,7 @@ public class ConfigFileReader implements Loggable {
             File dir = Importer.getProgramDir();
 
             File ini = new File(dir, INI_FILE);
-            fine("Config file: " + ini.getAbsolutePath());
+            LOGGER.config("Config file: " + ini.getAbsolutePath());
 
             if (ini.exists()) {
                 // Read the properties
@@ -57,7 +59,7 @@ public class ConfigFileReader implements Loggable {
 
                 assignOptions(properties);
             } else {
-                log("No ini file: creating default");
+            	LOGGER.fine("No config file: creating default");
                 Properties properties = createDefaultProperties();
                 properties.store(new FileOutputStream(ini), null);
             }
