@@ -1119,16 +1119,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         	return createBlankTable();
 
         // Make the table model
-
         DefaultTableModel model = new DefaultTableModel();
 
         List<Object> columnList = new ArrayList<>();
         columnList.add(Labels.Clusters.CLUSTER_GROUP);
         columnList.add(Labels.Clusters.CLUSTER_FOUND);
-        columnList.add(Labels.Clusters.CLUSTER_METHOD);
-        columnList.add(Labels.Clusters.CLUSTER_DIM_RED);
         columnList.add(Labels.Clusters.CLUSTER_PARAMS);
-
+        columnList.add(Labels.Clusters.CLUSTER_DIM_RED);
+        columnList.add(Labels.Clusters.CLUSTER_METHOD);
         columnList.add(Labels.Clusters.TREE);
 
         model.addColumn(EMPTY_STRING, columnList.toArray());
@@ -1146,13 +1144,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 dataList.add(String.valueOf(g.size()));
             	
                 String dimRed = createDimensionalReductionString(g);
-                
                 String clusterMethod = createClusterMethodString(g);
             	String params = createClusterParameterString(g);
-            	
-            	dataList.add(clusterMethod);
-            	dataList.add(dimRed);
             	dataList.add(params);
+            	dataList.add(dimRed);
+            	dataList.add(clusterMethod);
                 	
                 if(g.hasTree())
                 	dataList.add(g);
@@ -1162,7 +1158,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 model.addColumn(dataset.getName(), dataList.toArray());
             }
         }
-
         return model;
     }
     
