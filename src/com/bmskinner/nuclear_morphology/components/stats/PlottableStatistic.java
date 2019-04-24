@@ -263,7 +263,7 @@ public interface PlottableStatistic extends Serializable {
      */
     static List<PlottableStatistic> getRodentSpermNucleusStats() {
         List<PlottableStatistic> list = getRoundNucleusStats();
-        list.add(OP_RP_ANGLE);
+//        list.add(OP_RP_ANGLE);
         list.add(HOOK_LENGTH);
         list.add(BODY_WIDTH);
         return list;
