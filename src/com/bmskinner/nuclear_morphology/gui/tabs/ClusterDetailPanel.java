@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -406,9 +407,10 @@ public class ClusterDetailPanel extends DetailPanel {
      * Colour analysis parameter table cell background. If parameters are false
      * or N/A, make the text colour grey
      */    
-    public class ClusterTableCellRenderer extends DefaultTableCellRenderer {
+    public static class ClusterTableCellRenderer extends DefaultTableCellRenderer {
 
-        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+        @Override
+    	public Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
 
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -417,7 +419,7 @@ public class ClusterDetailPanel extends DetailPanel {
 
             if (value != null && !value.toString().equals("")) {
 
-                if (value.toString().equals("false") || value.toString().equals("N/A")) {
+                if(value.toString().equals("false") || value.toString().equals(Labels.NA)) {
                     colour = Color.GRAY;
                 }
             }
@@ -443,7 +445,8 @@ public class ClusterDetailPanel extends DetailPanel {
         public Component getTableCellEditorComponent(JTable table,
                 Object value, boolean isSelected, int row, int column) {
             area.setText(value == null ? "" : value.toString());        
-            return pane;
+//            return pane;
+            return area;
         }
 
         private void setColor(boolean isSelected, JTable table) {
@@ -458,9 +461,20 @@ public class ClusterDetailPanel extends DetailPanel {
             area.setText(value == null ? "" : value.toString());
             setColor(isSelected,table);
             area.setFont(DEFAULT_FONT);
-            area.setBorder(null);
+            area.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             pane.setBorder(null);
-            return pane;
+            area.setLineWrap(true);
+            area.setWrapStyleWord(false);
+//            return pane;
+
+            Color colour = Color.BLACK;
+            if (value != null && !value.toString().equals("")) {
+                if(value.toString().equals("false") || value.toString().equals(Labels.NA)) {
+                    colour = Color.GRAY;
+                }
+            }
+            area.setForeground(colour);
+            return area;
         }
 
     }

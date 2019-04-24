@@ -1173,7 +1173,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 if(g.hasTree())
                 	dataList.add(g.getTree());
                 else
-                	dataList.add(EMPTY_STRING);
+                	dataList.add(Labels.NA);
    
                 model.addColumn(dataset.getName(), dataList.toArray());
             }
@@ -1220,8 +1220,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         IClusteringOptions op = opn.get();
         if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY))
         	builder.append("t-SNE");
-        
-        return builder.toString();
+
+        String s = builder.toString();
+        if(s.equals(EMPTY_STRING))
+        	return Labels.NA;
+        return s;
     }
     
     private String createClusterMethodString(IClusterGroup group) {
@@ -1238,11 +1241,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     	ClusteringMethod method = op.getType();
     	builder.append(method+Io.NEWLINE);
     	if(method.equals(ClusteringMethod.EM)) {
-    		builder.append(op.getIterations()+Io.NEWLINE);
+    		builder.append(op.getIterations()+" iterations"+Io.NEWLINE);
     	}
     	
     	if(method.equals(ClusteringMethod.HIERARCHICAL)) {
-    		builder.append(op.getHierarchicalMethod()+Io.NEWLINE);
+    		builder.append("Distance: "+op.getHierarchicalMethod()+Io.NEWLINE);
     	}
         return builder.toString();
     }
