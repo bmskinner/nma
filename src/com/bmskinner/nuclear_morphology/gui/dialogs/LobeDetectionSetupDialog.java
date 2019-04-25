@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.LobeDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
@@ -73,6 +74,11 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
     	}
         return new LobeDetectionMethod(dataset, options);
     }
+    
+    @Override
+	public HashOptions getOptions() {
+		return options;
+	}
 
     @Override
     protected void createUI() {

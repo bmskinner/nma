@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
@@ -115,6 +116,11 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 	@Override
 	public IAnalysisMethod getMethod() {
 		return new TreeBuildingMethod(dataset, options);
+	}
+	
+	@Override
+	public HashOptions getOptions() {
+		return options;
 	}
 
 	@Override

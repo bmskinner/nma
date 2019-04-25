@@ -18,6 +18,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
@@ -124,6 +125,11 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 		@Override
 		public IAnalysisMethod getMethod() {
 			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		@Override
+		public HashOptions getOptions() {
 			return null;
 		}
 

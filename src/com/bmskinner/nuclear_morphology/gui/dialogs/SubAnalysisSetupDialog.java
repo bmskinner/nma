@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 
 /**
@@ -92,6 +93,14 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
      * @return
      */
     public abstract IAnalysisMethod getMethod();
+    
+    /**
+     * Get the options for the analysis to be run.
+     * Can be null
+     * 
+     * @return
+     */
+    public abstract HashOptions getOptions();
 
     /**
      * Make the UI for the dialog

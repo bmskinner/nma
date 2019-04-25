@@ -66,6 +66,11 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
     public IAnalysisMethod getMethod() {
     	return new ProfileTsneMethod(dataset, options);
     }
+    
+    @Override
+	public HashOptions getOptions() {
+		return options;
+	}
 
     @Override
     protected void createUI() {
@@ -155,4 +160,6 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
         });  
         return perplexitySpinner;
     }
+
+	
 }
