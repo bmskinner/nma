@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportCellLocationsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportOptionsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportSingleCellImagesAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
@@ -61,8 +62,6 @@ import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
-import com.bmskinner.nuclear_morphology.gui.actions.RunTsneAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
@@ -78,7 +77,6 @@ import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener.
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
-import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -545,11 +543,7 @@ public class EventHandler implements Loggable, EventListener {
                 return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
             }
             
-            if (event.method().equals(DatasetEvent.RUN_TSNE)) {
-            	fine("Running t-SNE");
-                return new RunTsneAction(event.firstDataset(), acceptor, EventHandler.this);
-            }
-            
+             
             if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
                 fine("Manually clustering dataset");
                 return new ManualClusterAction(event.firstDataset(), acceptor, EventHandler.this);

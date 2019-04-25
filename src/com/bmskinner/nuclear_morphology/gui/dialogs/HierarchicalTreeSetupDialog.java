@@ -107,8 +107,6 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 		options.setHierarchicalMethod(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
 		options.setIterations(IClusteringOptions.DEFAULT_EM_ITERATIONS);
 		options.setUseSimilarityMatrix(IClusteringOptions.DEFAULT_USE_SIMILARITY_MATRIX);
-		options.setIncludeProfile(IClusteringOptions.DEFAULT_INCLUDE_PROFILE);
-		options.setProfileType(DEFAULT_PROFILE_TYPE);
 		options.setIncludeMesh(IClusteringOptions.DEFAULT_INCLUDE_MESH);
 		options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
 	}
