@@ -79,7 +79,6 @@ public class ClusterDetailPanel extends DetailPanel {
     private JButton buildTreeButton      = new JButton(NEW_TREE_LBL);
     private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
     private JButton manualClusterBtn     = new JButton(MAN_CLUSTER_LBL);
-    private JButton tSneBtn              = new JButton(TSNE_LBL);
 
     private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
     private JPanel statusPanel = new JPanel(new BorderLayout());
@@ -249,19 +248,13 @@ public class ClusterDetailPanel extends DetailPanel {
         	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets());
         });
                 
-        tSneBtn.addActionListener(e -> {
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_TSNE, getDatasets());
-        });
-
 
         saveClassifierButton.setEnabled(false);
         buildTreeButton.setEnabled(true);
         manualClusterBtn.setEnabled(true);
-        tSneBtn.setEnabled(true);
         buttonPanel.add(manualClusterBtn);
         buttonPanel.add(buildTreeButton);
-        buttonPanel.add(clusterButton);
-        buttonPanel.add(tSneBtn);
+        buttonPanel.add(clusterButton);;
 
         buttonPanel.add(manualClusterBtn);
         buttonPanel.add(buildTreeButton);
@@ -281,7 +274,6 @@ public class ClusterDetailPanel extends DetailPanel {
         clusterButton.setEnabled(b);
         buildTreeButton.setEnabled(b);
         manualClusterBtn.setEnabled(b);
-        tSneBtn.setEnabled(b);
         // saveClassifierButton.setEnabled(b); // not yet enabled
     }
 

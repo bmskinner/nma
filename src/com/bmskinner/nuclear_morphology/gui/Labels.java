@@ -237,7 +237,7 @@ public class Labels {
     	public static final String PROFILE_TYPE     = "Profile type";
     	public static final String INCLUDE_MESH     = "Include mesh";
     	public static final String INCLUDE_SEGMENTS = "Include segments";
-    	public static final String TREE             = "Tree";
+    	public static final String TREE             = "Hierarchical tree";
     }
     
 
