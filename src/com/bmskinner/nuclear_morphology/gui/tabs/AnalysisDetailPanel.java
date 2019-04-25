@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -32,7 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.components.renderers.AnalysisTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRenderer;
 
 /**
  * Holds the nuclear detection parameters
@@ -53,10 +54,8 @@ public class AnalysisDetailPanel extends DetailPanel {
         JPanel header = new JPanel();
         header.add(new JLabel(HEADER_LBL));
         
-        JScrollPane parametersPanel = createAnalysisParametersPanel();
-
         this.add(header, BorderLayout.NORTH);
-        this.add(parametersPanel, BorderLayout.CENTER);
+        this.add(createTablePanel(), BorderLayout.CENTER);
 
     }
 
@@ -96,34 +95,30 @@ public class AnalysisDetailPanel extends DetailPanel {
         		.setDatasets(getDatasets())
                 .setType(TableType.ANALYSIS_PARAMETERS)
                 .setTarget(tableAnalysisParameters)
-                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
+//                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new JTextAreaCellRenderer())
                 .build();
 
         setTable(options);
 
     }
 
-    private JScrollPane createAnalysisParametersPanel() {
-        JScrollPane scrollPane = new JScrollPane();
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-
+    private JPanel createTablePanel() {
+    	JPanel panel = new JPanel();
+    	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        
         tableAnalysisParameters = new ExportableTable();
-        panel.add(tableAnalysisParameters, BorderLayout.CENTER);
+        tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
+
         tableAnalysisParameters.setEnabled(false);
+        tableAnalysisParameters.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
+        JScrollPane scrollPane = new JScrollPane(tableAnalysisParameters);
 
-        scrollPane.setViewportView(panel);
-        scrollPane.setColumnHeaderView(tableAnalysisParameters.getTableHeader());
+        JPanel tablePanel = new JPanel(new BorderLayout());
 
-        TableOptions options = new TableOptionsBuilder()
-        		.setDatasets(null)
-        		.setType(TableType.ANALYSIS_PARAMETERS)
-        		.build();
-
-        TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
-        tableAnalysisParameters.setModel(model);
-
-        return scrollPane;
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        tablePanel.add(tableAnalysisParameters.getTableHeader(), BorderLayout.NORTH);
+        
+        panel.add(tablePanel);
+        return panel;
     }
 }

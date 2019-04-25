@@ -254,8 +254,15 @@ public class Labels {
     }
     
     public static class AnalysisParameters {
-    	public static final String COLLECTION_SOURCE = "Collection source";
-    	
+    	public static final String PROFILE_WINDOW      = "Profile window";
+    	public static final String IMAGE_PREPROCESSING = "Image filtering";
+    	public static final String NUCLEUS_DETECTION   = "Nucleus detection";
+    	public static final String NUCLEUS_CIRCULARITY = "Nucleus circularity";
+    	public static final String NUCLEUS_SIZE        = "Nucleus area";
+    	public static final String COLLECTION_SOURCE   = "Image source";
+    	public static final String RUN_TIME            = "Run time";
+    	public static final String NUCLEUS_TYPE        = "Nucleus type";
+    	public static final String SOFTWARE_VERSION    = "Created in";
     }
     
     public static class Merges {

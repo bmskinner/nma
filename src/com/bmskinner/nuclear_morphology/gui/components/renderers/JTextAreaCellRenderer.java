@@ -21,6 +21,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
  */
 public class JTextAreaCellRenderer extends JTextArea implements TableCellRenderer {
 	private static final Font DEFAULT_FONT = UIManager.getFont("Label.font");
+	public static final Color CONSISTENT_CELL_COLOUR = new Color(178, 255, 102);
 
     private void setColor(boolean isSelected, JTable table) {
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
@@ -37,14 +38,45 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         setLineWrap(true);
         setWrapStyleWord(true);
-        Color colour = Color.BLACK;
+        Color foreground = Color.BLACK;
         if (value != null && !value.toString().equals("")) {
             if(value.toString().equals("false") || value.toString().equals(Labels.NA)) {
-                colour = Color.GRAY;
+                foreground = Color.GRAY;
             }
         }
-
-        setForeground(colour);
+        
+        Color background = Color.WHITE;
+        if(isRowConsistentAcrossColumns(table, row))
+        	background = CONSISTENT_CELL_COLOUR;
+        
+        setBackground(background);
+        setForeground(foreground);
         return this;
+    }
+    
+    /**
+     * Test if the values across the given row are consistent between columns
+     * 
+     * @param table
+     * @param row
+     * @return
+     */
+    protected boolean isRowConsistentAcrossColumns(JTable table, int row) {
+
+        if (table.getColumnCount() <= 2) // don't colour single datasets
+        	return false;
+
+        Object test = table.getModel().getValueAt(row, 1);
+        for (int col = 1; col < table.getColumnCount(); col++) {
+        	Object value = table.getModel().getValueAt(row, col);
+
+        	// Ignore empty cells
+        	if(value==null || value.toString().equals(""))
+        		return false;
+
+        	if (!test.equals(value))
+        		return false;
+        }
+        return true;
     }
 }
