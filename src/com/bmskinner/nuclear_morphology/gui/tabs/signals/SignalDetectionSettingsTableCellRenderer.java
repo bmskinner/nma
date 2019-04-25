@@ -18,13 +18,15 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.components.renderers.ConsistentRowTableCellRenderer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Colour analysis parameter table cell background. If all the datasets selected
@@ -33,6 +35,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRen
  */
 @SuppressWarnings("serial")
 public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTableCellRenderer {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
@@ -91,8 +95,7 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
             }
 
         } catch (Exception e) {
-            warn("Error in signal detection table renderer");
-            stack("Error in signal detection table renderer", e);
+            LOGGER.log(Loggable.STACK, "Error in signal detection table renderer", e);
         }
 
         // Cells are by default rendered as a JLabel.

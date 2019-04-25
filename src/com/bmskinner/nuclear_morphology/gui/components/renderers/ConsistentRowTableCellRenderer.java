@@ -14,18 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui.components;
+package com.bmskinner.nuclear_morphology.gui.components.renderers;
 
 import java.awt.Color;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
+/**
+ * Cell renderer which colours rows if all columns other than the 
+ * first contain the same values
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
-public abstract class ConsistentRowTableCellRenderer extends DefaultTableCellRenderer
-        implements Loggable {
+public abstract class ConsistentRowTableCellRenderer extends DefaultTableCellRenderer {
 
     public static final Color CONSISTENT_CELL_COLOUR = new Color(178, 255, 102);
 

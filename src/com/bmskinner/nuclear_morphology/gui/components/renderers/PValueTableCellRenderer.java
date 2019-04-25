@@ -14,36 +14,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui.components;
+package com.bmskinner.nuclear_morphology.gui.components.renderers;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-/**
- * Colour a table cell grey if it is null or empty. Use for diagonals in
- * pairwise tables
- */
-public class PairwiseTableCellRenderer extends DefaultTableCellRenderer {
+import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
-    private static final long serialVersionUID = 1L;
+@SuppressWarnings("serial")
+public class PValueTableCellRenderer extends DefaultTableCellRenderer {
 
-    @Override
-    public Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+	@Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
         // Cells are by default rendered as a JLabel.
-    	Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        String cellContents = value.toString();
-        if (cellContents == null || cellContents.equals("")) {
-            c.setBackground(Color.LIGHT_GRAY);
-        } else {
-            c.setBackground(Color.WHITE);
+        Color bg = c.getBackground();
+
+        NumberFormat nf = NumberFormat.getInstance();
+
+        try {
+        	double pvalue = nf.parse(value.toString()).doubleValue();
+
+            if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL)
+            	bg = Color.YELLOW;
+
+            if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL)
+            	bg = Color.GREEN;
+        } catch (ParseException e) {
+        	bg = Color.WHITE;
+        	e.printStackTrace();
         }
 
-        // Return the JLabel which renders the cell.
+        c.setBackground(bg);
+
         return c;
     }
+
 }

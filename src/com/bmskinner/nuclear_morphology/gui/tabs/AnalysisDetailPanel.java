@@ -31,8 +31,8 @@ import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.Tab
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.components.AnalysisTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.components.renderers.AnalysisTableCellRenderer;
 
 /**
  * Holds the nuclear detection parameters
@@ -72,17 +72,17 @@ public class AnalysisDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateMultiple();
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         updateAnalysisParametersPanel();
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
     }
 
@@ -107,7 +107,7 @@ public class AnalysisDetailPanel extends DetailPanel {
         JScrollPane scrollPane = new JScrollPane();
 
         JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout(0, 0));
+        panel.setLayout(new BorderLayout());
 
         tableAnalysisParameters = new ExportableTable();
         panel.add(tableAnalysisParameters, BorderLayout.CENTER);

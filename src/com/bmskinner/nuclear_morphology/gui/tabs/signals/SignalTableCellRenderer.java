@@ -17,9 +17,11 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.Color;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
-import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.components.renderers.ConsistentRowTableCellRenderer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This allows a blank cell in a table to be coloured with a signal colour based
@@ -30,6 +32,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRen
  */
 @SuppressWarnings("serial")
 public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
@@ -69,7 +73,7 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
                 }
             }
         } catch (Exception e) {
-            stack("Error in signal renderer", e);
+        	LOGGER.log(Loggable.STACK, "Error in signal renderer", e);
             colour = Color.WHITE;
         }
 

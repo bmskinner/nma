@@ -76,9 +76,7 @@ public class ExportableTable extends JTable {
         getColumnModel().addColumnModelListener(cl);
         getTableHeader().addMouseListener(cl);
     }
-    
-    
-    
+
     /**
      * Create an empty table
      */
@@ -94,6 +92,12 @@ public class ExportableTable extends JTable {
     public ExportableTable(TableModel model) {
         this(model, true);
         setComponentPopupMenu(new TablePopupMenu());
+    }
+    
+    @Override
+    public void validate() {
+    	updateRowHeights();
+    	super.validate();
     }
     
     @Override

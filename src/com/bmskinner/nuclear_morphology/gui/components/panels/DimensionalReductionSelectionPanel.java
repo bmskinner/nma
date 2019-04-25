@@ -27,7 +27,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class DimensionalReductionSelectionPanel extends OptionsPanel {
 
 	private static final double MIN_PERPLEXITY = 5;
-	private static final double MAX_PERPLEXITY = 10000;
+	private static final double INTIIAL_PERPLEXITY_FRACTION = 20d;
+	private static final double MAX_PERPLEXITY_FRACTION = 3d;
 	private static final double STEP_PERPLEXITY = 1;
 	
 	private static final int MIN_ITERATIONS = 500;
@@ -126,10 +127,11 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 */
 	private JSpinner makePerplexitySpinner() {
 		int nNuclei = dataset.getCollection().getNucleusCount();
-		double initialPerplexity = Math.max(MIN_PERPLEXITY, Math.floor(nNuclei/20d));
+		double initialPerplexity = Math.max(MIN_PERPLEXITY, Math.floor(nNuclei/INTIIAL_PERPLEXITY_FRACTION));
+		double maxPerplexity = Math.floor(nNuclei/MAX_PERPLEXITY_FRACTION)-1;
 		options.setDouble(TsneMethod.PERPLEXITY_KEY, initialPerplexity);
 
-		SpinnerModel perplexityModel = new SpinnerNumberModel(initialPerplexity, MIN_PERPLEXITY, nNuclei, STEP_PERPLEXITY);
+		SpinnerModel perplexityModel = new SpinnerNumberModel(initialPerplexity, MIN_PERPLEXITY, maxPerplexity, STEP_PERPLEXITY);
 
 		JSpinner perplexitySpinner = new JSpinner(perplexityModel);
 		perplexitySpinner.setEnabled(true);

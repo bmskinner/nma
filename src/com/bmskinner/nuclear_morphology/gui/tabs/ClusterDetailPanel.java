@@ -17,10 +17,8 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -31,9 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
@@ -50,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -118,7 +115,7 @@ public class ClusterDetailPanel extends DetailPanel {
         TableModel optionsModel = AbstractTableCreator.createBlankTable();
         
         TableCellRenderer buttonRenderer = new JButtonRenderer();
-        TableCellRenderer textRenderer = new JTextAreaColumnRenderer();
+        TableCellRenderer textRenderer = new JTextAreaCellRenderer();
         
         clusterDetailsTable = new ExportableTable(optionsModel) {
            
@@ -135,12 +132,6 @@ public class ClusterDetailPanel extends DetailPanel {
             		return buttonRenderer;
             	}
             	return textRenderer;
-            }
-            
-            @Override
-            public void validate() {
-            	updateRowHeights();
-            	super.validate();
             }
         };
         
@@ -333,39 +324,7 @@ public class ClusterDetailPanel extends DetailPanel {
             getInterfaceEventHandler().fire(event);
         }
     }
-        
-    private static class JTextAreaColumnRenderer extends JTextArea  implements TableCellRenderer {
-
-        private static final Font DEFAULT_FONT = UIManager.getFont("Label.font");
-
-        private void setColor(boolean isSelected, JTable table) {
-            setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
-            setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table,
-                Object value, boolean isSelected, boolean hasFocus, int row,
-                int column) {
-            setText(value == null ? "" : value.toString());
-            setColor(isSelected,table);
-            setFont(DEFAULT_FONT);
-            setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            setLineWrap(true);
-            setWrapStyleWord(true);
-            Color colour = Color.BLACK;
-            if (value != null && !value.toString().equals("")) {
-                if(value.toString().equals("false") || value.toString().equals(Labels.NA)) {
-                    colour = Color.GRAY;
-                }
-            }
-
-            setForeground(colour);
-            return this;
-        }
-
-    }
-    
+            
     /**
      * Render a button in a cell. Note, this is non-functional - it just paints 
      * a button shape. Use a mouse listener on the table for functionality
