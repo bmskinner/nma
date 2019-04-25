@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,6 +64,7 @@ import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
@@ -83,6 +85,8 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
  */
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends LoadingIconDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     private static final String ANALYSE_LBL = "Analyse new clusters";
     private static final String SHOW_MGE_SRC_LBL = "Show merge sources";
@@ -138,8 +142,8 @@ public class ClusterTreeDialog extends LoadingIconDialog {
 
         } catch (Exception e) {
 
-            warn("Error creating tree view");
-            stack("Error creating tree view", e);
+            LOGGER.log(Level.WARNING, "Error creating tree view");
+            LOGGER.log(Loggable.STACK, "Error creating tree view", e);
             this.dispose();
         }
     }
@@ -151,7 +155,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      */
     private RootedTree importTree() {
         RootedTree topTree = null;
-        fine("Reading tree");
+        LOGGER.fine("Reading tree");
         StringReader reader = new StringReader(group.getTree());
 
         boolean readUnquotedLabels = true;
@@ -175,14 +179,14 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 }
             }
         } catch (IOException e) {
-            warn("Unable to display tree: Error reading data");
-            log(Level.FINE, "Error reading tree", e);
+        	LOGGER.log(Level.WARNING, "Unable to display tree: Error reading data");
+        	LOGGER.log(Loggable.STACK, "Error reading tree", e);
         } catch (DuplicateTaxaException e) {
-            warn("Unable to display tree: duplicate taxon names");
-            log(Level.FINE, "Duplicate taxon names", e);
+        	LOGGER.log(Level.WARNING, "Unable to display tree: duplicate taxon names");
+        	LOGGER.log(Loggable.STACK, "Duplicate taxon names", e);
         } catch (ImportException e) {
-            warn("Unable to display tree: error importing newick tree");
-            log(Level.FINE, "Error in tree IO", e);
+        	LOGGER.log(Level.WARNING, "Unable to display tree: error importing newick tree");
+        	LOGGER.log(Loggable.STACK, "Error in tree IO", e);
         }
         return topTree;
     }
@@ -193,7 +197,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
     private void displayTree(RootedTree tree) {
 
         int numTaxa = tree.getTaxa().size();
-        fine("Tree has " + numTaxa + " taxa");
+        LOGGER.fine("Tree has " + numTaxa + " taxa");
 
         viewer.setTree(tree);
 
@@ -333,7 +337,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
     private void colourTreeNodesByClusterGroup(final IClusterGroup group) {
 
         if (group != null) {
-            finer("Colouring nodes by cluster group: " + group.getName());
+        	LOGGER.finer("Colouring nodes by cluster group: " + group.getName());
 
             setStatusLoading();
 
@@ -362,7 +366,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 Paint colour = ColourSelecter.getColor(clusterNumber++);
                 setNodeColour(cluster.getCollection(), colour);
 
-                finer("Node colours assigned");
+                LOGGER.finer("Node colours assigned");
 
             }
 //            updateNodePainter();
@@ -498,7 +502,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
         if (clusterCollection.hasCells()) {
             colourTreeNodesByCluster(clusterCollection);
             clusterList.add(clusterCollection);
-            log("Extracted " + clusterCollection.size() + " cells");
+            LOGGER.info("Extracted " + clusterCollection.size() + " cells");
         } else {
             warn("No cells found. Check taxon labels are correct");
         }
@@ -528,10 +532,10 @@ public class ClusterTreeDialog extends LoadingIconDialog {
         testClusterGroupable(list);
 
         if (!list.isEmpty()) {
-            finest("Firing population update request");
+        	LOGGER.finest("Firing population update request");
             fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         } else {
-            warn("No datasets to analyse");
+        	LOGGER.info("No datasets to analyse");
         }
         this.setVisible(false);
         this.dispose();
@@ -644,14 +648,14 @@ public class ClusterTreeDialog extends LoadingIconDialog {
 
                     }
                 } else {
-                    log("Cannot make cluster group");
-                    log("Not all cells are assigned clusters");
-                    log("Adding as standard manual clusters");
+                	LOGGER.info("Cannot make cluster group");
+                	LOGGER.info("Not all cells are assigned clusters");
+                	LOGGER.info("Adding as standard manual clusters");
                 }
             } else {
-                log("Cannot make cluster group");
-                log("Cells present in more than one cluster");
-                log("Adding as standard manual clusters");
+            	LOGGER.info("Cannot make cluster group");
+            	LOGGER.info("Cells present in more than one cluster");
+            	LOGGER.info("Adding as standard manual clusters");
             }
 
         }

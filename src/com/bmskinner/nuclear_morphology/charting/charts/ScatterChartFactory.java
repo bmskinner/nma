@@ -170,10 +170,10 @@ public class ScatterChartFactory extends AbstractChartFactory {
      * @return
      * @throws ChartDatasetCreationException
      */
-    public static JFreeChart createTsneChart(IAnalysisDataset d, ColourByType type, IClusterGroup group)  {
+    public static JFreeChart createTsneChart(IAnalysisDataset d, ColourByType type, IClusterGroup plotGroup, IClusterGroup colourGroup)  {
     	
     	try {
-    		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d, type, group);
+    		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d, type, plotGroup, colourGroup);
     		String xLabel = "tSNE 1";
     		String yLabel = "tSNE 2";
 

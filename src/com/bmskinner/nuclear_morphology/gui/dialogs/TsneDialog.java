@@ -15,7 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -36,17 +36,17 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelect
 public class TsneDialog extends LoadingIconDialog {
 
 	private final IAnalysisDataset dataset;
+	private final IClusterGroup group;
 	private final ExportableChartPanel chartPanel = new ExportableChartPanel(ScatterChartFactory.createEmptyChart());
-
-	private final JButton runTsneBtn = new JButton("Run new t-SNE");
 	
-	public TsneDialog(final @NonNull IAnalysisDataset dataset) {
+	public TsneDialog(final @NonNull IAnalysisDataset dataset, final @NonNull IClusterGroup group) {
 		this.dataset = dataset;
+		this.group = group;
 
 		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel, ImageThumbnailGenerator.COLOUR_GREYSCALE));
 
 		updateTitle();
-		updateChart(ColourByType.NONE, null);
+		updateChart(ColourByType.CLUSTER, group);
 		setLayout(new BorderLayout());
 
 		add(createHeader(), BorderLayout.NORTH);
@@ -65,9 +65,7 @@ public class TsneDialog extends LoadingIconDialog {
 
 
 	private JPanel createHeader() {
-		JPanel panel = new JPanel(new FlowLayout());
-		runTsneBtn.addActionListener( l->runNewTsne());
-		panel.add(runTsneBtn);
+		JPanel panel = new JPanel(new FlowLayout());		
 		
 		// How should cells be coloured?
 		
@@ -79,10 +77,11 @@ public class TsneDialog extends LoadingIconDialog {
 		colourGroup.add(byClusterBtn);
 		colourGroup.add(byMergeSourceBtn);
 		
-		byNoneBtn.setSelected(true);
+		byClusterBtn.setSelected(true);
 		
 		ClusterGroupSelectionPanel clustersBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
-		clustersBox.setEnabled(false);
+		clustersBox.setEnabled(group!=null);
+		clustersBox.setSelectedGroup(group);
 		
 		
 		ActionListener colourListener = e ->{
@@ -104,28 +103,8 @@ public class TsneDialog extends LoadingIconDialog {
 		return panel;
 	}
 
-	private void runNewTsne() {
-		SubAnalysisSetupDialog tsneSetup = new TsneSetupDialog(dataset);
-		if (tsneSetup.isReadyToRun()) {
-			try {
-				chartPanel.setChart(ScatterChartFactory.createLoadingChart());
-				IAnalysisWorker w = new DefaultAnalysisWorker(tsneSetup.getMethod());
-				w.addPropertyChangeListener(e->{
-					if (e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
-						updateTitle();
-						updateChart(ColourByType.NONE, null);
-					}
-				});
-				ThreadManager.getInstance().submit(w);	
-			} catch (Exception e) {
-				error("Error running new t-SNE", e);
-			}
-		}
-		tsneSetup.dispose();
-	}
-
-	private void updateChart(ColourByType type, IClusterGroup group) {
-		chartPanel.setChart(ScatterChartFactory.createTsneChart(dataset, type, group));
+	private void updateChart(ColourByType type, IClusterGroup colourGroup) {
+		chartPanel.setChart(ScatterChartFactory.createTsneChart(dataset, type, group, colourGroup));
 	}
 	
 	private void updateTitle() {
@@ -143,12 +122,7 @@ public class TsneDialog extends LoadingIconDialog {
 			return;
 		}
 		
-		setTitle("tSNE for "+dataset.getName()+
-				": "+tSNEOptions.get().getString(ProfileTsneMethod.PROFILE_TYPE_KEY)+
-				", Perplexity "+
-				tSNEOptions.get().getDouble(ProfileTsneMethod.PERPLEXITY_KEY)+
-				", Max iterations "+
-				tSNEOptions.get().getInt(ProfileTsneMethod.MAX_ITERATIONS_KEY));
+		setTitle("tSNE for "+dataset.getName()+": "+group.getName());		
 	}
 
 

@@ -29,11 +29,17 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -73,7 +79,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         run();
 
         // Save the clusters to the dataset
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
 
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
@@ -111,9 +117,22 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
                 list.add(clusterDataset);
             }
-
         }
         fine("Profiles copied to all clusters");
+        
+        // Move tSNE values to their cluster group if needed
+        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	for(ICell c : dataset.getCollection()) {
+        		for(Nucleus n : c.getNuclei()) {
+        			n.setStatistic(new GenericStatistic("TSNE_1_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.TSNE_1));
+        			n.setStatistic(new GenericStatistic("TSNE_2_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.TSNE_2));
+        			n.setStatistic(PlottableStatistic.TSNE_1, Statistical.STAT_NOT_CALCULATED);
+        			n.setStatistic(PlottableStatistic.TSNE_2, Statistical.STAT_NOT_CALCULATED);
+        		}
+        	}
+        }
+        
+        
         dataset.addClusterGroup(group);
         IAnalysisResult r = new ClusterAnalysisResult(list, group);
         return r;

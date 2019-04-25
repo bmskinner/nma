@@ -142,6 +142,17 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
     @Override
 	protected FastVector makeAttributes() throws ClusteringMethodException{
+    	
+    	if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+    		FastVector attributes = new FastVector(2);
+        	attributes.addElement(new Attribute("tSNE_X"));
+        	attributes.addElement(new Attribute("tSNE_Y"));
+        	 if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+                 Attribute name = new Attribute("name", (FastVector) null);
+                 attributes.addElement(name);
+             }
+        	return attributes;
+        }
 
         // Determine the number of attributes required
         int attributeCount = 0;
@@ -224,12 +235,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             Attribute name = new Attribute("name", (FastVector) null);
             attributes.addElement(name);
         }
-        
-        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
-        	attributes.addElement(new Attribute("tSNE_X"));
-        	attributes.addElement(new Attribute("tSNE_Y"));
-        }
-
         return attributes;
     }
 
@@ -263,8 +268,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         final Mesh<Nucleus> t = template;
         final double w = windowProportion;
-//        try {
-                        
+    
             collection.getCells()
                 .forEach( c->c.getNuclei().stream()
                     .forEach( n-> {
@@ -283,10 +287,25 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     private void addNucleus(ICell c, Nucleus n, FastVector attributes, Instances instances, Mesh<Nucleus> template,
             double windowProportion) throws UnavailableBorderTagException, UnavailableProfileTypeException,
             ProfileException, MeshCreationException {
-
+    	int attNumber = 0;
         Instance inst = new SparseInstance(attributes.size());
-
-        int attNumber = 0;
+        
+        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	Attribute attX = (Attribute) attributes.elementAt(attNumber++);
+        	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_1));
+        	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
+        	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
+        	
+        	if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+                String uniqueName = c.getId().toString();
+                Attribute att = (Attribute) attributes.elementAt(attNumber++);
+                inst.setValue(att, uniqueName);
+            }
+        	 instances.add(inst);
+             cellToInstanceMap.put(inst, c.getId());
+             fireProgressEvent();
+             return;
+        }
 
         int pointsToSample = (int) Math.floor(1d / windowProportion);
 
@@ -339,12 +358,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             inst.setValue(att, uniqueName);
         }
         
-        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
-        	Attribute attX = (Attribute) attributes.elementAt(attNumber++);
-        	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_1));
-        	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
-        	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
-        }
+
 
         instances.add(inst);
         cellToInstanceMap.put(inst, c.getId());

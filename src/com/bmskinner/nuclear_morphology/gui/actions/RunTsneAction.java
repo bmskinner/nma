@@ -51,7 +51,7 @@ implements EventListener {
 		 if(analysisOptions.get().hasSecondaryOptions(IAnalysisOptions.TSNE)) {
 			 // tSNE has already been run for this dataset. Display directly
 			 cancel();
-			 Runnable r = () -> new TsneDialog(dataset);
+			 Runnable r = () -> new TsneDialog(dataset, null);
 			 new Thread(r).start();
 		 } else {
 			 // No existing tSNE. Run.
@@ -75,7 +75,7 @@ implements EventListener {
 
         try {
         	worker.get();
-        	Runnable r = () -> new TsneDialog(dataset);
+        	Runnable r = () -> new TsneDialog(dataset, null);
 			new Thread(r).start();
             cleanup(); // do not cancel, we need the MainWindow listener to
                        // remain attached

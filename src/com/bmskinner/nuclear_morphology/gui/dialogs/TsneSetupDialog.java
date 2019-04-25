@@ -17,7 +17,7 @@ import javax.swing.SpinnerNumberModel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -64,7 +64,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
 
     @Override
     public IAnalysisMethod getMethod() {
-    	return new ProfileTsneMethod(dataset, options);
+    	return new TsneMethod(dataset, options);
     }
     
     @Override
@@ -88,13 +88,13 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
         List<JLabel> labels = new ArrayList<>();
         List<Component> fields = new ArrayList<>();
 
-        labels.add(new JLabel(ProfileTsneMethod.PROFILE_TYPE_KEY));
+        labels.add(new JLabel(TsneMethod.PROFILE_TYPE_KEY));
         fields.add(makeProfileComboBox());
 
-        labels.add(new JLabel(ProfileTsneMethod.MAX_ITERATIONS_KEY));
+        labels.add(new JLabel(TsneMethod.MAX_ITERATIONS_KEY));
         fields.add(makeMaxIterationsSpinner());
 
-        labels.add(new JLabel(ProfileTsneMethod.PERPLEXITY_KEY));
+        labels.add(new JLabel(TsneMethod.PERPLEXITY_KEY));
         fields.add(makePerplexitySpinner());
         
         addLabelTextRows(labels, fields, layout, panel);
@@ -105,7 +105,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
     	 JComboBox<ProfileType> profileBox = new JComboBox<>(ProfileType.displayValues());
          profileBox.setSelectedItem(ProfileType.ANGLE);
          profileBox.setEnabled(true);
-         profileBox.addActionListener(l->options.setString(ProfileTsneMethod.PROFILE_TYPE_KEY,profileBox.getSelectedItem().toString()));
+         profileBox.addActionListener(l->options.setString(TsneMethod.PROFILE_TYPE_KEY,profileBox.getSelectedItem().toString()));
          return profileBox;
     }
     
@@ -115,7 +115,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
      * @return
      */
     private JSpinner makeMaxIterationsSpinner() {
-    	SpinnerModel iterationsModel = new SpinnerNumberModel(options.getInt(ProfileTsneMethod.MAX_ITERATIONS_KEY), // initial                                                                           // value
+    	SpinnerModel iterationsModel = new SpinnerNumberModel(options.getInt(TsneMethod.MAX_ITERATIONS_KEY), // initial                                                                           // value
                 500, // min
                 5000, // max
                 25); // step
@@ -125,7 +125,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
         iterationsSpinner.addChangeListener(l->{
         	try {
 				iterationsSpinner.commitEdit();
-				options.setInt(ProfileTsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
+				options.setInt(TsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
 			} catch (ParseException e) {
 				stack("Parse error in spinner", e);
 			}
@@ -142,7 +142,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
     private JSpinner makePerplexitySpinner() {
         int nNuclei = dataset.getCollection().getNucleusCount();
         double initialPerplexity = Math.max(MIN_PERPLEXITY, nNuclei/20d);
-        options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, initialPerplexity);
+        options.setDouble(TsneMethod.PERPLEXITY_KEY, initialPerplexity);
         
         SpinnerModel perplexityModel = new SpinnerNumberModel(initialPerplexity, MIN_PERPLEXITY, MAX_PERPLEXITY, STEP_PERPLEXITY);
 
@@ -152,7 +152,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
         perplexitySpinner.addChangeListener(l->{
         	try {
         		perplexitySpinner.commitEdit();
-				options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
+				options.setDouble(TsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
 			} catch (ParseException e) {
 				stack("Parse error in spinner", e);
 			}

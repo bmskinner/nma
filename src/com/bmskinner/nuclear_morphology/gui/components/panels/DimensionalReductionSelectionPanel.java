@@ -17,7 +17,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
@@ -82,10 +82,10 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		labels.add(label);
 		fields.add(box);
 
-		labels.add(new JLabel(ProfileTsneMethod.MAX_ITERATIONS_KEY));
+		labels.add(new JLabel(TsneMethod.MAX_ITERATIONS_KEY));
 		fields.add(iterationsSpinner);
 
-		labels.add(new JLabel(ProfileTsneMethod.PERPLEXITY_KEY));
+		labels.add(new JLabel(TsneMethod.PERPLEXITY_KEY));
 		fields.add(perplexitySpinner);
 
 		addLabelTextRows(labels, fields, layout, panel);
@@ -98,7 +98,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 * @return
 	 */
 	private JSpinner makeMaxIterationsSpinner() {
-		SpinnerModel iterationsModel = new SpinnerNumberModel(options.getInt(ProfileTsneMethod.MAX_ITERATIONS_KEY), // initial                                                                           // value
+		SpinnerModel iterationsModel = new SpinnerNumberModel(options.getInt(TsneMethod.MAX_ITERATIONS_KEY), // initial                                                                           // value
 				500, // min
 				5000, // max
 				25); // step
@@ -108,7 +108,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		iterationsSpinner.addChangeListener(l->{
 			try {
 				iterationsSpinner.commitEdit();
-				options.setInt(ProfileTsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
+				options.setInt(TsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
 			} catch (ParseException e) {
 				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
 			}
@@ -125,7 +125,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	private JSpinner makePerplexitySpinner() {
 		int nNuclei = dataset.getCollection().getNucleusCount();
 		double initialPerplexity = Math.max(MIN_PERPLEXITY, nNuclei/20d);
-		options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, initialPerplexity);
+		options.setDouble(TsneMethod.PERPLEXITY_KEY, initialPerplexity);
 
 		SpinnerModel perplexityModel = new SpinnerNumberModel(initialPerplexity, MIN_PERPLEXITY, MAX_PERPLEXITY, STEP_PERPLEXITY);
 
@@ -135,7 +135,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		perplexitySpinner.addChangeListener(l->{
 			try {
 				perplexitySpinner.commitEdit();
-				options.setDouble(ProfileTsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
+				options.setDouble(TsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
 			} catch (ParseException e) {
 				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
 			}

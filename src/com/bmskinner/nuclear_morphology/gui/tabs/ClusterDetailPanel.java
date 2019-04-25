@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
@@ -130,7 +131,9 @@ public class ClusterDetailPanel extends DetailPanel {
             
             @Override
             public TableCellRenderer getCellRenderer(int row, int column) {
-            	if(this.getValueAt(row, 0).equals(Labels.Clusters.TREE) && column>0 && this.getValueAt(row, column) instanceof IClusterGroup) {
+            	if( (this.getValueAt(row, 0).equals(Labels.Clusters.TREE) || this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)) 
+            			&& column>0
+            			&& !(getValueAt(row, column).equals(Labels.NA))) {
             		return buttonRenderer;
             	}
             	return textRenderer;
@@ -150,16 +153,31 @@ public class ClusterDetailPanel extends DetailPanel {
 				int row = clusterDetailsTable.rowAtPoint(e.getPoint());
 				int col = clusterDetailsTable.columnAtPoint(e.getPoint());
 				Object value = clusterDetailsTable.getValueAt(row, col);
-	        	if(value instanceof IClusterGroup) {
+				
+				IClusterGroup group = (IClusterGroup) clusterDetailsTable.getValueAt(0, col);
+				// find the dataset with this cluster group
+				IAnalysisDataset d = getDatasets().stream().filter(t->t.hasClusterGroup(group)).findFirst().orElse(null);
+				
+	        	if(clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.TREE) && 
+	        			!clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
 	        		Runnable r = () ->{
-	        			// find the dataset with this cluster group
-	        			IAnalysisDataset d = getDatasets().stream().filter(t->t.getClusterGroups().stream().anyMatch(c->c.getId().equals(((IClusterGroup) value).getId()))).findFirst().orElse(null);
-	            		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, (IClusterGroup) value);
+	        			ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, group);
 	                    clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
 	                    clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
 	            	};
 	                new Thread(r).start();
 	        	}
+	        	
+	        	if(clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT) && 
+	        			!clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
+	        		Runnable r = () ->{
+	        			TsneDialog tsneDialog = new TsneDialog(d, group);
+	        			tsneDialog.addDatasetEventListener(ClusterDetailPanel.this);
+	        			tsneDialog.addInterfaceEventListener(ClusterDetailPanel.this);
+	        		};
+	        		new Thread(r).start();
+	        	}
+	        	
 			}
 
 			@Override
@@ -385,7 +403,8 @@ public class ClusterDetailPanel extends DetailPanel {
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
-            setText(value == null ? "" : SHOW_TREE_LBL);
+			String text = value==null ? "" : value instanceof IClusterGroup ? SHOW_TREE_LBL : value.toString();
+            setText(text);
             setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             return this;
         }

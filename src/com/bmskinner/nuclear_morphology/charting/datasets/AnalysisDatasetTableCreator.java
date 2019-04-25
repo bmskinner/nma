@@ -39,6 +39,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
@@ -1126,6 +1127,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         columnList.add(Labels.Clusters.CLUSTER_FOUND);
         columnList.add(Labels.Clusters.CLUSTER_PARAMS);
         columnList.add(Labels.Clusters.CLUSTER_DIM_RED);
+        columnList.add(Labels.Clusters.CLUSTER_DIM_PLOT);
         columnList.add(Labels.Clusters.CLUSTER_METHOD);
         columnList.add(Labels.Clusters.TREE);
 
@@ -1140,18 +1142,20 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             for (IClusterGroup g : clusterGroups) {
             	
             	List<Object> dataList = new ArrayList<>();
-            	dataList.add(g.getName());
+            	dataList.add(g);
                 dataList.add(String.valueOf(g.size()));
             	
                 String dimRed = createDimensionalReductionString(g);
+                String dimPlot = createDimensionalPlotString(g);
                 String clusterMethod = createClusterMethodString(g);
             	String params = createClusterParameterString(g);
             	dataList.add(params);
             	dataList.add(dimRed);
+            	dataList.add(dimPlot);
             	dataList.add(clusterMethod);
                 	
                 if(g.hasTree())
-                	dataList.add(g);
+                	dataList.add(Labels.Clusters.CLUSTER_SHOW_TREE);
                 else
                 	dataList.add(Labels.NA);
    
@@ -1159,6 +1163,26 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             }
         }
         return model;
+    }
+    
+    private String createDimensionalPlotString(IClusterGroup group) {
+    	StringBuilder builder = new StringBuilder();
+    	Optional<IClusteringOptions> opn = group.getOptions();
+    	
+    	if(!opn.isPresent()) {
+    		builder.append(Labels.NA);
+    		return builder.toString();
+    	}
+
+        IClusteringOptions op = opn.get();
+        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	builder.append("View plot");
+        }
+
+        String s = builder.toString();
+        if(s.equals(EMPTY_STRING))
+        	return Labels.NA;
+        return s;
     }
     
     private String createClusterParameterString(IClusterGroup group) {
@@ -1201,8 +1225,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     	}
 
         IClusteringOptions op = opn.get();
-        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY))
-        	builder.append("t-SNE");
+        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	builder.append("t-SNE"+Io.NEWLINE);
+        	builder.append("Perplexity: "+op.getDouble(TsneMethod.PERPLEXITY_KEY)+Io.NEWLINE);
+        	builder.append("Max iterations: "+op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
+        }
 
         String s = builder.toString();
         if(s.equals(EMPTY_STRING))

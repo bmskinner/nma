@@ -26,7 +26,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
-import com.bmskinner.nuclear_morphology.analysis.classification.ProfileTsneMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
@@ -60,7 +60,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
         	if(clusterSetup.getOptions().getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
 
-        		IAnalysisMethod m = new ProfileTsneMethod(dataset, clusterSetup.getOptions());
+        		IAnalysisMethod m = new TsneMethod(dataset, clusterSetup.getOptions());
         		worker = new DefaultAnalysisWorker(m);
         		worker.addPropertyChangeListener(e->{
         			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
