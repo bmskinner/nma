@@ -73,7 +73,6 @@ public class ClusterDetailPanel extends DetailPanel {
     private static final String SHOW_TREE_LBL   = "Show tree";
     private static final String NO_CLUSTERS_LBL = "No clusters present";
     private static final String MAN_CLUSTER_LBL = "Manual cluster";
-    private static final String TSNE_LBL        = "Profile t-SNE";
 
     private JButton clusterButton        = new JButton(NEW_CLUSTER_LBL);
     private JButton buildTreeButton      = new JButton(NEW_TREE_LBL);
@@ -151,7 +150,8 @@ public class ClusterDetailPanel extends DetailPanel {
 			public void mouseClicked(MouseEvent e) {				
 				int row = clusterDetailsTable.rowAtPoint(e.getPoint());
 				int col = clusterDetailsTable.columnAtPoint(e.getPoint());
-				Object value = clusterDetailsTable.getValueAt(row, col);
+				if(col==0)
+					return;
 				
 				IClusterGroup group = (IClusterGroup) clusterDetailsTable.getValueAt(0, col);
 				// find the dataset with this cluster group
@@ -181,26 +181,22 @@ public class ClusterDetailPanel extends DetailPanel {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				// Not needed
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				// Not needed
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				// Not needed
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				// Not needed
 			}
         	
         };
@@ -232,29 +228,17 @@ public class ClusterDetailPanel extends DetailPanel {
         JPanel panel = new JPanel(new BorderLayout());
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        clusterButton.addActionListener(e -> {
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets());
-        });
-
-        buildTreeButton.addActionListener(e -> {
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets());
-        });
-
-        saveClassifierButton.addActionListener(e -> {
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
-        });
-        
-        manualClusterBtn.addActionListener(e -> {
-        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets());
-        });
+        clusterButton.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets()));
+        buildTreeButton.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets()));
+        saveClassifierButton.addActionListener(e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets()));
+        manualClusterBtn.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets()));
                 
-
         saveClassifierButton.setEnabled(false);
         buildTreeButton.setEnabled(true);
         manualClusterBtn.setEnabled(true);
         buttonPanel.add(manualClusterBtn);
         buttonPanel.add(buildTreeButton);
-        buttonPanel.add(clusterButton);;
+        buttonPanel.add(clusterButton);
 
         buttonPanel.add(manualClusterBtn);
         buttonPanel.add(buildTreeButton);
@@ -264,7 +248,6 @@ public class ClusterDetailPanel extends DetailPanel {
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
         panel.add(statusLabel, BorderLayout.CENTER);
-
         return panel;
     }
 

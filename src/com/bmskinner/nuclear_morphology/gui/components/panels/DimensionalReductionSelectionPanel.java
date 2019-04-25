@@ -129,7 +129,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		double initialPerplexity = Math.max(MIN_PERPLEXITY, Math.floor(nNuclei/20d));
 		options.setDouble(TsneMethod.PERPLEXITY_KEY, initialPerplexity);
 
-		SpinnerModel perplexityModel = new SpinnerNumberModel(initialPerplexity, MIN_PERPLEXITY, MAX_PERPLEXITY, STEP_PERPLEXITY);
+		SpinnerModel perplexityModel = new SpinnerNumberModel(initialPerplexity, MIN_PERPLEXITY, nNuclei, STEP_PERPLEXITY);
 
 		JSpinner perplexitySpinner = new JSpinner(perplexityModel);
 		perplexitySpinner.setEnabled(true);
