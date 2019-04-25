@@ -29,6 +29,10 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	private static final double MIN_PERPLEXITY = 5;
 	private static final double MAX_PERPLEXITY = 10000;
 	private static final double STEP_PERPLEXITY = 1;
+	
+	private static final int MIN_ITERATIONS = 500;
+	private static final int MAX_ITERATIONS = 50000;
+	private static final int STEP_ITERATIONS = 25;
 
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
@@ -98,10 +102,8 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 * @return
 	 */
 	private JSpinner makeMaxIterationsSpinner() {
-		SpinnerModel iterationsModel = new SpinnerNumberModel(options.getInt(TsneMethod.MAX_ITERATIONS_KEY), // initial                                                                           // value
-				500, // min
-				5000, // max
-				25); // step
+		double initialIterations = options.getInt(TsneMethod.MAX_ITERATIONS_KEY);
+		SpinnerModel iterationsModel = new SpinnerNumberModel(initialIterations, MIN_ITERATIONS, MAX_ITERATIONS, STEP_ITERATIONS);
 
 		JSpinner iterationsSpinner = new JSpinner(iterationsModel);
 		iterationsSpinner.setEnabled(true);
