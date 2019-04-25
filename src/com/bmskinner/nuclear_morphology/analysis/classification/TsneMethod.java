@@ -36,7 +36,7 @@ import com.jujutsu.utils.TSneUtils;
 
 /**
  * This method takes a dataset and generates a t-SNE
- * from angle profiles. The downside of this over exporting the data
+ * from cell stats. The downside of this over exporting the data
  * into R is that the Barnes-Hut t-SNE implementation uses 
  * ThreadLocalRandom random number generation, so there is no 
  * opportunity to set a seed. This means every run will give a different

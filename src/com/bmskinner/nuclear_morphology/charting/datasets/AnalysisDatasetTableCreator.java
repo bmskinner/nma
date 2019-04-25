@@ -1105,9 +1105,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     }
 
     /**
-     * Get the options used for clustering as a table
+     * Get the options used for creating cluster groups
      * 
-     * @param list
      * @return
      */
     public TableModel createClusterOptionsTable() {
@@ -1139,26 +1138,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         for (IAnalysisDataset dataset : list) {
             List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
 
-            for (IClusterGroup g : clusterGroups) {
-            	
+            for (IClusterGroup g : clusterGroups) {  	
             	List<Object> dataList = new ArrayList<>();
             	dataList.add(g);
                 dataList.add(String.valueOf(g.size()));
-            	
-                String dimRed = createDimensionalReductionString(g);
-                String dimPlot = createDimensionalPlotString(g);
-                String clusterMethod = createClusterMethodString(g);
-            	String params = createClusterParameterString(g);
-            	dataList.add(params);
-            	dataList.add(dimRed);
-            	dataList.add(dimPlot);
-            	dataList.add(clusterMethod);
-                	
-                if(g.hasTree())
-                	dataList.add(Labels.Clusters.CLUSTER_SHOW_TREE);
-                else
-                	dataList.add(Labels.NA);
-   
+            	dataList.add(createClusterParameterString(g));
+            	dataList.add(createDimensionalReductionString(g));
+            	dataList.add(createDimensionalPlotString(g));
+            	dataList.add(createClusterMethodString(g));
+            	dataList.add(g.hasTree() ? Labels.Clusters.CLUSTER_SHOW_TREE : Labels.NA);   
                 model.addColumn(dataset.getName(), dataList.toArray());
             }
         }
