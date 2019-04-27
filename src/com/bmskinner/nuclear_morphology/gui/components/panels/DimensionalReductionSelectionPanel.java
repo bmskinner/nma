@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class DimensionalReductionSelectionPanel extends OptionsPanel {
@@ -34,6 +35,8 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	private static final int MIN_ITERATIONS = 500;
 	private static final int MAX_ITERATIONS = 50000;
 	private static final int STEP_ITERATIONS = 25;
+	
+	private static final String BORDER_LABEL = "Dimensional reduction";
 
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
@@ -55,7 +58,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 
 		panel.add(createTsnePanel());
 		
-		panel.setBorder(BorderFactory.createTitledBorder("Dimensional reduction"));
+		panel.setBorder(BorderFactory.createTitledBorder(BORDER_LABEL));
 		return panel;
 	}
 	
@@ -71,7 +74,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		box.setForeground(Color.DARK_GRAY);
 		
 		box.setSelected(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
-		JLabel label = new JLabel("t-SNE");
+		JLabel label = new JLabel(Labels.Clusters.TSNE);
 
 		JSpinner iterationsSpinner = makeMaxIterationsSpinner();
 		iterationsSpinner.setEnabled(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
@@ -86,12 +89,12 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 
 		labels.add(label);
 		fields.add(box);
+		
+		labels.add(new JLabel(TsneMethod.PERPLEXITY_KEY));
+		fields.add(perplexitySpinner);
 
 		labels.add(new JLabel(TsneMethod.MAX_ITERATIONS_KEY));
 		fields.add(iterationsSpinner);
-
-		labels.add(new JLabel(TsneMethod.PERPLEXITY_KEY));
-		fields.add(perplexitySpinner);
 
 		addLabelTextRows(labels, fields, layout, panel);
 		return panel;
@@ -103,7 +106,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 * @return
 	 */
 	private JSpinner makeMaxIterationsSpinner() {
-		double initialIterations = options.getInt(TsneMethod.MAX_ITERATIONS_KEY);
+		int initialIterations = options.getInt(TsneMethod.MAX_ITERATIONS_KEY);
 		SpinnerModel iterationsModel = new SpinnerNumberModel(initialIterations, MIN_ITERATIONS, MAX_ITERATIONS, STEP_ITERATIONS);
 
 		JSpinner iterationsSpinner = new JSpinner(iterationsModel);

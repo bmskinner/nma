@@ -64,12 +64,11 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 public class ClusterDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Clusters";
-    private static final String NEW_CLUSTER_LBL = "Cluster cells";
+    private static final String NEW_CLUSTER_LBL = "Cluster automatically";
     private static final String NEW_TREE_LBL    = "Create tree";
     private static final String NEW_CLASS_LBL   = "Create classifier";
-    private static final String SHOW_TREE_LBL   = "Show tree";
     private static final String NO_CLUSTERS_LBL = "No clusters present";
-    private static final String MAN_CLUSTER_LBL = "Manual cluster";
+    private static final String MAN_CLUSTER_LBL = "Cluster manually";
 
     private JButton clusterButton        = new JButton(NEW_CLUSTER_LBL);
     private JButton buildTreeButton      = new JButton(NEW_TREE_LBL);
@@ -115,7 +114,7 @@ public class ClusterDetailPanel extends DetailPanel {
         TableModel optionsModel = AbstractTableCreator.createBlankTable();
         
         TableCellRenderer buttonRenderer = new JButtonRenderer();
-        TableCellRenderer textRenderer = new JTextAreaCellRenderer();
+        TableCellRenderer textRenderer = new JTextAreaCellRenderer(false);
         
         clusterDetailsTable = new ExportableTable(optionsModel) {
            
@@ -228,14 +227,7 @@ public class ClusterDetailPanel extends DetailPanel {
         buildTreeButton.setEnabled(true);
         manualClusterBtn.setEnabled(true);
         buttonPanel.add(manualClusterBtn);
-        buttonPanel.add(buildTreeButton);
         buttonPanel.add(clusterButton);
-
-        buttonPanel.add(manualClusterBtn);
-        buttonPanel.add(buildTreeButton);
-        buttonPanel.add(clusterButton);
-        
-        // buttonPanel.add(saveClassifierButton);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
         panel.add(statusLabel, BorderLayout.CENTER);
@@ -300,12 +292,12 @@ public class ClusterDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return null;
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
         return new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
     }
 
@@ -337,7 +329,7 @@ public class ClusterDetailPanel extends DetailPanel {
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
-			String text = value==null ? "" : value instanceof IClusterGroup ? SHOW_TREE_LBL : value.toString();
+			String text = value==null ? "" : value instanceof IClusterGroup ? Labels.Clusters.CLUSTER_SHOW_TREE : value.toString();
             setText(text);
             setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             return this;

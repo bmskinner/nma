@@ -228,7 +228,7 @@ public class Labels {
     	public static final String CLUSTER_PARAMS   = "Parameters";
     	public static final String CLUSTER_DIM_RED  = "Dimensional reduction";
     	public static final String CLUSTER_DIM_PLOT = "Dimensional reduction plot";
-    	public static final String CLUSTER_SHOW_TREE= "Show tree";
+    	public static final String CLUSTER_SHOW_TREE= "View tree";
     	
     	public static final String HC_ITERATIONS    = "Iterations";
     	public static final String HC_METHOD        = "Hierarchical method";
@@ -238,6 +238,11 @@ public class Labels {
     	public static final String INCLUDE_MESH     = "Include mesh";
     	public static final String INCLUDE_SEGMENTS = "Include segments";
     	public static final String TREE             = "Hierarchical tree";
+    	public static final String VIEW_PLOT        = "View plot";
+    	
+    	public static final String TSNE             = "Barnes-Hut t-SNE";
+    	public static final String TSNE_PERPLEXITY  = "Perplexity";
+    	public static final String TSNE_MAX_ITER    = "Max iterations";
     }
     
 

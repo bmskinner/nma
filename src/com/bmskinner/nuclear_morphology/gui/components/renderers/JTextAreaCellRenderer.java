@@ -22,6 +22,24 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 public class JTextAreaCellRenderer extends JTextArea implements TableCellRenderer {
 	private static final Font DEFAULT_FONT = UIManager.getFont("Label.font");
 	public static final Color CONSISTENT_CELL_COLOUR = new Color(178, 255, 102);
+	private boolean colourConsistentRows = true;
+	
+	public JTextAreaCellRenderer() {
+		super();
+	}
+	
+	/**
+	 * Create specifying whether rows with consistent values should be highlighted
+	 * @param colourConsistentRows
+	 */
+	public JTextAreaCellRenderer(boolean colourConsistentRows) {
+		this();
+		this.colourConsistentRows = colourConsistentRows;
+	}
+	
+	public void setConsistentRowColouring(boolean b) {
+		colourConsistentRows = b;
+	}
 
     private void setColor(boolean isSelected, JTable table) {
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
@@ -46,7 +64,7 @@ public class JTextAreaCellRenderer extends JTextArea implements TableCellRendere
         }
         
         Color background = Color.WHITE;
-        if(isRowConsistentAcrossColumns(table, row))
+        if(colourConsistentRows && isRowConsistentAcrossColumns(table, row))
         	background = CONSISTENT_CELL_COLOUR;
         
         setBackground(background);
