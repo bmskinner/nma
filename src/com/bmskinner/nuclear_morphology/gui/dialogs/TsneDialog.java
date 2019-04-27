@@ -108,20 +108,6 @@ public class TsneDialog extends LoadingIconDialog {
 	}
 	
 	private void updateTitle() {
-		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
-		if(!analysisOptions.isPresent()) {
-			warn("Unable to create dialog, no analysis options in dataset");
-			setTitle("");
-			return;
-		}
-
-		Optional<HashOptions> tSNEOptions = analysisOptions.get().getSecondaryOptions(IAnalysisOptions.TSNE);
-		if(!tSNEOptions.isPresent()) {
-			warn("Unable to create dialog, no t-SNE options in dataset");
-			setTitle("");
-			return;
-		}
-		
 		setTitle("tSNE for "+dataset.getName()+": "+group.getName());		
 	}
 
