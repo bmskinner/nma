@@ -19,13 +19,12 @@
 
 package com.bmskinner.nuclear_morphology.io;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.table.TableModel;
 
 import org.junit.Test;
 
@@ -33,13 +32,8 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * This class tests the dataset merging functionality

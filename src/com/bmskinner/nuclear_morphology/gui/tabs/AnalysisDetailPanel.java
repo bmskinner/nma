@@ -28,7 +28,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -67,7 +66,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 
     @Override
     protected TableModel createPanelTableType(@NonNull TableOptions options) {
-        return new AnalysisDatasetTableCreator(options).createAnalysisTable();
+        return new AnalysisDatasetTableCreator(options).createAnalysisParametersTable();
     }
 
     @Override
@@ -93,9 +92,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 
         TableOptions options = new TableOptionsBuilder()
         		.setDatasets(getDatasets())
-                .setType(TableType.ANALYSIS_PARAMETERS)
                 .setTarget(tableAnalysisParameters)
-//                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new JTextAreaCellRenderer())
                 .build();
 
         setTable(options);

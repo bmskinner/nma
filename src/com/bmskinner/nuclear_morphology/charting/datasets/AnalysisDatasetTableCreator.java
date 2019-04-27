@@ -41,7 +41,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
+import com.bmskinner.nuclear_morphology.charting.options.AbstractOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -300,29 +300,31 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      * @param collection
      * @return
      */
-    public TableModel createAnalysisTable() {
-
-        if (!options.hasDatasets()) {
-            return createBlankTable();
-        }
-
-        TableOptions op = options;
-
-        if (op.getType().equals(TableType.ANALYSIS_PARAMETERS))
-            return createAnalysisParametersTable();
-
-        if (op.getType().equals(TableType.ANALYSIS_STATS))
-            return createStatsTable();
-
-        return createBlankTable();
-    }
+//    public TableModel createAnalysisTable() {
+//
+//        if (!options.hasDatasets()) {
+//            return createBlankTable();
+//        }
+//
+//        TableOptions op = options;
+//
+//        if (op.getType().equals(TableType.ANALYSIS_PARAMETERS))
+//            return createAnalysisParametersTable();
+//
+//        if (op.getType().equals(TableType.ANALYSIS_STATS))
+//            return createStatsTable();
+//
+//        return createBlankTable();
+//    }
+    
+    
 
     /**
      * Create a table model of analysis parameters from a nucleus collection. If
      * null parameter is passed, will create an empty table
      * @return
      */
-    private TableModel createAnalysisParametersTable() {
+    public TableModel createAnalysisParametersTable() {
 
         if (!options.hasDatasets()) {
             return createBlankTable();
@@ -339,6 +341,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         columnList.add(Labels.AnalysisParameters.NUCLEUS_TYPE);
         columnList.add(Labels.AnalysisParameters.PROFILE_WINDOW);
         columnList.add(Labels.AnalysisParameters.SOFTWARE_VERSION);
+        
+        if(options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
+        	columnList.add(Labels.Merges.RECOVER_SOURCE);
         model.addColumn(EMPTY_STRING, columnList.toArray());
 
         List<IAnalysisDataset> list = options.getDatasets();
@@ -450,6 +455,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         dataList.add(options.getNucleusType().toString());
         dataList.add(options.getProfileWindowProportion());
         dataList.add(dataset.getVersion().toString());
+        
+        if(this.options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
+        	dataList.add(dataset);
         return dataList;
     }
     
@@ -564,7 +572,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      * @param collection
      * @return
      */
-    private TableModel createStatsTable() {
+    public TableModel createNucleusStatsTable() {
 
         if (!options.hasDatasets()) {
             return createBlankTable();

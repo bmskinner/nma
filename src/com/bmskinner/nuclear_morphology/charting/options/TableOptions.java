@@ -21,7 +21,7 @@ import java.util.Set;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 /**
  * This interface describes the values that should be checkable by table dataset
@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.Tab
  * @author bms41
  *
  */
-public interface TableOptions extends DisplayOptions {
+public interface TableOptions extends DisplayOptions, HashOptions {
 
     /**
      * A renderer is applied to all columns in a table
@@ -47,13 +47,6 @@ public interface TableOptions extends DisplayOptions {
      * column
      */
     static final int ALL_EXCEPT_FIRST_COLUMN = -2;
-
-    /**
-     * Get the table type to be drawn
-     * 
-     * @return
-     */
-    TableType getType();
 
     /**
      * Get the table the resulting model should be loaded into. Used by the

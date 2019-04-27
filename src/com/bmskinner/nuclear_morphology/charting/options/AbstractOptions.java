@@ -26,6 +26,8 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
@@ -37,7 +39,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  * @since 1.12.0
  *
  */
-public abstract class AbstractOptions implements DisplayOptions {
+public abstract class AbstractOptions extends DefaultOptions implements DisplayOptions, HashOptions {
 
     private final List<IAnalysisDataset>   list        = new ArrayList<>();
     private final List<PlottableStatistic> stats       = new ArrayList<>();
@@ -55,7 +57,10 @@ public abstract class AbstractOptions implements DisplayOptions {
     private Aggregation agg = Aggregation.BY_NUCLEUS;
     private Normalisation norm = Normalisation.NONE;
     private ShrinkType shrinkType = ShrinkType.AREA;
-    private boolean isNormalised = false;
+    
+    public static final String IS_NORMALISED_KEY = "Is normalised";
+    public static final String SHOW_RECOVER_MERGE_SOURCE_KEY = "Enable recover merge sources";
+
 
     /**
      * Create with a list of datasets.
@@ -290,17 +295,17 @@ public abstract class AbstractOptions implements DisplayOptions {
     }
     
     public boolean isNormalised(){
-    	return isNormalised;
+    	return getBoolean(IS_NORMALISED_KEY);
     }
     
     public void setNormalised(boolean b){
-    	isNormalised = b;
+    	setBoolean(IS_NORMALISED_KEY, b);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
+        int result = super.hashCode();
         
         if(list!=null) // calculating the hashcode for the entire dataset is pointless and unnecessary
         	for(IAnalysisDataset d : list)
@@ -314,7 +319,6 @@ public abstract class AbstractOptions implements DisplayOptions {
         result = prime * result + ((cell == null) ? 0 : cell.hashCode());
         result = prime * result + ((agg == null) ? 0 : agg.hashCode());
         result = prime * result + ((norm == null) ? 0 : norm.hashCode());
-        result = prime * result + (isNormalised ? 1231 : 1237);
         return result;
     }
 
@@ -328,6 +332,9 @@ public abstract class AbstractOptions implements DisplayOptions {
             return false;
 
         AbstractOptions other = (AbstractOptions) obj;
+        
+        if(!super.equals(other))
+        	return false;
 
         if (list == null) {
             if (other.list != null)
@@ -364,8 +371,6 @@ public abstract class AbstractOptions implements DisplayOptions {
             if (other.cell != null)
                 return false;
         } else if (!cell.equals(other.cell))
-            return false;
-        if (isNormalised != other.isNormalised)
             return false;
         return true;
     }

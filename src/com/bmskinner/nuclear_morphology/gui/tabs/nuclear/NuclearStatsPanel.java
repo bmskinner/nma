@@ -31,7 +31,6 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -73,7 +72,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
     @Override
     protected TableModel createPanelTableType(TableOptions options) {
 
-        return new AnalysisDatasetTableCreator(options).createAnalysisTable();
+        return new AnalysisDatasetTableCreator(options).createNucleusStatsTable();
     }
 
     @Override
@@ -113,8 +112,10 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 
         finest("Updating stats panel");
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.ANALYSIS_STATS)
-                .setScale(GlobalOptions.getInstance().getScale()).setTarget(tablePopulationStats).build();
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+                .setScale(GlobalOptions.getInstance().getScale())
+                .setTarget(tablePopulationStats)
+                .build();
 
         setTable(options);
         finest("Set table model");
@@ -136,10 +137,10 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
             scrollPane.setViewportView(panel);
             scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
 
-            TableOptions options = new TableOptionsBuilder().setDatasets(null).setType(TableType.ANALYSIS_STATS)
+            TableOptions options = new TableOptionsBuilder().setDatasets(null)
                     .build();
 
-            TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
+            TableModel model = new AnalysisDatasetTableCreator(options).createNucleusStatsTable();
 
             tablePopulationStats.setModel(model);
 

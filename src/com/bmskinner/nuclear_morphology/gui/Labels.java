@@ -263,11 +263,13 @@ public class Labels {
     	public static final String RUN_TIME            = "Run time";
     	public static final String NUCLEUS_TYPE        = "Nucleus type";
     	public static final String SOFTWARE_VERSION    = "Created in";
+    	
     }
     
     public static class Merges {
     	public static final String NO_MERGE_SOURCES = "No merge sources";
-    	public static final String MERGE_SOURCE = "Merge sources";
+    	public static final String MERGE_SOURCE     = "Merge sources";
+    	public static final String RECOVER_SOURCE   = "Recover merge source";
     	
     	
     }

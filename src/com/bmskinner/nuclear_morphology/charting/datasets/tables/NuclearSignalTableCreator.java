@@ -325,10 +325,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      * Create a table of signal stats for the given list of datasets. This table
      * covers size, number of signals
      * 
-     * @param list
-     *            the AnalysisDatasets to include
+     * @param list the AnalysisDatasets to include
      * @return a table model
-     * @throws Exception
      */
     public TableModel createSignalStatsTable() {
         return createMultiDatasetSignalStatsTable();

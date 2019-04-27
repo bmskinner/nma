@@ -30,7 +30,6 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -90,7 +89,7 @@ public class VennDetailPanel extends DetailPanel {
 
     @Override
     protected void updateMultiple() {
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.VENN)
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
                 .setTarget(vennTable).setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer())
                 .build();
 
@@ -100,10 +99,6 @@ public class VennDetailPanel extends DetailPanel {
 
     @Override
     protected void updateNull() {
-        // log("Set venn to blank via null");
-
-        // Exception e = new Exception("Null update of Venn");
-        // error("Venn: ",e);
         vennTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
     }
 

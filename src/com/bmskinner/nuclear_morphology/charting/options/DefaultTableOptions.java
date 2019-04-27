@@ -34,54 +34,21 @@ import com.bmskinner.nuclear_morphology.components.ICell;
  */
 public class DefaultTableOptions extends AbstractOptions implements TableOptions {
 
-    private TableType type = null;
-
     private ICell cell = null;
 
     private JTable target = null;
 
-    private Map<Integer, TableCellRenderer> renderer = new HashMap<Integer, TableCellRenderer>(1);
+    private Map<Integer, TableCellRenderer> renderer = new HashMap<>(1);
 
     public DefaultTableOptions(List<IAnalysisDataset> list) {
         super(list);
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.TableOptions#setType(charting.options.
-     * DefaultTableOptions.TableType)
-     */
-    public void setType(TableType type) {
-        this.type = type;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.TableOptions#getType()
-     */
-    @Override
-    public TableType getType() {
-        return this.type;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.TableOptions#getCell()
-     */
     @Override
     public ICell getCell() {
         return cell;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.TableOptions#setCell(components.ICell)
-     */
     @Override
     public void setCell(ICell cell) {
         this.cell = cell;
@@ -116,30 +83,14 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
         return renderer.keySet();
     }
 
-    public enum TableType {
-        ANALYSIS_PARAMETERS, ANALYSIS_STATS, VENN, PAIRWISE_VENN, WILCOXON, SIGNAL_STATS_TABLE, MERGE_SOURCES
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.TableOptions#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-
         result = prime * result + ((cell == null) ? 0 : cell.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.TableOptions#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -149,8 +100,6 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
         if (getClass() != obj.getClass())
             return false;
         DefaultTableOptions other = (DefaultTableOptions) obj;
-        if (type != other.type)
-            return false;
         if (cell != other.cell)
             return false;
         return true;

@@ -32,7 +32,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -94,7 +93,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 
     @Override
     protected void updateMultiple() {
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.PAIRWISE_VENN)
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
                 .setTarget(pairwiseVennTable)
                 .setColumnRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets())).build();
 
