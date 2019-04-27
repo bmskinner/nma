@@ -476,9 +476,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		}
 		
 		if(nucleusCannyOptions.isUseKuwahara())
-			builder.append("Kuwahara kernel:"+nucleusCannyOptions.getKuwaharaKernel()+Io.NEWLINE);
+			builder.append("Kuwahara kernel: "+nucleusCannyOptions.getKuwaharaKernel()+Io.NEWLINE);
 		if(nucleusCannyOptions.isUseFlattenImage())
-			builder.append("Flattening threshold:"+nucleusCannyOptions.getFlattenThreshold());	
+			builder.append("Flattening threshold: "+nucleusCannyOptions.getFlattenThreshold());	
 		return builder.toString();
     }
 
@@ -1199,7 +1199,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         IClusteringOptions op = opn.get();
         if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
-        	builder.append("View plot");
+        	builder.append(Labels.Clusters.VIEW_PLOT);
         }
 
         String s = builder.toString();
@@ -1250,9 +1250,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         IClusteringOptions op = opn.get();
         if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
-        	builder.append("t-SNE"+Io.NEWLINE);
-        	builder.append("Perplexity: "+op.getDouble(TsneMethod.PERPLEXITY_KEY)+Io.NEWLINE);
-        	builder.append("Max iterations: "+op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
+        	builder.append(Labels.Clusters.TSNE+Io.NEWLINE);
+        	builder.append(Labels.Clusters.TSNE_PERPLEXITY+": "+op.getDouble(TsneMethod.PERPLEXITY_KEY)+Io.NEWLINE);
+        	builder.append(Labels.Clusters.TSNE_MAX_ITER+": "+op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
         }
 
         String s = builder.toString();
