@@ -74,7 +74,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
      */
     public DefaultAnalysisOptions(@NonNull IAnalysisOptions template) {
         set(template);
-        analysisTime = System.currentTimeMillis();
+        analysisTime = template.getAnalysisTime();
     }
     
     @Override
