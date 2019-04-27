@@ -1219,8 +1219,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         IClusteringOptions op = opn.get();
 
-        if(op.isIncludeProfile())
-        	builder.append(op.getProfileType()+Io.NEWLINE);
+        for(ProfileType t : ProfileType.displayValues())
+        	if(op.getBoolean(t.toString()))
+        		builder.append(t+Io.NEWLINE);
  
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type))
