@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
@@ -174,8 +175,12 @@ public class ScatterChartFactory extends AbstractChartFactory {
     	
     	try {
     		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d, type, plotGroup, colourGroup);
-    		String xLabel = "tSNE 1";
-    		String yLabel = "tSNE 2";
+    		
+    		
+    		String prefix = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA " : "t-SNE ";
+    		
+    		String xLabel = prefix+"1";
+    		String yLabel = prefix+"2";
 
     		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 

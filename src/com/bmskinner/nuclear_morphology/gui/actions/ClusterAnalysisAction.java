@@ -26,6 +26,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.PrincipleComponentAnalysis;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
@@ -58,8 +59,9 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
         if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
 
+        	boolean canRunClusteringDirectly = true;
         	if(clusterSetup.getOptions().getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
-
+        		canRunClusteringDirectly = false;
         		IAnalysisMethod m = new TsneMethod(dataset, clusterSetup.getOptions());
         		worker = new DefaultAnalysisWorker(m);
         		worker.addPropertyChangeListener(e->{
@@ -68,9 +70,22 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         			}
         		});
         		ThreadManager.getInstance().submit(worker);
-        	} else {
-        		runClustering((IClusteringOptions) clusterSetup.getOptions());
         	}
+        	
+        	if(clusterSetup.getOptions().getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        		canRunClusteringDirectly = false;
+        		IAnalysisMethod m = new PrincipleComponentAnalysis(dataset, clusterSetup.getOptions());
+        		worker = new DefaultAnalysisWorker(m);
+        		worker.addPropertyChangeListener(e->{
+        			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
+        				runClustering((IClusteringOptions) clusterSetup.getOptions());
+        			}
+        		});
+        		ThreadManager.getInstance().submit(worker);
+        	}
+        	
+        	if(canRunClusteringDirectly)
+        		runClustering((IClusteringOptions) clusterSetup.getOptions());
 
         } else {
         	this.cancel();

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -132,10 +133,20 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         	}
         }
         
+        if(options.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        	for(ICell c : dataset.getCollection()) {
+        		for(Nucleus n : c.getNuclei()) {
+        			n.setStatistic(new GenericStatistic("PCA_1_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.PCA_1));
+        			n.setStatistic(new GenericStatistic("PCA_2_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.PCA_2));
+        			n.setStatistic(PlottableStatistic.PCA_1, Statistical.STAT_NOT_CALCULATED);
+        			n.setStatistic(PlottableStatistic.PCA_2, Statistical.STAT_NOT_CALCULATED);
+        		}
+        	}
+        }
+        
         
         dataset.addClusterGroup(group);
-        IAnalysisResult r = new ClusterAnalysisResult(list, group);
-        return r;
+        return new ClusterAnalysisResult(list, group);
     }
 
     private void run() {
@@ -207,41 +218,45 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * @param clusterer the clusterer to use
      */
     private void assignClusters(Clusterer clusterer) {
-        try {
 
-            for (int i = 0; i < clusterer.numberOfClusters(); i++) {
-                ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
+    	int numberOfClusters = 0;
+		try {
+			numberOfClusters = clusterer.numberOfClusters();
+		} catch (Exception e1) {
+			warn("Unable to cluster cells: "+e1.getMessage());
+			stack(e1);
+			return;
+		}
 
-                clusterCollection.setName("Cluster_" + i);
-                clusterMap.put(i, clusterCollection);
-            }
+    	for (int i = 0; i <numberOfClusters ; i++) {
+    		ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
 
-            for (Instance inst : cellToInstanceMap.keySet()) {
+    		clusterCollection.setName("Cluster_" + i);
+    		clusterMap.put(i, clusterCollection);
+    	}
 
-                try {
+    	for(Entry<Instance,UUID> entry : cellToInstanceMap.entrySet()) {
 
-                    UUID cellID = cellToInstanceMap.get(inst);
+    		try {
 
-                    int clusterNumber = clusterer.clusterInstance(inst);
+    			UUID cellID = entry.getValue();
+    			int clusterNumber = clusterer.clusterInstance(entry.getKey());
 
-                    ICellCollection cluster = clusterMap.get(clusterNumber);
+    			ICellCollection cluster = clusterMap.get(clusterNumber);
 
-                    // should never be null
-                    if (collection.getCell(cellID) != null) {
-                        cluster.addCell(collection.getCell(cellID));
-                    } else {
-                        warn("Error: cell with ID " + cellID + " is not found");
-                    }
-                    fireProgressEvent();
-                } catch (Exception e) {
-                    error("Error assigning instance to cluster", e);
-                }
+    			// should never be null
+    			if (collection.getCell(cellID) != null) {
+    				cluster.addCell(collection.getCell(cellID));
+    			} else {
+    				warn("Error: cell with ID " + cellID + " is not found");
+    			}
+    			fireProgressEvent();
+    		} catch (Exception e) {
+    			error("Error assigning instance to cluster", e);
+    		}
 
-            }
-        } catch (Exception e) {
-            warn("Unable to make clusters");
-            fine("Error clustering", e);
-        }
+    	}
+
     }
 
 }

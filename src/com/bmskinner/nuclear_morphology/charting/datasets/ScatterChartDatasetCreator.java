@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
@@ -219,6 +220,9 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     public static XYDataset createTsneScatterDataset(IAnalysisDataset d, ColourByType type, IClusterGroup plotGroup, IClusterGroup colourGroup) throws ChartDatasetCreationException {
     	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
     	
+    	String prefix1 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA_1_" : "TSNE_1_";
+    	String prefix2 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA_2_" : "TSNE_2_";
+    	
     	if(type.equals(ColourByType.CLUSTER) && colourGroup==null)
     		type = ColourByType.NONE;
     	
@@ -228,7 +232,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	if(type.equals(ColourByType.MERGE_SOURCE)) {
     		for(IAnalysisDataset mergeSource : d.getMergeSources()) {
     			List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
-    			double[][] data = createTsneValues(nuclei, plotGroup);
+    			double[][] data = createTsneValues(nuclei, prefix1+plotGroup.getId(), prefix2+plotGroup.getId());
     	    	ds.addSeries(mergeSource.getName(), data, nuclei);
     		}
     		return ds;
@@ -236,7 +240,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	
     	if(type.equals(ColourByType.NONE)) {
     		List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
-    		double[][] data = createTsneValues(nuclei, plotGroup);
+    		double[][] data = createTsneValues(nuclei, prefix1+plotGroup.getId(), prefix2+plotGroup.getId());
     		ds.addSeries("All nuclei", data, nuclei);
     		return ds;
     	}
@@ -245,7 +249,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     		for(UUID childId : colourGroup.getUUIDs()) {
     			IAnalysisDataset childDataset = d.getChildDataset(childId);
     			List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
-    			double[][] data = createTsneValues(nuclei, plotGroup);
+    			double[][] data = createTsneValues(nuclei, prefix1+plotGroup.getId(), prefix2+plotGroup.getId());
     	    	ds.addSeries(childDataset.getName(), data, nuclei);
     		}
     		return ds;
@@ -253,27 +257,20 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	return ds;
     }
     
-    private static double[][] createTsneValues(List<Nucleus> nuclei, IClusterGroup group){
+    private static double[][] createTsneValues(List<Nucleus> nuclei, String xStatName, String yStatName){
     	double[] xpoints = new double[nuclei.size()];
         double[] ypoints = new double[nuclei.size()];
         
-        if(group==null) {
-        	for(int i=0; i<nuclei.size(); i++) {
-        		Nucleus n = nuclei.get(i);
-        		xpoints[i] = 0;
-        		ypoints[i] = 0;
-        	}
-        } else {
-        	// need to transpose the matrix
-        	for(int i=0; i<nuclei.size(); i++) {
-        		Nucleus n = nuclei.get(i);
-        		PlottableStatistic tsne1 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals("TSNE_1_"+group.getId())).findFirst().orElse(PlottableStatistic.TSNE_1);
-        		PlottableStatistic tsne2 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals("TSNE_2_"+group.getId())).findFirst().orElse(PlottableStatistic.TSNE_2);
-        		xpoints[i] = n.getStatistic(tsne1);
-        		ypoints[i] = n.getStatistic(tsne2);
-        	}
+        // need to transpose the matrix
+        for(int i=0; i<nuclei.size(); i++) {
+        	Nucleus n = nuclei.get(i);
+        	PlottableStatistic tsne1 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(xStatName)).findFirst().orElse(PlottableStatistic.TSNE_1);
+        	PlottableStatistic tsne2 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(yStatName)).findFirst().orElse(PlottableStatistic.TSNE_2);
+        	xpoints[i] = n.getStatistic(tsne1);
+        	ypoints[i] = n.getStatistic(tsne2);
         }
-    	
+
+
     	double[][] data = { xpoints, ypoints };
     	return data;
     }

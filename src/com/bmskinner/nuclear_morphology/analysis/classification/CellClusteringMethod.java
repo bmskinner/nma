@@ -40,7 +40,7 @@ import weka.core.Instances;
  */
 public abstract class CellClusteringMethod extends SingleDatasetAnalysisMethod {
 	
-	protected final Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
+	protected final Map<Instance, UUID> cellToInstanceMap = new HashMap<>();
 	protected final ICellCollection    collection;
 	protected final IClusteringOptions options;
 	

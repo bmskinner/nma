@@ -1198,7 +1198,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     	}
 
         IClusteringOptions op = opn.get();
-        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY) || op.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
         	builder.append(Labels.Clusters.VIEW_PLOT);
         }
 
@@ -1253,6 +1253,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         	builder.append(Labels.Clusters.TSNE+Io.NEWLINE);
         	builder.append(Labels.Clusters.TSNE_PERPLEXITY+": "+op.getDouble(TsneMethod.PERPLEXITY_KEY)+Io.NEWLINE);
         	builder.append(Labels.Clusters.TSNE_MAX_ITER+": "+op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
+        }
+        
+        if(op.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        	builder.append(Labels.Clusters.PCA);
         }
 
         String s = builder.toString();

@@ -69,6 +69,8 @@ public interface PlottableStatistic extends Serializable {
 		static final String DISPLACEMENT             = "Displacement";
 		static final String TSNE_1             = "t-SNE 1";
 		static final String TSNE_2             = "t-SNE 2";
+		static final String PCA_1             = "PC1";
+		static final String PCA_2             = "PC2";
 		
 	}
 
@@ -110,6 +112,8 @@ public interface PlottableStatistic extends Serializable {
     // Special stats. These should not be included in default charts - they are used as hidden data stores
     static final PlottableStatistic TSNE_1 = new GenericStatistic(Names.TSNE_1, StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic TSNE_2 = new GenericStatistic(Names.TSNE_2, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic PCA_1 = new GenericStatistic(Names.PCA_1, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic PCA_2 = new GenericStatistic(Names.PCA_2, StatisticDimension.DIMENSIONLESS);
     
 
     /**

@@ -1,13 +1,9 @@
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -21,13 +17,11 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.tsne.barneshut.BarnesHutTSne;
@@ -142,10 +136,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 					continue;
 				
 				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(s.getID());
-
-                double length = 0;
-                int indexLength = seg.length();
-                double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
+                double proportionPerimeter = (double) seg.length() / (double) seg.getProfileLength();
 				matrix[i][j++] = n.getStatistic(PlottableStatistic.PERIMETER) * proportionPerimeter;
 			}
 		}

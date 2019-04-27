@@ -48,6 +48,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	protected void setDefaults() {
 		options.set(OptionsFactory.makeDefaultTsneOptions());
 		options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
+		options.setBoolean(IClusteringOptions.USE_PCA_KEY,  false);
 	}
 
 	@Override
@@ -70,10 +71,10 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
 		
-		JCheckBox box = new JCheckBox();
-		box.setForeground(Color.DARK_GRAY);
+		JCheckBox tSNEBox = new JCheckBox();
+		tSNEBox.setForeground(Color.DARK_GRAY);
 		
-		box.setSelected(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
+		tSNEBox.setSelected(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
 		JLabel label = new JLabel(Labels.Clusters.TSNE);
 
 		JSpinner iterationsSpinner = makeMaxIterationsSpinner();
@@ -81,20 +82,31 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		JSpinner perplexitySpinner = makePerplexitySpinner();
 		perplexitySpinner.setEnabled(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
 		
-		box.addChangeListener(e->{
-			options.setBoolean(IClusteringOptions.USE_TSNE_KEY, box.isSelected());
-			iterationsSpinner.setEnabled(box.isSelected());
-			perplexitySpinner.setEnabled(box.isSelected());
+		tSNEBox.addChangeListener(e->{
+			options.setBoolean(IClusteringOptions.USE_TSNE_KEY, tSNEBox.isSelected());
+			iterationsSpinner.setEnabled(tSNEBox.isSelected());
+			perplexitySpinner.setEnabled(tSNEBox.isSelected());
 		});
 
 		labels.add(label);
-		fields.add(box);
+		fields.add(tSNEBox);
 		
 		labels.add(new JLabel(TsneMethod.PERPLEXITY_KEY));
 		fields.add(perplexitySpinner);
 
 		labels.add(new JLabel(TsneMethod.MAX_ITERATIONS_KEY));
 		fields.add(iterationsSpinner);
+		
+		
+		JCheckBox pcaBox = new JCheckBox();
+		pcaBox.setSelected(options.getBoolean(IClusteringOptions.USE_PCA_KEY));
+		JLabel pcaLbl = new JLabel(Labels.Clusters.PCA);
+		pcaBox.addChangeListener(e->{
+			options.setBoolean(IClusteringOptions.USE_PCA_KEY, pcaBox.isSelected());
+		});
+		
+		labels.add(pcaLbl);
+		fields.add(pcaBox);
 
 		addLabelTextRows(labels, fields, layout, panel);
 		return panel;

@@ -108,7 +108,7 @@ public class TsneDialog extends LoadingIconDialog {
 	}
 	
 	private void updateTitle() {
-		setTitle("tSNE for "+dataset.getName()+": "+group.getName());		
+		setTitle("Dimensional reduction for "+dataset.getName()+": "+group.getName());		
 	}
 
 

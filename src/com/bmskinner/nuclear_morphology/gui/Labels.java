@@ -243,6 +243,8 @@ public class Labels {
     	public static final String TSNE             = "Barnes-Hut t-SNE";
     	public static final String TSNE_PERPLEXITY  = "Perplexity";
     	public static final String TSNE_MAX_ITER    = "Max iterations";
+    	
+    	public static final String PCA              = "PCA";
     }
     
 
