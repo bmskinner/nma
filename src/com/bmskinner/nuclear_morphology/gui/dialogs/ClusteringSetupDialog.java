@@ -17,35 +17,19 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ClusteringMethodSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DimensionalReductionSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ParameterSelectionPanel;
 
@@ -56,111 +40,39 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ParameterSelection
  *
  */
 @SuppressWarnings("serial")
-public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener {
+public class ClusteringSetupDialog extends SubAnalysisSetupDialog  {
 
     private static final String DIALOG_TITLE = "Clustering options";
-
-    private static final String CLUSTER_NUMBER_LBL = "Number of clusters";
-    private static final String EM_ITERATIONS_LBL  = "Iterations";
-    private static final String EM_CLUSTERING_LBL  = "Expectation maximisation";
-    private static final String HC_CLUSTERING_LBL  = "Hierarchical";
-
-    private JPanel   cardPanel;
-    private JSpinner clusterNumberSpinner;
-    
-    private JComboBox<HierarchicalClusterMethod> clusterMethodBox;
-
-    private JRadioButton clusterHierarchicalButton;
-    private JRadioButton clusterEMButton;
+	protected final IClusteringOptions options;
 
     public ClusteringSetupDialog(final @NonNull IAnalysisDataset dataset) {
-
         super(dataset, DIALOG_TITLE);
+        options = OptionsFactory.makeClusteringOptions();
         setDefaults();
         createUI();
         packAndDisplay();
     }
+    
+	/**
+	 * Set the default options
+	 */
+	@Override
+	protected void setDefaults() {
+		options.setClusterNumber(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
+		options.setHierarchicalMethod(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
+		options.setIterations(IClusteringOptions.DEFAULT_EM_ITERATIONS);
+		options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
+	}
 
     @Override
     public IAnalysisMethod getMethod() {
     	return new NucleusClusteringMethod(dataset, options);
     }
-
-    private JPanel createHierarchicalPanel() {
-        JPanel panel = new JPanel();
-        GridBagLayout layout = new GridBagLayout();
-        panel.setLayout(layout);
-
-        List<JLabel> labels = new ArrayList<>();
-        List<Component> fields = new ArrayList<>();
-
-        clusterMethodBox = new JComboBox<>(HierarchicalClusterMethod.values());
-        clusterMethodBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
-        clusterMethodBox.addActionListener(this);
-
-        labels.add(new JLabel(CLUSTER_METHOD_LBL));
-        fields.add(clusterMethodBox);
-
-        SpinnerModel model = new SpinnerNumberModel(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER, // initial
-                                                                                                      // value
-                1, // min
-                100, // max
-                1); // step
-
-        clusterNumberSpinner = new JSpinner(model);
-        clusterNumberSpinner.setEnabled(true);
-
-        labels.add(new JLabel(CLUSTER_NUMBER_LBL));
-        fields.add(clusterNumberSpinner);
-
-        clusterNumberSpinner.addChangeListener(e -> {
-            JSpinner j = (JSpinner) e.getSource();
-            try {
-                j.commitEdit();
-                options.setClusterNumber((Integer) j.getValue());
-
-            } catch (Exception e1) {
-                warn("Error reading value in cluster number field");
-                stack(e1.getMessage(), e1);
-            }
-        });
-
-        addLabelTextRows(labels, fields, layout, panel);
-        return panel;
-    }
-
-    private JPanel createEMPanel() {
-
-        JPanel panel = new JPanel();
-
-        GridBagLayout layout = new GridBagLayout();
-        panel.setLayout(layout);
-
-        List<JLabel> labels = new ArrayList<>();
-        List<Component> fields = new ArrayList<>();
-
-        SpinnerModel model = new SpinnerNumberModel(IClusteringOptions.DEFAULT_EM_ITERATIONS, // initial
-                                                                                              // value
-                1, // min
-                1000, // max
-                1); // step
-
-        JSpinner iterationsSpinner = new JSpinner(model);
-        iterationsSpinner.addChangeListener(e -> {
-            try {
-            	iterationsSpinner.commitEdit();
-                options.setIterations((Integer) iterationsSpinner.getValue());
-            } catch (ParseException e1) {
-            	stack("Error reading value in iterations field", e1);
-            }
-        });
-
-        labels.add(new JLabel(EM_ITERATIONS_LBL));
-        fields.add(iterationsSpinner);
-
-        this.addLabelTextRows(labels, fields, layout, panel);
-        return panel;
-    }
+    
+	@Override
+	public HashOptions getOptions() {
+		return options;
+	}
 
     @Override
     protected void createUI() {
@@ -174,70 +86,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		panel.add(new ParameterSelectionPanel(dataset, options));
 		panel.add(new DimensionalReductionSelectionPanel(dataset, options));
-		panel.add(createClusterPanel());
+		panel.add(new ClusteringMethodSelectionPanel(dataset, options));
 		return panel;
 	}
-    
-    private JPanel createClusterPanel() {
-    	JPanel panel = new JPanel();
-    	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-    	panel.add(createClusterMethodPanel(), BorderLayout.NORTH);
-    	panel.add(cardPanel, BorderLayout.CENTER);
-    	panel.setBorder(BorderFactory.createTitledBorder("Clustering method"));
-    	return panel;
-    }
-    
-    private JPanel createClusterMethodPanel() {
-    	JPanel methodPanel = new JPanel(new FlowLayout());
-
-        // Create the radio buttons.
-        clusterHierarchicalButton = new JRadioButton(HC_CLUSTERING_LBL);
-        clusterHierarchicalButton.setSelected(true);
-
-        clusterEMButton = new JRadioButton(EM_CLUSTERING_LBL);
-
-        // Group the radio buttons.
-        ButtonGroup clusterTypeGroup = new ButtonGroup();
-        clusterTypeGroup.add(clusterHierarchicalButton);
-        clusterTypeGroup.add(clusterEMButton);
-
-        clusterHierarchicalButton.addActionListener(this);
-        clusterEMButton.addActionListener(this);
-
-        cardPanel = new JPanel(new CardLayout());
-        cardPanel.add(createHierarchicalPanel(), HC_CLUSTERING_LBL);
-        cardPanel.add(createEMPanel(), EM_CLUSTERING_LBL);
-        CardLayout cl = (CardLayout) (cardPanel.getLayout());
-        cl.show(cardPanel, HC_CLUSTERING_LBL);
-
-        methodPanel.add(clusterHierarchicalButton);
-        methodPanel.add(clusterEMButton);
-        
-        return methodPanel;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-
-        // Set card panel based on selected radio button
-        if (clusterHierarchicalButton.isSelected()) {
-
-            CardLayout cl = (CardLayout) (cardPanel.getLayout());
-            cl.show(cardPanel, HC_CLUSTERING_LBL);
-
-            options.setType(ClusteringMethod.HIERARCHICAL);
-
-            clusterNumberSpinner.setEnabled(true);
-            options.setClusterNumber((Integer) clusterNumberSpinner.getValue());
-            options.setHierarchicalMethod((HierarchicalClusterMethod) clusterMethodBox.getSelectedItem());
-        }
-
-        if (clusterEMButton.isSelected()) {
-
-            CardLayout cl = (CardLayout) (cardPanel.getLayout());
-            cl.show(cardPanel, EM_CLUSTERING_LBL);
-
-            options.setType(ClusteringMethod.EM);
-        }
-    }
 }
