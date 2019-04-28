@@ -29,8 +29,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 public interface Statistical {
 
-    static final double ERROR_CALCULATING_STAT = -1d;
-    static final double STAT_NOT_CALCULATED    = -3d;
+    double ERROR_CALCULATING_STAT = -1d;
+    double STAT_NOT_CALCULATED    = -3d;
 
     /**
      * Check if the given stat is present
@@ -45,13 +45,10 @@ public interface Statistical {
      * {@link PlottableStatistic.VARIABILILTY} returns zero, as this must be
      * calculated at the collection level
      * 
-     * @param stat
-     *            the statistic to fetch
-     * @param scale
-     *            the units to return values in
+     * @param stat the statistic to fetch
+     * @param scale the units to return values in
      * @return the value or zero if
      *         stat.equals(PlottableStatistic.VARIABILILTY)==true
-     * @throws Exception
      */
     double getStatistic(PlottableStatistic stat, MeasurementScale scale);
 
@@ -62,10 +59,8 @@ public interface Statistical {
      * method converts exceptions from {@link CellularComponent#getStatistic()}
      * into RuntimeExceptions, so the method can be used in streams
      * 
-     * @param stat
-     *            the statistic to fetch
-     * @param scale
-     *            the units to return values in
+     * @param stat the statistic to fetch
+     * @param scale the units to return values in
      * @return the value or zero if stat.equals(
      *         {@link NucleusStatistic.VARIABILILTY})==true
      */
@@ -87,6 +82,12 @@ public interface Statistical {
      * @param d
      */
     void setStatistic(PlottableStatistic stat, double d);
+    
+    /*
+     * Remove the given statistic
+     * @param stat
+     */
+    void clearStatistic(PlottableStatistic stat);
 
     /**
      * Get all the statistics in this object

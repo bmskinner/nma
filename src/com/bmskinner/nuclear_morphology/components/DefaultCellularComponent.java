@@ -629,7 +629,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public synchronized void setStatistic(final PlottableStatistic stat, double d) {
-        this.statistics.put(stat, d);
+        statistics.put(stat, d);
+    }
+    
+    @Override
+    public synchronized void clearStatistic(final PlottableStatistic stat) {
+    	statistics.remove(stat);
     }
 
     @Override

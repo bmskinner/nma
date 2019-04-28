@@ -32,8 +32,10 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
@@ -426,10 +428,17 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
         if (hasClusterGroup(group)) {
 
-            for (UUID id : group.getUUIDs()) {
-                if (hasChild(id)) {
+            for (UUID id : group.getUUIDs())
+                if (hasChild(id))
                     this.deleteChild(id);
-                }
+            
+            // Remove saved values associated with the cluster group
+            // e.g. tSNE, PCA
+            for(Nucleus n : getCollection().getNuclei()) {
+            	for(PlottableStatistic s : n.getStatistics()) {
+            		if(s.toString().endsWith(group.getId().toString()))
+            			n.clearStatistic(s);
+            	}
             }
             this.clusterGroups.remove(group);
         }
