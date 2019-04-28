@@ -441,6 +441,11 @@ public class Cell implements ICell {
     }
     
     @Override
+    public void clearStatistic(PlottableStatistic stat) {
+    	// Noop
+    }
+    
+    @Override
     public void setScale(double scale) {
         nucleus.setScale(scale);
         tails.stream().forEach(n->n.setScale(scale));

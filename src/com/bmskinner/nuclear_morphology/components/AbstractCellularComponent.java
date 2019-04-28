@@ -451,6 +451,11 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
     public synchronized void setStatistic(PlottableStatistic stat, double d) {
         this.statistics.put(stat, d);
     }
+    
+    @Override
+    public void clearStatistic(PlottableStatistic stat) {
+    	statistics.remove(stat);
+    }
 
     @Override
     public PlottableStatistic[] getStatistics() {

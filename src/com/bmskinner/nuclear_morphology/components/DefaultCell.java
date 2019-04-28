@@ -225,6 +225,11 @@ public class DefaultCell implements ICell {
         if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)) 
             statistics.put(stat, d);
     }
+    
+    @Override
+    public void clearStatistic(PlottableStatistic stat) {
+    	statistics.remove(stat);
+    }
 
     @Override
     public PlottableStatistic[] getStatistics() {
