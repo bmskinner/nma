@@ -40,9 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
 
 /**
@@ -220,6 +218,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     public static XYDataset createTsneScatterDataset(IAnalysisDataset d, ColourByType type, IClusterGroup plotGroup, IClusterGroup colourGroup) throws ChartDatasetCreationException {
     	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
     	
+    	//TODO: add an input parameter for which method we want to display
     	String prefix1 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA_1_" : "TSNE_1_";
     	String prefix2 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA_2_" : "TSNE_2_";
     	

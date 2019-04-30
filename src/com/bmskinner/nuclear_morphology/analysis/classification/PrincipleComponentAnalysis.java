@@ -75,10 +75,11 @@ public class PrincipleComponentAnalysis extends SingleDatasetAnalysisMethod {
 			Instance instance = inst.instance(i);
 			Instance converted = pca.convertInstance(instance);
 			double[] values = converted.toDoubleArray();
-			log(Arrays.toString(values));
+//			log(Arrays.toString(values));
 			UUID nucleusId = cellToInstanceMap.get(i);
 			Optional<Nucleus> nucl = dataset.getCollection().stream().flatMap(c->c.getNuclei().stream()).filter(n->n.getID().equals(nucleusId)).findFirst();
 			if(nucl.isPresent()) {
+				// Store in the generic stats pool until assigned a cluster id by a clustering method
 				nucl.get().setStatistic(PlottableStatistic.PCA_1, values[0]);
 				nucl.get().setStatistic(PlottableStatistic.PCA_2, values[1]);
 			}

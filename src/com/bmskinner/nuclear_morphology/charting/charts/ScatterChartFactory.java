@@ -176,7 +176,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
     	try {
     		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d, type, plotGroup, colourGroup);
     		
-    		
+    		//TODO: add an input parameter for which method we want to display
     		String prefix = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA " : "t-SNE ";
     		
     		String xLabel = prefix+"1";

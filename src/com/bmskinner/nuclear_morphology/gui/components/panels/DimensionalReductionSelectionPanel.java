@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,7 +49,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	protected void setDefaults() {
 		options.set(OptionsFactory.makeDefaultTsneOptions());
 		options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
-		options.setBoolean(IClusteringOptions.USE_PCA_KEY,  false);
+		options.setBoolean(IClusteringOptions.USE_PCA_KEY,  IClusteringOptions.DEFAULT_USE_PCA);
 	}
 
 	@Override
@@ -57,19 +58,21 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
 		panel.setLayout(layout);
 
-		panel.add(createTsnePanel());
+		panel.add(createOptionPanel());
 		
 		panel.setBorder(BorderFactory.createTitledBorder(BORDER_LABEL));
 		return panel;
 	}
-	
-	private JPanel createTsnePanel() {
+		
+	private JPanel createOptionPanel() {
 		JPanel panel = new JPanel();
 		GridBagLayout layout = new GridBagLayout();
 		panel.setLayout(layout);
 
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
+		
+		ButtonGroup buttonGroup = new ButtonGroup();
 		
 		JCheckBox tSNEBox = new JCheckBox();
 		tSNEBox.setForeground(Color.DARK_GRAY);
@@ -105,6 +108,10 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 			options.setBoolean(IClusteringOptions.USE_PCA_KEY, pcaBox.isSelected());
 		});
 		
+		buttonGroup.add(tSNEBox);
+		buttonGroup.add(pcaBox);
+		
+		//TODO: re-enable when PCA is working 
 		labels.add(pcaLbl);
 		fields.add(pcaBox);
 

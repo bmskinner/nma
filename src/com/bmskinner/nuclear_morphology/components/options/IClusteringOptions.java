@@ -56,6 +56,7 @@ public interface IClusteringOptions extends Serializable, HashOptions {
     boolean                   DEFAULT_INCLUDE_PROFILE       = true;
     boolean                   DEFAULT_INCLUDE_MESH          = false;
     boolean                   DEFAULT_USE_TSNE              = false;
+    boolean                   DEFAULT_USE_PCA               = false;
 
     /**
      * The available types of hierarchical clustering for the Weka clusterer
