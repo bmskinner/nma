@@ -35,6 +35,8 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
@@ -62,10 +64,8 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	protected IAnalysisDataset dataset = null;
 	protected ICell cell = null;
 	protected CellularComponent component = null;
-	protected boolean isShowMesh;
-	protected boolean isWarpImage;
-	protected boolean isRotate;
-	
+	protected HashOptions displayOptions;
+
 	// the undistorted image
 	protected BufferedImage input;
 	protected BufferedImage output;
@@ -73,6 +73,22 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	protected int bigRadius   = 50;
 	protected int sourceWidth;
 	protected int sourceHeight;
+	
+	/**
+	 * Keys for display options. These are used in a HashOptions
+	 * @author bms41
+	 * @since 1.15.4
+	 *
+	 */
+	public class CellDisplayOptions {
+		public static final String SHOW_MESH       = "Show mesh";
+		public static final String WARP_IMAGE      = "Warp image";
+		public static final String ROTATE_VERTICAL = "Rotate vertical";		
+		
+		private CellDisplayOptions() { 
+			// private constructor. Access to static fields only
+		}
+	}
 	
 	/**
 	 * Create with a parent panel to listen for cell updates
@@ -94,7 +110,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	 * Set the panel to a null state with no cell showing
 	 */
 	public void setNull() {
-		setCell(null, null, null, false, false, false);
+		setCell(null, null, null, new DefaultOptions());
 	}
 
 	/**
@@ -105,7 +121,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	 * @param isShowMesh should the comparison mesh with the consensus nucleus be drawn?
 	 * @param isWarpImage should the image be warped to fit the consensus nucleus? (cannot be true at the same time as isShowMesh)
 	 */
-	public void setCell(@Nullable IAnalysisDataset dataset, @Nullable ICell cell, @Nullable CellularComponent component, boolean isShowMesh, boolean isWarpImage, boolean isRotate) {
+	public void setCell(@Nullable IAnalysisDataset dataset, @Nullable ICell cell, @Nullable CellularComponent component, HashOptions cellDisplayOptions) {
 		if(dataset==null || cell==null || component==null) {
 			imageLabel.setIcon(null);
 			return;
@@ -113,9 +129,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 		this.dataset     = dataset;
 		this.cell        = cell;
 		this.component   = component;
-		this.isShowMesh  = isShowMesh;
-		this.isWarpImage = isWarpImage;
-		this.isRotate    = isRotate; 
+		displayOptions = cellDisplayOptions;
 		createImage();
 	}
 		

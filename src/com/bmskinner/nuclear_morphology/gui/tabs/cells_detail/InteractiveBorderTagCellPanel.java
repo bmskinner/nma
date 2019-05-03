@@ -85,11 +85,11 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 
 	@Override
 	protected void createImage() {
-		if(isShowMesh) {
+		if(displayOptions.getBoolean(CellDisplayOptions.SHOW_MESH)) {
 			createMeshImage();
 			return;
 		}
-		if(isWarpImage) {
+		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE)) {
 			createWarpImage();
 			return;
 		}
@@ -127,7 +127,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			}    
 			
 			
-			if(isRotate) {
+			if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
 				try {
 					ImageProcessor rot = rotateToVertical(cell, an2.toProcessor());
 					rot.flipVertical(); // Y axis needs inverting since images have 0 at top
@@ -165,6 +165,8 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 		
 		@Override
         public synchronized void mouseWheelMoved(MouseWheelEvent e) {
+			if(imageLabel.getIcon()==null)
+				return;
 			// Modify the square size
             if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
                 InputEvent.CTRL_DOWN_MASK){
@@ -185,6 +187,8 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 		
 		@Override
 		public synchronized void mouseMoved(MouseEvent e){
+			if(imageLabel.getIcon()==null)
+				return;
 			IPoint p = translatePanelLocationToRenderedImage(e); 
 			if(p==null)
 				return;
@@ -262,13 +266,12 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 
 		@Override
 		public synchronized void mouseClicked(MouseEvent e) {
-
+			if(imageLabel.getIcon()==null)
+				return;
 			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
-//			System.out.println(String.format("Mouse clicked at %s - %s ", e.getX(), e.getY()));
 
 			Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
 					.stream().filter(p->{
-//						clickedPoint.overlaps(p)
 						return clickedPoint.getX()>=p.getX()-0.4 && 
 								clickedPoint.getX()<=p.getX()+0.4 &&
 								clickedPoint.getY()>=p.getY()-0.4 && 
@@ -278,7 +281,6 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 					.findFirst();
 
 			if(point.isPresent()) {
-//				System.out.println(String.format("Border point overlaps at %s ", point.get().toString()));
 				JPopupMenu popup = createPopup(point.get());
 				popup.show(imageLabel, e.getX(), e.getY());
 			}

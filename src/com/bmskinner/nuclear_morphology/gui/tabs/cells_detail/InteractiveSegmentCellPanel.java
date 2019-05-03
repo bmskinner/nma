@@ -139,6 +139,8 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 	private class ImageMouseAdapter extends MouseAdapter {
 		@Override
         public synchronized void mouseWheelMoved(MouseWheelEvent e) {
+			if(imageLabel.getIcon()==null)
+				return;
             if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
                 InputEvent.CTRL_DOWN_MASK){
             	int temp = smallRadius +( 1*e.getWheelRotation());
@@ -158,13 +160,16 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		
 		@Override
 		public synchronized void mouseMoved(MouseEvent e){
+			if(imageLabel.getIcon()==null)
+				return;
 			IPoint p = translatePanelLocationToRenderedImage(e); 
 			updateImage(p.getXAsInt(), p.getYAsInt());
 		}
 		
 		@Override
 		public synchronized void mouseClicked(MouseEvent e) {
-			
+			if(imageLabel.getIcon()==null)
+				return;
 			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
 			
 			// Not a circle around the valid point to click, but close enough

@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
@@ -108,7 +109,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         	 final ICell cell = getCellModel().getCell();
              final CellularComponent component = getCellModel().getComponent();
         	
-        	imagePanel.setCell(activeDataset(), cell, component, false, false, false);
+        	imagePanel.setCell(activeDataset(), cell, component, new DefaultOptions());
 
         } catch (Exception e) {
             error("Error updating cell panel", e);
