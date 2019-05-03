@@ -77,6 +77,10 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 
 	public InteractiveBorderTagCellPanel(@NonNull CellUpdatedEventListener parent){
 		super(parent);
+		CellImageMouseListener mouseListener = new CellImageMouseListener();
+		imageLabel.addMouseWheelListener(mouseListener);
+		imageLabel.addMouseMotionListener(mouseListener);
+		imageLabel.addMouseListener(mouseListener);
 	}
 
 	@Override
@@ -98,7 +102,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 	 * @param cell
 	 * @param component
 	 */
-	private void createCellImage() {
+	private synchronized void createCellImage() {
 		InterfaceUpdater u = () ->{
 			output= null;
 			ImageProcessor ip;
@@ -140,24 +144,9 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			input = an2.toBufferedImage();
 			sourceWidth = an.toProcessor().getWidth();
 			sourceHeight = an.toProcessor().getHeight();
-			
-			for(MouseListener l : imageLabel.getMouseListeners())
-				imageLabel.removeMouseListener(l);
-
-			for(MouseMotionListener l : imageLabel.getMouseMotionListeners())
-				imageLabel.removeMouseMotionListener(l);
-
-			for(MouseWheelListener l : imageLabel.getMouseWheelListeners())
-				imageLabel.removeMouseWheelListener(l);
-			
-			
-			CellImageMouseListener mouseListener = new CellImageMouseListener();
-			imageLabel.addMouseWheelListener(mouseListener);
-			imageLabel.addMouseMotionListener(mouseListener);
-			imageLabel.addMouseListener(mouseListener);
-
 		};
-		ThreadManager.getInstance().submit(u);
+		new Thread(u).start();
+//		ThreadManager.getInstance().submit(u);
 	}
 	
 	/**
