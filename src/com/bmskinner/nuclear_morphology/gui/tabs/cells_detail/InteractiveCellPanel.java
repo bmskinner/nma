@@ -118,8 +118,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
 	 * @param dataset the dataset the cell is present in
 	 * @param cell the cell to draw
 	 * @param component the cellular component within the cell to draw
-	 * @param isShowMesh should the comparison mesh with the consensus nucleus be drawn?
-	 * @param isWarpImage should the image be warped to fit the consensus nucleus? (cannot be true at the same time as isShowMesh)
+	 * @param cellDisplayOptions how the cell should be displayed; uses the keys in {@link CellDisplayOptions}
 	 */
 	public void setCell(@Nullable IAnalysisDataset dataset, @Nullable ICell cell, @Nullable CellularComponent component, HashOptions cellDisplayOptions) {
 		if(dataset==null || cell==null || component==null) {
