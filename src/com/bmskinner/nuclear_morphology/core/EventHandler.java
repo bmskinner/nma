@@ -548,6 +548,10 @@ public class EventHandler implements Loggable, EventListener {
                 fine("Manually clustering dataset");
                 return new ManualClusterAction(event.firstDataset(), acceptor, EventHandler.this);
             }
+            
+            if (event.method().equals(DatasetEvent.CLUSTER_FROM_FILE))
+                return new ClusterFileAssignmentAction(event.firstDataset(), acceptor, EventHandler.this);
+
 
             if (event.method().equals(DatasetEvent.BUILD_TREE)) {
             	fine("Building a tree from dataset");

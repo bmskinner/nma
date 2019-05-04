@@ -69,11 +69,13 @@ public class ClusterDetailPanel extends DetailPanel {
     private static final String NEW_CLASS_LBL   = "Create classifier";
     private static final String NO_CLUSTERS_LBL = "No clusters present";
     private static final String MAN_CLUSTER_LBL = "Cluster manually";
+    private static final String FILE_CLUSTER_LBL = "Import from file";
 
     private JButton clusterButton        = new JButton(NEW_CLUSTER_LBL);
     private JButton buildTreeButton      = new JButton(NEW_TREE_LBL);
     private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
     private JButton manualClusterBtn     = new JButton(MAN_CLUSTER_LBL);
+    private JButton fileClusterBtn       = new JButton(FILE_CLUSTER_LBL);
 
     private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
     private JPanel statusPanel = new JPanel(new BorderLayout());
@@ -222,12 +224,15 @@ public class ClusterDetailPanel extends DetailPanel {
         buildTreeButton.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets()));
         saveClassifierButton.addActionListener(e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets()));
         manualClusterBtn.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets()));
-                
+        fileClusterBtn.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER_FROM_FILE, getDatasets()));
+        
         saveClassifierButton.setEnabled(false);
         buildTreeButton.setEnabled(true);
         manualClusterBtn.setEnabled(true);
+        fileClusterBtn.setEnabled(true);
         buttonPanel.add(manualClusterBtn);
         buttonPanel.add(clusterButton);
+        buttonPanel.add(fileClusterBtn);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
         panel.add(statusLabel, BorderLayout.CENTER);
@@ -240,6 +245,7 @@ public class ClusterDetailPanel extends DetailPanel {
         clusterButton.setEnabled(b);
         buildTreeButton.setEnabled(b);
         manualClusterBtn.setEnabled(b);
+        fileClusterBtn.setEnabled(b);
         // saveClassifierButton.setEnabled(b); // not yet enabled
     }
 
