@@ -151,27 +151,32 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     public void segmentEventReceived(SegmentEvent event) {
 
         if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
-            try {
+        	
+        	// Wrap in a runnable to avoid occasional hanging. Did it help?
+        	Runnable r = () ->{
+        		try {
 
-            	fine("Updating segment start index to "+event.index);
-                // This is a manual change, so disable any lock
-                getCellModel().getCell().getNucleus().setLocked(false);
+        			fine("Updating segment start index to "+event.index);
+        			// This is a manual change, so disable any lock
+        			getCellModel().getCell().getNucleus().setLocked(false);
 
-                // Carry out the update
-                activeDataset().getCollection().getProfileManager()
-                        .updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
+        			// Carry out the update
+        			activeDataset().getCollection().getProfileManager()
+        			.updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
 
-                // even if no lock was previously set, there should be one now a manual adjustment was made
-                getCellModel().getCell().getNucleus().setLocked(true);
+        			// even if no lock was previously set, there should be one now a manual adjustment was made
+        			getCellModel().getCell().getNucleus().setLocked(true);
 
-                // Recache necessary charts within this panel at once
-                refreshChartCache();
+        			// Recache necessary charts within this panel at once
+        			refreshChartCache();
 
-                // Request a refresh of other panels
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
-            } catch (Exception e) {
-                error("Error updating segment", e);
-            }
+        			// Request a refresh of other panels
+        			getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
+        		} catch (Exception e) {
+        			error("Error updating segment", e);
+        		}
+        	};
+        	new Thread(r).start();
         }
     }
 
