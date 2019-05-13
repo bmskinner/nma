@@ -390,4 +390,9 @@ public class DummyCellularComponent implements CellularComponent {
 		return null;
 	}
 
+	@Override
+	public void clearStatistic(PlottableStatistic stat) {
+		component.clearStatistic(stat);
+	}
+
 }
