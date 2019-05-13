@@ -29,6 +29,8 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
@@ -36,6 +38,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOv
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.InteractiveCellPanel.CellDisplayOptions;
 
 @SuppressWarnings("serial")
 public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, CellUpdatedEventListener {
@@ -133,10 +136,12 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         final ICell cell = getCellModel().getCell();
         final CellularComponent component = getCellModel().getComponent();
         
-        boolean isShowMesh  = makeMeshPanel.isSelected();
-        boolean isWarpImage = warpMeshPanel.isSelected();   
-        boolean isRotate    = rotatePanel.isSelected();
-        imagePanel.setCell(activeDataset(), cell, component, isShowMesh, isWarpImage, isRotate);
+        HashOptions displayOptions = new DefaultOptions();
+        displayOptions.setBoolean(CellDisplayOptions.WARP_IMAGE, warpMeshPanel.isSelected());
+        displayOptions.setBoolean(CellDisplayOptions.SHOW_MESH, makeMeshPanel.isSelected());
+        displayOptions.setBoolean(CellDisplayOptions.ROTATE_VERTICAL, rotatePanel.isSelected());
+        
+        imagePanel.setCell(activeDataset(), cell, component, displayOptions);
 
         updateSettingsPanels();
     }

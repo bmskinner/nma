@@ -8,6 +8,9 @@ package com.bmskinner.nuclear_morphology.components.options;
  */
 public class DefaultOptions extends AbstractHashOptions {
 	
+	/**
+	 * Construct an empty options object
+	 */
 	public DefaultOptions() {
 		super();
 	}

@@ -6,10 +6,11 @@
 	<artifactId>nuclear_morphology</artifactId>
 	<version>1.16.0</version>
 
-	<!-- Define custom properties -->
+	<!-- Define custom properties to be exported -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<project.code.name>Excelsior</project.code.name>
+		<version>${project.version}</version>
 		<version.suffix></version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
@@ -98,6 +99,24 @@
 
 
 		<plugins>
+
+			<!-- Create a file in the jar with custom project properties -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>write-project-properties</goal>
+						</goals>
+						<configuration>
+							<outputFile>${project.build.outputDirectory}/project.properties</outputFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 			<!-- Create a year variable -->
 			<plugin>

@@ -69,45 +69,17 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 	
 	public InteractiveSegmentCellPanel(CellUpdatedEventListener parent){
 		super(parent);
+		MouseAdapter mouseListener = new ImageMouseAdapter();
+		imageLabel.addMouseWheelListener(mouseListener);
+		imageLabel.addMouseMotionListener(mouseListener);
+		imageLabel.addMouseListener(mouseListener);
 	}
 
 	@Override
-	protected void createImage() {
+	protected synchronized void createImage() {
 		finer("Redrawing cell image");
-		createCellImage();
-	}
-	
-	public synchronized void addSegmentEventListener(SegmentEventListener l) {
-        listeners.add(l);
-    }
-
-    public synchronized void removeSegmentEventListener(SegmentEventListener l) {
-        listeners.remove(l);
-    }
-
-    /**
-     * Fire a segmentation event
-     * @param id the segment to be altered
-     * @param index the index to be altered
-     * @param type the update type. Types are specified as static ints in SegmentEvent
-     */
-    protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
-        SegmentEvent e = new SegmentEvent(this, id, index, type);
-
-        for (SegmentEventListener l : listeners) {
-        	l.segmentEventReceived(e);
-        }
-    }
-	
-	/**
-	 * Create the default annotated cell image, with border, segments and border tags highlighted
-	 * @param dataset
-	 * @param cell
-	 * @param component
-	 */
-	private void createCellImage() {
 		InterfaceUpdater u = () ->{
-			output= null;
+			output = null;
 			ImageProcessor ip;
 			try{
 				ip = component.getImage();
@@ -132,126 +104,145 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			input = an2.toProcessor().getBufferedImage();
 			sourceWidth = an.toProcessor().getWidth();
 			sourceHeight = an.toProcessor().getHeight();
-			
-			for(MouseListener l : imageLabel.getMouseListeners()) {
-				imageLabel.removeMouseListener(l);
-			}
-			for(MouseMotionListener l : imageLabel.getMouseMotionListeners()) {
-				imageLabel.removeMouseMotionListener(l);
-			}
-			for(MouseWheelListener l : imageLabel.getMouseWheelListeners()) {
-				imageLabel.removeMouseWheelListener(l);
-			}
-			
-			imageLabel.addMouseWheelListener(new MouseAdapter() {
-				
-				@Override
-	            public synchronized void mouseWheelMoved(MouseWheelEvent e) {
-	                if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
-	                    InputEvent.CTRL_DOWN_MASK){
-	                	int temp = smallRadius +( 1*e.getWheelRotation());
-	                	temp = temp>100?100:temp;
-	                	temp = temp<5?5:temp;
-	                    smallRadius = temp;
-	                } else {
-	                	int temp = bigRadius +( 3 * e.getWheelRotation());
-	                	temp = temp>200?200:temp;
-	                	temp = temp<10?10:temp;
-	                	bigRadius = temp;
-	                }
-	                IPoint p = translatePanelLocationToRenderedImage(e); 
-					updateImage(p.getXAsInt(), p.getYAsInt());
-	            }
-			});
-			
-			
-			imageLabel.addMouseMotionListener(new MouseAdapter() {
-				@Override
-				public synchronized void mouseMoved(MouseEvent e){
-					IPoint p = translatePanelLocationToRenderedImage(e); 
-					updateImage(p.getXAsInt(), p.getYAsInt());
-				}
-			});
-
-			imageLabel.addMouseListener(new MouseAdapter() {
-				
-				private synchronized JPopupMenu createPopup(IBorderPoint point) {
-					JPopupMenu popupMenu = new JPopupMenu("Popup");
-					try {
-						
-						int rawIndex = cell.getNucleus().getBorderIndex(point);
-						
-						int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
-						
-						// Get the index of the clicked point in the RP-indexed profile
-						int index = cell.getNucleus().wrapIndex(rawIndex-rpIndex);
-
-						IBorderSegment seg = cell.getNucleus().getProfile(ProfileType.ANGLE)
-								.getSegmentContaining(rawIndex);
-
-						
-						IBorderSegment prev = seg.prevSegment();
-						IBorderSegment next = seg.nextSegment();
-						
-						JMenuItem prevItem = new JMenuItem("Extend "+prev.getName()+" to here");
-						prevItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
-						prevItem.setBorderPainted(true);
-
-						prevItem.addActionListener(e->{
-							fine(String.format("Updating segment %s start to %d", next.getID(), index));
-							fireSegmentEvent(seg.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
-							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
-							createImage();
-						});
-						popupMenu.add(prevItem);
-
-						popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
-						
-						JMenuItem nextItem = new JMenuItem("Extend "+next.getName()+" to here");
-						nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 3));
-						nextItem.setBorderPainted(true);
-						
-						nextItem.addActionListener(e->{
-							fine(String.format("Updating segment %s start to %d", next.getID(), index));
-							fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
-							cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
-							createImage();
-						});
-						popupMenu.add(nextItem);
-						
-					} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
-						stack("Cannot get border tag index", e);
-					}
-					return popupMenu;
-				}
-
-				@Override
-				public synchronized void mouseClicked(MouseEvent e) {
-					
-					IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
-					
-					// Not a circle around the valid point to click, but close enough
-					Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
-							.stream().filter(p->{
-								return clickedPoint.getX()>=p.getX()-POINT_CLICK_RADIUS_PIXELS && 
-										clickedPoint.getX()<=p.getX()+POINT_CLICK_RADIUS_PIXELS &&
-										clickedPoint.getY()>=p.getY()-POINT_CLICK_RADIUS_PIXELS && 
-										clickedPoint.getY()<=p.getY()+POINT_CLICK_RADIUS_PIXELS;
-								
-							})
-							.findFirst();
-
-					if(point.isPresent()) {
-						JPopupMenu popup = createPopup(point.get());
-						popup.show(imageLabel, e.getX(), e.getY());
-					}
-
-				}
-
-			});
-
 		};
-		ThreadManager.getInstance().submit(u);
+		new Thread(u).start(); // avoid thread manager
+	}
+	
+	public synchronized void addSegmentEventListener(SegmentEventListener l) {
+        listeners.add(l);
+    }
+
+    public synchronized void removeSegmentEventListener(SegmentEventListener l) {
+        listeners.remove(l);
+    }
+
+    /**
+     * Fire a segmentation event
+     * @param id the segment to be altered
+     * @param index the index to be altered
+     * @param type the update type. Types are specified as static ints in SegmentEvent
+     */
+    protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
+        SegmentEvent e = new SegmentEvent(this, id, index, type);
+
+        for (SegmentEventListener l : listeners) {
+        	l.segmentEventReceived(e);
+        }
+    }
+		
+	/**
+	 * Respond to mouse inputs
+	 * @author bms41
+	 * @since 1.5.4
+	 *
+	 */
+	private class ImageMouseAdapter extends MouseAdapter {
+		@Override
+        public synchronized void mouseWheelMoved(MouseWheelEvent e) {
+			if(imageLabel.getIcon()==null)
+				return;
+            if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
+                InputEvent.CTRL_DOWN_MASK){
+            	int temp = smallRadius +( 1*e.getWheelRotation());
+            	temp = temp>100?100:temp;
+            	temp = temp<5?5:temp;
+                smallRadius = temp;
+            } else {
+            	int temp = bigRadius +( 3 * e.getWheelRotation());
+            	temp = temp>200?200:temp;
+            	temp = temp<10?10:temp;
+            	bigRadius = temp;
+            }
+            IPoint p = translatePanelLocationToRenderedImage(e); 
+			updateImage(p.getXAsInt(), p.getYAsInt());
+        }
+		
+		
+		@Override
+		public synchronized void mouseMoved(MouseEvent e){
+			if(imageLabel.getIcon()==null)
+				return;
+			IPoint p = translatePanelLocationToRenderedImage(e); 
+			updateImage(p.getXAsInt(), p.getYAsInt());
+		}
+		
+		@Override
+		public synchronized void mouseClicked(MouseEvent e) {
+			if(imageLabel.getIcon()==null)
+				return;
+			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
+			
+			// Not a circle around the valid point to click, but close enough
+			Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
+					.stream().filter(p->{
+						return clickedPoint.getX()>=p.getX()-POINT_CLICK_RADIUS_PIXELS && 
+								clickedPoint.getX()<=p.getX()+POINT_CLICK_RADIUS_PIXELS &&
+								clickedPoint.getY()>=p.getY()-POINT_CLICK_RADIUS_PIXELS && 
+								clickedPoint.getY()<=p.getY()+POINT_CLICK_RADIUS_PIXELS;
+						
+					})
+					.findFirst();
+
+			if(point.isPresent()) {
+				JPopupMenu popup = createPopup(point.get());
+				popup.show(imageLabel, e.getX(), e.getY());
+			}
+
+		}
+		
+		private synchronized JPopupMenu createPopup(IBorderPoint point) {
+			JPopupMenu popupMenu = new JPopupMenu("Popup");
+			if(cell==null)
+				return popupMenu;
+			
+			try {
+				
+				int rawIndex = cell.getNucleus().getBorderIndex(point);
+				
+				int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
+				
+				// Get the index of the clicked point in the RP-indexed profile
+				int index = cell.getNucleus().wrapIndex(rawIndex-rpIndex);
+
+				IBorderSegment seg = cell.getNucleus().getProfile(ProfileType.ANGLE)
+						.getSegmentContaining(rawIndex);
+
+				
+				IBorderSegment prev = seg.prevSegment();
+				IBorderSegment next = seg.nextSegment();
+				
+				JMenuItem prevItem = new JMenuItem("Extend "+prev.getName()+" to here");
+				prevItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
+				prevItem.setBorderPainted(true);
+
+				prevItem.addActionListener(e->{
+					fine(String.format("Updating segment %s start to %d", next.getID(), index));
+					fireSegmentEvent(seg.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
+					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+					createImage();
+				});
+				popupMenu.add(prevItem);
+
+				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
+				
+				JMenuItem nextItem = new JMenuItem("Extend "+next.getName()+" to here");
+				nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 3));
+				nextItem.setBorderPainted(true);
+				
+				nextItem.addActionListener(e->{
+					fine(String.format("Updating segment %s start to %d", next.getID(), index));
+					fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
+					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+					createImage();
+				});
+				popupMenu.add(nextItem);
+				
+			} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
+				stack("Cannot get border tag index", e);
+			}
+			return popupMenu;
+		}
+		
 	}
 	
 	@Override
