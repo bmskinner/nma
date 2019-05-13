@@ -84,20 +84,20 @@ public class Version implements Serializable {
      * @return
      */
     public static Version currentVersion() {
-//        return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
-        try {
-        	LOGGER.config("Reading properties file: "+"project.properties");
-        	InputStream is = Version.class.getResourceAsStream("project.properties");
-            Properties p = new Properties();
-			p.load(is);
-	        String version = p.getProperty("version");
-	        return fromString(version);
-		} catch (IOException | NullPointerException e) {
-			LOGGER.config("Cannot read properties file: "+e.getMessage());
-			Version v = new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
-			LOGGER.config("Using default version: "+v.toString());
-			return v;
-		}
+        return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+//        try {
+//        	LOGGER.config("Reading properties file: "+"project.properties");
+//        	InputStream is = Version.class.getResourceAsStream("project.properties");
+//            Properties p = new Properties();
+//			p.load(is);
+//	        String version = p.getProperty("version");
+//	        return fromString(version);
+//		} catch (IOException | NullPointerException e) {
+//			LOGGER.config("Cannot read properties file: "+e.getMessage());
+//			Version v = new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+//			LOGGER.config("Using default version: "+v.toString());
+//			return v;
+//		}
     }
         
     /**
