@@ -64,6 +64,14 @@ public class MultiScaleStructuralSimilarityIndex {
 	private static final int MIN_IMAGE_DIMENSION_PIXELS = 32;
 	private static final double DEFAULT_SIGMA_GAUSS = 1.5;
 	
+	
+	/**
+	 * LOD [] ARE LOW PASS FILTER VALUES. Impulse response of low-pass filter to use defaults to 9/7 
+	 * biorthogonal wavelet filters. IT USES THE ROUSE/HEMAMI'S VALUES INSTEAD OF ZHOU WANG'S METHOD AND VALUES.
+	 * THERE IS A LITTLE DIFFERENCE (< 2%) WITH MR. WANG'S VALUES FOR THE SAME SET OF IMAGES.
+	 */
+	private static final double[] LOD = { 0.0378, -0.0238, -0.1106, 0.3774, 0.8527, 0.3774, -0.1106, -0.0238, 0.0378 };  
+	
 	/**
 	 * All the values calculated by MS-SSIM
 	 * @author ben
@@ -106,148 +114,157 @@ public class MultiScaleStructuralSimilarityIndex {
 		if(inputImageA instanceof ColorProcessor)
 			throw new IllegalArgumentException("Cannot handle colour images");
 		
-		
-		ImageProcessor image_1_p, image_2_p;
-		int  pointer, filter_length, image_height, image_width, image_dimension, bits_per_pixel_1, bits_per_pixel_2, a, b, c;
-		float filter_weights [];
-		double luminance_exponent [] = { 1, 1, 1, 1, 1, 0.1333};
-		double contrast_exponent [] = { 1, 0.0448, 0.2856, 0.3001, 0.2363, 0.1333};
-		double structure_exponent []= { 1, 0.0448, 0.2856, 0.3001, 0.2363, 0.1333};
-		double luminance_comparison =1;
-		double contrast_comparison =1;
-		double structure_comparison =1;
-		double ms_ssim_index;
-		double [] ssim_map;
-		double ssim_index;
-
-		bits_per_pixel_1=inputImageA.getBitDepth();
-		bits_per_pixel_2=inputImageB.getBitDepth();
-
-		// THIS DIALOG BOX SHOWS DIFFERENT OPTIONS TO CREATE THE WINDOW WE ARE GOING TO USE TO EVALUATE SSIM INDEX OVER THE ENTIRE IMAGES
-		//	
-		double sigma_gauss = DEFAULT_SIGMA_GAUSS;
-		int filter_width = 11;
-		double K1 = 0.01; 
-		double K2 = 0.03;
-		double lod [] = {0.0378, -0.0238, -0.1106, 0.3774, 0.8527, 0.3774, -0.1106, -0.0238, 0.0378};  
-		//
-		// LOD [] ARE LOW PASS FILTER VALUES. Impulse response of low-pass filter to use defaults to 9/7 biorthogonal wavelet filters. IT USES THE ROUSE/HEMAMI'S VALUES INSTEAD OF ZHOU WANG'S METHOD AND VALUES.
-		// THERE IS A LITTLE DIFFERENCE (< 2%) WITH MR. WANG'S VALUES FOR THE SAME SET OF IMAGES.
-		//
-		double number_of_levels = 5;
 		double downsampled=1;
-		boolean gaussian_window = true;
-//		String[] window_type = {"Gaussian","Same weight"};  // WE CAN WEIGHTS THE WINDOW WITH A GAUSSIAN WEIGHTING FUNCTION OR GIVING THE SAME WEIGHT TO ALL THE PIXELS IN THE WINDOW
-//		String window_selection = window_type[0];
-//		String[] kind_of_algorithm = {ZHOU_WANG,ROUSE_HEMAMI};  // WE CAN USE THE INDEX FOR THE SUPRA-THRESHOLD LEVEL (WANG)  OR THE RECOGNITION THRESHOLD (ROUSE/HEMAMI)
-		String algorithm_selection = ROUSE_HEMAMI; // DEFAULT TO ROUSE/HENAMI
-//		boolean out=false;
-		boolean show_ssim_map= false;
 
-//		String[] ssim_map_level_option = {"0", "1", "2", "3", "4", "5"};
-//		String ssim_map_selection = ssim_map_level_option[0];
-		int ssim_map_level=0;
-
-		double C1 = (Math.pow(2, bits_per_pixel_1) - 1)*K1;
-		C1= C1*C1;
-		double C2 = (Math.pow(2, bits_per_pixel_1) - 1)*K2;
-		C2=C2*C2;
-		//
-		// NOW, WE CREATE THE FILTER, GAUSSIAN OR MEDIA FILTER, ACCORDING TO THE VALUE OF boolean "gaussian_window"
-		//
-		filter_length = filter_width*filter_width;
-		float window_weights [] = new float [filter_length];
-		double [] array_gauss_window = new double [filter_length];
-
-		if (gaussian_window) {	
-
-			double value, distance = 0;
-			int center = (filter_width/2);
-			double total = 0;
-			double sigma_sq=sigma_gauss*sigma_gauss;
-
-			for (int y = 0; y < filter_width; y++){
-				for (int x = 0; x < filter_width; x++){
-					distance = Math.abs(x-center)*Math.abs(x-center)+Math.abs(y-center)*Math.abs(y-center);
-					pointer = y*filter_width + x;
-					array_gauss_window[pointer] = Math.exp(-0.5*distance/sigma_sq);
-					total = total + array_gauss_window[pointer];
-				}
-			}
-			for (pointer=0; pointer < filter_length; pointer++) {	
-				array_gauss_window[pointer] = array_gauss_window[pointer] / total;
-				window_weights [pointer] = (float) array_gauss_window[pointer];
-			}
-		}
-		else { 								// NO WEIGHTS. ALL THE PIXELS IN THE EVALUATION WINDOW HAVE THE SAME WEIGHT
-			for (pointer=0; pointer < filter_length; pointer++) {
-				array_gauss_window[pointer]= 1.0/ filter_length;
-				window_weights [pointer] = (float) array_gauss_window[pointer];
-			}
-		}
-		//
-		// END OF FILTER SELECTION							
-		//
-		//
-		// THE VALUE OF THE LOW PASS FILTER
-		//
-		float [] lpf = new float [81]; 
-		int lpf_width = 9;
-
-		for (a=0; a<lpf_width;a++) {
-			for (b=0; b<lpf_width;b++) {
-				lpf [a*lpf_width+b] = (float) (lod[a]*lod[b]);
-			}
-		}
-		float suma_lpf =0;
-		int cont=0;
-		for (cont=0; cont<81;cont++) {
-			suma_lpf= suma_lpf + lpf[cont];
-		}
-		for (cont=0; cont<81;cont++) {
-			lpf[cont]= lpf[cont]/suma_lpf;
-		}
-		//
-		// MAIN ALGORITHM
-		//
-
-		image_width = inputImageA.getWidth();
+		int image_width = inputImageA.getWidth();
 		image_width = (int) (image_width/downsampled);		// YOU CAN DOWNSAMPLE THE IMAGE BEFORE YOU CALCULATE THE MS-SSIM
 		inputImageA.setInterpolate(false);
 		inputImageB.setInterpolate(false);
-		image_1_p= inputImageA.resize (image_width);
-		image_2_p= inputImageB.resize (image_width);
+		
+		// Downsample both images
+		ImageProcessor image_1_p = inputImageA.resize(image_width);
+		ImageProcessor image_2_p = inputImageB.resize(image_width);
 
-		// WE ARE GOING TO USE ARRAYS OF 6 LEVELS INSTEAD OF 5.
-		// WE WANT TO FORCE THAT THE INDEX OVER THE LEVEL WERE THE SAME THAN THE INDEX OVER THE ARRAY. 
-		// REMEMBER THAT IN JAVA THE FIRST INDEX OF AN ARRAY IS THE "0" POSITION. WE WILL NEVER USE THIS POSITION IN THE FOLLOWING THREE ARRAYS.
-		//
-		int level=1;
-		double [] contrast = new double [6];  
-		double [] structure = new double [6];
-		double [] luminance = new double [6];
+		MssimCalculation calc = new MssimCalculation(image_1_p, image_2_p);
+		calc.calculate();
+		return calc.getResult();
+	}
+	
+	private class MssimCalculation {
+		
+		public static final double NUMBER_OF_LEVELS = 5;
+		public static final int LPF_WIDTH = 9;
+		public static final int FILTER_WIDTH = 11;
+		
+		public double luminance_exponent [] = { 1, 1, 1, 1, 1, 0.1333};
+		public double contrast_exponent [] = { 1, 0.0448, 0.2856, 0.3001, 0.2363, 0.1333};
+		public double structure_exponent []= { 1, 0.0448, 0.2856, 0.3001, 0.2363, 0.1333};
+		public double luminance_comparison =1;
+		public double contrast_comparison =1;
+		public double structure_comparison =1;
+		
+		private double[] contrast = new double [6];  
+		private double[] structure = new double [6];
+		private double[] luminance = new double [6];
+		
+		private final float[] window_weights;
+		private final double[] array_gauss_window;
+		
+		private double[] ssim_map;
+		
+		private String algorithm_selection = ROUSE_HEMAMI; // DEFAULT TO ROUSE/HENAMI
+		private boolean showSsimMap = false;
+		
+		private static final boolean IS_GAUSSIAN_WINDOW = true;
+		
+		private ImageProcessor image_1_p, image_2_p;
+		
+		private int ssim_map_level=0;
+		
+		private int bits_per_pixel_1;
+		
+		private final float[] lpf;
+		
+		double K1 = 0.01; 
+		double K2 = 0.03;
+		double C1;
+		double C2;
+		
+		public MssimCalculation(ImageProcessor imp1, ImageProcessor imp2) {
+			image_1_p = imp1;
+			image_2_p = imp2;
+			
+			bits_per_pixel_1=imp1.getBitDepth();
+			C1 = (Math.pow(2, bits_per_pixel_1) - 1)*K1;
+			C1 = C1*C1;
+			C2 = (Math.pow(2, bits_per_pixel_1) - 1)*K2;
+			C2 = C2*C2;
 
-		for (level=1; level <=number_of_levels; level++) {	// THIS LOOP CALCULATES, FOR EACH ITERATION, THE VALUES OF L, C AND S
+			int filterLength =  FILTER_WIDTH*FILTER_WIDTH;
+			window_weights = new float [filterLength];
+			array_gauss_window = new double [filterLength];
+			createWeights(FILTER_WIDTH);
+			
+//			Create the low pass filters
+			lpf = createLowPassFilter(LPF_WIDTH);
+		}
+		
+		/**
+		 * NOW, WE CREATE THE FILTER, GAUSSIAN OR MEDIA FILTER, ACCORDING TO THE VALUE OF boolean "gaussian_window"
+		 * @param filterWidth
+		 */
+		private void createWeights(int filterWidth) {
+			int filterLength =  filterWidth*filterWidth;
+			double sigma_gauss = DEFAULT_SIGMA_GAUSS;
+			if (IS_GAUSSIAN_WINDOW) {
 
+				double distance = 0;
+				int center = (filterWidth/2);
+				double total = 0;
+				double sigma_sq = sigma_gauss*sigma_gauss;
+
+				for (int y = 0; y < filterWidth; y++){
+					for (int x = 0; x < filterWidth; x++){
+						distance = Math.abs(x-center)*Math.abs(x-center)+Math.abs(y-center)*Math.abs(y-center);
+						int pointer = y*filterWidth + x;
+						array_gauss_window[pointer] = Math.exp(-0.5*distance/sigma_sq);
+						total = total + array_gauss_window[pointer];
+					}
+				}
+				for (int pointer=0; pointer < filterLength; pointer++) {	
+					array_gauss_window[pointer] = array_gauss_window[pointer] / total;
+					window_weights [pointer] = (float) array_gauss_window[pointer];
+				}
+			}
+			else { // NO WEIGHTS. ALL THE PIXELS IN THE EVALUATION WINDOW HAVE THE SAME WEIGHT
+				for (int i=0; i < filterLength; i++) {
+					array_gauss_window[i] = 1.0/ filterLength;
+					window_weights [i] = (float) array_gauss_window[i];
+				}
+			}
+		}
+		
+		private void calculate() {
+			for (int level=1; level <=NUMBER_OF_LEVELS; level++) {	// THIS LOOP 
+				calculateLevel(level);
+			} 
+
+			for (int level=1; level <=NUMBER_OF_LEVELS; level++) {
+				if (structure[level] < 0)
+					structure[level] = -1*structure[level];
+				luminance_comparison = Math.pow ( luminance [level], luminance_exponent[level])*luminance_comparison;
+				contrast_comparison = Math.pow (contrast [level], contrast_exponent[level])*contrast_comparison;
+				structure_comparison = Math.pow (structure [level], structure_exponent[level])*structure_comparison;
+			}
+		}
+		
+		/**
+		 * CALCULATE, FOR EACH ITERATION, THE VALUES OF L, C AND S
+		 * @param level
+		 */
+		private void calculateLevel(int level) {
+			
+			int image_width = image_1_p.getWidth();
+			int image_height = image_1_p.getHeight();
+			
 			if (level !=1) {
-				image_1_p.convolve (lpf, lpf_width, lpf_width);
-				image_2_p.convolve (lpf, lpf_width, lpf_width);
+				image_1_p.convolve (lpf, LPF_WIDTH, LPF_WIDTH);
+				image_2_p.convolve (lpf, LPF_WIDTH, LPF_WIDTH);
 				image_1_p.setInterpolate(false);			// IT'S CRITICAL TO THIS VALUE. DON'T USE TRUE
 				image_2_p.setInterpolate(false);
 				image_1_p= image_1_p.resize (image_width/2);
 				image_2_p= image_2_p.resize (image_width/2);
 			}
-			image_height = image_1_p.getHeight();
-			image_width = image_1_p.getWidth();
-			image_dimension = image_width*image_height;
+
+			int image_dimension = image_width*image_height;
 
 			if (ssim_map_level == level) {
 				ssim_map = new double [image_dimension];
-				show_ssim_map=true;
+				showSsimMap=true;
 			}	
 			else {
 				ssim_map = new double [1];
-				show_ssim_map=false;
+				showSsimMap=false;
 			}
 			ImageProcessor mu1_ip = new FloatProcessor (image_width, image_height);
 			ImageProcessor mu2_ip = new FloatProcessor (image_width, image_height);
@@ -257,8 +274,9 @@ public class MultiScaleStructuralSimilarityIndex {
 			float [] array_mu1_ip_copy = new float [image_dimension];
 			float [] array_mu2_ip_copy = new float [image_dimension];
 
-			a=b=0;
-			for (pointer =0; pointer<image_dimension; pointer++) {	
+			int a=0;
+			int b=0;
+			for (int pointer =0; pointer<image_dimension; pointer++) {	
 
 				if (bits_per_pixel_1 == 8) {
 					a = (0xff & image_1_p.get (pointer));
@@ -272,17 +290,17 @@ public class MultiScaleStructuralSimilarityIndex {
 					a = (image_1_p.get(pointer));
 					b = (image_2_p.get(pointer));
 				}
-				array_mu1_ip [pointer] = array_mu1_ip_copy [pointer] = a; // Float.intBitsToFloat(a);
-				array_mu2_ip [pointer] = array_mu2_ip_copy [pointer] = b; //Float.intBitsToFloat(b);
+				array_mu1_ip [pointer] = array_mu1_ip_copy [pointer] = a;
+				array_mu2_ip [pointer] = array_mu2_ip_copy [pointer] = b;
 			}
-			mu1_ip.convolve (window_weights, filter_width, filter_width);
-			mu2_ip.convolve (window_weights, filter_width, filter_width);
+			mu1_ip.convolve (window_weights, FILTER_WIDTH, FILTER_WIDTH);
+			mu2_ip.convolve (window_weights, FILTER_WIDTH, FILTER_WIDTH);
 
 			double [] mu1_sq = new double [image_dimension];
 			double [] mu2_sq = new double [image_dimension];
 			double [] mu1_mu2 = new double [image_dimension];
 
-			for (pointer =0; pointer<image_dimension; pointer++) {
+			for (int pointer =0; pointer<image_dimension; pointer++) {
 				mu1_sq[pointer] = array_mu1_ip [pointer]*array_mu1_ip [pointer];
 				mu2_sq[pointer] = array_mu2_ip[pointer]*array_mu2_ip[pointer];
 				mu1_mu2 [pointer]= array_mu1_ip [pointer]*array_mu2_ip[pointer];
@@ -293,7 +311,7 @@ public class MultiScaleStructuralSimilarityIndex {
 			double [] sigma2_sq = new double [image_dimension];
 			double [] sigma12 = new double [image_dimension];
 
-			for (pointer =0; pointer<image_dimension; pointer++) {
+			for (int pointer =0; pointer<image_dimension; pointer++) {
 
 				sigma1_sq[pointer] =array_mu1_ip_copy [pointer]*array_mu1_ip_copy [pointer];
 				sigma2_sq[pointer] =array_mu2_ip_copy [pointer]*array_mu2_ip_copy [pointer];
@@ -309,16 +327,16 @@ public class MultiScaleStructuralSimilarityIndex {
 			float [] array_soporte_2 =  (float []) soporte_2_ip.getPixels();
 			float [] array_soporte_3 =  (float []) soporte_3_ip.getPixels();
 
-			for (pointer =0; pointer<image_dimension; pointer++) {
+			for (int pointer =0; pointer<image_dimension; pointer++) {
 				array_soporte_1[pointer] = (float) sigma1_sq[pointer];
 				array_soporte_2[pointer] = (float) sigma2_sq[pointer];
 				array_soporte_3[pointer] = (float) sigma12[pointer];
 			}
-			soporte_1_ip.convolve (window_weights, filter_width,  filter_width);
-			soporte_2_ip.convolve (window_weights, filter_width,  filter_width); 
-			soporte_3_ip.convolve (window_weights, filter_width,  filter_width);
+			soporte_1_ip.convolve (window_weights, FILTER_WIDTH,  FILTER_WIDTH);
+			soporte_2_ip.convolve (window_weights, FILTER_WIDTH,  FILTER_WIDTH); 
+			soporte_3_ip.convolve (window_weights, FILTER_WIDTH,  FILTER_WIDTH);
 
-			for (pointer =0; pointer<image_dimension; pointer++) {
+			for (int pointer =0; pointer<image_dimension; pointer++) {
 				sigma1_sq[pointer] =  array_soporte_1[pointer] - mu1_sq[pointer];
 				sigma2_sq[pointer] =  array_soporte_2[pointer ]- mu2_sq[pointer];
 				sigma12[pointer] =  array_soporte_3[pointer] - mu1_mu2[pointer];
@@ -349,7 +367,7 @@ public class MultiScaleStructuralSimilarityIndex {
 
 			if (algorithm_selection.equals(ZHOU_WANG)) {
 
-				for (pointer =0; pointer<image_dimension; pointer++) {
+				for (int pointer =0; pointer<image_dimension; pointer++) {
 
 					luminance_point = ( 2*mu1_mu2[pointer] + C1) / (mu1_sq[pointer]+mu2_sq[pointer] + C1);
 					luminance[level] = luminance [level] + luminance_point;
@@ -360,7 +378,7 @@ public class MultiScaleStructuralSimilarityIndex {
 					structure_point = (sigma12[pointer] + C2/2) / (sigma1[pointer]*sigma2[pointer] + C2/2);
 					structure [level] = structure [level]+structure_point;
 
-					if (show_ssim_map) {
+					if (showSsimMap) {
 						ssim_map[pointer] = luminance_point*contrast_point*structure_point;
 						suma = suma + ssim_map[pointer];
 					}
@@ -369,7 +387,7 @@ public class MultiScaleStructuralSimilarityIndex {
 
 			else {   // ROUSE/HEMAMI
 
-				for (pointer =0; pointer<image_dimension; pointer++) {
+				for (int pointer =0; pointer<image_dimension; pointer++) {
 
 					if ( (mu1_sq[pointer]+mu2_sq[pointer]) == 0)
 						luminance_point = 1;
@@ -385,17 +403,17 @@ public class MultiScaleStructuralSimilarityIndex {
 
 					contrast [level] = contrast [level]+contrast_point;
 
-					if (((sigma1[pointer] == 0) | (sigma2[pointer] == 0)) & (sigma1[pointer] != sigma2[pointer]))
+					if (((sigma1[pointer] == 0) || (sigma2[pointer] == 0)) && (sigma1[pointer] != sigma2[pointer]))
 						structure_point = 0;
 					else
-						if ((sigma1[pointer] == 0) & (sigma2[pointer] == 0))
+						if ((sigma1[pointer] == 0) && (sigma2[pointer] == 0))
 							structure_point = 1;
 						else
 							structure_point = (sigma12[pointer]) / (sigma1[pointer]*sigma2[pointer]);
 
 					structure [level] = structure [level]+structure_point;
 
-					if (show_ssim_map) {
+					if (showSsimMap) {
 						ssim_map[pointer] = luminance_point*contrast_point*structure_point;
 						suma = suma + ssim_map[pointer];
 					}
@@ -404,23 +422,40 @@ public class MultiScaleStructuralSimilarityIndex {
 
 			contrast [level] = contrast [level] / image_dimension;
 			structure [level] = structure [level] / image_dimension;
-			if (level == number_of_levels) 
+			if (level == NUMBER_OF_LEVELS) 
 				luminance [level] = luminance [level] / image_dimension;
 			else 
 				luminance [level] =1;
-
-		} 	// END-FOR OF OUTER LOOP OVER THE DIFFERENT VIEWING LEVELS
-		//
-		for (level=1; level <=number_of_levels; level++) {
-
-			if (structure[level] < 0) structure[level] = -1*structure[level];
-			luminance_comparison = Math.pow ( luminance [level], luminance_exponent[level])*luminance_comparison;
-			contrast_comparison = Math.pow (contrast [level], contrast_exponent[level])*contrast_comparison;
-			structure_comparison = Math.pow (structure [level], structure_exponent[level])*structure_comparison;
 		}
-		ms_ssim_index= luminance_comparison*contrast_comparison*structure_comparison;
+		
+		public MSSIMScore getResult() {
+			double index = luminance_comparison*contrast_comparison*structure_comparison;
+			return new MSSIMScore(luminance_comparison, contrast_comparison, structure_comparison, index);
+		}
+	}
+	
+	/**
+	 * Create the low pass filter
+	 * @param lpfWidth the filter width
+	 * @return
+	 */
+	private float[] createLowPassFilter(int lpfWidth) {
+		int lpfLength = lpfWidth*lpfWidth;
+		float [] lpf = new float [lpfLength]; 
 
-		MSSIMScore result = new MSSIMScore(luminance_comparison, contrast_comparison, structure_comparison, ms_ssim_index);
-		return result;
+		for (int a = 0; a<lpfWidth; a++) {
+			for (int b=0; b<lpfWidth; b++)
+				lpf [a*lpfWidth+b] = (float) (LOD[a]*LOD[b]);
+		}
+		float sumA = 0;
+
+		for (int cont=0; cont<lpfLength;cont++) 
+			sumA += lpf[cont];
+		if(sumA==0)
+			return lpf; // Probably not a sensible abort point, but...
+		
+		for (int cont=0; cont<lpfLength;cont++)
+			lpf[cont] /= sumA;
+		return lpf;
 	}
 }
