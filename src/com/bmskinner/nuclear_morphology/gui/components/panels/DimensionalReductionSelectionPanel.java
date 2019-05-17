@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
@@ -58,7 +60,12 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
 		panel.setLayout(layout);
 
-		panel.add(createOptionPanel());
+		
+		JPanel optionPanel = createOptionPanel();
+		optionPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+		panel.add(Box.createRigidArea(new Dimension(5, 0)));
+		panel.add(optionPanel);
+		panel.add(Box.createVerticalGlue());
 		
 		panel.setBorder(BorderFactory.createTitledBorder(BORDER_LABEL));
 		return panel;
@@ -74,6 +81,13 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		
 		ButtonGroup buttonGroup = new ButtonGroup();
 		
+		JCheckBox noneBox = new JCheckBox();
+		noneBox.setForeground(Color.DARK_GRAY);
+		noneBox.setSelected( !(options.getBoolean(IClusteringOptions.USE_TSNE_KEY) || options.getBoolean(IClusteringOptions.USE_PCA_KEY)));
+		JLabel noneLabel = new JLabel("None");
+		labels.add(noneLabel);
+		fields.add(noneBox);
+		
 		JCheckBox tSNEBox = new JCheckBox();
 		tSNEBox.setForeground(Color.DARK_GRAY);
 		
@@ -87,6 +101,13 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		
 		tSNEBox.addChangeListener(e->{
 			options.setBoolean(IClusteringOptions.USE_TSNE_KEY, tSNEBox.isSelected());
+			iterationsSpinner.setEnabled(tSNEBox.isSelected());
+			perplexitySpinner.setEnabled(tSNEBox.isSelected());
+		});
+		
+		noneBox.addActionListener(e->{
+			options.setBoolean(IClusteringOptions.USE_PCA_KEY, false);
+			options.setBoolean(IClusteringOptions.USE_TSNE_KEY, false);
 			iterationsSpinner.setEnabled(tSNEBox.isSelected());
 			perplexitySpinner.setEnabled(tSNEBox.isSelected());
 		});
@@ -108,10 +129,10 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 			options.setBoolean(IClusteringOptions.USE_PCA_KEY, pcaBox.isSelected());
 		});
 		
+		buttonGroup.add(noneBox);
 		buttonGroup.add(tSNEBox);
 		buttonGroup.add(pcaBox);
-		
-		//TODO: re-enable when PCA is working 
+
 		labels.add(pcaLbl);
 		fields.add(pcaBox);
 

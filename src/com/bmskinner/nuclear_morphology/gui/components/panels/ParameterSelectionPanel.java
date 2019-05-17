@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.gui.components.panels;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +46,19 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
 		panel.setLayout(layout);
 				
+		
+		JPanel paramPanel = new JPanel(new FlowLayout());
 		JPanel shape = createShapePanel();
 		shape.setAlignmentY(Component.TOP_ALIGNMENT);
 		
 		JPanel stats = createStatsPanel();
 		stats.setAlignmentY(Component.TOP_ALIGNMENT);
-		
-		panel.add(shape);
-		panel.add(Box.createHorizontalGlue());
-		panel.add(stats);
 
+		paramPanel.add(shape);
+		paramPanel.add(Box.createHorizontalGlue());
+		paramPanel.add(stats);
+		
+		panel.add(paramPanel);
 		panel.setBorder(BorderFactory.createTitledBorder("Parameters"));
 		return panel;
 	}
@@ -132,7 +136,6 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		}
 		
 		addLabelTextRows(labels, fields, layout, panel);
-//		panel.setBorder(BorderFactory.createTitledBorder("Shape"));
 		return panel;
 	}
 	
