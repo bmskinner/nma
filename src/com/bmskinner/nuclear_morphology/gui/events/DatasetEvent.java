@@ -176,17 +176,11 @@ public class DatasetEvent extends EventObject {
      * @return
      */
     public boolean hasDatasets() {
-        if (list == null || list.isEmpty()) {
-            return false;
-        }
-        return true;
+    	return list != null && !list.isEmpty();
     }
 
     public boolean hasSecondaryDataset() {
-        if (secondaryDataset == null) {
-            return false;
-        }
-        return true;
+        return secondaryDataset != null;
     }
 
     /**

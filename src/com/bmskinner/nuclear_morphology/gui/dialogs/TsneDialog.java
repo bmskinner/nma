@@ -25,9 +25,12 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelect
  * @since 1.16.0
  *
  */
+public class TsneDialog extends MessagingDialog {
 
-public class TsneDialog extends LoadingIconDialog {
-
+	private static final String COLOUR_BY_LBL       = "Colour by:";
+	private static final String COLOUR_MERGE_SOURCE = "Merge sources";
+	private static final String COLOUR_CLUSTERS     = "Clusters";
+	private static final String COLOUR_NONE         = "None";
 	private final IAnalysisDataset dataset;
 	private final IClusterGroup group;
 	private final ExportableChartPanel chartPanel = new ExportableChartPanel(ScatterChartFactory.createEmptyChart());
@@ -63,9 +66,9 @@ public class TsneDialog extends LoadingIconDialog {
 		// How should cells be coloured?
 		
 		final ButtonGroup colourGroup = new ButtonGroup();
-		JRadioButton byNoneBtn = new JRadioButton("None");
-		JRadioButton byClusterBtn = new JRadioButton("Clusters");
-		JRadioButton byMergeSourceBtn = new JRadioButton("Merge source");
+		JRadioButton byNoneBtn = new JRadioButton(COLOUR_NONE);
+		JRadioButton byClusterBtn = new JRadioButton(COLOUR_CLUSTERS);
+		JRadioButton byMergeSourceBtn = new JRadioButton(COLOUR_MERGE_SOURCE);
 		colourGroup.add(byNoneBtn);
 		colourGroup.add(byClusterBtn);
 		colourGroup.add(byMergeSourceBtn);
@@ -88,7 +91,7 @@ public class TsneDialog extends LoadingIconDialog {
 		byMergeSourceBtn.addActionListener(colourListener);
 		clustersBox.addActionListener(colourListener);
 		
-		panel.add(new JLabel("Colour by:"));
+		panel.add(new JLabel(COLOUR_BY_LBL));
 		panel.add(byNoneBtn);
 		panel.add(byClusterBtn);
 		panel.add(clustersBox);
