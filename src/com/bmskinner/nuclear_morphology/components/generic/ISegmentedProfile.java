@@ -153,6 +153,7 @@ public interface ISegmentedProfile extends IProfile {
      * Get the names of the segments in the profile
      * 
      * @return
+     * @deprecated since segments are referred to by id
      */
     @Deprecated
     List<String> getSegmentNames();

@@ -20,11 +20,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,6 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private boolean isFileFormatValid() throws ClusteringMethodException {		
 		ICellCollection collection = dataset.getCollection();
-		int cells = 0;
 		List<UUID> found = new ArrayList<>(collection.size());
 		Map<Integer, UUID> notInDataset = new HashMap<>();
 		
@@ -95,7 +95,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		List<Integer> numErrors = new ArrayList<>();
 		int lineNo = 0;
 		try(FileInputStream fstream = new FileInputStream(clusterFile);
-			BufferedReader br = new BufferedReader(new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));) {
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream, StandardCharsets.ISO_8859_1));) {
 			
 
 			String strLine;
@@ -120,9 +120,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 					numErrors.add(lineNo);
 				}
 				found.add(id);
-				if(collection.contains(id)) {
-					cells++;			
-				} else {
+				if(!collection.contains(id)) {
 					notInDataset.put(lineNo, id);
 				}
 			}
@@ -134,20 +132,14 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		
 		boolean ok = true;
 		
-		if(idErrors.size()!=0) {
+		if(!idErrors.isEmpty()) {
 			ok = false;
 			warn("Mapping file has errors in the cell id column");
-//			for(Integer line : idErrors) {
-//				warn(String.format("Line %d does not have a cell id in column 1", line));
-//			}
 		}
 		
-		if(numErrors.size()!=0) {
+		if(!numErrors.isEmpty()) {
 			ok=false;
 			warn("Mapping file has errors in the cluster number column");
-//			for(Integer line : numErrors) {
-//				warn(String.format("Line %d does not have a readable number in column 2", line));
-//			}
 		}
 				
 		if(!ok)
@@ -159,7 +151,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
         try(FileInputStream fstream = new FileInputStream(clusterFile);
             BufferedReader br = new BufferedReader(
-                        new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));) {
+                        new InputStreamReader(fstream, StandardCharsets.ISO_8859_1));) {
 
             String strLine;
             int lineNo = 0;
@@ -201,12 +193,12 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
         }
         
         // Add all the cells to clusters
-        for(UUID id : cellMap.keySet()){
-            int cluster = cellMap.get(id);
-            fine("Assigning "+id.toString()+" to cluster "+cluster);
-            ICell cell = dataset.getCollection().getCell(id);
+        for(Entry<UUID, Integer> entry : cellMap.entrySet()){
+            int cluster = entry.getValue();
+            fine("Assigning "+entry.getKey().toString()+" to cluster "+cluster);
+            ICell cell = dataset.getCollection().getCell(entry.getKey());
             if(cell==null){
-            	fine("Cell not found "+id.toString());
+            	fine("Cell not found "+entry.getKey().toString());
                 continue;
             }
             clusterMap.get(cluster).addCell(cell);

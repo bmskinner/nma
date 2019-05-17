@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;

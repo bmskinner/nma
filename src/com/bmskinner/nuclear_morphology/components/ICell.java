@@ -162,7 +162,8 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
      */
     boolean hasCytoplasm();
 
-    int compareTo(ICell o);
+    @Override
+	int compareTo(ICell o);
     
     /**
      * Set the image scale for all components in the cell

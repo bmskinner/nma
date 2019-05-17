@@ -41,7 +41,6 @@ import java.awt.Rectangle;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
@@ -171,7 +170,7 @@ public class Hough_Circles implements PlugInFilter, Loggable {
                 int indexR = (radius - radiusMin) / radiusInc;
                 int rcos = (int) Math.round((double) radius * Math.cos(angle));
                 int rsin = (int) Math.round((double) radius * Math.sin(angle));
-                if ((i == 0) | (rcos != lut[0][i][indexR]) & (rsin != lut[1][i][indexR])) {
+                if ((i == 0) || (rcos != lut[0][i][indexR]) && (rsin != lut[1][i][indexR])) {
                     lut[0][i][indexR] = rcos;
                     lut[1][i][indexR] = rsin;
                     i++;
@@ -202,7 +201,7 @@ public class Hough_Circles implements PlugInFilter, Loggable {
 
                             int a = x + lut[1][i][indexR];
                             int b = y + lut[0][i][indexR];
-                            if ((b >= 0) & (b < height) & (a >= 0) & (a < width)) {
+                            if ((b >= 0) && (b < height) && (a >= 0) && (a < width)) {
                                 houghValues[a][b][indexR] += 1;
                             }
                         }
@@ -243,7 +242,7 @@ public class Hough_Circles implements PlugInFilter, Loggable {
         int roiaddr = 0;
         for (int y = offy; y < offy + height; y++) {
             for (int x = offx; x < offx + width; x++) {
-                // Copy;
+                // Copy
                 circlespixels[roiaddr] = imageValues[x + offset * y];
                 // Saturate
                 if (circlespixels[roiaddr] != 0)

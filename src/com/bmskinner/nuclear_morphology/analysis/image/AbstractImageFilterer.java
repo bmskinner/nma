@@ -29,7 +29,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
@@ -46,6 +45,8 @@ import ij.process.TypeConverter;
  */
 public abstract class AbstractImageFilterer implements Loggable {
 	
+	protected static final String DIMENSIONS_DO_NOT_MATCH_ERROR = "Dimensions do not match";
+
 	private static Logger logger = Logger.getLogger(ROOT_LOGGER);
 
     private static final int RGB_WHITE = 16777215;
@@ -546,7 +547,7 @@ public abstract class AbstractImageFilterer implements Loggable {
             if (ip == null)
                 continue;
             if (w != ip.getWidth() || h != ip.getHeight())
-                throw new IllegalArgumentException("Dimensions do not match");
+                throw new IllegalArgumentException(DIMENSIONS_DO_NOT_MATCH_ERROR);
             nonNull++;
         }
         // Create an empty white processor of the correct dimensions
@@ -567,13 +568,12 @@ public abstract class AbstractImageFilterer implements Loggable {
                     pixelTotal += ip.get(x, y);
                 }
 
-                pixelTotal /= nonNull; // scale back down to 0-255;
+                pixelTotal /= nonNull; // scale back down to 0-255
 
                 // Ignore anything that is not signal -
                 // the background is already black
-                if (pixelTotal > 0) {
+                if (pixelTotal > 0) 
                     mergeProcessor.set(x, y, pixelTotal);
-                }
             }
         }
         return mergeProcessor;
@@ -600,7 +600,7 @@ public abstract class AbstractImageFilterer implements Loggable {
              }
              
              if (w != ip.getWidth() || h != ip.getHeight())
-                 throw new IllegalArgumentException("Dimensions do not match");
+                 throw new IllegalArgumentException(DIMENSIONS_DO_NOT_MATCH_ERROR);
              
          }
 
@@ -673,7 +673,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 
         // Check images are same dimensions
         if (imageA.getWidth() != imageB.getWidth() || imageA.getHeight() != imageB.getHeight()) {
-            throw new IllegalArgumentException("Dimensions do not match");
+            throw new IllegalArgumentException(DIMENSIONS_DO_NOT_MATCH_ERROR);
         }
 
         // Set the saturation scaled by intensity
