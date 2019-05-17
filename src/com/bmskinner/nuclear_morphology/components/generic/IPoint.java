@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
+import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -267,10 +268,25 @@ public interface IPoint {
     void offset(double x, double y);
     
     /**
-     * Test strict equality
-     * @param obj
-     * @return
+     * Find the mean x and y position of the points. Returns the origin (0,0)
+     * if the provided points collection is null or empty
+     * @param points the points to average
+     * @return the point at the mean x and y position, or the  origin
+     * if no points are provided
      */
-    boolean equals(Object obj);
+    static IPoint average(Collection<IPoint> points) {
+    	double x = 0;
+    	double y = 0;
+    	if(points==null || points.isEmpty())
+    		return IPoint.makeNew(x, y);
 
+    	for(IPoint p :points) {
+    		x += p.getX();
+    		y += p.getY();
+    	}
+    	x /= points.size();
+    	y /= points.size();
+    	return IPoint.makeNew(x, y);
+    }
+    
 }
