@@ -22,11 +22,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
-//import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
@@ -72,20 +73,13 @@ import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
-    private static final double DEFAULT_PROFILE_LENGTH = 100;
+    private static final String UNABLE_TO_GET_BORDER_POINT_ERROR = "Unable to get border point";
+	private static final String UNABLE_TO_GET_MEDIAN_PROFILE_ERROR = "Unable to get median profile";
 
-    public NucleusDatasetCreator(ChartOptions options) {
+	public NucleusDatasetCreator(@NonNull ChartOptions options) {
         super(options);
     }
     
-    private static IProfile createXPositions(IProfile profile, int newLength){
-        float[] result = new float[profile.size()];
-        for (int i = 0; i < profile.size(); i++) {
-            result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
-        }
-        return new FloatProfile(result);
-    }
-
     /**
      * Create a dataset containing only the given bounds, starting at 0,0. 
      * @param w
@@ -101,41 +95,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         float[][] data = { xpoints, ypoints };
         ds.addSeries("Bounds", data, 0);
         return ds;
-    }
-
-    /**
-     * For offsetting a raw profile to the right. Find the maximum length of
-     * median profile in the dataset.
-     * 
-     * @param list
-     *            the datasets to check
-     * @return the maximum length
-     */
-    private double getMaximumMedianProfileLength(final List<IAnalysisDataset> list) {
-        double length = 100;
-        for (IAnalysisDataset dataset : list) {
-            length = dataset.getCollection().getMedianArrayLength() > length
-                    ? dataset.getCollection().getMedianArrayLength() : length;
-        }
-        return length;
-    }
-
-    /**
-     * Get the maximum nucleus length in a collection
-     * 
-     * @param list
-     * @return
-     */
-    private double getMaximumNucleusProfileLength(ICellCollection collection) {
-        double length = 100;
-
-        for (Nucleus n : collection.getNuclei()) {
-            length = n.getBorderLength() > length ? n.getBorderLength() : length;
-        }
-
-        return length;
-    }
-    
+    }   
 
     /**
      * Get a boxplot dataset for the given statistic for each collection
@@ -152,12 +112,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         for (int i = 0; i < datasets.size(); i++) {
             ICellCollection c = datasets.get(i).getCollection();
 
-            List<Double> list = new ArrayList<Double>();
             double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
-
-            for (double d : stats) {
-                list.add(new Double(d));
-            }
+            List<Double> list = Arrays.stream(stats).boxed().collect(Collectors.toList());
             ds.add(list, c.getName() + "_" + i, stat.toString());
         }
 
@@ -209,10 +165,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
                 fine("Error getting profile from tag", e);
-                throw new ChartDatasetCreationException("Unable to get median profile", e);
+                throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
             }
 
-            List<Double> list = new ArrayList<Double>(0);
+            List<Double> list = new ArrayList<>(0);
 
             for (Nucleus n : collection.getNuclei()) {
                 double length = 0;
@@ -269,10 +225,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
                 fine("Error getting profile from tag", e);
-                throw new ChartDatasetCreationException("Unable to get median profile", e);
+                throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
             }
 
-            List<Double> list = new ArrayList<Double>(0);
+            List<Double> list = new ArrayList<>(0);
 
             for (Nucleus n : collection.getNuclei()) {
 
@@ -325,7 +281,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                     int medianSegmentLength = medianSeg.length();
 
-                    List<Integer> list = new ArrayList<Integer>(0);
+                    List<Integer> list = new ArrayList<>(0);
 
                     for (Nucleus n : collection.getNuclei()) {
                         IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
@@ -344,7 +300,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
                 fine("Error getting profile from tag", e);
-                throw new ChartDatasetCreationException("Unable to get median profile", e);
+                throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
             }
         }
         return dataset;
@@ -372,7 +328,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             xpoints[n.getBorderLength()] = xpoints[0];
             ypoints[n.getBorderLength()] = ypoints[0];
         } catch (UnavailableBorderPointException e) {
-            throw new ChartDatasetCreationException("Unable to get border point", e);
+            throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
         } // get the border points in the segment
 
         double[][] data = { xpoints, ypoints };
@@ -427,12 +383,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      */
     private double getScaleForIQRRange(@NonNull Nucleus n) {
-        // get the maximum values from nuclear diameters
-        // get the limits for the plot
         double min = Math.min(n.getMinX(), n.getMinY());
         double max = Math.max(n.getMaxX(), n.getMaxY());
-        double scale = Math.min(Math.abs(min), Math.abs(max));
-        return scale;
+        return Math.min(Math.abs(min), Math.abs(max));
     }
     
     /**
@@ -597,7 +550,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 outerIQRY[i] = (float) outerPoint.getY();
 
             } catch (UnavailableBorderPointException e) {
-                throw new ChartDatasetCreationException("Unable to get border point", e);
+                throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
             } catch(IllegalArgumentException e){
                 throw new ChartDatasetCreationException("Problem with line equation", e);
             } catch (UnavailableBorderTagException e) {
@@ -636,7 +589,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 ds.addSeries("Tag_" + tag, data, 0);
             }
         } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
-            throw new ChartDatasetCreationException("Unable to get border point", e);
+            throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
         }
 
         return ds;
@@ -671,26 +624,24 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * Create a dataset for the signal groups in the cell. Each signalGroup is a
      * new dataset, and each signal in that group is a series
      * 
-     * @param cell
-     *            the cell to get signals from
+     * @param cell the cell to get signals from
+     * @param dataset the dataset the cell belongs to
      * @return a dataset for charting
+     * 
      */
-    public List<ComponentOutlineDataset> createSignalOutlines(@NonNull ICell cell, @NonNull IAnalysisDataset dataset)
+    public List<ComponentOutlineDataset<CellularComponent>> createSignalOutlines(@NonNull ICell cell, @NonNull IAnalysisDataset dataset)
             throws ChartDatasetCreationException {
 
-        List<ComponentOutlineDataset> result = new ArrayList<>();
+        List<ComponentOutlineDataset<CellularComponent>> result = new ArrayList<>();
         List<IAnalysisDataset> datasets = new ArrayList<>();
         datasets.add(dataset);
 
-        if (cell == null) {
-            finest("Input cell is null, returning blank signal outline dataset list");
+        if (cell == null) 
             return result;
-        }
 
-        if (dataset == null) {
-            finest("Input dataset is null, returning blank signal outline dataset list");
+        if (dataset == null)
             return result;
-        }
+        
 
         Nucleus nucleus = cell.getNucleus();
 
@@ -709,7 +660,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 			if (group.get().isVisible()) {
 
-			    ComponentOutlineDataset<CellularComponent> groupDataset = new ComponentOutlineDataset<CellularComponent>();
+			    ComponentOutlineDataset<CellularComponent> groupDataset = new ComponentOutlineDataset<>();
 			    int signalNumber = 0;
 
 			    for (INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)) {
@@ -731,10 +682,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			} else {
 			    finest("Not adding " + group + ": not set as visible");
 			}
-
         }
-
-        finest("Made signal outlines for " + result.size() + " signal groups");
         return result;
     }
 
@@ -814,28 +762,17 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         ICellCollection collection = dataset.getCollection();
         KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset, type);
 
-        // List<Double> xValues = new ArrayList<Double>();
-        // List<Double> yValues = new ArrayList<Double>();
-
         float[] xvalues = new float[3600];
         float[] yvalues = new float[3600];
 
         float step = 0.1f;
-
-        // for(double i=0; i<=360; i+=0.1){
         for (int i = 0; i < xvalues.length; i++) {
 
             float position = i * step;
             xvalues[i] = position;
             yvalues[i] = (float) est.getProbability(position);
-
-            // xValues.add(i);
-            // yValues.add(est.getProbability(i));
         }
         float[][] data = { xvalues, yvalues };
-        // double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new
-        // Double[0])),
-        // Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 
         ds.addSeries(collection.getName(), data, 0);
 
@@ -845,15 +782,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Generate a chart dataset showing the p-values along each profile position
      * for all datasets
-     * 
-     * @param options
-     *            the charting options
+
      * @return
      * @throws ChartDatasetCreationException
      */
     public XYDataset createModalityProfileDataset() throws ChartDatasetCreationException {
 
-        // log("Creating modality p-value dataset");
         FloatXYDataset ds = new FloatXYDataset();
 
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -870,6 +804,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         }
 
         return ds;
+    }
+    
+    private static IProfile createXPositions(IProfile profile, int newLength){
+    	float[] result = new float[profile.size()];
+    	for (int i = 0; i < profile.size(); i++) 
+    		result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
+    	return new FloatProfile(result);
     }
 
     /**
@@ -942,28 +883,21 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * Create a probability kernel estimator for an array of values using
      * default precision of the KernelEstimator (0.001)
      * 
-     * @param values
-     *            the array of values
+     * @param values the array of values
      * @return
-     * @throws Exception
      */
-    public KernelEstimator createProbabililtyKernel(double[] values) throws ChartDatasetCreationException {
-
+    public KernelEstimator createProbabililtyKernel(double[] values) {
         return createProbabililtyKernel(values, 0.001);
     }
 
     /**
      * Create a probability kernel estimator for an array of values
      * 
-     * @param values
-     *            the array of values
-     * @param binWidth
-     *            the precision of the KernelEstimator
+     * @param values the array of values
+     * @param binWidth the precision of the KernelEstimator
      * @return
-     * @throws Exception
      */
-    public KernelEstimator createProbabililtyKernel(double[] values, double binWidth)
-            throws ChartDatasetCreationException {
+    public KernelEstimator createProbabililtyKernel(double[] values, double binWidth) {
         KernelEstimator est = new KernelEstimator(binWidth);
 
         // add the values to a kernel estimator
@@ -977,10 +911,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Create a probability kernel estimator for an array of values
      * 
-     * @param values
-     *            the array of values
-     * @param binWidth
-     *            the precision of the KernelEstimator
+     * @param values the array of values
+     * @param binWidth the precision of the KernelEstimator
      * @return
      */
     public KernelEstimator createProbabililtyKernel(List<Number> values, double binWidth) {
@@ -997,15 +929,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     /**
      * Create a dataset suitable for making a QQ plot
      * 
-     * @param values
-     *            the array of values to use
+     * @param values the array of values to use
      * @return a dataset for charting
      */
     public XYDataset createQQDataset(float[] values) throws ChartDatasetCreationException {
         FloatXYDataset ds = new FloatXYDataset();
 
         Arrays.sort(values);
-        // double[] percentiles = new double[values.length];
         float[] zscores = new float[values.length];
 
         for (int i = 0; i < values.length; i++) {
@@ -1084,7 +1014,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh<Nucleus> mesh) throws Exception {
+    public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
         NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
         for (MeshEdge edge : mesh.getEdges()) {

@@ -43,6 +43,8 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  *
  */
 public class FileSelector {
+	
+	private FileSelector() {}
 
     public static @Nullable File chooseTableExportFile(){
         
@@ -183,7 +185,7 @@ public class FileSelector {
             fc.setFileFilter(filter);
         
         if(message!=null)
-        	fc.setDialogTitle(message);;
+        	fc.setDialogTitle(message);
 
         int returnVal = fc.showOpenDialog(fc);
         if (returnVal != 0)
@@ -347,12 +349,10 @@ public class FileSelector {
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
 		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0) {
+		if (returnVal != 0)
 		    return null;
-		}
 
-		File file = fc.getSelectedFile();
-		return file;
+		return fc.getSelectedFile();
     }
 
     /**
@@ -366,19 +366,15 @@ public class FileSelector {
         File[] files = folder.listFiles();
 
         // There must be items in the folder
-        if (files == null || files.length == 0) {
+        if (files == null || files.length == 0)
             return false;
-        }
 
         int countFiles = 0;
 
         // Some of the items must be files
-        for (File f : files) {
-            if (f.isFile()) {
+        for (File f : files)
+            if (f.isFile())
                 countFiles++;
-            }
-        }
-
         return countFiles>0;
     }
 

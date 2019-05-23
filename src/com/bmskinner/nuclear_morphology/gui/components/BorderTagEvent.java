@@ -37,14 +37,9 @@ public class BorderTagEvent extends EventObject {
     /**
      * Create an event from a source, with the given message
      * 
-     * @param source
-     *            the source of the datasets
-     * @param message
-     *            the instruction on what to do with the datasets
-     * @param sourceName
-     *            the name of the object or component generating the datasets
-     * @param list
-     *            the datasets to carry
+     * @param source the source of the datasets
+     * @param tag the affected border tag
+     * @param index the affected index
      */
     public BorderTagEvent(Object source, Tag tag, int index) {
         super(source);

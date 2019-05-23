@@ -16,7 +16,9 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
-public class ChartDatasetCreationException extends Exception {
+import com.bmskinner.nuclear_morphology.charting.charts.ChartCreationException;
+
+public class ChartDatasetCreationException extends ChartCreationException {
     private static final long serialVersionUID = 1L;
 
     public ChartDatasetCreationException() {

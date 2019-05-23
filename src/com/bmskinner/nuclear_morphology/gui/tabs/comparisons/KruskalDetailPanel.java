@@ -86,19 +86,8 @@ public class KruskalDetailPanel extends DetailPanel {
         panel.add(new JLabel(COMPARE_INFO_LBL));
 
         frankenButton.addActionListener(e -> {
-
-            Thread thr = new Thread() {
-                public void run() {
-
-                    try {
-                        new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1));
-                    } catch (Exception e) {
-                        warn("Error testing frankenprofiles");
-                        stack("Error testing frankenprofiles", e);
-                    }
-                }
-            };
-            thr.start();
+        	Runnable r = () -> new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1));
+        	new Thread(r).start();
         });
 
         panel.add(frankenButton);
@@ -123,45 +112,37 @@ public class KruskalDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new MorphologyChartFactory(options).makeKruskalWallisChart(false);
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+        return new MorphologyChartFactory(options).makeKruskalWallisChart();
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         chartPanel.setChart(AbstractChartFactory.createLoadingChart());
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateNull();
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         if (getDatasets().size() == 2) { // Only create a chart if exactly two
                                          // datasets are selected
-
             // Only allow a franken normlisation if datasets have the same
             // number of segments
-            if (IBorderSegment.segmentCountsMatch(getDatasets())) {
-                setEnabled(true);
-            } else {
-                setEnabled(false);
-            }
-
+        	setEnabled(IBorderSegment.segmentCountsMatch(getDatasets()));
             updateChartPanel();
-
         } else {
             updateNull();
 
         }
-        finest("Updated Kruskal panel");
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         setEnabled(false);
         JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
         chartPanel.setChart(chart);

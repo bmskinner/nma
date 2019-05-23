@@ -130,7 +130,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             }
 			finer("Signal CoM for signal outline chart");
 			return makeSignalCoMNucleusOutlineChart();
-        } catch (ChartCreationException | ChartDatasetCreationException e) {
+        } catch (ChartCreationException e) {
             warn("Error making signal chart");
             stack("Error making signal chart", e);
             return createErrorChart();
@@ -262,7 +262,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
         IAnalysisDataset dataset = options.firstDataset();
 
         // Create the outline of the consensus
-
         JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
         XYPlot plot = chart.getXYPlot();
@@ -320,18 +319,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     MeshImage<Nucleus> im = new DefaultMeshImage(cellMesh, ip);
 
                     // Draw NucleusMeshImage onto consensus mesh.
-
                     warped = im.drawImage(meshConsensus);
                 } catch (UncomparableMeshImageException | MeshImageCreationException e) {
                     fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
                     stack("Error creating mesh", e);
                     return createErrorChart();
-                    // warped = null;
                 }
 
-                // ImagePlus image = new
-                // ImagePlus(cell.getNucleus().getNameAndNumber(), warped);
-                // image.show();
                 drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
 
             } catch (UnloadableImageException e) {
@@ -455,7 +449,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         }
 
         JFreeChart chart = createBaseXYChart();
-        ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
+        ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<>();
 
         ICell cell = options.getCell();
 
@@ -580,12 +574,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     finest("Displaying signals on chart");
                     if (cell.getNucleus().getSignalCollection().hasSignal()) {
 
-                        List<ComponentOutlineDataset> signalsDatasets = new NucleusDatasetCreator(options)
+                        List<ComponentOutlineDataset<CellularComponent>> signalsDatasets = new NucleusDatasetCreator(options)
                                 .createSignalOutlines(cell, dataset);
 
                         finest("Fetched signal outline datasets for " + cell.getNucleus().getNameAndNumber());
 
-                        for (OutlineDataset d : signalsDatasets) {
+                        for (OutlineDataset<CellularComponent> d : signalsDatasets) {
 
                             for (int series = 0; series < d.getSeriesCount(); series++) {
                                 String seriesKey = d.getSeriesKey(series).toString();
@@ -796,7 +790,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         col = new Color(pixel, pixel, pixel, alpha);
                 }
 
-                if (col == null && showBounds)
+                if (col == null && showBounds) // Draw red pixels at bounds
                     col = new Color(255, 0, 0, alpha);
 
                 if (col != null) {
@@ -807,12 +801,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     rend.addAnnotation(a, Layer.BACKGROUND);
                 }
-                
-                // Draw the image border - debug only
-//                if( x==0 || x==ip.getWidth()-1 ||y==0 || y==ip.getHeight()-1) {
-//                	Rectangle2D r = new Rectangle2D.Double(x + xOffset - 0.1, y + yOffset - 0.1, 1.2, 1.2);
-//                    rend.addAnnotation( new XYShapeAnnotation(r, null, null, Color.BLACK), Layer.BACKGROUND);
-//                }
             }
         }
 
@@ -872,10 +860,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         ImageProcessor openProcessor;
         try {
-//        	ImageProcessor ip = isRGB ? component.getRGBImage() : component.getImage();
         	ImageConverter ic = new ImageConverter(component.getGreyscaleImage()).invert();
         	openProcessor = ic.convertToRGBGreyscale().toProcessor();
-//            openProcessor = isRGB ? component.getRGBImage() : component.getGreyscaleImage();
         } catch (UnloadableImageException e) {
             return;
         }
@@ -1141,7 +1127,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * Log2 ratios are coming in, which must be converted to real ratios
      * 
      * @param ratio
-     * @param minRatio
      * @param maxRatio
      * @return
      */

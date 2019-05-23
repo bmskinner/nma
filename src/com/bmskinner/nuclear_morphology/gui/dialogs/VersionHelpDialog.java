@@ -71,26 +71,25 @@ public class VersionHelpDialog extends SettingsDialog {
 		 
 		 JButton websiteBtn = new JButton(VIST_WEBSITE_LBL);
 		 		 
-		 websiteBtn.addActionListener(e->{
-			 Desktop desktop = Desktop.getDesktop();
-
-				if( !desktop.isSupported( Desktop.Action.BROWSE ) ) {
-					warn( "Desktop doesn't support the browse action" );
-					return;
-				}
-				try {
-					URI uri = new URI(SITE_URL);
-					desktop.browse(uri);
-				} catch (IOException e1) {
-					warn(e1.getMessage());
-				} catch (URISyntaxException e1) {
-					warn("Unable to parse URI: "+e1.getMessage());
-				}
-		 });
-		 
+		 websiteBtn.addActionListener(e->browseToWebsite());
 		 panel.add(websiteBtn);
 		 return panel;
 	 }
 	 
-	 
+	 private void browseToWebsite() {
+		 Desktop desktop = Desktop.getDesktop();
+
+		 if( !desktop.isSupported( Desktop.Action.BROWSE ) ) {
+			 warn( "Desktop doesn't support the browse action" );
+			 return;
+		 }
+		 try {
+			 URI uri = new URI(SITE_URL);
+			 desktop.browse(uri);
+		 } catch (IOException e1) {
+			 warn(e1.getMessage());
+		 } catch (URISyntaxException e1) {
+			 warn("Unable to parse URI: "+e1.getMessage());
+		 }
+	 }
 }

@@ -76,6 +76,7 @@ public class ColourSelecter {
             this.name = value;
         }
 
+        @Override
         public String toString() {
             return this.name;
         }

@@ -213,7 +213,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createAnnotatedNucleusOutline();
         } catch (ChartDatasetCreationException e) {
-            stack("Error creating boxplot", e);
+            stack("Error creating annotated nucleus outline: "+e.getMessage(), e);
             return createErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);

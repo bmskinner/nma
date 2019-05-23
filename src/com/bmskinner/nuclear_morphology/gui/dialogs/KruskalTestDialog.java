@@ -20,11 +20,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -81,27 +78,11 @@ public class KruskalTestDialog extends LoadingIconDialog {
         panel.add(label);
 
         runButton = new JButton("Run");
-        runButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                Thread thr = new Thread() {
-                    public void run() {
-
-                        try {
-                            runAnalysis();
-                        } catch (Exception e) {
-                            log(Level.SEVERE, "Error testing", e);
-                        }
-                    }
-                };
-                thr.start();
-
-            }
+        runButton.addActionListener(e-> {
+        	Runnable r = () -> runAnalysis();
+        	new Thread(r).start();
         });
         panel.add(runButton);
-
         return panel;
     }
 
@@ -114,10 +95,8 @@ public class KruskalTestDialog extends LoadingIconDialog {
         if (b) {
             this.setEnabled(false);
             for (Component c : this.getComponents()) {
-                c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); // new
-                                                                             // Cursor(Cursor.WAIT_CURSOR));
+                c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             }
-
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         } else {
@@ -129,18 +108,19 @@ public class KruskalTestDialog extends LoadingIconDialog {
         }
     }
 
+    @Override
     public void setEnabled(boolean b) {
         runButton.setEnabled(b);
     }
 
-    private void runAnalysis() throws Exception {
+    private void runAnalysis() {
 
         setAnalysing(true);
-        log(Level.INFO, "Franken-normalising collections");
+
         // Clear the old chart
         chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
 
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
         list.add(dataset1);
         list.add(dataset2);
 
@@ -148,10 +128,9 @@ public class KruskalTestDialog extends LoadingIconDialog {
                 .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.FRANKEN).build();
 
-        JFreeChart chart = new MorphologyChartFactory(options).makeKruskalWallisChart(true);
+        JFreeChart chart = new MorphologyChartFactory(options).makeKruskalWallisChart();
         chartPanel.setChart(chart);
 
         setAnalysing(false);
-        log(Level.INFO, "Comparison complete");
     }
 }
