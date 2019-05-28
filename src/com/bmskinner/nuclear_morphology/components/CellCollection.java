@@ -44,6 +44,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -436,6 +437,17 @@ public class CellCollection implements ICellCollection {
 	public ICell getCell(UUID id) {
         return this.mappedCollection.get(id);
     }
+    
+	@Override
+	public Optional<Nucleus> getNucleus(@NonNull UUID id) {
+		for(ICell c : this) {
+			for(Nucleus n : c.getNuclei()) {
+				if(n.getID().equals(id))
+					return Optional.ofNullable(n);
+			}
+		}
+		return Optional.empty();
+	}
 
     @Override
 	public NucleusType getNucleusType() {

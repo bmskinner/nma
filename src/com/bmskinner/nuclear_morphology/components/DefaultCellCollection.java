@@ -370,6 +370,17 @@ public class DefaultCellCollection implements ICellCollection {
 				.filter(c->c.getId().equals(id))
 				.findFirst().orElse(null);
 	}
+	
+	@Override
+	public Optional<Nucleus> getNucleus(@NonNull UUID id) {
+		for(ICell c : this) {
+			for(Nucleus n : c.getNuclei()) {
+				if(n.getID().equals(id))
+					return Optional.ofNullable(n);
+			}
+		}
+		return Optional.empty();
+	}
 
 	@Override
 	public NucleusType getNucleusType() {

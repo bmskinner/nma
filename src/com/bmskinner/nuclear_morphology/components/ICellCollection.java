@@ -179,6 +179,14 @@ public interface ICellCollection
      * @return
      */
     ICell getCell(@NonNull UUID id);
+    
+    /**
+     * Get the nucleus with the given UUID. Convenience method.
+     * 
+     * @param id the nucleus id
+     * @return the nucleus, if present, or an empty optional
+     */
+    Optional<Nucleus> getNucleus(@NonNull UUID id);
 
     /**
      * Get the type of nucleus this collection should contain

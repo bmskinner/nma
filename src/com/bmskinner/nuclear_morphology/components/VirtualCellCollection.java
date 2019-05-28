@@ -367,6 +367,17 @@ public class VirtualCellCollection implements ICellCollection {
             return parent.getCollection().getCell(id);
         return null;
     }
+    
+	@Override
+	public Optional<Nucleus> getNucleus(@NonNull UUID id) {
+		for(ICell c : this) {
+			for(Nucleus n : c.getNuclei()) {
+				if(n.getID().equals(id))
+					return Optional.ofNullable(n);
+			}
+		}
+		return Optional.empty();
+	}
 
     @Override
     public NucleusType getNucleusType() {
