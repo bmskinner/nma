@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.stats;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -69,6 +70,7 @@ public interface PlottableStatistic extends Serializable {
 		static final String DISPLACEMENT             = "Displacement";
 		static final String TSNE_1             = "t-SNE 1";
 		static final String TSNE_2             = "t-SNE 2";
+		static final String PCA_N             = "Number of PCs";
 		static final String PCA_1             = "PC1";
 		static final String PCA_2             = "PC2";
 		
@@ -112,8 +114,10 @@ public interface PlottableStatistic extends Serializable {
     // Special stats. These should not be included in default charts - they are used as hidden data stores
     static final PlottableStatistic TSNE_1 = new GenericStatistic(Names.TSNE_1, StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic TSNE_2 = new GenericStatistic(Names.TSNE_2, StatisticDimension.DIMENSIONLESS);
+    
     static final PlottableStatistic PCA_1 = new GenericStatistic(Names.PCA_1, StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic PCA_2 = new GenericStatistic(Names.PCA_2, StatisticDimension.DIMENSIONLESS);
+    static final PlottableStatistic PCA_N = new GenericStatistic(Names.PCA_N, StatisticDimension.DIMENSIONLESS); // Number of PCs 
     
 
     /**
@@ -131,6 +135,34 @@ public interface PlottableStatistic extends Serializable {
         if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
             return getSegmentStats().toArray(new PlottableStatistic[0]);
         return null;
+    }
+    
+    /**
+     * Create a statistic for a principal component
+     * @param pc the number of the component, from 1 to n
+     * @return the stat for the component
+     */
+    static PlottableStatistic makePrincipalComponent(int pc) {
+    	return new GenericStatistic("PC"+pc, StatisticDimension.DIMENSIONLESS);
+    }
+    
+    /**
+     * Create a statistic for a principal component with a cluster group
+     * @param pc the number of the component, from 1 to n
+     * @param id a group id
+     * @return the stat for the component
+     */
+    static PlottableStatistic makePrincipalComponent(int pc, UUID id) {
+    	return new GenericStatistic("PC"+pc+"_"+id, StatisticDimension.DIMENSIONLESS);
+    }
+    
+    /**
+     * Create a statistic for the number of principal components with a cluster group
+     * @param id a group id
+     * @return the stat for the component
+     */
+    static PlottableStatistic makePrincipalComponentNumber(UUID id) {
+    	return new GenericStatistic(Names.PCA_N+"_"+id, StatisticDimension.DIMENSIONLESS);
     }
     
     /**

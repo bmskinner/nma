@@ -44,6 +44,7 @@ public interface IClusteringOptions extends Serializable, HashOptions {
 	String PROFILE_TYPE_KEY          = "PROFILE_TYPE";
 	String USE_TSNE_KEY              = "Use t-SNE";
 	String USE_PCA_KEY               = "Use PCA";
+	String NUM_PCS_KEY               = "Number of PCs";
 
     int                       DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
     ClusteringMethod          DEFAULT_CLUSTER_METHOD        = ClusteringMethod.HIERARCHICAL;
