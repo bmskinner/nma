@@ -20,7 +20,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.analysis.classification.PrincipleComponentAnalysis;
+import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalComponentAnalysis;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -152,7 +152,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		labels.add(pcaLbl);
 		fields.add(pcaBox);
 		
-		labels.add(new JLabel(PrincipleComponentAnalysis.PROPORTION_VARIANCE_KEY));
+		labels.add(new JLabel(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY));
 		fields.add(pcaSpinner);
 
 		addLabelTextRows(labels, fields, layout, panel);
@@ -214,7 +214,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 * @return
 	 */
 	private JSpinner makePcaVarianceSpinner() {
-		options.setDouble(PrincipleComponentAnalysis.PROPORTION_VARIANCE_KEY, DEFAULT_PCA_VARIANCE);
+		options.setDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY, DEFAULT_PCA_VARIANCE);
 
 		SpinnerModel model = new SpinnerNumberModel(DEFAULT_PCA_VARIANCE, MIN_PCA_VARIANCE, MAX_PCA_VARIANCE, STEP_PCA_VARIANCE);
 		JSpinner spinner = new JSpinner(model);
@@ -223,7 +223,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		spinner.addChangeListener(l->{
 			try {
 				spinner.commitEdit();
-				options.setDouble(PrincipleComponentAnalysis.PROPORTION_VARIANCE_KEY, (Double) spinner.getValue());
+				options.setDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY, (Double) spinner.getValue());
 			} catch (ParseException e) {
 				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
 			}

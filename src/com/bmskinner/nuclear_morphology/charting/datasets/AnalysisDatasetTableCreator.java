@@ -38,7 +38,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.analysis.classification.PrincipleComponentAnalysis;
+import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalComponentAnalysis;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
@@ -1258,7 +1258,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         
         if(op.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
         	builder.append(Labels.Clusters.PCA+Io.NEWLINE);
-        	builder.append(Labels.Clusters.PCA_VARIANCE+": "+op.getDouble(PrincipleComponentAnalysis.PROPORTION_VARIANCE_KEY)+Io.NEWLINE);
+        	builder.append(Labels.Clusters.PCA_VARIANCE+": "+op.getDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY)+Io.NEWLINE);
         	builder.append(Labels.Clusters.PCA_NUM_PCS+": "+op.getInt(IClusteringOptions.NUM_PCS_KEY)+Io.NEWLINE);
         }
 

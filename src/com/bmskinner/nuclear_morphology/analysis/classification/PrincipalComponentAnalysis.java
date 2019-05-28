@@ -59,7 +59,7 @@ import weka.core.SparseInstance;
  * @since 1.14.0
  *
  */
-public class PrincipleComponentAnalysis extends SingleDatasetAnalysisMethod {
+public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 	private final HashOptions options;
 	
 	
@@ -67,7 +67,7 @@ public class PrincipleComponentAnalysis extends SingleDatasetAnalysisMethod {
 	
 	private final Map<Integer, UUID> nucleusToInstanceMap = new HashMap<>();
 	
-	public PrincipleComponentAnalysis(@NonNull IAnalysisDataset dataset, @NonNull HashOptions options) {
+	public PrincipalComponentAnalysis(@NonNull IAnalysisDataset dataset, @NonNull HashOptions options) {
 		super(dataset);
 		this.options = options;
 	}
