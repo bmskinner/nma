@@ -133,13 +133,18 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         	}
         }
         
+     // Move PCA values to their cluster group if needed        
         if(options.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
-        			n.setStatistic(new GenericStatistic("PCA_1_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.PCA_1));
-        			n.setStatistic(new GenericStatistic("PCA_2_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.PCA_2));
-        			n.setStatistic(PlottableStatistic.PCA_1, Statistical.STAT_NOT_CALCULATED);
-        			n.setStatistic(PlottableStatistic.PCA_2, Statistical.STAT_NOT_CALCULATED);
+        			int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);
+        			
+        			n.setStatistic(PlottableStatistic.makePrincipalComponentNumber(group.getId()), nPcs);
+        			n.clearStatistic(PlottableStatistic.PCA_N);
+        			for(int i=1; i<=nPcs; i++) {
+        				n.setStatistic(PlottableStatistic.makePrincipalComponent(i, group.getId()), n.getStatistic(PlottableStatistic.makePrincipalComponent(i)));
+        				n.clearStatistic(PlottableStatistic.makePrincipalComponent(i));
+        			}
         		}
         	}
         }

@@ -42,7 +42,9 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
@@ -139,20 +141,45 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         }
         return true;
     }
+    
+    private FastVector makeTsneAttributes() {
+    	FastVector attributes = new FastVector(2);
+    	attributes.addElement(new Attribute("tSNE_X"));
+    	attributes.addElement(new Attribute("tSNE_Y"));
+    	 if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+             Attribute name = new Attribute("name", (FastVector) null);
+             attributes.addElement(name);
+         }
+    	return attributes;
+    }
+    
+    private FastVector makePCAttributes() {
+    	
+    	// From the first nucleus, find the number of PCs to cluster on
+    	Nucleus n = dataset.getCollection().getCells().stream().findFirst().get().getNucleus();
+    	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N); 
+
+    	FastVector attributes = new FastVector(nPcs);
+    	for(int i=1; i<=nPcs; i++)
+    		attributes.addElement(new Attribute("PC_"+i));
+
+    	
+    	 if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+             Attribute name = new Attribute("name", (FastVector) null);
+             attributes.addElement(name);
+         }
+    	return attributes;
+    }
 
     @Override
 	protected FastVector makeAttributes() throws ClusteringMethodException{
     	
-    	if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
-    		FastVector attributes = new FastVector(2);
-        	attributes.addElement(new Attribute("tSNE_X"));
-        	attributes.addElement(new Attribute("tSNE_Y"));
-        	 if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
-                 Attribute name = new Attribute("name", (FastVector) null);
-                 attributes.addElement(name);
-             }
-        	return attributes;
-        }
+    	// Shortcuts if dimensional reduction is chosen
+    	if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY))
+        	return makeTsneAttributes();
+    	
+    	if(options.getBoolean(IClusteringOptions.USE_PCA_KEY))
+        	return makePCAttributes();   	
 
         // Determine the number of attributes required
         int attributeCount = 0;
@@ -192,9 +219,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             attributeCount++;
         }
         
-        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY))
-        	attributeCount+=2;
-
         // Create the attributes
 
         FastVector attributes = new FastVector(attributeCount);
@@ -265,47 +289,78 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 				throw new ClusteringMethodException(e);
 			}
         }
-
-        final Mesh<Nucleus> t = template;
-        final double w = windowProportion;
-    
-            collection.getCells()
-                .forEach( c->c.getNuclei().stream()
-                    .forEach( n-> {
-                        try {
-                            addNucleus(c, n, attributes, instances, t, w);
-                        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
-                                | MeshCreationException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                }));
+        
+        for(ICell c : collection) {
+        	for(Nucleus n : c.getNuclei()) {
+        		 try {
+                     addNucleus(c, n, attributes, instances, template, windowProportion);
+                 } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
+                         | MeshCreationException e) {
+                     // TODO Auto-generated catch block
+                     e.printStackTrace();
+                 }
+        	}
+        }
         return instances;
 
+    }
+    
+    private void addTsneNucleus(ICell c, Nucleus n, FastVector attributes, Instances instances) {
+    	int attNumber = 0;
+    	Instance inst = new SparseInstance(attributes.size());
+    	Attribute attX = (Attribute) attributes.elementAt(attNumber++);
+    	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_1));
+    	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
+    	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
+    	
+    	if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+            String uniqueName = c.getId().toString();
+            Attribute att = (Attribute) attributes.elementAt(attNumber++);
+            inst.setValue(att, uniqueName);
+        }
+    	 instances.add(inst);
+         cellToInstanceMap.put(inst, c.getId());
+         fireProgressEvent();
+    }
+    
+    private void addPCANucleus(ICell c, Nucleus n, FastVector attributes, Instances instances) {
+    	int attNumber = 0;
+    	Instance inst = new SparseInstance(attributes.size());
+    	
+    	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);
+    	for(int i=1; i<=nPcs; i++) {
+    		Attribute att = (Attribute) attributes.elementAt(attNumber++);
+    		double pc = n.getStatistic(PlottableStatistic.makePrincipalComponent(i));
+    		inst.setValue(att, pc);
+    	}
+    	
+    	if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+            String uniqueName = c.getId().toString();
+            Attribute att = (Attribute) attributes.elementAt(attNumber++);
+            inst.setValue(att, uniqueName);
+        }
+    	 instances.add(inst);
+         cellToInstanceMap.put(inst, c.getId());
+         fireProgressEvent();
     }
 
     private void addNucleus(ICell c, Nucleus n, FastVector attributes, Instances instances, Mesh<Nucleus> template,
             double windowProportion) throws UnavailableBorderTagException, UnavailableProfileTypeException,
             ProfileException, MeshCreationException {
-    	int attNumber = 0;
-        Instance inst = new SparseInstance(attributes.size());
+
         
         if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
-        	Attribute attX = (Attribute) attributes.elementAt(attNumber++);
-        	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_1));
-        	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
-        	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
-        	
-        	if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
-                String uniqueName = c.getId().toString();
-                Attribute att = (Attribute) attributes.elementAt(attNumber++);
-                inst.setValue(att, uniqueName);
-            }
-        	 instances.add(inst);
-             cellToInstanceMap.put(inst, c.getId());
-             fireProgressEvent();
-             return;
+        	addTsneNucleus(c, n, attributes, instances);
+        	return;
         }
+        
+        if(options.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        	addPCANucleus(c, n, attributes, instances);
+        	return;
+        }
+        
+    	int attNumber = 0;
+        Instance inst = new SparseInstance(attributes.size());
 
         int pointsToSample = (int) Math.floor(1d / windowProportion);
 

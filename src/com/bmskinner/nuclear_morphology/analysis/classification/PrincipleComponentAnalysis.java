@@ -40,7 +40,11 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic.Names;
 
 import weka.attributeSelection.PrincipalComponents;
 import weka.core.Attribute;
@@ -58,7 +62,10 @@ import weka.core.SparseInstance;
 public class PrincipleComponentAnalysis extends SingleDatasetAnalysisMethod {
 	private final HashOptions options;
 	
-	private final Map<Integer, UUID> cellToInstanceMap = new HashMap<>();
+	
+	public static final String PROPORTION_VARIANCE_KEY = "Variance";
+	
+	private final Map<Integer, UUID> nucleusToInstanceMap = new HashMap<>();
 	
 	public PrincipleComponentAnalysis(@NonNull IAnalysisDataset dataset, @NonNull HashOptions options) {
 		super(dataset);
@@ -69,22 +76,40 @@ public class PrincipleComponentAnalysis extends SingleDatasetAnalysisMethod {
 	public IAnalysisResult call() throws Exception {		
 		Instances inst = createInstances();
 		PrincipalComponents pca = new PrincipalComponents();
+		pca.setVarianceCovered(options.getDouble(PROPORTION_VARIANCE_KEY));
 		pca.buildEvaluator(inst);
+		double var = pca.getVarianceCovered();
+		fine("Variance covered: "+var);
 		
+		int expectedPcs = 0;
+
 		for(int i=0; i<inst.numInstances(); i++) {
 			Instance instance = inst.instance(i);
 			Instance converted = pca.convertInstance(instance);
 			double[] values = converted.toDoubleArray();
-//			log(Arrays.toString(values));
-			UUID nucleusId = cellToInstanceMap.get(i);
-			Optional<Nucleus> nucl = dataset.getCollection().stream().flatMap(c->c.getNuclei().stream()).filter(n->n.getID().equals(nucleusId)).findFirst();
+			UUID nucleusId = nucleusToInstanceMap.get(i);
+			Optional<Nucleus> nucl = dataset.getCollection().getNucleus(nucleusId);
+
 			if(nucl.isPresent()) {
+				nucl.get().setStatistic(PlottableStatistic.PCA_N, values.length); // Store the number of expected PCs
 				// Store in the generic stats pool until assigned a cluster id by a clustering method
-				nucl.get().setStatistic(PlottableStatistic.PCA_1, values[0]);
-				nucl.get().setStatistic(PlottableStatistic.PCA_2, values[1]);
-			}
+				for(int pc=0; pc<values.length; pc++) {
+					int readableName = pc+1;
+					PlottableStatistic stat = PlottableStatistic.makePrincipalComponent(readableName);
+					nucl.get().setStatistic(stat, values[pc]);
+				}
+				if(i==0) {
+					expectedPcs = values.length;
+					fine("Detected number of PCs: "+expectedPcs);
+				} else {
+					if(values.length!=expectedPcs)
+						fine("Different number of PCs: "+values.length);
+				}
+			} else 
+				fine("No nucleus in collection for instance "+i+" with id "+nucleusId);
 		}
 
+		options.setInt(IClusteringOptions.NUM_PCS_KEY, expectedPcs);
 
 		return new DefaultAnalysisResult(dataset);
 	}
@@ -170,7 +195,7 @@ public class PrincipleComponentAnalysis extends SingleDatasetAnalysisMethod {
 
         instances.add(inst);
         int index = instances.numInstances();
-        cellToInstanceMap.put(index, n.getID());
+        nucleusToInstanceMap.put(index-1, n.getID());
         fireProgressEvent();
     }
 	

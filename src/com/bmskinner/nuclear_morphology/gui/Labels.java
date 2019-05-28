@@ -245,6 +245,8 @@ public class Labels {
     	public static final String TSNE_MAX_ITER    = "Max iterations";
     	
     	public static final String PCA              = "PCA";
+    	public static final String PCA_VARIANCE     = "Variance";
+    	public static final String PCA_NUM_PCS      = "Number of PCs";
     }
     
 

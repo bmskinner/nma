@@ -20,6 +20,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.PrincipleComponentAnalysis;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -38,6 +39,11 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	private static final int MIN_ITERATIONS = 500;
 	private static final int MAX_ITERATIONS = 50000;
 	private static final int STEP_ITERATIONS = 25;
+	
+	private static final double DEFAULT_PCA_VARIANCE = 0.95;
+	private static final double MIN_PCA_VARIANCE = 0.05;
+	private static final double MAX_PCA_VARIANCE = 1;
+	private static final double STEP_PCA_VARIANCE = 0.01;
 	
 	private static final String BORDER_LABEL = "Dimensional reduction";
 
@@ -99,6 +105,9 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		JSpinner perplexitySpinner = makePerplexitySpinner();
 		perplexitySpinner.setEnabled(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
 		
+		
+		// Add checkbox listeners last so we can reference the spinners
+		
 		tSNEBox.addChangeListener(e->{
 			options.setBoolean(IClusteringOptions.USE_TSNE_KEY, tSNEBox.isSelected());
 			iterationsSpinner.setEnabled(tSNEBox.isSelected());
@@ -111,6 +120,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 			iterationsSpinner.setEnabled(tSNEBox.isSelected());
 			perplexitySpinner.setEnabled(tSNEBox.isSelected());
 		});
+
 
 		labels.add(label);
 		fields.add(tSNEBox);
@@ -125,24 +135,32 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		JCheckBox pcaBox = new JCheckBox();
 		pcaBox.setSelected(options.getBoolean(IClusteringOptions.USE_PCA_KEY));
 		JLabel pcaLbl = new JLabel(Labels.Clusters.PCA);
+		
+		JSpinner pcaSpinner = makePcaVarianceSpinner();
+		pcaSpinner.setEnabled(options.getBoolean(IClusteringOptions.USE_PCA_KEY));
+		
 		pcaBox.addChangeListener(e->{
 			options.setBoolean(IClusteringOptions.USE_PCA_KEY, pcaBox.isSelected());
+			pcaSpinner.setEnabled(pcaBox.isSelected());
 		});
 		
+
 		buttonGroup.add(noneBox);
 		buttonGroup.add(tSNEBox);
 		buttonGroup.add(pcaBox);
 
 		labels.add(pcaLbl);
 		fields.add(pcaBox);
+		
+		labels.add(new JLabel(PrincipleComponentAnalysis.PROPORTION_VARIANCE_KEY));
+		fields.add(pcaSpinner);
 
 		addLabelTextRows(labels, fields, layout, panel);
 		return panel;
 	}
 
 	/**
-	 * Create the iterations spinner with default perplexity based
-	 * on the number of nuclei in the dataset
+	 * Create the iterations spinner
 	 * @return
 	 */
 	private JSpinner makeMaxIterationsSpinner() {
@@ -189,5 +207,28 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 
 		});  
 		return perplexitySpinner;
+	}
+	
+	/**
+	 * Create the PCA variance spinner
+	 * @return
+	 */
+	private JSpinner makePcaVarianceSpinner() {
+		options.setDouble(PrincipleComponentAnalysis.PROPORTION_VARIANCE_KEY, DEFAULT_PCA_VARIANCE);
+
+		SpinnerModel model = new SpinnerNumberModel(DEFAULT_PCA_VARIANCE, MIN_PCA_VARIANCE, MAX_PCA_VARIANCE, STEP_PCA_VARIANCE);
+		JSpinner spinner = new JSpinner(model);
+		spinner.setEnabled(true);
+
+		spinner.addChangeListener(l->{
+			try {
+				spinner.commitEdit();
+				options.setDouble(PrincipleComponentAnalysis.PROPORTION_VARIANCE_KEY, (Double) spinner.getValue());
+			} catch (ParseException e) {
+				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+			}
+
+		});  
+		return spinner;
 	}
 }

@@ -210,7 +210,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     }
 
     /**
-     * A temporary method to create tSNE plots
+     * A temporary method to create tSNE and PCA plots
      * @param r
      * @return
      * @throws ChartDatasetCreationException
@@ -219,8 +219,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
     	
     	//TODO: add an input parameter for which method we want to display
-    	String prefix1 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA_1_" : "TSNE_1_";
-    	String prefix2 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PCA_2_" : "TSNE_2_";
+    	String prefix1 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PC1_" : "TSNE_1_";
+    	String prefix2 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PC2_" : "TSNE_2_";
     	
     	if(type.equals(ColourByType.CLUSTER) && colourGroup==null)
     		type = ColourByType.NONE;
