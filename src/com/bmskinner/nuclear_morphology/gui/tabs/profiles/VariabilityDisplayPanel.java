@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 /**
- * Display variabillity information about profiles
+ * Display variability information about profiles
  * 
  * @author bms41
  *
@@ -150,8 +150,6 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
     protected void updateSingle() {
 
         this.setEnabled(true);
-
-        // BorderTagObject tag = borderTagOptionsPanel.getSelected();
         boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
         ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 

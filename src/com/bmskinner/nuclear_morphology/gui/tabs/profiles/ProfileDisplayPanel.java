@@ -28,6 +28,11 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
+/**
+ * Display a profile chart
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
@@ -37,9 +42,8 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
         JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
         chartPanel.setChart(chart);
 
-        if (this.type == ProfileType.FRANKEN) {
+        if (this.type == ProfileType.FRANKEN)
             this.profileAlignmentOptionsPanel.setEnabled(false);
-        }
     }
     
     @Override

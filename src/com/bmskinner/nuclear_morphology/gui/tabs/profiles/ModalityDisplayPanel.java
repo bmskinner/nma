@@ -61,14 +61,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
     private JPanel               mainPanel = new JPanel(new BorderLayout());
     private JList<Double>        pointList;
     private ExportableChartPanel angleDistributionPanel;
-    private ExportableChartPanel pValueChartPanel;                          // hold
-                                                                            // a
-                                                                            // chart
-                                                                            // showing
-                                                                            // p-values
-                                                                            // across
-                                                                            // the
-                                                                            // profile
+    private ExportableChartPanel pValueChartPanel; // p-value across the profile
 
     private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
 
@@ -171,8 +164,6 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
         pointList.setSelectedIndex(0);
 
         updateModalityProfileChart();
-        // updatePositionChart(0);
-
     }
 
     @Override
@@ -181,7 +172,6 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 
         updateModalityProfileChart();
         updatePositionChart(0);
-
     }
 
     @Override
@@ -205,31 +195,26 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 
         ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true) // here,
-                                                                                                        // the
-                                                                                                        // boolean
-                                                                                                        // is
-                                                                                                        // used
-                                                                                                        // to
-                                                                                                        // indicate
-                                                                                                        // the
-                                                                                                        // the
-                                                                                                        // p-value
-                                                                                                        // chart
-                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
-                .setProfileType(type).setSwatch(GlobalOptions.getInstance().getSwatch()).setTarget(pValueChartPanel)
+        
+        ChartOptions options = new ChartOptionsBuilder()
+        		.setDatasets(getDatasets())
+        		.setNormalised(true) // setNormalised is used to indicate use of p-value chart here
+                .setAlignment(ProfileAlignment.LEFT)
+                .setTag(Tag.REFERENCE_POINT)
+                .setShowMarkers(false)
+                .setProfileType(type)
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setTarget(pValueChartPanel)
                 .build();
 
         setChart(options);
-
     }
 
     /**
      * Update the chart to display values at the given percentage along the
      * profile.
      * 
-     * @param xvalue
-     *            the percentage between zero and one hundred
+     * @param xvalue the percentage between zero and one hundred
      */
     public void updatePositionChart(double xvalue) {
 
@@ -237,30 +222,24 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 
         double fraction = xvalue / 100d;
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(false) // here,
-                                                                                                         // the
-                                                                                                         // boolean
-                                                                                                         // is
-                                                                                                         // used
-                                                                                                         // to
-                                                                                                         // indicate
-                                                                                                         // the
-                                                                                                         // main
-                                                                                                         // chart
-                .setAlignment(ProfileAlignment.RIGHT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
-                .setProfileType(type).setModalityPosition(fraction).setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setTarget(angleDistributionPanel).build();
-
+        ChartOptions options = new ChartOptionsBuilder()
+        		.setDatasets(getDatasets())
+        		.setNormalised(false) // setNormalised is used to indicate use of main chart here
+                .setAlignment(ProfileAlignment.RIGHT)
+                .setTag(Tag.REFERENCE_POINT)
+                .setShowMarkers(false)
+                .setProfileType(type)
+                .setModalityPosition(fraction)
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setTarget(angleDistributionPanel)
+                .build();
         setChart(options);
-
     }
 
     @Override
     public void actionPerformed(ActionEvent arg0) {
-
         updatePointSelection();
         updateModalityProfileChart();
-
     }
 
     private void updatePointSelection() {
@@ -271,18 +250,15 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 
             int lastRow = pointList.getModel().getSize() - 1;
 
-            if (xvalue == 100 || pointList.getSelectedIndex() == lastRow) {
+            if (xvalue == 100 || pointList.getSelectedIndex() == lastRow)
                 xvalue = 0; // wrap arrays
-            }
 
             updatePositionChart(xvalue);
         }
     }
 
     public void valueChanged(ListSelectionEvent e) {
-
         updatePointSelection();
-
     }
 
     /**
