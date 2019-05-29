@@ -236,7 +236,7 @@ public class DatasetValidator implements Loggable {
 				for(Tag t : rootTags) {
 					if(!n.hasBorderTag(t)) {
 						isOk = false;
-						errorList.add(String.format("Nucleus %s does not have root collection tag", n.getNameAndNumber(), t));
+						errorList.add(String.format("Nucleus %s does not have root collection tag %s", n.getNameAndNumber(), t));
 						errorCells.add(c);
 					}
 				}
@@ -247,7 +247,7 @@ public class DatasetValidator implements Loggable {
 			for(Tag t : rootTags) {
 				if(!d.getCollection().getConsensus().hasBorderTag(t)) {
 					isOk = false;
-					errorList.add(String.format("Consensus nucleus does not have root collection tag", t));
+					errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
 				}
 			}
 		}
@@ -257,7 +257,7 @@ public class DatasetValidator implements Loggable {
 			for(Tag t : rootTags) {
 				if(!child.getCollection().getProfileCollection().getBorderTags().contains(t)) {
 					isOk = false;
-					errorList.add(String.format("Child dataset %s does not have root collection tag", child.getName(), t));
+					errorList.add(String.format("Child dataset %s does not have root collection tag %s", child.getName(), t));
 				}
 			}
 			
@@ -265,7 +265,7 @@ public class DatasetValidator implements Loggable {
 				for(Tag t : rootTags) {
 					if(!child.getCollection().getConsensus().hasBorderTag(t)) {
 						isOk = false;
-						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag", child.getName(), t));
+						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
 					}
 				}
 			}
