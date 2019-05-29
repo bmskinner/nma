@@ -116,16 +116,10 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
             URL urlToGif = cl.getResource(pathToGif);
 
             if (urlToGif != null) {
-                // loadingGif = new ImageIcon(urlToGif);
                 loadingGif = loadURL(urlToGif);
-
-                if (loadingGif == null) {
-                    log(Level.WARNING, "Unable to load gif");
-                    ok = false;
-                } else {
-                    ok = true;
-                }
-
+                ok = loadingGif!=null;
+                if(!ok)
+                    log(Level.WARNING, "Unable to load loading gif");
             }
 
             // Get current classloader
@@ -133,15 +127,9 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
 
             if (urlToBlank != null) {
                 blankGif = loadURL(urlToBlank);
-                // blankGif = new ImageIcon(urlToBlank);
-
-                if (blankGif == null) {
+                ok = blankGif!=null;
+                if(!ok)
                     log(Level.WARNING, "Unable to load blank gif");
-                    ok = false;
-                } else {
-                    ok = true;
-                }
-
             }
 
         } catch (Exception e) {
@@ -171,30 +159,9 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
             case 8:
                 status = "Complete";
                 break;
-
             }
 
             log(Level.FINER, "Load status: " + status);
-
-            // if(icon.getImageLoadStatus()== MediaTracker.ERRORED){
-            // programLogger.log(Level.WARNING, "Could not load icon from
-            // "+url.getPath());
-            // programLogger.log(Level.WARNING, "Icon status
-            // "+icon.getImageLoadStatus());
-            //
-            //
-            //
-            // programLogger.log(Level.WARNING, "Trying to load icon
-            // directly...");
-            // try{
-            // Image img = ImageIO.read(url);
-            // icon = new ImageIcon(img);
-            // } catch(IOException e){
-            // programLogger.log(Level.SEVERE, "Error in loading image ", e);
-            // icon = null;
-            // }
-            // }
-
         }
         return icon;
     }
