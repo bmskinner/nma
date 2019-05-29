@@ -26,7 +26,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 public class TsneMethodTest extends ComponentTester {
 
-private static final Logger LOGGER = Logger.getLogger(TsneMethodTest.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(TsneMethodTest.class.getName());
 	
 	private IAnalysisDataset dataset;
 	

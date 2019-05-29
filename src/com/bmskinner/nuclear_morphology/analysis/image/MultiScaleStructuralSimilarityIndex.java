@@ -244,17 +244,21 @@ public class MultiScaleStructuralSimilarityIndex {
 		 */
 		private void calculateLevel(int level) {
 			
-			int image_width = image_1_p.getWidth();
+			int image_width  = image_1_p.getWidth();
 			int image_height = image_1_p.getHeight();
 			
-			if (level !=1) {
+			if (level!=1) {
 				image_1_p.convolve (lpf, LPF_WIDTH, LPF_WIDTH);
 				image_2_p.convolve (lpf, LPF_WIDTH, LPF_WIDTH);
 				image_1_p.setInterpolate(false);			// IT'S CRITICAL TO THIS VALUE. DON'T USE TRUE
 				image_2_p.setInterpolate(false);
-				image_1_p= image_1_p.resize (image_width/2);
-				image_2_p= image_2_p.resize (image_width/2);
+				image_1_p = image_1_p.resize(image_width/2);
+				image_2_p = image_2_p.resize(image_width/2);
 			}
+			
+			// If level is above 1, these will have changed
+			image_width  = image_1_p.getWidth();
+			image_height = image_1_p.getHeight();
 
 			int image_dimension = image_width*image_height;
 
@@ -276,10 +280,10 @@ public class MultiScaleStructuralSimilarityIndex {
 
 			int a=0;
 			int b=0;
-			for (int pointer =0; pointer<image_dimension; pointer++) {	
+			for (int pointer=0; pointer<image_dimension; pointer++) {	
 
 				if (bits_per_pixel_1 == 8) {
-					a = (0xff & image_1_p.get (pointer));
+					a = (0xff & image_1_p.get(pointer));
 					b = (0xff & image_2_p.get(pointer));
 				}
 				if (bits_per_pixel_1 == 16) {
