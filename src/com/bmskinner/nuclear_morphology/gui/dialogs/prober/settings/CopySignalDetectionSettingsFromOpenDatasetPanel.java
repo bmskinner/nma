@@ -1,12 +1,9 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.JOptionPane;

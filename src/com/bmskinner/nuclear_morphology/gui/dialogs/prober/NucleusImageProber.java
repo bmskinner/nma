@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 
 import javax.swing.JPanel;
 

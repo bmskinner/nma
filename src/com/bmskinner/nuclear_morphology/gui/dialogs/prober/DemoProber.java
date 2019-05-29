@@ -25,7 +25,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;

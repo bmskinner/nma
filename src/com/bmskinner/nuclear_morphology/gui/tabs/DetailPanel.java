@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

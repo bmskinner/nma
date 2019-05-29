@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOption
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;

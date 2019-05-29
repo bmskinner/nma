@@ -140,7 +140,7 @@ public class VersionHelpDialog extends SettingsDialog {
 		 JTextArea textBox = new JTextArea();
 		 textBox.setFont(UIManager.getFont("Label.font"));
 
-		 String fileName = "licenses/T-SNE-Java.txt";
+		 String fileName = "licenses/DependencyLicenses.txt";
 		 
 		 textBox.setText(readTextFile(fileName));
 		 textBox.setEditable(false);

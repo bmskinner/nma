@@ -23,7 +23,6 @@ import java.util.List;
 import javax.swing.JComboBox;
 
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 
 /**
  * A panel with a drop down list of cluster groups, specified in the

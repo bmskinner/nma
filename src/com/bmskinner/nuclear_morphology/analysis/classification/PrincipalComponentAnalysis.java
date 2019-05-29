@@ -16,10 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,10 +39,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic.Names;
 
 import weka.attributeSelection.PrincipalComponents;
 import weka.core.Attribute;
@@ -155,7 +150,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         for(ICell c : dataset.getCollection()) {
         	for(Nucleus n : c.getNuclei()) {
         		try {
-    				addNucleus(c, n, attributes, instances,  windowProportion);
+    				addNucleus(n, attributes, instances,  windowProportion);
     			} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
     				warn("Unable to add nucleus to instances: "+e.getMessage());
     			}
@@ -165,7 +160,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
     }
     
-    private void addNucleus(ICell c, Nucleus n, FastVector attributes, Instances instances,
+    private void addNucleus(Nucleus n, FastVector attributes, Instances instances,
             double windowProportion) throws UnavailableBorderTagException, UnavailableProfileTypeException,
             ProfileException {
 

@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;

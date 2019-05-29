@@ -17,9 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
