@@ -11,7 +11,8 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ PrincipalComponentAnalysisTest.class })
+@SuiteClasses({ PrincipalComponentAnalysisTest.class,
+	TsneMethodTest.class})
 public class AnalysisClassificationTestSuite {
 
 }
