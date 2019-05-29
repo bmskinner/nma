@@ -43,24 +43,16 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
 
     	JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     	
-        // default cell colour is white
         Color bg = Color.WHITE;
-        Color fg = Color.BLACK;
-        
-        
+
         String header = getFirstColumnText(row, table);
-        
-        
+
         // Highlight consistent rows
         if (isRowConsistentAcrossColumns(table, row))
         	bg = ConsistentRowTableCellRenderer.CONSISTENT_CELL_COLOUR;
         
-        if(header.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
-        	File signalFolder = new File(value.toString());
-        	if(!signalFolder.exists())
-        		fg = Color.RED;
-        }
-        
+
+        Color fg = chooseForegroundColour(header, value);        
         
         try {
 
@@ -97,13 +89,23 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
         } catch (Exception e) {
             LOGGER.log(Loggable.STACK, "Error in signal detection table renderer", e);
         }
-
-        // Cells are by default rendered as a JLabel.
         
         l.setBackground(bg);
         l.setForeground(fg);
-        // Return the JLabel which renders the cell.
         return l;
+    }
+    
+    private Color chooseForegroundColour(String header, Object value) {
+    	if(header.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
+    		if(value==null)
+    			return Color.RED;
+
+    		File signalFolder = new File(value.toString());
+    		if(!signalFolder.exists())
+    			return Color.RED;
+
+        }
+    	return Color.BLACK;
     }
     
 
