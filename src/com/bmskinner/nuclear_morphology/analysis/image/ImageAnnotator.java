@@ -713,7 +713,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     float[] x = p.xpoints;
                     float[] y = p.ypoints;
                     
-                    if(scale!=1d){
+                    if(Math.abs(scale-1)>0.0000001){
                         for(int j=0; j<p.npoints; j++){
                             x[j]*=scale;
                             y[j]*=scale;
