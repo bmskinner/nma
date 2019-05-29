@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.AnalysisClassificationTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSuite;
 
 /**
@@ -18,7 +19,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSu
 	MergeSourceExtracterTest.class, 
 	ProfileAggregateTest.class,
 	RuleSetTester.class,
-	AnalysisProfilesTestSuite.class})
+	AnalysisProfilesTestSuite.class,
+	AnalysisClassificationTestSuite.class})
 public class AnalysisTestSuite {
 
 }
