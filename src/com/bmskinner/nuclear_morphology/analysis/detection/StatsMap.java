@@ -31,16 +31,15 @@ public class StatsMap {
     public static final String PERIM = "Perim";
     public static final String FERET = "Feret";
 
-    private HashMap<String, Double> values = new HashMap<String, Double>(0);
+    private HashMap<String, Double> values = new HashMap<>(0);
 
     public StatsMap() {
 
     }
 
     public StatsMap(StatsMap s) {
-        for (String key : s.keys()) {
-            this.add(key, new Double(s.get(key)));
-        }
+        for (String key : s.keys())
+            this.add(key, s.get(key).doubleValue());
     }
 
     public Set<String> keys() {
@@ -48,19 +47,16 @@ public class StatsMap {
     }
 
     public void add(String s, Double d) {
-        if (s == null || d == null) {
+        if (s == null || d == null)
             throw new IllegalArgumentException("Argument is null");
-        }
         values.put(s, d);
     }
 
     public Double get(String s) {
-        if (s == null) {
+        if (s == null)
             throw new IllegalArgumentException("Argument is null");
-        }
-        if (!values.containsKey(s)) {
+        if (!values.containsKey(s))
             throw new IllegalArgumentException("Key is not present");
-        }
         return values.get(s);
     }
 

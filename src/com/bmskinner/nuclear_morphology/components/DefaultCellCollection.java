@@ -1260,9 +1260,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 		in.defaultReadObject();
 		
-		
-//		isRefolding = false;
-
 		if (ruleSets == null || ruleSets.isEmpty()) {
 			log("Creating default ruleset for collection");
 			ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);

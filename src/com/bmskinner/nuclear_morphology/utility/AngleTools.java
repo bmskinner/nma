@@ -22,7 +22,7 @@ import java.awt.geom.Point2D;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
- * Calculate the x and y components of a vector
+ * Utility methods for handling angles
  * 
  * @author ben
  *

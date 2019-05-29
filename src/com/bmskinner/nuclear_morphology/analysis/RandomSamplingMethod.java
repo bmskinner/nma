@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 	
-	private List<Double>       magnitudes = new ArrayList<Double>();
+	private List<Double>       magnitudes = new ArrayList<>();
     private int                iterations;
     private PlottableStatistic stat;
     
@@ -121,7 +121,7 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
     }
     
     public class RandomSamplingResult extends DefaultAnalysisResult {
-    	private List<Double> values = new ArrayList<Double>();
+    	private List<Double> values = new ArrayList<>();
 		public RandomSamplingResult(IAnalysisDataset d, List<Double> values) {
 			super(d);
 			this.values = values;
