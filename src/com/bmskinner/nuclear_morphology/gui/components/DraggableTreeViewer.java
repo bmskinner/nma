@@ -27,7 +27,6 @@ import java.util.List;
 import org.virion.jam.controlpanels.ControlPalette;
 
 import jebl.gui.trees.treeviewer.TreeViewer;
-//import jebl.gui.trees.treeviewer_dev.DefaultTreeViewer;
 
 /**
  * An extension to jebl's tree viewer that allows lines to be added to the tree
@@ -37,24 +36,24 @@ import jebl.gui.trees.treeviewer.TreeViewer;
 @SuppressWarnings("serial")
 public class DraggableTreeViewer extends TreeViewer {
 
-    List<Line2D.Double> lines = new ArrayList<Line2D.Double>();
-
+    private final List<Line2D> lines = new ArrayList<>();
+    
     public DraggableTreeViewer() {
         super();
-
     }
 
     public DraggableTreeViewer(ControlPalette controlPalette, int CONTROL_PALETTE_ALIGNMENT) {
         super(controlPalette, CONTROL_PALETTE_ALIGNMENT);
     }
 
-    public void addLine(Line2D.Double line) {
+    
+    public void addLine(Line2D line) {
         clearLines();
-        this.lines.add(line);
+        lines.add(line);
     }
 
     public void clearLines() {
-        this.lines = new ArrayList<Line2D.Double>();
+    	lines.clear();
     }
 
     @Override
@@ -63,11 +62,13 @@ public class DraggableTreeViewer extends TreeViewer {
         super.paint(g);
 
         Graphics2D g2 = (Graphics2D) g;
+        Color c = g2.getColor();
         g2.setPaint(Color.BLACK);
         g2.setStroke(new BasicStroke(2f));
-        for (Line2D.Double line : lines) {
+        for (Line2D line : lines) {
             g2.draw(line);
         }
+        g2.setPaint(c);
     }
 
 }

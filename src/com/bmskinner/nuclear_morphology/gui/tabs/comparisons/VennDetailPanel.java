@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -35,9 +36,12 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class VennDetailPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Venn";
     private static final String HEADER_LBL      = "Shows the percentage of each row's cells shared with each column";
@@ -70,20 +74,18 @@ public class VennDetailPanel extends DetailPanel {
             vennTable.setEnabled(false);
 
         } catch (Exception e) {
-            error("Error creating venn panel", e);
+            LOGGER.log(Loggable.STACK, "Error creating venn panel", e);
         }
 
     }
     
     @Override
     public void setChartsAndTablesLoading() {
-        // log("Set venn to loading");
         vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
     }
 
     @Override
     protected void updateSingle() {
-        // log("Setting venn to blank via single");
         updateNull();
     }
 
@@ -132,9 +134,6 @@ public class VennDetailPanel extends DetailPanel {
                 String columnName = table.getColumnName(column);
 
                 String pctString = cellContents.replace("%", "");
-                // String[] array = cellContents.split("%");
-                // String[] array2 = array[0].split("\\(");
-
                 double pct = 0;
                 try {
 
@@ -142,7 +141,7 @@ public class VennDetailPanel extends DetailPanel {
                     pct = nf.parse(pctString).doubleValue();
 
                 } catch (ParseException e) {
-                    fine("Error getting value: " + cellContents + " in column " + columnName, e);
+                    LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName+": "+e.getMessage());
                     pct = 0;
                 }
 

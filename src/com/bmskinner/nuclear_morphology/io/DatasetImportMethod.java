@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -47,6 +48,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionExc
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Method to read a dataset from file
@@ -58,6 +60,8 @@ import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 @SuppressWarnings("deprecation")
 public class DatasetImportMethod extends AbstractAnalysisMethod implements Importer {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private final File       file;
     private IAnalysisDataset dataset      = null;
@@ -123,25 +127,25 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             try {
             	// Deserialise whatever is in the file
             	try {
-            		fine("Trying to read file as XML");
+            		LOGGER.fine("Trying to read file as XML");
             		dataset = readXMLDataset(file);
             	}  catch (UnloadableDatasetException e) {  // not xml format, try to deserialise directly
-            		fine("Dataset is not a readable XML format; deserialising directly");
+            		LOGGER.fine("Dataset is not a readable XML format; deserialising directly");
             		dataset = readDataset(file);
 
             	}
             	fireIndeterminateState();
             } catch (UnsupportedVersionException e) {
-            	warn("Version "+e.getMessage()+" not supported");
+            	LOGGER.warning("Version "+e.getMessage()+" not supported");
             	if(e.getDetectedVersion().isNewerThan(Version.currentVersion()))
-            		warn(String.format("Dataset version %s is from a newer software version; upgrade to view", e.getDetectedVersion()));
+            		LOGGER.warning(String.format("Dataset version %s is from a newer software version; upgrade to view", e.getDetectedVersion()));
             	if(e.getDetectedVersion().isOlderThan(Version.currentVersion()))
-            		warn(String.format("Dataset version %s is too old to read in this software", e.getDetectedVersion()));
+            		LOGGER.warning(String.format("Dataset version %s is too old to read in this software", e.getDetectedVersion()));
             	throw(e);
 
             } catch (UnloadableDatasetException e) {
-            	warn(e.getMessage());
-            	stack("Error reading dataset", e);
+            	LOGGER.warning(e.getMessage());
+            	LOGGER.log(Loggable.STACK, "Error reading dataset", e);
             }
 
             if(dataset==null)
@@ -152,8 +156,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             validateDataset();
 
         } catch (IllegalArgumentException e) {
-            warn("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
-            stack("Error opening file", e);
+            LOGGER.warning("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Error opening file", e);
         }
     }
     
@@ -164,8 +168,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         // Replace existing save file path with the path to the file that has
         // been opened
         if (!dataset.getSavePath().equals(file)) {
-            fine("Old save path: " + dataset.getSavePath().getAbsolutePath());
-            fine("Input file: " + file.getAbsolutePath());
+        	LOGGER.fine("Old save path: " + dataset.getSavePath().getAbsolutePath());
+        	LOGGER.fine("Input file: " + file.getAbsolutePath());
             updateSavePath(file, dataset);
         }
 
@@ -177,9 +181,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             	 dataset = conv.convert();
             	 wasConverted = conv.shouldSave();
              } catch (DatasetConversionException e) {
-                 warn("Unable to convert to new format.");
-                 warn("Displaying as old format.");
-                 stack("Error in converter", e);
+                 LOGGER.warning("Unable to convert to new format.");
+                 LOGGER.warning("Displaying as old format.");
+                 LOGGER.log(Loggable.STACK, "Error in converter", e);
              }
         }
 
@@ -194,7 +198,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 // update to the current file path
                 exportFolder = file.getParentFile();
                 dataset.getCollection().setOutputFolder(exportFolder);
-                fine("Updated output folder to " + exportFolder);
+                LOGGER.fine("Updated output folder to " + exportFolder);
             }
             
             if(file.getName().endsWith(BACKUP_FILE_EXTENSION)){
@@ -222,12 +226,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 }
 
             } catch (Exception e) {
-                warn("Error updating vertical nuclei");
-                stack("Error updating vertical nuclei", e);
+                LOGGER.warning("Error updating vertical nuclei");
+                LOGGER.log(Loggable.STACK, "Error updating vertical nuclei", e);
             }
 
         } else {
-            warn("Unable to open dataset version: " + dataset.getVersion());
+            LOGGER.warning("Unable to open dataset version: " + dataset.getVersion());
         }
     }
     
@@ -239,16 +243,16 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
             for (String s : dv.getErrors()) {
-                stack(s);
+                LOGGER.log(Loggable.STACK, s);
             }
-            warn("The dataset is not properly segmented");
-            warn("Curated datasets and groups have been saved");
-            warn("Either resegment (Editing>Segmentation>Segment profile) or redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
+            LOGGER.warning("The dataset is not properly segmented");
+            LOGGER.warning("Curated datasets and groups have been saved");
+            LOGGER.warning("Either resegment (Editing>Segmentation>Segment profile) or redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
             try {
 				new CellFileExporter(dataset).call();
 			} catch (Exception e) {
-				warn("Unable to save cell locations");
-				warn("Redetect these nuclei");
+				LOGGER.warning("Unable to save cell locations");
+				LOGGER.warning("Redetect these nuclei");
 			}
            
         }
@@ -285,13 +289,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     			throw new UnsupportedVersionException(d.getVersion());
     		return d;
     	} catch(XMLReadingException e) {
-    		fine("Error reading XML: "+e.getMessage());
+    		LOGGER.fine("Error reading XML: "+e.getMessage());
     		throw new UnloadableDatasetException("Cannot read as XML dataset", e);
     	}
     }
     
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
-    	fine("Deserialising dataset");
+    	LOGGER.fine("Deserialising dataset");
         IAnalysisDataset dataset = null;
 
         try(FileInputStream fis = new FileInputStream(inputFile.getAbsolutePath());
@@ -312,12 +316,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         	throw(e1);
 
         } catch (ClassNotFoundException e1) {
-        	warn("Missing class: "+e1.getMessage());
-        	stack("Class not found reading '" + file.getAbsolutePath() + "': ", e1);
+        	LOGGER.warning("Missing class: "+e1.getMessage());
+        	LOGGER.log(Loggable.STACK, "Class not found reading '" + file.getAbsolutePath() + "': ", e1);
         	throw new UnloadableDatasetException("Missing class "+e1.getMessage());
         } catch (NullPointerException e1) {
             // holdover from deserialisation woes when migrating packages
-            stack("NPE Error reading '" + file.getAbsolutePath() + "': ", e1);
+            LOGGER.log(Loggable.STACK, "NPE Error reading '" + file.getAbsolutePath() + "': ", e1);
             throw new UnloadableDatasetException("Cannot load dataset due to " + e1.getClass().getSimpleName(), e1);
 
         } catch (OptionalDataException e1) {
@@ -333,7 +337,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                  * by a class-defined readObject or readExternal method. In this
                  * case, the OptionalDataException's eof field is set to true
                  */
-                stack("Unexpected end of data '" + file.getAbsolutePath() + "'", e1);
+                LOGGER.log(Loggable.STACK, "Unexpected end of data '" + file.getAbsolutePath() + "'", e1);
             } else {
 
                 /*
@@ -343,14 +347,14 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                  * bytes of primitive data immediately readable from the stream,
                  * and the eof field is set to false
                  */
-                stack(file.getAbsolutePath() + ": " + e1.length + " remaining in buffer", e1);
+                LOGGER.log(Loggable.STACK, file.getAbsolutePath() + ": " + e1.length + " remaining in buffer", e1);
             }
             throw new UnloadableDatasetException(
                     "Cannot load '" + file.getAbsolutePath() + "' due to unexpected end of file", e1);
 
         } catch (Exception e1) {
             // Is there anything else left that could go wrong? Probably.
-            stack("Error reading '" + file.getAbsolutePath() + "'", e1);
+            LOGGER.log(Loggable.STACK, "Error reading '" + file.getAbsolutePath() + "'", e1);
             throw new UnloadableDatasetException(
                     "Cannot load '" + file.getAbsolutePath() + "' due to " + e1.getClass().getSimpleName(), e1);
 
@@ -374,7 +378,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      */
     private void updateSavePath(@NonNull final File inputFile, @NonNull final IAnalysisDataset dataset) {
 
-        fine("File path has changed: attempting to relocate images");
+    	LOGGER.fine("File path has changed: attempting to relocate images");
 
         // Check if the original image paths are still correct/
         // If not, proceed with the relocate below
@@ -394,8 +398,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         dataset.setSavePath(inputFile);
 
         if (dataset.hasMergeSources()) {
-        	warn("Dataset is a merge");
-            warn("Unable to find single source image directory");
+        	LOGGER.warning("Dataset is a merge");
+            LOGGER.warning("Unable to find single source image directory");
             return;
         }
 
@@ -408,11 +412,11 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         try {
         	dataset.updateSourceImageDirectory(expectedImageDirectory);
         } catch (IllegalArgumentException e) {
-        	fine("Cannot update image file paths: " + e.getMessage());
-        	fine("Nucleus images will not be displayed");
+        	LOGGER.fine("Cannot update image file paths: " + e.getMessage());
+        	LOGGER.fine("Nucleus images will not be displayed");
         }
 
-        fine("Checking if signal folders need updating");
+        LOGGER.fine("Checking if signal folders need updating");
         if(!signalFileMap.isPresent()){
         	Map<UUID, File> map = new HashMap<>();
         	for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
@@ -440,7 +444,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     	if (!dataset.getCollection().getSignalManager().hasSignals())
     		return;
 
-    	fine("Updating signal locations");
+    	LOGGER.fine("Updating signal locations");
     	Set<UUID> signalGroups = dataset.getCollection().getSignalGroupIDs();
 
     	for (UUID signalID : signalGroups) {
@@ -448,11 +452,11 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     		// Get the new folder of images
     		File newsignalDir = newSignalMap.get(signalID);
     		if(newsignalDir== null) {
-    			warn("Cannot update signal folder for group");
+    			LOGGER.warning("Cannot update signal folder for group");
     			continue;
     		}
 
-    		fine("Updating signal group to " + newsignalDir);
+    		LOGGER.fine("Updating signal group to " + newsignalDir);
     		// Update the folder
     		dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
     		dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalID).setFolder(newsignalDir);

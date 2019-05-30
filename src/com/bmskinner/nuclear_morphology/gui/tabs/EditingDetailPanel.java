@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
+import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 
@@ -27,9 +28,12 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class EditingDetailPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     private static final String PANEL_TITLE_LBL = "Editing";
     
@@ -77,7 +81,7 @@ public class EditingDetailPanel extends DetailPanel {
     public void eventReceived(SignalChangeEvent event) {
 
         super.eventReceived(event);
-        finer("Editing panel heard signal: " + event.type());
+        LOGGER.finer("Editing panel heard signal: " + event.type());
 
         // Pass downwards if the signal was not generated internally
         if (!this.getSubPanels().contains(event.getSource())) {

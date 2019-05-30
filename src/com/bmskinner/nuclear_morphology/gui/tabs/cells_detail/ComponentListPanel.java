@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -40,9 +41,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class ComponentListPanel extends AbstractCellDetailPanel implements ListSelectionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Components";
     private JList<ComponentListCell> list;
@@ -124,13 +128,13 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 
     public void update() {
 
-        finest("Updating component list for cell");
+        LOGGER.finest("Updating component list for cell");
         list.removeListSelectionListener(this);
         ListModel<ComponentListCell> model = createListModel();
         list.setModel(model);
 
         if (this.getCellModel().hasCell()) {
-            finest("Cell is not null");
+        	LOGGER.finest("Cell is not null");
 
             // Check if the new cell has the same component as the last
             int selectedIndex = 0;
@@ -158,7 +162,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
     private ComponentListCell getSelectedRow() {
         ComponentListCell tableCell = null;
         int row = list.getSelectedIndex();
-        finer("Selected component row " + row);
+        LOGGER.finer("Selected component row " + row);
         if (row >= 0) { // -1 if nothing selected
             tableCell = (ComponentListCell) list.getModel().getElementAt(row);
         }
@@ -178,7 +182,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
     @Override
     public void valueChanged(ListSelectionEvent e) {
 
-        finest("Component selection changed");
+    	LOGGER.finest("Component selection changed");
         ComponentListCell cell = getSelectedRow();
         if (cell != null) {
             prevComponent = cell.toString(); // set the new component string

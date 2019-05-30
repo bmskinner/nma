@@ -19,8 +19,11 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Stores the basic methods for an IAnalysisMethod. The logic for an analysis
@@ -39,6 +42,8 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public abstract class AbstractAnalysisMethod implements IAnalysisMethod, ProgressListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private List<Object>       listeners = new ArrayList<>();
     protected IAnalysisResult  result    = null;
@@ -127,7 +132,7 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
             try {
                 Thread.sleep(millisToSleep);
             } catch (InterruptedException e) {
-                error("Thread interrupted", e);
+                LOGGER.log(Loggable.STACK, "Thread interrupted", e);
                 return;
             }
         }

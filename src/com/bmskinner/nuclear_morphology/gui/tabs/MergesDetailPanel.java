@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This panel shows any merge sources for a merged dataset, and the analysis
@@ -59,6 +61,8 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
  */
 @SuppressWarnings("serial")
 public class MergesDetailPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private ExportableTable sourceParametersTable;
     private JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);
@@ -72,7 +76,7 @@ public class MergesDetailPanel extends DetailPanel {
         try {
             createUI();
         } catch (Exception e) {
-            error("Error creating merge panel", e);
+        	LOGGER.log(Loggable.STACK, "Error creating merge panel", e);
         }
     }
     

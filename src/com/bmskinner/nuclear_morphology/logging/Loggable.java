@@ -197,7 +197,7 @@ public interface Loggable {
      * @param message
      * @param t
      */
-    default void logToImageJ(String message, Throwable t) {
+    static void logToImageJ(String message, Throwable t) {
         IJ.log(message);
         IJ.log(t.getMessage());
         for (StackTraceElement el : t.getStackTrace()) {
@@ -211,7 +211,7 @@ public interface Loggable {
      * 
      * @param message
      */
-    default void logIJ(String message) {
+    static void logIJ(String message) {
         IJ.log(message);
         System.err.println(message);
     }

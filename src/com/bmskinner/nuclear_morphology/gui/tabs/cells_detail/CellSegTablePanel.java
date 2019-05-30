@@ -17,6 +17,8 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -30,9 +32,17 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Display for segments per cell 
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class CellSegTablePanel extends AbstractCellDetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Segment table";
     
@@ -74,8 +84,8 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
             setTable(options);
 
         } catch (Exception e) {
-            warn("Error updating cell segments table");
-            stack(e);
+        	LOGGER.log(Level.WARNING, "Error updating cell segments table");
+            LOGGER.log(Loggable.STACK, "Error updating cell segments table", e);
         }
 
     }

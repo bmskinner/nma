@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -38,9 +39,12 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class PairwiseVennDetailPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Detailed Venn";
     private static final String HEADER_LBL      = "Shows a dataset by dataset comparison of shared and non-shared nuclei";
@@ -76,7 +80,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
             pairwiseVennTable.setEnabled(false);
 
         } catch (Exception e) {
-            log(Level.SEVERE, "Error updating pairwise venn table", e);
+        	LOGGER.log(Loggable.STACK, "Error updating pairwise venn table", e);
         }
 
     }
@@ -153,7 +157,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
                     NumberFormat nf = NumberFormat.getInstance();
                     pct = nf.parse(cellContents).doubleValue();
                 } catch (Exception e) {
-                    fine("Error getting value: " + cellContents + " in column " + columnName, e);
+                	LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName+": "+e.getMessage());
                     pct = 0;
                 }
 

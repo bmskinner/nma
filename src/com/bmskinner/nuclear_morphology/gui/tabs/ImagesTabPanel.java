@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -62,6 +63,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -74,6 +76,8 @@ import ij.process.ImageProcessor;
  */
 @SuppressWarnings("serial")
 public class ImagesTabPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private JTree  tree;      // hold the image list
     private JPanel imagePanel;
@@ -214,7 +218,7 @@ public class ImagesTabPanel extends DetailPanel {
                     int i2 = Integer.parseInt(s2);
                     return i1 - i2;
                 } catch(NumberFormatException e) {
-                    stack("Error parsing number", e);
+                	LOGGER.log(Loggable.STACK, "Error parsing number", e);
                     return f1.compareTo(f2);
                 }
                 
@@ -298,7 +302,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     			} catch (Exception e1) {
     				label.setIcon(null);
-    				fine("Error fetching image "+f.getAbsolutePath(), e1);
+    				LOGGER.fine("Error fetching image "+f.getAbsolutePath()+": "+e1.getMessage());
     			}
     		};
 

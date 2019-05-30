@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,9 +37,12 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class CellSignalStatsPanel extends AbstractCellDetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Signals";
     private static final String HEADER_LBL    = "Pairwise distances between the centres of mass of all signals";
@@ -101,8 +106,8 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
             setTable(options);
 
         } catch (Exception e) {
-            warn("Error updating cell stats table");
-            stack("Error updating cell stats table", e);
+        	LOGGER.log(Level.WARNING, "Error updating cell stats table");
+            LOGGER.log(Loggable.STACK, "Error updating cell stats table", e);
         }
     }
 

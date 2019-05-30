@@ -1248,7 +1248,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
-
+    	
         IClusteringOptions op = opn.get();
         if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
         	builder.append(Labels.Clusters.TSNE+Io.NEWLINE);

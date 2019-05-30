@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
@@ -35,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 
 /**
@@ -45,6 +47,8 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptions
  */
 @SuppressWarnings("serial")
 public class CellProfilesPanel extends AbstractCellDetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Profiles";
     private ExportableChartPanel chartPanel;
@@ -121,7 +125,7 @@ public class CellProfilesPanel extends AbstractCellDetailPanel {
             }
 
         } catch (Exception e) {
-            stack("Error updating cell panel", e);
+            LOGGER.log(Loggable.STACK, "Error updating cell panel", e);
             chartPanel.setChart(MorphologyChartFactory.createErrorChart());
             profileOptions.setEnabled(false);
         }

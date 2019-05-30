@@ -16,12 +16,15 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.reports;
 
+import java.util.logging.Logger;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Method containined the shell report generator
@@ -30,6 +33,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  *
  */
 public class ShellReportMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public ShellReportMethod(@NonNull IAnalysisDataset dataset) {
 		super(dataset);
@@ -48,8 +53,8 @@ public class ShellReportMethod extends SingleDatasetAnalysisMethod {
 			generator.generateShellReport(dataset);
 			fireProgressEvent();
 		} catch(Exception e) {
-			warn("Could not generate report for dataset "+dataset.getName()+": "+e.getMessage());
-			stack(e);
+			LOGGER.warning("Could not generate report for dataset "+dataset.getName()+": "+e.getMessage());
+			LOGGER.log(Loggable.STACK, "Could not generate report for dataset "+dataset.getName(),  e);
 		}
 		
 	}

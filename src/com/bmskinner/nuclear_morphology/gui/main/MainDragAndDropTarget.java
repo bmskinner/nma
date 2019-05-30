@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
@@ -34,7 +35,9 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public class MainDragAndDropTarget extends DropTarget implements Loggable {
+public class MainDragAndDropTarget extends DropTarget {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	SignalChangeEventHandler sh = new SignalChangeEventHandler(this);
 
@@ -65,7 +68,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
                 // Open the files - we process *.nmd, *.bak,  *.wrk,and *.xml files
                 
                 for (File f : fileList) {
-                    fine("Checking dropped file");
+                    LOGGER.fine("Checking dropped file");
                     if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
                             || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
                         sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
@@ -82,9 +85,9 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
             }
 
         } catch (UnsupportedFlavorException e) {
-            error("Error in DnD", e);
+            LOGGER.log(Loggable.STACK, "Error in DnD", e);
         } catch (IOException e) {
-            error("IO error in DnD", e);
+            LOGGER.log(Loggable.STACK, "IO error in DnD", e);
         }
     }
 }

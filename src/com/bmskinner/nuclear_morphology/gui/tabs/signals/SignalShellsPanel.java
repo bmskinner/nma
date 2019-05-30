@@ -26,6 +26,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -72,6 +74,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDia
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.reports.DemoReportGenerator;
 
 /**
@@ -83,6 +86,8 @@ import com.bmskinner.nuclear_morphology.reports.DemoReportGenerator;
  */
 @SuppressWarnings("serial")
 public class SignalShellsPanel extends DetailPanel implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Shells";
     private static final String WITHIN_SIGNALS_LBL = "Within signals";
@@ -256,7 +261,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         	try {
 				new DemoReportGenerator().generateShellReport(activeDataset());
 			} catch (IOException e1) {
-				warn("Unable to generate report");
+				LOGGER.log(Level.WARNING, "Unable to generate report");
 			}
         });
 //        panel.add(reportBtn);

@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -38,9 +39,12 @@ import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartSetEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Segments";
     
@@ -55,7 +59,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     // https://stackoverflow.com/questions/15863178/memory-leaking-on-jdialog-closing
     // Hence, only keep one dialog, and prevent multiple copies spawning by
     // loading the active cell in when needed
-//    private final CellResegmentationDialog resegDialog;
+//    private final CellResegmentationDialog resegDialog; // not in use while debugging
 
     public CellSegmentsPanel(@NonNull InputSupplier context, final CellViewModel model) {
         super(context, model, PANEL_TITLE_LBL);
@@ -112,7 +116,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         	imagePanel.setCell(activeDataset(), cell, component, new DefaultOptions());
 
         } catch (Exception e) {
-            error("Error updating cell panel", e);
+            LOGGER.log(Loggable.STACK, "Error updating cell panel", e);
             setEnabled(false);
         }
 
@@ -156,7 +160,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         	Runnable r = () ->{
         		try {
 
-        			fine("Updating segment start index to "+event.index);
+        			LOGGER.fine("Updating segment start index to "+event.index);
         			// This is a manual change, so disable any lock
         			getCellModel().getCell().getNucleus().setLocked(false);
 
@@ -173,7 +177,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         			// Request a refresh of other panels
         			getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
         		} catch (Exception e) {
-        			error("Error updating segment", e);
+        			LOGGER.log(Loggable.STACK, "Error updating segment", e);
         		}
         	};
         	new Thread(r).start();

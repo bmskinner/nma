@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -63,6 +64,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * An abstract class implementing the plottable statistic header on a detail
@@ -73,6 +75,8 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
  */
 @SuppressWarnings("serial")
 public abstract class AbstractScatterChartPanel extends DetailPanel  {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Scatter";
     private static final String FILTER_BTN_LBL  = "Filter visible";
@@ -248,7 +252,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         if (result == 0)
             return;
 
-        finer("Filtering datasets on " + statABox.getSelectedItem().toString() + " and "
+        LOGGER.finer("Filtering datasets on " + statABox.getSelectedItem().toString() + " and "
                 + statBBox.getSelectedItem().toString());
 
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
@@ -279,12 +283,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         		d.getCollection().getSignalManager().copySignalGroups(virt);
         		d.addChildCollection(virt);		
         	} catch (CollectionFilteringException | ProfileException e1) {
-        		stack("Unable to filter collection for " + d.getName(), e1);
+        		LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);
         		continue;
         	}
         }
 
-        log(String.format("Filtered datasets by %s and %s", statA, statB));
+        LOGGER.info(String.format("Filtered datasets by %s and %s", statA, statB));
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
     }
 

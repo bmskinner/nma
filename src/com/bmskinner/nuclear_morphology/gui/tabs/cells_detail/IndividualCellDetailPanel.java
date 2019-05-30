@@ -19,6 +19,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -34,9 +36,13 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class IndividualCellDetailPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
     private JTabbedPane tabPane;
 
     private static final String PANEL_TITLE_LBL = "Cells";
@@ -99,8 +105,8 @@ public class IndividualCellDetailPanel extends DetailPanel {
             add(sp, BorderLayout.CENTER);
 
         } catch (Exception e) {
-            warn("Error creating cell detail panel");
-            stack("Error creating cell detail panel", e);
+        	LOGGER.log(Level.WARNING, "Error creating cell detail panel");
+            LOGGER.log(Loggable.STACK, "Error creating cell detail panel", e);
         }
     }
     

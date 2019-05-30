@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -44,9 +45,12 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelectionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Cell list";
     private JTree tree;
@@ -184,7 +188,6 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
         }
 
         public String toString() {
-            // return name;
             if (name.equals("Cells")) {
                 return name;
             }
@@ -214,8 +217,8 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
                 }
 
             } catch (Exception e1) {
-                warn("Error fetching cell");
-                log(Level.FINE, "Error fetching cell", e1);
+            	LOGGER.log(Level.WARNING, "Error fetching cell");
+                LOGGER.log(Loggable.STACK, "Error fetching cell", e1);
             }
         }
 
@@ -233,6 +236,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
     @Override
     public void update() {
+    	// No action
     }
 
 }

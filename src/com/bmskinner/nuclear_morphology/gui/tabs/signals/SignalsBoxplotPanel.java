@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -34,9 +35,12 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class SignalsBoxplotPanel extends BoxplotsTabPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public SignalsBoxplotPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEAR_SIGNAL);
@@ -58,7 +62,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
             try {
                 chart = new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
             } catch (Exception e) {
-                log(Level.SEVERE, "Error creating boxplots panel", e);
+                LOGGER.log(Loggable.STACK, "Error creating boxplots panel", e);
             }
 
             ViolinChartPanel panel = new ViolinChartPanel(chart);

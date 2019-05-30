@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 @SuppressWarnings("serial")
 public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
 
-    private Map<BorderTagObject, JRadioButton> map = new HashMap<BorderTagObject, JRadioButton>();
+    private Map<Tag, JRadioButton> map = new HashMap<>();
 
     public BorderTagOptionsPanel() {
 
@@ -50,9 +50,8 @@ public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
     }
 
     public void setEnabled(boolean b) {
-        for (Tag type : BorderTagObject.values(BorderTagType.CORE)) {
+        for (Tag type : BorderTagObject.values(BorderTagType.CORE))
             map.get(type).setEnabled(b);
-        }
     }
 
     /**
@@ -60,12 +59,11 @@ public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
      * 
      * @return
      */
-    public BorderTagObject getSelected() {
-        for (BorderTagObject type : BorderTagObject.values(BorderTagType.CORE)) {
+    public Tag getSelected() {
+        for (Tag type : BorderTagObject.values(BorderTagType.CORE)) {
             JRadioButton button = map.get(type);
-            if (button.isSelected()) {
+            if (button.isSelected())
                 return type;
-            }
         }
         return null;
     }

@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 
@@ -37,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Display boxplots for whole cell data
@@ -47,6 +49,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
  */
 @SuppressWarnings("serial")
 public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public CellsBoxplotsPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.WHOLE_CELL);
@@ -79,7 +83,7 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
     @Override
     protected synchronized void updateSingle() {
         super.updateSingle();
-        finest("Passing to update multiple in " + this.getClass().getName());
+        LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
         updateMultiple();
 
     }

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -76,6 +78,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, CellUpdatedEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	protected static final int SINGLE_CLICK = 1;
 	protected static final int DOUBLE_CLICK = 2;
@@ -362,14 +366,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
             updateSingle();
 
         } catch (Exception e) {
-            fine("Error updating panel " + this.getClass().getName());
-            stack("Error updating panel", e); // save detail for fine logging
+            LOGGER.fine("Error updating panel " + this.getClass().getName());
+            LOGGER.log(Loggable.STACK, "Error updating panel", e); // save detail for fine logging
 
             try {
                 updateNull();
             } catch (Exception e1) {
-            	fine(this.getClass().getName() + ": Error recovering from error updating panel");
-            	stack("Error recovering from error updating panel", e1);
+            	LOGGER.fine(this.getClass().getName() + ": Error recovering from error updating panel");
+            	LOGGER.log(Loggable.STACK, "Error recovering from error updating panel", e1);
             }
         } finally {
             setUpdating(false);
@@ -466,8 +470,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
                 chartCache.add(options, chart);
                 return chart;
             } catch (Exception e) {
-                warn("Error creating chart: " + this.getClass().getSimpleName());
-                fine(this.getClass().getName() + ": Error creating chart", e);
+            	LOGGER.log(Level.WARNING, "Error creating chart: " + this.getClass().getSimpleName());
+                LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating chart", e);
                 return ScatterChartFactory.createErrorChart();
             }
         }
@@ -490,8 +494,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
             try {
                 model = createPanelTableType(options);
             } catch (Exception e) {
-                warn("Error creating table: " + this.getClass().getSimpleName());
-                fine(this.getClass().getName() + ": Error creating table", e);
+            	LOGGER.log(Level.WARNING, "Error creating table: " + this.getClass().getSimpleName());
+                LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating table", e);
                 model = AnalysisDatasetTableCreator.createBlankTable();
             }
 //            finest("Added cached table");
@@ -778,8 +782,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
 
                 return chart;
             } catch (Exception e) {
-                warn("Error creating chart");
-                stack("Error creating chart", e);
+            	LOGGER.log(Level.WARNING, "Error creating chart");
+                LOGGER.log(Loggable.STACK, "Error creating chart", e);
                 return null;
             }
 
@@ -794,11 +798,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
                     options.getTarget().setCursor(Cursor.getDefaultCursor());
                 }
             } catch (InterruptedException e) {
-                warn("Interruption to charting in " + DetailPanel.this.getClass().getName());
-                stack(e);
+            	LOGGER.log(Level.WARNING, "Interruption to charting in " + DetailPanel.this.getClass().getName());
+                LOGGER.log(Loggable.STACK, "Interruption to charting", e);
             } catch (ExecutionException e) {
-                warn("Excecution error in charting in " + DetailPanel.this.getClass().getName());
-                stack(e);
+            	LOGGER.log(Level.WARNING, "Excecution error in charting in " + DetailPanel.this.getClass().getName());
+                LOGGER.log(Loggable.STACK, "Excecution error charting", e);
             }
         }
 
@@ -836,8 +840,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
 
                 return model;
             } catch (Exception e) {
-                warn("Error creating table model");
-                stack(e);
+            	LOGGER.log(Level.WARNING, "Error creating table model");
+            	LOGGER.log(Loggable.STACK, "Error creating table model", e);
                 return null;
             }
 
@@ -860,17 +864,17 @@ public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, 
                     table.setCursor(Cursor.getDefaultCursor());
                 }
             } catch (InterruptedException e) {
-                warn("Interruption to table creation in " + DetailPanel.this.getClass().getName());
-                stack("Error in table worker", e);
+            	LOGGER.log(Level.WARNING, "Interruption to table creation in " + DetailPanel.this.getClass().getName());
+            	LOGGER.log(Loggable.STACK, "Error in table worker", e);
             } catch (ExecutionException e) {
-                warn("Excecution error in table creation in " + DetailPanel.this.getClass().getName());
-                stack("Error in table worker", e);
+            	LOGGER.log(Level.WARNING, "Excecution error in table creation in " + DetailPanel.this.getClass().getName());
+            	LOGGER.log(Loggable.STACK, "Error in table worker", e);
             }
         }
 
         @Override
         public void cancel() {
-            log("Cancelling detail panel table update");
+            LOGGER.fine("Cancelling detail panel table update");
             this.cancel(true);
         }
                 

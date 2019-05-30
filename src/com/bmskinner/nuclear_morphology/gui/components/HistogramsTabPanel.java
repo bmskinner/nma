@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -46,6 +47,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -56,6 +58,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
  */
 @SuppressWarnings("serial")
 public abstract class HistogramsTabPanel extends DetailPanel implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Histograms";
     
@@ -104,7 +108,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
             this.setEnabled(false);
         } catch (Exception e) {
-            log(Level.SEVERE, "Error creating panel", e);
+            LOGGER.log(Loggable.STACK, "Error creating panel", e);
         }
 
     }
@@ -142,10 +146,10 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
     public void actionPerformed(ActionEvent e) {
 
         try {
-            finest("Updating abstract histogram tab panel");
+            LOGGER.finest("Updating abstract histogram tab panel");
             this.update(getDatasets());
         } catch (Exception e1) {
-            error("Error updating histogram panel from action listener", e1);
+        	LOGGER.log(Loggable.STACK, "Error updating histogram panel from action listener", e1);
         }
 
     }

@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -39,6 +40,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for multiple violin plots arranged horizontally
@@ -48,6 +50,8 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
  */
 @SuppressWarnings("serial")
 public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Violin plots";
     protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
@@ -83,7 +87,7 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 
             this.setEnabled(false);
         } catch (Exception e) {
-            error("Error creating panel", e);
+        	LOGGER.log(Loggable.STACK, "Error creating panel", e);
         }
 
     }

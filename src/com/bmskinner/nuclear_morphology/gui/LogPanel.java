@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
@@ -72,6 +73,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
@@ -83,6 +85,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
  */
 @SuppressWarnings("serial")
 public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
     
@@ -171,24 +175,24 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         int i = 0;
         for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
             String type = d.getCollection().isReal() ? "Real" : "Virtual";
-            log(i + "\t" + d.getName()+"\t"+type);
+            LOGGER.info(i + "\t" + d.getName()+"\t"+type);
             i++;
         }
     }
 
     private void killAllTasks() {
 
-        log("Threads running in the JVM:");
+    	LOGGER.info("Threads running in the JVM:");
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
         for (Thread t : threadSet) {
-            log("Thread " + t.getId() + ": " + t.getState());
+        	LOGGER.info("Thread " + t.getId() + ": " + t.getState());
             t.interrupt();
         }
 
     }
     
     private void listTasks() {
-    	log(ThreadManager.getInstance().toString());
+    	LOGGER.info(ThreadManager.getInstance().toString());
     }
 
    
@@ -204,9 +208,9 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
             try {
                 doc.insertString(doc.getLength(), s, attrs);
             } catch (BadLocationException e) {
-                logIJ(s);
-                logIJ("Requested insert at " + e.offsetRequested() + " in document of " + doc.getLength());
-                logToImageJ("Error appending to log panel", e);
+                Loggable.logIJ(s);
+                Loggable.logIJ("Requested insert at " + e.offsetRequested() + " in document of " + doc.getLength());
+                Loggable.logToImageJ("Error appending to log panel", e);
             }
         };
         SwingUtilities.invokeLater(r);
@@ -277,13 +281,13 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
         DatasetValidator v = new DatasetValidator();
         for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
-            log("Validating " + d.getName() + "...");
+            LOGGER.info("Validating " + d.getName() + "...");
             if (!v.validate(d)) {
                 for (String s : v.getErrors()) {
-                    warn(s);
+                	LOGGER.warning(s);
                 }
             } else {
-                log("Dataset OK");
+            	LOGGER.info("Dataset OK");
             }
 
         }
@@ -423,9 +427,9 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
          */
         private void makeCommandList() {
         	runnableCommands.put(HIST_CMD, () -> {
-                log("History: ");
+        		LOGGER.info("History: ");
                 for (String s : history)
-                    log("\t"+s);
+                	LOGGER.info("\t"+s);
             });
         	
         	
@@ -433,30 +437,30 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         		Set<IAnalysisDataset> datasets = DatasetListManager.getInstance().getAllDatasets();
         		
         		for(IAnalysisDataset d : datasets)
-        			log(d.getName()+": "+d.hashCode());
+        			LOGGER.info(d.getName()+": "+d.hashCode());
         		
         	});
         	
             
             runnableCommands.put(HELP_CMD, () -> {
-                log("Available commands: ");
+            	LOGGER.info("Available commands: ");
                 for (String key : commandMap.keySet()) {
                     InterfaceMethod im = commandMap.get(key);
-                    log(" " + key + " - " + im.toString());
+                    LOGGER.info(" " + key + " - " + im.toString());
                 }
-                log(" check - validate the open root datasets");
-                log(" list  - list the open root datasets");
-                log(" export xml - export the selected dataset in XML format");
-                log(" tasks - list the current task list");
-                log(" "+HASH_CMD+" - print the hashes of the selected datasets");
+                LOGGER.info(" check - validate the open root datasets");
+                LOGGER.info(" list  - list the open root datasets");
+                LOGGER.info(" export xml - export the selected dataset in XML format");
+                LOGGER.info(" tasks - list the current task list");
+                LOGGER.info(" "+HASH_CMD+" - print the hashes of the selected datasets");
             });
            
             runnableCommands.put(THROW_CMD, () -> {
-                log("Throwing exception");
+            	LOGGER.info("Throwing exception");
                 try {
                     throw new IllegalArgumentException("Throwing an exception");
                 } catch (Exception e) {
-                    error("Caught expected exception", e);
+                    LOGGER.log(Loggable.STACK, "Caught expected exception", e);
                 }
             });
             
@@ -482,7 +486,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
                 if (runnableCommands.containsKey(command)) {
                     runnableCommands.get(command).run();
                 } else {
-                    log("Command not recognised");
+                	LOGGER.info("Command not recognised");
                 }
 
             }
@@ -495,7 +499,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         public void actionPerformed(ActionEvent e) {
 
             if (e.getSource().equals(console)) {
-                log(console.getText());
+            	LOGGER.info(console.getText());
                 history.add(console.getText());
                 historyIndex=history.size();
                 runCommand(console.getText());

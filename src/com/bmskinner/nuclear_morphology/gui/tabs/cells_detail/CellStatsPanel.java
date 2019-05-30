@@ -23,6 +23,8 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -46,9 +48,17 @@ import com.bmskinner.nuclear_morphology.gui.components.renderers.ConsistentRowTa
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Display for overall stats per cell
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class CellStatsPanel extends AbstractCellDetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Info";
     
@@ -143,40 +153,32 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
     @Override
     public synchronized void refreshTableCache() {
-        finest("Preparing to refresh table cache");
+        LOGGER.finest("Preparing to refresh table cache");
         clearTableCache();
-        finest("Updating tables after clear");
+        LOGGER.finest("Updating tables after clear");
         this.update();
     }
 
     @Override
-	public synchronized void update() {
+    public synchronized void update() {
 
-        if (this.isMultipleDatasets() || !this.hasDatasets()) {
-            table.setModel(AbstractTableCreator.createBlankTable());
-            return;
-        }
+    	if (this.isMultipleDatasets() || !this.hasDatasets()) {
+    		table.setModel(AbstractTableCreator.createBlankTable());
+    		return;
+    	}
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setCell(this.getCellModel().getCell())
-                .setScale(GlobalOptions.getInstance().getScale())
-                .setTarget(table)
-                .setColumnRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer())
-                .build();
+    	TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+    			.setCell(this.getCellModel().getCell())
+    			.setScale(GlobalOptions.getInstance().getScale())
+    			.setTarget(table)
+    			.setColumnRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer())
+    			.build();
 
-        try {
-
-            setTable(options);
-
-        } catch (Exception e) {
-            warn("Error updating cell stats table");
-            fine("Error updating cell stats table", e);
-        }
+    	setTable(options);
     }
 
     @Override
     public void setChartsAndTablesLoading() {
-
         table.setModel(AbstractTableCreator.createLoadingTable());
     }
 

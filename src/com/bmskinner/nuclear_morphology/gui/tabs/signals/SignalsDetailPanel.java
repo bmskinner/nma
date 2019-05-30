@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
+import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 
@@ -26,6 +27,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The top level tab panel showing information on signals at the dataset level
@@ -35,6 +37,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
  */
 @SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Nuclear signals";
     private JTabbedPane signalsTabPane;
@@ -79,7 +83,7 @@ public class SignalsDetailPanel extends DetailPanel {
             this.add(signalsTabPane, BorderLayout.CENTER);
 
         } catch (Exception e) {
-            error("Error making signal panel", e);
+            LOGGER.log(Loggable.STACK, "Error making signal panel", e);
         }
     }
     

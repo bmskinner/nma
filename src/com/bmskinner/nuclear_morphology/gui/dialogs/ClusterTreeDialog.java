@@ -58,6 +58,10 @@ import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.DraggableTreeViewer;
 import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
@@ -84,7 +88,7 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
  *
  */
 @SuppressWarnings("serial")
-public class ClusterTreeDialog extends LoadingIconDialog {
+public class ClusterTreeDialog extends MessagingDialog {
 	
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
@@ -116,7 +120,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                     new BasicControlPalette(0, BasicControlPalette.DisplayMode.INITIALLY_CLOSED, true),
                     SwingConstants.LEFT);
 
-            viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
+            viewer.addMouseListener(new MouseClusterSelectionAdapter());
 
             this.add(viewer, BorderLayout.CENTER);
 
@@ -297,10 +301,6 @@ public class ClusterTreeDialog extends LoadingIconDialog {
         	log("Copied Newick tree for cluster "+group.getName());
         });
         panel.add(copyNewickButton);
-        
-
-        panel.add(this.getLoadingLabel());
-
         return panel;
     }
 
@@ -318,28 +318,20 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      *            the dataset of nuclei in the cluster
      */
     private void colourTreeNodesByCluster(final ICellCollection cluster) {
-
-        setStatusLoading();
         // Set everything to grey
         setNodeColour(dataset.getCollection(), Color.LIGHT_GRAY);
 
         if (cluster != null) {
-
             // Set the cluster colour
             setNodeColour(cluster, Color.BLACK);
-
         }
         updateNodePainter();
-        setStatusLoaded();
-
     }
 
     private void colourTreeNodesByClusterGroup(final IClusterGroup group) {
 
         if (group != null) {
         	LOGGER.finer("Colouring nodes by cluster group: " + group.getName());
-
-            setStatusLoading();
 
             int clusterNumber = 0;
             for (UUID id : group.getUUIDs()) {
@@ -375,7 +367,6 @@ public class ClusterTreeDialog extends LoadingIconDialog {
             setNodeColour(dataset.getCollection(), Color.BLACK);
         }
         updateNodePainter();
-        setStatusLoaded();
     }
 
     /**
@@ -395,17 +386,8 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 Taxon t = tree.getTaxon(n);
 
                 ICell c = (ICell) t.getAttribute("Cell");
-
                 collection.streamCells().filter(cell->cell.equals(c))
                     .forEach(cell->n.setAttribute("Color", colour));
-                
-
-
-//                for (ICell cell : cells) {
-//                    if (cell.equals(c)) {
-//                        n.setAttribute("Color", colour);
-//                    }
-//                }
             }
         }
     }
@@ -464,9 +446,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 if (digit > maxExisting) {
                     maxExisting = digit;
                 }
-
             }
-
         }
 
         int clusterNumber = maxExisting + offset;
@@ -491,12 +471,9 @@ public class ClusterTreeDialog extends LoadingIconDialog {
             if (tree.isExternal(n)) {
 
                 Taxon t = tree.getTaxon(n);
-
                 ICell c = (ICell) t.getAttribute("Cell");
                 clusterCollection.addCell(c);
-
             }
-
         }
 
         if (clusterCollection.hasCells()) {
@@ -551,9 +528,8 @@ public class ClusterTreeDialog extends LoadingIconDialog {
 
         IClusterGroup mergeGroup = makeNewClusterGroup(list);
 
-        for (IAnalysisDataset d : list) {
+        for (IAnalysisDataset d : list)
             mergeGroup.addDataset(d);
-        }
         
         colourTreeNodesByClusterGroup(mergeGroup);
     }
@@ -562,16 +538,15 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * Create a new cluster group based on the clustering options in the
      * existing cluster group, and a new list of datasets
      * 
-     * @param list
-     *            the datasets to include in the cluster group
+     * @param list the datasets to include in the cluster group
      * @return
      */
-    private ClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list) {
-        ClusteringOptions newOptions = new ClusteringOptions(group.getOptions().get());
+    private IClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list) {
+        IClusteringOptions newOptions = group.getOptions().get().duplicate();
         newOptions.setClusterNumber(list.size());
 
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-        ClusterGroup newGroup = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, newOptions,
+        IClusterGroup newGroup = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, newOptions,
                 group.getTree());
         return newGroup;
     }
@@ -582,7 +557,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * @param list
      * @return
      */
-    private boolean checkCellPresentOnlyOnce(List<IAnalysisDataset> list) {
+    private boolean cellsPresentOnlyOnce(List<IAnalysisDataset> list) {
         boolean ok = true;
         Set<UUID> cellIDsFound = new HashSet<>();
                 
@@ -603,7 +578,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * @param list
      * @return true if all cells in the list are present in a cluster
      */
-    private boolean checkAllCellsPresent(List<IAnalysisDataset> clusters) {
+    private boolean cellsAllPresent(List<IAnalysisDataset> clusters) {
         boolean ok = true;
 
         List<UUID> cellIDsFound = new ArrayList<UUID>();
@@ -622,164 +597,62 @@ public class ClusterTreeDialog extends LoadingIconDialog {
 
         if (!list.isEmpty()) {
 
-            if (checkCellPresentOnlyOnce(list)) {
+        	if (!cellsPresentOnlyOnce(list)) {
+        		LOGGER.info("Cannot make cluster group");
+        		LOGGER.info("Cells present in more than one cluster");
+        		LOGGER.info("Adding as standard manual clusters");
+        		return;
+        	}
 
-                if (checkAllCellsPresent(list)) {
-                    // Offer to make a cluster group
-                    int option = JOptionPane.showOptionDialog(null, "Join the new clusters into a cluster group?",
-                            "Create cluster group", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-                            null, null);
+        	if (!cellsAllPresent(list)) {
+        		LOGGER.info("Cannot make cluster group");
+        		LOGGER.info("Not all cells are assigned clusters");
+        		LOGGER.info("Adding as standard manual clusters");
+        		return;
+        	}
+        	
+        	// Offer to make a cluster group
+        	try {
+        		boolean join = new DefaultInputSupplier().requestApproval("Join the new clusters into a cluster group?", "Create cluster group");
 
-                    if (option == JOptionPane.CANCEL_OPTION) {
-                        // Cancelled
-                        log("Adding as standard manual clusters");
-                    } else if (option == JOptionPane.OK_OPTION) {
-                        // Make the group
+        		if (join) {
+        			LOGGER.fine("Creating cluster group");
+        			// Make the group
 
-                        ClusterGroup newGroup = makeNewClusterGroup(list);
+        			IClusterGroup newGroup = makeNewClusterGroup(list);
 
-                        int i = 0;
-                        for (IAnalysisDataset d : list) {
-                            d.setName(newGroup.getName() + "_Cluster_" + i);
-                            newGroup.addDataset(d);
-                            i++;
-                        }
-                        dataset.addClusterGroup(newGroup);
-
-                    }
-                } else {
-                	LOGGER.info("Cannot make cluster group");
-                	LOGGER.info("Not all cells are assigned clusters");
-                	LOGGER.info("Adding as standard manual clusters");
-                }
-            } else {
-            	LOGGER.info("Cannot make cluster group");
-            	LOGGER.info("Cells present in more than one cluster");
-            	LOGGER.info("Adding as standard manual clusters");
-            }
-
+        			int i = 0;
+        			for (IAnalysisDataset d : list) {
+        				d.setName(newGroup.getName() + "_Cluster_" + i);
+        				newGroup.addDataset(d);
+        				i++;
+        			}
+        			dataset.addClusterGroup(newGroup);
+        			
+        		} else {
+        			LOGGER.info("Adding as standard manual clusters");
+        		}
+        	} catch (RequestCancelledException e) {
+        		LOGGER.info("Adding as standard manual clusters");
+        	}        	
         }
     }
 
+    /**
+     * Select cluster nodes based on horizontal position
+     * @author bms41
+     *
+     */
     protected class MouseClusterSelectionAdapter extends MouseAdapter {
 
-        public MouseClusterSelectionAdapter() {
+        public MouseClusterSelectionAdapter() {}
 
-        }
-
-        // public void mousePressed(MouseEvent e){
-        //
-        // TreePane pane = viewer.getTreePane();
-        // Point location = pane.getMousePosition();
-        // RootedTree tree = pane.getTree();
-        // /*
-        // * How to get the rectangle left of the mouse x-position?
-        // * Then select all nodes to the left, and find the nodes with no
-        // children
-        // * selected. Use their direct children as the new clusters
-        // */
-        // IJ.log("Click heard");
-        //
-        //// The region left of the line
-        // Rectangle r = new Rectangle( (int) location.getX(), (int)
-        // pane.getBounds().getHeight());
-        // viewer.setSelectionMode(SelectionMode.NODE);
-        // pane.setDragRectangle(r);
-        //
-        // // Need to select the given nodes
-        //
-        // Set<Node> leftNodes = pane.getSelectedNodes();
-        //
-        //// Set<Node> leftNodes = viewer.getNodesAtPoint((Graphics2D)
-        // pane.getGraphics(), r);
-        //// Set<Node> leftNodes = getNodesAt((Graphics2D) pane.getGraphics(),
-        // r);
-        //
-        // // The child free nodes
-        // Set<Node> childLess = new HashSet<Node>();
-        // for(Node n : leftNodes){
-        // for(Node check : leftNodes){
-        // if( ! tree.getChildren(n).contains(check)){
-        // // no children in the left space
-        // childLess.add(n);
-        // }
-        // }
-        // }
-        // IJ.log("Found "+childLess.size()+" child free nodes left of point");
-        // viewer.setSelectionMode(SelectionMode.CLADE);
-        // for(Node n : childLess){
-        // List<Node> clusterNodes = tree.getChildren(n);
-        //
-        // for(Node clusterNode : clusterNodes){
-        // pane.setSelectedNode(clusterNode);
-        // extractSelectedNodesToCluster();
-        //
-        // }
-        // }
-        // IJ.log("Clusters made");
-        //
-        // List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-        //
-        // for(CellCollection c : clusterList){
-        // if(c.hasCells()){
-        //
-        // dataset.addChildCollection(c);
-        //
-        // AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-        // clusterDataset.setRoot(false);
-        // list.add(clusterDataset);
-        // }
-        // }
-        //
-        // ClusteringOptions newOptions = new
-        // ClusteringOptions(ClusteringMethod.HIERARCHICAL);
-        // newOptions.setClusterNumber(list.size());
-        // newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
-        // newOptions.setIncludeModality(group.getOptions().isIncludeModality());
-        // newOptions.setModalityRegions(group.getOptions().getModalityRegions());
-        // newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
-        // int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-        // ClusterGroup newGroup = new
-        // ClusterGroup("ClusterGroup_"+clusterNumber, newOptions,
-        // group.getTree());
-        //
-        // for(AnalysisDataset d : list){
-        // d.setName(newGroup.getName()+"_"+d.getName());
-        // newGroup.addDataset(d);
-        // }
-        //
-        // colourTreeNodesByClusterGroup(newGroup);
-        //
-        //
-        // }
-
-        // private Set<Node> getNodesAt(Graphics2D g2, Rectangle rect) {
-        ////
-        // Set<Node> nodes = new HashSet<Node>();
-        ////
-        // Tree tree = viewer.getTreePane().getTree();
-        //
-        // IJ.log("Selection rectangle: "+rect.x+", "+rect.y+" : "+rect.width+"
-        // x "+rect.height);
-        // AffineTransform transform = g2.getTransform();
-        // TreeLayout treeLayout = new RectilinearTreeLayout();
-        // treeLayout.setTree(tree);
-        //
-        // Node[] allNodes = tree.getNodes().toArray(new Node[0]);
-        // for(int i=allNodes.length-1; i >= 0; i--){
-        // if(rect.contains(transform.transform(treeLayout.getNodePoint(allNodes[i]),null))){
-        // nodes.add(allNodes[i]);
-        // }
-        // }
-        //
-        // return nodes;
-        // }
-        //
         @Override
         public void mouseMoved(MouseEvent e) {
 
             Point location = viewer.getMousePosition();
             double lineLength = viewer.getTreePane().getBounds().getHeight();
+            LOGGER.fine("Mouse at "+location+" length "+lineLength);
 
             Line2D.Double line = new Line2D.Double(location.getX(), 0, location.getX(), lineLength);
 

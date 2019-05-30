@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLCreator;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Export the dataset to an nmd file
@@ -44,6 +46,8 @@ import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLCreator;
  *
  */
 public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private File saveFile = null;
     private ExportFormat format;
@@ -99,13 +103,13 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     		}
 
     		if (isOk) 
-    			fine("Save was sucessful");
+    			LOGGER.fine("Save was sucessful");
     		else
-    			warn("Save was unsucessful");
+    			LOGGER.warning("Save was unsucessful");
 
     	} catch (Exception e) {
-    		warn("Save was unsucessful");
-    		stack("Unable to save dataset", e);
+    		LOGGER.warning("Save was unsucessful");
+    		LOGGER.log(Loggable.STACK, "Unable to save dataset", e);
     	}
     }
 
@@ -118,7 +122,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
      */
     public boolean saveAnalysisDatasetToXML(IAnalysisDataset dataset, File saveFile) {
     	 boolean ok = true;
- 		fine("Saving XML dataset to " + saveFile.getAbsolutePath());
+ 		LOGGER.fine("Saving XML dataset to " + saveFile.getAbsolutePath());
  		
  		File parentFolder = saveFile.getParentFile();
  		if(!parentFolder.exists())
@@ -142,7 +146,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  			xmlOutput.setFormat(Format.getPrettyFormat());
  			xmlOutput.output(doc, cos);
  		} catch (IOException e) {
- 			stack(String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
+ 			LOGGER.log(Loggable.STACK, String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
  			ok = false;
  		}
  		
@@ -162,7 +166,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
         boolean ok = true;
         // Since we're creating a save format, go with nmd: Nuclear
 		// Morphology Dataset
-		fine("Saving dataset to " + saveFile.getAbsolutePath());
+		LOGGER.fine("Saving dataset to " + saveFile.getAbsolutePath());
 		
 		File parentFolder = saveFile.getParentFile();
 		if(!parentFolder.exists())
@@ -180,13 +184,13 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 		    output.writeObject(dataset);
 
 		} catch (IOException e) {
-		    error("IO error saving dataset", e);
+		    LOGGER.log(Loggable.STACK, "IO error saving dataset", e);
 		    ok = false;
 		} catch (Exception e1) {
-		    error("Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
+		    LOGGER.log(Loggable.STACK, "Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
 		    ok = false;
 		} catch (StackOverflowError e) {
-		    error("StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
+		    LOGGER.log(Loggable.STACK, "StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
 		    ok = false;
 		}
 
@@ -221,7 +225,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     	try {
     		copyFile(saveFile, backupFile);
     	} catch (IOException e) {
-    		stack(e.getMessage(), e);
+    		LOGGER.log(Loggable.STACK, e.getMessage(), e);
     	}     
     }
 
