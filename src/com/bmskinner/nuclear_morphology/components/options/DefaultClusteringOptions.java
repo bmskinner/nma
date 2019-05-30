@@ -56,23 +56,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	}
 
 	public DefaultClusteringOptions(@NonNull IClusteringOptions oldOptions) {
-		setString(CLUSTER_METHOD_KEY, oldOptions.getType().name());
-		setString(HIERARCHICAL_METHOD_KEY, oldOptions.getHierarchicalMethod().name());
-
-
-		setBoolean(USE_SIMILARITY_MATRIX_KEY, oldOptions.isUseSimilarityMatrix());
-
-		setBoolean(INCLUDE_MESH_KEY, oldOptions.isIncludeMesh());
-		setBoolean(USE_TSNE_KEY, oldOptions.getBoolean(USE_TSNE_KEY));
-
-		setInt(EM_ITERATIONS_KEY, oldOptions.getIterations());
-		setInt(MANUAL_CLUSTER_NUMBER_KEY, oldOptions.getClusterNumber());
-
-		for (PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats())
-			setBoolean(stat.toString(), oldOptions.isIncludeStatistic(stat));
-
-		for (UUID id : oldOptions.getSegments())
-			setBoolean(id.toString(), oldOptions.isIncludeSegment(id));
+		set(oldOptions);
 	}
 	
 	@Override
