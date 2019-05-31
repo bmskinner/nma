@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -32,12 +33,15 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Refold the consensus nucleus for the selected dataset using default
  * parameters
  */
 public class RefoldNucleusAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_LBL = "Refolding";
     private static final int PROGRESS_BAR_LENGTH = 100;
@@ -95,8 +99,8 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 
         } catch (Exception e1) {
             this.cancel();
-            warn("Error refolding nucleus");
-            stack("Error refolding nucleus", e1);
+            LOGGER.warning("Error refolding nucleus");
+            LOGGER.log(Loggable.STACK, "Error refolding nucleus", e1);
         }
     }
 

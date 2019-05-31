@@ -25,6 +25,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -40,7 +41,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class EllipticalOverlay extends AbstractOverlay
-        implements Overlay, PropertyChangeListener, Serializable, Loggable {
+        implements Overlay, PropertyChangeListener, Serializable{
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private EllipticalOverlayObject ellipse = null;
 
@@ -152,8 +155,8 @@ public class EllipticalOverlay extends AbstractOverlay
         	minyy = minyy > maxyy ? maxyy : minyy;
         	maxyy = temp > maxyy ? temp : maxyy;
 
-        	finest("Chart rectangle x: " + minx + " - " + maxx + "  y: " + miny + " - " + maxy);
-        	finest("Java2D rectangle x: " + minxx + " - " + maxxx + "  y: " + minyy + " - " + maxyy);
+        	LOGGER.finest( "Chart rectangle x: " + minx + " - " + maxx + "  y: " + miny + " - " + maxy);
+        	LOGGER.finest( "Java2D rectangle x: " + minxx + " - " + maxxx + "  y: " + minyy + " - " + maxyy);
 
         	if (plot.getOrientation() == PlotOrientation.VERTICAL) {
         		drawVerticalEllipse(g2, dataArea, minxx, maxxx, minyy, maxyy, ellipse);

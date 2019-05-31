@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -52,7 +54,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
-
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public static final int DEFAULT_PROFILE_LENGTH = 1000;
 
@@ -284,10 +287,10 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				}
 			}
 		} catch (UnavailableBorderTagException e) {
-			fine("Border tag is not present: "+borderTag);
+			LOGGER.fine("Border tag is not present: "+borderTag);
 			return;
 		}catch (ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-			stack("Error getting profile from tag", e);
+			LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get median profile", e);
 		}
 	}
@@ -450,17 +453,17 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				profile = nucleus.getProfile(type);
 			} else {
 
-				finest("Getting XY positions along profile from reference point");
+				LOGGER.finest( "Getting XY positions along profile from reference point");
 				profile = nucleus.getProfile(type, Tag.REFERENCE_POINT);
 
 				// add the segments
-				finest("Adding ordered segments from reference point");
+				LOGGER.finest( "Adding ordered segments from reference point");
 				List<IBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getOrderedSegments();
 				addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0, 0);
 			}
 		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-			fine("Error getting profile", e);
+			LOGGER.log(Loggable.STACK, "Error getting profile", e);
 			throw new ChartDatasetCreationException("Cannot get segmented profile for " + nucleus.getNameAndNumber());
 		}
 
@@ -523,7 +526,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             }
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
                 | UnsegmentedProfileException e) {
-            fine("Error creating single dataset variability data", e);
+        	LOGGER.log(Loggable.STACK, "Error creating single dataset variability data", e);
             throw new ChartDatasetCreationException("Error creating single dataset variability data", e);
         }
         return ds;
@@ -541,7 +544,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             try {
                 profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-                fine("Error getting profile from tag", e);
+            	LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
             }
             IProfile xpoints = createXPositions(profile, DEFAULT_PROFILE_LENGTH);

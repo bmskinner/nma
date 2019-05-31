@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -27,6 +28,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Holds arrays of values with wrapping and provides methods to manipulate them.
@@ -37,10 +39,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
  */
 @Deprecated
 public class Profile implements IProfile {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
     protected final double[] array;
@@ -650,8 +651,8 @@ public class Profile implements IProfile {
             }
 
         } catch (ProfileException e) {
-            warn("Cannot offset profile");
-            stack("Error getting offset profile", e);
+            LOGGER.warning("Cannot offset profile");
+            LOGGER.log(Loggable.STACK, "Error getting offset profile", e);
         }
 
         return index;
@@ -893,7 +894,7 @@ public class Profile implements IProfile {
             }
 
             if (result.length == 0) {
-                log(Level.SEVERE, "Subregion length zero: " + indexStart + " - " + indexEnd);
+               LOGGER.fine("Subregion length zero: " + indexStart + " - " + indexEnd);
             }
             return new Profile(result);
         }

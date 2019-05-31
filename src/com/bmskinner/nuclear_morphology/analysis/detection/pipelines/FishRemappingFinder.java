@@ -17,12 +17,14 @@
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
 import ij.process.ImageProcessor;
@@ -36,6 +38,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class FishRemappingFinder extends VoidFinder {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String FISH_FOLDER_IS_FILE_ERROR = "FISH directory is not a folder";
     private final File          dir;
@@ -55,7 +59,7 @@ public class FishRemappingFinder extends VoidFinder {
         // Import the image as a stack
         String imageName = imageFile.getName();
 
-        finest("Converting image");
+        LOGGER.finest( "Converting image");
         ImageProcessor openProcessor = new ImageImporter(imageFile).toConverter()
         		.convertToRGBGreyscale()
         		.invert()
@@ -67,7 +71,7 @@ public class FishRemappingFinder extends VoidFinder {
         File fishImageFile = new File(dir, imageName);
 
         if (!fishImageFile.exists()) {
-            warn("File does not exist: " + fishImageFile.getAbsolutePath());
+            LOGGER.warning("File does not exist: " + fishImageFile.getAbsolutePath());
             ImageProcessor ep = ImageConverter.createBlankImage(openProcessor.getWidth(), openProcessor.getHeight());
 
             ImageAnnotator an = new ImageAnnotator(ep).annotateString(ep.getWidth() / 2, ep.getHeight() / 2,

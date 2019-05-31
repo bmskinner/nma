@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -71,7 +72,9 @@ import ij.io.SaveDialog;
  *
  */
 @SuppressWarnings("serial")
-public class ExportableChartPanel extends ChartPanel implements Loggable, ChartSetEventListener {
+public class ExportableChartPanel extends ChartPanel implements ChartSetEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String EXPORT_LBL = "Export data";
 	private static final String COPY_LBL   = "Copy data";
@@ -243,7 +246,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
             double aspectRatio = chartWidth / chartHeight;
 
-            finest("Plot w: " + chartWidth + "; h: " + chartHeight + "; asp: " + aspectRatio);
+            LOGGER.finest( "Plot w: " + chartWidth + "; h: " + chartHeight + "; asp: " + aspectRatio);
 
             // start with impossible values, before finding the real chart
             // values
@@ -259,7 +262,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
                 XYDataset dataset = plot.getDataset(i);
 
                 if (dataset == null) { // No dataset, skip
-                    finest("Null dataset " + i);
+                    LOGGER.finest( "Null dataset " + i);
                     continue;
                 }
 
@@ -320,7 +323,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             yMax += yDiff;
 
             if (yMin >= yMax) {
-                finer("Min and max are equal");
+                LOGGER.finer( "Min and max are equal");
                 xMin = -DEFAULT_AUTO_RANGE;
                 yMin = -DEFAULT_AUTO_RANGE;
                 xMax = DEFAULT_AUTO_RANGE;
@@ -331,7 +334,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             plot.getDomainAxis().setRange(xMin, xMax);
 
         } catch (Exception e) {
-            stack("Error restoring auto bounds, falling back to default", e);
+            LOGGER.log(Loggable.STACK, "Error restoring auto bounds, falling back to default", e);
             super.restoreAutoBounds();
         }
 
@@ -394,8 +397,8 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
     		try(PrintWriter out = new PrintWriter(saveFile) ) {
     			out.println(string);
     		} catch (FileNotFoundException e) {
-    			warn("Cannot export to file");
-    			stack("Error exporting", e);
+    			LOGGER.warning("Cannot export to file");
+    			LOGGER.log(Loggable.STACK, "Error exporting", e);
     		}
     	}).start();
     }

@@ -21,6 +21,7 @@ import java.awt.Paint;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -47,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Methods for creating histograms from chart options
@@ -55,6 +57,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  *
  */
 public class HistogramChartFactory extends AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final boolean HISTOGRAM_CREATE_LEGEND = true;
 	private static final boolean HISTOGRAM_CREATE_TOOLTIP = true;
@@ -113,7 +117,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
     public JFreeChart createStatisticHistogram(String component) {
 
-        finest("Creating stats histogram for " + component + ": " + options.getStat());
+        LOGGER.finest( "Creating stats histogram for " + component + ": " + options.getStat());
 
         if (!options.hasDatasets()) {
             return createEmptyHistogram();
@@ -199,7 +203,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
             list = options.hasDatasets() ? new SignalHistogramDatasetCreator(options)
                     .createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale()) : null;
         } catch (ChartDatasetCreationException e) {
-            stack("Error making signal dataset", e);
+            LOGGER.log(Loggable.STACK, "Error making signal dataset", e);
             return createErrorChart();
         }
 

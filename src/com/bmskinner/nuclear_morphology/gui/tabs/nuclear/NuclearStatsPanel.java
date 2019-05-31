@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -37,9 +38,12 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public class NuclearStatsPanel extends DetailPanel implements ActionListener {
+public class NuclearStatsPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Average stats";
     private ExportableTable tablePopulationStats;
@@ -77,22 +81,22 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 
     @Override
     protected void updateSingle() {
-        finest("Passing to update multiple");
+        LOGGER.finest( "Passing to update multiple");
         updateMultiple();
     }
 
     @Override
     protected void updateMultiple() {
         super.updateMultiple();
-        finest("Updating analysis stats panel");
+        LOGGER.finest( "Updating analysis stats panel");
         updateStatsPanel();
-        finest("Updated analysis stats panel");
+        LOGGER.finest( "Updated analysis stats panel");
     }
 
     @Override
     protected void updateNull() {
         super.updateNull();
-        finest("Passing to update multiple");
+        LOGGER.finest( "Passing to update multiple");
         updateMultiple();
     }
 
@@ -105,12 +109,11 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
     /**
      * Update the stats panel with data from the given datasets
      * 
-     * @param list
-     *            the datasets
+     * @param list the datasets
      */
     private void updateStatsPanel() {
 
-        finest("Updating stats panel");
+        LOGGER.finest( "Updating stats panel");
 
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
                 .setScale(GlobalOptions.getInstance().getScale())
@@ -118,7 +121,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
                 .build();
 
         setTable(options);
-        finest("Set table model");
+        LOGGER.finest( "Set table model");
 
     }
 
@@ -145,22 +148,9 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
             tablePopulationStats.setModel(model);
 
         } catch (Exception e) {
-            warn("Error making nuclear stats panel");
-            stack("Error creating stats panel", e);
+            LOGGER.warning("Error making nuclear stats panel");
+            LOGGER.log(Loggable.STACK, "Error creating stats panel", e);
         }
         return scrollPane;
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        try {
-            finest("Updating nucleus stats panel");
-            this.update(getDatasets());
-        } catch (Exception e1) {
-            stack("Error updating boxplot panel from action listener", e1);
-        }
-
-    }
-
 }

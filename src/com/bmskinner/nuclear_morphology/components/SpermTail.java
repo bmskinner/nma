@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -40,6 +42,8 @@ import ij.process.ImageProcessor;
  */
 @Deprecated
 public class SpermTail extends AbstractCellularComponent implements Serializable, Flagellum {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -121,15 +125,15 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        finest("\tWriting sperm tail");
+        LOGGER.finest( "\tWriting sperm tail");
         out.defaultWriteObject();
-        finest("\tWrote sperm tail");
+        LOGGER.finest( "\tWrote sperm tail");
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        finest("\tReading sperm tail");
+        LOGGER.finest( "\tReading sperm tail");
         in.defaultReadObject();
-        finest("\tRead sperm tail");
+        LOGGER.finest( "\tRead sperm tail");
     }
 
     @Override

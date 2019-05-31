@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This holds a CellCollection, the analyses that have been run on it and the
@@ -48,6 +50,8 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  */
 @Deprecated
 public class AnalysisDataset implements IAnalysisDataset {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long          serialVersionUID = 1L;
     private Map<UUID, AnalysisDataset> childCollections = new HashMap<UUID, AnalysisDataset>(); // hold
@@ -280,7 +284,7 @@ public class AnalysisDataset implements IAnalysisDataset {
     public void setScale(double scale) {				
 		if(scale<=0) // don't allow a scale to cause divide by zero errors
 			return;
-		fine("Setting scale for "+getName()+" to "+scale);
+		LOGGER.fine("Setting scale for "+getName()+" to "+scale);
 		getCollection().setScale(scale);
 		
 		Optional<IAnalysisOptions> op = getAnalysisOptions();
@@ -864,7 +868,7 @@ public class AnalysisDataset implements IAnalysisDataset {
     @Override
     public void updateSourceImageDirectory(File expectedImageDirectory) {
 
-        fine("Searching " + expectedImageDirectory.getAbsolutePath());
+        LOGGER.fine("Searching " + expectedImageDirectory.getAbsolutePath());
 
         if (!expectedImageDirectory.exists()) {
             throw new IllegalArgumentException("Requested directory does not exist: " + expectedImageDirectory);
@@ -875,24 +879,24 @@ public class AnalysisDataset implements IAnalysisDataset {
         if (!checkName(expectedImageDirectory, this)) {
             throw new IllegalArgumentException("Dataset name does not match new folder; unable to update paths");
         }
-        fine("Dataset name matches new folder");
+        LOGGER.fine("Dataset name matches new folder");
 
         // Does expectedImageDirectory contain image files?
         if (!checkHasImages(expectedImageDirectory)) {
             throw new IllegalArgumentException("Target folder contains no images; unable to update paths");
         }
 
-        fine("Target folder contains at least one image");
+        LOGGER.fine("Target folder contains at least one image");
 
-        fine("Updating dataset image paths");
+        LOGGER.fine("Updating dataset image paths");
         this.getCollection().setSourceFolder(expectedImageDirectory);
 
-        fine("Updating child dataset image paths");
+        LOGGER.fine("Updating child dataset image paths");
         for (IAnalysisDataset child : this.getAllChildDatasets()) {
              child.getCollection().setSourceFolder(expectedImageDirectory);
         }
 
-        log("Updated image paths to new folder location");
+        LOGGER.info("Updated image paths to new folder location");
     }
 
     /**

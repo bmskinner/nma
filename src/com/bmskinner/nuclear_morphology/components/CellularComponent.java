@@ -41,8 +41,8 @@ import ij.process.FloatPolygon;
  * @since 1.11.0
  *
  */
-public interface CellularComponent extends Imageable, Serializable, Loggable, Rotatable, Statistical {
-
+public interface CellularComponent extends Imageable, Serializable, Rotatable, Statistical {
+	
     // Standard components
     String WHOLE_CELL             = "Cell";
     String ACROSOME               = "Acrosome";

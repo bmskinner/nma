@@ -18,8 +18,11 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The default implementation of IAnalysisWorker, using a SwingWorker.
@@ -29,6 +32,8 @@ import javax.swing.SwingWorker;
  *
  */
 public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> implements IAnalysisWorker {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private long progressTotal;     // the maximum value for the progress bar
     private long progressCount = 0; // the current value for the progress bar
@@ -117,19 +122,19 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
             }
 
         } catch (StackOverflowError e) {
-            warn("Stack overflow detected");
-            stack("Stack overflow in worker", e);
+            LOGGER.warning("Stack overflow detected");
+            LOGGER.log(Loggable.STACK, "Stack overflow in worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
-            warn("Interruption to swing worker: " + e.getMessage());
-            stack("Interruption to swing worker", e);
+            LOGGER.warning("Interruption to swing worker: " + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-            warn("Execution error in swing worker: " + e.getMessage());
-            stack("Execution error in swing worker", e);
+            LOGGER.warning("Execution error in swing worker: " + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
             Throwable cause = e.getCause();
-            warn("Causing error: " + cause.getMessage());
-            stack("Causing error: ", cause);
+            LOGGER.warning("Causing error: " + cause.getMessage());
+            LOGGER.log(Loggable.STACK, "Causing error: ", cause);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         }
 

@@ -22,15 +22,15 @@ import java.util.logging.Logger;
 import ij.IJ;
 
 /**
- * This interface provides default methods for logging to the program log panel.
+ * This interface provides methods for logging.
  * 
  * @author bms41
  *
  */
 public interface Loggable {
 
-    public static final String ROOT_LOGGER    = "ProgramLogger";
-    public static final Level STACK = new StackLevel();
+    String ROOT_LOGGER    = "ProgramLogger";
+    Level STACK = new StackLevel();
     
     /**
      * The STACK error level has a level value of 600, so will display ahead of
@@ -48,147 +48,6 @@ public interface Loggable {
         }
     }
     
-    /**
-     * Log the given message to the program log window.
-     * 
-     * @param level the log level
-     * @param message the message to log
-     */
-    default void log(Level level, String message) {
-        Logger.getLogger(ROOT_LOGGER).log(level, message);
-    }
-
-    /**
-     * Log an error to the program log window and to the error log file with
-     * Level.SEVERE
-     * 
-     * @param message the error messsage
-     * @param t the exception
-     */
-    default void error(String message, Throwable t) {
-        Logger.getLogger(ROOT_LOGGER).log(Level.SEVERE, message, t);
-    }
-    
-    /**
-     * Log an error to the program log window and to the error log file with a
-     * stack trace. The TRACE error level has a level value of 600, so will
-     * display ahead of FINE.
-     * 
-     * @param message the error messsage
-     * @param t the exception
-     */
-    default void stack(String message) {
-        Logger.getLogger(ROOT_LOGGER).log(STACK, message);
-    }
-
-    /**
-     * Log an error to the program log window and to the error log file with a
-     * stack trace.
-     * 
-     * @param message the error message
-     * @param t the exception
-     */
-    default void stack(String message, Throwable t) {
-        Logger.getLogger(ROOT_LOGGER).log(STACK, message, t);
-    }
-
-    /**
-     * Log an error to the program log window and to the error log file with a
-     * stack trace. The TRACE error level has a level value of 600, so will
-     * display ahead of FINE.
-     * 
-     * @param message the error messsage
-     * @param t the exception
-     */
-    default void stack(Throwable t) {
-    	Logger.getLogger(ROOT_LOGGER).log(STACK, t.getMessage(), t);
-    }
-
-    /**
-     * Log a message to the program log window with Level.FINE
-     * 
-     * @param message the messsage
-     */
-    default void fine(String message) {
-        Logger.getLogger(ROOT_LOGGER).log(Level.FINE, message);
-    }
-
-    /**
-     * Log an error to the program log window with Level.FINE Use to show stack
-     * traces when debugging.
-     * 
-     * @param message the error message
-     * @param t the throwable
-     */
-    default void fine(String message, Throwable t) {
-        Logger.getLogger(ROOT_LOGGER).log(STACK, message, t);
-    }
-
-    /**
-     * Log a message to the program log window with Level.FINER
-     * 
-     * @param message the error message
-     */
-    default void finer(String message) {
-        Logger.getLogger(ROOT_LOGGER).log(Level.FINER, message);
-    }
-
-    /**
-     * Log a message to the program log window with Level.FINEST
-     * 
-     * @param message the error message
-     */
-    default void finest(String message) {
-        Logger.getLogger(ROOT_LOGGER).log(Level.FINEST, message);
-    }
-
-    /**
-     * Log an error to the program log window with Level.WARNING
-     * 
-     * @param message the message
-     */
-    default void warn(String message) {
-        Logger.getLogger(ROOT_LOGGER).log(Level.WARNING, message);
-    }
-
-    /**
-     * Log a message to the program log window with Level.INFO
-     * 
-     * @param message the message
-     */
-    default void log(String message) {
-    	Logger.getLogger(ROOT_LOGGER).log(Level.INFO, message);
-    }
-
-    /**
-     * Log a message to the program log window and to the dataset debug file.
-     * 
-     * @param level the logging level
-     * @param message the error messsage
-     * @param t the exception
-     */
-    default void log(Level level, String message, Throwable t) {
-        Logger.getLogger(ROOT_LOGGER).log(level, message, t);
-    }
-    
-    /**
-     * Log a message with Level.CONFIG
-     * 
-     * @param message the message
-     */
-    default void debug(String message) {
-    	Logger.getLogger(ROOT_LOGGER).log(Level.CONFIG, message);
-    }
-    
-    /**
-     * Log a message with Level.CONFIG
-     * 
-     * @param message the message
-     */
-    default void config(String message) {
-    	Logger.getLogger(ROOT_LOGGER).log(Level.CONFIG, message);
-    }
-
     /**
      * Log the given message and srack trace from the given throwable to the
      * ImageJ log window. Only use if the program log panel is not expected to

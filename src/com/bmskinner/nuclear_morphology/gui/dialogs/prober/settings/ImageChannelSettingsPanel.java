@@ -22,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -32,6 +33,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Panel for image channel settings
@@ -42,6 +44,9 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  */
 @SuppressWarnings("serial")
 public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
     private static final double SCALE_STEP_SIZE = 1;
     private static final double SCALE_MIN       = 1;
     private static final double SCALE_MAX       = 100000;
@@ -93,7 +98,7 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
                 options.setScale((Double) j.getValue());
 
             } catch (ParseException e1) {
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
         });
     }

@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
@@ -26,9 +27,12 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilF
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class NeutrophilImageProber extends IntegratedImageProber {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DIALOG_TITLE_BAR_LBL = "Neutrophil detection settings";
 
@@ -70,8 +74,8 @@ public class NeutrophilImageProber extends IntegratedImageProber {
                                                                                   // working
 
         } catch (Exception e) {
-            error("Error launching analysis window", e);
-            stack(e.getMessage(), e);
+            LOGGER.log(Loggable.STACK, "Error launching analysis window", e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
             this.dispose();
         }
 

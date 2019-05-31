@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.AbstractAsymmetricNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 
@@ -45,6 +47,8 @@ import ij.gui.Roi;
  *
  */
 public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
     
@@ -89,7 +93,7 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
         try {
             return new DefaultPigSpermNucleus(this);
         } catch (UnprofilableObjectException e) {
-            stack("Error duplicating nucleus", e);
+            LOGGER.log(Loggable.STACK, "Error duplicating nucleus", e);
         }
         return null;
     }
@@ -104,7 +108,7 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
             int rpIndex = f.identifyIndex(p, rpSet);
 
             if (rpIndex == -1) {
-                finest("RP index was not found in nucleus, setting to zero in profile");
+                LOGGER.finest( "RP index was not found in nucleus, setting to zero in profile");
                 rpIndex = 0;
             }
 
@@ -136,9 +140,9 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
             }
 
         } catch (UnavailableProfileTypeException e) {
-            stack("Error getting profile type", e);
+            LOGGER.log(Loggable.STACK, "Error getting profile type", e);
         } catch (NoDetectedIndexException e) {
-            fine("Unable to detect RP in nucleus");
+            LOGGER.fine("Unable to detect RP in nucleus");
             setBorderTag(Tag.REFERENCE_POINT, 0);
             setBorderTag(Tag.ORIENTATION_POINT, 0);
         }

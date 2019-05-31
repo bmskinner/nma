@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -32,16 +33,17 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.14.0
  *
  */
-public class OptionsXMLWriter extends XMLWriter implements Loggable {
+public class OptionsXMLWriter extends XMLWriter {
 	
-
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
 	public void write(@NonNull IAnalysisDataset dataset, @NonNull File outFile) {
 		
 		Document doc = new OptionsXMLCreator(dataset).create();
 		try {
 			writeXML(doc, outFile);
 		} catch (IOException e) {
-			 warn("Cannot export options file");
+			 LOGGER.warning("Cannot export options file");
 		}
 	}
 

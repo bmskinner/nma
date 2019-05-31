@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -86,7 +87,9 @@ import ij.gui.Roi;
  * @since 1.13.3
  *
  */
-public class DatasetConverter implements Loggable, Importer {
+public class DatasetConverter implements Importer {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private IAnalysisDataset oldDataset;
     private boolean wasConverted = false;
@@ -185,7 +188,7 @@ public class DatasetConverter implements Loggable, Importer {
     private IAnalysisDataset convertUpTo1_13_2(@NonNull IAnalysisDataset template) throws DatasetConversionException {
     	// Correct signal border locations from older versions for all
     	// imported datasets
-        fine("Updating signal locations for pre-1.13.2 dataset");
+        LOGGER.fine("Updating signal locations for pre-1.13.2 dataset");
         updateSignalPositions(template);
         for (IAnalysisDataset child : template.getAllChildDatasets()) {
         	updateSignalPositions(child);
@@ -224,7 +227,7 @@ public class DatasetConverter implements Loggable, Importer {
                                 try {
                                     s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
                                 } catch (UnavailableBorderPointException e) {
-                                    stack("Could not offset border point", e);
+                                    LOGGER.log(Loggable.STACK, "Could not offset border point", e);
                                 }
                             }
                         }
@@ -249,12 +252,12 @@ public class DatasetConverter implements Loggable, Importer {
     private IAnalysisDataset convertAnalysisDatasetToCurrent(@NonNull IAnalysisDataset template) throws DatasetConversionException {
     	
     	 try {
-             log("Old dataset version : " + template.getVersion());
-             log("Shiny target version: " + Version.currentVersion());
+             LOGGER.info("Old dataset version : " + template.getVersion());
+             LOGGER.info("Shiny target version: " + Version.currentVersion());
 
              backupOldDataset();
 
-             log("Beginning conversion...");
+             LOGGER.info("Beginning conversion...");
 
              ICellCollection newCollection = makeNewRootCollection();
 
@@ -308,7 +311,7 @@ public class DatasetConverter implements Loggable, Importer {
              return newDataset;
 
          } catch (Exception e) {
-             stack("Error converting dataset", e);
+             LOGGER.log(Loggable.STACK, "Error converting dataset", e);
              throw new DatasetConversionException(e.getCause());
          }
     	
@@ -391,7 +394,7 @@ public class DatasetConverter implements Loggable, Importer {
     	try {
     	realignSegmentsToRP(template);
     	} catch (DatasetConversionException e) {
-    		stack(e.getMessage(), e.getCause());
+    		LOGGER.log(Loggable.STACK, e.getMessage(), e.getCause());
     	}
     	return template;
 
@@ -402,7 +405,7 @@ public class DatasetConverter implements Loggable, Importer {
             for (IAnalysisDataset d : template.getMergeSources()) {
                 dest.addMergeSource(d);
             }
-            log("Added merge sources");
+            LOGGER.info("Added merge sources");
         }
     }
 
@@ -429,15 +432,15 @@ public class DatasetConverter implements Loggable, Importer {
             	newCollection.createProfileCollection();
                 oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
             } catch (ProfileException e) {
-                warn("Unable to copy profile offsets");
-                stack("Unable to copy collection offsets", e);
+                LOGGER.warning("Unable to copy profile offsets");
+                LOGGER.log(Loggable.STACK, "Unable to copy collection offsets", e);
             }
 
             dest.addChildCollection(newCollection);
 
             IAnalysisDataset destChild = dest.getChildDataset(newCollection.getID());
 
-            // log("\tMaking clusters: "+child.getName());
+            // LOGGER.info("\tMaking clusters: "+child.getName());
             for (IClusterGroup oldGroup : child.getClusterGroups()) {
 
                 IClusterGroup newGroup = new ClusterGroup(oldGroup);
@@ -459,7 +462,7 @@ public class DatasetConverter implements Loggable, Importer {
      * @throws DatasetConversionException
      */
     private ICellCollection makeNewRootCollection() throws DatasetConversionException {
-        fine("Converting root: " + oldDataset.getName());
+        LOGGER.fine("Converting root: " + oldDataset.getName());
         ICellCollection oldCollection = oldDataset.getCollection();
 
         ICellCollection newCollection = new DefaultCellCollection(oldCollection.getFolder(),
@@ -479,7 +482,7 @@ public class DatasetConverter implements Loggable, Importer {
             oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
 
         } catch (ProfileException e) {
-            stack("Error updating profiles across datasets", e);
+            LOGGER.log(Loggable.STACK, "Error updating profiles across datasets", e);
             throw new DatasetConversionException("Profiling error in root dataset");
         }
 
@@ -530,7 +533,7 @@ public class DatasetConverter implements Loggable, Importer {
             }
 
         } catch (UnavailableBorderPointException e) {
-            stack("Unable to get border point", e);
+            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
             throw new DatasetConversionException("Unable to get border point");
         }
 
@@ -562,23 +565,23 @@ public class DatasetConverter implements Loggable, Importer {
                 ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
             }
         } catch (UnavailableBorderPointException e) {
-            stack("Unable to get border point", e);
+            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
             throw new DatasetConversionException("Unable to get border point");
         }
         PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 
         if (!roi.contains(n.getOriginalCentreOfMass().getXAsInt(), n.getOriginalCentreOfMass().getYAsInt())) {
-            warn("Updating roi location");
+            LOGGER.warning("Updating roi location");
             // Set the position of the top left corner of the ROI
             roi.setLocation(n.getPosition()[CellularComponent.X_BASE], n.getPosition()[CellularComponent.Y_BASE]);
         }
 
-        // log(n.getNameAndNumber()+": Created roi at "+roi.getBounds());
+        // LOGGER.info(n.getNameAndNumber()+": Created roi at "+roi.getBounds());
         // Use the default constructor
 
         try {
 
-            // log(n.getNameAndNumber()+": Creating nucleus at original position
+            // LOGGER.info(n.getNameAndNumber()+": Creating nucleus at original position
             // "+xpoints[0]+", "+ypoints[0]);
             Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, com, f, channel, position, number);
 
@@ -586,7 +589,7 @@ public class DatasetConverter implements Loggable, Importer {
             newNucleus.moveCentreOfMass(n.getCentreOfMass());
             return newNucleus;
         } catch (IllegalArgumentException e) {
-            stack("Error making nucleus", e);
+            LOGGER.log(Loggable.STACK, "Error making nucleus", e);
             throw new DatasetConversionException("Cannot create nucleus from input data", e);
         }
     }
@@ -610,7 +613,7 @@ public class DatasetConverter implements Loggable, Importer {
                 ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
             }
         } catch (UnavailableBorderPointException e) {
-            stack("Unable to get border point", e);
+            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
             throw new DatasetConversionException("Unable to get border point");
         }
 
@@ -634,7 +637,7 @@ public class DatasetConverter implements Loggable, Importer {
         // template
 
         try {
-            // fine("Created nucleus id is "+newNucleus.getID());
+            // LOGGER.fine("Created nucleus id is "+newNucleus.getID());
             Class<DefaultCellularComponent> superClass = DefaultCellularComponent.class;
             Field field = superClass.getDeclaredField("id");
             field.setAccessible(true);
@@ -642,37 +645,37 @@ public class DatasetConverter implements Loggable, Importer {
             field.setAccessible(false);
 
         } catch (NoSuchFieldException e) {
-            stack("No field", e);
+            LOGGER.log(Loggable.STACK, "No field", e);
             throw new DatasetConversionException("Cannot set ID", e);
         } catch (SecurityException e) {
-            stack("Security error", e);
+            LOGGER.log(Loggable.STACK, "Security error", e);
             throw new DatasetConversionException("Cannot set ID", e);
         } catch (IllegalArgumentException e) {
-            stack("Illegal argument", e);
+            LOGGER.log(Loggable.STACK, "Illegal argument", e);
             throw new DatasetConversionException("Cannot set ID", e);
         } catch (IllegalAccessException e) {
-            stack("Illegal access", e);
+            LOGGER.log(Loggable.STACK, "Illegal access", e);
             throw new DatasetConversionException("Cannot set ID", e);
         } catch (Exception e) {
-            stack("Unexpected exception", e);
+            LOGGER.log(Loggable.STACK, "Unexpected exception", e);
             throw new DatasetConversionException("Cannot set ID", e);
         }
 
-        // fine("New nucleus id is "+newNucleus.getID());
+        // LOGGER.fine("New nucleus id is "+newNucleus.getID());
 
-        finer("\tCreated nucleus object");
+        LOGGER.finer( "\tCreated nucleus object");
 
-        finer("Converting stats");
+        LOGGER.finer( "Converting stats");
         convertPlottableStatistics(newNucleus, template);
 
         newNucleus.setScale(template.getScale());
 
         // Create the profiles within the nucleus
-        finer("\tInitialising");
+        LOGGER.finer( "\tInitialising");
         try {
             newNucleus.initialise(template.getWindowProportion(ProfileType.ANGLE));
 
-            fine("\tCopying tags");
+            LOGGER.fine("\tCopying tags");
 
             // The keyset of the map will not have a defined order, so do the RP
             // first now
@@ -685,10 +688,10 @@ public class DatasetConverter implements Loggable, Importer {
 
             int newIndex = (int) ((double) newNucleus.getBorderLength() * propIndex);
 
-            fine("\tChanging tag " + Tag.REFERENCE_POINT + " to index " + newIndex + " : " + propIndex);
+            LOGGER.fine("\tChanging tag " + Tag.REFERENCE_POINT + " to index " + newIndex + " : " + propIndex);
             newNucleus.setBorderTag(Tag.REFERENCE_POINT, newIndex);
         } catch (UnavailableBorderTagException | IndexOutOfBoundsException | ComponentCreationException e) {
-            stack("Cannot initialise or cannot set border tag to requested index", e);
+            LOGGER.log(Loggable.STACK, "Cannot initialise or cannot set border tag to requested index", e);
             throw new DatasetConversionException("Cannot create profilable object", e);
         }
 
@@ -709,12 +712,12 @@ public class DatasetConverter implements Loggable, Importer {
 
                 int newIndex = (int) ((double) newNucleus.getBorderLength() * propIndex);
 
-                fine("\tChanging tag " + t + " to index " + newIndex + " : " + propIndex);
+                LOGGER.fine("\tChanging tag " + t + " to index " + newIndex + " : " + propIndex);
                 newNucleus.setBorderTag(t, newIndex);
             } catch (UnavailableBorderTagException | IndexOutOfBoundsException e) {
-                stack("Cannot set border tag to requested index", e);
+                LOGGER.log(Loggable.STACK, "Cannot set border tag to requested index", e);
             }
-            finer("\tSetting tag " + t);
+            LOGGER.finer( "\tSetting tag " + t);
         }
 
         // Copy segments from RP
@@ -722,7 +725,7 @@ public class DatasetConverter implements Loggable, Importer {
 
         convertNuclearSignals(template, newNucleus);
 
-        fine("Created nucleus " + newNucleus.getNameAndNumber() + "\n");
+        LOGGER.fine("Created nucleus " + newNucleus.getNameAndNumber() + "\n");
 
         return newNucleus;
     }
@@ -753,7 +756,7 @@ public class DatasetConverter implements Loggable, Importer {
 
                 newNucleus.setStatistic(newStat, template.getStatistic(stat, MeasurementScale.PIXELS));
             } catch (Exception e) {
-                fine("Error setting statistic: " + stat, e);
+                LOGGER.log(Loggable.STACK, "Error setting statistic: " + stat, e);
                 newNucleus.setStatistic(stat, 0);
             }
         }
@@ -763,7 +766,7 @@ public class DatasetConverter implements Loggable, Importer {
         // Copy segments from RP
         for (ProfileType type : ProfileType.values()) {
 
-            fine("\nCopying profile type " + type);
+            LOGGER.fine("\nCopying profile type " + type);
 
             if (template.hasProfile(type)) {
                 try {
@@ -779,21 +782,21 @@ public class DatasetConverter implements Loggable, Importer {
                     }
 
                     if (newProfile.getSegmentCount() != profile.getSegmentCount()) {
-                        warn("Segment count mismatch: new has " + newProfile.getSegmentCount() + ", target has "
+                        LOGGER.warning("Segment count mismatch: new has " + newProfile.getSegmentCount() + ", target has "
                                 + profile.getSegmentCount());
                         throw new DatasetConversionException( "Error copying segments for nucleus " + template.getNameAndNumber());
                     }
 
-                    fine("\tSetting the profile " + type + " in the new nucleus");
+                    LOGGER.fine("\tSetting the profile " + type + " in the new nucleus");
                     newNucleus.setProfile(type, Tag.REFERENCE_POINT, newProfile);
 
                 } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
-                    stack("Error getting profile from template or target nucleus", e1);
+                    LOGGER.log(Loggable.STACK, "Error getting profile from template or target nucleus", e1);
                     throw new DatasetConversionException("Cannot convert nucleus", e1);
                 }
             }
 
-            fine("Complete profile type " + type);
+            LOGGER.fine("Complete profile type " + type);
         }
     }
 
@@ -801,7 +804,7 @@ public class DatasetConverter implements Loggable, Importer {
 
         // Copy signals
 
-        fine("Copying signals for " + template.getNameAndNumber());
+        LOGGER.fine("Copying signals for " + template.getNameAndNumber());
 
         for (UUID signalGroup : template.getSignalCollection().getSignalGroupIds()) {
 
@@ -811,8 +814,8 @@ public class DatasetConverter implements Loggable, Importer {
                     INuclearSignal newSignal = convertSignal(s);
                     newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
                 } catch (UnavailableBorderPointException e) {
-                    warn("Could not convert signal " + s.toString());
-                    stack("Unable to get border point", e);
+                    LOGGER.warning("Could not convert signal " + s.toString());
+                    LOGGER.log(Loggable.STACK, "Unable to get border point", e);
                 }
 
             }
@@ -867,15 +870,15 @@ public class DatasetConverter implements Loggable, Importer {
                 newFile = Importer.replaceFileExtension(saveFile, SAVE_FILE_EXTENSION, BAK_FILE_EXTENSION);
 
             if (newFile.exists()) 
-                warn("Overwriting existing backup file");
+                LOGGER.warning("Overwriting existing backup file");
 
             try {
 
                 Files.copy(saveFile.toPath(), newFile.toPath(), REPLACE_EXISTING);
 
-                log("Backup file created OK");
+                LOGGER.info("Backup file created OK");
             } catch (IOException e) {
-                stack("Error copying file", e);
+                LOGGER.log(Loggable.STACK, "Error copying file", e);
                 throw new DatasetConversionException("Unable to make backup file");
             }
 

@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
@@ -61,7 +62,9 @@ import ij.process.ImageProcessor;
  * @since 1.13.6
  *
  */
-public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implements Loggable {
+public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	public static final boolean STRAIGHTEN_MESH = true;
 	public static final boolean REGULAR_MESH = false;
@@ -116,14 +119,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         SignalManager m = sourceDataset.getCollection().getSignalManager();
         Set<ICell> cells = warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY) ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
         totalCells = cells.size();
-        fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
+        LOGGER.fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
         		sourceDataset.getName(), signalGroup, totalCells, warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
         
         try {
     		// Create the consensus mesh to warp each cell onto
     		meshConsensus = new DefaultMesh<>(target);
         } catch (MeshCreationException e2) {
-    		stack("Error creating mesh", e2);
+    		LOGGER.log(Loggable.STACK, "Error creating mesh", e2);
     		throw new IllegalArgumentException("Could not create mesh", e2);
     	}
     }
@@ -131,7 +134,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
     @Override
     protected ImageProcessor doInBackground() throws Exception {
 
-    	finer("Running warper");
+    	LOGGER.finer( "Running warper");
 
         List<ImageProcessor> warpedImages =  generateImages();
         return ImageFilterer.addByteImages(warpedImages);
@@ -155,10 +158,10 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                 firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
             }
         } catch (InterruptedException e) {
-            error("Interruption error in worker", e);
+            LOGGER.log(Loggable.STACK, "Interruption error in worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-            error("Execution error in worker", e);
+            LOGGER.log(Loggable.STACK, "Execution error in worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         }
     }
@@ -168,13 +171,13 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
      * 
      */
     private List<ImageProcessor> generateImages() {
-    	finer("Generating warped images for " + sourceDataset.getName());
+    	LOGGER.finer( "Generating warped images for " + sourceDataset.getName());
     	final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
     	
     	Set<ICell> cells = getCells(warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY));
     	
     	cells.parallelStream().flatMap(c->c.getNuclei().stream()).forEach(n->{
-    		finer("Drawing signals for " + n.getNameAndNumber());
+    		LOGGER.finer( "Drawing signals for " + n.getNameAndNumber());
 			ImageProcessor nImage = generateNucleusImage(n);
 			warpedImages.add(nImage);
 			publish(warpedImages.size());
@@ -235,11 +238,11 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
 
 		    // Draw the mesh image onto the consensus mesh.
-		    finer("Warping image onto consensus mesh");
+		    LOGGER.finer( "Warping image onto consensus mesh");
 		   return meshImage.drawImage(meshConsensus);
 
 		} catch (IllegalArgumentException | UnloadableImageException |ImageImportException | MeshCreationException | UncomparableMeshImageException | MeshImageCreationException e) {
-		    stack(e.getMessage(), e);
+		    LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		    return createEmptyProcessor();
 		}
 		
@@ -256,10 +259,10 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
         SignalManager m = sourceDataset.getCollection().getSignalManager();
         Set<ICell> cells;
         if (withSignalsOnly) {
-            finer("Only fetching cells with signals");
+            LOGGER.finer( "Only fetching cells with signals");
             cells = m.getCellsWithNuclearSignals(signalGroup, true);
         } else {
-            finer("Fetching all cells");
+            LOGGER.finer( "Fetching all cells");
             cells = sourceDataset.getCollection().getCells();
 
         }

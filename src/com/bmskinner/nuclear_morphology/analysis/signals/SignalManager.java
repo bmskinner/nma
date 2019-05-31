@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -56,7 +57,9 @@ import ij.process.ImageProcessor;
  * @author bms41
  *
  */
-public class SignalManager implements Loggable {
+public class SignalManager {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private ICellCollection collection;
 
@@ -344,7 +347,7 @@ public class SignalManager implements Loggable {
             values = getOffsetSignalAngles(signalGroupId);
 
             if (values.length == 0) {
-                fine("No signals detected in group for " + stat);
+                LOGGER.fine("No signals detected in group for " + stat);
                 return 0;
             }
 
@@ -355,7 +358,7 @@ public class SignalManager implements Loggable {
             values = this.getSignalStatistics(stat, scale, signalGroupId);
 
             if (values.length == 0) {
-                fine("No signals detected in group for " + stat);
+                LOGGER.fine("No signals detected in group for " + stat);
                 return 0;
             }
 
@@ -508,12 +511,12 @@ public class SignalManager implements Loggable {
      *  recalculated.
      */
     public void recalculateSignalAngles() {
-        finer("Recalcalculating signal angles");
+        LOGGER.finer( "Recalcalculating signal angles");
         for (Nucleus n : collection.getNuclei()) {
             try {
                 n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
-                fine("Cannot get OP index");
+                LOGGER.fine("Cannot get OP index");
             }
         }
     }

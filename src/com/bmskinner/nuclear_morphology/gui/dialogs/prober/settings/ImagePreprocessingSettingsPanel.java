@@ -20,6 +20,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -30,6 +31,7 @@ import javax.swing.SpinnerNumberModel;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Holds the Kuwahara and flattening settings for nucleus detection
@@ -40,6 +42,8 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
  */
 @SuppressWarnings("serial")
 public class ImagePreprocessingSettingsPanel extends SettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final Integer KUWAHARA_WIDTH_MIN  = Integer.valueOf(1);
     public static final Integer KUWAHARA_WIDTH_MAX  = Integer.valueOf(11);
@@ -70,7 +74,7 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
         try {
             this.options = options.getCannyOptions();
         } catch (MissingOptionException e) {
-            warn("missing Canny options");
+            LOGGER.warning("missing Canny options");
         }
         createSpinners();
         createPanel();
@@ -140,8 +144,8 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
                 options.setFlattenThreshold((Integer) j.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -162,8 +166,8 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
                 }
 
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });

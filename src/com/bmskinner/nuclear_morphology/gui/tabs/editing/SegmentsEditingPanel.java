@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -63,11 +64,14 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends AbstractEditingPanel implements ActionListener, SegmentEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Segmentation";
     
@@ -229,7 +233,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
                     Tag.REFERENCE_POINT, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                 | UnsegmentedProfileException e) {
-            stack("Error getting profile", e);
+            LOGGER.log(Loggable.STACK, "Error getting profile", e);
 
         }
 
@@ -294,7 +298,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     				Tag.REFERENCE_POINT, Stats.MEDIAN);
     	} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
     			| UnsegmentedProfileException e) {
-    		stack("Error getting profile", e);
+    		LOGGER.log(Loggable.STACK, "Error getting profile", e);
     		setButtonsEnabled(false);
     		return;
     	}
@@ -403,8 +407,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             }
 
         } catch (Exception e1) {
-            warn("Error in action");
-            stack("Error in action", e1);
+            LOGGER.warning("Error in action");
+            LOGGER.log(Loggable.STACK, "Error in action", e1);
         } finally {
             SegmentsEditingPanel.this.setAnalysing(false);
         }
@@ -521,13 +525,13 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     @Override
     public void segmentEventReceived(SegmentEvent event) {
         if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
-            finest("Heard update segment request");
+            LOGGER.finest( "Heard update segment request");
             try {
                 setAnalysing(true);
                 updateSegmentStartIndexAction(event.id, event.index);
 
             } catch (Exception e) {
-                error("Error updating segment", e);
+                LOGGER.log(Loggable.STACK, "Error updating segment", e);
             } finally {
                 setAnalysing(false);
             }

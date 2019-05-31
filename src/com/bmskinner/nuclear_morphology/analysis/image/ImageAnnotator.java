@@ -23,6 +23,7 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -49,6 +50,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -62,6 +64,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class ImageAnnotator extends AbstractImageFilterer {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     private static final int BORDER_TAG_POINT_SIZE = 7;
 	private static final int RP_POINT_SIZE = 9;
@@ -173,7 +177,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             annotateSignals(n);
 
         } catch (Exception e) {
-            error("Error annotating nucleus", e);
+            LOGGER.log(Loggable.STACK, "Error annotating nucleus", e);
         }
         return this;
     }
@@ -214,7 +218,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             }
             annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, RP_POINT_SIZE);
         } catch (Exception e) {
-            error("Error annotating nucleus", e);
+            LOGGER.log(Loggable.STACK, "Error annotating nucleus", e);
         }
         return this;
     }
@@ -239,7 +243,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             annotateSignals(n);
 
         } catch (Exception e) {
-            error("Error annotating nucleus", e);
+            LOGGER.log(Loggable.STACK, "Error annotating nucleus", e);
 
         }
         return this;
@@ -379,7 +383,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
         try {
             return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
         } catch (UnavailableBorderTagException e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, "Cannot find border tag OP", e);
         }
         return this;
     }
@@ -395,7 +399,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
         try {
             return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
         } catch (UnavailableBorderTagException e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, "Cannot find border tag RP", e);
             return this;
         }
     }
@@ -586,7 +590,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
             return annotateLine(narrow1, narrow2, Color.MAGENTA);
         } catch (UnavailableProfileTypeException | ProfileException | UnavailableBorderPointException e) {
-            stack("Unable to get diameter profile", e);
+            LOGGER.log(Loggable.STACK, "Unable to get diameter profile", e);
             return this;
         }
 
@@ -624,7 +628,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
                 }
             }
         } catch (Exception e) {
-            error("Error annotating segments", e);
+            LOGGER.log(Loggable.STACK, "Error annotating segments", e);
         }
         return this;
     }
@@ -678,7 +682,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
                 }
             }
         } catch (Exception e) {
-            error("Error annotating segments", e);
+            LOGGER.log(Loggable.STACK, "Error annotating segments", e);
         }
         return this;
     }

@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -27,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MessagingDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This dialog contins a CellViewModel and is used as a base for any dialogs
@@ -38,6 +40,8 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractCellEditingDialog extends MessagingDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     protected ICell            cell    = null;
     protected ICell            workingCell;
@@ -134,8 +138,8 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
             try {
 				dataset.getCollection().createProfileCollection();
 			} catch (ProfileException e) {
-				warn("Unable to profile cell collection");
-				stack(e);
+				LOGGER.warning("Unable to profile cell collection");
+				LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			}
             cellModel.swapCell(workingCell);
 

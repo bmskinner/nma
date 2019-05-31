@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -84,6 +85,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -100,6 +102,8 @@ import ij.process.FloatPolygon;
 @SuppressWarnings("serial")
 public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implements BorderPointEventListener,
          MouseListener, MouseMotionListener, MouseWheelListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private DualChartPanel dualPanel;
 
@@ -182,7 +186,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
     protected void createUI() {
 
         try {
-            finer("Creating border adjustment dialog");
+            LOGGER.finer( "Creating border adjustment dialog");
             this.setLayout(new BorderLayout());
 
             JPanel header = createHeader();
@@ -244,7 +248,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             mainPanel.addOverlay(new EllipticalOverlay(ellipse));
 
         } catch (Exception e) {
-            fine("Error making UI", e);
+            LOGGER.log(Loggable.STACK, "Error making UI", e);
         }
     }
 
@@ -299,7 +303,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
     @Override
     protected void updateCharts(ICell cell) {
 
-        finer("Making outline chart options");
+        LOGGER.finer( "Making outline chart options");
         ChartOptions outlineOptions = new ChartOptionsBuilder()
         		.setDatasets(dataset).setCell(cell)
                 .setRotationMode(RotationMode.ACTUAL)
@@ -322,7 +326,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
     @Override
     public void borderPointEventReceived(BorderPointEvent event) {
-        fine("Border point event received");
+        LOGGER.fine("Border point event received");
 
     }
 
@@ -385,7 +389,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
         double newX = xy.getDomainAxis().java2DToValue(p.getX(), dataArea, xy.getDomainAxisEdge());
 
-        fine("Adding point at " + newX + ", " + newY);
+        LOGGER.log(Loggable.STACK, "Adding point at " + newX + ", " + newY);
         IPoint newPoint = IPoint.makeNew(newX, newY);
 
         // Get the border point that is closest to the clicked point
@@ -393,7 +397,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         try {
             bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
         } catch (UnavailableBorderPointException e) {
-            stack("Unable to get border point", e);
+            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
 
         }
 
@@ -491,7 +495,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         try {
             templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
         } catch (UnavailableProfileTypeException e1) {
-            warn("Angle profile not present");
+            LOGGER.warning("Angle profile not present");
             return;
         }
         int oldLength = templateProfile.size();
@@ -513,14 +517,14 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
                 double proportion = (double) oldIndex / (double) oldLength;
 
                 int newIndex = (int) (proportion * (double) newLength);
-                fine(tag.toString() + " From: " + oldIndex + " : To: " + newIndex);
+                LOGGER.fine(tag.toString() + " From: " + oldIndex + " : To: " + newIndex);
                 // workingCell.getNucleus().setBorderTag(tag, newIndex);
                 newMap.put(tag, newIndex);
             }
 //            workingCell.getNucleus().replaceBorderTags(newMap);
 
         } catch (Exception e) {
-            warn("Cannot calculate profiles for cell");
+            LOGGER.warning("Cannot calculate profiles for cell");
             mustResegment = true;
         }
 
@@ -653,7 +657,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             if (finalMovePointX != initialMovePointX && finalMovePointY != initialMovePointY) {
 
                 // Point was moved, get the item to change in the dataset
-                fine("Released at " + finalMovePointX + " , " + finalMovePointY);
+                LOGGER.log(Loggable.STACK, "Released at " + finalMovePointX + " , " + finalMovePointY);
                 moveSelectedPoint();
             }
 

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
@@ -46,9 +47,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @Deprecated
 public class RodentSpermNucleus extends SpermNucleus {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -100,7 +104,7 @@ public class RodentSpermNucleus extends SpermNucleus {
                                        // are not present. Using -1 will cause
                                        // infinite loop.
 
-        // finest("Hook/body is "+stat);
+        // LOGGER.finest( "Hook/body is "+stat);
         return stat;
 
     }
@@ -108,7 +112,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     private void calculateHookAndBodyLength() throws UnavailableBorderTagException {
 
         // Copy the nucleus
-        finest("Calculating hook and body length");
+        LOGGER.finest( "Calculating hook and body length");
         // RodentSpermNucleus testNucleus = new RodentSpermNucleus( this);
         // //.duplicate();
 
@@ -121,7 +125,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 
             // Nucleus testVertical = testNucleus.getVerticallyRotatedNucleus();
 
-            finer("Nucleus " + this.getNameAndNumber());
+            LOGGER.finer( "Nucleus " + this.getNameAndNumber());
             /*
              * Get the X position of the top vertical
              */
@@ -143,7 +147,7 @@ public class RodentSpermNucleus extends SpermNucleus {
             double minBoundingX = testNucleus.toPolygon().getBounds().getMinX();
 
             if (vertX < minBoundingX || vertX > maxBoundingX) {
-                finer("Error calculating hook and body: vertical is out of bounds");
+                LOGGER.finer( "Error calculating hook and body: vertical is out of bounds");
                 setStatistic(PlottableStatistic.HOOK_LENGTH, -1);
                 setStatistic(PlottableStatistic.BODY_WIDTH, -1);
                 return;
@@ -166,12 +170,12 @@ public class RodentSpermNucleus extends SpermNucleus {
             double distanceHump = 0;
             double referenceX = testNucleus.getBorderPoint(Tag.REFERENCE_POINT).getX();
 
-            finer("TV is at " + vertX);
-            finer("Max bounding x is " + maxBoundingX);
-            finer("Min bounding x is " + minBoundingX);
-            finer("RP x is " + referenceX);
-            finer("Distance lower is " + distanceLower);
-            finer("Distance higher is " + distanceHigher);
+            LOGGER.finer( "TV is at " + vertX);
+            LOGGER.finer( "Max bounding x is " + maxBoundingX);
+            LOGGER.finer( "Min bounding x is " + minBoundingX);
+            LOGGER.finer( "RP x is " + referenceX);
+            LOGGER.finer( "Distance lower is " + distanceLower);
+            LOGGER.finer( "Distance higher is " + distanceHigher);
 
             if (referenceX < vertX) {
                 distanceHook = distanceLower;
@@ -184,12 +188,12 @@ public class RodentSpermNucleus extends SpermNucleus {
             setStatistic(PlottableStatistic.HOOK_LENGTH, distanceHook);
             setStatistic(PlottableStatistic.BODY_WIDTH, distanceHump);
 
-            finer("Hook length is " + distanceHook);
-            finer("Body width is " + distanceHump);
+            LOGGER.finer( "Hook length is " + distanceHook);
+            LOGGER.finer( "Body width is " + distanceHump);
 
-            finest("Hook length and body width calculated");
+            LOGGER.finest( "Hook length and body width calculated");
         } else {
-            finest("Top and bottom vertical not assigned, skipping");
+            LOGGER.finest( "Top and bottom vertical not assigned, skipping");
 
             setStatistic(PlottableStatistic.HOOK_LENGTH, -2);
             setStatistic(PlottableStatistic.BODY_WIDTH, -2);
@@ -349,9 +353,9 @@ public class RodentSpermNucleus extends SpermNucleus {
             setBorderTag(Tag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
 
         } catch (UnavailableProfileTypeException e) {
-            stack("Error getting profile type", e);
+            LOGGER.log(Loggable.STACK, "Error getting profile type", e);
         } catch (NoDetectedIndexException e) {
-            fine("Unable to detect RP in nucleus");
+            LOGGER.fine("Unable to detect RP in nucleus");
             setBorderTag(Tag.REFERENCE_POINT, 0);
             setBorderTag(Tag.ORIENTATION_POINT, 0);
         }
@@ -409,9 +413,9 @@ public class RodentSpermNucleus extends SpermNucleus {
          * Ensure the nucleus is cached
          */
         super.getVerticallyRotatedNucleus();
-        finest("Fetched vertical nucleus from round nucleus");
+        LOGGER.finest( "Fetched vertical nucleus from round nucleus");
         if (verticalNucleus == null) {
-            warn("Unknown error creating vertical nucleus");
+            LOGGER.warning("Unknown error creating vertical nucleus");
         }
 
         /*
@@ -659,20 +663,16 @@ public class RodentSpermNucleus extends SpermNucleus {
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading rodent sperm nucleus");
         in.defaultReadObject();
         try {
             calculateHookAndBodyLength();
         } catch (UnavailableBorderTagException e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
-        // finest("\tRead rodent sperm nucleus");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting rodent sperm nucleus");
         out.defaultWriteObject();
-        // finest("\tWrote rodent sperm nucleus");
     }
 
 }

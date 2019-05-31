@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -59,9 +60,12 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Overview";
 
@@ -350,23 +354,17 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
     }
 
     private void updateSignalConsensusChart() {
-        try {
 
-            // The options do not hold which signal groups are visible
-            // so we must invalidate the cache whenever they change
-            this.clearChartCache(getDatasets());
+    	// The options do not hold which signal groups are visible
+    	// so we must invalidate the cache whenever they change
+    	this.clearChartCache(getDatasets());
 
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-            		.setShowWarp(false)
-                    .setTarget(chartPanel)
-                    .setShowAnnotations(isShowAnnotations).build();
+    	ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+    			.setShowWarp(false)
+    			.setTarget(chartPanel)
+    			.setShowAnnotations(isShowAnnotations).build();
 
-            setChart(options);
-
-        } catch (Exception e) {
-        	chartPanel.setChart(AbstractChartFactory.createErrorChart());
-            stack("Error updating signal overview panel", e);
-        }
+    	setChart(options);
     }
 
     private UUID getSignalGroupFromLabel(String label) {

@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -53,10 +54,13 @@ import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class RandomSamplingDialog extends LoadingIconDialog
         implements ChangeListener, PropertyChangeListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private IAnalysisDataset     dataset;
     private ExportableChartPanel chartPanel;
@@ -97,7 +101,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
             chartPanel = new ExportableChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
             this.add(chartPanel, BorderLayout.CENTER);
         } catch (Exception e) {
-            error("Error making chart", e);
+            LOGGER.log(Loggable.STACK, "Error making chart", e);
         }
 
     }
@@ -190,7 +194,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
     			}
     		} catch (ChartDatasetCreationException e1) {
     			chart = HistogramChartFactory.createErrorChart();
-    			stack(e1.getMessage(), e1);
+    			LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
     		}
 
     		chartPanel.setChart(chart);
@@ -229,7 +233,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
             ThreadManager.getInstance().submit(sampler);
 
         } catch (Exception e) {
-            error("Error running sampling", e);
+            LOGGER.log(Loggable.STACK, "Error running sampling", e);
             setEnabled(true);
         }
     }
@@ -260,8 +264,8 @@ public class RandomSamplingDialog extends LoadingIconDialog
             chartPanel.setChart(chart);
             setStatusLoaded();
         } catch (Exception e) {
-            warn("Error running sampling");
-            stack("Error running sampling", e);
+            LOGGER.warning("Error running sampling");
+            LOGGER.log(Loggable.STACK, "Error running sampling", e);
         }
     }
 
@@ -306,7 +310,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
             }
 
         } catch (Exception e1) {
-            error("Error in spinners", e1);
+            LOGGER.log(Loggable.STACK, "Error in spinners", e1);
         }
 
     }

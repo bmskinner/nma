@@ -23,6 +23,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -46,9 +47,12 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class BorderTagEditingPanel extends AbstractEditingPanel implements ActionListener, BorderTagEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Border tags";
     
@@ -206,7 +210,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
         super.eventReceived(event);// Pass messages upwards
 
         if (event.getSource() instanceof RulesetDialog) {
-            fine("Heard interface event");
+            LOGGER.fine("Heard interface event");
             getInterfaceEventHandler().fireInterfaceEvent(event.method());
         }
 
@@ -217,7 +221,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
         super.eventReceived(event);
 
         if (event.getSource() instanceof RulesetDialog) {
-            fine("Heard dataset event");
+            LOGGER.fine("Heard dataset event");
             this.getDatasetEventHandler().fireDatasetEvent(event.method(), event.getDatasets());
         }
     }

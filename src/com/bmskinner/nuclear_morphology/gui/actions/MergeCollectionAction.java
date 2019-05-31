@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -37,6 +38,7 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Carry out a merge of datasets
@@ -45,6 +47,8 @@ import com.bmskinner.nuclear_morphology.io.Io;
  *
  */
 public class MergeCollectionAction extends MultiDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_BAR_LABEL   = "Merging";
     private static final String DEFAULT_DATASET_NAME = "Merge_of_datasets";
@@ -115,7 +119,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
     private boolean datasetsAreMergeable() {
 
     	if (datasets.size() == 2 && (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0)))) {
-    		warn("No. Merging parent and child is silly.");
+    		LOGGER.warning("No. Merging parent and child is silly.");
     		return false;
     	}
     	return true;
@@ -128,8 +132,8 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
         try {
             r = worker.get();
         } catch (InterruptedException | ExecutionException e) {
-            warn("Error merging datasets");
-            stack("Error merging datasets", e);
+            LOGGER.warning("Error merging datasets");
+            LOGGER.log(Loggable.STACK, "Error merging datasets", e);
             this.cancel();
             return;
         }

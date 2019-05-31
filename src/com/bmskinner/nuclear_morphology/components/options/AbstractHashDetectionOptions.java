@@ -20,11 +20,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A replacement for the AbstractDetectionOptions providing more extensibility
@@ -35,6 +37,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public abstract class AbstractHashDetectionOptions extends AbstractHashOptions implements IDetectionOptions {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -255,7 +259,7 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
         	for(String subKey : template.getSubOptionKeys())
         		subMap.put(subKey, template.getSubOptions(subKey).duplicate());
         } catch (MissingOptionException e) {
-        	error("Missing sub options", e);
+        	LOGGER.log(Loggable.STACK, "Missing sub options", e);
         }
     }
 

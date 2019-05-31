@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.14.0
  *
  */
-public abstract class XMLWriter implements Loggable {
+public abstract class XMLWriter {
 	
 	/**
 	 * Write the given XML document to a file

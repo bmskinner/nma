@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
@@ -40,11 +41,14 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Methods to make charts with a consensus nucleus.
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String MULTIPLE_DATASETS_NO_CONSENSUS_ERROR = "No consensus in dataset(s)";
 
@@ -111,7 +115,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         
         // Single dataset
         
-        fine("Single dataset, making consenusus chart");
+        LOGGER.fine("Single dataset, making consenusus chart");
         
         if (options.isShowMesh()) {
         	try {
@@ -119,7 +123,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         				options.getMeshSize());
         		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
         	} catch (ChartCreationException | MeshCreationException e) {
-        		stack("Error making mesh chart", e);
+        		LOGGER.log(Loggable.STACK, "Error making mesh chart", e);
         		return createErrorChart();
         	}
         }
@@ -166,7 +170,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
         } catch (ChartDatasetCreationException e) {
-            stack("Error creating boxplot", e);
+            LOGGER.log(Loggable.STACK, "Error creating boxplot", e);
             return createErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);
@@ -213,7 +217,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createAnnotatedNucleusOutline();
         } catch (ChartDatasetCreationException e) {
-            stack("Error creating annotated nucleus outline: "+e.getMessage(), e);
+            LOGGER.log(Loggable.STACK, "Error creating annotated nucleus outline: "+e.getMessage(), e);
             return createErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);
@@ -293,14 +297,14 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         if (!dataset.getCollection().hasConsensus())
         	return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
         
-        fine("Making segmented consenusus chart");
+        LOGGER.fine("Making segmented consenusus chart");
         XYDataset ds = null;
 
         ICellCollection collection = dataset.getCollection();
         try {
             ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
         } catch (ChartDatasetCreationException e) {
-            fine("Unable to make segmented outline, creating base outline instead: "+e.getMessage());
+            LOGGER.fine("Unable to make segmented outline, creating base outline instead: "+e.getMessage());
             return makeNucleusOutlineChart();
         }
 
@@ -376,7 +380,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createMultiNucleusOutline();
         } catch (ChartDatasetCreationException e) {
-            fine("Error making consensus dataset", e);
+        	LOGGER.log(Loggable.STACK, "Error making consensus dataset", e);
             return createErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);

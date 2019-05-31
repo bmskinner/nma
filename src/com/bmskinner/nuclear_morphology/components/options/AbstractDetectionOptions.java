@@ -20,9 +20,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The abstract implementation of IDetectionOptions, which is extended
@@ -35,6 +37,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 @Deprecated
 public abstract class AbstractDetectionOptions implements IDetectionOptions {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -84,7 +88,7 @@ public abstract class AbstractDetectionOptions implements IDetectionOptions {
             try {
                 cannyOptions = template.getCannyOptions().duplicate();
             } catch (MissingOptionException e) {
-                error("Missing Canny options", e);
+                LOGGER.log(Loggable.STACK, "Missing Canny options", e);
             }
         } else {
             cannyOptions = OptionsFactory.makeCannyOptions();

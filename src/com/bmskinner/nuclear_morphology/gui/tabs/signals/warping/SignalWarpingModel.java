@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.table.DefaultTableModel;
@@ -55,7 +56,9 @@ import ij.process.ImageProcessor;
  * @since 1.14.0
  *
  */
-public class SignalWarpingModel extends DefaultTableModel implements Loggable {
+public class SignalWarpingModel extends DefaultTableModel{
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public static final int THRESHOLD_ALL_VISIBLE = 255;
 	private static final int KEY_COLUMN_INDEX = 5;
@@ -84,7 +87,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 	public WarpedImageKey getKey(int row) {
 		
 		WarpedImageKey key = (WarpedImageKey) getValueAt(row, KEY_COLUMN_INDEX);
-		fine("Selecting key "+key.toString());
+		LOGGER.fine("Selecting key "+key.toString());
 		return key;
 	}
 	
@@ -217,7 +220,7 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
 		if(!isCommonTargetSelected())
 			return OutlineChartFactory.createEmptyChart();
 			
-		fine("Creating display image from "+displayImages.size()+" selected keys");
+		LOGGER.fine("Creating display image from "+displayImages.size()+" selected keys");
 		ImageProcessor image = createDisplayImage(isPseudocolour, isEnhance);
 
         ChartOptions options = new ChartOptionsBuilder()
@@ -338,8 +341,8 @@ public class SignalWarpingModel extends DefaultTableModel implements Loggable {
             	return averaged;
 
         } catch (Exception e) {
-            warn("Error averaging images");
-            stack(e);
+        	LOGGER.warning("Error averaging images");
+            LOGGER.log(Loggable.STACK, "Error averaging images", e);
             return ImageFilterer.createWhiteByteProcessor(100, 100);
         }
 

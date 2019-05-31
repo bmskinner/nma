@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -28,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The default implementation of a segmented profile.
@@ -37,6 +39,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.Segmen
  *
  */
 public class SegmentedFloatProfile extends FloatProfile implements ISegmentedProfile {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     private static final long serialVersionUID = 1L;
 
     // the segments
@@ -121,7 +125,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         try {
            return IBorderSegment.copy(temp);
         } catch (ProfileException | IllegalArgumentException e) {
-            error("Error copying segments", e);
+            LOGGER.log(Loggable.STACK, "Error copying segments", e);
             return new ArrayList<>();
         }
     }
@@ -185,8 +189,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 					return getSegmentsFrom(seg);
 			}
 		} catch (UnavailableComponentException | ProfileException e) {
-			warn("Profile error getting segments");
-			stack("Profile error getting segments", e);
+			LOGGER.warning("Profile error getting segments");
+			LOGGER.log(Loggable.STACK, "Profile error getting segments", e);
 			return new ArrayList<>();
 		}
     	System.out.println("Found segment count is "+getSegmentCount());
@@ -274,7 +278,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             }
 
         } catch (ProfileException e) {
-            warn("Cannot copy segments");
+            LOGGER.warning("Cannot copy segments");
         }
     }
 
@@ -377,7 +381,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 //        try {
 //            result = IBorderSegment.nudge(getSegments(), amount);
 //        } catch (ProfileException e) {
-//            fine("Error offsetting segments", e);
+//            LOGGER.fine("Error offsetting segments", e);
 //            return;
 //        }
         this.segments = new IBorderSegment[segments.length];
@@ -612,8 +616,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         try {
             IBorderSegment.linkSegments(segments);
         } catch (ProfileException e) {
-            warn("Error linking segments");
-            stack("Cannot link segments in reversed profile", e);
+            LOGGER.warning("Error linking segments");
+            LOGGER.log(Loggable.STACK, "Cannot link segments in reversed profile", e);
         }
         this.setSegments(segments);
     }
@@ -660,8 +664,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         mergedSegment.addMergeSource(firstSegment);
         mergedSegment.addMergeSource(secondSegment);
 
-        fine("Merged segment has source 1: "+mergedSegment.hasMergeSource(seg1));
-        fine("Merged segment has source 2: "+mergedSegment.hasMergeSource(seg2));
+        LOGGER.fine("Merged segment has source 1: "+mergedSegment.hasMergeSource(seg1));
+        LOGGER.fine("Merged segment has source 2: "+mergedSegment.hasMergeSource(seg2));
         // Replace the two segments in this profile
         List<IBorderSegment> oldSegs = this.getSegments();
         List<IBorderSegment> newSegs = new ArrayList<>();
@@ -752,7 +756,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getProfileLength())
                     && IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getProfileLength());
         } catch (UnavailableComponentException e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
             return false;
         }
 
@@ -872,7 +876,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         in.defaultReadObject();
         // finest("\tRead segmented profile");
         if (size() != segments[0].getProfileLength()) {
-            log("Error reading segments: " + " segment length " + segments[0].getProfileLength()
+            LOGGER.warning("Error reading segments: " + " segment length " + segments[0].getProfileLength()
                     + " different to profile " + size());
         }
     }

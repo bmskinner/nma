@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.13.3
  *
  */
-public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
+public class DefaultProfileAggregate implements IProfileAggregate {
 
 	/** the values samples per profile */
     private final float[][] aggregate;  

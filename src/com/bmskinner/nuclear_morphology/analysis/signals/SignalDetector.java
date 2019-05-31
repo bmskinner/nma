@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -42,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -58,6 +60,8 @@ import ij.process.ImageStatistics;
  *
  */
 public class SignalDetector extends Detector {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private INuclearSignalOptions                  options;
     private final ComponentFactory<INuclearSignal> factory = new SignalFactory();
@@ -94,20 +98,20 @@ public class SignalDetector extends Detector {
         options.setThreshold(minThreshold); // reset to default
 
         if (options.getDetectionMode().equals(SignalDetectionMode.FORWARD)) {
-            finest("Running forward detection");
+            LOGGER.finest( "Running forward detection");
             return detectForwardThresholdSignal(sourceFile, stack, n);
         }
 
         if (options.getDetectionMode().equals(SignalDetectionMode.REVERSE)) {
-            finest("Running reverse detection");
+            LOGGER.finest( "Running reverse detection");
             return detectReverseThresholdSignal(sourceFile, stack, n);
         }
 
         if (options.getDetectionMode().equals(SignalDetectionMode.ADAPTIVE)) {
-            finest("Running adaptive detection");
+            LOGGER.finest( "Running adaptive detection");
             return detectHistogramThresholdSignal(sourceFile, stack, n);
         }
-        finest("No mode specified");
+        LOGGER.finest( "No mode specified");
         return new ArrayList<>();
     }
 
@@ -126,10 +130,10 @@ public class SignalDetector extends Detector {
         // only use the calculated threshold if it is larger than
         // the given minimum
         if (newThreshold > minThreshold) {
-            fine("Threshold set at: " + newThreshold);
+            LOGGER.fine("Threshold set at: " + newThreshold);
             options.setThreshold(newThreshold);
         } else {
-            fine("Threshold kept at minimum: " + minThreshold);
+            LOGGER.fine("Threshold kept at minimum: " + minThreshold);
             options.setThreshold(minThreshold);
         }
     }
@@ -160,14 +164,14 @@ public class SignalDetector extends Detector {
             ImageProcessor ip = stack.getProcessor(stackNumber);
             roiList = detectRois(ip);
         } catch (IllegalArgumentException e) {
-            fine("No signal channel in image "+sourceFile.getAbsolutePath());
+            LOGGER.fine("No signal channel in image "+sourceFile.getAbsolutePath());
             return signals;
         }
 
         if (roiList.isEmpty())
             return signals;
 
-        fine(roiList.size() + " signals in stack " + stackNumber);
+        LOGGER.fine(roiList.size() + " signals in stack " + stackNumber);
 
         for(Entry<Roi, StatsMap> entry : roiList.entrySet()) {
         	Roi r = entry.getKey();
@@ -207,8 +211,8 @@ public class SignalDetector extends Detector {
 
                 }
             } catch (IllegalArgumentException | ComponentCreationException e) {
-                warn("Cannot make signal for component "+n.getNameAndNumber());
-                fine("Error detecting or making signal: "+e.getMessage(), e);
+                LOGGER.warning("Cannot make signal for component "+n.getNameAndNumber());
+                LOGGER.log(Loggable.STACK, "Error detecting or making signal: "+e.getMessage(), e);
             }
         }
         return signals;
@@ -232,7 +236,7 @@ public class SignalDetector extends Detector {
      */
     private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) {
 
-        finest("Beginning reverse detection for nucleus");
+        LOGGER.finest( "Beginning reverse detection for nucleus");
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
 
@@ -294,7 +298,7 @@ public class SignalDetector extends Detector {
      * @throws Exception
      */
     private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile, @NonNull final ImageStack stack, @NonNull final Nucleus n) {
-        fine("Beginning histogram detection for nucleus");
+        LOGGER.fine("Beginning histogram detection for nucleus");
 
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
@@ -321,7 +325,7 @@ public class SignalDetector extends Detector {
          * lower, and the black pixels increase the total range making it harder
          * to carry out the range based minima detection below
          */
-        finest("Initial histo threshold: " + minThreshold);
+        LOGGER.finest( "Initial histo threshold: " + minThreshold);
 
         IProfile histogramProfile = new FloatProfile(d);
         IProfile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);

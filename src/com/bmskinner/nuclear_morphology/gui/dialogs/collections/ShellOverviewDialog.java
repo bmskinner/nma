@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.io.FileSaver;
@@ -60,6 +62,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class ShellOverviewDialog extends CollectionOverviewDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String HEADER_LBL = "Double click a nucleus to export image to ";
 	
@@ -146,7 +150,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
                 ip = c.getNucleus().getComponentImage();
             }
         } catch (UnloadableImageException e) {
-            stack("Cannot load image for component", e);
+            LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
             return null;
         }
         
@@ -156,7 +160,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         
         int shellCount = dataset.getCollection().getSignalManager().getShellCount();
         if(shellCount==0) 
-            fine("No shells present, cannot draw");
+            LOGGER.fine("No shells present, cannot draw");
 
         ShrinkType t = dataset.getCollection().getSignalManager().getShrinkType().get();
 
@@ -169,12 +173,12 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
  				List<Shell> shells = new ShellDetector(n, shellCount, t, false).getShells();
  				
  				for(Shell shell : shells){
- 					fine("Drawing shell at "+shell.getBase().toString());
+ 					LOGGER.fine("Drawing shell at "+shell.getBase().toString());
  					an = an.annotate(shell, Color.ORANGE);
  				}
  			} catch (ShellAnalysisException e1) {
- 				warn("Error making shells");
- 				stack(e1.getMessage(), e1);
+ 				LOGGER.warning("Error making shells");
+ 				LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
  			}
         	 
         	 ISignalCollection signalCollection = n.getSignalCollection();
@@ -204,7 +208,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	            try {
 	                ip = rotateToVertical(c, ip);
 	            } catch (UnavailableBorderTagException e) {
-	                stack("Unable to rotate", e);
+	                LOGGER.log(Loggable.STACK, "Unable to rotate", e);
 	            }
 	            ip.flipVertical(); // Y axis needs inverting
 	        }

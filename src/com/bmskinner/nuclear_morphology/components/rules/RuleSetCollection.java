@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -39,7 +40,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class RuleSetCollection implements Serializable, Loggable {
+public class RuleSetCollection implements Serializable {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -192,7 +195,7 @@ public class RuleSetCollection implements Serializable, Loggable {
             while (it.hasNext()) {
                 Object tag = it.next();
                 if (tag instanceof BorderTag) {
-                    fine("No BorderTagObject for " + tag.toString() + ": creating");
+                    LOGGER.fine("No BorderTagObject for " + tag.toString() + ": creating");
 
                     newMap.put(new BorderTagObject((BorderTag) tag), map.get(tag));
                 }

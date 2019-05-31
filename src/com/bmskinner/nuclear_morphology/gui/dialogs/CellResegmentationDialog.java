@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -66,6 +67,7 @@ import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.AbstractCellEditingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This dialog permits complete resegmentation of a cell via a coupled profile
@@ -76,6 +78,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
  */
 @SuppressWarnings("serial")
 public class CellResegmentationDialog extends AbstractCellEditingDialog implements BorderPointEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private CoupledProfileOutlineChartPanel panel;
 
@@ -126,7 +130,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     protected void createUI() {
 
         try {
-            finer("Creating resegmentation dialog");
+            LOGGER.finer( "Creating resegmentation dialog");
             this.setLayout(new BorderLayout());
 
             JPanel header = createHeader();
@@ -151,7 +155,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             mainPanel.add(table, BorderLayout.WEST);
             this.add(mainPanel, BorderLayout.CENTER);
         } catch (Exception e) {
-            error("Error making UI", e);
+            LOGGER.log(Loggable.STACK, "Error making UI", e);
         }
     }
 
@@ -195,7 +199,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             this.isSelectRP = true;
             newTags = new HashMap<Tag, Integer>();
             table.setModel(createTableModel(""));
-            log("Select RP");
+            LOGGER.info("Select RP");
             setEnabled(false);
         });
         panel.add(reassignRpBtn);
@@ -214,7 +218,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-            log("Select endpoint for segment 0");
+            LOGGER.info("Select endpoint for segment 0");
             drawCurrentSegments(obj); // clear the segment chart
             setEnabled(false);
         });
@@ -254,7 +258,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
      */
     private void drawCurrentSegments(Taggable n) {
 
-        finer("Assigned all segments");
+        LOGGER.finer( "Assigned all segments");
         try {
 
             List<IBorderSegment> tempList;
@@ -277,19 +281,19 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
             ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE);
             newProfile.setSegments(tempList);
-            finer("Segments added: ");
-            finer(IBorderSegment.toString(tempList));
-            finer("New profile:");
-            finer(newProfile.toString());
+            LOGGER.finer( "Segments added: ");
+            LOGGER.finer( IBorderSegment.toString(tempList));
+            LOGGER.finer( "New profile:");
+            LOGGER.finer( newProfile.toString());
 
-            finer("RP index: " + n.getBorderIndex(Tag.REFERENCE_POINT));
+            LOGGER.finer( "RP index: " + n.getBorderIndex(Tag.REFERENCE_POINT));
 
             n.setProfile(ProfileType.ANGLE, newProfile);
 
         } catch (ProfileException e) {
-            error("Cannot link segments", e);
+            LOGGER.log(Loggable.STACK, "Cannot link segments", e);
         } catch (Exception e) {
-            error("Error setting profile", e);
+            LOGGER.log(Loggable.STACK, "Error setting profile", e);
         }
 
         // Need to update OP to new segment boundary position
@@ -313,13 +317,13 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     		IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
     				n.getBorderLength(), id);
     		newSegments.add(last);
-    		finer("Added " + last.toString());
+    		LOGGER.finer( "Added " + last.toString());
 
-    		log("Resegmenting complete");
+    	 LOGGER.info("Resegmenting complete");
 
     	} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-    		warn("Cannot get segmented profile");
-    		fine("Error getting profile", e);
+    		LOGGER.warning("Cannot get segmented profile");
+    	 LOGGER.log(Loggable.STACK, "Error getting profile", e);
     		return;
     	}
     }
@@ -332,20 +336,20 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
             int newRpIndex = newTags.get(Tag.REFERENCE_POINT);
 
-            fine("Selected RP index: " + newRpIndex);
+            LOGGER.fine("Selected RP index: " + newRpIndex);
 
             // Make a new cell with the updated RP
             workingCell.getNucleus().setBorderTag(Tag.REFERENCE_POINT, newRpIndex);
 
-            fine("Updated RP");
+            LOGGER.fine("Updated RP");
 
             // Draw the new cell
             updateCharts(workingCell);
 
-            fine("Finished updating RP chart");
+            LOGGER.fine("Finished updating RP chart");
 
         } catch (Exception e) {
-            error("Error moving RP", e);
+            LOGGER.log(Loggable.STACK, "Error moving RP", e);
         }
     }
 
@@ -354,13 +358,13 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
         Runnable r = () -> {
 
-            finer("Making profile chart options");
+            LOGGER.finer( "Making profile chart options");
             ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset).setCell(cell)
                     .setNormalised(false).setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT)
                     .setShowMarkers(false).setProfileType(ProfileType.ANGLE)
                     .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(true).build();
 
-            finer("Making outline chart options");
+            LOGGER.finer( "Making outline chart options");
             ChartOptions outlineOptions = new ChartOptionsBuilder().setDatasets(dataset).setCell(cell)
                     .setRotationMode(RotationMode.ACTUAL).setShowSignals(false).setShowBorderTags(false)
                     .setShowAnnotations(true).setInvertYAxis(true) // only
@@ -368,10 +372,10 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                                                                    // actual
                     .setShowPoints(false).setCellularComponent(cell.getNucleus()).build();
 
-            finer("Making charts");
+            LOGGER.finer( "Making charts");
             JFreeChart profileChart = new ProfileChartFactory(profileOptions).createProfileChart();
             JFreeChart outlineChart = new OutlineChartFactory(outlineOptions).makeCellOutlineChart();
-            finer("Updating charts");
+            LOGGER.finer( "Updating charts");
             panel.setObject(cell.getNucleus());
             panel.getProfilePanel().setChart(profileChart);
             panel.getOutlinePanel().setChart(outlineChart);
@@ -401,12 +405,12 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                 segStop = n.getBorderIndex(p);
                 IBorderSegment seg = IBorderSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
                 newSegments.add(seg);
-                finer("Added " + seg.toString());
+                LOGGER.finer( "Added " + seg.toString());
                 segStart = segStop;
 
                 table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
                 segCount++;
-                log("Select endpoint for segment " + segCount);
+                LOGGER.info("Select endpoint for segment " + segCount);
 
                 drawCurrentSegments(n);
 
@@ -417,8 +421,8 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                 }
 
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-                warn("Unable to update segments");
-                fine("Error getting profiles", e);
+                LOGGER.warning("Unable to update segments");
+                LOGGER.log(Loggable.STACK, "Error getting profiles", e);
             }
 
         }

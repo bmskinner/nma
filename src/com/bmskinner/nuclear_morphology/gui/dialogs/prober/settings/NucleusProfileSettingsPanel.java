@@ -23,6 +23,7 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -33,6 +34,7 @@ import javax.swing.SpinnerNumberModel;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Holds other nucleus detection options. E.g. profile window
@@ -43,6 +45,8 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
  */
 @SuppressWarnings("serial")
 public class NucleusProfileSettingsPanel extends SettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final double MIN_PROFILE_PROP  = 0;
     private static final double MAX_PROFILE_PROP  = 1;
@@ -94,8 +98,8 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
                 j.commitEdit();
                 options.setAngleWindowProportion((Double) j.getValue());
             } catch (Exception e1) {
-                warn("Parsing error in spinner");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing error in spinner");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });

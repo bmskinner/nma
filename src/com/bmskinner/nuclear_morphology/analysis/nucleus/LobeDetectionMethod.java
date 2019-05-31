@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus.IncorrectNucle
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -64,6 +66,8 @@ import inra.ijpb.watershed.Watershed;
  *
  */
 public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final double DEFAULT_MIN_LOBE_AREA = 10;
 
@@ -76,7 +80,7 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
     @Override
     public IAnalysisResult call() throws Exception {
 
-        fine("Running lobe detection method");
+        LOGGER.fine("Running lobe detection method");
 
         
         if (NucleusType.NEUTROPHIL.equals(dataset.getAnalysisOptions().get().getNucleusType())) {
@@ -122,63 +126,12 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
             // detectLobesViaHough(cell);
 
         } catch (UnloadableImageException e) {
-            warn("Unable to load cell image");
-            stack(e);
+            LOGGER.log(Loggable.STACK,"Unable to load cell image", e);
         } catch (Exception e) {
-            warn("Error in lobe detection");
-            stack(e.getMessage(), e);
+            LOGGER.warning("Error in lobe detection");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
     }
-
-    /**
-     * Detect lobes using the hough transform
-     * 
-     * @param cell
-     * @throws UnloadableImageException
-     * @throws MissingOptionException
-     */
-//    private void detectLobesViaHough(ICell cell) throws UnloadableImageException, MissingOptionException {
-//
-//    	Optional<IAnalysisOptions> an = dataset.getAnalysisOptions();
-//        if(!an.isPresent())
-//        	throw new MissingOptionException("Options not present in dataset "+dataset.getName());
-//
-//        Optional<IDetectionOptions> no = an.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-//        
-//        if(!no.isPresent())
-//        	throw new MissingOptionException("Nucleus options not present in dataset "+dataset.getName());
-//        
-//        IDetectionOptions nucleusOptions = no.get();
-//        
-//        IPreprocessingOptions op = (IPreprocessingOptions) nucleusOptions
-//                .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-//
-//        ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
-//        if (op.isUseColourThreshold()) {
-//
-//            int minHue = op.getMinHue();
-//            int maxHue = op.getMaxHue();
-//            int minSat = op.getMinSaturation();
-//            int maxSat = op.getMaxSaturation();
-//            int minBri = 73;// op.getMinBrightness();
-//            int maxBri = 255;// op.getMaxBrightness();
-//
-//            ImageProcessor test = new ImageFilterer(ip).colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
-//                    .convertToByteProcessor().toProcessor();
-//
-//            //
-//            // ICannyOptions canny = OptionsFactory.makeCannyOptions();
-//
-//            ImageFilterer imf = new ImageFilterer(test);
-//            // .runEdgeDetector(canny);
-//
-//            // new ImagePlus(cell.getNucleus().getNameAndNumber()+": Canny",
-//            // imf.toProcessor()).show();
-//            List<IPoint> lobes = imf.houghCircleDetection(options);
-//            addPointsToNuclei(cell, lobes);
-//        }
-//
-//    }
 
     /**
      * Identify lobes based on watershed segmentation of nuclei within cytoplasm
@@ -409,7 +362,7 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
                     // Copy stat for charting
                     l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
                 } catch (UnloadableImageException | ComponentCreationException e) {
-                    stack(e);
+                    LOGGER.log(Loggable.STACK, "Cannot identify lobes: "+e.getMessage(), e);
                 }
             }
 

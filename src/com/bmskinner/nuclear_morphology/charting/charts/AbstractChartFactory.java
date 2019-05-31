@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
@@ -47,7 +48,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public abstract class AbstractChartFactory implements Loggable {
+public abstract class AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	/** The X and Y axis positive & negative range magnitude for empty charts  */
     protected static final int DEFAULT_EMPTY_RANGE         = 10;

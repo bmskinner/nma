@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  * @param <E> the options type describing the chart to build
  */
-public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {
+public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 
     protected final E options;
     

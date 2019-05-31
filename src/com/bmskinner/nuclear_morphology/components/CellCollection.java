@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,6 +72,7 @@ import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -80,6 +82,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 @Deprecated
 public class CellCollection implements ICellCollection {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -516,18 +520,18 @@ public class CellCollection implements ICellCollection {
                 continue;
             }
 
-            fine("Creating profile aggregate: " + type);
+            LOGGER.fine("Creating profile aggregate: " + type);
 
             int length = pc.length();
 
             if (length > 0) { // failsafe in case some idiot (me) tries to
                               // maintain length on an empty aggregate
 
-                finer(type + " length before update: " + pc.length());
+                LOGGER.finer( type + " length before update: " + pc.length());
 
                 pc.createProfileAggregate(this, length);
 
-                finer(type + " length after update: " + pc.length());
+                LOGGER.finer( type + " length after update: " + pc.length());
             } else {
                 pc.createProfileAggregate(this, this.getMedianArrayLength());
             }
@@ -863,7 +867,7 @@ public class CellCollection implements ICellCollection {
                 IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
                 result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
             } catch (ProfileException | UnavailableProfileTypeException e) {
-                fine("Error getting angle profile", e);
+            	LOGGER.log(Loggable.STACK, "Error getting angle profile", e);
                 result[i] = 0;
             } finally {
                 i++;
@@ -916,7 +920,7 @@ public class CellCollection implements ICellCollection {
                 result[i] = rootDiff;
 
             } catch (ProfileException | UnavailableProfileTypeException e) {
-                fine("Error getting angle profile", e);
+            	LOGGER.log(Loggable.STACK, "Error getting angle profile", e);
                 result[i] = Double.MAX_VALUE;
             } finally {
                 i++;
@@ -967,7 +971,7 @@ public class CellCollection implements ICellCollection {
                                                // degrees
             return rootDiff;
         } catch (ProfileException | UnavailableComponentException e) {
-            stack("Cannot get angle profile", e);
+            LOGGER.log(Loggable.STACK, "Cannot get angle profile", e);
             return Double.MAX_VALUE;
         }
     }
@@ -1008,7 +1012,7 @@ public class CellCollection implements ICellCollection {
             try {
                 result[i++] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
             } catch (UnavailableBorderTagException e) {
-                fine("Tag not present: " + pointTypeA + " or " + pointTypeB);
+                LOGGER.fine("Tag not present: " + pointTypeA + " or " + pointTypeB);
             }
         }
         return result;
@@ -1276,13 +1280,13 @@ public class CellCollection implements ICellCollection {
 
             Arrays.sort(result);
 
-            // finest("Making statistic fetching task for "+stat);
+            // LOGGER.finest( "Making statistic fetching task for "+stat);
             //// NucleusStatisticFetchingTask task = new
             // NucleusStatisticFetchingTask(getNucleusArray(),
             //// stat,
             //// scale);
             //// result = task.invoke();
-            // finest("Fetched statistic result for "+stat);
+            // LOGGER.finest( "Fetched statistic result for "+stat);
 
         }
 
@@ -1325,7 +1329,7 @@ public class CellCollection implements ICellCollection {
             try {
                 segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
             } catch (ProfileException | UnavailableComponentException e) {
-                stack(e);
+                LOGGER.log(Loggable.STACK, e.getMessage(), e);
                 return 0;
             }
             double perimeterLength = 0;
@@ -1356,13 +1360,13 @@ public class CellCollection implements ICellCollection {
 
         List<ICell> list = getCells().parallelStream().filter(predicate).collect(Collectors.toList());
 
-        finest("Adding cells to new collection");
+        LOGGER.finest( "Adding cells to new collection");
         for (ICell cell : list) {
             subCollection.addCell(new DefaultCell(cell));
         }
 
         if (subCollection.size() == 0) {
-            warn("No cells in collection");
+            LOGGER.warning("No cells in collection");
         }
 
         try {
@@ -1373,8 +1377,8 @@ public class CellCollection implements ICellCollection {
             this.getSignalManager().copySignalGroups(subCollection);
 
         } catch (ProfileException e) {
-            warn("Error copying collection offsets");
-            stack("Error in offsetting", e);
+            LOGGER.warning("Error copying collection offsets");
+            LOGGER.log(Loggable.STACK, "Error in offsetting", e);
         }
 
         return subCollection;
@@ -1404,7 +1408,7 @@ public class CellCollection implements ICellCollection {
                             return false;
                         }
                     } catch (UnavailableBorderTagException e) {
-                        stack(e);
+                        LOGGER.log(Loggable.STACK, e.getMessage(),  e);
                         return false;
                     }
 
@@ -1454,8 +1458,8 @@ public class CellCollection implements ICellCollection {
     // value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT,
     // c.getNucleus());
     // } catch (UnavailableBorderTagException e) {
-    // warn("Cannot get variability score");
-    // fine("Error getting difference to median profile", e);
+    // LOGGER.warning("Cannot get variability score");
+    // LOGGER.fine("Error getting difference to median profile", e);
     // value = Double.MAX_VALUE;
     // }
     //
@@ -1479,8 +1483,8 @@ public class CellCollection implements ICellCollection {
     // try {
     // this.getProfileManager().copyCollectionOffsets(subCollection);
     // } catch (ProfileException e) {
-    // warn("Error copying collection offsets");
-    // fine("Error in offsetting", e);
+    // LOGGER.warning("Error copying collection offsets");
+    // LOGGER.fine("Error in offsetting", e);
     // }
     //
     // this.getSignalManager().copySignalGroups(subCollection);
@@ -1794,7 +1798,7 @@ public class CellCollection implements ICellCollection {
         Set<UUID> toSearch1 = this.getCellIDs();
         Set<UUID> toSearch2 = d2.getCellIDs();
 
-        finest("Beginning search for shared cells");
+        LOGGER.finest( "Beginning search for shared cells");
 
         // choose the smaller to search within
 
@@ -1814,7 +1818,7 @@ public class CellCollection implements ICellCollection {
             }
 
         }
-        finest("Completed search for shared cells");
+        LOGGER.finest( "Completed search for shared cells");
         return shared;
     }
 
@@ -1890,7 +1894,7 @@ public class CellCollection implements ICellCollection {
                                                   // nuclei with other datasets
 
         if (ruleSets == null || ruleSets.isEmpty()) {
-            log("Creating default ruleset for collection");
+            LOGGER.info("Creating default ruleset for collection");
             ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
         }
     }
@@ -2022,7 +2026,7 @@ public class CellCollection implements ICellCollection {
 
             if (this.hasStatistic(stat, scale)) {
 
-                finest("Fetching cached stat: " + stat);
+                LOGGER.finest( "Fetching cached stat: " + stat);
                 return cache.get(stat).get(scale);
 
             } else {
@@ -2074,19 +2078,19 @@ public class CellCollection implements ICellCollection {
     @Override
     public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
             throws Exception {
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return 0;
     }
 
     @Override
     public double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale) {
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 
     @Override
     public double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 
@@ -2099,13 +2103,13 @@ public class CellCollection implements ICellCollection {
 
 	@Override
 	public IPoint currentConsensusOffset() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public double currentConsensusRotation() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return 0;
 	}
 

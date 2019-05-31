@@ -22,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -41,7 +42,9 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public class MainHeaderPanel extends JPanel implements Loggable {
+public class MainHeaderPanel extends JPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String NEW_ANALYSIS_LBL   = "New analysis";
     private static final String NEW_STANDARD_LBL   = "Fluorescent nuclei";
@@ -159,7 +162,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
         JButton btnSavePopulation = new JButton(SAVE_ALL_LBL);
         btnSavePopulation.addActionListener(e -> {
-            log("Saving root populations...");
+            LOGGER.info("Saving root populations...");
             mw.getEventHandler().saveRootDatasets();
         });
 

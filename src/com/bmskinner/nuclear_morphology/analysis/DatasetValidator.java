@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -50,7 +51,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.13.6
  *
  */
-public class DatasetValidator implements Loggable {
+public class DatasetValidator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public static final List<String> errorList = new ArrayList<>();
 	public static final Set<ICell> errorCells  = new HashSet<>();
@@ -299,7 +302,7 @@ public class DatasetValidator implements Loggable {
 					}
 				} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					// allow isOk to fall through
-					fine("No border tag present");
+					LOGGER.fine("No border tag present");
 				}
 
 				if(!isOk) {

@@ -21,6 +21,7 @@ import java.awt.Paint;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
@@ -39,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This factory creates boxplot charts.
@@ -47,6 +49,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  *
  */
 public class BoxplotChartFactory extends AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public BoxplotChartFactory(@NonNull ChartOptions o) {
         super(o);
@@ -86,7 +90,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
             try {
                 ds = new NucleusDatasetCreator(options).createBoxplotDataset();
             } catch (ChartDatasetCreationException e) {
-                fine("Error creating boxplot", e);
+            	LOGGER.log(Loggable.STACK, "Error creating nucleus boxplot", e);
                 return createErrorChart();
             }
         }
@@ -114,7 +118,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createSegmentStatDataset();
         } catch (ChartDatasetCreationException e) {
-            fine("Error creating boxplot", e);
+        	LOGGER.log(Loggable.STACK, "Error creating segment boxplot", e);
             return createErrorChart();
         }
         JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null,

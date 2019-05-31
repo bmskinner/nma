@@ -44,8 +44,7 @@ import ij.Prefs;
  * @since 1.13.7
  *
  */
-public class Nuclear_Morphology_Analysis
-	implements Loggable {
+public class Nuclear_Morphology_Analysis {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
 //	private CommandLineParser parser; // parse command line arguments and launch the UI

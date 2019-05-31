@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -15,6 +16,7 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Button that allows nuclear signal detection options to be copied from an open
@@ -25,6 +27,8 @@ import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
  *
  */
 public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpenDatasetPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * Create with an analysis options and the detection options to copy to
@@ -70,7 +74,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 
             if (choice != null) {
 
-            	fine("Copying options from: " + choice);
+            	LOGGER.fine("Copying options from: " + choice);
 //            	// Ensure the folder is not overwritten by the new options
             	File folder = options.getFolder();
             	IDetectionOptions template = choice.d.getAnalysisOptions().get().getNuclearSignalOptions(choice.signalGroupId);
@@ -116,7 +120,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 				fireOptionsChangeEvent();
 
 			} catch (XMLReadingException e1) {
-				stack(e1);
+				LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
 			}
 		};
 	}

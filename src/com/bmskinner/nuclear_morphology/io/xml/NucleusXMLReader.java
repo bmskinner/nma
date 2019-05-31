@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
@@ -21,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -32,6 +34,8 @@ import ij.gui.Roi;
  *
  */
 public class NucleusXMLReader extends XMLReader<Nucleus>{
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private final NucleusFactory fact;
 	private final double windowProportion;
@@ -47,7 +51,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 		try {
 			return readNucleus(rootElement);
 		} catch (ComponentCreationException e) {
-			stack(e);
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			throw new XMLReadingException(e);
 		}
 	}
@@ -93,7 +97,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 		int actualLength = n.getBorderLength();
 		int expLength    = readInt(e, XMLCreator.BORDER_LENGTH_KEY);
 		if(actualLength!=expLength)
-			warn(String.format("Border interpolation to %s does not match saved value %s", actualLength, expLength));
+			LOGGER.warning(String.format("Border interpolation to %s does not match saved value %s", actualLength, expLength));
 		
 		// Apply tags
 		readTags(e.getChild(XMLCreator.BORDER_TAGS_KEY), n);
@@ -214,7 +218,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 			}
 
 		} catch(Exception e1) {
-			stack(e1);
+			LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
 		}
 	}
 

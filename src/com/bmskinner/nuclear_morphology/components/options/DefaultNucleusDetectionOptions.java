@@ -20,9 +20,11 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The default detection options for a nucleus
@@ -34,6 +36,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  */
 @Deprecated
 public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final int     DEFAULT_MIN_NUCLEUS_SIZE  = 2000;
     public static final int     DEFAULT_MAX_NUCLEUS_SIZE  = 10000;
@@ -100,7 +104,7 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
     @Override
     public void setHoughOptions(IHoughDetectionOptions hough) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
     }
 
 //    @Override
@@ -111,7 +115,7 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
     @Override
     public boolean isUseHoughTransform() {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return false;
     }
 
@@ -123,79 +127,79 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
     @Override
     public IDetectionSubOptions getSubOptions(String s) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 
     @Override
     public void setSubOptions(String s, IDetectionSubOptions sub) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
     public boolean isRGB() {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return false;
     }
 
     @Override
     public void setRGB(boolean b) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
     public double getDouble(String s) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return 0;
     }
 
     @Override
     public int getInt(String s) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return 0;
     }
 
     @Override
     public boolean getBoolean(String s) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return false;
     }
 
     @Override
     public void setDouble(String s, double d) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
     public void setInt(String s, int i) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
     public void setBoolean(String s, boolean b) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
     public float getFloat(String s) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return 0;
     }
 
     @Override
     public void setFloat(String s, float f) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
     }
 
 	@Override
@@ -205,54 +209,54 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 
 	@Override
 	public Object getValue(String key) {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getBooleanKeys() {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getIntegerKeys() {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getDoubleKeys() {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getFloatKeys() {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public Set<String> getSubOptionKeys() {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public String getString(String s) {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public void setString(String k, String v) {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 	}
 
 	@Override
 	public List<String> getStringKeys() {
-		 warn("Unimplemented method in " + this.getClass().getName());
+		 LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 

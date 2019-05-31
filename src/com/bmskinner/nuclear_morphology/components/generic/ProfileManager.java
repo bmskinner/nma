@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -46,7 +47,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @author bms41
  *
  */
-public class ProfileManager implements Loggable {
+public class ProfileManager {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     private final ICellCollection collection;
 
     public ProfileManager(final ICellCollection collection) {
@@ -77,8 +80,8 @@ public class ProfileManager implements Loggable {
             		n.setBorderTag(tag, newIndex);
 
                 } catch (ProfileException | UnavailableProfileTypeException e1) {
-                    warn("Error updating tag by offset in nucleus " + n.getNameAndNumber());
-                    stack(e1.getMessage(), e1);
+                    LOGGER.warning("Error updating tag by offset in nucleus " + n.getNameAndNumber());
+                    LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
                     return;
                 }
 
@@ -121,7 +124,7 @@ public class ProfileManager implements Loggable {
      */
     public void calculateTopAndBottomVerticals() {
 
-        fine("Detecting top and bottom verticals in collection");
+        LOGGER.fine("Detecting top and bottom verticals in collection");
 
         try {
             ProfileIndexFinder finder = new ProfileIndexFinder();
@@ -129,19 +132,19 @@ public class ProfileManager implements Loggable {
             int topIndex = finder.identifyIndex(collection, Tag.TOP_VERTICAL);
             int btmIndex = finder.identifyIndex(collection, Tag.BOTTOM_VERTICAL);
 
-            fine("TV in median is located at index " + topIndex);
-            fine("BV in median is located at index " + btmIndex);
+            LOGGER.fine("TV in median is located at index " + topIndex);
+            LOGGER.fine("BV in median is located at index " + btmIndex);
 
             updateProfileCollectionOffsets(Tag.TOP_VERTICAL, topIndex);
 
             updateProfileCollectionOffsets(Tag.BOTTOM_VERTICAL, btmIndex);
 
         } catch (NoDetectedIndexException e) {
-            fine("Cannot find TV or BV in median profile");
+            LOGGER.fine("Cannot find TV or BV in median profile");
             return;
         }
 
-        fine("Updating nuclei");
+        LOGGER.fine("Updating nuclei");
 
         IProfile topMedian;
         IProfile btmMedian;
@@ -153,14 +156,14 @@ public class ProfileManager implements Loggable {
             btmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL,
                     Stats.MEDIAN);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            fine("Error getting TV or BV profile", e);
+        	LOGGER.log(Loggable.STACK, "Error getting TV or BV profile", e);
             return;
         }
 
         updateTagToMedianBestFit(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
         updateTagToMedianBestFit(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
 
-        fine("Updated nuclei");
+        LOGGER.fine("Updated nuclei");
     }
 
     /**
@@ -176,12 +179,12 @@ public class ProfileManager implements Loggable {
     public void updateBorderTag(Tag tag, int index) throws ProfileException,
             UnavailableBorderTagException, UnavailableProfileTypeException {
 
-        finer("Updating border tag " + tag);
+        LOGGER.finer( "Updating border tag " + tag);
         if (tag.type().equals(BorderTagType.CORE)) {
             try {
 				updateCoreBorderTagIndex(tag, index);
 			} catch (UnsegmentedProfileException e) {
-				stack(e);
+				LOGGER.log(Loggable.STACK, "Profile is not segmented", e);
 			}
             return;
         }
@@ -203,7 +206,7 @@ public class ProfileManager implements Loggable {
         int oldIndex = collection.getProfileCollection().getIndex(tag);
 
         if (oldIndex == -1)
-            finer("Border tag does not exist and will be created");
+            LOGGER.finer( "Border tag does not exist and will be created");
         
         // If the new index for the tag is the same as the RP, set directly
         
@@ -226,7 +229,7 @@ public class ProfileManager implements Loggable {
             				setOpUsingTvBv(n);
         				}
         			} catch (UnavailableBorderTagException e) {
-        				stack(e);
+        				LOGGER.log(Loggable.STACK, "Border tag not available", e);
         			}
         		});
         		
@@ -247,14 +250,14 @@ public class ProfileManager implements Loggable {
         /*
          * Set the border tag in the median profile
          */
-        finer("Setting " + tag + " in median profiles to " + index + " from " + oldIndex);
+        LOGGER.finer( "Setting " + tag + " in median profiles to " + index + " from " + oldIndex);
         updateProfileCollectionOffsets(tag, index);
 
         // Use the median profile to set the tag in the nuclei
 
         IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN);
 
-        finer("Updating tag in nuclei");
+        LOGGER.finer( "Updating tag in nuclei");
         updateTagToMedianBestFit(tag, ProfileType.ANGLE, median);
 
         /*
@@ -282,7 +285,7 @@ public class ProfileManager implements Loggable {
     private void setOpUsingTvBv(@NonNull final Nucleus n) {
     	// also update the OP to be directly below the CoM in vertically oriented nucleus
 		if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-			finer("Updating OP due to TV or BV change");
+			LOGGER.finer( "Updating OP due to TV or BV change");
 			Nucleus vertN = n.getVerticallyRotatedNucleus();
 			IBorderPoint bottom = vertN.getBorderList().stream()
 				.filter(p-> p.getY()<vertN.getCentreOfMass().getY())
@@ -307,7 +310,7 @@ public class ProfileManager implements Loggable {
     private void updateCoreBorderTagIndex(@NonNull Tag tag, int index)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException {
 
-        fine("Updating core border tag index");
+        LOGGER.fine("Updating core border tag index");
 
         // Get the median zeroed on the RP
         ISegmentedProfile oldMedian = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
@@ -346,7 +349,7 @@ public class ProfileManager implements Loggable {
         try {
             return pc.getSegments(Tag.REFERENCE_POINT).size();
         } catch (Exception e) {
-            error("Error getting segment count from collection " + collection.getName(), e);
+            LOGGER.log(Loggable.STACK, "Error getting segment count from collection " + collection.getName(), e);
             return 0;
         }
     }
@@ -382,11 +385,11 @@ public class ProfileManager implements Loggable {
         try {
             segments = sourcePC.getSegments(Tag.REFERENCE_POINT);
         } catch (UnavailableBorderTagException e1) {
-            warn("RP not found in source collection");
-            fine("Error getting segments from RP", e1);
+            LOGGER.warning("RP not found in source collection");
+            LOGGER.log(Loggable.STACK, "Error getting segments from RP", e1);
             return;
         }
-        fine("Got existing list of " + segments.size() + " segments");
+        LOGGER.fine("Got existing list of " + segments.size() + " segments");
 
         // use the same array length as the source collection to avoid segment slippage
         int profileLength = sourcePC.length();
@@ -395,7 +398,7 @@ public class ProfileManager implements Loggable {
         // Create a new profile collection for the destination, so profiles are refreshed
         IProfileCollection destPC = destination.getProfileCollection();
         destPC.createProfileAggregate(destination, destination.getMedianArrayLength());
-        fine("Created new profile aggregate with length " + destination.getMedianArrayLength());
+        LOGGER.fine("Created new profile aggregate with length " + destination.getMedianArrayLength());
                 
         // Copy the tags from the source collection
         // Use proportional indexes to allow for a changed aggregate length
@@ -414,19 +417,19 @@ public class ProfileManager implements Loggable {
             destPC.addSegments(Tag.REFERENCE_POINT, interpolatedMedian.getSegments());
 
         } catch (UnavailableBorderTagException | IllegalArgumentException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-            stack("Cannot add segments to RP", e);
+            LOGGER.log(Loggable.STACK, "Cannot add segments to RP", e);
         }
-        fine("Copied tags to new collection");
+        LOGGER.fine("Copied tags to new collection");
         
         
         // Final sanity check - did the segment IDs get copied properly?
-        fine("Testing profiles");
+        LOGGER.fine("Testing profiles");
         List<IBorderSegment> newSegs;
         try {
             newSegs = destPC.getSegments(Tag.REFERENCE_POINT);
         } catch (UnavailableBorderTagException e1) {
-            warn("RP not found in destination collection");
-            fine("Error getting destination segments from RP", e1);
+            LOGGER.warning("RP not found in destination collection");
+            LOGGER.log(Loggable.STACK, "Error getting destination segments from RP", e1);
             return;
         }
         
@@ -488,7 +491,7 @@ public class ProfileManager implements Loggable {
      */
     public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws ProfileException, UnavailableComponentException {
 
-    	fine("Updating segment start index");
+    	LOGGER.fine("Updating segment start index");
     	
         Nucleus n = cell.getNucleus();
         ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
@@ -503,10 +506,10 @@ public class ProfileManager implements Loggable {
 
         try {
         	if (profile.update(seg, newStart, newEnd)) {
-        		finer(String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
-        		finer("Profile now: "+profile.toString());
+        		LOGGER.finer( String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
+        		LOGGER.finer( "Profile now: "+profile.toString());
         		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-        		finest("Updated nucleus profile with new segment boundaries");
+        		LOGGER.finest( "Updated nucleus profile with new segment boundaries");
 
         		/*
         		 * Check the border tags - if they overlap the old index replace
@@ -514,13 +517,13 @@ public class ProfileManager implements Loggable {
         		 */
         		int rawIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
 
-        		finest("Updating to index " + index + " from reference point");
-        		finest("Raw old border point is index " + rawOldIndex);
-        		finest("Raw new border point is index " + rawIndex);
+        		LOGGER.finest( "Updating to index " + index + " from reference point");
+        		LOGGER.finest( "Raw old border point is index " + rawOldIndex);
+        		LOGGER.finest( "Raw new border point is index " + rawIndex);
 
         		if (n.hasBorderTag(rawOldIndex)) {
         			Tag tagToUpdate = n.getBorderTag(rawOldIndex);
-        			fine("Updating tag " + tagToUpdate);
+        			LOGGER.fine("Updating tag " + tagToUpdate);
         			n.setBorderTag(tagToUpdate, rawIndex);
 
         			// Update intersection point if needed
@@ -532,10 +535,10 @@ public class ProfileManager implements Loggable {
         		n.updateDependentStats();
 
         	} else {
-        		warn(String.format("Updating %s start index from %s to %s failed", seg.getName(), seg.getStartIndex(), index ));
+        		LOGGER.warning(String.format("Updating %s start index from %s to %s failed", seg.getName(), seg.getStartIndex(), index ));
         	}
         } catch(SegmentUpdateException e) {
-        	warn(String.format("Updating %s start index from %s to %s failed", seg.getName(), seg.getStartIndex(), index ));
+        	LOGGER.warning(String.format("Updating %s start index from %s to %s failed", seg.getName(), seg.getStartIndex(), index ));
         }
     }
 
@@ -581,14 +584,13 @@ public class ProfileManager implements Loggable {
             if (oldProfile.update(seg, newStart, newEnd)) {
                 collection.getProfileCollection().addSegments(Tag.REFERENCE_POINT, oldProfile.getSegments());
 
-                finest("Segments added, refresh the charts");
+                LOGGER.finest( "Segments added, refresh the charts");
 
             } else {
-                warn("Updating " + seg.getStartIndex() + " to index " + index + " failed");
+                LOGGER.warning("Updating " + seg.getStartIndex() + " to index " + index + " failed");
             }
         } catch (SegmentUpdateException e) {
-            warn("Error updating segments");
-            stack(e);
+            LOGGER.log(Loggable.STACK, "Error updating segments", e);
         }
 
     }
@@ -656,7 +658,7 @@ public class ProfileManager implements Loggable {
          // put the new segment pattern back with the appropriate offset
             collection.getProfileCollection().addSegments(Tag.REFERENCE_POINT, medianProfile.getSegments());
         } catch(ProfileException e){
-            fine("Error merging segments in median profile; cancelling merge", e);
+        	LOGGER.log(Loggable.STACK, "Error merging segments in median profile; cancelling merge", e);
             return;
         }
 
@@ -749,9 +751,9 @@ public class ProfileManager implements Loggable {
         double proportion = seg.getIndexProportion(index);
 
         // Validate that all nuclei have segments long enough to be split
-        fine("Testing splittability of collection");
+        LOGGER.fine("Testing splittability of collection");
         if (!isCollectionSplittable(seg.getID(), proportion)) {
-            warn("Segment cannot be split: profile failed testing");
+            LOGGER.warning("Segment cannot be split: profile failed testing");
             return false;
         }
 
@@ -759,7 +761,7 @@ public class ProfileManager implements Loggable {
         @NonNull UUID nId1 = newID1 == null ? java.util.UUID.randomUUID() : newID1;
         @NonNull UUID nId2 = newID2 == null ? java.util.UUID.randomUUID() : newID2;
         medianProfile.splitSegment(seg, index, nId1, nId2);
-        fine("Split median profile");
+        LOGGER.fine("Split median profile");
 
         // put the new segment pattern back with the appropriate offset
         collection.getProfileCollection().addSegments(Tag.REFERENCE_POINT, medianProfile.getSegments());
@@ -819,7 +821,7 @@ public class ProfileManager implements Loggable {
         int index = medianProfile.getSegment(id).getProportionalIndex(proportion);
 
         if (!medianProfile.isSplittable(id, index)) {
-        	fine("Median profile in "+collection.getName()+" is not splittable");
+        	LOGGER.fine("Median profile in "+collection.getName()+" is not splittable");
         	return false;
         }
             
@@ -827,7 +829,7 @@ public class ProfileManager implements Loggable {
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus().component();
             if (!isSplittable(n, id, proportion)) {
-                fine("Consensus not splittable");
+                LOGGER.fine("Consensus not splittable");
                 return false;
             }
         }
@@ -835,7 +837,7 @@ public class ProfileManager implements Loggable {
         if(collection.isReal()) {
         	boolean allNucleiSplittable = collection.getNuclei().parallelStream().allMatch( n->isSplittable(n, id, proportion) );
         	if(!allNucleiSplittable)
-        		fine("At least one nucleus in "+collection.getName()+" is not splittable");
+        		LOGGER.fine("At least one nucleus in "+collection.getName()+" is not splittable");
         	return allNucleiSplittable;
         }
         return true;
@@ -849,7 +851,7 @@ public class ProfileManager implements Loggable {
             int targetIndex = nSeg.getProportionalIndex(proportion);
             return profile.isSplittable(id, targetIndex);
         } catch (UnavailableComponentException | ProfileException e) {
-            fine("Error getting profile", e);
+        	LOGGER.log(Loggable.STACK, "Error getting profile", e);
             return false;
         }
         
@@ -888,7 +890,7 @@ public class ProfileManager implements Loggable {
         // Get the segments to merge
         IBorderSegment test = medianProfile.getSegment(segId);
         if (!test.hasMergeSources()) {
-            fine("Segment has no merge sources - cannot unmerge");
+            LOGGER.fine("Segment has no merge sources - cannot unmerge");
             return;
         }
         

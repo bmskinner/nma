@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -34,8 +35,11 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ImportWorkflowAction  extends VoidResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private File file;
     private static final String PROGRESS_BAR_LABEL = "Running workflow...";
@@ -95,16 +99,16 @@ public class ImportWorkflowAction  extends VoidResultAction {
             datasets = r.getDatasets();
 
             if (datasets == null || datasets.isEmpty()) {
-                log("No datasets returned");
+                LOGGER.info("No datasets returned");
             } else {
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, datasets);
             }
         } catch (InterruptedException e) {
-            warn("Interruption to swing worker");
-            stack("Interruption to swing worker", e);
+            LOGGER.warning("Interruption to swing worker");
+            LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
         } catch (ExecutionException e) {
-            warn("Execution error in swing worker");
-            stack("Execution error in swing worker", e);
+            LOGGER.warning("Execution error in swing worker");
+            LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
         }
 
         super.finished();

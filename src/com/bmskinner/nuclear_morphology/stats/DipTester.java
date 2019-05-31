@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.stats;
 
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -38,7 +39,9 @@ import jdistlib.disttest.NormalityTest;
  * profile in a collection; for each nucleus in the collection, what is the
  * difference to the median at that point? Is the list of differences bimodal?
  */
-public class DipTester implements Loggable, SignificanceTest {
+public class DipTester implements SignificanceTest {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private ICellCollection collection;
 
@@ -81,7 +84,7 @@ public class DipTester implements Loggable, SignificanceTest {
             resultProfile = resultProfile.offset(offset);
         } catch (ProfileException | UnavailableBorderTagException
                 | UnavailableProfileTypeException e) {
-            stack("Error converting values or offsetting profile", e);
+            LOGGER.log(Loggable.STACK, "Error converting values or offsetting profile", e);
             resultProfile = createErrorPValueProfile();
 
         }

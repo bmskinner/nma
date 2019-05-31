@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
@@ -83,6 +84,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
@@ -94,6 +96,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class OutlineChartFactory extends AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	protected static final String NO_CONSENSUS_ERROR_LBL = "No consensus nucleus in dataset";
 
@@ -110,29 +114,29 @@ public class OutlineChartFactory extends AbstractChartFactory {
         try {
 
             if (!options.hasDatasets()) {
-                finer("No datasets for signal outline chart");
+                LOGGER.finer( "No datasets for signal outline chart");
                 return createEmptyChart();
             }
 
             if (options.isMultipleDatasets()) {
-                finer("Multiple datasets for signal outline chart");
+                LOGGER.finer( "Multiple datasets for signal outline chart");
                 return createMultipleDatasetEmptyChart();
             }
 
             if (!options.firstDataset().getCollection().hasConsensus()) {
-                finer("No consensus for signal outline chart");
+                LOGGER.finer( "No consensus for signal outline chart");
                 return createTextAnnotatedEmptyChart(NO_CONSENSUS_ERROR_LBL);
             }
 
             if (options.isShowWarp()) {
-                finer("Warp chart for signal outline chart");
+                LOGGER.finer( "Warp chart for signal outline chart");
                 return makeSignalWarpChart();
             }
-			finer("Signal CoM for signal outline chart");
+			LOGGER.finer( "Signal CoM for signal outline chart");
 			return makeSignalCoMNucleusOutlineChart();
         } catch (ChartCreationException e) {
-            warn("Error making signal chart");
-            stack("Error making signal chart", e);
+            LOGGER.warning("Error making signal chart");
+            LOGGER.log(Loggable.STACK, "Error making signal chart", e);
             return createErrorChart();
         }
 
@@ -228,7 +232,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getComponent());
         } catch (ChartDatasetCreationException e) {
-            stack("Error creating outline", e);
+            LOGGER.log(Loggable.STACK, "Error creating outline", e);
             return createErrorChart();
         }
 
@@ -239,8 +243,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
         
      // Get the bounding box size for the consensus, to find the offsets for the images created
         Rectangle2D consensusBounds = options.getComponent().getBounds();
-        fine(String.format("Consensus bounds: %s x %s : x%s y%s", consensusBounds.getWidth(), consensusBounds.getHeight(), consensusBounds.getX(), consensusBounds.getY() ));
-        fine(String.format("Image bounds: %s x %s",image.getWidth(), image.getHeight()));
+        LOGGER.fine(String.format("Consensus bounds: %s x %s : x%s y%s", consensusBounds.getWidth(), consensusBounds.getHeight(), consensusBounds.getX(), consensusBounds.getY() ));
+        LOGGER.fine(String.format("Image bounds: %s x %s",image.getWidth(), image.getHeight()));
         
         int xOffset = (int) Math.round(-xChartMin);
         int yOffset = (int) Math.round(-yChartMin);
@@ -271,7 +275,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         try {
             meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
         } catch (MeshCreationException e) {
-            stack("Error creating consensus mesh", e);
+            LOGGER.log(Loggable.STACK, "Error creating consensus mesh", e);
             return createErrorChart();
         }
 
@@ -297,14 +301,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
         Set<ICell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
 
         for (ICell cell : cells) {
-            fine("Drawing signals for cell " + cell.getNucleus().getNameAndNumber());
+            LOGGER.fine("Drawing signals for cell " + cell.getNucleus().getNameAndNumber());
             // Get each nucleus. Make a mesh.
             DefaultMesh cellMesh;
             try {
                 cellMesh = new DefaultMesh(cell.getNucleus(), meshConsensus);
             } catch (MeshCreationException e1) {
-                fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
-                stack("Error creating mesh", e1);
+                LOGGER.fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
+                LOGGER.log(Loggable.STACK, "Error creating mesh", e1);
                 return createErrorChart();
             }
 
@@ -321,17 +325,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     // Draw NucleusMeshImage onto consensus mesh.
                     warped = im.drawImage(meshConsensus);
                 } catch (UncomparableMeshImageException | MeshImageCreationException e) {
-                    fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
-                    stack("Error creating mesh", e);
+                    LOGGER.fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
+                    LOGGER.log(Loggable.STACK, "Error creating mesh", e);
                     return createErrorChart();
                 }
 
                 drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
 
             } catch (UnloadableImageException e) {
-                warn("Unable to load signal image for signal group " + options.getSignalGroup() + " in cell "
+                LOGGER.warning("Unable to load signal image for signal group " + options.getSignalGroup() + " in cell "
                         + cell.getNucleus().getNameAndNumber());
-                stack("Unable to load signal image for signal group " + options.getSignalGroup() + " in cell "
+                LOGGER.log(Loggable.STACK, "Unable to load signal image for signal group " + options.getSignalGroup() + " in cell "
                         + cell.getNucleus().getNameAndNumber(), e);
             }
 
@@ -340,7 +344,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
         } catch (ChartDatasetCreationException e) {
-            stack("Error creating outline", e);
+            LOGGER.log(Loggable.STACK, "Error creating outline", e);
             return createErrorChart();
         }
         plot.setDataset(0, ds);
@@ -381,7 +385,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return createMeshChart(result, 0.5);
 
                     } catch (MeshCreationException e) {
-                        stack("Error creating mesh", e);
+                        LOGGER.log(Loggable.STACK, "Error creating mesh", e);
                         return createErrorChart();
                     }
 
@@ -412,20 +416,20 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return drawImageAsAnnotation(ip);
 
                     } catch (UnloadableImageException e) {
-                        warn("Cannot load nucleus image: "
+                        LOGGER.warning("Cannot load nucleus image: "
                                 + options.getCell().getNucleus().getSourceFile().getAbsolutePath());
-                        stack("Error loading nucleus image", e);
+                        LOGGER.log(Loggable.STACK, "Error loading nucleus image", e);
                         return createErrorChart();
                     } catch (MeshImageCreationException e) {
-                        fine("Cannot create mesh for " + options.getCell().getNucleus().getNameAndNumber());
-                        stack("Error creating mesh", e);
+                        LOGGER.fine("Cannot create mesh for " + options.getCell().getNucleus().getNameAndNumber());
+                        LOGGER.log(Loggable.STACK, "Error creating mesh", e);
                         return createErrorChart();
                     } catch (UncomparableMeshImageException e) {
-                        fine("Cannot compare mesh for " + options.getCell().getNucleus().getNameAndNumber());
-                        stack("Error comparing mesh", e);
+                        LOGGER.fine("Cannot compare mesh for " + options.getCell().getNucleus().getNameAndNumber());
+                        LOGGER.log(Loggable.STACK, "Error comparing mesh", e);
                         return createErrorChart();
                     } catch (MeshCreationException e) {
-                        stack("Error creating mesh", e);
+                        LOGGER.log(Loggable.STACK, "Error creating mesh", e);
                         return createErrorChart();
                     }
 
@@ -434,8 +438,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
             }
             return makeStandardCellOutlineChart();
         } catch (ChartCreationException e) {
-            warn("Error creating cell outline chart");
-            fine("Error creating cell outline chart", e);
+            LOGGER.warning("Error creating cell outline chart");
+            LOGGER.log(Loggable.STACK, "Error creating cell outline chart", e);
             return createErrorChart();
         }
 
@@ -444,7 +448,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
     private JFreeChart makeBareCellOutlineChart() throws ChartCreationException {
 
         if (!options.hasCell()) {
-            finest("No cell to draw");
+            LOGGER.finest( "No cell to draw");
             return ConsensusNucleusChartFactory.createEmptyChart();
         }
 
@@ -458,7 +462,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             try {
                 new OutlineDatasetCreator(options, cell.getCytoplasm()).addOutline(ds, false);
             } catch (ChartDatasetCreationException e) {
-                fine("Error making cytoplasm outline", e);
+            	LOGGER.log(Loggable.STACK, "Error making cytoplasm outline", e);
                 return createErrorChart();
             }
 
@@ -471,7 +475,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 try {
                     new OutlineDatasetCreator(options, n).addOutline(ds, false);
                 } catch (ChartDatasetCreationException e) {
-                    fine("Error making nucleus outline", e);
+                	LOGGER.log(Loggable.STACK, "Error making nucleus outline", e);
                     return createErrorChart();
                 }
 
@@ -571,20 +575,20 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 }
 
                 if (options.isShowSignals()) {
-                    finest("Displaying signals on chart");
+                    LOGGER.finest( "Displaying signals on chart");
                     if (cell.getNucleus().getSignalCollection().hasSignal()) {
 
                         List<ComponentOutlineDataset<CellularComponent>> signalsDatasets = new NucleusDatasetCreator(options)
                                 .createSignalOutlines(cell, dataset);
 
-                        finest("Fetched signal outline datasets for " + cell.getNucleus().getNameAndNumber());
+                        LOGGER.finest( "Fetched signal outline datasets for " + cell.getNucleus().getNameAndNumber());
 
                         for (OutlineDataset<CellularComponent> d : signalsDatasets) {
 
                             for (int series = 0; series < d.getSeriesCount(); series++) {
                                 String seriesKey = d.getSeriesKey(series).toString();
 
-                                finest("Adding outline for " + seriesKey + " to dataset hash");
+                                LOGGER.finest( "Adding outline for " + seriesKey + " to dataset hash");
 
                                 cellDataset.addOutline(seriesKey, d);
                             }
@@ -592,7 +596,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     }
                 }
 
-                finest("Created nucleus outline");
+                LOGGER.finest( "Created nucleus outline");
             }
 
         } catch (ChartDatasetCreationException e) {
@@ -961,8 +965,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     plot.setRenderer(i, r);
 
                 } catch (ChartDatasetCreationException e) {
-                    warn("Cannot create data for dataset " + dataset.getName());
-                    fine("Error getting chart data", e);
+                    LOGGER.warning("Cannot create data for dataset " + dataset.getName());
+                    LOGGER.log(Loggable.STACK, "Error getting chart data", e);
                 } finally {
                     i++;
                 }
@@ -1059,9 +1063,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				}
 				
         	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-        		stack("Error getting segments for mesh");
-        		stack(e);
-        		stack("Falling back to old mesh face annotation");
+        		LOGGER.log(Loggable.STACK, "Error getting segments for mesh", e);
+        		LOGGER.log(Loggable.STACK, "Falling back to old mesh face annotation");
 
         		for (MeshFace f : mesh.getFaces()) {
 

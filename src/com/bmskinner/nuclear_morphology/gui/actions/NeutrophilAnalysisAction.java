@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 
@@ -41,8 +42,11 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class NeutrophilAnalysisAction extends VoidResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private IAnalysisOptions options;
     private Date                    startTime;
@@ -105,7 +109,7 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
                 return;
             }
 
-            log("Directory: " + directory.getName());
+            LOGGER.info("Directory: " + directory.getName());
 
             this.startTime = Calendar.getInstance().getTime();
             this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
@@ -124,19 +128,19 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
             worker = new DefaultAnalysisWorker(m);
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
-            finest("Worker is executing");
+            LOGGER.finest( "Worker is executing");
             analysisSetup.dispose();
 
         } else {
             analysisSetup.dispose();
-            fine("Analysis cancelled");
+            LOGGER.fine("Analysis cancelled");
             this.cancel();
         }
     }
 
     @Override
     public void finished() {
-        // log("Method finished");
+        // LOGGER.info("Method finished");
         List<IAnalysisDataset> datasets;
 
         try {
@@ -144,19 +148,19 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
             datasets = r.getDatasets();
 
             if (datasets == null || datasets.size() == 0) {
-                log("No datasets returned");
+                LOGGER.info("No datasets returned");
             } else {
-                // log("Fire profiling");
+                // LOGGER.info("Fire profiling");
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
 
             }
 
         } catch (InterruptedException e) {
-            warn("Interruption to swing worker");
-            stack("Interruption to swing worker", e);
+            LOGGER.warning("Interruption to swing worker");
+            LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
         } catch (ExecutionException e) {
-            warn("Execution error in swing worker");
-            stack("Execution error in swing worker", e);
+            LOGGER.warning("Execution error in swing worker");
+            LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
         }
 
         super.finished();
@@ -179,7 +183,7 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
         if (!file.isDirectory()) {
             return false;
         }
-        fine("Selected directory: " + file.getAbsolutePath());
+        LOGGER.fine("Selected directory: " + file.getAbsolutePath());
         folder = file;
 
         return true;

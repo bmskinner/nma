@@ -20,6 +20,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -29,11 +30,14 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 
 @SuppressWarnings("serial")
 public class ColourThresholdingSettingsPanel extends SettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final Integer THRESHOLD_MIN  = Integer.valueOf(0);
     public static final Integer THRESHOLD_MAX  = Integer.valueOf(255);
@@ -64,8 +68,8 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
         try {
             this.options = (PreprocessingOptions) options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
         } catch (MissingOptionException e) {
-            warn("Missing background options");
-            stack(e.getMessage(), e);
+            LOGGER.warning("Missing background options");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
 
         createSpinners();
@@ -132,8 +136,8 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                 options.setHueThreshold((int) j.getValue(), (int) maxHueSpinner.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -153,8 +157,8 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                 options.setHueThreshold((int) minHueSpinner.getValue(), (int) j.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -174,8 +178,8 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                 options.setSaturationThreshold((int) j.getValue(), (int) maxSatSpinner.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -195,8 +199,8 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                 options.setSaturationThreshold((int) minSatSpinner.getValue(), (int) j.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -216,8 +220,8 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                 options.setBrightnessThreshold((int) j.getValue(), (int) maxBriSpinner.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -237,8 +241,8 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                 options.setBrightnessThreshold((int) minBriSpinner.getValue(), (int) j.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });

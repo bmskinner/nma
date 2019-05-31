@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -51,6 +52,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -70,6 +72,8 @@ import ij.process.ImageProcessor;
  *
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	/** the distance from a point to allow for searching an opposite border point*/
     private static final int OPPOSITE_BORDER_INTERVAL_PIXELS = 4;
@@ -220,7 +224,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         }
 
         if (!polygon.contains(centreOfMass.getX(), centreOfMass.getY())) {
-            fine("Centre of mass is not inside the object. You may have a doughnut.");
+            LOGGER.fine("Centre of mass is not inside the object. You may have a doughnut.");
         }
 
         this.xpoints = new int[polygon.npoints];
@@ -244,7 +248,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     private void makeBorderList() {
 
-    	finer("Creating border list from "+xpoints.length+" integer points");
+    	LOGGER.finer( "Creating border list from "+xpoints.length+" integer points");
     	
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
@@ -266,7 +270,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
 
-        finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
+        LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
             IBorderPoint point = IBorderPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
 
@@ -313,7 +317,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param a the template component
      */
     protected DefaultCellularComponent(CellularComponent a) {
-    	finer("Constructing a new component from existing template component");
+    	LOGGER.finer( "Constructing a new component from existing template component");
         this.id = UUID.fromString(a.getID().toString());
         this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);
         this.originalCentreOfMass = IPoint.makeNew(a.getOriginalCentreOfMass());
@@ -326,7 +330,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             try {
                 this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
             } catch (Exception e) {
-                stack("Error getting " + stat + " from template", e);
+                LOGGER.log(Loggable.STACK, "Error getting " + stat + " from template", e);
                 this.setStatistic(stat, Statistical.ERROR_CALCULATING_STAT);
             }
         }
@@ -346,7 +350,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     private void duplicateBorderList(CellularComponent c) {
         // Duplicate the border points
-    	finest("Duplicating border list from template component");
+    	LOGGER.finest( "Duplicating border list from template component");
         this.borderList = new ArrayList<>(c.getBorderLength());
 
         for (IBorderPoint p : c.getBorderList()) {
@@ -479,7 +483,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         	 
 
         } catch (ImageImportException e) {
-        	stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
+        	LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
         	throw new UnloadableImageException("Source image is not available");
         }
     }
@@ -497,7 +501,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
             return imageStack.getProcessor(stack);
         } catch (ImageImportException e) {
-            stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
+            LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
             throw new UnloadableImageException("Source image is not available");
         }
 
@@ -871,7 +875,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public void reverse() {
-    	fine("Reversing component border list");
+    	LOGGER.fine("Reversing component border list");
         int[] newXpoints = new int[xpoints.length], newYpoints = new int[xpoints.length];
 
         for (int i = xpoints.length - 1, j = 0; j < xpoints.length; i--, j++) {
@@ -1066,7 +1070,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             }
 
         } catch (UnloadableImageException e) {
-            warn("Cannot load source image");
+            LOGGER.warning("Cannot load source image");
             result = new boolean[10][10];
         }
         return new BooleanMask(result);
@@ -1218,7 +1222,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public void refreshBorderList(boolean useSplineFitting) {
 
-    	finest("Creating border list from "+xpoints.length+" integer points");
+    	LOGGER.finest( "Creating border list from "+xpoints.length+" integer points");
     	
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
@@ -1243,7 +1247,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
                 
         FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, isSmooth);
 
-        finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
+        LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
             IBorderPoint point = IBorderPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
 
@@ -1259,7 +1263,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         moveCentreOfMass(oldCoM);
         calculateBounds();
-        finest("Component has "+getBorderLength()+" border points");
+        LOGGER.finest( "Component has "+getBorderLength()+" border points");
 
     }
 

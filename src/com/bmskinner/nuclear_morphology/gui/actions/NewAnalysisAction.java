@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 
@@ -43,11 +44,14 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Run a new analysis
  */
 public class NewAnalysisAction extends VoidResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private IAnalysisOptions options;
     private IDetectionOptions nucleusOptions;
@@ -92,13 +96,13 @@ public class NewAnalysisAction extends VoidResultAction {
 
         if (folder == null) {
             if (!getImageDirectory()) {
-                fine("Could not get image directory");
+                LOGGER.fine("Could not get image directory");
                 cancel();
                 return;
             }
         }
 
-        fine("Creating for " + folder.getAbsolutePath());
+        LOGGER.fine("Creating for " + folder.getAbsolutePath());
 
         NucleusImageProber analysisSetup = new NucleusImageProber(folder, options);
 
@@ -116,7 +120,7 @@ public class NewAnalysisAction extends VoidResultAction {
                 return;
             }
 
-            log("Directory: " + directory.getName());
+            LOGGER.info("Directory: " + directory.getName());
 
             Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
@@ -127,12 +131,12 @@ public class NewAnalysisAction extends VoidResultAction {
             worker = new DefaultAnalysisWorker(m);
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
-            finest("Worker is executing");
+            LOGGER.finest( "Worker is executing");
             analysisSetup.dispose();
 
         } else {
             analysisSetup.dispose();
-            fine("Analysis cancelled");
+            LOGGER.fine("Analysis cancelled");
             this.cancel();
         }
     }
@@ -145,17 +149,17 @@ public class NewAnalysisAction extends VoidResultAction {
             List<IAnalysisDataset> datasets = r.getDatasets();
 
             if (datasets == null || datasets.isEmpty()) {
-                log("No datasets returned");
+                LOGGER.info("No datasets returned");
             } else {
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets);
             }
 
         } catch (InterruptedException e) {
-            warn("Interruption to swing worker");
-            stack("Interruption to swing worker", e);
+            LOGGER.warning("Interruption to swing worker");
+            LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
         } catch (ExecutionException e) {
-            warn("Execution error in swing worker");
-            stack("Execution error in swing worker", e);
+            LOGGER.warning("Execution error in swing worker");
+            LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
         }
 
         super.finished();

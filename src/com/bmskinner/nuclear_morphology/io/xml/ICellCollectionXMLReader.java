@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
@@ -22,6 +23,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Reader for cell collections
@@ -30,6 +32,9 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
  *
  */
 public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
 	private final NucleusFactory fact;
 	private final double windowProportion;
 	private final String collectionName;
@@ -72,7 +77,7 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 		try {
 			collection.createProfileCollection();
 		} catch (ProfileException e1) {
-			stack(e1);
+			LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
 		}
 		
 		Element tags = e.getChild(XMLCreator.BORDER_TAGS_KEY);
@@ -127,14 +132,14 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 			return;
 		
 		for(Element groupElement : e.getChildren(XMLCreator.SIGNAL_GROUP_KEY)) {
-			fine("Adding signal group to "+collection.getName());
+			LOGGER.fine("Adding signal group to "+collection.getName());
 			String name = groupElement.getChildText(XMLCreator.NAME_KEY);
 			UUID id = readUUID(groupElement);
 			ISignalGroup sg = new SignalGroup(name);
 			Element colourElement = groupElement.getChild(XMLCreator.COLOUR_KEY);
 			if(colourElement!=null)
 				sg.setGroupColour(Color.decode(colourElement.getText()));
-			fine("Adding signal group "+sg.toString());
+			LOGGER.fine("Adding signal group "+sg.toString());
 			collection.addSignalGroup(id, sg);
 		}
 	}
@@ -145,7 +150,7 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 		try {
 			return new DefaultConsensusNucleus(template, type);
 		} catch (UnprofilableObjectException e1) {
-			stack("Error reading consensus", e1);
+			LOGGER.log(Loggable.STACK, "Error reading consensus", e1);
 			throw new XMLReadingException(e1);
 		}
 	}

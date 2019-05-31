@@ -43,7 +43,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.5
  *
  */
-public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
+public abstract class AbstractFinder<E> implements Finder<E>{
 
     protected volatile IAnalysisOptions             options;
     protected volatile List<DetectionEventListener> detectionlisteners = new ArrayList<>();

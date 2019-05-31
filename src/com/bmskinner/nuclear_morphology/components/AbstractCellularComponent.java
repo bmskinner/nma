@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
@@ -65,7 +67,9 @@ import ij.process.ImageProcessor;
  *             datasets to be read and converted.
  */
 @Deprecated
-public abstract class AbstractCellularComponent implements CellularComponent, Rotatable {
+public abstract class AbstractCellularComponent implements CellularComponent {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
     private final UUID        id;
@@ -227,7 +231,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             try {
                 this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
             } catch (Exception e) {
-                fine("Error setting statistic: " + stat, e);
+            	LOGGER.log(Loggable.STACK, "Error setting statistic: " + stat, e);
                 this.setStatistic(stat, 0);
             }
         }
@@ -333,7 +337,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
                 return ip;
 
             } catch (ImageImportException e) {
-                error("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
+                LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
                 return null;
             }
 
@@ -355,7 +359,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
             return imageStack.getProcessor(stack);
         } catch (ImageImportException e) {
-            stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
+            LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
             throw new UnloadableImageException("Source image is not available");
         }
 
@@ -423,22 +427,22 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
     @Override
     public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
         if (this.statistics.containsKey(stat)) {
-            finest("Fetching stat " + stat);
+            LOGGER.finest( "Fetching stat " + stat);
             double result = statistics.get(stat);
             result = stat.convert(result, this.getScale(), scale);
             return result;
         }
-		// finest("Calculating stat "+stat);
+		// LOGGER.finest( "Calculating stat "+stat);
 		double result = calculateStatistic(stat);
-		// finest("Setting stat "+stat+": "+result);
+		// LOGGER.finest( "Setting stat "+stat+": "+result);
 		setStatistic(stat, result);
-		// finest("Set stat "+stat+"; returning");
+		// LOGGER.finest( "Set stat "+stat+"; returning");
 		return result;
     }
 
     // For subclasses to override
     protected synchronized double calculateStatistic(PlottableStatistic stat) {
-        // finest("Abstract method for calculating stat: "+stat);
+        // LOGGER.finest( "Abstract method for calculating stat: "+stat);
         return 0;
     }
 
@@ -943,8 +947,8 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
 
         if (result.isEmpty()) {
             // IJ.log(" Roi has no pixels");
-            log(Level.SEVERE, "No points found in roi");
-            log(Level.FINE, "X base: " + minX + "  Y base: " + minY + "  X max: " + maxX + "  Y max: " + maxY);
+            LOGGER.fine("No points found in roi");
+            LOGGER.fine("X base: " + minX + "  Y base: " + minY + "  X max: " + maxX + "  Y max: " + maxY);
         } else {
             // IJ.log(" Roi of area "+result.size());
         }
@@ -1165,7 +1169,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading abstract cellular component");
+        // LOGGER.finest( "\tReading abstract cellular component");
 
         // id is final, so cannot be assigned normally.
         // Reflect around the problem by making the field
@@ -1181,19 +1185,19 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             idField.setAccessible(false);
 
         } catch (NoSuchFieldException e) {
-            fine("No field", e);
+            LOGGER.log(Loggable.STACK, "No field", e);
             return;
         } catch (SecurityException e) {
-            fine("Security error", e);
+            LOGGER.log(Loggable.STACK, "Security error", e);
             return;
         } catch (IllegalArgumentException e) {
-            fine("Illegal argument", e);
+            LOGGER.log(Loggable.STACK, "Illegal argument", e);
             return;
         } catch (IllegalAccessException e) {
-            fine("Illegal access", e);
+            LOGGER.log(Loggable.STACK, "Illegal access", e);
             return;
         } catch (Exception e) {
-            fine("Unexpected exception", e);
+            LOGGER.log(Loggable.STACK, "Unexpected exception", e);
             return;
         }
 
@@ -1269,13 +1273,13 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
 
         imageRef = new SoftReference<ImageProcessor>(null);
 
-        // finest("\tRead abstract cellular component");
+        // LOGGER.finest( "\tRead abstract cellular component");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting abstract cellular component");
+        // LOGGER.finest( "\tWriting abstract cellular component");
         // out.defaultWriteObject();
-        // finest("\tWrote abstract cellular component");
+        // LOGGER.finest( "\tWrote abstract cellular component");
 
         /*
          * Java serialization keeps a record of every object written to a
@@ -1308,7 +1312,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
          * 
          */
         // Use the default methods to write everything until the borderlist
-        // finest("\tWriting abstract cellular component");
+        // LOGGER.finest( "\tWriting abstract cellular component");
         out.writeObject(id);
         out.writeObject(position);
         out.writeObject(centreOfMass);
@@ -1327,7 +1331,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             out.writeFloat((float) p.getY());
         }
         out.writeBoolean(false);
-        // finest("\tWrote abstract cellular component");
+        // LOGGER.finest( "\tWrote abstract cellular component");
     }
 
     /*

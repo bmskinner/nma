@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -24,6 +25,7 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The settings panel for detection nuclear signals. This is designed to be
@@ -36,6 +38,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
  */
 @SuppressWarnings("serial")
 public class SignalDetectionSettingsPanel extends SettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private INuclearSignalOptions options;
 
@@ -52,7 +56,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 
             this.add(createPanel(), BorderLayout.CENTER);
         } catch (Exception e) {
-            error(e.getMessage(), e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
     }
 

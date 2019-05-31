@@ -23,6 +23,7 @@ import java.io.ObjectStreamClass;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -36,7 +37,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("deprecation")
-public class PackageReplacementObjectInputStream extends ObjectInputStream implements Loggable {
+public class PackageReplacementObjectInputStream extends ObjectInputStream {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * Migration table. Holds old to new classes representation.
@@ -229,7 +232,7 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
                     f.setAccessible(true);
                     f.set(resultClassDescriptor, replacement);  
                 } catch (Exception e) {
-                    error("Error while replacing class name: " + e.getMessage(), e);
+                    LOGGER.log(Loggable.STACK, "Error while replacing class name: " + e.getMessage(), e);
                     throw new ClassNotFoundException("Package replacement of class "+oldName+" was unsuccessful", e);
                 }
             }

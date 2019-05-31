@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Extract virtual merge source datasets into real root datasets.
@@ -42,6 +44,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
  *
  */
 public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     public MergeSourceExtractionMethod(@NonNull List<IAnalysisDataset> toExtract) {
         super(toExtract);
@@ -55,7 +59,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     }
     
     private List<IAnalysisDataset> extractSourceDatasets(){
-    	fine("Extracting merge sources");
+    	LOGGER.fine("Extracting merge sources");
     	List<IAnalysisDataset> result = new ArrayList<>();     
     	
     	DatasetValidator dv = new DatasetValidator();
@@ -63,16 +67,16 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
         for (IAnalysisDataset virtualMergeSource : datasets) {
             
         	IAnalysisDataset extracted = extractMergeSource(virtualMergeSource);
-            fine("Checking new datasets from merge source "+extracted.getName());
+            LOGGER.fine("Checking new datasets from merge source "+extracted.getName());
          	if(!dv.validate(extracted)) {
-         		warn("New dataset failed to validate; resegmentation is recommended");
-         		fine(dv.getErrors().stream().collect(Collectors.joining("\n")));
+         		LOGGER.warning("New dataset failed to validate; resegmentation is recommended");
+         		LOGGER.fine(dv.getErrors().stream().collect(Collectors.joining("\n")));
          	}
 
             result.add(extracted);
 
         }
-        fine("Finished extracting merge sources");
+        LOGGER.fine("Finished extracting merge sources");
         return result;
     }
     
@@ -108,7 +112,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 //    		copyChildDatasets(template, newDataset);
 
     	} catch (ProfileException e) {
-    		error("Cannot copy profile offsets to recovered merge source", e);
+    		LOGGER.log(Loggable.STACK, "Cannot copy profile offsets to recovered merge source", e);
     	}
 
          Optional<IAnalysisOptions> op = template.getAnalysisOptions();
@@ -134,9 +138,9 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     
     
 //    private void copyChildDatasets(IAnalysisDataset template, IAnalysisDataset newDataset) throws ProfileException{
-//    	 fine("Adding children of "+template.getName());
+//    	 LOGGER.fine("Adding children of "+template.getName());
 //    	for(IAnalysisDataset childTemplate : template.getChildDatasets()) {
-//    		fine("Adding child "+childTemplate.getName());
+//    		LOGGER.fine("Adding child "+childTemplate.getName());
 //    		ICellCollection templateCollection = childTemplate.getCollection();
 //    		
 //            // Make a new real cell collection from the virtual collection

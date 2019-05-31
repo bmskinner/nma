@@ -20,6 +20,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -27,6 +28,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Set the radius for top hat filtering
@@ -37,6 +39,8 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
  */
 @SuppressWarnings("serial")
 public class TophatPanel extends SettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final Integer TOPHAT_RADIUS_MIN  = Integer.valueOf(1);
     public static final Integer TOPHAT_RADIUS_MAX  = Integer.valueOf(100);
@@ -74,8 +78,8 @@ public class TophatPanel extends SettingsPanel {
                 options.setInt(IDetectionOptions.TOP_HAT_RADIUS, value.intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -96,7 +100,7 @@ public class TophatPanel extends SettingsPanel {
 
             addLabelTextRows(labelList, fieldList, this);
         } catch (Exception e) {
-            error(e.getMessage(), e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
 
     }

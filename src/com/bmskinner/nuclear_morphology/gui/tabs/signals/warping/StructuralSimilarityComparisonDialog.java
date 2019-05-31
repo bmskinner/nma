@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
@@ -50,6 +51,7 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -60,6 +62,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 	
@@ -72,7 +76,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
 	public StructuralSimilarityComparisonDialog(@NonNull final SignalWarpingModel model) {
 		super();
-		fine("Creating MS-SSIM dialog");
+		LOGGER.fine("Creating MS-SSIM dialog");
 		this.model = model;
 		chartPanel = new ExportableChartPanel(ViolinChartFactory.createLoadingChart());
 		comparisonTable = new ExportableTable(AbstractTableCreator.createLoadingTable());
@@ -100,12 +104,12 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //			makePerCellCharts();
 			
 		} catch(Exception e) {
-			stack(e);
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			comparisonTable.setModel(AbstractTableCreator.createBlankTable());
 		}
 		validate();
 		pack();
-		fine("Showing MS-SSIM dialog");
+		LOGGER.fine("Showing MS-SSIM dialog");
 		setVisible(true);
 	}
 	
@@ -148,7 +152,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 
 						ImageProcessor ip1 = model.getImage(keys.get(0));
 						ImageProcessor ip2 = model.getImage(keys.get(1));
-						finer(keys.get(0)+" vs "+keys.get(1));
+						LOGGER.finer( keys.get(0)+" vs "+keys.get(1));
 						MSSIMScore score = msi.calculateMSSIM(ip1, ip2);
 
 						Object[] rowData = { keys.get(0).getTemplate().getName(), 
@@ -161,7 +165,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 							compModel.addRow(rowData);
 
 					} catch(Exception e) {
-						stack(String.format("Error calculating MS-SSIM* for pair %s and %s: %s", k1, k2, e.getMessage()), e);
+						LOGGER.log(Loggable.STACK, String.format("Error calculating MS-SSIM* for pair %s and %s: %s", k1, k2, e.getMessage()), e);
 					}
 				}
 			}
@@ -182,7 +186,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
 		
 //	private void makePerCellCharts() {
-//		fine("Creating per cell charts");
+//		LOGGER.fine("Creating per cell charts");
 //		
 //		
 //		PerCellMSSSIDCalculator calc = new PerCellMSSSIDCalculator();
@@ -207,7 +211,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //					scores = calc.get();
 //					chartPanel.setChart(makeCharts(scores));
 //				} catch (InterruptedException | ExecutionException e) {
-//					stack(e);
+//					LOGGER.log(Loggable.STACK, e);
 //					chartPanel.setChart(ViolinChartFactory.createErrorChart());
 //				}
 //				
@@ -309,12 +313,12 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //	    protected Map<ViolinKey, List<MSSIMScore>> doInBackground() throws Exception {
 //			Map<ViolinKey, List<MSSIMScore>> result = new HashMap<>();
 //	        try {
-//	            finer("Running warping");
+//	            LOGGER.finer( "Running warping");
 //	            result = calculatePerCellMSSSIMs();
 //
 //	        } catch (Exception e) {
 //	            warn("Error in warper");
-//	            stack("Error in signal warper", e);
+//	            LOGGER.log(Loggable.STACK, "Error in signal warper", e);
 //	        }
 //	        
 //	        return result;
@@ -326,12 +330,12 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //			Map<ViolinKey, List<MSSIMScore>> scores = new HashMap();
 //			for(IAnalysisDataset d : model.getTemplates()) {
 //				setLoadingLabelText("Generating pairwise comparison plots for "+d.getName()+"...");
-//				fine("Calculating score for "+d.getName());
+//				LOGGER.fine("Calculating score for "+d.getName());
 //				Mesh<Nucleus> meshConsensus;
 //				try {
 //					meshConsensus = new DefaultMesh<Nucleus>(d.getCollection().getConsensus());
 //				} catch (MeshCreationException e2) {
-//					stack(e2);
+//					LOGGER.log(Loggable.STACK, e2);
 //					progress+=d.getCollection().getNucleusCount();
 //					publish(progress);
 //					continue;
@@ -352,7 +356,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //				Rectangle r = meshConsensus.toPath().getBounds();
 //
 //				for(Nucleus n : d.getCollection().getNuclei()) {
-//					finer("Calculating "+n.getNameAndNumber());
+//					LOGGER.finer( "Calculating "+n.getNameAndNumber());
 //					if(n.getSignalCollection().getSignalGroupIds().size()==2) {
 //						List<UUID> signalIds = new ArrayList<>(n.getSignalCollection().getSignalGroupIds());
 //						UUID sig0 = signalIds.get(0);
@@ -403,7 +407,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 //			    return meshImage.drawImage(meshConsensus);
 //
 //			} catch (Exception e) {
-//				stack(e);
+//				LOGGER.log(Loggable.STACK, e);
 //				return ImageFilterer.createBlackByteProcessor(w, h);
 //			} 
 //		}

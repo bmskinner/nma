@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
@@ -49,6 +50,7 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The populations panel holds the list of open datasets for selection by the
@@ -59,6 +61,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
  */
 @SuppressWarnings("serial")
 public class PopulationsPanel extends DetailPanel  {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Populations";
     
@@ -302,7 +306,7 @@ public class PopulationsPanel extends DetailPanel  {
      *            move the dataset down (true) or up (false)
      */
     private void moveDataset(boolean isDown) {
-        finer("Move dataset heard");
+        LOGGER.finer( "Move dataset heard");
         List<IAnalysisDataset> datasets = DatasetListManager.getInstance().getSelectedDatasets();
         List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
 
@@ -395,8 +399,8 @@ public class PopulationsPanel extends DetailPanel  {
     			getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
     		} catch (Exception ex) {
-    			warn("Error in tree selection handler");
-    			stack("Error in tree selection handler", ex);
+    			LOGGER.warning("Error in tree selection handler");
+    			LOGGER.log(Loggable.STACK, "Error in tree selection handler", ex);
     		}
     	}
     	

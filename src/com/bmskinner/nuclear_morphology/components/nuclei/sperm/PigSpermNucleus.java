@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
@@ -29,9 +30,12 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @Deprecated
 public class PigSpermNucleus extends SpermNucleus {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -53,7 +57,7 @@ public class PigSpermNucleus extends SpermNucleus {
             int rpIndex = f.identifyIndex(p, rpSet);
 
             if (rpIndex == -1) {
-                finest("RP index was not found in nucleus, setting to zero in profile");
+                LOGGER.finest( "RP index was not found in nucleus, setting to zero in profile");
                 rpIndex = 0;
             }
 
@@ -76,9 +80,9 @@ public class PigSpermNucleus extends SpermNucleus {
             }
 
         } catch (UnavailableProfileTypeException e) {
-            stack("Error getting profile type", e);
+            LOGGER.log(Loggable.STACK, "Error getting profile type", e);
         } catch (NoDetectedIndexException e) {
-            fine("Unable to detect RP in nucleus");
+            LOGGER.fine("Unable to detect RP in nucleus");
             setBorderTag(Tag.REFERENCE_POINT, 0);
             setBorderTag(Tag.ORIENTATION_POINT, 0);
         }
@@ -180,15 +184,15 @@ public class PigSpermNucleus extends SpermNucleus {
     // }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading pig sperm nucleus");
+        // LOGGER.finest( "\tReading pig sperm nucleus");
         in.defaultReadObject();
-        // finest("\tRead pig sperm nucleus");
+        // LOGGER.finest( "\tRead pig sperm nucleus");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting pig sperm nucleus");
+        // LOGGER.finest( "\tWriting pig sperm nucleus");
         out.defaultWriteObject();
-        // finest("\tWrote pig sperm nucleus");
+        // LOGGER.finest( "\tWrote pig sperm nucleus");
     }
 
 }

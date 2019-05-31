@@ -20,6 +20,7 @@ import java.awt.Paint;
 import java.awt.Shape;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -42,8 +43,11 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ScatterChartFactory extends AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public ScatterChartFactory(ChartOptions o) {
         super(o);
@@ -70,7 +74,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 
         for (PlottableStatistic stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {
-                fine("Statistic classes are different");
+                LOGGER.fine("Statistic classes are different");
                 return createTextAnnotatedEmptyChart("Variable classes are different");
             }
         }
@@ -82,7 +86,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
             return createSignalStatisticScatterChart();
         
     	} catch(ChartDatasetCreationException e) {
-    		stack(e.getMessage(), e);
+    		LOGGER.log(Loggable.STACK, e.getMessage(), e);
     		return createErrorChart();
     	}
 
@@ -128,7 +132,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
             ds = (SignalXYDataset) new ScatterChartDatasetCreator(options)
                     .createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
         } catch (ChartDatasetCreationException e) {
-            stack("Error creating scatter dataset", e);
+            LOGGER.log(Loggable.STACK, "Error creating scatter dataset", e);
             return createErrorChart();
         }
 

@@ -29,6 +29,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -56,6 +57,7 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.process.ImageProcessor;
@@ -69,6 +71,8 @@ import ij.process.ImageProcessor;
  */
 @SuppressWarnings("serial")
 public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String MAKE_NEW_COLLECTION_LBL = "Make new collection from selected";
 	private static final String SELECT_ALL_LBL = "Select all";
@@ -241,7 +245,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         for (ICell c : cells) {
             newCollection.addCell(c);
         }
-        log("Added " + cells.size() + " cells to new collection");
+        LOGGER.info("Added " + cells.size() + " cells to new collection");
 
         /* We don;t want to run a new profiling because this will bugger up the
          * segment patterns of the original cells. We need to copy the segments
@@ -251,7 +255,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
             dataset.addChildCollection(newCollection);
             List<IAnalysisDataset> list = new ArrayList<>();
             list.add(dataset.getChildDataset(newCollection.getID()));
-            fine("Firing request for profile segmentation");
+            LOGGER.fine("Firing request for profile segmentation");
             fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, list, dataset);
         }
     }
@@ -299,7 +303,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    		try {
 	    			ip = rotateToVertical(c, ip);
 	    		} catch (UnavailableBorderTagException e) {
-	    			stack("Unable to rotate", e);
+	    			LOGGER.log(Loggable.STACK, "Unable to rotate", e);
 	    		}
 	    		ip.flipVertical(); // Y axis needs inverting
 	    		
@@ -351,7 +355,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
 	    	
 	    	File signalFile = new File(signalOptions.getFolder(),c.getNucleus().getSourceFileName());
-	    	fine("Loading signal image "+signalFile.getAbsolutePath());
+	    	LOGGER.fine("Loading signal image "+signalFile.getAbsolutePath());
 	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getChannel());
 	    	ip.invert();
 	    	ImageAnnotator an = new ImageAnnotator(ip);
@@ -385,7 +389,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	            return new SelectableCellIcon(ip, c);
 	            
 	        } catch (UnloadableImageException | ImageImportException e) {
-	            stack("Cannot load image for component", e);
+	            LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
 	            return new SelectableCellIcon(ImageFilterer.createBlackColorProcessor(150, 150), c);
 	        }
 

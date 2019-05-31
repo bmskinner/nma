@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -33,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDe
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is for tables about nuclei at the dataset level
@@ -42,6 +44,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public class NucleusTableCreator extends AbstractTableCreator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public NucleusTableCreator(final TableOptions options) {
         super(options);
@@ -107,8 +111,7 @@ public class NucleusTableCreator extends AbstractTableCreator {
             }
 
         } catch (MissingOptionException e) {
-            fine("Missing detection options in dataset");
-            stack(e.getMessage(), e);
+            LOGGER.log(Loggable.STACK, "Missing detection options in dataset: "+e.getMessage(), e);
             return createBlankTable();
         }
         return model;

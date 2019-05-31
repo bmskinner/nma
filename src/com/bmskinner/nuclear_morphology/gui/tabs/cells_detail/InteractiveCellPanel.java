@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -54,7 +55,9 @@ import ij.process.ImageProcessor;
  * @since 1.14.0
  *
  */
-public abstract class InteractiveCellPanel extends JPanel implements Loggable {
+public abstract class InteractiveCellPanel extends JPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	protected JLabel imageLabel;
 	
@@ -316,7 +319,7 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
         }
 
         // Increase the canvas size so rotation does not crop the nucleus
-        finer("Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
+        LOGGER.finer( "Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
         ImageProcessor newIp = createEnlargedProcessor(ip, angle);
 
         newIp.rotate(angle);
@@ -345,9 +348,9 @@ public abstract class InteractiveCellPanel extends JPanel implements Loggable {
         int xBase = (w - ip.getWidth()) >> 1;
         int yBase = (h - ip.getHeight()) >> 1;
 
-        finer(String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
+        LOGGER.finer( String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
 
-        finest("Copy starting at " + xBase + ", " + yBase);
+        LOGGER.finest( "Copy starting at " + xBase + ", " + yBase);
 
         ImageProcessor newIp = new ColorProcessor(w, h);
 

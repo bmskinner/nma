@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets.charts;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
 
 import org.jfree.data.statistics.HistogramDataset;
@@ -32,6 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.estimators.KernelEstimator;
 
@@ -42,6 +44,8 @@ import weka.estimators.KernelEstimator;
  *
  */
 public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	public static final int MIN_ROUNDED = 0;
     public static final int MAX_ROUNDED = 1;
@@ -68,7 +72,7 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
         double stepSize = Math.pow(10, binLog); // turn the log into an absolute
                                                 // step size
 
-        finest("Range finding: binLog: " + binLog + "; step: " + stepSize);
+        LOGGER.finest( "Range finding: binLog: " + binLog + "; step: " + stepSize);
         // If stepsize is < 1 for stats that increment in steps of 1, we will
         // get blanks in the histogram
         // Correct based on the stat.
@@ -84,10 +88,10 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
             }
 
             if (isInteger) {
-                finest("Detected integer only values: setting histogram step size to 1");
+                LOGGER.finest( "Detected integer only values: setting histogram step size to 1");
                 stepSize = 1;
             } else {
-                finest("Non-integer values: setting histogram step size to " + stepSize);
+                LOGGER.finest( "Non-integer values: setting histogram step size to " + stepSize);
             }
 
         }

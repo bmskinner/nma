@@ -20,6 +20,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -29,6 +30,7 @@ import javax.swing.SpinnerNumberModel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Set parameters for Hough circle detection
@@ -39,6 +41,8 @@ import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOption
  */
 @SuppressWarnings("serial")
 public class HoughSettingsPanel extends SettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final Integer HOUGH_MIN_RADIUS_MIN  = Integer.valueOf(5);
     public static final Integer HOUGH_MIN_RADIUS_MAX  = Integer.valueOf(100);
@@ -102,8 +106,8 @@ public class HoughSettingsPanel extends SettingsPanel {
                 options.setMinRadius(value.intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -117,8 +121,8 @@ public class HoughSettingsPanel extends SettingsPanel {
                 options.setMaxRadius(value.intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -132,8 +136,8 @@ public class HoughSettingsPanel extends SettingsPanel {
                 thresholdSpinner.setEnabled(value==0);
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -153,8 +157,8 @@ public class HoughSettingsPanel extends SettingsPanel {
 
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -185,7 +189,7 @@ public class HoughSettingsPanel extends SettingsPanel {
 
             addLabelTextRows(labels, fields, this);
         } catch (Exception e) {
-            error(e.getMessage(), e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
 
     }

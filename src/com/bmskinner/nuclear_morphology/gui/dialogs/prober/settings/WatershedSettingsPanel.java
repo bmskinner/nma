@@ -21,6 +21,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -29,8 +30,11 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class WatershedSettingsPanel extends DetectionSettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final Integer DYNAMIC_MIN_RANGE = Integer.valueOf(1);
     private static final Integer DYNAMIC_MAX_RANGE = Integer.valueOf(255);
@@ -76,8 +80,8 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
                 options.setInt(IDetectionOptions.DYNAMIC, ((Integer) dynamicSpinner.getValue()).intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing error in JSpinner");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing error in JSpinner");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
         });
 
@@ -92,8 +96,8 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
                 options.setInt(IDetectionOptions.EROSION, ((Integer) erosionSpinner.getValue()).intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing error in JSpinner");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing error in JSpinner");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
         });
 

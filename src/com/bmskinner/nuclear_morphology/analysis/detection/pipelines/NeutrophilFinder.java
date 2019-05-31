@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
@@ -52,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 import ij.plugin.ContrastEnhancer;
@@ -73,6 +75,8 @@ import inra.ijpb.watershed.ExtendedMinimaWatershed;
  *
  */
 public class NeutrophilFinder extends CellFinder {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private final ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
     private final ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);
@@ -199,7 +203,7 @@ public class NeutrophilFinder extends CellFinder {
 				ICytoplasm cyto = makeCytoplasm(r, imageFile, cytoOptions, i, m);
 				list.add(cyto);
 			} catch (ComponentCreationException e) {
-				stack("Error creating cytoplasm", e);
+				LOGGER.log(Loggable.STACK, "Error creating cytoplasm", e);
 			} finally {
 				i++;
 			}
@@ -330,7 +334,7 @@ public class NeutrophilFinder extends CellFinder {
             return ip;
 
         } catch (MissingOptionException e) {
-            error("Missing option", e);
+            LOGGER.log(Loggable.STACK, "Missing option", e);
             return null;
         }
 

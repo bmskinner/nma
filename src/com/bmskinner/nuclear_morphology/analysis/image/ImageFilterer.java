@@ -21,6 +21,7 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -30,6 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.detection.Kuwahara_Filter;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImagePlus;
@@ -49,6 +51,8 @@ import inra.ijpb.morphology.strel.DiskStrel;
  *
  */
 public class ImageFilterer extends AbstractImageFilterer {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public ImageFilterer(ImageProcessor ip) {
         super(ip);
@@ -502,7 +506,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      */
     public List<IPoint> houghCircleDetection(@NonNull IHoughDetectionOptions options) {
 
-        fine("Running hough detection");
+        LOGGER.fine("Running hough detection");
 
         Hough_Circles circ = new Hough_Circles();
 

@@ -24,7 +24,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public class TailDatasetCreator implements Loggable {
+public class TailDatasetCreator {
 
     /**
      * Get a dataset contining the outlines of all tails within the cell as

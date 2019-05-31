@@ -21,6 +21,7 @@ import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -30,6 +31,7 @@ import javax.swing.JRadioButton;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Holds a canny settings panel and a threshold settings panel. Uses a card
@@ -41,6 +43,8 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
  */
 @SuppressWarnings("serial")
 public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String THRESHOLD_LBL = "Threshold";
     private static final String EDGE_LBL      = "Edge detection";
@@ -88,7 +92,7 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
             CardLayout cl = (CardLayout) (cardPanel.getLayout());
             cl.show(cardPanel, EDGE_LBL);
         } catch (MissingOptionException e) {
-            warn("Missing canny options");
+            LOGGER.warning("Missing canny options");
         }
 
         return cardPanel;

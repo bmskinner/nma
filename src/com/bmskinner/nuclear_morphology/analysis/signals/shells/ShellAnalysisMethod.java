@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.ImageStack;
@@ -60,6 +62,8 @@ import ij.ImageStack;
  *
  */
 public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public static final int MINIMUM_AREA_PER_SHELL = 50;
 	public static final double MINIMUM_CIRCULARITY = 0.07;
@@ -87,7 +91,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	if (!collection.getSignalManager().hasSignals()) 
              return;
     	 
-        log(String.format("Performing %s shell analysis with %s shells on dataset %s...", 
+        LOGGER.info(String.format("Performing %s shell analysis with %s shells on dataset %s...", 
         		options.getErosionMethod(), options.getShellNumber(), collection.getName()));
         
         
@@ -101,7 +105,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         	
         	Optional<ISignalGroup> randomGroup = parent.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
         	if(!randomGroup.isPresent()) {
-        		warn("Parent dataset does not have shell results to copy");
+        		LOGGER.warning("Parent dataset does not have shell results to copy");
         		return;
         	}
         	if(randomGroup.get().hasShellResult())
@@ -118,10 +122,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             fireIndeterminateState();
             createResults();
 
-            log("Shell analysis complete");
+            LOGGER.info("Shell analysis complete");
         } catch (Exception e) {
-            warn("Error in shell analysis");
-            stack("Error in shell analysis", e);
+            LOGGER.warning("Error in shell analysis");
+            LOGGER.log(Loggable.STACK, "Error in shell analysis", e);
             return;
         }
     }
@@ -136,10 +140,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             counters.put(signalGroupId, new KeyedShellResult( options.getShellNumber(), options.getErosionMethod()));
             
             // Assign the options to each signal group
-            fine("Creating signal counter for group "+signalGroupId);
+            LOGGER.fine("Creating signal counter for group "+signalGroupId);
             Optional<IAnalysisOptions> datasetOptions = dataset.getAnalysisOptions();
             if(!datasetOptions.isPresent()) {
-            	warn("No analysis options in dataset; unable to set shell options");
+            	LOGGER.warning("No analysis options in dataset; unable to set shell options");
             	return;
             }
             datasetOptions.get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
@@ -186,7 +190,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     				long[] signals      = channelCounter.getPixelValues(CountType.SIGNAL, c, n, null);
     				
     				if(counterstain==null) {
-    					fine("No counterstain for "+n.getNameAndNumber());
+    					LOGGER.fine("No counterstain for "+n.getNameAndNumber());
     					continue;
     				}
     				if(signals==null)
@@ -257,7 +261,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                 fireProgressEvent();
             }
         	} catch(Exception e) {
-        		stack(e);
+        		LOGGER.log(Loggable.STACK, e.getMessage(), e);
         	}
         }
 
@@ -266,8 +270,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             try {
                 shellDetector = new ShellDetector(n,  options.getShellNumber(), options.getErosionMethod(), true);
             } catch (ShellAnalysisException e1) {
-                warn("Unable to make shells for " + n.getNameAndNumber());
-                stack("Error in shell detector", e1);
+                LOGGER.warning("Unable to make shells for " + n.getNameAndNumber());
+                LOGGER.log(Loggable.STACK, "Error in shell detector", e1);
                 return;
             }
 
@@ -280,8 +284,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                 }
             } catch (ImageImportException | UnloadableImageException e) {
 
-                warn("Cannot import image source file");
-                stack("Error importing file", e);
+                LOGGER.warning("Cannot import image source file");
+                LOGGER.log(Loggable.STACK, "Error importing file", e);
             }
 
         }
@@ -360,7 +364,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 			    	unMappedPoints++;
 			    }
 			}
-			finer("Random signal: "+unMappedPoints+" points were not in a shell");
+			LOGGER.finer("Random signal: "+unMappedPoints+" points were not in a shell");
 
         }
 

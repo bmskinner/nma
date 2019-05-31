@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Show the setup screen to detect nuclear signals, and run a detection analysis
@@ -42,6 +44,8 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
  *
  */
 public class AddNuclearSignalAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private File folder;
     
@@ -92,14 +96,14 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
         } catch (Exception e) {
             this.cancel();
-            warn("Error in signal detection");
-            stack("Error in signal detection", e);
+            LOGGER.warning("Error in signal detection");
+            LOGGER.log(Loggable.STACK, "Error in signal detection", e);
         }
     }
 
     @Override
     public void finished() {
-        finer("Finished signal detection");
+        LOGGER.finer( "Finished signal detection");
         cleanup(); // remove the property change listener
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);

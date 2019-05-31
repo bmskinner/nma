@@ -131,7 +131,7 @@ public class ClusterTreeDialog extends MessagingDialog {
             RootedTree r = importTree();
 
             if (r == null) {
-                warn("Unable to import tree");
+                LOGGER.warning("Unable to import tree");
                 this.dispose();
 
             } else {
@@ -259,8 +259,8 @@ public class ClusterTreeDialog extends MessagingDialog {
             try {
                 extractSelectedNodesToCluster();
             } catch (Exception e) {
-                warn("Error extracting cells");
-                stack("Error extracting cells", e);
+                LOGGER.warning("Error extracting cells");
+                LOGGER.log(Loggable.STACK, "Error extracting cells", e);
             }
         });
         panel.add(extractButton);
@@ -298,7 +298,7 @@ public class ClusterTreeDialog extends MessagingDialog {
         	StringSelection stringSelection = new StringSelection(group.getTree());
         	Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         	clipboard.setContents(stringSelection, null);
-        	log("Copied Newick tree for cluster "+group.getName());
+         LOGGER.info("Copied Newick tree for cluster "+group.getName());
         });
         panel.add(copyNewickButton);
         return panel;
@@ -351,7 +351,7 @@ public class ClusterTreeDialog extends MessagingDialog {
                 	cluster = dataset.getMergeSource(id);
                 } else {
                     // If the cluster was not found, stop
-                    warn("Child dataset not found, cancelling");
+                    LOGGER.warning("Child dataset not found, cancelling");
                     return;
                 }
 
@@ -481,7 +481,7 @@ public class ClusterTreeDialog extends MessagingDialog {
             clusterList.add(clusterCollection);
             LOGGER.info("Extracted " + clusterCollection.size() + " cells");
         } else {
-            warn("No cells found. Check taxon labels are correct");
+            LOGGER.warning("No cells found. Check taxon labels are correct");
         }
     }
 
@@ -496,8 +496,8 @@ public class ClusterTreeDialog extends MessagingDialog {
                 try {
                     dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
                 } catch (ProfileException e) {
-                    warn("Error copying collection offsets");
-                    fine("Error in offsetting", e);
+                    LOGGER.warning("Error copying collection offsets");
+                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);
                 }
 
                 IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());

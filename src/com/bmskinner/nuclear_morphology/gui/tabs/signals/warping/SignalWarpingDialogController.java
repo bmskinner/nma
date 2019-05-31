@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
@@ -53,7 +54,9 @@ import ij.process.ImageProcessor;
  * @since 1.15.0
  *
  */
-public class SignalWarpingDialogController implements Loggable {
+public class SignalWarpingDialogController {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private SignalWarpingModel model;
 	private ChartPanel chart;
@@ -78,7 +81,7 @@ public class SignalWarpingDialogController implements Loggable {
 			List<WarpedImageKey> keys = new ArrayList<>();
 			int[] selectedRow = table.getSelectedRows();
 			for (int i = 0; i < selectedRow.length; i++) {
-				fine("Selecting table row "+selectedRow[i]);
+				LOGGER.fine("Selecting table row "+selectedRow[i]);
 				model.addSelection(selectedRow[i]);
 				settingsPanel.setDisplayThreshold(SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
 				keys.add(model.getKey(selectedRow[i]));
@@ -156,7 +159,7 @@ public class SignalWarpingDialogController implements Loggable {
 			settingsPanel.setSettingsEnabled(true);
 
 		} catch (Exception e) {
-			error("Error getting warp results", e);
+			LOGGER.log(Loggable.STACK, "Error getting warp results", e);
 		}
 	}
 
@@ -166,7 +169,7 @@ public class SignalWarpingDialogController implements Loggable {
 	 */
 	public void updateBlankChart() {
 
-		fine("Updating blank chart");
+		LOGGER.fine("Updating blank chart");
 		JFreeChart ch = null;
 
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(settingsPanel.getTarget()).build();

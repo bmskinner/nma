@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Attribute;
@@ -30,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Saves a workspace to a *.wrk file
@@ -39,6 +41,8 @@ import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
  *
  */
 public abstract class WorkspaceExporter extends XMLWriter implements Exporter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String VERSION_1_13_x = "1.13.x";
 	private static final String VERSION_1_14_0 = "1.14.0";
@@ -86,8 +90,8 @@ public abstract class WorkspaceExporter extends XMLWriter implements Exporter {
 	        try(PrintWriter out = new PrintWriter(exportFile)) {
 	            out.print(builder.toString());
 	        } catch (FileNotFoundException e) {
-	            warn("Cannot export workspace file");
-	            fine("Error writing file", e);
+	            LOGGER.warning("Cannot export workspace file");
+	            LOGGER.log(Loggable.STACK, "Error writing file", e);
 	        }
 	    }
 	}

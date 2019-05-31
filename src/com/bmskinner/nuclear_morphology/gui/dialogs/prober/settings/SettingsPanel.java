@@ -23,6 +23,7 @@ import java.awt.GridBagConstraints;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -45,7 +46,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public abstract class SettingsPanel extends JPanel
-        implements Loggable, OptionsChangeListener, PanelUpdatingEventListener {
+        implements OptionsChangeListener, PanelUpdatingEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     protected static final int BOX_WIDTH  = 80;
     protected static final int BOX_HEIGHT = 20;
@@ -236,7 +239,7 @@ public abstract class SettingsPanel extends JPanel
 
     @Override
     public void setEnabled(boolean b) {
-        finest(this.getClass().getSimpleName() + ": Setting updating " + b);
+        LOGGER.finest( this.getClass().getSimpleName() + ": Setting updating " + b);
         for (Component c : this.getComponents()) {
             c.setEnabled(b);
         }

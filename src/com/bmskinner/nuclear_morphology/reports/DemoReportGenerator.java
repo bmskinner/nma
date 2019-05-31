@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartUtilities;
@@ -61,7 +62,9 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
  * @since 1.14.0
  *
  */
-public class DemoReportGenerator implements Loggable {
+public class DemoReportGenerator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String NEWLINE = System.getProperty("line.separator");
 	private static final String P_VALUE_FORMAT = "0.##E0";
@@ -241,7 +244,7 @@ public class DemoReportGenerator implements Loggable {
 			writer.write(builder.toString());
 			
 		} catch (FileNotFoundException e) {
-			warn("Unable to write domain file");
+			LOGGER.warning("Unable to write domain file");
 		}
 
 	}

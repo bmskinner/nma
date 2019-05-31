@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class MessagingDialog extends JDialog implements Loggable {
+public abstract class MessagingDialog extends JDialog {
     
     protected final DatasetEventHandler dh = new DatasetEventHandler(this);
     protected final InterfaceEventHandler ih = new InterfaceEventHandler(this);

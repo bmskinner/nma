@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -28,6 +29,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
@@ -37,6 +39,8 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  *
  */
 public class ExportWorkspaceAction extends VoidResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_LBL = "Saving workspace";
 
@@ -56,7 +60,7 @@ public class ExportWorkspaceAction extends VoidResultAction {
     public void run() {
     	WorkspaceExporter exp = WorkspaceExporter.createExporter();
     	for(IWorkspace w : workspaces) {
-    		log("Saving workspace "+w.getName()+"...");
+    	 LOGGER.info("Saving workspace "+w.getName()+"...");
             if(w.getSaveFile()==null) {
                 try {
                 	File defaultFolder = w.getFiles().size()>0 ? FileUtils.commonPathOfFiles(w.getFiles()) : null;

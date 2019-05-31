@@ -27,12 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -45,6 +47,8 @@ import ij.process.ImageProcessor;
  */
 @Deprecated
 public class SignalCollection implements ISignalCollection {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -647,7 +651,7 @@ public class SignalCollection implements ISignalCollection {
         try {
             return new ImageImporter(f).importImageAndInvert(channel);
         } catch (ImageImportException e) {
-            error("Error importing image source file " + f.getAbsolutePath(), e);
+            LOGGER.log(Loggable.STACK, "Error importing image source file " + f.getAbsolutePath(), e);
             return null;
         }
     }
@@ -817,7 +821,7 @@ public class SignalCollection implements ISignalCollection {
     @Override
     public List<Double> getStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
         // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
+        LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 }

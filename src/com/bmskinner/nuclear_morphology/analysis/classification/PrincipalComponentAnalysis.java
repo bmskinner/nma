@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -40,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.attributeSelection.PrincipalComponents;
 import weka.core.Attribute;
@@ -55,8 +57,10 @@ import weka.core.SparseInstance;
  *
  */
 public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
-	private final HashOptions options;
 	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
+	private final HashOptions options;	
 	
 	public static final String PROPORTION_VARIANCE_KEY = "Variance";
 	
@@ -74,7 +78,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 		pca.setVarianceCovered(options.getDouble(PROPORTION_VARIANCE_KEY));
 		pca.buildEvaluator(inst);
 		double var = pca.getVarianceCovered();
-		fine("Variance covered: "+var);
+		LOGGER.fine("Variance covered: "+var);
 		
 		int expectedPcs = 0;
 
@@ -95,13 +99,13 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 				}
 				if(i==0) {
 					expectedPcs = values.length;
-					fine("Detected number of PCs: "+expectedPcs);
+					LOGGER.fine("Detected number of PCs: "+expectedPcs);
 				} else {
 					if(values.length!=expectedPcs)
-						fine("Different number of PCs: "+values.length);
+						LOGGER.fine("Different number of PCs: "+values.length);
 				}
 			} else 
-				fine("No nucleus in collection for instance "+i+" with id "+nucleusId);
+				LOGGER.fine("No nucleus in collection for instance "+i+" with id "+nucleusId);
 		}
 
 		options.setInt(IClusteringOptions.NUM_PCS_KEY, expectedPcs);
@@ -152,7 +156,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         		try {
     				addNucleus(n, attributes, instances,  windowProportion);
     			} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-    				warn("Unable to add nucleus to instances: "+e.getMessage());
+    				LOGGER.warning("Unable to add nucleus to instances: "+e.getMessage());
     			}
         	}
         }

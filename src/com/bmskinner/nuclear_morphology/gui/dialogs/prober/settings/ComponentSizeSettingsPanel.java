@@ -23,6 +23,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,6 +33,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Provides basic settings parameters for detection of components. Values such
@@ -43,6 +45,8 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
  */
 @SuppressWarnings("serial")
 public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implements ChangeListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String MIN_SIZE_LBL = "Min area (pixels)";
     private static final String MAX_SIZE_LBL = "Max area (pixels)";
@@ -205,7 +209,7 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
             fireOptionsChangeEvent();
 
         } catch (ParseException e1) {
-            stack("Parsing error in JSpinner", e1);
+            LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
         }
 
     }

@@ -22,6 +22,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -33,6 +34,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverla
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This class takes a chart and adds a single draggable rectangle overlay. The
@@ -45,6 +47,8 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
  */
 @SuppressWarnings("serial")
 public class PositionSelectionChartPanel extends ExportableChartPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     protected RectangleOverlayObject overlayRectangle = null;
 
@@ -94,13 +98,13 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
             double maxY = chart.getXYPlot().getRangeAxis().getUpperBound();
             double minY = chart.getXYPlot().getRangeAxis().getLowerBound();
             double fullYRange = maxY - minY;
-            // finest("Chart range "+fullXRange+": "+minX+" - "+maxX);
-            finest("Rectangle is x: " + overlayRectangle.getXMinValue() + " - " + overlayRectangle.getXMaxValue()
+            // LOGGER.finest( "Chart range "+fullXRange+": "+minX+" - "+maxX);
+            LOGGER.finest( "Rectangle is x: " + overlayRectangle.getXMinValue() + " - " + overlayRectangle.getXMaxValue()
                     + "; y: " + overlayRectangle.getYMidValue() + " - " + overlayRectangle.getYMaxValue());
             oldXPct = (overlayRectangle.getXMidValue() - minX) / fullXRange;
             oldYPct = (overlayRectangle.getYMidValue() - minY) / fullYRange;
 
-            finest("Existing rectangle overlay midpoint (" + overlayRectangle.getXMidValue() + ") at fraction "
+            LOGGER.finest( "Existing rectangle overlay midpoint (" + overlayRectangle.getXMidValue() + ") at fraction "
                     + oldXPct);
         }
         super.setChart(chart);
@@ -111,7 +115,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
             double maxX = getChart().getXYPlot().getDomainAxis().getUpperBound();
             double minX = getChart().getXYPlot().getDomainAxis().getLowerBound();
             double fullXRange = maxX - minX;
-            finest("New chart range " + fullXRange + ": " + minX + " - " + maxX);
+            LOGGER.finest( "New chart range " + fullXRange + ": " + minX + " - " + maxX);
 
             double maxY = getChart().getXYPlot().getRangeAxis().getUpperBound();
             double minY = getChart().getXYPlot().getRangeAxis().getLowerBound();
@@ -128,7 +132,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
             overlayRectangle.setYMinValue(newYPosition - halfYRange);
             overlayRectangle.setYMaxValue(newYPosition + halfYRange);
 
-            finest("Restoring rectangle overlay midpoint to " + newXPosition + ": " + overlayRectangle.getXMinValue()
+            LOGGER.finest( "Restoring rectangle overlay midpoint to " + newXPosition + ": " + overlayRectangle.getXMinValue()
                     + " - " + overlayRectangle.getXMaxValue());
             fireSignalChangeEvent("UpdatePosition");
         }
@@ -364,7 +368,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
         overlayRectangle.setYMinValue(yMoveMin);
         overlayRectangle.setYMaxValue(yMoveMax);
 
-        finest("Set rectangle x :" + xMoveMin + " - " + xMoveMax + ", y: " + yMoveMin + " - " + yMoveMax);
+        LOGGER.finest( "Set rectangle x :" + xMoveMin + " - " + xMoveMax + ", y: " + yMoveMin + " - " + yMoveMax);
         fireSignalChangeEvent("UpdatePosition");
     }
 

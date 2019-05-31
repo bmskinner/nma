@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
@@ -61,7 +62,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class GenericImageProberPanel extends JPanel implements Loggable, ProberReloadEventListener {
+public class GenericImageProberPanel extends JPanel implements ProberReloadEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /*
      * STATIC DISPLAY VALUES
@@ -138,7 +141,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
             throw new IllegalArgumentException(NULL_FILE_ERROR);
         
         try {
-            finer("Firing panel updating event");
+            LOGGER.finer( "Firing panel updating event");
             int imageNumber = fileIndex+1;
             setImageLabel(FOLDER_LBL+ imageNumber+" of "+imageFiles.size()+ ": "+imageFile.getAbsolutePath());
             firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
@@ -149,7 +152,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
             finder.findInImage(imageFile);
 
         } catch (ImageImportException e) { // end try
-            stack(e.getMessage(), e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
             setImageLabel("Error probing " + imageFile.getAbsolutePath());
 
         } finally {
@@ -196,8 +199,8 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
             try {
                 importAndDisplayImage(openImage);
             } catch (Exception e) {
-            	warn("Error in prober");
-                stack("Error in prober", e);
+            	LOGGER.warning("Error in prober");
+                LOGGER.log(Loggable.STACK, "Error in prober", e);
             }
         };
         ThreadManager.getInstance().submit(r);
@@ -223,7 +226,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
      */
     protected void createFileList(final File folder) {
 
-        finest("Generating file list from " + folder.getAbsolutePath());
+        LOGGER.finest( "Generating file list from " + folder.getAbsolutePath());
 
         imageFiles = importImages(folder);
 
@@ -231,7 +234,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
             openImage = imageFiles.get(fileIndex);
             run();
         } else {
-            warn("No images found in folder "+folder.getAbsolutePath());
+            LOGGER.warning("No images found in folder "+folder.getAbsolutePath());
         }
     }
 
@@ -541,7 +544,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
                 }
 
             } catch (Exception e) {
-                stack("Prober cell renderer error", e);
+                LOGGER.log(Loggable.STACK, "Prober cell renderer error", e);
                 setIcon(null);
                 setText("");
             }

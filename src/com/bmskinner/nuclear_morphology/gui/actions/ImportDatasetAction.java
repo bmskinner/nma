@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -38,12 +39,15 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Call an open dialog to choose a saved .nbd dataset. The opened dataset will
  * be added to the bottom of the dataset list.
  */
 public class ImportDatasetAction extends VoidResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private final File          file;
     private static final String PROGRESS_BAR_LABEL = "Opening file...";
@@ -92,12 +96,12 @@ public class ImportDatasetAction extends VoidResultAction {
                                 firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
                             }
                         } catch (StackOverflowError e) {
-                            warn("Stack overflow detected");
-                            stack("Stack overflow in worker", e);
+                            LOGGER.warning("Stack overflow detected");
+                            LOGGER.log(Loggable.STACK, "Stack overflow in worker", e);
                             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
                         } catch (InterruptedException e) {
-                            warn("Interruption to swing worker: "+e.getMessage());
-                            stack("Interruption to swing worker", e);
+                            LOGGER.warning("Interruption to swing worker: "+e.getMessage());
+                            LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
                             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
                         } catch (ExecutionException e) {
                             
@@ -106,11 +110,11 @@ public class ImportDatasetAction extends VoidResultAction {
                                 return;
                             }
 
-                            warn("Execution error in swing worker: "+e.getMessage());
-                            stack("Execution error in swing worker", e);
+                            LOGGER.warning("Execution error in swing worker: "+e.getMessage());
+                            LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
                             Throwable cause = e.getCause();
-                            warn("Causing error: "+cause.getMessage());
-                            stack("Causing error: ", cause);
+                            LOGGER.warning("Causing error: "+cause.getMessage());
+                            LOGGER.log(Loggable.STACK, "Causing error: ", cause);
                             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
                         }
 
@@ -120,8 +124,8 @@ public class ImportDatasetAction extends VoidResultAction {
                 worker.addPropertyChangeListener(this);
                 
             } catch(IllegalArgumentException e){
-                warn("Unable to import file");
-                fine(e.getMessage(), e);
+                LOGGER.warning("Unable to import file");
+                LOGGER.log(Loggable.STACK, e.getMessage(), e);
                 cancel();
             }
 
@@ -129,7 +133,7 @@ public class ImportDatasetAction extends VoidResultAction {
 
             ThreadManager.getInstance().submit(worker);
         } else {
-            fine("Open cancelled");
+            LOGGER.fine("Open cancelled");
             cancel();
         }
     }
@@ -163,7 +167,7 @@ public class ImportDatasetAction extends VoidResultAction {
         if (file.isDirectory()) {
             return null;
         }
-        fine("Selected file: " + file.getAbsolutePath());
+        LOGGER.fine("Selected file: " + file.getAbsolutePath());
         return file;
     }
 
@@ -183,15 +187,15 @@ public class ImportDatasetAction extends VoidResultAction {
             }
 
         } catch (InterruptedException e) {
-            warn("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
-            stack("Unable to open '" + file.getAbsolutePath() + "': ", e);
+            LOGGER.warning("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Unable to open '" + file.getAbsolutePath() + "': ", e);
             return;
         } catch (ExecutionException e) {
-            warn("Unable to open '" + file.getAbsolutePath() + "': " + e.getMessage());
-            stack("Unable to open '" + file.getAbsolutePath() + "': ", e);
+            LOGGER.warning("Unable to open '" + file.getAbsolutePath() + "': " + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Unable to open '" + file.getAbsolutePath() + "': ", e);
             return;
         }
-        fine("Opened dataset");
+        LOGGER.fine("Opened dataset");
 
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
         super.finished();

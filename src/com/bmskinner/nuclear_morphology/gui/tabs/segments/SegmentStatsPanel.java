@@ -57,15 +57,9 @@ public class SegmentStatsPanel extends DetailPanel {
         this.setLayout(new BorderLayout());
 
         scrollPane = new JScrollPane();
+        TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+        table = new ExportableTable(model);
 
-        try {
-
-            TableModel model = AnalysisDatasetTableCreator.createBlankTable();
-            table = new ExportableTable(model);
-
-        } catch (Exception e) {
-            log(Level.SEVERE, "Error in segment table", e);
-        }
         table.setEnabled(false);
 
         scrollPane.setViewportView(table);

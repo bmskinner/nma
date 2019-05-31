@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.Dimension;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -30,9 +31,12 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class SignalsHistogramPanel extends HistogramsTabPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public SignalsHistogramPanel(@NonNull InputSupplier context) throws Exception {
         super(context, CellularComponent.NUCLEAR_SIGNAL);
@@ -41,22 +45,17 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 
             Dimension preferredSize = new Dimension(400, 150);
             for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
-
                 JFreeChart chart = HistogramChartFactory.createEmptyChart();
                 SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
-                // SelectableChartPanel panel = new SelectableChartPanel(new
-                // HistogramChartFactory(options).createStatisticHistogram(),
-                // stat.toString());
                 panel.setPreferredSize(preferredSize);
                 panel.addSignalChangeListener(this);
                 chartPanels.put(stat.toString(), panel);
                 mainPanel.add(panel);
-
             }
 
         } catch (Exception e) {
-            warn("Error creating signal histogram panel");
-            stack("Error creating histogram panel", e);
+            LOGGER.warning("Error creating signal histogram panel");
+            LOGGER.log(Loggable.STACK, "Error creating histogram panel", e);
         }
 
     }

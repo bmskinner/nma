@@ -27,6 +27,7 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -44,7 +45,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * Contains methods for laying out panels in settings dialog options
  */
 @SuppressWarnings("serial")
-public abstract class SettingsDialog extends JDialog implements Loggable {
+public abstract class SettingsDialog extends JDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     protected boolean readyToRun = false;
     private final List<EventListener> interfaceListeners = new ArrayList<>();
@@ -81,7 +84,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
      */
     public SettingsDialog(Frame owner, boolean modal) {
         super(owner, modal);
-        fine("Making settings dialog");
+        LOGGER.fine("Making settings dialog");
         this.setLocationRelativeTo(null);
     }
 

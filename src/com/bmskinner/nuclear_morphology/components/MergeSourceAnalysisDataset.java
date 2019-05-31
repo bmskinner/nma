@@ -25,12 +25,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This provides a virtual dataset view for merge sources.
@@ -40,6 +42,8 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
  *
  */
 public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -54,10 +58,8 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
      * template. A new virtual cell collection will be created from the merge
      * source dataset.
      * 
-     * @param merged
-     *            the dataset to which this dataset will belong
-     * @param mergeSource
-     *            the original dataset which was merged
+     * @param merged the dataset to which this dataset will belong
+     * @param mergeSource the original dataset which was merged
      */
     public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource) {
         super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getId(),
@@ -76,8 +78,8 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         	getCollection().createProfileCollection();
             mergeSource.getCollection().getProfileManager().copyCollectionOffsets(this.getCollection());
         } catch (ProfileException e) {
-            warn("Unable to create merge source dataset");
-            fine("Error copying offsets", e);
+            LOGGER.warning("Unable to create merge source dataset");
+            LOGGER.log(Loggable.STACK, "Error copying offsets", e);
         }
         
         // Ensure merge sources from the source datasets are retained
@@ -127,7 +129,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     public void setScale(double scale) {				
 		if(scale<=0) // don't allow a scale to cause divide by zero errors
 			return;
-		fine("Setting scale for "+getName()+" to "+scale);
+		LOGGER.fine("Setting scale for "+getName()+" to "+scale);
 		getCollection().setScale(scale);
 		
 		Optional<IAnalysisOptions> op = getAnalysisOptions();

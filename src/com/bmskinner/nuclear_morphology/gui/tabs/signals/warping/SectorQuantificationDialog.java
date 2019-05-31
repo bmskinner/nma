@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 import java.awt.BorderLayout;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
@@ -26,7 +27,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
-public class SectorQuantificationDialog extends JDialog implements Loggable {
+public class SectorQuantificationDialog extends JDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String DIALOG_TITLE = "Quantification scores";
 	
@@ -45,7 +48,7 @@ public class SectorQuantificationDialog extends JDialog implements Loggable {
 			pack();
 			setVisible(true);
 		} catch(Exception e) {
-			stack(e);
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		}
 	}
 
@@ -71,7 +74,7 @@ public class SectorQuantificationDialog extends JDialog implements Loggable {
 					for(MeshFace f : mesh.getFaces(s))
 						total += meshImage.quantifySignalProportion(f);
 					
-					fine("Sector: "+total);
+					LOGGER.fine("Sector: "+total);
 					Object[] rowData = { k1, s.getName(),  df.format(total) };
 					compModel.addRow(rowData);
 				}

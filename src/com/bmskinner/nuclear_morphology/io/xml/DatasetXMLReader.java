@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.io.xml;
 import java.awt.Color;
 import java.io.File;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
@@ -18,6 +19,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Read serialised XML dataset files
@@ -26,6 +28,8 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
  *
  */
 public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private NucleusFactory fact = null;
 	private double windowProportion = 0.05;
@@ -58,7 +62,7 @@ public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 			throw e;
 		} catch(Exception e) {
 			// log anything else
-			stack(e);
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			throw new XMLReadingException("Error reading XML: invalid XML format", e);
 		}
 	}

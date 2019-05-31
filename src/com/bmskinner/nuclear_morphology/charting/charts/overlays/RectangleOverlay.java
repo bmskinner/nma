@@ -24,6 +24,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -43,7 +44,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class RectangleOverlay extends AbstractOverlay
-        implements Overlay, PropertyChangeListener, Serializable, Loggable {
+        implements Overlay, PropertyChangeListener, Serializable{
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private RectangleOverlayObject rectangle = null;
 
@@ -162,8 +165,8 @@ public class RectangleOverlay extends AbstractOverlay
                 minyy = minyy > maxyy ? maxyy : minyy;
                 maxyy = temp > maxyy ? temp : maxyy;
 
-                finest("Chart rectangle x: " + minx + " - " + maxx + "  y: " + miny + " - " + maxy);
-                finest("Java2D rectangle x: " + minxx + " - " + maxxx + "  y: " + minyy + " - " + maxyy);
+                LOGGER.finest( "Chart rectangle x: " + minx + " - " + maxx + "  y: " + miny + " - " + maxy);
+                LOGGER.finest( "Java2D rectangle x: " + minxx + " - " + maxxx + "  y: " + minyy + " - " + maxyy);
 
                 if (plot.getOrientation() == PlotOrientation.VERTICAL) {
                     drawVerticalRectangle(g2, dataArea, minxx, maxxx, minyy, maxyy, rectangle);
@@ -231,7 +234,7 @@ public class RectangleOverlay extends AbstractOverlay
 
         if (minx >= dataArea.getMinX() && minx <= dataArea.getMaxX()) {
 
-            finest("Drawing rectangle");
+            LOGGER.finest( "Drawing rectangle");
 
             double w = maxx - minx;
             double h = maxy - miny;

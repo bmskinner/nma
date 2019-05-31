@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -41,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.Cl
 import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -57,6 +59,8 @@ import weka.core.Instances;
  *
  */
 public class NucleusClusteringMethod extends TreeBuildingMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final int EM           = 0; // expectation maximisation
     public static final int HIERARCHICAL = 1;
@@ -93,13 +97,13 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             ICellCollection c = clusterMap.get(cluster);
 
             if (c.hasCells()) {
-                finest("Cluster " + cluster + ": " + c.getName());
+                LOGGER.finest( "Cluster " + cluster + ": " + c.getName());
 
                 try {
                     dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
                 } catch (ProfileException e) {
-                    warn("Error copying collection offsets");
-                    stack("Error in offsetting", e);
+                    LOGGER.warning("Error copying collection offsets");
+                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);
                 }
 
                 group.addDataset(c);
@@ -108,7 +112,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 dataset.addChildCollection(c);
 
                 // attach the clusters to their parent collection
-                log("Cluster " + cluster + ": " + c.size() + " nuclei");
+                LOGGER.info("Cluster " + cluster + ": " + c.size() + " nuclei");
                 IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
                 clusterDataset.setRoot(false);
 
@@ -119,7 +123,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 list.add(clusterDataset);
             }
         }
-        fine("Profiles copied to all clusters");
+        LOGGER.fine("Profiles copied to all clusters");
         
         // Move tSNE values to their cluster group if needed
         if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
@@ -156,7 +160,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
     private void run() {
         boolean ok = cluster();
-        fine("Returning " + ok);
+        LOGGER.fine("Returning " + ok);
     }
 
     /**
@@ -176,7 +180,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             String[] optionArray = this.options.getOptions();
 
             for (String s : optionArray) {
-                finest("Clusterer options: " + s);
+                LOGGER.finest( "Clusterer options: " + s);
             }
 
             if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
@@ -187,7 +191,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 clusterer.setDistanceIsBranchLength(true);
                 clusterer.setNumClusters(1);
 
-                finest("Building clusterer for tree");
+                LOGGER.finest( "Building clusterer for tree");
                 // firePropertyChange("Cooldown", getProgress(),
                 // Constants.Progress.FINISHED.code());
                 clusterer.buildClusterer(instances); // build the clusterer with
@@ -210,7 +214,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             }
 
         } catch (Exception e) {
-            error("Error in cluster assignments", e);
+            LOGGER.log(Loggable.STACK, "Error in cluster assignments", e);
             return false;
         }
         return true;
@@ -228,8 +232,8 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 		try {
 			numberOfClusters = clusterer.numberOfClusters();
 		} catch (Exception e1) {
-			warn("Unable to cluster cells: "+e1.getMessage());
-			stack(e1);
+			LOGGER.warning("Unable to cluster cells: "+e1.getMessage());
+			LOGGER.log(Loggable.STACK, "Unable to cluster cells", e1);
 			return;
 		}
 
@@ -253,11 +257,11 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     			if (collection.getCell(cellID) != null) {
     				cluster.addCell(collection.getCell(cellID));
     			} else {
-    				warn("Error: cell with ID " + cellID + " is not found");
+    				LOGGER.warning("Error: cell with ID " + cellID + " is not found");
     			}
     			fireProgressEvent();
     		} catch (Exception e) {
-    			error("Error assigning instance to cluster", e);
+    			LOGGER.log(Loggable.STACK, "Error assigning instance to cluster", e);
     		}
 
     	}

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -62,7 +63,9 @@ import ij.process.ShortStatistics;
  * @author bms41
  *
  */
-public abstract class Detector implements Loggable {
+public abstract class Detector {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of
                                                 // open or closed objects
@@ -227,7 +230,7 @@ public abstract class Detector implements Loggable {
 
         boolean success = pa.analyze(processor);
         if (!success)
-            warn("Unable to perform particle analysis");
+            LOGGER.warning("Unable to perform particle analysis");
 
         for(Roi r : pa.getRois()){
             StatsMap m = measure(r, processor);

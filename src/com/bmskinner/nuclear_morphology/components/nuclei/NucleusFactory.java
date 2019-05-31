@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -28,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -40,6 +42,8 @@ import ij.process.FloatPolygon;
  *
  */
 public class NucleusFactory implements ComponentFactory<Nucleus> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String NULL_NUCLEUS_ERROR = "Error making nucleus; constructed object is null";
 	private static final String NULL_COM_ERROR = "Centre of mass cannot be null in nucleus factory";
@@ -141,7 +145,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         nucleusCount++;
         if (n == null)
             throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
-        finer("Created nucleus with border length "+n.getBorderLength());
+        LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;
     }
 
@@ -170,7 +174,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         nucleusCount++;
         if (n == null)
             throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
-        finer("Created nucleus with border length "+n.getBorderLength());
+        LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;
     }
     
@@ -196,7 +200,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         }
         if (n == null)
             throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
-        finer("Created nucleus with border length "+n.getBorderLength());
+        LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;
     }
 

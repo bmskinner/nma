@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -44,7 +45,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public abstract class WorkspaceImporter implements Loggable, Importer {
+public abstract class WorkspaceImporter implements Importer {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String VERSION_1_13_x = "1.13.x";
 	private static final String VERSION_1_14_0 = "1.14.0";
@@ -202,7 +205,7 @@ public abstract class WorkspaceImporter implements Loggable, Importer {
                 }
                 fstream.close();
             } catch (Exception e) {
-                error("Error parsing workspace file", e);
+                LOGGER.log(Loggable.STACK, "Error parsing workspace file", e);
             }
 
             return w;

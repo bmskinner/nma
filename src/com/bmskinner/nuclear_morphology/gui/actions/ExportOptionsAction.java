@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -29,6 +30,7 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Export the options stored in a dataset
@@ -38,13 +40,9 @@ import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
  */
 public class ExportOptionsAction extends MultiDatasetResultAction {
 	
-	private static final String PROGRESS_LBL = "Exporting options";
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
-//	public ExportOptionsAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-//        List<IAnalysisDataset> list = new ArrayList<>();
-//        list.add(dataset);
-//		super(list, PROGRESS_LBL, acceptor, eh);
-//    }
+	private static final String PROGRESS_LBL = "Exporting options";
 	
 	public ExportOptionsAction(@NonNull List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(datasets, PROGRESS_LBL, acceptor, eh);
@@ -79,7 +77,7 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 						File f = new File(folder, d.getName()+Io.XML_FILE_EXTENSION);
 						OptionsXMLWriter m = new OptionsXMLWriter();
 						m.write(d, f);
-						log(String.format("Exported %s options to %s", d.getName(), f.getAbsolutePath()));
+					 LOGGER.info(String.format("Exported %s options to %s", d.getName(), f.getAbsolutePath()));
 					}
 					 cancel();
 		         };

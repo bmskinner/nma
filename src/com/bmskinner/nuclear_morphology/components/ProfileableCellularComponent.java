@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 
@@ -56,6 +58,8 @@ import ij.gui.Roi;
  *
  */
 public abstract class ProfileableCellularComponent extends DefaultCellularComponent implements Taggable {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private static final long serialVersionUID = 1L;
 
@@ -133,7 +137,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 } catch (UnavailableProfileTypeException e) {
                 	// not present in this profile; possibly a deprecated type; ignore and continue
                 } catch (ProfileException e) {
-                    stack("Cannot copy " + type + " from template", e);
+                    LOGGER.log(Loggable.STACK, "Cannot copy " + type + " from template", e);
                 }
             }
             this.setBorderTags(comp.getBorderTags());
@@ -164,8 +168,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                  this.profileMap.put(type, c.profileMap.get(type).copy());
 
              } catch (ProfileException e) {
-                 stack("Cannot make new profile type " + type + " from template", e);
-                 warn("Error copying profile");
+                 LOGGER.log(Loggable.STACK, "Cannot make new profile type " + type + " from template", e);
+                 LOGGER.warning("Error copying profile");
              }
          }
     }
@@ -321,7 +325,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 try {
                     p.nudgeSegments(diff);
                 } catch (ProfileException e) {
-                    stack("Error nudging segments when assigning RP", e);
+                    LOGGER.log(Loggable.STACK, "Error nudging segments when assigning RP", e);
                     return;
                 }
                 setProfile(ProfileType.ANGLE, p);
@@ -336,9 +340,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 
         } catch (UnavailableProfileTypeException e) {
-        	stack(String.format("Unable to find angle profile in object"), e);
+        	LOGGER.log(Loggable.STACK, String.format("Unable to find angle profile in object"), e);
         } catch(UnavailableBorderTagException e) {
-        	stack(String.format("Error getting border tag %s for object", tag), e);
+        	LOGGER.log(Loggable.STACK, String.format("Error getting border tag %s for object", tag), e);
         }
     }
 
@@ -367,7 +371,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			int newIndex = getOffsetBorderIndex(tag, index);
 			return this.hasBorderTag(newIndex);
 		} catch (UnavailableBorderTagException e) {
-			stack(e);
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			return false;
 		}
         
@@ -421,14 +425,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
             // calculate profiles
             angleProfileWindowSize = (int) Math.round(angleWindow);
-            finest("Recalculating angle profile");
+            LOGGER.finest( "Recalculating angle profile");
             ProfileCreator creator = new ProfileCreator(this);
             ISegmentedProfile profile;
             try {
                 profile = creator.createProfile(ProfileType.ANGLE);
             } catch (ProfileException e) {
-                warn("Unable to set window proportion");
-                stack(e);
+                LOGGER.warning("Unable to set window proportion");
+                LOGGER.log(Loggable.STACK, e.getMessage(), e);
                 return;
             }
 
@@ -444,7 +448,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);
 
         try {
-        	finer("Getting profile: "+type);
+        	LOGGER.finer( "Getting profile: "+type);
         	ISegmentedProfile template = profileMap.get(type);
         	return template.copy();
         	
@@ -505,7 +509,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             // remove the offset from the profile, by setting the profile to start from the pointIndex
             assignProfile(type, p.offset(-tagIndex));
         } catch (ProfileException e) {
-            stack("Error setting profile " + type + " at " + tag, e);
+            LOGGER.log(Loggable.STACK, "Error setting profile " + type + " at " + tag, e);
             assignProfile(type, oldProfile);
         }
 
@@ -531,9 +535,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	ProfileCreator creator = new ProfileCreator(this);
 
     	for (ProfileType type : ProfileType.values()) {
-    		finest("Attempting to create profile "+type);
+    		LOGGER.finest( "Attempting to create profile "+type);
     		ISegmentedProfile profile = creator.createProfile(type);
-    		finest("Assigning profile "+type);
+    		LOGGER.finest( "Assigning profile "+type);
     		assignProfile(type, profile);
     	}
     }
@@ -549,7 +553,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 try {
                     p.getSegment(segID).setLocked(lock);
                 } catch (UnavailableComponentException e) {
-                    stack(e);
+                    LOGGER.log(Loggable.STACK, e.getMessage(), e);
                 }
             }
         }
@@ -578,7 +582,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 prevPoint = thisPoint;
             }
         } catch (UnavailableProfileTypeException e) {
-            stack("Error getting angle profile ", e);
+            LOGGER.log(Loggable.STACK, "Error getting angle profile ", e);
         }
         return pathLength;
     }
@@ -621,7 +625,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             return IBorderPoint.makeNew(this.getBorderPoint(index));
 
         } catch (UnavailableProfileTypeException | ProfileException e) {
-            stack("Error getting diameter profile minimum", e);
+            LOGGER.log(Loggable.STACK, "Error getting diameter profile minimum", e);
             throw new UnavailableBorderPointException("Error getting diameter profile minimum");
         }
 
@@ -631,7 +635,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         try {
             return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray()).min().orElse(0);
         } catch (UnavailableProfileTypeException e) {
-            stack("Error getting diameter profile", e);
+            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
             return 0;
         }
     }
@@ -692,8 +696,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             try {
                 calculateProfiles();
             } catch (ProfileException e) {
-                warn("Error calculating profiles");
-                stack(e);
+                LOGGER.warning("Error calculating profiles");
+                LOGGER.log(Loggable.STACK, e.getMessage(), e);
             }
         }
     }

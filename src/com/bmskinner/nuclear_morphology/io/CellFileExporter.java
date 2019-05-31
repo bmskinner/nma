@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -41,7 +42,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author ben
  *
  */
-public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
+public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Exporter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	/**
      * Create specifying the folder cell files will be exported into
@@ -76,13 +79,13 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements E
 
         if (!exportFile.getParentFile().isDirectory()) {
             // the desired output folder does not exist
-            warn("The intended export folder does not exist");
+            LOGGER.warning("The intended export folder does not exist");
 
             File folder = GlobalOptions.getInstance().getDefaultDir();
             exportFile = new File(folder, fileName);
         }
 
-        log("Exporting cells to " + exportFile.getAbsolutePath());
+        LOGGER.info("Exporting cells to " + exportFile.getAbsolutePath());
 
         if (exportFile.exists()) {
             exportFile.delete();
@@ -104,7 +107,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements E
         try {
             export(builder.toString(), exportFile);
         } catch (FileNotFoundException e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
             return false;
         }
         return true;

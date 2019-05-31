@@ -32,6 +32,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -77,6 +78,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPa
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Displays signals warped onto the consensus nucleus of a dataset
@@ -86,6 +88,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingMo
  */
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String EXPORT_IMAGE_LBL    = "Export image";
 	private static final String SOURCE_DATASET_LBL  = "Source dataset";
@@ -528,8 +532,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	            ThreadManager.getInstance().execute(warper);
 
     	        } catch (Exception e) {
-    	        	warn("Error running warping");
-    	            stack("Error running warping", e);
+    	        	LOGGER.warning("Error running warping");
+    	            LOGGER.log(Loggable.STACK, "Error running warping", e);
     	            JFreeChart chart = ConsensusNucleusChartFactory.createErrorChart();
     	            chartPanel.setChart(chart);
     	            setSettingsEnabled(true);

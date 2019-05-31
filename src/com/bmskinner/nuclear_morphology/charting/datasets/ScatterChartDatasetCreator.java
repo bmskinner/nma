@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -42,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Create scatter chart datasets
@@ -50,6 +52,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
  *
  */
 public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
     /**
      * Construct with an options
@@ -134,7 +138,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
                         statBValue = n.getStatistic(statB, scale);
                     
                 } catch (UnavailableBorderTagException e) {
-                    stack("Tag not present in cell", e);
+                    LOGGER.log(Loggable.STACK, "Tag not present in cell", e);
                     statAValue = Statistical.ERROR_CALCULATING_STAT;
                     statBValue = Statistical.ERROR_CALCULATING_STAT;
                 }

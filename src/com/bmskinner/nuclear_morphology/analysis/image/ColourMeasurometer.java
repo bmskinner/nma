@@ -44,7 +44,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.5
  *
  */
-public class ColourMeasurometer implements Loggable {
+public class ColourMeasurometer {
 
     /**
      * Calculate the median greyscale intensity in the given component of a

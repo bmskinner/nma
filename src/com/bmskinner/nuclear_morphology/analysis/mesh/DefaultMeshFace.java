@@ -19,15 +19,19 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 import java.awt.geom.Path2D;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.generic.FloatEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
+import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class DefaultMeshFace implements Loggable, MeshFace {
+public class DefaultMeshFace implements MeshFace {
+	
+	private static final Logger LOGGER = Logger.getLogger(VersionHelpDialog.class.getName());
 
     final Set<MeshEdge> edges = new HashSet<>();
 
@@ -517,7 +521,7 @@ public class DefaultMeshFace implements Loggable, MeshFace {
         double i1p = getEdgeProportion(i1, p);
 
         if (p1p == 0 && p2p == 0 & i1p == 0) {
-            warn("Point " + p + " does not have edge proportion calculated");
+            LOGGER.warning("Point " + p + " does not have edge proportion calculated");
         }
 
         return new DefaultMeshFaceCoordinate(p1p, p2p, i1p);

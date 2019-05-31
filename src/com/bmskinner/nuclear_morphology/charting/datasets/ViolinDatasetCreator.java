@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -40,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -49,6 +51,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final int STEP_COUNT = 100;
 
@@ -67,8 +71,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * 
      * @param stat the statistic to chart
      * @return a violin dataset
-     * @throws ChartDatasetCreationException
-     *             if any error occurs or the statistic was not recognised
+     * @throws ChartDatasetCreationException if any error occurs or the statistic was not recognised
      */
     public synchronized ViolinCategoryDataset createPlottableStatisticViolinDataset(@NonNull String component)
             throws ChartDatasetCreationException {
@@ -91,8 +94,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     /**
      * Get a boxplot dataset for the given statistic for each collection
      * 
-     * @param options
-     *            the charting options
+     * @param options the charting options
      * @return
      * @throws Exception
      */
@@ -208,7 +210,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      */
     private synchronized ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
 
-        finest("Making segment statistic dataset");
+        LOGGER.finest( "Making segment statistic dataset");
 
         PlottableStatistic stat = options.getStat();
 
@@ -259,7 +261,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     list.add(length);
                     
                 	} catch (UnavailableComponentException e) {
-                        stack("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
+                        LOGGER.log(Loggable.STACK, "Error fetching segment for nucleus "+n.getNameAndNumber(), e);
                         throw new ChartDatasetCreationException("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
                     }
                 }
@@ -269,12 +271,10 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 dataset.add(list, rowKey, colKey);
 
             } catch (ProfileException e) {
-                fine("Error fetching median profile");
-                stack(e);
+                LOGGER.log(Loggable.STACK, "Error fetching median profile", e);
                 throw new ChartDatasetCreationException("Error fetching median profile", e);
             } catch (UnavailableComponentException e) {
-                fine("Error fetching segment", e);
-                stack(e);
+                LOGGER.log(Loggable.STACK, "Error fetching segment", e);
                 throw new ChartDatasetCreationException("Error fetching segment", e);
             }
             
@@ -308,26 +308,26 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                         .getSegmentAt(segPosition);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
-                stack("Unable to get segmented median profile", e);
-                throw new ChartDatasetCreationException("Cannot get median profile");
+            	LOGGER.log(Loggable.STACK, "Unable to get segmented median profile", e);
+            	throw new ChartDatasetCreationException("Cannot get median profile");
             }
 
             List<Number> list = new ArrayList<Number>(0);
 
             for (Nucleus n : collection.getNuclei()) {
 
-                try {
+            	try {
 
-                    ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
-                    IBorderSegment seg = profile.getSegment(medianSeg.getID());
+            		IBorderSegment seg = profile.getSegment(medianSeg.getID());
 
-                    double displacement = profile.getDisplacement(seg);
-                    list.add(displacement);
-                } catch (ProfileException | UnavailableComponentException e) {
-                    stack("Error getting segmented profile", e);
-                    throw new ChartDatasetCreationException("Cannot get segmented profile", e);
-                }
+            		double displacement = profile.getDisplacement(seg);
+            		list.add(displacement);
+            	} catch (ProfileException | UnavailableComponentException e) {
+            		LOGGER.log(Loggable.STACK, "Error getting segmented profile", e);
+            		throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+            	}
 
             }
 
@@ -335,48 +335,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             String colKey = IBorderSegment.SEGMENT_PREFIX + segPosition;
 
             dataset.add(list, rowKey, colKey);
-
-//            addProbabilities(dataset, list, rowKey, colKey);
         }
         return dataset;
     }
-
-//    protected synchronized void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey,
-//            Comparable<?> colKey) {
-//
-//        double[] pdfValues = new double[STEP_COUNT+1];
-//
-//        if (list.isEmpty()) {
-//            Range r = new Range(0, 0);
-//            dataset.addProbabilityRange(r, rowKey, colKey);
-//            dataset.addProbabilities(pdfValues, rowKey, colKey);
-//            return;
-//        }
-//
-//        double total = list.stream().mapToDouble(n->n.doubleValue()).sum();
-//        double min = list.stream().mapToDouble(n->n.doubleValue()).min().orElse(0);
-//        double max = list.stream().mapToDouble(n->n.doubleValue()).max().orElse(0);
-//
-//        // If all values are the same, min==max, and there will be a step error
-//        // calculating values between them for pdf
-//        if (list.size() > 2 && total > 0 && min < max) { // don't bother with  a dataset of a single cell, or if the  stat  is not present
-//
-//            double stepSize = (max - min) / STEP_COUNT;
-//
-//            KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(list, 0.001);
-//
-//            for(int i=0; i<STEP_COUNT; i++){
-//            	double v = min+(stepSize*i);
-//            	pdfValues[i] = est.getProbability(v);
-//            }
-//            // ensure last value in the array is at yMax; allows the renderer to have a flat top
-//            pdfValues[STEP_COUNT] = est.getProbability(max);
-//
-//            Range r = new Range(min, max);
-//            dataset.addProbabilityRange(r, rowKey, colKey);
-//        }
-//        dataset.addProbabilities(pdfValues, rowKey, colKey);
-//
-//    }
-
 }

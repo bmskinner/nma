@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -56,6 +57,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Generate the stats tables for a single cell
@@ -64,6 +66,8 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
  *
  */
 public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public CellTableDatasetCreator(final DisplayOptions options, final ICell c) {
         super(options, c);
@@ -249,8 +253,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
             rowData.add(colour.getRed() + ", " + colour.getGreen() + ", " + colour.getBlue());
 
         } catch (UnloadableImageException e) {
-            warn("Cannot get colour of cytoplasm");
-            stack(e);
+            LOGGER.log(Loggable.STACK, "Cannot get colour of cytoplasm", e);
         }
 
     }
@@ -311,7 +314,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                         int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
                         rowData.add(p.toString() + " at profile index " + index);
                     } catch (UnavailableBorderTagException e) {
-                        fine("Tag not present: " + tag);
+                        LOGGER.fine("Tag not present: " + tag);
                         rowData.add("Missing tag");
                     }
 

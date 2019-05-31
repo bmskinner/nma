@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.14.0
  *
  */
-public class ShellResultCellFilterer implements Loggable {
+public class ShellResultCellFilterer {
 	
 	private UUID signalGroupId;
 	private double proportion;

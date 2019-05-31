@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -42,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is a cell detection method for neutrophils, separate from the
@@ -53,6 +55,8 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  *
  */
 public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String spacerString = "---------";
 
@@ -108,36 +112,36 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
             countTotalImagesToAnalyse();
 
-            log("Running neutrophil detector");
+            LOGGER.info("Running neutrophil detector");
             processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder());
 
-            fine("Detected nuclei in "
+            LOGGER.fine("Detected nuclei in "
                     + analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder().getAbsolutePath());
 
-            fine("Creating cell collections");
+            LOGGER.fine("Creating cell collections");
 
             List<ICellCollection> folderCollection = this.getNucleiCollections();
 
             // Run the analysis pipeline
 
-            fine("Analysing collections");
+            LOGGER.fine("Analysing collections");
 
             datasets = analysePopulations(folderCollection);
 
-            fine("Analysis complete; return collections");
+            LOGGER.fine("Analysis complete; return collections");
 
         } catch (Exception e) {
-            stack("Error in processing folder", e);
+            LOGGER.log(Loggable.STACK, "Error in processing folder", e);
         }
 
     }
 
     private void countTotalImagesToAnalyse() {
-    	log("Calculating number of images to analyse");
+     LOGGER.info("Calculating number of images to analyse");
     	File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder();
     	int totalImages = countSuitableImages(folder);
     	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
-    	log("Analysing " + totalImages + " images");
+     LOGGER.info("Analysing " + totalImages + " images");
     }
 
     public List<IAnalysisDataset> getDatasets() {
@@ -146,7 +150,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
     public List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection) {
 
-        log("Creating cell collections");
+        LOGGER.info("Creating cell collections");
 
         List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
 
@@ -157,20 +161,20 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
             dataset.setRoot(true);
 
             File folder = collection.getFolder();
-            log("Analysing: " + folder.getName());
+            LOGGER.info("Analysing: " + folder.getName());
 
             try {
 
                 ICellCollection failedNuclei = new DefaultCellCollection(folder, collection.getOutputFolderName(),
                         collection.getName() + " - failed", collection.getNucleusType());
 
-                // log("Filtering collection...");
+                // LOGGER.info("Filtering collection...");
                 // boolean ok = new CollectionFilterer().run(collection,
                 // failedNuclei); // put fails into failedNuclei, remove from r
                 // if(ok){
-                // log("Filtered OK");
+                // LOGGER.info("Filtered OK");
                 // } else {
-                // log("Filtering error");
+                // LOGGER.info("Filtering error");
                 // }
 
                 /*
@@ -178,7 +182,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
                  */
 
                 if (analysisOptions.isKeepFailedCollections()) {
-                    log("Keeping failed nuclei as new collection");
+                    LOGGER.info("Keeping failed nuclei as new collection");
                     IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
                     IAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
                     failedOptions.setNucleusType(NucleusType.ROUND);
@@ -187,19 +191,19 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
                     result.add(failed);
                 }
 
-                log(spacerString);
+                LOGGER.info(spacerString);
 
-                log("Population: " + collection.getName());
-                log("Passed: " + collection.size() + " nuclei");
-                log("Failed: " + failedNuclei.size() + " nuclei");
+                LOGGER.info("Population: " + collection.getName());
+                LOGGER.info("Passed: " + collection.size() + " nuclei");
+                LOGGER.info("Failed: " + failedNuclei.size() + " nuclei");
 
-                log(spacerString);
+                LOGGER.info(spacerString);
 
                 result.add(dataset);
 
             } catch (Exception e) {
-                warn("Cannot create collection: " + e.getMessage());
-                stack("Error in nucleus detection", e);
+                LOGGER.warning("Cannot create collection: " + e.getMessage());
+                LOGGER.log(Loggable.STACK, "Error in nucleus detection", e);
             }
 
             //
@@ -230,29 +234,29 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
     public List<ICellCollection> getNucleiCollections() {
         // remove any empty collections before returning
 
-        fine("Getting all collections");
+        LOGGER.fine("Getting all collections");
 
         List<File> toRemove = new ArrayList<File>(0);
 
-        fine("Testing nucleus counts");
+        LOGGER.fine("Testing nucleus counts");
 
         Set<File> keys = collectionMap.keySet();
         for (File key : keys) {
             ICellCollection collection = collectionMap.get(key);
             if (collection.size() == 0) {
-                fine("Removing collection " + key.toString());
+                LOGGER.fine("Removing collection " + key.toString());
                 toRemove.add(key);
             }
         }
 
-        fine("Got collections to remove");
+        LOGGER.fine("Got collections to remove");
 
         Iterator<File> iter = toRemove.iterator();
         while (iter.hasNext()) {
             collectionMap.remove(iter.next());
         }
 
-        fine("Removed collections");
+        LOGGER.fine("Removed collections");
 
         List<ICellCollection> result = new ArrayList<ICellCollection>();
         for (ICellCollection c : collectionMap.values()) {
@@ -312,7 +316,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
             throw new IllegalArgumentException("Folder cannot be null");
         }
 
-        finest("Processing folder " + folder.getAbsolutePath());
+        LOGGER.finest( "Processing folder " + folder.getAbsolutePath());
         File[] arrOfFiles = folder.listFiles();
         if (arrOfFiles == null) {
             return;
@@ -323,7 +327,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
         collectionMap.put(folder, folderCollection);
 
-        finest("Invoking recursive detection task");
+        LOGGER.finest( "Invoking recursive detection task");
 
         for (File f : arrOfFiles) {
             if (f.isDirectory()) {
@@ -337,7 +341,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
     protected void analyseFile(File file, ICellCollection collection) {
 
-        finest("Analysing file " + file.getAbsolutePath());
+        LOGGER.finest( "Analysing file " + file.getAbsolutePath());
         boolean ok = ImageImporter.fileIsImportable(file);
 
         if (!ok) {
@@ -350,23 +354,23 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
             // (e.g. empty directory analysed)
             makeFolder(folder);
 
-            log("File:  " + file.getName());
+            LOGGER.info("File:  " + file.getName());
             Collection<ICell> cells = finder.findInImage(file);
 
             if (cells.isEmpty()) {
-                log("  No cells detected in image");
+                LOGGER.info("  No cells detected in image");
             } else {
 
                 for (ICell cell : cells) {
                     collection.addCell(cell);
-                    log("  Added nucleus " + cell.getNucleus().getNucleusNumber());
+                    LOGGER.info("  Added nucleus " + cell.getNucleus().getNucleusNumber());
                 }
-                log("  Added " + cells.size() + " nuclei");
+                LOGGER.info("  Added " + cells.size() + " nuclei");
             }
 
         } catch (Exception e) {
-            warn("Error processing file");
-            stack("Error in image processing: " + e.getMessage(), e);
+            LOGGER.warning("Error processing file");
+            LOGGER.log(Loggable.STACK, "Error in image processing: " + e.getMessage(), e);
         }
 
         fireProgressEvent();
@@ -386,7 +390,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
             try {
                 output.mkdir();
             } catch (Exception e) {
-                error("Failed to create directory", e);
+                LOGGER.log(Loggable.STACK, "Failed to create directory", e);
             }
         }
         return output;

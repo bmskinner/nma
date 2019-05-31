@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -28,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * An implementation of the Finder for cells
@@ -37,6 +39,8 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  *
  */
 public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * Construct the finder using an options
@@ -68,7 +72,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     		try {
     			list.addAll(findInImage(f));
     		} catch (ImageImportException e) {
-    			stack("Error searching image", e);
+    			LOGGER.log(Loggable.STACK, "Error searching image", e);
     		}
     	});
     	return list;

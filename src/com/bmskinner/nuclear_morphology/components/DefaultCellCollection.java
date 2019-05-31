@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +71,7 @@ import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.components.stats.VennCache;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -80,6 +82,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class DefaultCellCollection implements ICellCollection {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private static final long serialVersionUID = 1L;
 
@@ -574,8 +578,8 @@ public class DefaultCellCollection implements ICellCollection {
 		try {
 			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
 		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-			warn("Cannot get median profile for collection");
-			stack("Error getting median profile", e);
+			LOGGER.warning("Cannot get median profile for collection");
+			LOGGER.log(Loggable.STACK, "Error getting median profile", e);
 			double[] result = new double[size()];
 			Arrays.fill(result, Double.MAX_VALUE);
 			return result;
@@ -590,7 +594,7 @@ public class DefaultCellCollection implements ICellCollection {
 				return Math.sqrt(diff/FIXED_PROFILE_LENGTH); // differences in degrees, rather than square degrees
 
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-				fine("Error getting nucleus profile", e);
+			 LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
 				return  Double.MAX_VALUE;
 			} 
 		}).toArray();
@@ -611,7 +615,7 @@ public class DefaultCellCollection implements ICellCollection {
 		try {
 			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
 		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-			stack("Error getting median profile for collection", e);
+			LOGGER.log(Loggable.STACK, "Error getting median profile for collection", e);
 			return 0;
 		}
 
@@ -621,7 +625,7 @@ public class DefaultCellCollection implements ICellCollection {
 			double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
 			return Math.sqrt(diff/FIXED_PROFILE_LENGTH); // use the differences in degrees divided by the pixel interplation length
 		} catch (ProfileException | UnavailableComponentException e) {
-			stack("Error getting nucleus profile", e);
+			LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
 			return 0;
 		}
 	}
@@ -641,7 +645,7 @@ public class DefaultCellCollection implements ICellCollection {
 			try {
 				result[i] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
 			} catch (UnavailableBorderTagException e) {
-				stack("Tag not present: " + pointTypeA + " or " + pointTypeB, e);
+				LOGGER.log(Loggable.STACK, "Tag not present: " + pointTypeA + " or " + pointTypeB, e);
 				result[i] = 0;
 			} finally {
 				i++;
@@ -747,7 +751,7 @@ public class DefaultCellCollection implements ICellCollection {
 		case CellularComponent.NUCLEUS: return getNuclearStatistics(stat, scale);
 		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return getSegmentStatistics(stat, scale, id);
 		default: {
-			warn("No component of type " + component + " can be handled");
+			LOGGER.warning("No component of type " + component + " can be handled");
 			return null;
 		}
 		}
@@ -891,7 +895,7 @@ public class DefaultCellCollection implements ICellCollection {
 			try {
 				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
 			} catch (ProfileException | UnavailableComponentException e) {
-				stack(String.format("Error getting segment %s from nucleus %s in DefaultCellCollection::getSegmentStatistics", id, n.getNameAndNumber()), e);
+				LOGGER.log(Loggable.STACK, String.format("Error getting segment %s from nucleus %s in DefaultCellCollection::getSegmentStatistics", id, n.getNameAndNumber()), e);
 				errorCount.incrementAndGet();
 				return 0;
 			}
@@ -907,7 +911,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
 		if(errorCount.get()>0)
-			warn(String.format("Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment", id, errorCount.get()));
+			LOGGER.warning(String.format("Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment", id, errorCount.get()));
 		return result;
 	}
 
@@ -930,7 +934,7 @@ public class DefaultCellCollection implements ICellCollection {
 			subCollection.addCell(new DefaultCell(cell));
 
 		if (subCollection.size() == 0) {
-			warn("No cells in collection");
+			LOGGER.warning("No cells in collection");
 			return subCollection;
 		}
 
@@ -939,8 +943,8 @@ public class DefaultCellCollection implements ICellCollection {
 			this.getSignalManager().copySignalGroups(subCollection);
 
 		} catch (ProfileException e) {
-			warn("Error copying collection offsets");
-			stack("Error in offsetting", e);
+			LOGGER.warning("Error copying collection offsets");
+			LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 		}
 
 		return subCollection;
@@ -1261,7 +1265,7 @@ public class DefaultCellCollection implements ICellCollection {
 		in.defaultReadObject();
 		
 		if (ruleSets == null || ruleSets.isEmpty()) {
-			log("Creating default ruleset for collection");
+		 LOGGER.info("Creating default ruleset for collection");
 			ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
 		}
 
@@ -1280,8 +1284,8 @@ public class DefaultCellCollection implements ICellCollection {
 		try {
 			this.profileCollection.createAndRestoreProfileAggregate(this);
 		}catch(ProfileException e) {
-			warn("Unable to restore profile aggregate");
-			stack(e);
+			LOGGER.warning("Unable to restore profile aggregate");
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		}
 		
 	}

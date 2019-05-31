@@ -29,6 +29,7 @@ import java.awt.geom.Area;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -40,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImageStack;
@@ -62,6 +64,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class ShellDetector extends Detector {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final int DEFAULT_SHELL_COUNT = 5;
     
@@ -176,8 +180,8 @@ public class ShellDetector extends Detector {
                 result[i] = shell.getPixelIntensity(component);
             }
         } catch (UnloadableImageException e) {
-            warn("Unable to load image for signal");
-            fine("Error loading image", e);
+            LOGGER.warning("Unable to load image for signal");
+            LOGGER.log(Loggable.STACK, "Error loading image", e);
             return makeZeroArray();
         }
         result = correctNestedValues(result);
@@ -436,12 +440,12 @@ public class ShellDetector extends Detector {
             
             Rectangle roiBounds = mask.getBounds();
             if(!mask.intersects(roiBounds)){
-                fine("Mask is not in shell bounds: "+mask.getBounds().getMinX()+"-"+mask.getBounds().getMinY());
+                LOGGER.fine("Mask is not in shell bounds: "+mask.getBounds().getMinX()+"-"+mask.getBounds().getMinY());
                 return 0;
             }
             
             if(ip instanceof ColorProcessor){
-                fine("Cannot handle color processors");
+                LOGGER.fine("Cannot handle color processors");
                 return 0;
             }
                 

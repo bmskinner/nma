@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -41,7 +42,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.13.0
  *
  */
-public class ProfileIndexFinder implements Loggable {
+public class ProfileIndexFinder {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * Thrown when no indexes are found by a ruleset
@@ -202,7 +205,7 @@ public class ProfileIndexFinder implements Loggable {
         return identifyIndex(collection, list);
         } catch(NoDetectedIndexException e) {
         	// No index was found, fall back 
-        	warn("No reference point could be found using the default rules; falling back on longest diameter");
+        	LOGGER.warning("No reference point could be found using the default rules; falling back on longest diameter");
         	List<RuleSet> rules = new ArrayList<>();
         	rules.add(RuleSet.roundRPRuleSet());
         	return identifyIndex(collection, rules);
@@ -252,7 +255,7 @@ public class ProfileIndexFinder implements Loggable {
                     Tag.REFERENCE_POINT, Stats.MEDIAN), true);
 
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            fine("Cannot get matching profile", e);
+        	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
             return new BooleanProfile(collection.getProfileCollection().length(), false);
         }
 
@@ -263,7 +266,7 @@ public class ProfileIndexFinder implements Loggable {
             try {
                 p = collection.getProfileCollection().getProfile(r.getType(), Tag.REFERENCE_POINT, Stats.MEDIAN);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-                fine("Cannot get matching profile", e);
+            	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
                 return new BooleanProfile(collection.getProfileCollection().length(), false);
             }
 
@@ -636,7 +639,7 @@ public class ProfileIndexFinder implements Loggable {
         try {
             index = p.getIndexOfMin(limits);
         } catch (ProfileException e) {
-            fine("No minimum index found");
+            LOGGER.fine("No minimum index found");
         }
 
         BooleanProfile result = new BooleanProfile(p, !b);
@@ -659,7 +662,7 @@ public class ProfileIndexFinder implements Loggable {
         try {
             index = p.getIndexOfMax(limits);
         } catch (ProfileException e) {
-            fine("No maximum index found");
+            LOGGER.fine("No maximum index found");
         }
 
         BooleanProfile result = new BooleanProfile(p, !b);

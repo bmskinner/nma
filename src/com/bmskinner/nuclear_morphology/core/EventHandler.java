@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -88,7 +89,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.7
  *
  */
-public class EventHandler implements Loggable, EventListener {
+public class EventHandler implements EventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private final InputSupplier ic;
     private ProgressBarAcceptor acceptor;
@@ -333,7 +336,7 @@ public class EventHandler implements Loggable, EventListener {
 
     		if (event.type().startsWith(SignalChangeEvent.NEW_BIOSAMPLE_PREFIX))
     			return () ->{
-    				fine("Creating new biosample");
+    				LOGGER.fine("Creating new biosample");
     				try {
 						String bsName = ic.requestString("New biosample name");
 						List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
@@ -345,7 +348,7 @@ public class EventHandler implements Loggable, EventListener {
 						}
 						fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
 					} catch (RequestCancelledException e) {
-						fine("New biosample cancelled");
+						LOGGER.fine("New biosample cancelled");
 						return;
 					}
     			};	
@@ -354,7 +357,7 @@ public class EventHandler implements Loggable, EventListener {
     		if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
             	return () ->{
             		String bsName = event.type().replace(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
-            		fine("Removing dataset from biosample "+bsName);
+            		LOGGER.fine("Removing dataset from biosample "+bsName);
             		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
             		for(IWorkspace w : workspaces) {
             			BioSample b = w.getBioSample(bsName);
@@ -367,7 +370,7 @@ public class EventHandler implements Loggable, EventListener {
         	if (event.type().startsWith(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX))
         		return () ->{
         			String bsName = event.type().replace(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
-        			fine("Adding dataset to biosample "+bsName);
+        			LOGGER.fine("Adding dataset to biosample "+bsName);
         			List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
 					for(IWorkspace w : workspaces) {
 						BioSample b = w.getBioSample(bsName);
@@ -416,7 +419,7 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { // wait for profiling and run segmentation
             			try {
             				profileLatch.await();
-            				fine("Starting segmentation action");
+            				LOGGER.fine("Starting segmentation action");
             				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG,
             						acceptor, EventHandler.this, segmentLatch).run();
             			} catch(InterruptedException e) {
@@ -427,7 +430,7 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { // wait for segmentation and run refolding
             			try {
             				segmentLatch.await();
-            				fine("Starting refolding action");
+            				LOGGER.fine("Starting refolding action");
             				new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch).run();
             			} catch(InterruptedException e) {
             				return;
@@ -437,7 +440,7 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { // wait for refolding and run save
             			try {
             				refoldLatch.await();
-            				fine("Starting save action");
+            				LOGGER.fine("Starting save action");
             				new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch, GlobalOptions.getInstance().getExportFormat()).run();
             			} catch(InterruptedException e) {
             				return;
@@ -448,7 +451,7 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { //  wait for save and recache charts
             			try {
             				saveLatch.await();
-            				fine("Starting recache action");
+            				LOGGER.fine("Starting recache action");
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
             			} catch(InterruptedException e) {
             				return;
@@ -498,7 +501,7 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { //  wait for save and recache charts
             			try {
             				segmentLatch.await();
-            				fine("Adding datasets");
+            				LOGGER.fine("Adding datasets");
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
             			} catch(InterruptedException e) {
             				return;
@@ -521,7 +524,7 @@ public class EventHandler implements Loggable, EventListener {
             		
             		final CountDownLatch segmentLatch = new CountDownLatch(1);
             		new Thread( ()-> { // wait for profiling and run segmentation
-            				fine("Starting segmentation action");
+            				LOGGER.fine("Starting segmentation action");
             				new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.NO_FLAG,
                     				acceptor, EventHandler.this, segmentLatch).run();
             		}).start();
@@ -529,7 +532,7 @@ public class EventHandler implements Loggable, EventListener {
             		new Thread( ()-> { //  wait for save and recache charts
             			try {
             				segmentLatch.await();
-            				fine("Adding datasets");
+            				LOGGER.fine("Adding datasets");
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
             			} catch(InterruptedException e) {
             				return;
@@ -539,13 +542,13 @@ public class EventHandler implements Loggable, EventListener {
             }
 
             if (event.method().equals(DatasetEvent.CLUSTER)) {
-            	fine("Clustering dataset");
+            	LOGGER.fine("Clustering dataset");
                 return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
             }
             
              
             if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
-                fine("Manually clustering dataset");
+                LOGGER.fine("Manually clustering dataset");
                 return new ManualClusterAction(event.firstDataset(), acceptor, EventHandler.this);
             }
             
@@ -554,7 +557,7 @@ public class EventHandler implements Loggable, EventListener {
 
 
             if (event.method().equals(DatasetEvent.BUILD_TREE)) {
-            	fine("Building a tree from dataset");
+            	LOGGER.fine("Building a tree from dataset");
                 return new BuildHierarchicalTreeAction(event.firstDataset(), acceptor, EventHandler.this);
             }
 
@@ -670,7 +673,7 @@ public class EventHandler implements Loggable, EventListener {
         case LIST_SELECTED_DATASETS:
             int count = 0;
             for (IAnalysisDataset d : selected) {
-                log(count + "\t" + d.getName());
+                LOGGER.info(count + "\t" + d.getName());
                 count++;
             }
             break;
@@ -678,14 +681,14 @@ public class EventHandler implements Loggable, EventListener {
         case DUMP_LOG_INFO:
             for (IAnalysisDataset d : selected) {
                 for (Nucleus n : d.getCollection().getNuclei()) {
-                    log(n.toString());
+                    LOGGER.info(n.toString());
                 }
             }
             break;
 
         case INFO:
             for (IAnalysisDataset d : selected) {
-                log(d.getCollection().toString());
+                LOGGER.info(d.getCollection().toString());
             }
             break;
             
@@ -757,7 +760,7 @@ public class EventHandler implements Loggable, EventListener {
 			String workspaceName = ic.requestString("New workspace name");
 			IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
 			DatasetListManager.getInstance().addWorkspace(w);
-    		log("New workspace created: "+workspaceName);
+    		LOGGER.info("New workspace created: "+workspaceName);
     		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
 			
 		} catch (RequestCancelledException e) {
@@ -782,14 +785,14 @@ public class EventHandler implements Loggable, EventListener {
     				try {
     					latch.await();
     				} catch (InterruptedException e) {
-    					error("Interruption to thread", e);
+    					LOGGER.log(Loggable.STACK, "Interruption to thread", e);
     				}
 
     				Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
     				wrk.run();
     			}).start();
     		}
-    		fine("All root datasets attempted to be saved");
+    		LOGGER.fine("All root datasets attempted to be saved");
     	};
 
         ThreadManager.getInstance().execute(r);

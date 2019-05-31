@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -39,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Find cells from a .cell file and assign them to child datasets.
@@ -48,6 +50,8 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
  *
  */
 public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String TAB          = "\\t";
     private static final String UUID_KEY     = "UUID";
@@ -79,8 +83,8 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         try {
             findCells();
         } catch (Exception e) {
-            warn("Error selecting cells");
-            stack("Error selecting cells", e);
+            LOGGER.warning("Error selecting cells");
+            LOGGER.log(Loggable.STACK, "Error selecting cells", e);
         }
     }
 
@@ -89,7 +93,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         try {
             newDatasets = parsePathList();
         } catch (CellRelocationException | ProfileException e) {
-            stack("Error relocating cells", e);
+            LOGGER.log(Loggable.STACK, "Error relocating cells", e);
             return;
         }
 
@@ -106,8 +110,8 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                     }
                 }
             } catch (ProfileException e) {
-                warn("Unable to profile new collections");
-                stack("Unable to profile new collections", e);
+                LOGGER.warning("Unable to profile new collections");
+                LOGGER.log(Loggable.STACK, "Unable to profile new collections", e);
                 return;
             }
         }
@@ -147,8 +151,8 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                 if (dataset.getId().equals(activeID) || dataset.hasChild(activeID)) {
                     // the dataset already exists with this id - we must fail
                     scanner.close();
-                    warn("Dataset in cell file already exists");
-                    warn("Cancelling relocation");
+                    LOGGER.warning("Dataset in cell file already exists");
+                    LOGGER.warning("Cancelling relocation");
                     throw new CellRelocationException("Dataset already exists");
                 }
 
@@ -200,7 +204,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                 map.get(activeID).getCollection().addCell(cell);
             }
         }
-        fine("All cells found");
+        LOGGER.fine("All cells found");
 
         // Make the profile collections for the new datasets
 
@@ -213,7 +217,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
     }
 
     private ICell getCellFromLine(String line) throws CellRelocationException {
-        finest("Processing line: " + line);
+        LOGGER.finest("Processing line: " + line);
 
         // Line format is FilePath\tPosition as x-y
         // Build a file name based on the current image folder and the stored filename

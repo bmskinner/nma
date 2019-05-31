@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTable;
@@ -54,6 +55,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The image panel for FISH remapping. Stores the cells selected for remapping
@@ -65,6 +67,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  */
 @SuppressWarnings("serial")
 public class FishRemappingProberPanel extends GenericImageProberPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final int    ORIGINAL_IMG_COL        = 0;
     private static final int    ORIGINAL_IMG_ROW        = 0;
@@ -194,7 +198,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
         IPoint p = getPointInOriginalImage(pnt);
         if(p==null) {
-        	warn("Cannot convert to point in original image");
+        	LOGGER.warning("Cannot convert to point in original image");
         	return;
         }
 
@@ -251,7 +255,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         double x = pnt.getX();
         double y = pnt.getY();
 
-        finer("Clicked " + x + " : " + y);
+        LOGGER.finer( "Clicked " + x + " : " + y);
 
         /*
          * The coordinates within the cell must be converted to coordinates
@@ -286,8 +290,8 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         int columnWidth = cellRectangle.width;
         int rowHeight = cellRectangle.height;
 
-        finer("Column width is " + columnWidth);
-        finer("IconCell width is " + iconWidth);
+        LOGGER.finer( "Column width is " + columnWidth);
+        LOGGER.finer( "IconCell width is " + iconWidth);
 
         // Split the difference
         int xOffset = (columnWidth - iconWidth) >> 1;
@@ -296,7 +300,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         x -= xOffset;
         y -= yOffset;
 
-        finer("Clicked in small image " + x + " : " + y);
+        LOGGER.finer( "Clicked in small image " + x + " : " + y);
 
         if (x < 0 || x > iconWidth) {
             return null; // out of bounds of icon

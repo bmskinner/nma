@@ -38,6 +38,7 @@ package com.bmskinner.nuclear_morphology.analysis.detection;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -55,7 +56,9 @@ import ij.process.ImageProcessor;
  * a binary image. The image must have been passed through an edge detection
  * module and have edges marked in white (background must be in black).
  */
-public class Hough_Circles implements PlugInFilter, Loggable {
+public class Hough_Circles implements PlugInFilter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public int radiusMin;      // Find circles with radius grater or equal
                                // radiusMin
@@ -120,8 +123,8 @@ public class Hough_Circles implements PlugInFilter, Loggable {
                     getCenterPoints(maxCircles);
             }
         } catch (Exception e) {
-            warn("Error in hough transform");
-            stack(e.getMessage(), e);
+            LOGGER.warning("Error in hough transform");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
     }
 

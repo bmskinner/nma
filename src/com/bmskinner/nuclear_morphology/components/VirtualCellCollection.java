@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,6 +64,7 @@ import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -73,6 +75,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class VirtualCellCollection implements ICellCollection {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -265,7 +269,7 @@ public class VirtualCellCollection implements ICellCollection {
         Set<ICell> result = new HashSet<ICell>(cellIDs.size());
         ICellCollection parentCollection = parent.getCollection();
         if (parentCollection == null) {
-            warn("Cannot access parent collection");
+            LOGGER.warning("Cannot access parent collection");
             return result;
         }
         return parentCollection.getCells().parallelStream()
@@ -319,7 +323,7 @@ public class VirtualCellCollection implements ICellCollection {
         ICellCollection parentCollection = parent.getCollection();
 
         if (parentCollection == null) {
-            warn("Parent collection not restored!");
+            LOGGER.warning("Parent collection not restored!");
             return new HashSet<Nucleus>(cellIDs.size());
         }
         
@@ -339,7 +343,7 @@ public class VirtualCellCollection implements ICellCollection {
 
         ICellCollection parentCollection = parent.getCollection();
         if (parentCollection == null) {
-            warn("Parent collection not restored!");
+            LOGGER.warning("Parent collection not restored!");
             return new HashSet<Nucleus>();
         }
 
@@ -756,12 +760,12 @@ public class VirtualCellCollection implements ICellCollection {
 
         List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
 
-        finest("Adding cells to new collection");
+        LOGGER.finest( "Adding cells to new collection");
         for (ICell cell : list)
             subCollection.addCell(new DefaultCell(cell));
 
         if (subCollection.size() == 0) {
-            warn("No cells in collection");
+            LOGGER.warning("No cells in collection");
         } else {
         	try {
 
@@ -771,8 +775,8 @@ public class VirtualCellCollection implements ICellCollection {
                 this.getSignalManager().copySignalGroups(subCollection);
 
             } catch (ProfileException e) {
-                warn("Error copying collection offsets");
-                stack("Error in offsetting", e);
+                LOGGER.warning("Error copying collection offsets");
+                LOGGER.log(Loggable.STACK, "Error in offsetting", e);
             }
         }
         return subCollection;
@@ -938,7 +942,7 @@ public class VirtualCellCollection implements ICellCollection {
 		case CellularComponent.NUCLEUS: return getNuclearStatistics(stat, scale);
 		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return getSegmentStatistics(stat, scale, id);
 		default: {
-			warn("No component of type " + component + " can be handled");
+			LOGGER.warning("No component of type " + component + " can be handled");
 			return null;
 		}
 	}
@@ -1100,8 +1104,8 @@ public class VirtualCellCollection implements ICellCollection {
         try {
             medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            warn("Cannot get median profile for collection");
-            fine("Error getting median profile", e);
+            LOGGER.warning("Cannot get median profile for collection");
+            LOGGER.log(Loggable.STACK, "Error getting median profile", e);
             double[] result = new double[size()];
             Arrays.fill(result, Double.MAX_VALUE);
             return result;
@@ -1115,7 +1119,7 @@ public class VirtualCellCollection implements ICellCollection {
                 return Math.sqrt(diff/FIXED_PROFILE_LENGTH); // differences in degrees, rather than square degrees
 
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-                fine("Error getting nucleus profile", e);
+                LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
                 return  Double.MAX_VALUE;
             } 
         }).toArray();
@@ -1164,7 +1168,7 @@ public class VirtualCellCollection implements ICellCollection {
         try {
             medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            fine("Error getting median profile for collection", e);
+            LOGGER.log(Loggable.STACK, "Error getting median profile for collection", e);
             return 0;
         }
         
@@ -1174,7 +1178,7 @@ public class VirtualCellCollection implements ICellCollection {
             double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
             return Math.sqrt(diff/FIXED_PROFILE_LENGTH);
         } catch (ProfileException | UnavailableComponentException e) {
-            fine("Error getting nucleus profile", e);
+            LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
             return Double.NaN;
         }
     }

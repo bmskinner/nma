@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.jfree.data.Range;
 import org.jfree.data.statistics.HistogramDataset;
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.estimators.KernelEstimator;
 
@@ -42,7 +44,10 @@ import weka.estimators.KernelEstimator;
  * @author ben
  * @since 1.13.8
  *
- */public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
+ */
+public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public SignalHistogramDatasetCreator(final ChartOptions o) {
 		super(o);
@@ -158,7 +163,7 @@ import weka.estimators.KernelEstimator;
                 try {
                     est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, 0.001);
                 } catch (Exception e1) {
-                    stack("Error creating probability kernel", e1);
+                    LOGGER.log(Loggable.STACK, "Error creating probability kernel", e1);
                     throw new ChartDatasetCreationException("Cannot make probability dataset", e1);
                 }
 

@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -32,8 +33,11 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ExportDatasetAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private File saveFile = null;
     private ExportFormat format = ExportFormat.JAVA;
@@ -104,7 +108,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
     public void run() {
 
         if (saveFile != null) {
-            log("Saving as " + saveFile.getAbsolutePath() + "...");
+            LOGGER.info("Saving as " + saveFile.getAbsolutePath() + "...");
             long length = saveFile.exists() ? saveFile.length() : 0;
             IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile, format);
             worker = new DefaultAnalysisWorker(m, length);

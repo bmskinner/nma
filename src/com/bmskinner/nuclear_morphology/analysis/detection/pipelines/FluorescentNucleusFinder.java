@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -44,11 +45,14 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 public class FluorescentNucleusFinder extends CellFinder {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private final ComponentFactory<Nucleus> nuclFactory;
     private final IDetectionOptions nuclOptions;
@@ -97,7 +101,7 @@ public class FluorescentNucleusFinder extends CellFinder {
                 }
             }
         } catch (MissingOptionException e) {
-        	warn("No options for nucleus creation in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
+        	LOGGER.warning("No options for nucleus creation in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
         } finally {
         	fireProgressEvent();
         }        
@@ -169,7 +173,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         
         Map<Roi, StatsMap> rois = gd.getRois(img.duplicate());
-        fine("Image: "+imageFile.getName()+": "+rois.size()+" rois");
+        LOGGER.fine("Image: "+imageFile.getName()+": "+rois.size()+" rois");
         
         for (Roi roi : rois.keySet()) {
             StatsMap s = rois.get(roi);
@@ -178,7 +182,7 @@ public class FluorescentNucleusFinder extends CellFinder {
             	Nucleus n = makeNucleus(roi, imageFile, s);
             	list.add(n);
             } catch(ComponentCreationException e) {
-            	stack("Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
+            	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
             }
         }
         return list;
@@ -188,7 +192,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     private synchronized Nucleus makeNucleus(final Roi roi, final File f,
             final StatsMap values) throws ComponentCreationException {
         
-        fine("Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
+        LOGGER.fine("Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
 
         // save the position of the roi, for later use
         int xbase = (int) roi.getXBase();

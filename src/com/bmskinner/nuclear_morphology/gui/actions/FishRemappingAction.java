@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -28,12 +29,15 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Compare morphology images with post-FISH images, and select nuclei into new
  * sub-populations
  */
 public class FishRemappingAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_LBL      = "Remapping";
     
@@ -49,14 +53,14 @@ public class FishRemappingAction extends SingleDatasetResultAction {
         try {
 
             if (dataset.hasMergeSources()) {
-                warn("Cannot remap merged datasets");
+                LOGGER.warning("Cannot remap merged datasets");
                 cancel();
                 return;
             }
 
             fishDir = FileSelector.choosePostFISHDirectory(dataset);
             if (fishDir==null) {
-                log("Remapping cancelled");
+                LOGGER.info("Remapping cancelled");
                 cancel();
                 return;
             }
@@ -65,16 +69,16 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 
             if (fishMapper.isOk()) {
 
-                log("Fetching collections...");
+                LOGGER.info("Fetching collections...");
                 final List<IAnalysisDataset> newList = fishMapper.getNewDatasets();
 
                 if (newList.isEmpty()) {
-                    log("No collections returned");
+                    LOGGER.info("No collections returned");
                     cancel();
                     return;
                 }
 
-                log("Reapplying morphology...");
+                LOGGER.info("Reapplying morphology...");
 
                 CountDownLatch latch = new CountDownLatch(1);
                 new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0), eh, latch).run();
@@ -90,20 +94,20 @@ public class FishRemappingAction extends SingleDatasetResultAction {
                 
 
             } else {
-                log("Remapping cancelled");
+                LOGGER.info("Remapping cancelled");
                 cancel();
             }
 
         } catch (Exception e) {
-            warn("Error in FISH remapping: " + e.getMessage());
-            stack("Error in FISH remapping: " + e.getMessage(), e);
+            LOGGER.warning("Error in FISH remapping: " + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Error in FISH remapping: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void finished() {
         // Do not use super.finished(), or it will trigger another save action
-        fine("FISH mapping complete");
+        LOGGER.fine("FISH mapping complete");
         cancel();
         getInterfaceEventHandler().removeListener(eh);
         getDatasetEventHandler().removeListener(eh);

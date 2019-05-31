@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
@@ -45,6 +46,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
@@ -58,6 +60,8 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
  */
 @SuppressWarnings("serial")
 public class DraggableOverlayChartPanel extends ExportableChartPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private volatile ISegmentedProfile profile = null;
 
@@ -100,7 +104,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
     public synchronized double getDomainCrosshairPosition() {
 
         if (xCrosshair != null) {
-            finest("Domain value is " + xCrosshair.getValue());
+            LOGGER.finest( "Domain value is " + xCrosshair.getValue());
             return xCrosshair.getValue();
         }
         return 0;
@@ -146,8 +150,8 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                 this.addOverlay(overlay);
 
             } catch (Exception e1) {
-                warn("Error creating segment markers");
-                stack("Error creating segment markers", e1);
+                LOGGER.warning("Error creating segment markers");
+                LOGGER.log(Loggable.STACK, "Error creating segment markers", e1);
             }
 
             this.revalidate();
@@ -169,7 +173,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         crosses = new ArrayList<>();
         overlay = null;
         updateOverlays();
-        finer("Profile has been set");
+        LOGGER.finer( "Profile has been set");
     }
 
     @Override
@@ -203,7 +207,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                 // Get the normalised position
                 double xValue = this.getDomainCrosshairPosition();
 
-                fine("Double of domain value is " + xValue);
+                LOGGER.fine("Double of domain value is " + xValue);
 
                 // Correct for normalisation
                 if (isChartNormalised) {
@@ -216,13 +220,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
                     xValue = profile.size() * (xValue / ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
 
-                    fine("Profile position of domain value is " + xValue);
+                    LOGGER.fine("Profile position of domain value is " + xValue);
                 }
 
                 // Get the closest integer to the selected point
                 int intXValue = (int) Math.round(xValue);
 
-                fine("Integer of domain value is " + intXValue);
+                LOGGER.fine("Integer of domain value is " + intXValue);
 
                 // Get the segment associated with the point
                 IBorderSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();

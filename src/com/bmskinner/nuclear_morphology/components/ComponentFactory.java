@@ -35,7 +35,7 @@ import ij.gui.Roi;
  * @param <E>
  *            the type of CellularComponent to be created
  */
-public interface ComponentFactory<E extends CellularComponent> extends Loggable {
+public interface ComponentFactory<E extends CellularComponent> {
 
     /**
      * Create a component of the appropriate class for the factory

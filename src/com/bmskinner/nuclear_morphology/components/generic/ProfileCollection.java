@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -51,6 +52,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 @Deprecated
 public class ProfileCollection implements IProfileCollection {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -165,7 +168,7 @@ public class ProfileCollection implements IProfileCollection {
             try {
                 profile = getAggregate().getQuartile(quartile).offset(indexOffset);
             } catch (ProfileException e) {
-                error("Unable to get profile for " + tag + " quartile " + quartile, e);
+                LOGGER.log(Loggable.STACK, "Unable to get profile for " + tag + " quartile " + quartile, e);
                 return null;
             }
             profileCache.setProfile(tag, quartile, profile);
@@ -283,7 +286,7 @@ public class ProfileCollection implements IProfileCollection {
         try {
             segments = this.getSegments(tag);
         } catch (ProfileException e) {
-            error("Cannot get segments", e);
+            LOGGER.log(Loggable.STACK, "Cannot get segments", e);
             return null;
         }
 
@@ -329,7 +332,7 @@ public class ProfileCollection implements IProfileCollection {
         try {
             segments = this.getSegments(tag);
         } catch (ProfileException e) {
-            error("Cannot get segments", e);
+            LOGGER.log(Loggable.STACK, "Cannot get segments", e);
             return null;
         }
 
@@ -356,7 +359,7 @@ public class ProfileCollection implements IProfileCollection {
         try {
             segments = this.getSegments(Tag.REFERENCE_POINT);
         } catch (ProfileException e) {
-            error("Cannot get segments", e);
+            LOGGER.log(Loggable.STACK, "Cannot get segments", e);
             return null;
         }
 
@@ -508,7 +511,7 @@ public class ProfileCollection implements IProfileCollection {
                 }
             }
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            error("Error making profile aggregates", e);
+            LOGGER.log(Loggable.STACK, "Error making profile aggregates", e);
         }
 
     }
@@ -615,7 +618,7 @@ public class ProfileCollection implements IProfileCollection {
         if (q25 == null || q75 == null) { // if something goes wrong, return a
                                           // zero profile
 
-            warn("Problem calculating the IQR - setting to zero");
+            LOGGER.warning("Problem calculating the IQR - setting to zero");
             return new Profile(0, aggregate.length());
         }
 
@@ -647,7 +650,7 @@ public class ProfileCollection implements IProfileCollection {
         try {
             minIndex = iqrProfile.getIndexOfMin();
         } catch (ProfileException e) {
-            stack("Error getting index", e);
+            LOGGER.log(Loggable.STACK, "Error getting index", e);
             return result;
         } // ensure that our has begins with lowest data
 
@@ -711,7 +714,7 @@ public class ProfileCollection implements IProfileCollection {
         while (it.hasNext()) {
             Object tag = it.next();
             if (tag instanceof BorderTag) {
-                fine("Deserialization has no BorderTagObject for " + tag.toString() + ", creating");
+                LOGGER.fine("Deserialization has no BorderTagObject for " + tag.toString() + ", creating");
 
                 newIndexes.put(new BorderTagObject((BorderTag) tag), indexes.get(tag));
             }
@@ -777,7 +780,7 @@ public class ProfileCollection implements IProfileCollection {
 
                 map.put(quartile, (Profile) profile);
             } else {
-                warn("Cannot cast IProfile to Profile in profile cache");
+                LOGGER.warning("Cannot cast IProfile to Profile in profile cache");
             }
 
         }
@@ -853,7 +856,7 @@ public class ProfileCollection implements IProfileCollection {
             while (it.hasNext()) {
                 Object tag = it.next();
                 if (tag instanceof BorderTag) {
-                    fine("Deserialization has no BorderTagObject for " + tag.toString() + ", creating");
+                    LOGGER.fine("Deserialization has no BorderTagObject for " + tag.toString() + ", creating");
 
                     newCache.put(new BorderTagObject((BorderTag) tag), cache.get(tag));
                 }
@@ -942,7 +945,7 @@ public class ProfileCollection implements IProfileCollection {
         try {
             result = this.getAggregate().getValuesAtPosition(position);
         } catch (Exception e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
 
         return result;

@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -46,7 +47,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
+public class DefaultMesh<E extends Taggable> implements Mesh<E> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final boolean IS_PERIPERHAL = true;
 	private static final boolean IS_INTERNAL   = false;
@@ -104,7 +107,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             createEdgesAndFaces();
             
         } catch (IllegalArgumentException e) {
-        	stack(e);
+        	LOGGER.log(Loggable.STACK,"Unable to create mesh for component", e);
             throw new MeshCreationException("Unable to create mesh for component", e);
         }
     }
@@ -133,7 +136,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             createEdgesAndFaces();
 
         } catch (IllegalArgumentException e) {
-            fine("Error creating mesh");
+            LOGGER.fine("Error creating mesh");
             throw new MeshCreationException("Unable to create mesh for component", e);
         }
     }
@@ -342,8 +345,8 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         if (!this.isComparableTo(mesh))
             throw new IllegalArgumentException("Cannot compare meshes");
 
-        finer("Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
-        finer("Mesh has " + mesh.getFaceCount() + " faces");
+        LOGGER.finer( "Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
+        LOGGER.finer( "Mesh has " + mesh.getFaceCount() + " faces");
 
         DefaultMesh<E> result = new DefaultMesh<E>(this);
 
@@ -404,7 +407,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
                 return f;
             }
         }
-        finer("Cannot find face in mesh: " + test.toString());
+        LOGGER.finer( "Cannot find face in mesh: " + test.toString());
         return null;
     }
 
@@ -415,7 +418,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
                 return e;
             }
         }
-        finer("Cannot find edge in mesh: " + test.toString());
+        LOGGER.finer( "Cannot find edge in mesh: " + test.toString());
         return null;
     }
 
@@ -433,7 +436,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
      */
     private void determineVertexProportions() throws MeshCreationException {
 
-    	finer("Determining vertex proportions");
+    	LOGGER.finer( "Determining vertex proportions");
 
     	try {
     		List<IBorderSegment> segments = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
@@ -447,12 +450,12 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
     			// the closest number of divisions to a spacing of vertexSpacing
     			long divisions = Math.round(div); 
 
-    			finest("Dividing segment into " + divisions + " parts");
+    			LOGGER.finest( "Dividing segment into " + divisions + " parts");
 
     			for (int i = 0; i < divisions; i++) {
 
     				double proportion = (double) i / (double) divisions;
-    				finest("Fetching point at proportion " + proportion);
+    				LOGGER.finest( "Fetching point at proportion " + proportion);
     				proportions.add(proportion);
     			}
 
@@ -474,7 +477,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
      * @throws MeshCreationException
      */
     private void createPeripheralVertices() throws MeshCreationException {
-        finer("Creating peripheral vertices");
+        LOGGER.finer( "Creating peripheral vertices");
         try {
             List<IBorderSegment> list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 
@@ -483,7 +486,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
                 IBorderSegment segment = list.get(segIndex);
                 Set<MeshVertex> segVertices = segmentFaces.get(segIndex);
-                finer("Segment " + segIndex + ": " + segment.length());
+                LOGGER.finer( "Segment " + segIndex + ": " + segment.length());
 
                 List<Double> proportions = segmentVertexProportions.get(segIndex);
 
@@ -503,7 +506,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
                     int correctedIndex = CellularComponent
                             .wrapIndex(index + component.getBorderIndex(Tag.REFERENCE_POINT), segment.getProfileLength());
 
-                    finest("Fetching point at index " + correctedIndex);
+                    LOGGER.finest( "Fetching point at index " + correctedIndex);
 
                     int vertIndex = addVertex(component.getOriginalBorderPoint(correctedIndex), IS_PERIPERHAL);
                     
@@ -550,7 +553,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
      */
     private void createInternalVertices() {
 
-        finer("Creating internal vertices");
+        LOGGER.finer( "Creating internal vertices");
         /*
          * The first index in the list is the reference point. Take the second
          * and last, the third and next-to-last etc
@@ -572,7 +575,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         // Build the edges
 
         // Link peripheral vertices
-        finer("Creating peripheral edges");
+        LOGGER.finer( "Creating peripheral edges");
         for (int i = 0, j = 1; j < peripheralVertices.size(); i++, j++) {
 
             MeshVertex v1 = peripheralVertices.get(i);
@@ -590,7 +593,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             }
         }
 
-        finer("Creating internal edges");
+        LOGGER.finer( "Creating internal edges");
         // Link the internal vertices, from peripheral vertex 0
         for (int i = 0, j = 1; j < internalVertices.size(); i++, j++) {
 
@@ -604,10 +607,10 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
         // Link between peripheral and internal vertices
         int halfArray = (int) Math.floor(((double) peripheralVertices.size() / 2));
 
-        finer("Linking peripheral edges and internal edges");
-        finer("Peripheral vertices: " + peripheralVertices.size());
-        finer("Internal vertices: " + internalVertices.size());
-        finer("Half array: " + halfArray);
+        LOGGER.finer( "Linking peripheral edges and internal edges");
+        LOGGER.finer( "Peripheral vertices: " + peripheralVertices.size());
+        LOGGER.finer( "Internal vertices: " + internalVertices.size());
+        LOGGER.finer( "Half array: " + halfArray);
 
         try {
 
@@ -655,7 +658,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
                 this.getFace(p2_x, i1, i2);
             }
 
-            finer("Created first face set");
+            LOGGER.finer( "Created first face set");
 
             // create the top faces - RP to nearest peripheral indexes to I0
             getEdge(peripheralVertices.get(0), internalVertices.get(0));
@@ -667,13 +670,13 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
             this.getFace(peripheralVertices.get(0), peripheralVertices.get(peripheralVertices.size() - 1),
                     internalVertices.get(0));
 
-            finer("Created top face set");
+            LOGGER.finer( "Created top face set");
 
             // if needed, create the bottom face (final intenal vertex to
             // central peripheral vertices)
             if (peripheralVertices.size() % 2 != 0) {
 
-                finer("Need bottom face set");
+                LOGGER.finer( "Need bottom face set");
 
                 MeshVertex p1 = peripheralVertices.get(halfArray);
                 MeshVertex p2 = peripheralVertices.get(halfArray + 1);
@@ -686,11 +689,11 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
                 this.getFace(p1, p2, i1);
 
-                finer("Created bottom face set");
+                LOGGER.finer( "Created bottom face set");
             }
 
         } catch (Exception e) {
-            stack("Error linking edges and vertices in mesh", e);
+            LOGGER.log(Loggable.STACK, "Error linking edges and vertices in mesh", e);
         }
 
     }

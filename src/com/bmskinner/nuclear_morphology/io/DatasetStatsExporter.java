@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -47,7 +48,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.13.4
  *
  */
-public class DatasetStatsExporter extends StatsExporter implements Loggable {
+public class DatasetStatsExporter extends StatsExporter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private boolean includeProfiles = true;
     private boolean includeSegments = false;
@@ -217,7 +220,7 @@ public class DatasetStatsExporter extends StatsExporter implements Loggable {
                     varP = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, (Taggable) c);
                     varM = varP;
                 } catch (UnavailableBorderTagException e) {
-                    stack("Tag not present in component", e);
+                    LOGGER.log(Loggable.STACK, "Tag not present in component", e);
                     varP = -1;
                     varM = -1;
                 }

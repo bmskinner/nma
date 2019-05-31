@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Setup a clustering of the given dataset.
@@ -44,6 +46,8 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
  *
  */
 public class ClusterAnalysisAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_BAR_LABEL = "Clustering cells";
 
@@ -107,10 +111,10 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         try {
             ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
             int size = r.getGroup().size();
-            log("Found " + size + " clusters");
+            LOGGER.info("Found " + size + " clusters");
         } catch (InterruptedException | ExecutionException e) {
-            warn("Error clustering");
-            stack("Error clustering", e);
+            LOGGER.warning("Error clustering");
+            LOGGER.log(Loggable.STACK, "Error clustering", e);
         }
 
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);

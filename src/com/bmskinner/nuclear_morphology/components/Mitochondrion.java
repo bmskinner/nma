@@ -17,14 +17,18 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
 @Deprecated
 public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -37,15 +41,15 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        finest("\tWriting mitochondrion");
+        LOGGER.finest( "\tWriting mitochondrion");
         out.defaultWriteObject();
-        finest("\tWrote mitochondrion");
+        LOGGER.finest( "\tWrote mitochondrion");
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        finest("Reading mitochondrion");
+        LOGGER.finest( "Reading mitochondrion");
         in.defaultReadObject();
-        finest("Read mitochondrion");
+        LOGGER.finest( "Read mitochondrion");
     }
 
     /*

@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,7 +44,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public final class DatasetListManager implements Loggable {
+public final class DatasetListManager {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static DatasetListManager instance   = null;
     private static final Object                lockObject = new Object(); // synchronisation
@@ -196,7 +199,7 @@ public final class DatasetListManager implements Loggable {
                 }
             }
         } catch (Exception e) {
-            error("Error refreshing clusters", e);
+            LOGGER.log(Loggable.STACK, "Error refreshing clusters", e);
         }
     }
     
@@ -404,7 +407,7 @@ public final class DatasetListManager implements Loggable {
             if (datasetHashcodeMap.containsKey(d.getId())) {
                 return d.hashCode() != datasetHashcodeMap.get(d.getId());
             }
-			warn("Missing root dataset hashcode");
+			LOGGER.warning("Missing root dataset hashcode");
 
         }
         return false;
@@ -421,7 +424,7 @@ public final class DatasetListManager implements Loggable {
     	if (workspaceHashcodeMap.containsKey(w.getId())) {
     		return w.hashCode() != workspaceHashcodeMap.get(w.getId());
     	}
-		warn("Missing workspace hashcode");
+		LOGGER.warning("Missing workspace hashcode");
 
     	return false;
     }

@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -38,10 +39,13 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 @SuppressWarnings("serial")
 public class NuclearHistogramsPanel extends HistogramsTabPanel  {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public NuclearHistogramsPanel(@NonNull InputSupplier context) {
 		super(context, CellularComponent.NUCLEUS);
@@ -162,27 +166,27 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
                     ICellCollection collection = dataset.getCollection();
                     try {
 
-                        log("Filtering on " + stat.toString() + ": " + df.format(lower) + " - " + df.format(upper));
+                        LOGGER.info("Filtering on " + stat.toString() + ": " + df.format(lower) + " - " + df.format(upper));
 
                         ICellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
 
                         if (subCollection.hasCells()) {
 
-                            log("Filtered " + subCollection.size() + " nuclei");
+                            LOGGER.info("Filtered " + subCollection.size() + " nuclei");
                             dataset.addChildCollection(subCollection);
                             try {
                                 dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);
                             } catch (Exception e1) {
-                                error("Error applying segments", e1);
+                                LOGGER.log(Loggable.STACK, "Error applying segments", e1);
                             }
                         }
 
                     } catch (Exception e) {
-                        error("Error filtering", e);
+                        LOGGER.log(Loggable.STACK, "Error filtering", e);
 
                     }
                 }
-                finest("Firing population update request");
+                LOGGER.finest( "Firing population update request");
                 getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
             }
         }

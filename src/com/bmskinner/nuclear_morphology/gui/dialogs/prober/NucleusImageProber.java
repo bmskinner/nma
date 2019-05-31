@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
@@ -28,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
 //import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusDetectionSettingsPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * An image prober for detecting nuclei
@@ -38,6 +40,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.Constructabl
  */
 @SuppressWarnings("serial")
 public class NucleusImageProber extends IntegratedImageProber {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
 
@@ -77,8 +81,8 @@ public class NucleusImageProber extends IntegratedImageProber {
             imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
 
         } catch (Exception e) {
-            warn("Error launching analysis window");
-            stack(e.getMessage(), e);
+            LOGGER.warning("Error launching analysis window");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
             this.dispose();
         }
 

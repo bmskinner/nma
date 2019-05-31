@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
@@ -46,7 +47,9 @@ import ij.process.ImageProcessor;
  * @author ben
  *
  */
-public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> implements Loggable {
+public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	protected final IAnalysisDataset dataset;
 	protected final TableModel       model;
@@ -74,7 +77,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
             	SelectableCellIcon ic = importCellImage(c);
                 publish(ic);
             } catch (Exception e) {
-                stack("Error importing cell image", e);
+                LOGGER.log(Loggable.STACK, "Error importing cell image", e);
             }
         }
         return true;
@@ -93,10 +96,10 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
             else
                 firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
-            stack("Interruption error in worker", e);
+            LOGGER.log(Loggable.STACK, "Interruption error in worker", e);
             firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-        	stack("Execution error in worker", e);
+        	LOGGER.log(Loggable.STACK, "Execution error in worker", e);
             firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         }
     }
@@ -128,7 +131,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
         double angle = findVerticalRotationAngle(topPoint, btmPoint);
 
         // Increase the canvas size so rotation does not crop the nucleus
-        finer("Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
+        LOGGER.finer( "Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
         ImageProcessor newIp = createEnlargedProcessor(ip, angle);
 
         newIp.rotate(angle);
@@ -202,9 +205,9 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
         int xBase = (w - ip.getWidth()) >> 1;
         int yBase = (h - ip.getHeight()) >> 1;
 
-        finer(String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
+        LOGGER.finer( String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
 
-        finest("Copy starting at " + xBase + ", " + yBase);
+        LOGGER.finest( "Copy starting at " + xBase + ", " + yBase);
 
         ImageProcessor newIp = new ColorProcessor(w, h);
 

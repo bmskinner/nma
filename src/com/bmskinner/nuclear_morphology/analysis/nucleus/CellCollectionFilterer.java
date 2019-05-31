@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -29,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A filterer that filters cell collections on measured values
@@ -38,6 +40,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
     @Override
     public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta)
@@ -59,7 +63,7 @@ public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
         				med = collection.getMedian(stat, CellularComponent.NUCLEUS,
         						MeasurementScale.PIXELS);
         			} catch (Exception e) {
-        				stack("Cannot get median stat", e);
+        				LOGGER.log(Loggable.STACK, "Cannot get median stat", e);
         				return false;
         			}
         			double max = med * delta;
@@ -84,7 +88,7 @@ public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
                 it.remove();
             }
         }
-        fine("Remaining: " + collection.size() + " nuclei");
+        LOGGER.fine("Remaining: " + collection.size() + " nuclei");
     }
 
     @Override
@@ -98,8 +102,8 @@ public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
              collection.getSignalManager().copySignalGroups(filtered);
 
          } catch (ProfileException e) {
-             warn("Error copying collection offsets");
-             stack("Error in offsetting", e);
+             LOGGER.warning("Error copying collection offsets");
+             LOGGER.log(Loggable.STACK, "Error in offsetting", e);
          }
          return filtered;
     }

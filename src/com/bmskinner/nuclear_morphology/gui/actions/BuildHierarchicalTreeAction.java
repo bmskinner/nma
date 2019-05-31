@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Action for constructing hierarchical trees based on dataset parameters
@@ -45,6 +47,8 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
  */
 public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
         implements EventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_BAR_LABEL = "Building tree";
 
@@ -104,7 +108,7 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
 
     @Override
     public void eventReceived(DatasetEvent event) {
-        finest("BuildHierarchicalTreeAction heard dataset event");
+        LOGGER.finest( "BuildHierarchicalTreeAction heard dataset event");
         if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
             getDatasetEventHandler().fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
         }

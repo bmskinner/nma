@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -31,8 +32,11 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class DatasetArithmeticAction extends MultiDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private IAnalysisDataset datasetOne = null;
 
@@ -60,7 +64,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
                 IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
                 DatasetArithmeticOperation operation = dialog.getOperation();
 
-                log("Performing " + operation + " on datasets");
+                LOGGER.info("Performing " + operation + " on datasets");
                 // prepare a new collection
 
                 ICellCollection newCollection = null;
@@ -101,7 +105,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
             }
 
         } catch (Exception e1) {
-            error("Error in dataset arithmetic", e1);
+            LOGGER.log(Loggable.STACK, "Error in dataset arithmetic", e1);
 
         } finally {
             cancel();
@@ -111,7 +115,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
     private void makeNewDataset(ICellCollection newCollection) {
         if (newCollection != null && newCollection.size() > 0) {
 
-            log("Found " + newCollection.size() + " cells");
+            LOGGER.info("Found " + newCollection.size() + " cells");
             IAnalysisDataset newDataset;
 
             if (newCollection instanceof VirtualCellCollection) {
@@ -124,8 +128,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 	                newDataset = root.getChildDataset(newCollection.getID());
 	                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 				} catch (ProfileException e) {
-					warn("Error: unable to complete operation");
-					fine("Error copying profile offsets", e);
+					LOGGER.warning("Error: unable to complete operation");
+				 LOGGER.log(Loggable.STACK, "Error copying profile offsets", e);
 				}
 
             } else {
@@ -134,7 +138,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, newDataset);
             }
         } else {
-            log("No populations returned");
+            LOGGER.info("No populations returned");
         }
     }
 }

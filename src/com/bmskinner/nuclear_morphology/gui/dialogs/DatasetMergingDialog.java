@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -38,6 +39,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.Data
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Allows options to be set when merging datasets. E.g. which signal groups are
@@ -48,6 +50,8 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
  */
 @SuppressWarnings("serial")
 public class DatasetMergingDialog extends LoadingIconDialog implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String SIGNAL_GROUP_COL_LBL = "Signal group";
 
@@ -75,7 +79,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         this.pack();
         centerOnScreen();
         this.setVisible(true);
-        finest("Created dataset merging dialog");
+        LOGGER.finest( "Created dataset merging dialog");
     }
 
     /**
@@ -216,7 +220,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         }
 
         if (e.getSource() == mergeButton) {
-            log("Merging datasets");
+            LOGGER.info("Merging datasets");
             this.setVisible(false);
         }
 

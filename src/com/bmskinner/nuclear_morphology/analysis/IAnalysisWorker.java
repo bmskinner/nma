@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.4
  *
  */
-public interface IAnalysisWorker extends RunnableFuture<IAnalysisResult>, ProgressListener, Loggable {
+public interface IAnalysisWorker extends RunnableFuture<IAnalysisResult>, ProgressListener{
 
 	String FINISHED_MSG       = "Finished";
 	String ERROR_MSG          = "Error";

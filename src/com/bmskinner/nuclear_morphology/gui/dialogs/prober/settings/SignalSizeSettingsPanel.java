@@ -23,6 +23,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,6 +35,7 @@ import javax.swing.event.ChangeListener;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A size settings panel for signals, which replaces the max size with a max
@@ -45,6 +47,8 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
  */
 @SuppressWarnings("serial")
 public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements ChangeListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String MIN_SIZE_LBL = "Min area (pixels)";
     private static final String MAX_SIZE_LBL = "Max fraction";
@@ -212,7 +216,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
             fireOptionsChangeEvent();
 
         } catch (ParseException e1) {
-            stack("Parsing error in JSpinner", e1);
+            LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
         }
 
     }

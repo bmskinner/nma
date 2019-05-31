@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.text.ParseException;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,9 +27,12 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class ThresholdSettingsPanel extends DetectionSettingsPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final Integer MIN_RANGE = Integer.valueOf(0);
     private static final Integer MAX_RANGE = Integer.valueOf(255);
@@ -62,8 +66,8 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
                 options.setThreshold(((Integer) thresholdSpinner.getValue()).intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing error in JSpinner");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing error in JSpinner");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
         });
 

@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Display collections of images from a dataset. Uses a SwingWorker
@@ -41,6 +43,8 @@ import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
  *
  */
 public abstract class CollectionOverviewDialog extends LoadingIconDialog implements PropertyChangeListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final int COLUMN_COUNT = 3;
 
@@ -127,13 +131,13 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
             }
 
             if (evt.getPropertyName().equals("Finished")) {
-                finest("Worker signaled finished");
+                LOGGER.finest( "Worker signaled finished");
                 progressBar.setVisible(false);
 
             }
 
         } catch (Exception e) {
-            error("Error getting value from property change", e);
+            LOGGER.log(Loggable.STACK, "Error getting value from property change", e);
         }
 
     }

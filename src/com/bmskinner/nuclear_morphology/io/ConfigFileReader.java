@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.4
  *
  */
-public class ConfigFileReader implements Loggable {
+public class ConfigFileReader {
 
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     public static final String INI_FILE = "config.ini";
@@ -65,7 +65,7 @@ public class ConfigFileReader implements Loggable {
             }
 
         } catch (IOException e) {
-            stack("Error reading ini file", e);
+            LOGGER.log(Loggable.STACK, "Error reading ini file", e);
         }
 
     }

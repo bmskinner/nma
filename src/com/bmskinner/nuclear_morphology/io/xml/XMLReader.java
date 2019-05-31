@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  * @param <T> the type of object to be read
  */
-public abstract class XMLReader<T> implements Loggable {
+public abstract class XMLReader<T> {
 	
 	public static final File EMPTY_FILE = new File("empty");
 	

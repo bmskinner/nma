@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -30,8 +31,11 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class MergeSourceExtractionAction extends MultiDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     private static final String PROGRESS_BAR_LABEL = "Extracting merge source";
     
@@ -70,12 +74,12 @@ public class MergeSourceExtractionAction extends MultiDatasetResultAction {
             }
 
         } catch (InterruptedException e) {
-            warn("Unable to extract merge source" + e.getMessage());
-            stack("Unable to extract merge source", e);
+            LOGGER.warning("Unable to extract merge source" + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
             return;
         } catch (ExecutionException e) {
-            warn("Unable to extract merge source" + e.getMessage());
-            stack("Unable to extract merge source", e);
+            LOGGER.warning("Unable to extract merge source" + e.getMessage());
+            LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
             return;
         }
         

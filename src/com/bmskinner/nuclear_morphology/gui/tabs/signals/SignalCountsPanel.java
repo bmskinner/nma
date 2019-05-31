@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -56,6 +57,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Plot the number of signals per nucleus/per cell
@@ -65,6 +67,9 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
  */
 @SuppressWarnings("serial")
 public class SignalCountsPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
 	private static final String FILTER_LBL = "Filter nuclei";
 	
 	private static final String PANEL_TITLE_LBL = "Signal counts";
@@ -202,7 +207,7 @@ public class SignalCountsPanel extends DetailPanel {
             	dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
             	dataset.addChildCollection(virt);		
             } catch (CollectionFilteringException | ProfileException e1) {
-            	stack("Unable to filter collection for " + dataset.getName(), e1);
+            	LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
             }
             
             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);

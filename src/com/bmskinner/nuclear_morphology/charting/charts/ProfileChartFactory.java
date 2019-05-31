@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.text.DecimalFormat;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,6 +57,7 @@ import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -67,6 +69,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileChartFactory extends AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String IQR_AXIS_LBL = "IQR";
 	private static final String POSITION_AXIS_LBL = "Position";
@@ -141,7 +145,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		try {
 			ds = new ProfileDatasetCreator(options).createProfileDataset(n);
 		} catch (ChartDatasetCreationException e) {
-			fine("Error creating profile chart", e);
+			LOGGER.log(Loggable.STACK, "Error creating profile chart", e);
 			return createErrorChart();
 		}
 		JFreeChart chart = makeProfileChart(ds, options.getCell().getNucleus().getBorderLength());
@@ -152,12 +156,12 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		
 		// Add segment name annotations
 		if (options.isShowAnnotations()) {
-			finest("Adding segment annotations");
+			LOGGER.finest( "Adding segment annotations");
 			try {
 				ISegmentedProfile profile = n.getProfile(options.getType(), options.getTag());
 				addSegmentTextAnnotations(profile, chart.getXYPlot());
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-				fine("Error adding segment annotations", e);
+				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
 		}
@@ -182,7 +186,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				ds = new ProfileDatasetCreator(options).createProfileDataset();
 			}
 		} catch (ChartDatasetCreationException e) {
-			stack("Error making profile dataset", e);
+			LOGGER.log(Loggable.STACK, "Error making profile dataset", e);
 			return createErrorChart();
 		}
 
@@ -223,7 +227,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 					addDomainMarkerToXYPlot(plot, tag, indexToDraw);
 
 				} catch (UnavailableBorderTagException e) {
-					fine("Tag not present in profile: " + tag);
+					LOGGER.fine("Tag not present in profile: " + tag);
 				}
 
 			}
@@ -235,7 +239,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN);
 				addSegmentTextAnnotations(profile, plot);
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-				fine("Error adding segment annotations", e);
+				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
 		}
@@ -256,7 +260,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
     	try {
     		profiles = new ProfileDatasetCreator(options).createProfileDataset();
     	} catch (ChartDatasetCreationException e) {
-    		fine("Unable to create profile dataset", e);
+    		LOGGER.log(Loggable.STACK, "Unable to create profile dataset", e);
     		return createErrorChart();
     	}
     	    	
@@ -414,7 +418,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				addDomainMarkerToXYPlot(plot, tag, (double) index);
 
 			} catch (UnavailableBorderTagException e) {
-				stack("Border tag not available", e);
+				LOGGER.log(Loggable.STACK, "Border tag not available", e);
 			}
 		}
 	}
@@ -505,7 +509,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
                 annotation.setTextAnchor(TextAnchor.TOP_LEFT);
                 plot.addAnnotation(annotation);
             } catch (IllegalArgumentException ex) {
-                fine("Missing data in variability chart");
+                LOGGER.fine("Missing data in variability chart");
             }
         }
         applyDefaultAxisOptions(chart);

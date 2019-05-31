@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -39,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -74,6 +76,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private ICellCollection sourceCollection = null;
 	
@@ -119,9 +123,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-		fine("-----------------------------");
-    	fine("Beginning segmentation method");
-    	fine("-----------------------------");
+		LOGGER.fine("-----------------------------");
+    	LOGGER.fine("Beginning segmentation method");
+    	LOGGER.fine("-----------------------------");
 		try {
 
 			switch (mode) {
@@ -145,20 +149,20 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 				n.updateVerticallyRotatedNucleus();
 				n.updateDependentStats();
 			}
-			fine("Updated verticals and stats");
+			LOGGER.fine("Updated verticals and stats");
 			
 			
 			DatasetValidator dv = new DatasetValidator();
 			if(!dv.validate(dataset)) {
-				warn("Segmentation failed; resulting dataset did not validate");
+				LOGGER.warning("Segmentation failed; resulting dataset did not validate");
 //				for(String s : dv.getErrors())
-//					warn(s);
+//					LOGGER.warning(s);
 			}
 		} catch (Exception e) {
 			result = null;
 			System.out.println("Error in segmentation: "+e.getMessage());
 			e.printStackTrace();
-			stack("Error in segmentation analysis", e);
+			LOGGER.log(Loggable.STACK, "Error in segmentation analysis", e);
 		}
 
 		return result;
@@ -175,21 +179,21 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private IAnalysisResult runNewAnalysis() throws Exception {
 		if(!dataset.isRoot()) {
-			fine("Dataset is not root, not segmenting");
+			LOGGER.fine("Dataset is not root, not segmenting");
 			return new DefaultAnalysisResult(dataset);
 		}
 		
 		dataset.getCollection().setConsensus(null); // clear if present
-		fine("Before segmentation median length: "+collection.getMedianArrayLength());
+		LOGGER.fine("Before segmentation median length: "+collection.getMedianArrayLength());
 		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
 		
 		if(median.getSegmentCount()<=0) {
-			warn("Error finding segments in median profile");
+			LOGGER.warning("Error finding segments in median profile");
 			return new DefaultAnalysisResult(dataset);
 		}
 		
 		if(median.getSegmentCount()==1)
-			warn("Unable to segment the median profile");
+			LOGGER.warning("Unable to segment the median profile");
 		
 		// Make a new collection and aggregate to invalidate previous cached data, possibly
 		// with different profile lengths
@@ -212,19 +216,19 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	
 	private IAnalysisResult runCopyAnalysis() throws Exception {
 		if (sourceCollection == null) {
-			warn("Cannot copy: source collection is null");
+			LOGGER.warning("Cannot copy: source collection is null");
 			return null;
 		}
 
 		if(!sourceCollection.getProfileCollection().hasSegments()) {
-			fine("Cannot copy segments: source collection has no segments");
+			LOGGER.fine("Cannot copy segments: source collection has no segments");
 			dataset.getCollection().createProfileCollection(); // ensure profiles are set
 			return new DefaultAnalysisResult(dataset);
 		}
 
-		fine("Copying segmentation pattern");
+		LOGGER.fine("Copying segmentation pattern");
 		reapplyProfiles();
-		fine("Copying complete");
+		LOGGER.fine("Copying complete");
 		return new DefaultAnalysisResult(dataset);
 	}
 
@@ -252,13 +256,13 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private void reapplyProfiles() throws Exception {
 
-		fine("Applying existing segmentation profile to population");
+		LOGGER.fine("Applying existing segmentation profile to population");
 
 		sourceCollection.getProfileManager().copyCollectionOffsets(collection);
 
 		// At this point the collection has only a regular profile collections.
 		// No Frankenprofile has been copied.
-		fine("Re-profiling complete");
+		LOGGER.fine("Re-profiling complete");
 	}
 	
 	/**
@@ -273,13 +277,13 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	private ISegmentedProfile createSegmentsInMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		
 		// choose the best subset of nuclei and make a median profile from them
-		fine("Collection median length "+collection.getMedianArrayLength());
-		fine("Profile collection length "+collection.getProfileCollection().length());
+		LOGGER.fine("Collection median length "+collection.getMedianArrayLength());
+		LOGGER.fine("Profile collection length "+collection.getProfileCollection().length());
 
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
 		
 		IProfile median = finder.findMedian();
-		fine("Representative median length "+median.size());
+		LOGGER.fine("Representative median length "+median.size());
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		List<IBorderSegment> segments = segmenter.segment();

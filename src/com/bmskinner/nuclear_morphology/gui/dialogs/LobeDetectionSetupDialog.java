@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
@@ -33,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOption
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.HoughSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The setup for lobe detection in neutrophils
@@ -43,6 +45,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPane
  */
 @SuppressWarnings("serial")
 public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DIALOG_TITLE = "Lobe detection options";
 
@@ -93,8 +97,7 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 
             this.add(contentPanel, BorderLayout.CENTER);
         } catch (Exception e) {
-            error(e.getMessage(), e);
-            stack(e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
     }
 

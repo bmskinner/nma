@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.editing;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -37,10 +38,13 @@ import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel
         implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {  
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     public AbstractEditingPanel(@NonNull InputSupplier context, String title){
         super(context, title);
@@ -83,13 +87,13 @@ public abstract class AbstractEditingPanel extends DetailPanel
     	if(activeDataset()==null)
     		return;
         if (activeDataset().getCollection().isVirtual() && tag.equals(Tag.REFERENCE_POINT)) {
-            warn("Cannot update core border tag for a child dataset");
+            LOGGER.warning("Cannot update core border tag for a child dataset");
             return;
         }
 
         checkCellLock();
 
-        log("Updating " + tag + " to index " + newTagIndex);
+        LOGGER.info("Updating " + tag + " to index " + newTagIndex);
 
         setAnalysing(true);
 

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.process.ImageProcessor;
@@ -46,6 +48,9 @@ import ij.process.ImageProcessor;
  *
  */
 public class DefaultSignalCollection implements ISignalCollection {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
     private static final long serialVersionUID = 1L;
 
     /** Holds the signals */
@@ -308,7 +313,7 @@ public class DefaultSignalCollection implements ISignalCollection {
         try {
             return new ImageImporter(f).importImageAndInvert(c);
         } catch (ImageImportException e) {
-            stack("Error importing image source file " + f.getAbsolutePath(), e);
+            LOGGER.log(Loggable.STACK, "Error importing image source file " + f.getAbsolutePath(), e);
             throw new UnloadableImageException("Unable to load signal image", e);
         }
     }

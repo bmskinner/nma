@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.8
  *
  */
-public class DatasetShellsExporter extends StatsExporter implements Loggable {
+public class DatasetShellsExporter extends StatsExporter {
 
     /**
      * Create specifying the folder stats will be exported into

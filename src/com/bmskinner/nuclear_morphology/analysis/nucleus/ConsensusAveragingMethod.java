@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -52,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -64,6 +66,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	/** This length was chosen to avoid issues copying segments */
     private static final double PROFILE_LENGTH = 1000d;
@@ -84,7 +88,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             Consensus<Nucleus> refoldNucleus = makeConsensus(border);
             dataset.getCollection().setConsensus(refoldNucleus);
         } catch (Exception e) {
-            error("Error getting points for consensus nucleus", e);
+            LOGGER.log(Loggable.STACK, "Error getting points for consensus nucleus", e);
         }
     }
 
@@ -103,16 +107,16 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         		double scale = nucleusOptions.get().getScale();
         		n.setScale(scale);
         	} else {
-        		fine("No nucleus detection options present, unable to find pixel scale for consensus");
+        		LOGGER.fine("No nucleus detection options present, unable to find pixel scale for consensus");
         	}
         } else {
-        	fine("No analysis options present, unable to find pixel scale for consensus");
+        	LOGGER.fine("No analysis options present, unable to find pixel scale for consensus");
         }
 
         // Calculate the stats for the new consensus
         // Required for angle window size calculation
         double perim = ComponentMeasurer.calculatePerimeter(n);
-        fine("Consensus perimeter is "+perim);
+        LOGGER.fine("Consensus perimeter is "+perim);
         n.setStatistic(PlottableStatistic.PERIMETER, perim);
         n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
@@ -127,7 +131,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
                         Stats.MEDIAN);
                 int newIndex = cons.component().getProfile(ProfileType.ANGLE).findBestFitOffset(median);
-                fine(String.format("Setting %s in consensus to %s ", tag, newIndex));
+                LOGGER.fine(String.format("Setting %s in consensus to %s ", tag, newIndex));
                 cons.component().setBorderTag(tag, newIndex);
                 n.setBorderTag(tag, newIndex);
             }
@@ -138,11 +142,11 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	ISegmentedProfile profile = cons.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
         	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
-        	fine(profile.toString());
+        	LOGGER.fine(profile.toString());
         	for(IBorderSegment s : segs)
-        		fine(s.toString());
+        		LOGGER.fine(s.toString());
         	for(IBorderSegment s : newSegs)
-        		fine(s.toString());
+        		LOGGER.fine(s.toString());
         	profile.setSegments(newSegs);
         	cons.component().setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
@@ -183,7 +187,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                     list.add(point);
                 }
             } catch (Exception e1) {
-                stack("Error on nucleus " + n.getNameAndNumber(), e1);
+                LOGGER.log(Loggable.STACK, "Error on nucleus " + n.getNameAndNumber(), e1);
             }
 
         });
@@ -199,7 +203,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             IPoint avg = calculateMedianPoint(list);
 
             if(averagedPoints.isEmpty() || !averagedPoints.get(averagedPoints.size()-1).equals(avg)) {
-//            	fine(avg.getX()+"\t"+avg.getY());
+//            	LOGGER.fine(avg.getX()+"\t"+avg.getY());
             	averagedPoints.add(avg);
             }
             fireProgressEvent();

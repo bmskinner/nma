@@ -17,10 +17,12 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * View a cell annotated onto its original source image
@@ -30,6 +32,8 @@ import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
  */
 @SuppressWarnings("serial")
 public class CellImageDialog extends LoadingIconDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private AnnotatedNucleusPanel panel;
 
@@ -40,7 +44,7 @@ public class CellImageDialog extends LoadingIconDialog {
         if (cell.hasCytoplasm()) {
 
             if (!cell.getCytoplasm().getSourceFile().exists()) {
-                warn("Cannot load image: source file not present");
+                LOGGER.warning("Cannot load image: source file not present");
                 this.dispose();
             }
 
@@ -49,7 +53,7 @@ public class CellImageDialog extends LoadingIconDialog {
         if (cell.hasNucleus()) {
             for(Nucleus n : cell.getNuclei()){
                 if (!n.getSourceFile().exists()) {
-                    warn("Cannot load image: source file not present");
+                    LOGGER.warning("Cannot load image: source file not present");
                     this.dispose();
                 }
             }
@@ -68,8 +72,8 @@ public class CellImageDialog extends LoadingIconDialog {
             panel.showCell(cell);
 
         } catch (Exception e) {
-            warn("Cannot make cell image dialog");
-            stack("Error making dialog", e);
+            LOGGER.warning("Cannot make cell image dialog");
+            LOGGER.log(Loggable.STACK, "Error making dialog", e);
         }
         this.setModal(false);
         this.pack();

@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class SignalAnalyser implements Loggable {
+public class SignalAnalyser {
 
     /*
      * For each signal within the nucleus, calculate the distance to the nCoM

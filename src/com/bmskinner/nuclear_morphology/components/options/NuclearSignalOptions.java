@@ -20,10 +20,12 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * An early implementation of nuclear signal options. Use a hash version instead
@@ -33,6 +35,8 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
  */
 @Deprecated
 public class NuclearSignalOptions implements INuclearSignalOptions {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -241,80 +245,80 @@ public class NuclearSignalOptions implements INuclearSignalOptions {
 
     @Override
     public File getFolder() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return null;
     }
 
     @Override
     public double getMaxSize() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return 0;
     }
 
     @Override
     public double getScale() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return 0;
     }
 
     @Override
     public int getChannel() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return 0;
     }
 
     @Override
     public boolean isNormaliseContrast() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return false;
     }
 
     @Override
     public boolean hasCannyOptions() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return false;
     }
 
     @Override
     public ICannyOptions getCannyOptions() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return null;
     }
 
     @Override
     public boolean isValid(CellularComponent c) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return false;
     }
 
     @Override
     public void setChannel(int channel) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public void setScale(double scale) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public void setMaxSize(double maxNucleusSize) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public void setFolder(File folder) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public void setCannyOptions(ICannyOptions canny) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
@@ -324,14 +328,14 @@ public class NuclearSignalOptions implements INuclearSignalOptions {
 
     @Override
     public void setNormaliseContrast(boolean b) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 
     }
 
     @Override
     public void set(IDetectionOptions options) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
 //    @Override
@@ -341,8 +345,8 @@ public class NuclearSignalOptions implements INuclearSignalOptions {
 
     @Override
     public boolean isUseHoughTransform() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return false;
     }
 
@@ -353,183 +357,183 @@ public class NuclearSignalOptions implements INuclearSignalOptions {
 
     @Override
     public void setHoughOptions(IHoughDetectionOptions hough) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public IDetectionSubOptions getSubOptions(String s) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return null;
     }
 
     @Override
     public boolean isRGB() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return false;
     }
 
     @Override
     public void setSubOptions(String s, IDetectionSubOptions sub) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public void setRGB(boolean b) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public List<String> getKeys() {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return null;
     }
 
     @Override
     public boolean hasSubOptions(String key) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return false;
     }
 
     @Override
     public double getDouble(String s) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return 0;
     }
 
     @Override
     public int getInt(String s) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return 0;
     }
 
     @Override
     public boolean getBoolean(String s) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return false;
     }
 
     @Override
     public void setDouble(String s, double d) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public void setInt(String s, int i) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public void setBoolean(String s, boolean b) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
     @Override
     public float getFloat(String s) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
         return 0;
     }
 
     @Override
     public void setFloat(String s, float f) {
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
-        warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+        LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
     }
 
 	@Override
 	public Map<String, Object> getEntries() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public Object getValue(String key) {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public List<String> getBooleanKeys() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public List<String> getIntegerKeys() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public List<String> getDoubleKeys() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public List<String> getFloatKeys() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public Set<String> getSubOptionKeys() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public String getString(String s) {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public void setString(String k, String v) {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		
 	}
 
 	@Override
 	public List<String> getStringKeys() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public void setShellOptions(@NonNull IShellOptions o) {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		
 	}
 
 	@Override
 	public boolean hasShellOptions() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return false;
 	}
 
 	@Override
 	public IShellOptions getShellOptions() {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 		return null;
 	}
 
 	@Override
 	public void set(HashOptions o) {
-		warn("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
+		LOGGER.warning("Unimplemented method: " + this.getClass().getName()+"::"+Thread.currentThread().getStackTrace()[1]);
 	}
 
 }

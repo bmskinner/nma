@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -35,9 +36,12 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
+public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public NuclearBoxplotsPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEUS);
@@ -55,15 +59,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
             panel.setPreferredSize(preferredSize);
             chartPanels.put(stat.toString(), panel);
             mainPanel.add(panel);
-        }
-
-        // add the scroll pane to the tab
-//        scrollPane = new JScrollPane(mainPanel);
-        
-//        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-//        Dimension preferredFloatingDimension = new Dimension( (int) (screenSize.getWidth()*0.25), (int) (screenSize.getHeight()*0.25) );
-//        scrollPane.setPreferredSize(preferredFloatingDimension);
-        
+        }        
         this.add(scrollPane, BorderLayout.CENTER);
     }
 
@@ -77,7 +73,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
     @Override
     protected void updateSingle() {
         super.updateSingle();
-        finest("Passing to update multiple in " + this.getClass().getName());
+        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
         updateMultiple();
 
     }
@@ -102,7 +98,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
     @Override
     protected void updateNull() {
         super.updateNull();
-        finest("Passing to update multiple in " + this.getClass().getName());
+        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
         updateMultiple();
     }
 

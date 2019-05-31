@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -28,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 
 import ij.IJ;
@@ -39,6 +41,8 @@ import ij.IJ;
  */
 @Deprecated
 public class SegmentedProfile extends Profile implements ISegmentedProfile {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -68,7 +72,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         try {
             IBorderSegment.linkSegments(segments);
         } catch (ProfileException e) {
-            error("Profile error linking segments", e);
+            LOGGER.log(Loggable.STACK, "Profile error linking segments", e);
         }
 
         this.segments = segments;
@@ -106,7 +110,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         try {
             IBorderSegment.linkSegments(segments);
         } catch (ProfileException e) {
-            warn("Error linking segments");
+            LOGGER.warning("Error linking segments");
         }
 
         this.segments = segments;
@@ -140,7 +144,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         try {
             return IBorderSegment.copy(this.segments);
         } catch (ProfileException e) {
-            error("Error copying segments", e);
+            LOGGER.log(Loggable.STACK, "Error copying segments", e);
         }
         return new ArrayList<>();
     }
@@ -248,8 +252,8 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         try {
             result = getSegmentsFrom(firstSeg);
         } catch (ProfileException e) {
-            warn("Profile error getting segments");
-            log(Level.FINE, "Profile error getting segments", e);
+            LOGGER.warning("Profile error getting segments");
+            LOGGER.log(Loggable.STACK, "Profile error getting segments", e);
             result = new ArrayList<IBorderSegment>();
         }
 
@@ -349,7 +353,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         try {
             this.segments = IBorderSegment.copy(segments);
         } catch (ProfileException e) {
-            warn("Cannot copy segments");
+            LOGGER.warning("Cannot copy segments");
         }
     }
 
@@ -557,7 +561,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 //        return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
 //        
 //		} catch (UnavailableComponentException e) {
-//			stack("Error adjusting segment start", e);
+//			LOGGER.log(Loggable.STACK, e.getMessage(), "Error adjusting segment start", e);
 //			throw new SegmentUpdateException(e);
 //		}
 //    }
@@ -584,7 +588,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 //    				segmentToUpdate.getProfileLength());
 //    		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
 //    	} catch (UnavailableComponentException e) {
-//    		stack("Error adjusting segment start", e);
+//    		LOGGER.log(Loggable.STACK, e.getMessage(), "Error adjusting segment start", e);
 //    		throw new SegmentUpdateException(e);
 //    	}
 //    }
@@ -695,7 +699,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
                 finalSegmentProfiles.add(revisedProfile);
             }
         } catch (UnavailableComponentException e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
             throw new ProfileException("Error getting segment for normalising");
         }
 
@@ -769,7 +773,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         try {
             IBorderSegment.linkSegments(segments);
         } catch (ProfileException e) {
-            error("Cannot link segments in reversed profile", e);
+            LOGGER.log(Loggable.STACK, "Cannot link segments in reversed profile", e);
         }
         this.setSegments(segments);
 
@@ -1022,7 +1026,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         try {
             return new SegmentedProfile(this);
         } catch (IndexOutOfBoundsException e) {
-            stack(e);
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
         return null;
     }

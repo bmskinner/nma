@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -29,8 +30,11 @@ import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ManualClusterAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String PROGRESS_BAR_LABEL = "Clustering cells";
 
@@ -173,8 +177,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
                     try {
                         dataset.getCollection().getProfileManager().copyCollectionOffsets(coll);
                     } catch (ProfileException e) {
-                        warn("Error copying collection offsets");
-                        stack("Error in offsetting", e);
+                        LOGGER.warning("Error copying collection offsets");
+                        LOGGER.log(Loggable.STACK, "Error in offsetting", e);
                     }
 
                     group.addDataset(coll);
@@ -199,7 +203,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
         private void openCell(int i){
         	
         	if(i==cells.size()){
-        		fine("Finished manual clustering");
+        		LOGGER.fine("Finished manual clustering");
         		addCollections();
         		
         		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);

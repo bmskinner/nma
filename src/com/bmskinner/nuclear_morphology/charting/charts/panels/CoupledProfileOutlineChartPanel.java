@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.ValueAxis;
@@ -51,7 +52,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class CoupledProfileOutlineChartPanel implements Loggable {
+public class CoupledProfileOutlineChartPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private List<Object> listeners = new ArrayList<Object>();
 
@@ -125,8 +128,8 @@ public class CoupledProfileOutlineChartPanel implements Loggable {
                     yValue = obj.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).get(xValue);
                 } catch (ProfileException | IndexOutOfBoundsException | UnavailableBorderTagException
                         | UnavailableProfileTypeException e1) {
-                    warn("Error getting y-value");
-                    fine("Error getting y-value", e1);
+                    LOGGER.warning("Error getting y-value");
+                    LOGGER.log(Loggable.STACK, "Error getting y-value", e1);
                     return;
                 }
 

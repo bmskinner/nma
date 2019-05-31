@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Allow clusters to be assigned to a dataset, based on their map in a file.
@@ -54,6 +56,8 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
  *
  */
 public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private File clusterFile;
 	private Map<UUID, Integer> cellMap;
@@ -72,9 +76,9 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		if(!isFileFormatValid())
 			return null;
 		
-		log("Reading map file");
+	 LOGGER.info("Reading map file");
 		readMapFile();
-        fine("Read "+cellMap.size()+" cell ids");
+        LOGGER.fine("Read "+cellMap.size()+" cell ids");
 		IClusterGroup group = assignClusters();
 		return new ClusterAnalysisResult(dataset, group);
 	}
@@ -107,7 +111,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 					id = UUID.fromString(arr[0]);
 				} catch(IllegalArgumentException e) {
 					if(lineNo==1) { // check for a header line
-						log("Mapping file does not have a cell ID in line 1; assuming line 1 is a header");
+					 LOGGER.info("Mapping file does not have a cell ID in line 1; assuming line 1 is a header");
 						skipFirstLine = true;
 						continue;
 					}
@@ -126,7 +130,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 			}
 		}
 		catch (Exception e) {
-			warn("Parsing error reading mapping file");
+			LOGGER.warning("Parsing error reading mapping file");
 			return false;
 		}
 		
@@ -134,16 +138,16 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		
 		if(!idErrors.isEmpty()) {
 			ok = false;
-			warn("Mapping file has errors in the cell id column");
+			LOGGER.warning("Mapping file has errors in the cell id column");
 		}
 		
 		if(!numErrors.isEmpty()) {
 			ok=false;
-			warn("Mapping file has errors in the cluster number column");
+			LOGGER.warning("Mapping file has errors in the cluster number column");
 		}
 				
 		if(!ok)
-			warn("Unable to assign clusters; the mapping file is invalid. Please correct and try again.");
+			LOGGER.warning("Unable to assign clusters; the mapping file is invalid. Please correct and try again.");
 		return ok;
 	}
 	
@@ -168,14 +172,14 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
             }
         }
         catch (Exception e) {
-        	stack("Error parsing mapping file", e);
+        	LOGGER.log(Loggable.STACK, "Error parsing mapping file", e);
         	throw new ClusteringMethodException("Invalid mapping file format");
         }
     }
 
 	
 	private IClusterGroup assignClusters(){
-        fine("Assigning clusters");
+        LOGGER.fine("Assigning clusters");
 
         Map<Integer, ICellCollection> clusterMap = new HashMap<>();
         
@@ -185,7 +189,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
         // Make collections for the new clusters
         long nClusters = cellMap.values().stream().distinct().count();
-        fine("Creating "+nClusters+" child datasets");
+        LOGGER.fine("Creating "+nClusters+" child datasets");
         for (int i = 1; i <= nClusters; i++) {
             ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
             clusterCollection.setName("Cluster_" + i);
@@ -195,10 +199,10 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
         // Add all the cells to clusters
         for(Entry<UUID, Integer> entry : cellMap.entrySet()){
             int cluster = entry.getValue();
-            fine("Assigning "+entry.getKey().toString()+" to cluster "+cluster);
+            LOGGER.fine("Assigning "+entry.getKey().toString()+" to cluster "+cluster);
             ICell cell = dataset.getCollection().getCell(entry.getKey());
             if(cell==null){
-            	fine("Cell not found "+entry.getKey().toString());
+            	LOGGER.fine("Cell not found "+entry.getKey().toString());
                 continue;
             }
             clusterMap.get(cluster).addCell(cell);
@@ -245,7 +249,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
         }
         dataset.addClusterGroup(group);
-        fine("Clusters contain "+cellsInClusters+" cells compared to "+dataset.getCollection().size()+" in parent");
+        LOGGER.fine("Clusters contain "+cellsInClusters+" cells compared to "+dataset.getCollection().size()+" in parent");
         return group;
     }
 }

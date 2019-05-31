@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -34,8 +35,11 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CannySettingsPanel;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -81,7 +85,7 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
         try {
             canny = options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).get().getCannyOptions();
         } catch (MissingOptionException e) {
-            warn("Missing canny options");
+            LOGGER.warning("Missing canny options");
         }
 
         cannyPanel = new CannySettingsPanel(canny);

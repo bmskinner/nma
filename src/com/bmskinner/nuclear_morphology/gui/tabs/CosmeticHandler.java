@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -51,7 +52,9 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  * @since 1.13.8
  *
  */
-public class CosmeticHandler implements Loggable {
+public class CosmeticHandler {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     private static final String CHOOSE_A_NEW_NAME_LBL = "Choose a new name";
 	private final TabPanel parent;
@@ -208,7 +211,7 @@ public class CosmeticHandler implements Loggable {
      */
     public void updateSignalSource(@NonNull IAnalysisDataset d, @NonNull UUID signalGroup) {
 
-    	finest("Updating signal source for signal group " + signalGroup);
+    	LOGGER.finest( "Updating signal source for signal group " + signalGroup);
 
     	try {
     		

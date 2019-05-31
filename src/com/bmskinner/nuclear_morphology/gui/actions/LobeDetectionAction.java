@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.logging.Logger;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
@@ -27,8 +29,11 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LobeDetectionSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class LobeDetectionAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_BAR_LABEL = "Detecting lobes";
 
@@ -38,12 +43,12 @@ public class LobeDetectionAction extends SingleDatasetResultAction {
 
     @Override
     public void run() {
-        fine("Getting lobe detection options");
+        LOGGER.fine("Getting lobe detection options");
         SubAnalysisSetupDialog setup = new LobeDetectionSetupDialog(dataset);
 
         if (setup.isReadyToRun()) { // if dialog was cancelled, skip
 
-            log("Running lobe detection");
+            LOGGER.info("Running lobe detection");
             IAnalysisMethod m = setup.getMethod();
 
             int maxProgress = dataset.getCollection().size();
@@ -53,7 +58,7 @@ public class LobeDetectionAction extends SingleDatasetResultAction {
             ThreadManager.getInstance().submit(worker);
 
         } else {
-            fine("Cancelling lobe detection");
+            LOGGER.fine("Cancelling lobe detection");
             this.cancel();
         }
         setup.dispose();

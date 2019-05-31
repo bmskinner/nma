@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @param <E> the collection to be filtered
  * @since 1.13.5
  */
-public abstract class Filterer<E extends Filterable, K> implements Loggable {
+public abstract class Filterer<E extends Filterable, K>{
 
     public static final int FAILURE_THRESHOLD = 1;
     public static final int FAILURE_FERET     = 2;

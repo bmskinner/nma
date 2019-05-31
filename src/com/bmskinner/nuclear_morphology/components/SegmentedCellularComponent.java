@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -49,6 +50,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 
@@ -60,6 +62,8 @@ import ij.gui.Roi;
  *
  */
 public abstract class SegmentedCellularComponent extends ProfileableCellularComponent {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private static final long serialVersionUID = 1L;
 
@@ -112,9 +116,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
     	ProfileCreator creator = new ProfileCreator(this);
 
     	for (ProfileType type : ProfileType.values()) {
-    		finest("Attempting to create profile "+type);
+    		LOGGER.finest( "Attempting to create profile "+type);
     		ISegmentedProfile profile = creator.createProfile(type);
-    		finest("Assigning profile "+type);
+    		LOGGER.finest( "Assigning profile "+type);
     		setProfile(type, profile);
     	}
     }
@@ -127,7 +131,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
         try {
         	ISegmentedProfile p = profileMap.get(type);
-        	finest("Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
+        	LOGGER.finest( "Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
         	// When reading old datasets, sometimes the profile length does not match the border list length.
         	// This issue is resolved for datasets created in 1.14.0 onwards.
         	// If this happens, the conversion will fail due to the new length constraints in the profile constructor.
@@ -136,7 +140,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         		p = p.interpolate(getBorderLength());
         		assignProfile(type, new DefaultSegmentedProfile(p));
         	}
-//        	fine("Raw profile: "+p.toString());
+//        	LOGGER.fine("Raw profile: "+p.toString());
         	return profileMap.get(type).copy();
         } catch (IndexOutOfBoundsException | ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
@@ -154,7 +158,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         try {
     		assignProfile(type, new DefaultSegmentedProfile(profile));
 		} catch (IndexOutOfBoundsException | ProfileException e) {
-			stack("Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
+			LOGGER.log(Loggable.STACK, "Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
 		}
     }
 	
@@ -179,7 +183,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
 			setProfile(type, offsetNewProfile);
 		} catch (ProfileException e) { // restore the old profile
-			stack(String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
+			LOGGER.log(Loggable.STACK, String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
 			setProfile(type, oldProfile);
 		}
 	}
@@ -213,7 +217,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			this.setProfile(ProfileType.ANGLE, newProfile);
 
 		} catch (ProfileException | UnavailableComponentException e) {
-			stack(e);
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			return; // do not perform an update if things will get out of sync
 		}
 
@@ -248,7 +252,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			this.setProfile(ProfileType.ANGLE, newProfile);
 
 		} catch (ProfileException | UnavailableComponentException e) {
-			stack(e);
+			LOGGER.log(Loggable.STACK, e.getMessage(),  e);
 			return; // do not perform an update if things will get out of sync
 		}
 
@@ -765,7 +769,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			for (float d : resultB)
 				result[index++] = d;
 			if (result.length == 0)
-				warn("Subregion length zero: " + indexStart + " - " + indexEnd);
+				LOGGER.warning("Subregion length zero: " + indexStart + " - " + indexEnd);
 			return new FloatProfile(result);
 		}
 
@@ -1085,7 +1089,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					segments.endIndex   = rpIndex;
 					
 				} catch (UnavailableBorderTagException e) {
-					stack(e);
+					LOGGER.log(Loggable.STACK, e.getMessage(), e);
 				}
 			}
 		}
@@ -1167,8 +1171,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 						return getSegmentsFrom(seg);
 				}
 			} catch (UnavailableComponentException e) {
-				warn("Profile error getting segments");
-				stack("Profile error getting segments", e);
+				LOGGER.warning("Profile error getting segments");
+				LOGGER.log(Loggable.STACK, "Profile error getting segments", e);
 				return new ArrayList<>();
 			}
 			return new ArrayList<>();
@@ -1423,7 +1427,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	            }
 
 			} catch (UnavailableComponentException e) {
-				stack(e);
+				LOGGER.log(Loggable.STACK, e.getMessage(), e);
 				throw new ProfileException("Error getting segment for normalising", e);
 			}
 
@@ -1539,28 +1543,28 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			mergedSegment.addMergeSource(firstSegment);
 			mergedSegment.addMergeSource(secondSegment);
-//			fine("Added merge source "+mergedSegment.hasMergeSources());
+//			LOGGER.fine("Added merge source "+mergedSegment.hasMergeSources());
 			
 			// Clear the old segments
 			List<BorderSegmentTree> newSegs = new ArrayList<>();
 			// Replace the two segments in this profile
 			for (BorderSegmentTree oldSegment : segments.leaves) {
-//				fine("Checking profile segment "+oldSegment.getID());
+//				LOGGER.fine("Checking profile segment "+oldSegment.getID());
 				if (oldSegment.getID().equals(firstSegment.getID())) {
-//					fine("\tPutting merged segment "+mergedSegment.getID());
-//					fine("\tIgnoring old segment "+oldSegment.getID());
+//					LOGGER.fine("\tPutting merged segment "+mergedSegment.getID());
+//					LOGGER.fine("\tIgnoring old segment "+oldSegment.getID());
 					newSegs.add(mergedSegment);
 				} else if (oldSegment.getID().equals(secondSegment.getID())) {
-//					fine("\tIgnoring old segment "+oldSegment.getID());
+//					LOGGER.fine("\tIgnoring old segment "+oldSegment.getID());
 				} else {
 					// add the original segments
-//					fine("\tPutting old segment "+oldSegment.getID());
+//					LOGGER.fine("\tPutting old segment "+oldSegment.getID());
 					newSegs.add(oldSegment);
 				}
 			}
 			segments.clearMergeSources();
 			for (BorderSegmentTree seg : newSegs) {
-//				fine("Adding profile segment "+seg.getID());
+//				LOGGER.fine("Adding profile segment "+seg.getID());
 				segments.addMergeSource(seg);
 			}
 		}
@@ -1584,14 +1588,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			// Check the segments belong to the profile
 			if (!this.contains(segment))
 				throw new IllegalArgumentException("Input segment is not part of this profile");
-//			fine("Checking segment "+segment.getID()+" has merge sources");
+//			LOGGER.fine("Checking segment "+segment.getID()+" has merge sources");
 			if (!segment.hasMergeSources())
 				return;
 
 			List<BorderSegmentTree> newSegs = new ArrayList<>();
 			
 			for (BorderSegmentTree oldSegment : segments.leaves) {
-//				fine("Checking segment "+oldSegment.getID());
+//				LOGGER.fine("Checking segment "+oldSegment.getID());
 				if (oldSegment.getID().equals(segment.getID())) { // segment to unmerge
 					for (BorderSegmentTree mergedSegment : oldSegment.leaves) 
 						newSegs.add(mergedSegment);
@@ -1603,7 +1607,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			segments.clearMergeSources();
 			for (BorderSegmentTree seg : newSegs) {
-//				fine("Adding merge source "+seg.getID());
+//				LOGGER.fine("Adding merge source "+seg.getID());
 				segments.addMergeSource(seg);
 			}
 
@@ -1621,7 +1625,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, this.size())
 						&& IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), this.size());
 			} catch (UnavailableComponentException e) {
-				stack(e);
+				LOGGER.log(Loggable.STACK, e.getMessage(), e);
 				return false;
 			}
 		}
@@ -2112,15 +2116,15 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new SegmentUpdateException(String.format("Segment will become too short (%d)", newLength));
 				
 				// All checks passed
-				finer("Perform update  of "+this.toString()+" to "+startIndex+"-"+endIndex);
+				LOGGER.finer( "Perform update  of "+this.toString()+" to "+startIndex+"-"+endIndex);
 				
 
 				int segIndex = parent.leaves.indexOf(this);
 				if(segIndex==-1) {
-					finest("The segment was not found in the leaves!");
-					finest("Behold the leaves!");
+					LOGGER.finest( "The segment was not found in the leaves!");
+					LOGGER.finest( "Behold the leaves!");
 					for(BorderSegmentTree s : parent.leaves)
-						fine(s.getDetail());
+						LOGGER.fine(s.getDetail());
 				}
 				
 				this.startIndex = startIndex;
@@ -2128,19 +2132,19 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				// Pass on the updated positions to the surrounding segments
 
-				finest("This is segment index "+segIndex);
+				LOGGER.finest( "This is segment index "+segIndex);
 				
 				int nextSegIndex = wrapSegmentIndex(segIndex+1);
 				
 				BorderSegmentTree nextSeg = parent.leaves.get(nextSegIndex);
-				finest("Updating next segment "+nextSegIndex+": "+nextSeg);
+				LOGGER.finest( "Updating next segment "+nextSegIndex+": "+nextSeg);
 				nextSeg.startIndex = endIndex;
-				finest("Next segment "+nextSegIndex+" now: "+nextSeg);
+				LOGGER.finest( "Next segment "+nextSegIndex+" now: "+nextSeg);
 				
 				int prevSegIndex = wrapSegmentIndex(segIndex-1);
-				finest("Updating prev segment "+prevSegIndex);
+				LOGGER.finest( "Updating prev segment "+prevSegIndex);
 				BorderSegmentTree prevSeg = parent.leaves.get(prevSegIndex);
-				finest("Prev segment "+prevSegIndex+" now: "+prevSeg);
+				LOGGER.finest( "Prev segment "+prevSegIndex+" now: "+prevSeg);
 				prevSeg.endIndex = startIndex;
 				
 				return true;

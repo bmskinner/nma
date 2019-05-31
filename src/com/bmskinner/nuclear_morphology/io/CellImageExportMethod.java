@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -25,7 +26,9 @@ import ij.process.ImageProcessor;
  * @since 1.15.0
  *
  */
-public class CellImageExportMethod extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
+public class CellImageExportMethod extends MultipleDatasetAnalysisMethod implements Exporter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String IMAGE_FOLDER = "SingleNucleusImages_";
 
@@ -60,7 +63,7 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 					fireProgressEvent();
 					
 				} catch (UnloadableImageException e) {
-					stack("Unable to load image for nucleus "+n.getNameAndNumber(), e);
+					LOGGER.log(Loggable.STACK, "Unable to load image for nucleus "+n.getNameAndNumber(), e);
 				}
 			}
 		}

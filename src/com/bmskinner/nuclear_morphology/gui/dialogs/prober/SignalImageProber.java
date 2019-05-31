@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
@@ -38,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Show the results of a signal detection with given options
@@ -48,6 +50,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetect
  */
 @SuppressWarnings("serial")
 public class SignalImageProber extends IntegratedImageProber {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
     private static final String NEW_NAME_LBL         = "Enter a signal group name";
@@ -98,8 +102,8 @@ public class SignalImageProber extends IntegratedImageProber {
             imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
 
         } catch (Exception e) {
-            warn("Error launching analysis window");
-            stack(e.getMessage(), e);
+            LOGGER.warning("Error launching analysis window");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
             this.dispose();
         }
 

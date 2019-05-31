@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -33,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The chart dataset creator for outlines of cellular components
@@ -41,6 +43,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  *
  */
 public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private final CellularComponent component;
 
@@ -130,7 +134,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         if (!(component instanceof Taggable))
             throw new ChartDatasetCreationException("Component is not segmentable");
 
-        fine("Creating segmented outline");
+        LOGGER.fine("Creating segmented outline");
 
         Taggable t = (Taggable) component;
 
@@ -138,12 +142,12 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         try {
             segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            fine("Cannot get profile from RP", e);
+        	LOGGER.log(Loggable.STACK, "Cannot get profile from RP", e);
             throw new ChartDatasetCreationException("Cannot get profile", e);
         }
 
         if (!segmentList.isEmpty()) { // only draw if there are segments
-//            finest("Component has " + segmentList.size() + " segments");
+//            LOGGER.finest( "Component has " + segmentList.size() + " segments");
 
             for (IBorderSegment seg : segmentList) {
 
@@ -180,10 +184,10 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 String seriesKey = "Seg_" + segmentPosition + "_" + t.getID();
                 ds.addSeries(seriesKey, data);
                 ds.setComponent(seriesKey, component);
-                finest("Added segment data to chart dataset");
+                LOGGER.finest( "Added segment data to chart dataset");
             }
         } else {
-            fine("Component does not have segments; falling back to bare outline");
+            LOGGER.fine("Component does not have segments; falling back to bare outline");
             addNonSegmentedOutline(ds, chooseSeriesKey());
         }
 
@@ -215,7 +219,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     private OutlineDataset<CellularComponent> addNonSegmentedOutline(ComponentOutlineDataset<CellularComponent> ds,
             Comparable seriesKey) throws ChartDatasetCreationException {
-        finest("Creating non-segmented outline from component");
+        LOGGER.finest( "Creating non-segmented outline from component");
 
         try {
 
@@ -232,7 +236,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             double[][] data = { xpoints, ypoints };
 
-            finest("Adding series for component border centred on " + component.getCentreOfMass().toString());
+            LOGGER.finest( "Adding series for component border centred on " + component.getCentreOfMass().toString());
             ds.addSeries(seriesKey, data);
             ds.setComponent(seriesKey, component);
             return ds;

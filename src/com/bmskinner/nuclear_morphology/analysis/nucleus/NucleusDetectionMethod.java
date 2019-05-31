@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
@@ -53,6 +55,8 @@ import com.bmskinner.nuclear_morphology.io.Io;
  *
  */
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private final File outputFolder;
 
@@ -98,18 +102,18 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             int i = getTotalImagesToAnalyse();
             if(i==0) return;
 
-            log("Running nucleus detector");
+            LOGGER.info("Running nucleus detector");
             
             Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
             if(!op.isPresent()){
-            	warn("No nucleus detection options present");
+            	LOGGER.warning("No nucleus detection options present");
             	return;
             }
             
             // Detect the nuclei in the folders selected
             processFolder(op.get().getFolder());
 
-            fine("Detected nuclei in "+ op.get().getFolder().getAbsolutePath());
+            LOGGER.fine("Detected nuclei in "+ op.get().getFolder().getAbsolutePath());
             
             if(Thread.interrupted())
                 return;
@@ -118,16 +122,16 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             
             datasets.addAll(analysedDatasets);
 
-            fine("Analysis complete; return collections");
+            LOGGER.fine("Analysis complete; return collections");
 
         } catch (Exception e) {
-            stack("Error processing folder", e);
+            LOGGER.log(Loggable.STACK, "Error processing folder", e);
         }
     }
 
     private int getTotalImagesToAnalyse() {
 
-        log("Counting images to analyse");
+        LOGGER.info("Counting images to analyse");
         Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!op.isPresent())
         	return 0;
@@ -135,7 +139,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         File folder = op.get().getFolder();
         int totalImages = countSuitableImages(folder);
         fireUpdateProgressTotalLength(totalImages);
-        log(String.format("Analysing %d images", totalImages));
+        LOGGER.info(String.format("Analysing %d images", totalImages));
         return totalImages;
     }
 
@@ -149,7 +153,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     private List<IAnalysisDataset> analysePopulations() {
 
-        fine("Creating cell collections");
+        LOGGER.fine("Creating cell collections");
         List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
         for (final Entry<File, ICellCollection> entry : collectionGroup.entrySet()) {
@@ -169,17 +173,17 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             dataset.setRoot(true);
             dataset.setSavePath(new File(outputFolder, dataset.getName()+Io.SAVE_FILE_EXTENSION));
 
-            log("Analysing " + collection.getName());
+            LOGGER.info("Analysing " + collection.getName());
 
             try {
                 collection.clear(MeasurementScale.PIXELS);
                 collection.clear(MeasurementScale.MICRONS);
-                log("Found " + collection.size() + " nuclei");
+                LOGGER.info("Found " + collection.size() + " nuclei");
                 foundDatasets.add(dataset);
 
             } catch (Exception e) {
-                warn("Cannot create collection: " + e.getMessage());
-                stack("Error in nucleus detection", e);
+                LOGGER.warning("Cannot create collection: " + e.getMessage());
+                LOGGER.log(Loggable.STACK, "Error in nucleus detection", e);
             }
         }
         return foundDatasets;
@@ -221,9 +225,9 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             if (!cells.isEmpty() && !outputFolder.exists()) 
             	outputFolder.mkdir();
             folderCollection.addAll(cells);
-            fine("Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath());
+            LOGGER.fine("Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath());
         } catch (ImageImportException e) {
-            stack("Error searching folder", e);
+            LOGGER.log(Loggable.STACK, "Error searching folder", e);
         }
 
     }

@@ -25,6 +25,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -41,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This test class demostrates using the DetectionEventListener interface to
@@ -51,6 +53,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
  *
  */
 public class DemoProber extends SettingsDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private Finder<Collection<ICell>> test;
     JButton                     runButton;
@@ -78,8 +82,7 @@ public class DemoProber extends SettingsDialog {
             setVisible(true);
 
         } catch (Exception e) {
-            error("Error in prober", e);
-            stack(e);
+            LOGGER.log(Loggable.STACK, "Error in prober", e);
         }
     }
 
@@ -90,8 +93,7 @@ public class DemoProber extends SettingsDialog {
                 Collection<ICell> cells = test.find();
                 runButton.setEnabled(true);
             } catch (Exception e) {
-                error("Error in prober", e);
-                stack(e);
+                LOGGER.log(Loggable.STACK, "Error in prober", e);
             }
         };
         ThreadManager.getInstance().submit(r);
@@ -168,7 +170,7 @@ public class DemoProber extends SettingsDialog {
                     }
                 }
             } catch (Exception e) {
-                error("Renderer error", e);
+                LOGGER.log(Loggable.STACK, "Renderer error", e);
             }
 
             return this;

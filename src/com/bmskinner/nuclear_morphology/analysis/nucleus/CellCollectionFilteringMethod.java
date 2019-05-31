@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -27,6 +28,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Perform filtering of collections on arbitrary predicates
@@ -35,6 +37,8 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
  *
  */
 public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 		
 	private final FilteringOptions options;
 	private final String newCollectionName;
@@ -60,9 +64,9 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 			if(filtered==null)
 				continue;
 			if (!filtered.hasCells())
-				log("No cells passed filter for "+d.getName());
+				LOGGER.info("No cells passed filter for "+d.getName());
 			if(filtered.size()==d.getCollection().size()) {
-				log("Skipping; all cells passed filter for "+d.getName());
+				LOGGER.info("Skipping; all cells passed filter for "+d.getName());
 				continue;
 			}
 			ICellCollection v = new VirtualCellCollection(d, filtered);
@@ -72,8 +76,8 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 				d.getCollection().getSignalManager().copySignalGroups(v);
 
 			} catch (ProfileException e) {
-				warn("Error copying collection offsets");
-				stack("Error in offsetting", e);
+				LOGGER.warning("Error copying collection offsets");
+				LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 			}
 			d.addChildCollection(v);
 		}

@@ -20,6 +20,7 @@ import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -46,7 +47,9 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
  * @since 1.13.2
  *
  */
-public class ProfileCreator implements Loggable {
+public class ProfileCreator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private Taggable target;
 
@@ -68,7 +71,7 @@ public class ProfileCreator implements Loggable {
 	            case DIAMETER:     return calculateDiameterProfile();
 	            case RADIUS:       return calculateRadiusProfile();
 	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile();
-	            case FRANKEN:      finest("Frankenprofile");
+	            case FRANKEN:      LOGGER.finest( "Frankenprofile");
 	            default:           return calculateAngleProfile();
             }
         } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
@@ -86,21 +89,21 @@ public class ProfileCreator implements Loggable {
      */
     private List<IBorderSegment> getExistingSegments() {
         List<IBorderSegment> segments = new ArrayList<>();
-        finest("Getting existing segments from angle profile");
+        LOGGER.finest( "Getting existing segments from angle profile");
         if(!target.hasProfile(ProfileType.ANGLE))
         	return segments;
 
         try {
 
         	ISegmentedProfile templateProfile = target.getProfile(ProfileType.ANGLE);
-        	finest("Fetched angle profile");
+        	LOGGER.finest( "Fetched angle profile");
         	if (templateProfile.hasSegments()) {
-        		finest("Angle profile has "+templateProfile.getSegmentCount()+" segments");
+        		LOGGER.finest( "Angle profile has "+templateProfile.getSegmentCount()+" segments");
         		segments = templateProfile.getSegments();
         	}
 
         } catch (UnavailableProfileTypeException e) {
-        	fine("No profile angle type: "+e.getMessage(), e);
+        	LOGGER.log(Loggable.STACK, "No profile angle type: "+e.getMessage(), e);
         }
 
         return segments;
@@ -164,8 +167,8 @@ public class ProfileCreator implements Loggable {
             try {
                 segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());
             } catch (ProfileException e) {
-                warn("Error scaling segments");
-                stack("Error scaling segments when profiling", e);
+                LOGGER.warning("Error scaling segments");
+                LOGGER.log(Loggable.STACK, "Error scaling segments when profiling", e);
             }
 
         }
@@ -250,13 +253,13 @@ public class ProfileCreator implements Loggable {
         			IBorderPoint opp   = target.findOppositeBorder(point);
         			profile[index] = (float) point.getLengthTo(opp);
         		} catch(Exception e) {
-        			stack("Error finding opposite border in index "+index, e);
+        			LOGGER.log(Loggable.STACK, "Error finding opposite border in index "+index, e);
         			profile[index] = 0;
         		}
         	}
         } catch(Exception e) {
-        	stack("Error creating diameter profile", e);
-        	warn("profile length "+profile.length);
+        	LOGGER.log(Loggable.STACK, "Error creating diameter profile", e);
+        	LOGGER.warning("profile length "+profile.length);
         }
 
      // Make a new profile. If possible, use the internal segmentation type of the component
@@ -311,9 +314,9 @@ public class ProfileCreator implements Loggable {
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
         }
 
-        // finer("Iterating border");
+        // LOGGER.finer( "Iterating border");
         while (it.hasNext()) {
-            // finest("Getting points");
+            // LOGGER.finest( "Getting points");
 
             IBorderPoint point = it.next();
 
@@ -336,7 +339,7 @@ public class ProfileCreator implements Loggable {
         	newProfile = new SegmentedFloatProfile(profile);
         }
         return newProfile;
-        // finer("Making new profile");
+        // LOGGER.finer( "Making new profile");
         // Make a new profile. This will have two segments by default
         //        ISegmentedProfile newProfile = new SegmentedFloatProfile(profile);
 

@@ -17,10 +17,12 @@
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * An implementation of the Finder for analyses that don't return values. For
@@ -31,6 +33,8 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  *
  */
 public abstract class VoidFinder extends AbstractFinder<Void> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public VoidFinder(IAnalysisOptions op) {
         super(op);
@@ -48,7 +52,7 @@ public abstract class VoidFinder extends AbstractFinder<Void> {
         		try {
         			findInImage(f);
         		} catch (ImageImportException e) {
-        			stack("Error searching image", e);
+        			LOGGER.log(Loggable.STACK, "Error searching image", e);
         		}
         	}
 

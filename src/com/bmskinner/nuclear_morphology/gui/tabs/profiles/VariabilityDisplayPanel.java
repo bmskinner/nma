@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 /**
@@ -57,7 +59,9 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
  *
  */
 @SuppressWarnings("serial")
-public class VariabilityDisplayPanel extends DetailPanel implements ActionListener, ChangeListener {
+public class VariabilityDisplayPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Variability";
     private JPanel                 buttonPanel = new JPanel(new FlowLayout());
@@ -83,7 +87,14 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
         pvalueSpinner = new JSpinner(
                 new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL, 0d, 1d, 0.001d));
         pvalueSpinner.setEnabled(false);
-        pvalueSpinner.addChangeListener(this);
+        pvalueSpinner.addChangeListener(e->{
+             try {
+            	 pvalueSpinner.commitEdit();
+            	 update(getDatasets());
+             } catch (ParseException e1) {
+                 LOGGER.fine("Error setting p-value spinner: "+e1.getMessage());
+             }
+        });
         JComponent field = ((JSpinner.DefaultEditor) pvalueSpinner.getEditor());
         Dimension prefSize = field.getPreferredSize();
         prefSize = new Dimension(50, prefSize.height);
@@ -93,7 +104,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
         buttonPanel.add(new JLabel("Dip test p-value:"));
         buttonPanel.add(pvalueSpinner);
 
-        profileCollectionTypeSettingsPanel.addActionListener(this);
+        profileCollectionTypeSettingsPanel.addActionListener(e-> update(getDatasets()));
         profileCollectionTypeSettingsPanel.setEnabled(false);
         buttonPanel.add(profileCollectionTypeSettingsPanel);
 
@@ -123,27 +134,8 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
         try {
             setChart(options);
         } catch (Exception e) {
-           stack("Error in plotting variability chart", e);
+           LOGGER.log(Loggable.STACK, "Error in plotting variability chart", e);
         }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        update(getDatasets());
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent arg0) {
-        if (arg0.getSource() == pvalueSpinner) {
-            JSpinner j = (JSpinner) arg0.getSource();
-            try {
-                j.commitEdit();
-            } catch (ParseException e) {
-                log(Level.SEVERE, "Error setting p-value spinner", e);
-            }
-        }
-        update(getDatasets());
-
     }
 
     @Override

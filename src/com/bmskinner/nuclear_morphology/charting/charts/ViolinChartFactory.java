@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -37,8 +38,11 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ViolinChartFactory extends AbstractChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public ViolinChartFactory(@NonNull final ChartOptions o) {
         super(o);
@@ -63,7 +67,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
         		default: return createEmptyChart();
         	}
         } catch (Exception e) {
-            stack("Error making violin chart", e);
+            LOGGER.log(Loggable.STACK, "Error making violin chart", e);
             return createErrorChart();
         }
     }
@@ -97,7 +101,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
     		}
     		return chart;
     	} catch (ChartDatasetCreationException e) {
-    		stack("Error creating volin dataset", e);
+    		LOGGER.log(Loggable.STACK, "Error creating volin dataset", e);
     		return createErrorChart();
     	}
     }
@@ -134,7 +138,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 ds = new ViolinDatasetCreator(options)
                         .createPlottableStatisticViolinDataset(CellularComponent.WHOLE_CELL);
             } catch (ChartDatasetCreationException e) {
-                stack("Error making chart dataset", e);
+                LOGGER.log(Loggable.STACK, "Error making chart dataset", e);
                 return createErrorChart();
             }
         } else {
@@ -180,7 +184,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
             try {
                 ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEUS);
             } catch (ChartDatasetCreationException e) {
-                stack("Error making chart dataset", e);
+                LOGGER.log(Loggable.STACK, "Error making chart dataset", e);
                 return createErrorChart();
             }
 
@@ -229,7 +233,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 ds = new ViolinDatasetCreator(options)
                         .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_SIGNAL);
             } catch (ChartDatasetCreationException e) {
-                stack("Error making chart dataset", e);
+                LOGGER.log(Loggable.STACK, "Error making chart dataset", e);
                 return createErrorChart();
             }
         } else {
@@ -289,7 +293,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 ds = new ViolinDatasetCreator(options)
                         .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_BORDER_SEGMENT);
             } catch (ChartDatasetCreationException e) {
-                stack("Error creating volin dataset", e);
+                LOGGER.log(Loggable.STACK, "Error creating volin dataset", e);
                 return createErrorChart();
             }
         }

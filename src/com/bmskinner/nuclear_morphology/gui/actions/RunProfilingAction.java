@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -30,8 +31,11 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class RunProfilingAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String PROGRESS_BAR_LABEL = "Profiling";
 
@@ -62,7 +66,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
     private void runNewAnalysis() {
         try {
             String message = "Profiling: " + dataset.getName();
-            fine("Beginning profliling action");
+            LOGGER.fine("Beginning profliling action");
 
             this.setProgressMessage(message);
             IAnalysisMethod method = new DatasetProfilingMethod(dataset);
@@ -73,7 +77,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
             ThreadManager.getInstance().submit(worker);
         } catch (Exception e) {
             this.cancel();
-            error("Error in morphology analysis", e);
+            LOGGER.log(Loggable.STACK, "Error in morphology analysis", e);
         }
     }
 
@@ -86,9 +90,9 @@ public class RunProfilingAction extends SingleDatasetResultAction {
         Runnable task = () -> {
 
             if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
-                finest("Adding dataset to list manager");
+                LOGGER.finest( "Adding dataset to list manager");
                 DatasetListManager.getInstance().addDataset(dataset);
-                finest("Firing add dataset signal");
+                LOGGER.finest( "Firing add dataset signal");
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 
             }

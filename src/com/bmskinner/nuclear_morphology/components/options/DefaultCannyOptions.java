@@ -19,6 +19,9 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A default implementation of the ICannyOptions interface
@@ -29,6 +32,8 @@ import java.util.Map;
  */
 @Deprecated
 public class DefaultCannyOptions implements ICannyOptions {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -429,107 +434,107 @@ public class DefaultCannyOptions implements ICannyOptions {
 
     @Override
     public List<String> getKeys() {
-    	warn("Unimplemented method in " + this.getClass().getName());
+    	LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 
     @Override
     public Object getValue(String key) {
-    	warn("Unimplemented method in " + this.getClass().getName());
+    	LOGGER.warning("Unimplemented method in " + this.getClass().getName());
         return null;
     }
 
 	@Override
 	public double getDouble(String s) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return 0;
 	}
 
 	@Override
 	public int getInt(String s) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return 0;
 	}
 
 	@Override
 	public boolean getBoolean(String s) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return false;
 	}
 
 	@Override
 	public void setDouble(String s, double d) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		
 	}
 
 	@Override
 	public void setInt(String s, int i) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		
 	}
 
 	@Override
 	public void setBoolean(String s, boolean b) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		
 	}
 
 	@Override
 	public float getFloat(String s) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return 0;
 	}
 
 	@Override
 	public void setFloat(String s, float f) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 	}
 
 	@Override
 	public List<String> getBooleanKeys() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getIntegerKeys() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getDoubleKeys() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public List<String> getFloatKeys() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public Map<String, Object> getEntries() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public String getString(String s) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 
 	@Override
 	public void setString(String k, String v) {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 	}
 
 	@Override
 	public List<String> getStringKeys() {
-		warn("Unimplemented method in " + this.getClass().getName());
+		LOGGER.warning("Unimplemented method in " + this.getClass().getName());
 		return null;
 	}
 

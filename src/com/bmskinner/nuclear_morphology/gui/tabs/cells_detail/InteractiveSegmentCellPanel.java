@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -52,10 +53,13 @@ import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
 public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	/** When a clicking a feature in an image, allow the clicked point to be 
 	 * this many pixels away from the true point */
@@ -73,7 +77,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 	@Override
 	protected synchronized void createImage() {
-		finer("Redrawing cell image");
+		LOGGER.finer( "Redrawing cell image");
 		InterfaceUpdater u = () ->{
 			output = null;
 			ImageProcessor ip;
@@ -212,7 +216,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				prevItem.setBorderPainted(true);
 
 				prevItem.addActionListener(e->{
-					fine(String.format("Updating segment %s start to %d", next.getID(), index));
+					LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), index));
 					fireSegmentEvent(seg.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
 					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 					createImage();
@@ -226,7 +230,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				nextItem.setBorderPainted(true);
 				
 				nextItem.addActionListener(e->{
-					fine(String.format("Updating segment %s start to %d", next.getID(), index));
+					LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), index));
 					fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
 					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 					createImage();
@@ -234,7 +238,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				popupMenu.add(nextItem);
 				
 			} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
-				stack("Cannot get border tag index", e);
+				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
 			}
 			return popupMenu;
 		}

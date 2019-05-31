@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -31,6 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -50,6 +52,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class DefaultProfileCollection implements IProfileCollection {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -163,7 +167,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         try {
             return new SegmentedFloatProfile(p, getSegments(tag));
         } catch (IndexOutOfBoundsException e) {
-            stack("Cannot create segmented profile due to segment/profile mismatch", e);
+            LOGGER.log(Loggable.STACK, "Cannot create segmented profile due to segment/profile mismatch", e);
             throw new ProfileException("Cannot create segmented profile; segment lengths do not match array", e);
         }
     }
@@ -213,7 +217,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         	IBorderSegment.linkSegments(result);
         	return result;
         } catch (ProfileException e) {
-        	error("Could not get segments from "+tag, e);
+        	LOGGER.log(Loggable.STACK, "Could not get segments from "+tag, e);
         	e.printStackTrace();
         	 return new ArrayList<>();     
         }
@@ -397,7 +401,7 @@ public class DefaultProfileCollection implements IProfileCollection {
                     }
                 }
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-                stack("Error making aggregate", e);
+                LOGGER.log(Loggable.STACK, "Error making aggregate", e);
             }
         }
         
@@ -442,14 +446,14 @@ public class DefaultProfileCollection implements IProfileCollection {
                     for (Nucleus n : collection.getNuclei())
                          agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT));
                 } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-                    stack("Error making aggregate", e);
+                    LOGGER.log(Loggable.STACK, "Error making aggregate", e);
                 }
                 map.put(type, agg);
             } 	    		
     		
     		addSegments(Tag.REFERENCE_POINT, interpolatedSegments);
     	} catch(Exception e) {
-    		stack(e.getMessage(), e);
+    		LOGGER.log(Loggable.STACK, e.getMessage(), e);
     		throw new ProfileException(e);
     	}
     }
@@ -518,7 +522,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         if (q25 == null || q75 == null) { // if something goes wrong, return a
                                           // zero profile
 
-            warn("Problem calculating the IQR - setting to zero");
+            LOGGER.warning("Problem calculating the IQR - setting to zero");
             return new FloatProfile(0, length);
         }
 
@@ -536,7 +540,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         try {
             iqrProfile = getIQRProfile(type, tag);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            stack("Error getting variable regions", e);
+            LOGGER.log(Loggable.STACK, "Error getting variable regions", e);
             return result;
         }
 
@@ -551,7 +555,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         try {
             minIndex = iqrProfile.getIndexOfMin();
         } catch (ProfileException e) {
-            stack("Error getting index", e);
+            LOGGER.log(Loggable.STACK, "Error getting index", e);
             return result;
         } // ensure that our has begins with lowest data
 

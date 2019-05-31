@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -51,7 +52,9 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable {
+public class RuleSetBuildingDialog extends LoadingIconDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private boolean isOK = false;
 
@@ -321,9 +324,9 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
                 }
 
             } catch (ParseException e) {
-                error("Error parsing spinner", e);
+                LOGGER.log(Loggable.STACK, "Error parsing spinner", e);
             } catch (Exception e) {
-                error("Other error in spinners", e);
+                LOGGER.log(Loggable.STACK, "Other error in spinners", e);
             }
             return result;
         }

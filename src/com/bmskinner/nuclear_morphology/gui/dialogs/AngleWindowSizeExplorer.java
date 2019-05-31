@@ -25,6 +25,7 @@ import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -60,10 +61,13 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
 public class AngleWindowSizeExplorer extends LoadingIconDialog implements ChangeListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private IAnalysisDataset     dataset;
     private ExportableChartPanel chartPanel;
@@ -80,7 +84,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         try {
             createUI();
         } catch (Exception e) {
-            error("Error creating angle window explorer UI", e);
+            LOGGER.log(Loggable.STACK, "Error creating angle window explorer UI", e);
         }
         this.setModal(false);
         this.pack();
@@ -190,8 +194,8 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 			windowSizeMaxSpinner.commitEdit();
 			stepSizeSpinner.commitEdit();
 		} catch (ParseException e) {
-			warn("Error setting values in spinners");
-			stack(e.getMessage(), e);
+			LOGGER.warning("Error setting values in spinners");
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		}
 
         double windowSizeMin = (double) windowSizeMinSpinner.getValue();
@@ -203,11 +207,11 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         // Clear the old chart
         chartPanel.setChart(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
 
-        fine("Testing " + windowSizeMin + " - " + windowSizeMax);
+        LOGGER.fine("Testing " + windowSizeMin + " - " + windowSizeMax);
 
         try {
         	for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {
-        		finest("Calculating " + i+"...");
+        		LOGGER.finest( "Calculating " + i+"...");
         	    final double j = i;
         		// make a duplicate collection
         		final ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
@@ -238,11 +242,11 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         		updateChart(median, i);
         	}
         } catch(UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e){
-        	warn("Error making profile collections");
-        	stack(e.getMessage(), e);
+        	LOGGER.warning("Error making profile collections");
+        	LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
         setAnalysing(false);
-        fine("Profiling complete");
+        LOGGER.fine("Profiling complete");
     }
 
     private void updateChart(@NonNull IProfile profile, double windowSize) {
@@ -340,7 +344,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
             }
 
         } catch (ParseException e1) {
-            error("Error in spinners", e1);
+            LOGGER.log(Loggable.STACK, "Error in spinners", e1);
         }
 
     }

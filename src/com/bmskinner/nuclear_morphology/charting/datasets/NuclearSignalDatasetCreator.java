@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.category.CategoryDataset;
@@ -48,9 +49,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkTy
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public NuclearSignalDatasetCreator(@NonNull final ChartOptions o) {
         super(o);
@@ -326,7 +330,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
             c = new ShellDetector(options.firstDataset().getCollection().getConsensus(), shellCount, type, true);
         } catch (ShellAnalysisException e) {
-            stack("Error making shells in consensus", e);
+            LOGGER.log(Loggable.STACK, "Error making shells in consensus", e);
             throw new ChartDatasetCreationException("Error making shells", e);
         }
 

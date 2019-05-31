@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -58,6 +59,7 @@ import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -71,6 +73,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public InteractiveBorderTagCellPanel(@NonNull CellUpdatedEventListener parent){
 		super(parent);
@@ -133,7 +137,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 					an2 = new ImageAnnotator(rot, getWidth(), getHeight());
 					
 				} catch (UnavailableBorderTagException e) {
-					stack(e);
+					LOGGER.log(Loggable.STACK, e.getMessage(), e);
 				}
 			}
 			
@@ -314,7 +318,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 					input = an3.toProcessor().getBufferedImage();
 				}
 			} catch (MeshCreationException | IllegalArgumentException e) {
-				stack("Error making mesh or loading image", e);
+				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
 				setNull();
 			}
 		};
@@ -350,7 +354,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
         		input = an.toProcessor().getBufferedImage();
         		imageLabel.setIcon(an.toImageIcon());
 			} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
-				stack("Error making mesh or loading image", e);
+				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
 				setNull();
 			}
 		};

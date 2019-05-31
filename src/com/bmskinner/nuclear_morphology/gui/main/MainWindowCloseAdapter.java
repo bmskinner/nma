@@ -40,7 +40,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
+public class MainWindowCloseAdapter extends WindowAdapter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private MainView mw;
 
@@ -51,10 +53,10 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        fine("Checking dataset state");
+        LOGGER.fine("Checking dataset state");
 
         if (DatasetListManager.getInstance().hashCodeChanged()) {
-            fine("Found changed hashcode");
+            LOGGER.fine("Found changed hashcode");
             String[] options = { "Save and exit", "Exit without saving", "Do not exit" };
 
 			try {
@@ -71,7 +73,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 				return;
 			}
         }
-		fine("No change found");
+		LOGGER.fine("No change found");
 		close();
     }
 
@@ -116,13 +118,13 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
     				e.printStackTrace();
     			}
     		}
-    		log("All root datasets saved");
+    	 LOGGER.info("All root datasets saved");
 
     		for (IWorkspace w : DatasetListManager.getInstance().getWorkspaces()) {
     			Runnable wrkTask = new ExportWorkspaceAction(w, mw.getProgressAcceptor(), mw.getEventHandler());
     			wrkTask.run();
     		}
-    		log("All workspaces saved");
+    	 LOGGER.info("All workspaces saved");
     		latch.countDown();
     	};
 
@@ -131,7 +133,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
     		try {
     			latch.await();
     		} catch (InterruptedException e) {
-    			stack(e);
+    			LOGGER.log(Loggable.STACK, e.getMessage(), e);
     		}
     		close();
     	};

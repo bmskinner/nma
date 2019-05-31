@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -30,7 +31,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 /**
  * Divide a profile into segments of interest based on minima and maxima.
  */
-public class ProfileSegmenter implements Loggable {
+public class ProfileSegmenter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * The smallest number of points a segment can contain. Increasing this
@@ -103,13 +106,13 @@ public class ProfileSegmenter implements Loggable {
      * @return a list of segments
      */
     public List<IBorderSegment> segment()  {
-    	fine("-------------------------");
-    	fine("Beginning segmentation   ");
-    	fine("-------------------------");
+    	LOGGER.fine("-------------------------");
+    	LOGGER.fine("Beginning segmentation   ");
+    	LOGGER.fine("-------------------------");
         
     	/* Prepare segment start index  */
         int segmentStart = 0;
-        finer("Profile length "+profile.size());
+        LOGGER.finer( "Profile length "+profile.size());
         
         /*
          * Iterate through the profile, looking for breakpoints The reference
@@ -126,7 +129,7 @@ public class ProfileSegmenter implements Loggable {
 
                 segments.add(seg);
 
-                fine("New segment found in profile: " + seg.toString());
+                LOGGER.fine("New segment found in profile: " + seg.toString());
 
                 segmentStart = index; // Prepare for the next segment
             }
@@ -149,12 +152,12 @@ public class ProfileSegmenter implements Loggable {
 
         try {
             IBorderSegment.linkSegments(segments);
-            finer("Segments linked");
+            LOGGER.finer( "Segments linked");
         } catch (ProfileException e) {
-            warn("Cannot link segments in profile");            
+            LOGGER.warning("Cannot link segments in profile");            
         }
 
-        fine(String.format("Created %s segments in profile", segments.size()));
+        LOGGER.fine(String.format("Created %s segments in profile", segments.size()));
         return segments;
     }
 

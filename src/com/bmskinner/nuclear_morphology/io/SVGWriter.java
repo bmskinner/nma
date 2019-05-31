@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -44,7 +45,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.5
  *
  */
-public class SVGWriter implements Exporter, Loggable {
+public class SVGWriter implements Exporter{
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private File file;
 
@@ -203,11 +206,11 @@ public class SVGWriter implements Exporter, Loggable {
         try (PrintWriter out = new PrintWriter(file)) {
 
             out.println(svgElement);
-            log("SVG exported to " + file.getAbsolutePath());
+            LOGGER.info("SVG exported to " + file.getAbsolutePath());
 
         } catch (FileNotFoundException e) {
-            warn("File not found");
-            stack(e);
+            LOGGER.warning("File not found");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
     }
 

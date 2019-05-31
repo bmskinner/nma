@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -43,7 +44,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.13.3
  *
  */
-public class SegmentationHandler implements Loggable {
+public class SegmentationHandler {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL = "Segments are out of sync with median";
 	private final IAnalysisDataset dataset;
@@ -65,15 +68,15 @@ public class SegmentationHandler implements Loggable {
             throw new IllegalArgumentException("Segment IDs cannot be null");
 
         if(!dataset.isRoot()) {
-        	fine("Cannot merge segments in a virtual collection");
+        	LOGGER.fine("Cannot merge segments in a virtual collection");
         	return;
         }
         
         // Don't mess with a broken dataset 
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
-        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
-        	warn("Canceling merge");
+        	LOGGER.warning(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
+        	LOGGER.warning("Canceling merge");
         	return;
         }
         
@@ -82,7 +85,7 @@ public class SegmentationHandler implements Loggable {
         
         ISegmentedProfile medianProfile = null;
         try {
-        	fine("Merging segments in root dataset "+dataset.getName());
+        	LOGGER.fine("Merging segments in root dataset "+dataset.getName());
         	medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                     Tag.REFERENCE_POINT, Stats.MEDIAN);
 
@@ -106,23 +109,23 @@ public class SegmentationHandler implements Loggable {
                     child.getCollection().getProfileManager().mergeSegments(childSeg1, childSeg2, newID);
                 }
             } else {
-                warn("Segments are not mergable");
+                LOGGER.warning("Segments are not mergable");
             }
             
 			if(!dv.validate(dataset)) {
-				warn("Merging failed; resulting dataset did not validate");
+				LOGGER.warning("Merging failed; resulting dataset did not validate");
 				for(String s : dv.getErrors())
-					warn(s);
+					LOGGER.warning(s);
 			}
 
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
-            warn("Error merging segments");
+            LOGGER.warning("Error merging segments");
             if(medianProfile!=null){
                 for (UUID id : medianProfile.getSegmentIDs()) {
-                    warn(id.toString());
+                    LOGGER.warning(id.toString());
                 }
             }
-            stack(e);
+            LOGGER.log(Loggable.STACK, "Error merging segments", e);
 
         }
     }
@@ -136,15 +139,15 @@ public class SegmentationHandler implements Loggable {
     public void unmergeSegments(@NonNull final UUID segID) {
 
         if(!dataset.isRoot()) {
-        	fine("Cannot unmerge segments in a virtual collection");
+        	LOGGER.fine("Cannot unmerge segments in a virtual collection");
         	return;
         }
         
         // Don't mess with a broken dataset 
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
-        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
-        	warn("Canceling unmerge");
+        	LOGGER.warning(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
+        	LOGGER.warning("Canceling unmerge");
         	return;
         }
 
@@ -156,7 +159,7 @@ public class SegmentationHandler implements Loggable {
             IBorderSegment seg = medianProfile.getSegment(segID);
 
             if (!seg.hasMergeSources()) {
-                warn("Segment is not a merge; cannot unmerge");
+                LOGGER.warning("Segment is not a merge; cannot unmerge");
                 return;
             }
 
@@ -169,13 +172,13 @@ public class SegmentationHandler implements Loggable {
             }
             
             if(!dv.validate(dataset)) {
-				warn("Unmerging failed; resulting dataset did not validate");
+				LOGGER.warning("Unmerging failed; resulting dataset did not validate");
 				for(String s : dv.getErrors())
-					warn(s);
+					LOGGER.warning(s);
 			}
             
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
-            stack("Error unmerging segments", e);
+            LOGGER.log(Loggable.STACK, "Error unmerging segments", e);
         }
     }
 
@@ -188,15 +191,15 @@ public class SegmentationHandler implements Loggable {
     public void splitSegment(@NonNull UUID segID) {
 
     	if(!dataset.isRoot()) {
-        	fine("Cannot split segments in a virtual collection");
+        	LOGGER.fine("Cannot split segments in a virtual collection");
         	return;
         }
     	
     	// Don't mess with a broken dataset 
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
-        	warn(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
-        	warn("Canceling segment split");
+        	LOGGER.warning(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
+        	LOGGER.warning("Canceling segment split");
         	return;
         }
         
@@ -210,28 +213,28 @@ public class SegmentationHandler implements Loggable {
             UUID newID1 = UUID.randomUUID();
             UUID newID2 = UUID.randomUUID();
 
-            fine("Splitting segment in root dataset "+dataset.getName());
+            LOGGER.fine("Splitting segment in root dataset "+dataset.getName());
             boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
 
             if (ok) {
                 // Child datasets should all be virtual
                 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-                    fine("Splitting segment in "+child.getName());
+                    LOGGER.fine("Splitting segment in "+child.getName());
                     child.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
                 }
             } else {
-                warn("Splitting segment cancelled");
+                LOGGER.warning("Splitting segment cancelled");
             }
             
             if(!dv.validate(dataset)) {
-				warn("Splitting segment failed; resulting dataset did not validate");
+				LOGGER.warning("Splitting segment failed; resulting dataset did not validate");
 				for(String s : dv.getErrors())
-					warn(s);
+					LOGGER.warning(s);
 			}
 
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
-            warn("Error splitting segments");
-            stack(e.getMessage(), e);
+            LOGGER.warning("Error splitting segments");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
 
         }
     }
@@ -269,8 +272,8 @@ public class SegmentationHandler implements Loggable {
             dataset.getCollection().getProfileManager().setLockOnAllNucleusSegmentsExcept(id, true);
 
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
-            warn("Error updating index of segments");
-            stack(e.getMessage(), e);
+            LOGGER.warning("Error updating index of segments");
+            LOGGER.log(Loggable.STACK, e.getMessage(), e);
 
         }
 
@@ -288,7 +291,7 @@ public class SegmentationHandler implements Loggable {
         if (tag == null)
             throw new IllegalArgumentException("Tag is null");
         if (dataset.getCollection().isVirtual()) {
-        	fine("Cannot update tag in virtual collection");
+        	LOGGER.fine("Cannot update tag in virtual collection");
             return;
         }
         try {
@@ -313,11 +316,11 @@ public class SegmentationHandler implements Loggable {
 
         } catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException
                 | UnavailableProfileTypeException e) {
-            warn("Unable to update border tag index");
-            stack("Profiling error", e);
+            LOGGER.warning("Unable to update border tag index");
+            LOGGER.log(Loggable.STACK, "Profiling error", e);
         } catch (Exception e) {
-            warn("Unexpected error");
-            stack(e);
+            LOGGER.warning("Unexpected error");
+            LOGGER.log(Loggable.STACK, "Unexpected error", e);
         }
     }
     

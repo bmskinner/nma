@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -31,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.FloatPolygon;
 
@@ -42,6 +44,8 @@ import ij.process.FloatPolygon;
  *
  */
 public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implements Consensus<Nucleus>  {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -159,7 +163,7 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     		if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
     			n.flipHorizontal();
     	} catch (UnavailableBorderTagException e) {
-    		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+    		LOGGER.log(Loggable.STACK, "Cannot get RP from vertical nucleus; returning default orientation", e);
     	}
     	n.rotate(rotOffset);
     	n.offset(xOffset, yOffset);

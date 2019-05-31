@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.util.logging.Logger;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
@@ -29,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -40,6 +43,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public static final int RECALCULATE_MEDIAN = 0;
 	
@@ -82,9 +87,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @param pointType
 	 */
 	private void run() throws Exception {
-		fine("-----------------------------");
-    	fine("Beginning profiling method");
-    	fine("-----------------------------");
+		LOGGER.fine("-----------------------------");
+    	LOGGER.fine("Beginning profiling method");
+    	LOGGER.fine("-----------------------------");
 		ICellCollection collection = dataset.getCollection();
 
 		collection.createProfileCollection();
@@ -96,7 +101,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// RP index *should be* zero in the median profile at this point
 		// Check this before updating nuclei
 		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-		finer("RP in default median is located at index " + rpIndex);
+		LOGGER.finer( "RP in default median is located at index " + rpIndex);
 
 		IProfile templateProfile = median.offset(rpIndex);
 		// Update the position of the RP in the nuclei to best fit the median
@@ -110,7 +115,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		int coercionCounter = 0;
 		while (rpIndex != 0 && coercionCounter++<MAX_COERCION_ATTEMPTS) {
-			fine("Coercing RP to zero, round " + coercionCounter);
+			LOGGER.fine("Coercing RP to zero, round " + coercionCounter);
 			rpIndex = coerceRPToZero(collection);
 		}
 		
@@ -125,9 +130,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			// We do need to assign the RP in other ProfileTypes though
 			if (tag.equals(Tag.REFERENCE_POINT)) {
 
-				fine("Checking location of RP in profile");
+				LOGGER.fine("Checking location of RP in profile");
 				int index = finder.identifyIndex(collection, tag);
-				fine("RP is found at index " + index);
+				LOGGER.fine("RP is found at index " + index);
 				continue;
 			}
 
@@ -138,21 +143,21 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 				index = finder.identifyIndex(collection, tag);
 
 			} catch (NoDetectedIndexException e) {
-				warn("Unable to detect " + tag + " using default ruleset");
+				LOGGER.warning("Unable to detect " + tag + " using default ruleset");
 
 				if (tag.type().equals(BorderTag.BorderTagType.CORE)) {
-					warn("Falling back on reference point");
+					LOGGER.warning("Falling back on reference point");
 				}
 				continue;
 			} catch (IllegalArgumentException e) {
-				fine("No ruleset for " + tag + "; skipping");
+				LOGGER.fine("No ruleset for " + tag + "; skipping");
 				continue;
 			}
 
 			// Add the index to the median profiles
 			collection.getProfileManager().updateProfileCollectionOffsets(tag, index);
 
-			fine(tag + " in median is located at index " + index);
+			LOGGER.fine(tag + " in median is located at index " + index);
 
 			// Create a median from the current reference points in the
 			// nuclei
@@ -160,7 +165,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 					Stats.MEDIAN);
 
 			collection.getProfileManager().updateTagToMedianBestFit(tag, ProfileType.ANGLE, tagMedian);
-			fine("Assigned offset in nucleus profiles for " + tag);
+			LOGGER.fine("Assigned offset in nucleus profiles for " + tag);
 		}
 	}
 
@@ -177,12 +182,12 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// check the RP index in the median
 		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-		fine("RP in median is located at index " + rpIndex);
+		LOGGER.fine("RP in median is located at index " + rpIndex);
 
 		// If RP is not at zero, update
 		if (rpIndex != 0) {
 			
-			fine("RP in median is not yet at zero");
+			LOGGER.fine("RP in median is not yet at zero");
 			IProfile median = collection.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 			IProfile templateProfile = median.offset(rpIndex);
@@ -192,9 +197,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
-			finer("Checking RP index again");
+			LOGGER.finer( "Checking RP index again");
 			rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-			fine("RP in median is now located at index " + rpIndex);
+			LOGGER.fine("RP in median is now located at index " + rpIndex);
 		}
 
 		return rpIndex;

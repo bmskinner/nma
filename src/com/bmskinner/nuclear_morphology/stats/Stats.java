@@ -51,7 +51,7 @@ import ij.process.FloatPolygon;
  * @author bms41
  *
  */
-public class Stats implements Loggable {
+public class Stats {
 
     public static final double LOG2                      = Math.log(2);
     public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";

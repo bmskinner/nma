@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -32,7 +33,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class SegmentFitter implements Loggable {
+public class SegmentFitter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * The multiplier to add to best-fit scores when shrinking a segment below
@@ -78,7 +81,7 @@ public class SegmentFitter implements Loggable {
 		try {
 			return remapSegmentEndpoints(target);
 		} catch (UnavailableComponentException | ProfileException e) {
-			fine("Unable to remap segments in profile: "+e.getMessage(), e);
+			LOGGER.log(Loggable.STACK, "Unable to remap segments in profile: "+e.getMessage(), e);
 			return target;
 		}
     }
@@ -265,8 +268,8 @@ public class SegmentFitter implements Loggable {
             result = refProfile.absoluteSquareDifference(subjProfile);
 
         } catch (ProfileException e) {
-        	warn("Error calculating absolute square difference between segments");
-            stack("Error calculating absolute square difference between segments", e);
+        	LOGGER.warning("Error calculating absolute square difference between segments");
+            LOGGER.log(Loggable.STACK, "Error calculating absolute square difference between segments", e);
         }
         return result;
     }

@@ -21,6 +21,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -47,9 +48,12 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private Dimension preferredSize = new Dimension(200, 300);
 
@@ -83,7 +87,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-        finest("Dataset list is not empty");
+        LOGGER.finest( "Dataset list is not empty");
 
         // Check that all the datasets have the same number of segments
         if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a boxplot for each segment
@@ -93,8 +97,8 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
             try {
                 segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
             } catch (UnavailableBorderTagException | ProfileException e) {
-                warn("Cannot get segments");
-                fine("Cannot get segments", e);
+                LOGGER.warning("Cannot get segments");
+                LOGGER.log(Loggable.STACK, "Cannot get segments", e);
                 return;
             }
 

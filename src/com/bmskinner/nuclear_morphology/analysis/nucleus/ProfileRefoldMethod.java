@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import java.util.logging.Logger;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
@@ -38,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -48,6 +51,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
 	private IProfile targetCurve;
 	private Consensus<Nucleus> refoldNucleus;
@@ -125,18 +130,18 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             targetCurve = targetProfile;
             refoldNucleus.component().moveCentreOfMass(IPoint.makeNew(0, 0));
 
-            finer("Result: template at " + refoldNucleus.component().getCentreOfMass());
+            LOGGER.finer( "Result: template at " + refoldNucleus.component().getCentreOfMass());
 
             if (collection.size() > 1) 
                 refoldCurve(); // carry out the refolding
 
             collection.setConsensus(refoldNucleus);
 
-            fine("Updated " + pointUpdateCounter + " border points");
+            LOGGER.fine("Updated " + pointUpdateCounter + " border points");
 
         } catch (Exception e) {
-            warn("Unable to refold nucleus");
-            stack("Unable to refold nucleus", e);
+            LOGGER.warning("Unable to refold nucleus");
+            LOGGER.log(Loggable.STACK, "Unable to refold nucleus", e);
         }
     }
 
@@ -150,15 +155,15 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             double score = refoldNucleus.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
                     .absoluteSquareDifference(targetCurve);
 
-            fine("Refolding curve: initial score: " + (int) score);
+            LOGGER.fine("Refolding curve: initial score: " + (int) score);
             int i = 0;
             while (i < mode.maxIterations()) { // iterate until converging
                 score = this.iterateOverNucleus();
                 fireProgressEvent();
-                fine("Iteration " + i + ": " + (int) score);
+                LOGGER.fine("Iteration " + i + ": " + (int) score);
                 i++;
             }
-            fine("Refolded curve: final score: " + (int) score);
+            LOGGER.fine("Refolded curve: final score: " + (int) score);
 
         } catch (Exception e) {
             throw new Exception("Cannot calculate scores: " + e.getMessage());
@@ -245,7 +250,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         double maxDistance = medianDistanceBetweenPoints * 1.2;
 
         // make all changes to a fresh nucleus before buggering up the real one
-        finest("Creating test nucleus based on refold candidate");
+        LOGGER.finest( "Creating test nucleus based on refold candidate");
 
         Nucleus testNucleus;
         try {
@@ -259,18 +264,18 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             // Hence, put it back again to zero.
             testNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
 
-            finer("Test nucleus COM: " + testNucleus.getCentreOfMass());
-            finest("Beginning border tests");
+            LOGGER.finer( "Test nucleus COM: " + testNucleus.getCentreOfMass());
+            LOGGER.finest( "Beginning border tests");
             for (int i = 0; i < refoldNucleus.component().getBorderLength(); i++) {
                 similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
             }
 
         } catch (Error e) {
-            warn("Error making new consensus");
-            fine("Error in construction", e);
+            LOGGER.warning("Error making new consensus");
+            LOGGER.log(Loggable.STACK, "Error in construction", e);
         } catch (UnprofilableObjectException e) {
-            warn("Cannot create the test nucleus");
-            fine("Error in nucleus constructor", e);
+            LOGGER.warning("Cannot create the test nucleus");
+            LOGGER.log(Loggable.STACK, "Error in nucleus constructor", e);
         }
 
         testNucleus = null;
@@ -296,7 +301,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             UnavailableProfileTypeException, UnavailableBorderPointException {
         // // make all changes to a fresh nucleus before buggering up the real
         // one
-        finest("Testing point " + index);
+        LOGGER.finest( "Testing point " + index);
         double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
                 .absoluteSquareDifference(targetCurve);
 
@@ -325,7 +330,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             // Update the test nucleus and recalculate the profiles
             testNucleus.updateBorderPoint(index, newPoint);
 
-            finer("Testing profiles");
+            LOGGER.finer( "Testing profiles");
             try {
 
                 testNucleus.calculateProfiles();
@@ -340,7 +345,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
                 if (score < similarityScore) {
                     IPoint exisiting = refoldNucleus.component().getBorderPoint(index);
-                    fine("Updating " + exisiting.toString() + " to " + newPoint.toString() + ": "
+                    LOGGER.fine("Updating " + exisiting.toString() + " to " + newPoint.toString() + ": "
                             + exisiting.getLengthTo(newPoint));
                     refoldNucleus.component().updateBorderPoint(index, newPoint);
                     pointUpdateCounter++;
@@ -350,8 +355,8 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
                     similarityScore = score;
                 }
             } catch (ProfileException e) {
-                warn("Cannot calculate profiles in either test or consensus");
-                stack("Error calculating profiles", e);
+                LOGGER.warning("Cannot calculate profiles in either test or consensus");
+                LOGGER.log(Loggable.STACK, "Error calculating profiles", e);
             }
         }
 

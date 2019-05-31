@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -44,9 +45,12 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class NuclearLobesPanel extends DetailPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PANEL_TITLE_LBL = "Lobes";
 
@@ -74,14 +78,6 @@ public class NuclearLobesPanel extends DetailPanel {
 
     private JPanel createHeader() {
         JPanel panel = new JPanel(new FlowLayout());
-
-        // runLobeDetectionBtn = new JButton(RUN_LOBE_DETECTION_LBL);
-        // runLobeDetectionBtn.addActionListener( a -> {
-        // fireSignalChangeEvent(SignalChangeEvent.LOBE_DETECTION);
-        // } );
-        // runLobeDetectionBtn.setEnabled(false);
-        //
-        // panel.add(runLobeDetectionBtn);
         return panel;
     }
 
@@ -105,7 +101,7 @@ public class NuclearLobesPanel extends DetailPanel {
     protected void updateSingle() {
         super.updateSingle();
 
-        finest("Passing to update multiple in " + this.getClass().getName());
+        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
         updateMultiple();
         // runLobeDetectionBtn.setEnabled(true);
     }
@@ -129,7 +125,7 @@ public class NuclearLobesPanel extends DetailPanel {
     @Override
     protected void updateNull() {
         super.updateNull();
-        finest("Passing to update multiple in " + this.getClass().getName());
+        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
         updateMultiple();
     }
 

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -67,10 +68,13 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
 public class RulesetDialog extends LoadingIconDialog implements TreeSelectionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private IAnalysisDataset dataset;
 
@@ -158,11 +162,11 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
             RuleSetBuildingDialog builder = new RuleSetBuildingDialog();
             if (builder.isOK()) {
 
-                // log("Getting custom collection");
+                // LOGGER.info("Getting custom collection");
                 RuleSetCollection custom = builder.getCollection();
                 int size = customCollections.size();
                 customCollections.put("Custom_" + size, custom);
-                // log("Added as "+"Custom_"+size);
+                // LOGGER.info("Added as "+"Custom_"+size);
                 updateTreeNodes();
             }
 
@@ -242,7 +246,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
             // get selected sets
 
             RuleSetCollection r = d.getSelected();
-            // log(r.toString());
+            // LOGGER.info(r.toString());
 
             for (Tag tag : r.getTags()) {
 
@@ -259,7 +263,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
             // trigger a point finding for cells
 
         } else {
-            fine("Save was cancelled");
+            LOGGER.fine("Save was cancelled");
         }
 
     }
@@ -279,7 +283,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
                 dataset.getCollection().getRuleSetCollection().setRuleSets(tag, list);
 
                 updateTreeNodes();
-                log("Replaced RuleSet for " + tag.toString());
+                LOGGER.info("Replaced RuleSet for " + tag.toString());
                 // TODO - update points in cell profiles
                 updateBorderTagAction(tag);
 
@@ -297,31 +301,31 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
                 int newTagIndex = finder.identifyIndex(dataset.getCollection(), tag);
 
-                log("Updating " + tag + " to index " + newTagIndex);
+                LOGGER.info("Updating " + tag + " to index " + newTagIndex);
 
                 dataset.getCollection().getProfileManager().updateBorderTag(tag, newTagIndex);
             } catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException
                     | UnavailableProfileTypeException e) {
-                warn("Unable to update border tag index");
-                stack("Profile error", e);
+                LOGGER.warning("Unable to update border tag index");
+                LOGGER.log(Loggable.STACK, "Profile error", e);
                 return;
             } catch (NoDetectedIndexException e) {
-                warn("Unable to update border tag index - cannot find index with given ruleset");
-                stack("Unable to find matching index", e);
+                LOGGER.warning("Unable to update border tag index - cannot find index with given ruleset");
+                LOGGER.log(Loggable.STACK, "Unable to find matching index", e);
                 return;
             }
 
             if (tag.type().equals(BorderTagType.CORE)) {
-                log("Resegmenting dataset");
+                LOGGER.info("Resegmenting dataset");
 
                 fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, dataset);
             } else {
-                fine("Firing refresh cache request for loaded datasets");
+                LOGGER.fine("Firing refresh cache request for loaded datasets");
                 fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
             }
 
         } else {
-            fine("Tag is null");
+            LOGGER.fine("Tag is null");
             return;
         }
 
@@ -389,17 +393,17 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         }
 
         // Add any custom collections created in ascending order
-        // log("Adding custom nodes");
+        // LOGGER.info("Adding custom nodes");
         List<String> customList = new ArrayList<String>(customCollections.keySet());
         Collections.sort(customList);
         for (String s : customList) {
-            // log("Adding "+s);
+            // LOGGER.info("Adding "+s);
             RuleSetCollection collection = customCollections.get(s);
 
             RuleNodeData r = new RuleNodeData(s);
             // BorderTagObject tagObject = new BorderTagObject(s,
             // BorderTag.CUSTOM);
-            // log("Adding node for "+tagObject);
+            // LOGGER.info("Adding node for "+tagObject);
 
             r.setTag(Tag.CUSTOM_POINT);
             r.setCollection(collection);
@@ -490,7 +494,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
                 | IllegalArgumentException e1) {
-            stack("Error getting profile", e1);
+            LOGGER.log(Loggable.STACK, "Error getting profile", e1);
             chart = MorphologyChartFactory.createErrorChart();
         }
 

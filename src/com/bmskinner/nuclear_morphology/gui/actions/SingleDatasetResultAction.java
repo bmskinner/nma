@@ -18,12 +18,14 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Extends the VoidResultAction to include a dataset or list of datasets to be
@@ -33,6 +35,8 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
  *
  */
 public abstract class SingleDatasetResultAction extends VoidResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     
     // Flags to pass to ProgressableActions to determine the analyses
@@ -63,7 +67,7 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
     public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(barMessage, acceptor, eh);
         if (dataset == null) {
-            warn("Unable to create action");
+            LOGGER.warning("Unable to create action");
             throw new IllegalArgumentException("Must have dataset for progressable action");
         }
         this.dataset = dataset;

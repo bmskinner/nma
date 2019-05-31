@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.tree.TreePath;
@@ -40,7 +41,9 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel.Tr
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public class PopulationTreeTable extends JXTreeTable implements Loggable {
+public class PopulationTreeTable extends JXTreeTable {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * The column index for the dataset name
@@ -219,7 +222,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
                 collapsedRows.add(columnOneObject);
             }
         }
-        finest("Got all collapsed rows");
+        LOGGER.finest( "Got all collapsed rows");
         return collapsedRows;
     }
 
@@ -231,7 +234,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
     public void setCollapsedRows(List<Object> collapsedRows) {
         if (DatasetListManager.getInstance().hasDatasets()) {
 
-            finest("Expanding rows");
+            LOGGER.finest( "Expanding rows");
             for (int row = 0; row < getRowCount(); row++) {
 
                 Object columnOneObject = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);

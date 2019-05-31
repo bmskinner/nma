@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.charting;
 
+import java.util.logging.Logger;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
@@ -10,6 +12,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Create profile charts for test cases specifically
@@ -18,6 +21,8 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
  *
  */
 public class ProfileTestChartFactory extends ProfileChartFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	public ProfileTestChartFactory(ChartOptions o) {
 		super(o);
@@ -33,7 +38,7 @@ public class ProfileTestChartFactory extends ProfileChartFactory {
 		try {
 			ds = new ProfileDatasetCreator(options).createProfileDataset(profile);
 		} catch (ChartDatasetCreationException e) {
-			fine("Error creating profile chart", e);
+			LOGGER.log(Loggable.STACK, "Error creating profile chart", e);
 			return createErrorChart();
 		}
 

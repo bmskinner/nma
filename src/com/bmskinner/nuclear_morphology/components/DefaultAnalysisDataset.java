@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -38,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is the replacement analysis dataset designed to use less memory from
@@ -49,6 +51,8 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  *
  */
 public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -207,7 +211,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     public void setScale(double scale) {				
 		if(scale<=0) // don't allow a scale to cause divide by zero errors
 			return;
-		fine("Setting scale for "+getName()+" to "+scale);
+		LOGGER.fine("Setting scale for "+getName()+" to "+scale);
 		getCollection().setScale(scale);
 		
 		Optional<IAnalysisOptions> op = getAnalysisOptions();
@@ -477,7 +481,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     public void updateSourceImageDirectory(@NonNull final File expectedImageDirectory) {
 
     	if (!expectedImageDirectory.exists()) {
-    		warn(String.format("Requested directory '%s' does not exist",  expectedImageDirectory));
+    		LOGGER.warning(String.format("Requested directory '%s' does not exist",  expectedImageDirectory));
     		return;
     	}
 
@@ -485,13 +489,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	// image directory?
     	String expectedName = getCollection().getFolder().getName();
     	if (!expectedImageDirectory.getName().equals(expectedName)) {
-    		warn(String.format("Caution: Existing dataset folder '%s' does not match new folder name '%s'",
+    		LOGGER.warning(String.format("Caution: Existing dataset folder '%s' does not match new folder name '%s'",
     				expectedName, expectedImageDirectory.getName()));
     	}
 
     	// Does expectedImageDirectory contain image files?
     	if (!hasImages(expectedImageDirectory)) {
-    		warn("Target folder contains no images");
+    		LOGGER.warning("Target folder contains no images");
     		return;
     	}
 
@@ -501,7 +505,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             child.getCollection().setSourceFolder(expectedImageDirectory);
         }
 
-        log("Updated image paths to new folder location");
+        LOGGER.info("Updated image paths to new folder location");
     }
 
     /**
@@ -603,13 +607,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         in.defaultReadObject();
 
         if (cellCollection == null)
-            warn("No cell collection could be read in dataset");
+            LOGGER.warning("No cell collection could be read in dataset");
 
         IProfileCollection pc = cellCollection.getProfileCollection();
         
         try {
         if (pc == null) {
-            warn("Missing profile collection");
+            LOGGER.warning("Missing profile collection");
         } else {
         	 int length = pc.length();
              // Update all children to have the same profile lengths and offsets
@@ -625,8 +629,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
              }
         }
         } catch(ProfileException e) {
-        	 warn("Unable to update profile aggregates in child datasets");
-        	 stack(e);
+        	 LOGGER.warning("Unable to update profile aggregates in child datasets");
+        	 LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
 
     }

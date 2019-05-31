@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
 
 import javax.swing.table.DefaultTableModel;
@@ -67,6 +68,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -77,6 +79,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class AnalysisDatasetTableCreator extends AbstractTableCreator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * Create with a set of table options
@@ -163,7 +167,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         .getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN).getOrderedSegments();
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
-                stack("Error getting median profile", e);
+                LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
 
@@ -240,7 +244,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         try {
             segments = options.firstDataset().getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
         } catch (UnavailableBorderTagException | ProfileException e1) {
-            fine("Error getting segments from profile collection", e1);
+            LOGGER.log(Loggable.STACK, "Error getting segments from profile collection", e1);
             return createBlankTable();
         }
 
@@ -286,40 +290,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 model.addRow(rowData.toArray(new Object[0]));
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
-                stack("Error getting median profile", e);
+                LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
         }
 
         return model;
     }
-
-    /**
-     * Create a table model of analysis parameters or stats from datasets. If
-     * null parameter is passed, will create an empty table
-     * 
-     * @param collection
-     * @return
-     */
-//    public TableModel createAnalysisTable() {
-//
-//        if (!options.hasDatasets()) {
-//            return createBlankTable();
-//        }
-//
-//        TableOptions op = options;
-//
-//        if (op.getType().equals(TableType.ANALYSIS_PARAMETERS))
-//            return createAnalysisParametersTable();
-//
-//        if (op.getType().equals(TableType.ANALYSIS_STATS))
-//            return createStatsTable();
-//
-//        return createBlankTable();
-//    }
-    
-    
-
+ 
     /**
      * Create a table model of analysis parameters from a nucleus collection. If
      * null parameter is passed, will create an empty table
@@ -362,7 +340,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 model.addColumn(dataset.getCollection().getName(), collectionData.toArray());
 
             } else {
-                fine("No analysis options in dataset " + dataset.getName()+", treating as merge");
+                LOGGER.fine("No analysis options in dataset " + dataset.getName()+", treating as merge");
                 List<Object> collectionData = createAnalysisParametersMergeColumn(dataset);
                 model.addColumn(dataset.getCollection().getName(), collectionData.toArray());
             }
@@ -386,7 +364,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 // The options are the same in all merge sources
                 // Show the first options from the first source
-
                 List<IAnalysisDataset> l = new ArrayList<>(dataset.getAllMergeSources());
 
                 Optional<IAnalysisOptions> o = l.get(0).getAnalysisOptions();
@@ -395,8 +372,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 	
             } else {
             	return makeStringList(Labels.NA_MERGE, 9);
-                // Merge sources have different options
-//                Arrays.fill(data, Labels.NA_MERGE);
             }
         } else {
         	// if this is a child of merged datasets, get the root.
@@ -409,7 +384,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         		
         	} else {
         		return makeStringList(Labels.NA, 9);
-//        		Arrays.fill(data, Labels.NA); // there are no options to use; fill blank
         	}
         }
         return dataList;
@@ -436,7 +410,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         Optional<IDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         
         if(!nO.isPresent()) {
-        	fine("No nucleus options in dataset "+dataset.getName());
+        	LOGGER.log(Loggable.STACK, "No nucleus options in dataset "+dataset.getName());
         	return makeStringList("Error", 9);
         }
         
@@ -788,7 +762,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 }
             }
         }
-        finer("Created venn pairwise table model");
+        LOGGER.finer( "Created venn pairwise table model");
         return model;
     }
 
@@ -934,7 +908,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
-                fine("Error getting median profile", e);
+                LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
 
@@ -955,7 +929,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                                 .getSegmentAt(options.getSegPosition());
                     } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                             | UnsegmentedProfileException e) {
-                        fine("Error getting median profile", e);
+                        LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                         return createBlankTable();
                     }
 
@@ -1030,7 +1004,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 value1 = dataset.getCollection().getMedian(stat, CellularComponent.NUCLEUS,
                 		scale);
             } catch (Exception e) {
-                fine("Error getting median statistic", e);
+                LOGGER.log(Loggable.STACK, "Error getting median statistic", e);
                 return createBlankTable();
             }
 
@@ -1051,7 +1025,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         value2 = dataset2.getCollection().getMedian(stat, CellularComponent.NUCLEUS,
                         		scale);
                     } catch (Exception e) {
-                        fine("Error getting median statistic", e);
+                        LOGGER.log(Loggable.STACK, "Error getting median statistic", e);
                         return createBlankTable();
                     }
 
@@ -1093,7 +1067,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
-                fine("Error getting median profile", e);
+                LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
             
@@ -1122,7 +1096,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                                 .getSegmentAt(options.getSegPosition());
                     } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                             | UnsegmentedProfileException e) {
-                        fine("Error getting median profile", e);
+                        LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                         return createBlankTable();
                     }
 

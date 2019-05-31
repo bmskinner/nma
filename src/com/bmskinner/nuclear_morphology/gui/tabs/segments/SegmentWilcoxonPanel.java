@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,10 +40,13 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.WilcoxonTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
-
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
     private static final String PANEL_TITLE_LBL = "Wilcoxon stats";
     
     public SegmentWilcoxonPanel(@NonNull InputSupplier context) {
@@ -80,8 +84,8 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
             try {
                 segments = activeDataset().getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
             } catch (UnavailableBorderTagException | ProfileException e) {
-                warn("Cannot get segments");
-                fine("Cannot get segments", e);
+                LOGGER.warning("Cannot get segments");
+                LOGGER.log(Loggable.STACK, "Cannot get segments", e);
                 return;
             }
 

@@ -23,6 +23,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -37,7 +38,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class LoadingIconDialog extends MessagingDialog implements Loggable {
+public abstract class LoadingIconDialog extends MessagingDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
     
     private static final String RESOURCE_FOLDER  = "icons/";
     private static final String LOADING_GIF_NAME = "ajax-loader.gif";
@@ -56,7 +59,7 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
         if (!ok)
             ok = loadResources("");
         if (!ok)
-            fine("Resource loading failed (gif)");
+            LOGGER.fine("Resource loading failed (gif)");
         this.loadingLabel.setIcon(blankGif);
 
     }
@@ -119,7 +122,7 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
                 loadingGif = loadURL(urlToGif);
                 ok = loadingGif!=null;
                 if(!ok)
-                    log(Level.WARNING, "Unable to load loading gif");
+                    LOGGER.warning( "Unable to load loading gif");
             }
 
             // Get current classloader
@@ -129,11 +132,11 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
                 blankGif = loadURL(urlToBlank);
                 ok = blankGif!=null;
                 if(!ok)
-                    log(Level.WARNING, "Unable to load blank gif");
+                    LOGGER.warning( "Unable to load blank gif");
             }
 
         } catch (Exception e) {
-            log(Level.SEVERE, "Cannot load gif resource", e);
+            LOGGER.log(Loggable.STACK, "Cannot load gif resource", e);
         }
         return ok;
     }
@@ -141,7 +144,7 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
     private ImageIcon loadURL(URL url) {
         ImageIcon icon = null;
         if (url != null) {
-            log(Level.FINER, "URL found: " + url.toString());
+            LOGGER.finer( "URL found: " + url.toString());
             icon = new ImageIcon(url);
 
             String status = "";
@@ -161,7 +164,7 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
                 break;
             }
 
-            log(Level.FINER, "Load status: " + status);
+            LOGGER.finer("Load status: " + status);
         }
         return icon;
     }

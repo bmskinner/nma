@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
@@ -32,9 +33,12 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DIALOG_TITLE_BAR_LBL = "Post-FISH mapping";
     private static final String PROCEED_LBL          = "Finished selection";
@@ -61,7 +65,7 @@ public class FishRemappingProber extends IntegratedImageProber {
     		try {
 				imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
 			} catch (MissingOptionException e) {
-				warn("No options in dataset");
+				LOGGER.warning("No options in dataset");
 				this.dispose();
 			}
 

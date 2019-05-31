@@ -18,10 +18,12 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -32,7 +34,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class RuleSetBuilder implements Loggable {
+public class RuleSetBuilder {
+	
+	private static final Logger LOGGER = Logger.getLogger(RuleSetBuilder.class.getName());
 
     List<Rule>  rules;
     ProfileType type;
@@ -195,7 +199,7 @@ public class RuleSetBuilder implements Loggable {
      */
     public RuleSetBuilder indexIsLessThan(final double d) {
         if (d < 0 || d > 1) {
-            warn("Invalid rule: proportion " + d);
+            LOGGER.warning("Invalid rule: proportion " + d);
         }
         Rule r = new Rule(RuleType.INDEX_IS_LESS_THAN, d);
         rules.add(r);
@@ -211,7 +215,7 @@ public class RuleSetBuilder implements Loggable {
      */
     public RuleSetBuilder indexIsMoreThan(final double d) {
         if (d < 0 || d > 1) {
-            warn("Invalid rule: proportion " + d);
+            LOGGER.warning("Invalid rule: proportion " + d);
         }
         Rule r = new Rule(RuleType.INDEX_IS_MORE_THAN, d);
         rules.add(r);

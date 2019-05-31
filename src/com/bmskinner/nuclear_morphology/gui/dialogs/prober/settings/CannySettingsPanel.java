@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -30,6 +31,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A panel that allows changes to be made to a CannyOptions
@@ -40,6 +42,8 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
  */
 @SuppressWarnings("serial")
 public class CannySettingsPanel extends SettingsPanel implements ActionListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public static final double THRESHOLD_STEP_SIZE = 0.05;
 
@@ -147,8 +151,8 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                 options.setLowThreshold(doubleValue.floatValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -166,8 +170,8 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                 options.setHighThreshold(doubleValue.floatValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -180,8 +184,8 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                 options.setKernelRadius(doubleValue.floatValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -194,8 +198,8 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                 options.setKernelWidth(value.intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });
@@ -207,8 +211,8 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                 options.setClosingObjectRadius((Integer) j.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
-                warn("Parsing exception");
-                stack("Parsing error in JSpinner", e1);
+                LOGGER.warning("Parsing exception");
+                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
         });

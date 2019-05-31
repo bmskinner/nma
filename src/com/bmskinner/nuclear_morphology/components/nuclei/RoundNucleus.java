@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -70,6 +71,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -80,6 +82,8 @@ import ij.process.FloatPolygon;
  */
 @Deprecated
 public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -182,7 +186,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             try {
                 this.profileMap.put(type, n.getProfile(type));
             } catch (UnavailableProfileTypeException e) {
-                fine("Profile type " + type + " not present");
+                LOGGER.fine("Profile type " + type + " not present");
             }
 
         }
@@ -226,9 +230,9 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             }
 
         } catch (UnavailableProfileTypeException e) {
-            stack("Error getting profile type", e);
+            LOGGER.log(Loggable.STACK, "Error getting profile type", e);
         } catch (NoDetectedIndexException e) {
-            fine("Unable to detect RP in nucleus");
+            LOGGER.fine("Unable to detect RP in nucleus");
             setBorderTag(Tag.REFERENCE_POINT, 0);
             setBorderTag(Tag.ORIENTATION_POINT, 0);
         }
@@ -251,7 +255,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             s.calculateSignalDistancesFromCoM(this);
             s.calculateFractionalSignalDistancesFromCoM(this);
         } catch (UnavailableBorderPointException | ProfileException e) {
-            stack("Unable to get border point", e);
+            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
             throw new ComponentCreationException("Error finding signals or making profiles", e);
         }
 
@@ -346,7 +350,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 
     protected double calculateStatistic(NucleusStatistic stat) {
 
-        // finest("Calculating stat in round nucleus: "+stat);
+        // LOGGER.finest( "Calculating stat in round nucleus: "+stat);
         double result = 0;
         switch (stat) {
 
@@ -384,7 +388,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             break;
 
         }
-        // finest("Calculated stat in round nucleus: "+stat);
+        // LOGGER.finest( "Calculated stat in round nucleus: "+stat);
         return result;
     }
 
@@ -410,7 +414,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
                 testw.alignPointsOnVertical(points[0], points[1]);
 
             } catch (UnavailableProfileTypeException e) {
-                stack("Error getting vertical points", e);
+                LOGGER.log(Loggable.STACK, "Error getting vertical points", e);
                 testw.rotatePointToBottom(testw.getBorderTag(point));
             }
 
@@ -628,8 +632,8 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         try {
             this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
         } catch (ProfileException e) {
-            warn("Cannot set profile");
-            fine("Error setting profile", e);
+            LOGGER.warning("Cannot set profile");
+            LOGGER.log(Loggable.STACK, "Error setting profile", e);
         }
     }
 
@@ -683,14 +687,14 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
                 int diff = i - oldRP;
 
                 p.nudgeSegments(diff);
-                finest("Old RP at " + oldRP);
-                finest("New RP at " + i);
-                finest("Moving segments by" + diff);
+                LOGGER.finest( "Old RP at " + oldRP);
+                LOGGER.finest( "New RP at " + i);
+                LOGGER.finest( "Moving segments by" + diff);
 
                 setProfile(ProfileType.ANGLE, p);
             } catch (ProfileException | UnavailableProfileTypeException e) {
-                warn("Cannot adjust segments");
-                stack("Error moving segments", e);
+                LOGGER.warning("Cannot adjust segments");
+                LOGGER.log(Loggable.STACK, "Error moving segments", e);
             }
 
         }
@@ -725,7 +729,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         try {
             p = getProfile(ProfileType.ANGLE);
         } catch (UnavailableProfileTypeException e1) {
-            stack("Error getting angle profile", e1);
+            LOGGER.log(Loggable.STACK, "Error getting angle profile", e1);
             return;
         }
 
@@ -736,12 +740,12 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         try {
             p.nudgeSegments(diff);
         } catch (ProfileException e) {
-            warn("Cannot adjust segments");
-            fine("Error moving segments", e);
+            LOGGER.warning("Cannot adjust segments");
+            LOGGER.log(Loggable.STACK, "Error moving segments", e);
         }
-        finest("Old RP at " + oldRP);
-        finest("New RP at " + newRP);
-        finest("Moving segments by" + diff);
+        LOGGER.finest( "Old RP at " + oldRP);
+        LOGGER.finest( "New RP at " + newRP);
+        LOGGER.finest( "Moving segments by" + diff);
         setProfile(ProfileType.ANGLE, p);
 
         int newOP = getBorderIndex(Tag.ORIENTATION_POINT);
@@ -854,7 +858,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 
             // calculate profiles
             this.angleProfileWindowSize = (int) Math.round(angleWindow);
-            finest("Recalculating angle profile");
+            LOGGER.finest( "Recalculating angle profile");
             ProfileCreator creator = new ProfileCreator(this);
             ISegmentedProfile profile;
             try {
@@ -873,7 +877,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             try {
                 return new SegmentedFloatProfile(this.profileMap.get(type));
             } catch (IndexOutOfBoundsException | ProfileException e) {
-                stack("Error getting profile " + type, e);
+                LOGGER.log(Loggable.STACK, "Error getting profile " + type, e);
                 throw new UnavailableProfileTypeException("Error getting profile " + type);
             }
         } else {
@@ -882,7 +886,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
                 profileMap.put(type, pc.createProfile(type));
                 return new SegmentedFloatProfile(this.profileMap.get(type));
             } catch (ProfileException e) {
-                stack(e);
+                LOGGER.log(Loggable.STACK, e.getMessage(), e);
                 throw new UnavailableProfileTypeException("Profile type " + type + " missing and could not be created");
             }
 
@@ -905,8 +909,8 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
             try {
                 profile = new SegmentedFloatProfile(this.getProfile(type).offset(pointIndex));
             } catch (ProfileException e) {
-                warn("Error making offset profile");
-                fine("Error making profile", e);
+                LOGGER.warning("Error making offset profile");
+                LOGGER.log(Loggable.STACK, "Error making profile", e);
             }
 
         }
@@ -962,7 +966,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
                 try {
                     p.getSegment(segID).setLocked(lock);
                 } catch (UnavailableComponentException e) {
-                    stack(e);
+                    LOGGER.log(Loggable.STACK, e.getMessage(), e);
 
                 }
             }

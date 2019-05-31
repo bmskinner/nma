@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
@@ -39,7 +40,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 @Deprecated
-public class ProfileAggregate implements Loggable, Serializable, IProfileAggregate {
+public class ProfileAggregate implements Serializable, IProfileAggregate {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long               serialVersionUID = 1L;
     private Map<Double, Collection<Double>> aggregate        = new HashMap<Double, Collection<Double>>();
@@ -202,7 +205,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
                 throw (e);
             }
 
-            finest("Error in getting profile aggregate median: rescaling to " + newLength);
+            LOGGER.finest( "Error in getting profile aggregate median: rescaling to " + newLength);
             this.rescaleProfile(newLength);
             result = this.getMedian(); // recurse through this function until we
                                        // get a profile
@@ -226,7 +229,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
             result = this.getMedian(); // median is the only method that
                                        // rescales, so should have been called
                                        // before this
-            finest("Cannot find quartile; falling back on median");
+            LOGGER.finest( "Cannot find quartile; falling back on median");
         }
         return result;
     }
@@ -429,15 +432,15 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading profile aggregate");
+        // LOGGER.finest( "\tReading profile aggregate");
         in.defaultReadObject();
-        // finest("\tRead profile aggregate");
+        // LOGGER.finest( "\tRead profile aggregate");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting profile aggregate");
+        // LOGGER.finest( "\tWriting profile aggregate");
         out.defaultWriteObject();
-        // finest("\tWrote profile aggregate");
+        // LOGGER.finest( "\tWrote profile aggregate");
     }
 
 }

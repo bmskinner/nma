@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -29,8 +30,11 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class SplitCollectionAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String PROGRESS_BAR_LABEL = "Splitting collection";
 
@@ -43,7 +47,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
         try {
 
             if (dataset.hasChildren()) {
-                log("Splitting collection...");
+                LOGGER.info("Splitting collection...");
 
                 IAnalysisDataset[] names = dataset.getAllChildDatasets().toArray(new IAnalysisDataset[0]);
 
@@ -69,7 +73,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 
                     if (newCollection.size() > 0) {
 
-                        log(Level.INFO, "Reapplying morphology...");
+                        LOGGER.info("Reapplying morphology...");
 
                         int flag = 0;
                         IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
@@ -77,15 +81,15 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
                         new RunSegmentationAction(newDataset, dataset, flag, progressAcceptors.get(0), eh, latch);
                     }
                 } else {
-                    fine("User cancelled split");
+                    LOGGER.fine("User cancelled split");
                 }
 
             } else {
-                log("Cannot split; no children in dataset");
+                LOGGER.info("Cannot split; no children in dataset");
             }
 
         } catch (Exception e1) {
-            error("Error splitting collection", e1);
+            LOGGER.log(Loggable.STACK, "Error splitting collection", e1);
         } finally {
             cancel();
         }

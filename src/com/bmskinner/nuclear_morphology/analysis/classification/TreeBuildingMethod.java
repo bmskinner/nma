@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
@@ -53,6 +55,8 @@ import weka.core.Instances;
 import weka.core.SparseInstance;
 
 public class TreeBuildingMethod extends CellClusteringMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     protected String newickTree = null;
 
@@ -107,10 +111,10 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
             try {
 
-                finer("Clusterer is type " + options.getType());
+                LOGGER.finer( "Clusterer is type " + options.getType());
                 for (String s : optionArray) {
 
-                    finest("Clusterer options: " + s);
+                    LOGGER.finest( "Clusterer options: " + s);
                 }
 
                 // Cobweb clusterer = new Cobweb();
@@ -122,7 +126,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                 clusterer.setNumClusters(1);
                 clusterer.setDebug(true);
 
-                finest("Building clusterer for tree");
+                LOGGER.finest( "Building clusterer for tree");
                 clusterer.buildClusterer(instances); // build the clusterer with
                                                      // one cluster for the tree
                 clusterer.setPrintNewick(true);
@@ -130,11 +134,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                 this.newickTree = clusterer.graph();
 
             } catch (Exception e) {
-                error("Error in clustering", e);
+                LOGGER.log(Loggable.STACK, "Error in clustering", e);
                 return false;
             }
         } catch (Exception e) {
-            error("Error in assignments", e);
+            LOGGER.log(Loggable.STACK, "Error in assignments", e);
             return false;
         }
         return true;
@@ -222,7 +226,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         FastVector attributes = new FastVector(attributeCount);
 
         if (options.isIncludeProfile()) {
-            fine("Including profile " + options.getProfileType());
+            LOGGER.fine("Including profile " + options.getProfileType());
             for (int i = 0; i < profileAttributeCount; i++) {
                 Attribute a = new Attribute("att_" + i);
                 attributes.addElement(a);
@@ -238,7 +242,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         for (UUID segID : options.getSegments()) {
             if (options.isIncludeSegment(segID)) {
-                finer("Including segment" + segID.toString());
+                LOGGER.finer( "Including segment" + segID.toString());
                 Attribute a = new Attribute("att_" + segID.toString());
                 attributes.addElement(a);
             }
@@ -247,7 +251,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         if (options.isIncludeMesh() && collection.hasConsensus() && mesh!=null ){
 
             for (MeshFace face : mesh.getFaces()) {
-                finer("Including face " + face.toString());
+                LOGGER.finer( "Including face " + face.toString());
                 Attribute a = new Attribute("mesh_" + face.toString());
                 attributes.addElement(a);
             }
@@ -390,7 +394,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                 try {
                     length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
                 } catch (UnavailableComponentException e) {
-                    stack(e);
+                	LOGGER.log(Loggable.STACK, "Unabel to find segment", e);
                 }
                 inst.setValue(att, length);
             }

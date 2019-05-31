@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -52,10 +53,13 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.ShellDistributionTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class NuclearSignalTableCreator extends AbstractTableCreator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     /**
      * Create with a set of table options
@@ -68,8 +72,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      * Create a table of signal stats for the given list of datasets. This table
      * covers analysis parameters for the signals
      * 
-     * @param list
-     *            the AnalysisDatasets to include
+     * @param list the AnalysisDatasets to include
      * @return a table model
      */
     public TableModel createSignalDetectionParametersTable() {
@@ -347,11 +350,11 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         // int signalGroupCount = getSignalGroupCount(options.getDatasets());
 
-        finest("Selected collections have " + signalGroupTotal + " signal groups");
+        LOGGER.finest( "Selected collections have " + signalGroupTotal + " signal groups");
 
         if (signalGroupTotal <= 0) {
 
-            finest("No signal groups to show");
+            LOGGER.finest( "No signal groups to show");
             model.addColumn(Labels.Signals.NO_SIGNAL_GROUPS);
             return model;
         }

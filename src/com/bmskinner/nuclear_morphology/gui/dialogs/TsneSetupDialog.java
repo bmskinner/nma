@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -22,6 +23,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Analysis setup dialog for tSNE method
@@ -30,6 +32,8 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
  *
  */
 public class TsneSetupDialog extends SubAnalysisSetupDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DIALOG_TITLE = "t-SNE options";
     
@@ -127,7 +131,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
 				iterationsSpinner.commitEdit();
 				options.setInt(TsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
 			} catch (ParseException e) {
-				stack("Parse error in spinner", e);
+				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
 			}
         	
         });
@@ -154,7 +158,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
         		perplexitySpinner.commitEdit();
 				options.setDouble(TsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
 			} catch (ParseException e) {
-				stack("Parse error in spinner", e);
+				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
 			}
         	
         });  

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -47,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.AbstractAsymmetricNucl
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The standard rodent sperm nucleus
@@ -56,6 +58,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -99,8 +103,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         try {
             return new DefaultRodentSpermNucleus(this);
         } catch (UnprofilableObjectException e) {
-            stack("Cannot duplicate nucleus", e);
-            warn("Error duplicating nucleus");
+            LOGGER.log(Loggable.STACK, "Cannot duplicate nucleus", e);
+            LOGGER.warning("Error duplicating nucleus");
         }
         return null;
     }
@@ -189,7 +193,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         try {
             vertX = testNucleus.getBorderPoint(Tag.TOP_VERTICAL).getX();
         } catch (UnavailableBorderTagException e) {
-            stack("Cannot get border tag", e);
+            LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
             setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
             setStatistic(PlottableStatistic.BODY_WIDTH, BORDER_POINT_NOT_PRESENT);
             return;
@@ -203,7 +207,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         if (vertX < minBoundingX || vertX > maxBoundingX) {
             // The chosen vertical points is outside the bounding box of the nucleus
             IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical point x is outside nucleus bounds");
-            stack(String.format("Vertical point %s is out of bounds %s-%s", vertX, minBoundingX, maxBoundingX), e);
+            LOGGER.log(Loggable.STACK, String.format("Vertical point %s is out of bounds %s-%s", vertX, minBoundingX, maxBoundingX), e);
             setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
             setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
             return;
@@ -262,7 +266,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
                 }
 
             } catch (NoDetectedIndexException e) {
-                stack("Unable to detect RP in nucleus");
+                LOGGER.log(Loggable.STACK, "Unable to detect RP in nucleus");
                 setBorderTag(Tag.REFERENCE_POINT, 0);
             }
 
@@ -301,9 +305,9 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             setBorderTag(Tag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
 
         } catch (UnavailableBorderTagException e) {
-            stack("Error gettting tail position", e);
+            LOGGER.log(Loggable.STACK, "Error gettting tail position", e);
         } catch (UnavailableProfileTypeException e1) {
-            stack("Cannot get profile type", e1);
+            LOGGER.log(Loggable.STACK, "Cannot get profile type", e1);
         }
     }
 
@@ -334,7 +338,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	protected Nucleus createVerticallyRotatedNucleus() {
     	Nucleus verticalNucleus = super.getVerticallyRotatedNucleus();
     	if (verticalNucleus == null) {
-    		fine("Unknown error creating vertical nucleus");
+    		LOGGER.fine("Unknown error creating vertical nucleus");
     		return null;
     	}
     	try {
@@ -346,7 +350,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     		orientationChecked = true;
     		
     	} catch (UnavailableBorderTagException e) {
-    		stack("Cannot get RP or OP from nucleus; returning default orientation", e);
+    		LOGGER.log(Loggable.STACK, "Cannot get RP or OP from nucleus; returning default orientation", e);
     		orientationChecked = false;
     	}
     	
@@ -369,7 +373,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 //        	   verticalNucleus.flipHorizontal();
 //    		
 //    	} catch (UnavailableBorderTagException e) {
-//    		stack("Cannot get RP from vertical nucleus; returning default orientation", e);
+//    		LOGGER.log(Loggable.STACK, "Cannot get RP from vertical nucleus; returning default orientation", e);
 //    		orientationChecked = false;
 //    	}
     	return verticalNucleus;
@@ -404,7 +408,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         try {
             tipToCoMDistance = this.getBorderPoint (Tag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
         } catch (UnavailableBorderTagException e) {
-            fine("Cannot get border tag", e);
+        	LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
             throw new UnavailableBorderTagException("Cannot get RP", e);
         }
         BooleanProfile array = this.getProfile(ProfileType.ANGLE).getLocalMinima(5);
@@ -568,7 +572,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 //        if(!this.hasBorderTag(Tag.REFERENCE_POINT))
-//        	warn("Nucleus "+this.getNameAndNumber()+" has no RP");
+//        	LOGGER.warning("Nucleus "+this.getNameAndNumber()+" has no RP");
         calculateHookAndBodyLength();
 
     }

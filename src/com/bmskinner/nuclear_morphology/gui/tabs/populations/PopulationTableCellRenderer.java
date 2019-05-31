@@ -36,7 +36,7 @@ public /**
         * population list
         *
         */
-class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer implements Loggable {
+class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
     /**
      * Stores the row index of a cell that was selected as a key, and the order

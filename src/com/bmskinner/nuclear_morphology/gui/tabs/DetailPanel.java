@@ -77,7 +77,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel, Loggable, CellUpdatedEventListener {
+public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdatedEventListener {
 	
 	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	

@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -25,8 +26,11 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private static final String PROGRESS_BAR_LABEL = "Replacing images";
 
@@ -42,7 +46,7 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
 
     		try {
     			File folder = eh.getInputSupplier().requestFolder("Select new directory of images...");
-    			log("Updating folder to " + folder.getAbsolutePath());
+    		 LOGGER.info("Updating folder to " + folder.getAbsolutePath());
 
     			dataset.updateSourceImageDirectory(folder);
 
@@ -52,7 +56,7 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
     			cancel();
     		}
     	} else {
-    		warn("Dataset is a merge; cancelling");
+    		LOGGER.warning("Dataset is a merge; cancelling");
     		cancel();
     	}
 

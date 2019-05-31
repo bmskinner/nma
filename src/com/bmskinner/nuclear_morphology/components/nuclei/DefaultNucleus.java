@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 import ij.gui.Roi;
@@ -56,6 +58,8 @@ import ij.gui.Roi;
  *
  */
 public class DefaultNucleus extends SegmentedCellularComponent implements Nucleus {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -120,8 +124,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         try {
             return new DefaultNucleus(this);
         } catch (UnprofilableObjectException e) {
-            warn("Duplication failed");
-            stack("Error duplicating nucleus", e);
+            LOGGER.warning("Duplication failed");
+            LOGGER.log(Loggable.STACK, "Error duplicating nucleus", e);
         }
         return null;
     }
@@ -162,9 +166,9 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
             }
 
         } catch (UnavailableProfileTypeException e) {
-            stack("Error getting profile type", e);
+            LOGGER.log(Loggable.STACK, "Error getting profile type", e);
         } catch (NoDetectedIndexException e) {
-            fine("Unable to detect RP in nucleus");
+            LOGGER.fine("Unable to detect RP in nucleus");
             setBorderTag(Tag.REFERENCE_POINT, 0);
             setBorderTag(Tag.ORIENTATION_POINT, 0);
         }
@@ -180,7 +184,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
             s.calculateSignalDistancesFromCoM(this);
             s.calculateFractionalSignalDistancesFromCoM(this);
         } catch (UnavailableBorderPointException e) {
-            stack("Unable to get border point", e);
+            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
         }
     }
 
@@ -240,7 +244,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
                 result = getCentreOfMass().findSmallestAngle(this.getBorderPoint(Tag.REFERENCE_POINT),
                         this.getBorderPoint(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
-                stack("Cannot get border tag", e);
+                LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
                 result = ERROR_CALCULATING_STAT;
             }
         }
@@ -369,7 +373,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         try {
             profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            fine("Error getting profile", e);
+        	LOGGER.log(Loggable.STACK, "Error getting profile", e);
             return false;
         }
 
@@ -395,7 +399,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
         // Make an exact copy of the nucleus
-        finer("Creating vertical nucleus");
+        LOGGER.finer( "Creating vertical nucleus");
         Nucleus verticalNucleus = this.duplicate();
 
         // At this point the new nucleus was created at the original image
@@ -461,18 +465,14 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     			}
 
     			IPoint[] points = getBorderPointsForVerticalAlignment();
-//    			System.out.println("Before rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
-//    			fine("Before rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
     			alignPointsOnVertical(points[0], points[1]);
-//    			System.out.println("After rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
-//    			fine("After rotation: TV: "+getBorderPoint(Tag.TOP_VERTICAL)+" BV: "+getBorderPoint(Tag.BOTTOM_VERTICAL));
 
     		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
-    			stack("Cannot get border tag or profile", e);
+    			LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
     			try {
     				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
     			} catch (UnavailableBorderTagException e1) {
-    				stack("Cannot get border tag", e1);
+    				LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
     			}
     		}
     	} else {
@@ -481,7 +481,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     		try {
     			rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
     		} catch (UnavailableBorderTagException e) {
-    			stack("Cannot get border tag", e);
+    			LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
     		}
     	}
 

@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -39,7 +40,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @author bms41
  *
  */
-public class ProfileOffsetter implements Loggable {
+public class ProfileOffsetter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     final private ICellCollection collection;
 
@@ -76,7 +79,7 @@ public class ProfileOffsetter implements Loggable {
 
             segFromRef = profile.getSegment(segID);
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e1) {
-            stack("Error getting median profile and segment", e1);
+            LOGGER.log(Loggable.STACK, "Error getting median profile and segment", e1);
             throw new ProfileOffsetException("Cannot get median profile or segment", e1);
         }
 
@@ -97,13 +100,13 @@ public class ProfileOffsetter implements Loggable {
                 int newIndex = nucleusSegment.getProportionalIndex(proportion);
 
                 if (newIndex == -1) {
-                    warn("Cannot find " + tag + " index in nucleus profile at proportion " + proportion);
+                    LOGGER.warning("Cannot find " + tag + " index in nucleus profile at proportion " + proportion);
                     continue;
                 }
 
                 nucleus.setBorderTag(tag, newIndex);
             } catch (IndexOutOfBoundsException | UnavailableComponentException e) {
-                stack("Cannot set " + tag + " index in nucleus profile", e);
+                LOGGER.log(Loggable.STACK, "Cannot set " + tag + " index in nucleus profile", e);
             }
 
         }
@@ -119,12 +122,6 @@ public class ProfileOffsetter implements Loggable {
     public void reCalculateVerticals() throws ProfileOffsetException {
         assignTopAndBottomVerticalsViaFrankenProfile();
     }
-
-    /*
-     * 
-     * PRIVATE METHODS
-     * 
-     */
 
     /**
      * This method requires the frankenprofiling to be completed

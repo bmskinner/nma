@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
@@ -33,7 +34,9 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public class PopulationTreeTableModel extends DefaultTreeTableModel implements Loggable {
+public class PopulationTreeTableModel extends DefaultTreeTableModel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DATASET_COLUMN_LBL = "Dataset (0)";
     private static final String CELL_COLUMN_LBL    = "Cells (0)";
@@ -133,7 +136,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 
             }
         } catch (Exception e) {
-            error("Error adding nodes to table model", e);
+            LOGGER.log(Loggable.STACK, "Error adding nodes to table model", e);
         }
         
     }

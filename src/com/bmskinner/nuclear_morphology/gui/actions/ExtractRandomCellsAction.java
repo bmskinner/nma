@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -42,6 +43,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Allow a random subset of cells to be extracted as a child of the given dataset.
@@ -50,6 +52,8 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
  *
  */
 public class ExtractRandomCellsAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
 	private static final String PROGRESS_LBL = "Extract cells";
 
@@ -79,8 +83,8 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 	                try {
 	                    dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
 	                } catch (ProfileException e) {
-	                    warn("Error copying collection offsets");
-	                    stack("Error in offsetting", e);
+	                    LOGGER.warning("Error copying collection offsets");
+	                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 	                }
 
 	                dataset.addChildCollection(c);
@@ -97,7 +101,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 	            }
 
 		} else {
-			fine("User cancelled operation");
+			LOGGER.fine("User cancelled operation");
 		}
 		cancel();
 	}

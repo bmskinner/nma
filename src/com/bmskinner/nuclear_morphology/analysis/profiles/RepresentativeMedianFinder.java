@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -46,7 +47,9 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.14.0
  *
  */
-public class RepresentativeMedianFinder implements Loggable {
+public class RepresentativeMedianFinder {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private final ICellCollection collection;
 	private final List<Nucleus> nuclei;
@@ -64,7 +67,7 @@ public class RepresentativeMedianFinder implements Loggable {
 	 * @throws ProfileException
 	 */
 	public IProfile findMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-    	fine("Beginning median finding");
+    	LOGGER.fine("Beginning median finding");
 		float[][] differences  = buildDifferenceMatrix();
 		float[][] similarities = buildSimilarityMatrix(differences);
         
@@ -101,7 +104,7 @@ public class RepresentativeMedianFinder implements Loggable {
 			// The column with the lowest stdev has the largest number of similar nuclei
 			int index = findIndexOfLowestValue(differences);
 			float lowest = differences[index];
-			finer("Lowest difference index is "+index+" with value "+lowest);
+			LOGGER.finer( "Lowest difference index is "+index+" with value "+lowest);
 			
 			// Get this best profile
 			IProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);		
@@ -115,7 +118,7 @@ public class RepresentativeMedianFinder implements Loggable {
 			return buildMedianFromProfiles(profiles, collection.getMedianArrayLength());
 			
 		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-			error("Error creating matrix, returning default median", e);
+			LOGGER.log(Loggable.STACK, "Error creating matrix, returning default median", e);
 			return collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 		}
 	}
@@ -147,8 +150,8 @@ public class RepresentativeMedianFinder implements Loggable {
 	}
 	
 	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-		fine("Group size for new median is "+profiles.size());
-		fine("Building aggregate of length "+length);
+		LOGGER.fine("Group size for new median is "+profiles.size());
+		LOGGER.fine("Building aggregate of length "+length);
 		DefaultProfileAggregate agg = new DefaultProfileAggregate(length, profiles.size());
 		for(IProfile p : profiles)
 				agg.addValues(p);

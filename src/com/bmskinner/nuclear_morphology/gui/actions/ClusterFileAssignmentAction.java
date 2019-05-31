@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -31,8 +32,11 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String PROGRESS_BAR_LABEL = "Assigning clustered cells";
 
@@ -66,10 +70,10 @@ public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
         try {
             ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
             int size = r.getGroup().size();
-            log("Found " + size + " clusters");
+            LOGGER.info("Found " + size + " clusters");
         } catch (InterruptedException | ExecutionException e) {
-            warn("Error clustering");
-            stack("Error clustering", e);
+            LOGGER.warning("Error clustering");
+            LOGGER.log(Loggable.STACK, "Error clustering", e);
         }
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         super.finished();

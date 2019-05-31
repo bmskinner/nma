@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -41,10 +42,13 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class ScatterTableDatasetCreator extends AbstractTableCreator {
-
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	
     public ScatterTableDatasetCreator(@NonNull final TableOptions options) {
         super(options);
     }
@@ -69,7 +73,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
         for (PlottableStatistic stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {
-                fine("Statistic classes are different");
+                LOGGER.fine("Statistic classes are different");
                 createBlankTable();
             }
         }
@@ -145,8 +149,8 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
                         statBValue = n.getStatistic(statB, scale);
                     }
                 } catch (UnavailableBorderTagException e) {
-                    warn("Cannot get stats for cell");
-                    fine("Tag not present in cell", e);
+                    LOGGER.warning("Cannot get stats for cell");
+                    LOGGER.log(Loggable.STACK, "Tag RP not present in cell", e);
                     statAValue = 0;
                     statBValue = 0;
                 }

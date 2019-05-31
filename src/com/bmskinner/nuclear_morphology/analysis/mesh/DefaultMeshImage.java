@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -38,7 +39,9 @@ import ij.process.ImageProcessor;
  * @param <E>
  *
  */
-public class DefaultMeshImage<E extends CellularComponent> implements Loggable, MeshImage<E> {
+public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<E> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     final private Map<MeshFace, List<MeshPixel>> map = new HashMap<>();
 
@@ -76,7 +79,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         if (!mesh.isComparableTo(template))
             throw new UncomparableMeshImageException("Meshes do not match");
         
-        finer("Drawing image onto mesh");
+        LOGGER.finer( "Drawing image onto mesh");
 
         Rectangle r = mesh.toPath().getBounds();
 
@@ -100,7 +103,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
             MeshFace targetFace = mesh.getFace(templateFace);
 
             if (targetFace == null) {
-                finer("Cannot find template face in target mesh");
+                LOGGER.finer( "Cannot find template face in target mesh");
                 missingFaces++;
                 continue;
             }
@@ -109,8 +112,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         }
 
-        finer(missingFaces + " faces could not be found in the target mesh");
-        finer(missingPixels + " points lay outside the new image bounds");
+        LOGGER.finer( missingFaces + " faces could not be found in the target mesh");
+        LOGGER.finer( missingPixels + " points lay outside the new image bounds");
 
         interpolateMissingPixels(ip);
 
@@ -133,27 +136,27 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         int missingPixels = 0;
 
         List<MeshPixel> faceMap = map.get(templateFace);
-        finer("Found " + faceMap.size() + " pixels in face");
+        LOGGER.finer( "Found " + faceMap.size() + " pixels in face");
 
         for (MeshPixel c : faceMap) {
 
-            finest("Pixel:");
+            LOGGER.finest( "Pixel:");
 
             int pixelValue = c.getValue();
-            finest("\t" + c.toString());
+            LOGGER.finest( "\t" + c.toString());
             IPoint p = c.getCoordinate().getCartesianCoordinate(targetFace);
 
             int x = p.getXAsInt() + xOffset;
             int y = p.getYAsInt() + yOffset;
 
-            finest("\tCoordinate in target face is " + p.toString());
-            finest("\tMoving point to " + x + ", " + y);
+            LOGGER.finest( "\tCoordinate in target face is " + p.toString());
+            LOGGER.finest( "\tMoving point to " + x + ", " + y);
             // Handle array out of bounds errors from consensus nuclei.
             // This is because the consensus has -ve x and y positions
             try {
                 ip.set(x, y, pixelValue);
             } catch (ArrayIndexOutOfBoundsException e) {
-                finer("\tPoint outside image bounds: " + x + ", " + y);
+                LOGGER.finer( "\tPoint outside image bounds: " + x + ", " + y);
                 missingPixels++;
             }
 
@@ -269,7 +272,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
 
         int missedCount = 0;
 
-        finer("Creating MeshPixels for the template mesh based on the image processor");
+        LOGGER.finer( "Creating MeshPixels for the template mesh based on the image processor");
 
         // Add an empty list of MeshPixels to each face
         for (MeshFace face : template.getFaces()) {
@@ -342,7 +345,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
         }
 
         if (missedCount > 0) {
-            finer("Faces could not be found for " + missedCount + " points");
+            LOGGER.finer( "Faces could not be found for " + missedCount + " points");
         }
     }
 
@@ -355,7 +358,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements Loggable, 
     		faceTotal += c.getValue();
 
     	double fraction = ((double)faceTotal/(double)total);
-    	fine("Face: "+fraction+" of "+total);
+    	LOGGER.fine("Face: "+fraction+" of "+total);
     	return fraction;
     }
 	

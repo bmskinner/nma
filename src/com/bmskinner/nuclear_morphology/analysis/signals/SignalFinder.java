@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
 import ij.process.ImageProcessor;
@@ -48,6 +50,8 @@ import ij.process.ImageProcessor;
  *
  */
 public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private SignalDetector              detector;
     private final INuclearSignalOptions signalOptions;
@@ -87,7 +91,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         		try {
         			list.addAll(findInImage(f));
         		} catch (ImageImportException e) {
-        			stack("Error searching image", e);
+        			LOGGER.log(Loggable.STACK, "Error searching image", e);
         		}
         	}
         }
@@ -112,11 +116,11 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         // Ignore incorrect channel selections
         if (stack.getSize() < stackNumber) {
-            fine("Channel not present in image");
+            LOGGER.fine("Channel not present in image");
             return list;
         }
 
-        fine("Converting image");
+        LOGGER.fine("Converting image");
         // Get the greyscale processor for the signal channel
         ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 
@@ -141,7 +145,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
 
-        fine("Detecting signals in " + nuclei.size() + " nuclei");
+        LOGGER.fine("Detecting signals in " + nuclei.size() + " nuclei");
 
         for (Nucleus n : nuclei) {
             try {
@@ -149,7 +153,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
                 List<INuclearSignal> temp = detector.detectSignal(imageFile, stack, n);
 
                 if (hasDetectionListeners()) {
-                    fine("Drawing signals for " + n.getNameAndNumber());
+                    LOGGER.fine("Drawing signals for " + n.getNameAndNumber());
                     drawSignals(n, temp, in, false);
                     drawSignals(n, temp, an, true);
                 }
@@ -161,7 +165,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
                 }
 
             } catch (Exception e) {
-                error("Error in detector", e);
+                LOGGER.log(Loggable.STACK, "Error in detector", e);
             }
         }
 
@@ -196,8 +200,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
                 if (checkSignal(s, n)) 
                     list.add(s);
         } catch (IllegalArgumentException | ImageImportException e) {
-        	warn("Unable to find images in image "+imageFile.getAbsolutePath()+": "+e.getMessage());
-            fine("Error in detector with image "+imageFile.getAbsolutePath(), e);
+        	LOGGER.warning("Unable to find images in image "+imageFile.getAbsolutePath()+": "+e.getMessage());
+        	LOGGER.log(Loggable.STACK, "Error in detector with image "+imageFile.getAbsolutePath(), e);
         }
         return list;
     }

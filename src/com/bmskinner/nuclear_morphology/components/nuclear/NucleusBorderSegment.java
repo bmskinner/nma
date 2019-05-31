@@ -31,14 +31,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @Deprecated
 public class NucleusBorderSegment implements IBorderSegment {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final long serialVersionUID = 1L;
 
@@ -245,7 +249,7 @@ public class NucleusBorderSegment implements IBorderSegment {
     @Override
     public double getIndexProportion(int index) {
         if (!this.contains(index)) {
-            finest("Segment does not contain index " + index);
+            LOGGER.finest( "Segment does not contain index " + index);
             return -1;
         }
 
@@ -259,12 +263,12 @@ public class NucleusBorderSegment implements IBorderSegment {
             }
             counter++;
         }
-        finest("Error finding position of index " + index + ", returning -1");
-        finest("Listing indexes within segment");
+        LOGGER.finest( "Error finding position of index " + index + ", returning -1");
+        LOGGER.finest( "Listing indexes within segment");
         it = this.iterator();
         while (it.hasNext()) {
             int test = it.next();
-            finest("Segment contains index " + test);
+            LOGGER.finest( "Segment contains index " + test);
             counter++;
         }
         return -1;

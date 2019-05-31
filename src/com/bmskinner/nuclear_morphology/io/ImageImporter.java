@@ -37,7 +37,7 @@ import ij.process.ImageProcessor;
  * @since 1.11.0
  *
  */
-public class ImageImporter implements Loggable, Importer {
+public class ImageImporter implements Importer {
 
     private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -44,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Method to detect nuclear signals in a dataset
@@ -52,6 +54,8 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  *
  */
 public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     protected final INuclearSignalOptions options;
     protected final File folder;
@@ -94,7 +98,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
     protected void run() {
 
-        fine("Beginning signal detection in channel " + channel);
+        LOGGER.fine("Beginning signal detection in channel " + channel);
 
         try {
 
@@ -105,7 +109,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             dataset.getCollection().getCells().forEach(c-> detectInCell(c, finder, originalMinThreshold));
 
         } catch (Exception e) {
-            stack("Error in signal detection", e);
+            LOGGER.log(Loggable.STACK, "Error in signal detection", e);
         }
     }
     
@@ -123,13 +127,13 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     
     private void detectInNucleus(Nucleus n, SignalFinder finder){
 
-        finer("Looking for signals associated with nucleus " + n.getSourceFileName() + "-"
+        LOGGER.finer( "Looking for signals associated with nucleus " + n.getSourceFileName() + "-"
                 + n.getNucleusNumber());
 
         // get the image in the folder with the same name as the
         // nucleus source image
         File imageFile = new File(folder, n.getSourceFileName());
-        finer("Source file: " + imageFile.getAbsolutePath());
+        LOGGER.finer( "Source file: " + imageFile.getAbsolutePath());
 
         try {
 
@@ -143,21 +147,21 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             s.calculateSignalDistancesFromCoM(n);
             s.calculateFractionalSignalDistancesFromCoM(n);
 
-            fine("Calculating signal angles");
+            LOGGER.fine("Calculating signal angles");
 
             // If the nucleus is asymmetric, calculate angles
             if (!dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)) {
                 if (n.hasBorderTag(Tag.ORIENTATION_POINT)) {
-                    finest("Calculating angle from orientation point");
+                    LOGGER.finest( "Calculating angle from orientation point");
                     n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
                 } else {
-                    finest("No orientation point in nucleus");
+                    LOGGER.finest( "No orientation point in nucleus");
                 }
             }
 
         } catch (ImageImportException | UnavailableBorderPointException | UnavailableBorderTagException e) {
-            warn("Cannot open " + imageFile.getAbsolutePath());
-            stack("Cannot load image", e);
+            LOGGER.warning("Cannot open " + imageFile.getAbsolutePath());
+            LOGGER.log(Loggable.STACK, "Cannot load image", e);
         }
     }
     
@@ -168,13 +172,13 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         List<IAnalysisDataset> list = new ArrayList<>();
 
         for (ICellCollection collection : signalPopulations) {
-            finer("Processing " + collection.getName());
+            LOGGER.finer( "Processing " + collection.getName());
             processSubPopulation(collection);
-            finer("Processed " + collection.getName());
+            LOGGER.finer( "Processed " + collection.getName());
             list.add(dataset.getChildDataset(collection.getID()));
         }
 
-        fine("Finished processing sub-populations");
+        LOGGER.fine("Finished processing sub-populations");
     }
 
     /**
@@ -185,7 +189,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     private void processSubPopulation(@NonNull ICellCollection collection) {
 
         try {
-            finer("Creating new analysis dataset for " + collection.getName());
+            LOGGER.finer( "Creating new analysis dataset for " + collection.getName());
 
             IAnalysisDataset subDataset = new ChildAnalysisDataset(dataset, collection);
 
@@ -193,7 +197,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             dataset.getCollection().getProfileManager().copyCollectionOffsets(collection);
 
         } catch (Exception e) {
-            error("Error processing signal group", e);
+            LOGGER.log(Loggable.STACK, "Error processing signal group", e);
         }
     }
 
@@ -208,7 +212,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     private List<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
 
         List<ICellCollection> signalPopulations = new ArrayList<>();
-        fine("Dividing population by signals...");
+        LOGGER.fine("Dividing population by signals...");
 
         Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
         
@@ -221,7 +225,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 		
 		if (!list.isEmpty()) {
-		    fine("Signal group " + group.getGroupName() + ": found nuclei with signals");
+		    LOGGER.fine("Signal group " + group.getGroupName() + ": found nuclei with signals");
 		    ICellCollection listCollection = new VirtualCellCollection(dataset,
 		            group.getGroupName() + "_with_signals");
 

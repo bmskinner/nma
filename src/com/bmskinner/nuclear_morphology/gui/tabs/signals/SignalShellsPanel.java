@@ -474,24 +474,24 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         }
         
         public void filter() {
-        	log("Filtering "+dataset.getName());
+         LOGGER.info("Filtering "+dataset.getName());
         	ICellCollection filtered = new ShellResultCellFilterer(groupPanel.getSelectedID())
         			.setFilter(op, shell, proportion)
         			.filter(dataset.getCollection());
 			if(!filtered.hasCells()) {
-				log("No cells found");
+			 LOGGER.info("No cells found");
 				return;
 			}
 			
 			try {
-				log("Found "+filtered.size()+" cells");
+			 LOGGER.info("Found "+filtered.size()+" cells");
 				ICellCollection virt = new VirtualCellCollection(dataset, "Filtered_on_shell");
 				filtered.getCells().forEach(virt::addCell);
 				dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
 				dataset.addChildCollection(virt);		
 				getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 			} catch (ProfileException e1) {
-				stack("Unable to filter collection for " + dataset.getName(), e1);
+				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
 			}
         }
 

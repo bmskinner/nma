@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -42,7 +43,9 @@ import ij.process.ImageProcessor;
  *
  */
 @SuppressWarnings("serial")
-public class AnnotatedNucleusPanel extends JPanel implements Loggable {
+public class AnnotatedNucleusPanel extends JPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private ICell  cell;
     private JLabel imageLabel = new JLabel();
@@ -87,7 +90,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
             }
 
         } catch (UnloadableImageException e) {
-            stack("Cannot load image for component", e);
+            LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
             return;
         }
         

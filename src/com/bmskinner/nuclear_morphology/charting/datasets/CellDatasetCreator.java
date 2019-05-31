@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -34,8 +35,11 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public CellDatasetCreator(@NonNull final ChartOptions options) {
         super(options);
@@ -54,7 +58,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         XYDataset ds = null;
 
         if (options.isSingleDataset()) {
-            finest("Creating single dataset position dataset");
+            LOGGER.finest( "Creating single dataset position dataset");
 
             ds = createSinglePositionFeatureDataset();
 
@@ -62,13 +66,13 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
         if (options.isMultipleDatasets()) {
 
-            finest("Creating multiple dataset position dataset");
+            LOGGER.finest( "Creating multiple dataset position dataset");
 
             if (IBorderSegment.segmentCountsMatch(options.getDatasets())) {
 
                 ds = createMultiPositionFeatureDataset();
             } else {
-                fine("Unable to create multiple chart: segment counts do not match");
+                LOGGER.fine("Unable to create multiple chart: segment counts do not match");
             }
         }
 
@@ -86,7 +90,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
         DefaultXYDataset ds = new DefaultXYDataset();
 
-        finest("Fetching segment position list");
+        LOGGER.finest( "Fetching segment position list");
 
         List<IPoint> offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
 
@@ -103,7 +107,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         double[][] data = { xPoints, yPoints };
 
         ds.addSeries("Segment_" + options.getSegID() + "_" + options.firstDataset().getName(), data);
-        finest("Created segment position dataset for segment " + options.getSegID());
+        LOGGER.finest( "Created segment position dataset for segment " + options.getSegID());
         return ds;
     }
 
@@ -144,7 +148,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 ds.addSeries("Segment_" + segID + "_" + dataset.getName(), data);
 
             } catch (UnavailableBorderTagException | ProfileException e) {
-                warn("Missing segment from " + dataset.getName());
+                LOGGER.warning("Missing segment from " + dataset.getName());
             }
 
         }
@@ -177,38 +181,38 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         /*
          * Fetch the cells from the dataset, and rotate the nuclei appropriately
          */
-        finest("Fetching segment position for each nucleus");
+        LOGGER.finest( "Fetching segment position for each nucleus");
         for (Nucleus nucleus : dataset.getCollection().getNuclei()) {
 
             // nucleus.updateVerticallyRotatedNucleus(); // TODO: forcing an
             // update here because new analyses don't have a proper vertical yet
             Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
-            finest("Fetched vertical nucleus");
+            LOGGER.finest( "Fetched vertical nucleus");
 
             // Get the segment start position XY coordinates
 
             try {
 
                 if (!verticalNucleus.getProfile(ProfileType.ANGLE).hasSegment(segmentID)) {
-                    fine("Segment " + segmentID.toString() + " not found in vertical nucleus for "
+                    LOGGER.fine("Segment " + segmentID.toString() + " not found in vertical nucleus for "
                             + nucleus.getNameAndNumber());
                     continue;
 
                 }
                 IBorderSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE).getSegment(segmentID);
-                finest("Fetched segment " + segmentID.toString());
+                LOGGER.finest( "Fetched segment " + segmentID.toString());
 
                 int start = segment.getStartIndex();
-                finest("Getting start point at index " + start);
+                LOGGER.finest( "Getting start point at index " + start);
                 IPoint point = verticalNucleus.getBorderPoint(start);
                 result.add(point);
             } catch (UnavailableComponentException e) {
-                warn("Cannot get angle profile for nucleus");
+                LOGGER.warning("Cannot get angle profile for nucleus");
 
             }
 
         }
-        finest("Fetched segment position for each nucleus");
+        LOGGER.finest( "Fetched segment position for each nucleus");
         return result;
     }
 
@@ -268,7 +272,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             }
 
         } catch (UnavailableComponentException e) {
-            warn("Cannot get angle profile for nucleus");
+            LOGGER.warning("Cannot get angle profile for nucleus");
         }
 
         return result;

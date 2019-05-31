@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
@@ -36,7 +37,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public class DatasetDeleter implements Loggable {
+public class DatasetDeleter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     private static final String DELETE_LBL = "Close";
     private static final String KEEP_LBL   = "Don't close";
@@ -66,7 +69,7 @@ public class DatasetDeleter implements Loggable {
 
             // Ask before closing, if any root datasets have changed since last save
             if (rootHasChanged(list)) {
-                warn("A root dataset has changed since last save");
+                LOGGER.warning("A root dataset has changed since last save");
                 String[] buttonLabels = { KEEP_LBL, DELETE_LBL };
                 int option = is.requestOptionAllVisible(buttonLabels, WARNING_LBL, TITLE_LBL);
                 if(option==0)
@@ -78,8 +81,8 @@ public class DatasetDeleter implements Loggable {
         } catch (RequestCancelledException e) {
             return;
         } catch (Exception e) {
-            warn("Error deleting dataset");
-            stack("Error deleting dataset", e);
+            LOGGER.warning("Error deleting dataset");
+            LOGGER.log(Loggable.STACK, "Error deleting dataset", e);
         }
     }
 
@@ -114,7 +117,7 @@ public class DatasetDeleter implements Loggable {
         IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
 
         if (d.hasChildren()) {
-        	finer("Dataset "+d.getName()+" still has children");
+        	LOGGER.finer( "Dataset "+d.getName()+" still has children");
         	ids.addLast(id); // put at the end of the deque to be handled last
         } else {
         	deleteDataset(d);
@@ -130,12 +133,12 @@ public class DatasetDeleter implements Loggable {
     private void deleteDataset(IAnalysisDataset d) {
 
         UUID id = d.getId();
-        fine("Removing dataset "+d.getName());
+        LOGGER.fine("Removing dataset "+d.getName());
         // remove the dataset from its parents
         for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) {
             if(parent.hasChild(id)) {
                 parent.deleteChild(id);
-                fine("Successfully removed child: "+!parent.hasChild(id));
+                LOGGER.fine("Successfully removed child: "+!parent.hasChild(id));
             }
         }
 

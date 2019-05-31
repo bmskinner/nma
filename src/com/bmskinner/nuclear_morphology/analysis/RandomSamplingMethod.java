@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -27,8 +28,11 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 	
 	private List<Double>       magnitudes = new ArrayList<>();
     private int                iterations;
@@ -68,19 +72,19 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
     public void run() throws Exception {
 
         // for each iteration
-        fine("Beginning sampling");
+        LOGGER.fine("Beginning sampling");
         for (int i = 0; i < iterations; i++) {
-            finest("Sample " + i);
+            LOGGER.finest( "Sample " + i);
             // make a new collection randomly sampled to teh correct proportion
             ICellCollection[] collections = makeRandomSampledCollection(first, second);
-            finest("Made collection");
+            LOGGER.finest( "Made collection");
 
             // get the stat magnitude
             double value1 = collections[0].getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
             double value2 = collections[1].getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
             double magnitude = value2 / value1;
-            finest("Found value");
+            LOGGER.finest( "Found value");
             // add to a list
             magnitudes.add(magnitude);
                 fireProgressEvent();
@@ -93,20 +97,20 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 
         ICellCollection first = new VirtualCellCollection(dataset, "first");
         ICellCollection second = new VirtualCellCollection(dataset, "second");
-        finer("Created new collections");
+        LOGGER.finer( "Created new collections");
 
         List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
         Collections.shuffle(cells);
-        finer("Shuffled cells");
+        LOGGER.finer( "Shuffled cells");
 
         for (int i = 0; i < firstSize; i++) {
             first.addCell(cells.get(i));
         }
-        finer("Added first set");
+        LOGGER.finer( "Added first set");
         for (int i = firstSize; i < firstSize + secondSize; i++) {
             second.addCell(cells.get(i));
         }
-        finer("Added second set");
+        LOGGER.finer( "Added second set");
         
         if(stat.equals(PlottableStatistic.VARIABILITY)) {
         	first.createProfileCollection();

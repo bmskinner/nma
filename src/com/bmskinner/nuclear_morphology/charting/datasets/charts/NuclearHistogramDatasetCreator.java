@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets.charts;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -41,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import weka.estimators.KernelEstimator;
@@ -52,6 +54,8 @@ import weka.estimators.KernelEstimator;
  *
  */
 public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
 
     public NuclearHistogramDatasetCreator(final ChartOptions o) {
         super(o);
@@ -60,7 +64,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
     public HistogramDataset createNuclearStatsHistogramDataset() throws ChartDatasetCreationException {
         HistogramDataset ds = new HistogramDataset();
 
-        finest("Creating histogram dataset: " + options.getStat());
+        LOGGER.finest( "Creating histogram dataset: " + options.getStat());
         if (!options.hasDatasets()) {
             return ds;
         }
@@ -160,7 +164,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
     public HistogramDataset createSegmentLengthHistogramDataset() throws ChartDatasetCreationException {
         HistogramDataset ds = new HistogramDataset();
 
-        finest("Creating histogram dataset: " + options.getStat());
+        LOGGER.finest( "Creating histogram dataset: " + options.getStat());
 
         if (!options.hasDatasets()) {
             return ds;
@@ -203,7 +207,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             }
         }
 
-        finest("Completed histogram dataset");
+        LOGGER.finest( "Completed histogram dataset");
         return ds;
     }
 
@@ -231,7 +235,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
-                fine("Error getting profile from tag", e);
+                LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
             }
 
@@ -252,7 +256,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                             * proportionPerimeter;
                     lengths[count] = length;
                 } catch (ProfileException | UnavailableComponentException e) {
-                    fine("Error getting segment length");
+                    LOGGER.fine("Error getting segment length");
                     lengths[count] = 0;
                 } finally {
                     count++;
@@ -278,7 +282,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e2) {
-                fine("Error getting profile from tag", e2);
+                LOGGER.log(Loggable.STACK, "Error getting profile from tag", e2);
                 throw new ChartDatasetCreationException("Unable to get median profile", e2);
             }
 
@@ -300,7 +304,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                             * proportionPerimeter;
                     lengths[count] = length;
                 } catch (ProfileException | UnavailableComponentException e) {
-                    fine("Error getting segment length");
+                    LOGGER.log(Loggable.STACK, "Error getting segment length");
                     lengths[count] = 0;
                 } finally {
                     count++;
