@@ -17,20 +17,24 @@
 package com.bmskinner.nuclear_morphology.logging;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import ij.IJ;
 
 /**
- * This interface provides methods for logging.
+ * This class provides static methods for logging to the ImageJ
+ * window
  * 
  * @author bms41
  *
  */
-public interface Loggable {
+public class Loggable {
+	
+	private Loggable() {
+		// private
+	}
 
-    String ROOT_LOGGER    = "ProgramLogger";
-    Level STACK = new StackLevel();
+    public static final String ROOT_LOGGER    = "ProgramLogger";
+    public static final Level STACK = new StackLevel();
     
     /**
      * The STACK error level has a level value of 600, so will display ahead of
@@ -42,7 +46,7 @@ public interface Loggable {
      *
      */
     @SuppressWarnings("serial")
-    public class StackLevel extends Level {
+    public static class StackLevel extends Level {
         public StackLevel() {
             super("ERROR", 600);
         }
@@ -50,13 +54,13 @@ public interface Loggable {
     
     /**
      * Log the given message and srack trace from the given throwable to the
-     * ImageJ log window. Only use if the program log panel is not expected to
-     * be available.
+     * ImageJ log window. Only use if the program log panel  or console is not
+     *  expected to be available.
      * 
      * @param message
      * @param t
      */
-    static void logToImageJ(String message, Throwable t) {
+    public static void logToImageJ(String message, Throwable t) {
         IJ.log(message);
         IJ.log(t.getMessage());
         for (StackTraceElement el : t.getStackTrace()) {
@@ -66,11 +70,11 @@ public interface Loggable {
 
     /**
      * Log the given message to the ImageJ log window. Only use if the program
-     * log panel is not expected to be available.
+     * log panel or console is not expected to be available.
      * 
      * @param message
      */
-    static void logIJ(String message) {
+    public static void logToImageJ(String message) {
         IJ.log(message);
         System.err.println(message);
     }

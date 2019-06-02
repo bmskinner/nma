@@ -21,7 +21,6 @@ import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The measures that can be calculated for nuclei
@@ -30,7 +29,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @Deprecated
-public enum NucleusStatistic implements PlottableStatistic, Loggable {
+public enum NucleusStatistic implements PlottableStatistic {
     AREA("Area", StatisticDimension.AREA, new NucleusType[] { NucleusType.ROUND }), 
     PERIMETER("Perimeter",
             StatisticDimension.LENGTH, new NucleusType[] { NucleusType.ROUND }), 

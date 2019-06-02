@@ -34,7 +34,6 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The base of all progressible actions. Handles progress bars and workers
@@ -43,7 +42,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.6
  *
  */
-public abstract class VoidResultAction implements PropertyChangeListener, Loggable, Runnable {
+public abstract class VoidResultAction implements PropertyChangeListener, Runnable {
 
     protected IAnalysisWorker worker   = null;
     protected int downFlag = 0;   // flags for next action

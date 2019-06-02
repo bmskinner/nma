@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public interface Cache extends Loggable {
+public interface Cache {
 
     /**
      * Remove all cached charts

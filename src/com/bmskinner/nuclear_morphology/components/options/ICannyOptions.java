@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface ICannyOptions extends IDetectionSubOptions, Serializable, Loggable {
+public interface ICannyOptions extends IDetectionSubOptions, Serializable {
 
     // The default values below work for our mouse sperm images
     // pretty well.

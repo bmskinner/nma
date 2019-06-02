@@ -23,8 +23,6 @@ import java.awt.Graphics;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * Display the memory in use. Based on the monitor in 
  * SeqMonk: https://www.bioinformatics.babraham.ac.uk/projects/seqmonk/
@@ -33,7 +31,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class MemoryIndicator extends JPanel
-    implements Runnable, Loggable {
+    implements Runnable {
     
     private static final long serialVersionUID = 1L;
     private static final Color DARK_GREEN = new Color(0, 180, 0);

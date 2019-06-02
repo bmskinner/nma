@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface IProfile extends Serializable, Loggable {
+public interface IProfile extends Serializable {
 
     static final int ARRAY_BEFORE = -1;
     static final int ARRAY_AFTER  = 1;

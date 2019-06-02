@@ -37,7 +37,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This interface will provides the primary access to cell data, as well as the
@@ -48,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public interface ICellCollection
-        extends Serializable, Loggable, Filterable, StatisticalCollection, Refoldable<Nucleus>, Collection<ICell> {
+        extends Serializable, Filterable, StatisticalCollection, Refoldable<Nucleus>, Collection<ICell> {
 
 	
 	/** The length to interpolate profiles for comparisons between objects */

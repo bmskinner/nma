@@ -208,8 +208,8 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
             try {
                 doc.insertString(doc.getLength(), s, attrs);
             } catch (BadLocationException e) {
-                Loggable.logIJ(s);
-                Loggable.logIJ("Requested insert at " + e.offsetRequested() + " in document of " + doc.getLength());
+                Loggable.logToImageJ(s);
+                Loggable.logToImageJ("Requested insert at " + e.offsetRequested() + " in document of " + doc.getLength());
                 Loggable.logToImageJ("Error appending to log panel", e);
             }
         };

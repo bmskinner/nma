@@ -33,9 +33,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface IShellResult extends Serializable, Loggable {
+public interface IShellResult extends Serializable {
     
-    public static final UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     
     
     /**

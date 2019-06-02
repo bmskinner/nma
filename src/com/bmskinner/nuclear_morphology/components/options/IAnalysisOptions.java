@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface IAnalysisOptions extends Serializable, Loggable {
+public interface IAnalysisOptions extends Serializable {
 
     // Standard detection keys
     String NUCLEUS        = "Nucleus";

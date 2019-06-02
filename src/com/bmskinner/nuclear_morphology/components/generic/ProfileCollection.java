@@ -59,8 +59,8 @@ public class ProfileCollection implements IProfileCollection {
 
     private IProfileAggregate aggregate = null;
 
-    private Map<BorderTagObject, Integer> indexes  = new HashMap<BorderTagObject, Integer>();
-    private List<IBorderSegment>          segments = new ArrayList<IBorderSegment>();
+    private Map<BorderTagObject, Integer> indexes  = new HashMap<>();
+    private List<IBorderSegment>          segments = new ArrayList<>();
 
     private final ProfileCache profileCache = new ProfileCache();
 
@@ -737,7 +737,7 @@ public class ProfileCollection implements IProfileCollection {
         // finest("Wrote profile collection");
     }
 
-    public class ProfileCache implements Serializable, Loggable {
+    public class ProfileCache implements Serializable {
 
         private static final long serialVersionUID = 1L;
 

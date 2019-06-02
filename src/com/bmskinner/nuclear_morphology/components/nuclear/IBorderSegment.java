@@ -83,7 +83,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggable {
+public interface IBorderSegment extends Serializable, Iterable<Integer> {
 
     /**
      * The smallest number of indexes in a segment. 

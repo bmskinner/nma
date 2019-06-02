@@ -35,7 +35,7 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 
 @Deprecated
-public class XYPoint implements Serializable, Loggable, IPoint {
+public class XYPoint implements Serializable, IPoint {
 
     private static final long serialVersionUID = 1L;
     protected double          x;

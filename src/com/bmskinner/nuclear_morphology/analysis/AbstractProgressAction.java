@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 @Deprecated
-public abstract class AbstractProgressAction extends RecursiveAction implements ProgressListener, Loggable {
+public abstract class AbstractProgressAction extends RecursiveAction implements ProgressListener {
 
     private final List<Object> listeners = new ArrayList<Object>();
 

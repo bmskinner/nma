@@ -36,7 +36,7 @@ import ij.IJ;
  * @since 1.13.8
  *
  */
-public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
+public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implements Exporter {
     
     private File exportFile;
     private static final String EXPORT_MESSAGE          = "Exporting...";

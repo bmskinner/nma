@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This interface defines the detection options available for detecting an
@@ -35,35 +34,35 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
+public interface IDetectionOptions extends Serializable, HashOptions {
 
-    static final String NEWLINE = System.getProperty("line.separator");
+    String NEWLINE = System.getProperty("line.separator");
 
-    static final String THRESHOLD             = "Threshold";
-    static final String CHANNEL               = "Channel";
-    static final String IS_RGB                = "Is RGB";
-    static final String MIN_CIRC              = "Min circ";
-    static final String MAX_CIRC              = "Max circ";
-    static final String MIN_SIZE              = "Min size";
-    static final String MAX_SIZE              = "Max size";
-    static final String SCALE                 = "Scale";
-    static final String IS_NORMALISE_CONTRAST = "Normalise contrast";
-    static final String IS_USE_HOUGH          = "Use Hough";
-    static final String IS_USE_CANNY          = "Use Canny";
-    static final String DYNAMIC               = "Dynamic";
-    static final String EROSION               = "Erosion";
-    static final String IS_USE_WATERSHED      = "Use watershed";
-    static final String TOP_HAT_RADIUS        = "Top hat radius";
+    String THRESHOLD             = "Threshold";
+    String CHANNEL               = "Channel";
+    String IS_RGB                = "Is RGB";
+    String MIN_CIRC              = "Min circ";
+    String MAX_CIRC              = "Max circ";
+    String MIN_SIZE              = "Min size";
+    String MAX_SIZE              = "Max size";
+    String SCALE                 = "Scale";
+    String IS_NORMALISE_CONTRAST = "Normalise contrast";
+    String IS_USE_HOUGH          = "Use Hough";
+    String IS_USE_CANNY          = "Use Canny";
+    String DYNAMIC               = "Dynamic";
+    String EROSION               = "Erosion";
+    String IS_USE_WATERSHED      = "Use watershed";
+    String TOP_HAT_RADIUS        = "Top hat radius";
 
-    static final double  DEFAULT_SCALE        = GlobalOptions.getInstance().getImageScale();
-    static final double  DEFAULT_MIN_CIRC     = 0;
-    static final double  DEFAULT_MAX_CIRC     = 1;
-    static final boolean DEFAULT_IS_RGB       = false;
-    static final boolean DEFAULT_IS_NORMALISE = false;
+    double  DEFAULT_SCALE        = GlobalOptions.getInstance().getImageScale();
+    double  DEFAULT_MIN_CIRC     = 0;
+    double  DEFAULT_MAX_CIRC     = 1;
+    boolean DEFAULT_IS_RGB       = false;
+    boolean DEFAULT_IS_NORMALISE = false;
 
-    static final boolean DEFAULT_IS_USE_WATERSHED = true;
-    static final int     DEFAULT_DYNAMIC          = 1;
-    static final int     DEFAULT_EROSION          = 1;
+    boolean DEFAULT_IS_USE_WATERSHED = true;
+    int     DEFAULT_DYNAMIC          = 1;
+    int     DEFAULT_EROSION          = 1;
 
     /**
      * All sub option classes implement this interface. They must be cast
@@ -73,11 +72,11 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * @since 1.13.4
      *
      */
-    public interface IDetectionSubOptions extends HashOptions, Serializable, Loggable {
-        static final String CANNY_OPTIONS      = "Canny";
-        static final String HOUGH_OPTIONS      = "Hough";
-        static final String BACKGROUND_OPTIONS = "Background";
-        static final String SHELL_OPTIONS      = "Shell";
+    public interface IDetectionSubOptions extends HashOptions, Serializable {
+        String CANNY_OPTIONS      = "Canny";
+        String HOUGH_OPTIONS      = "Hough";
+        String BACKGROUND_OPTIONS = "Background";
+        String SHELL_OPTIONS      = "Shell";
         
         IDetectionSubOptions duplicate();
 

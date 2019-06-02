@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public abstract class AbstractAnalysisDataset implements Serializable, Loggable {
+public abstract class AbstractAnalysisDataset implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

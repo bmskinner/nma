@@ -32,7 +32,7 @@ import ij.IJ;
  * maxima.
  *
  */
-public class BooleanProfile implements Serializable, Loggable {
+public class BooleanProfile implements Serializable {
 
     private static final long serialVersionUID = 1L;
     final protected boolean[] array;

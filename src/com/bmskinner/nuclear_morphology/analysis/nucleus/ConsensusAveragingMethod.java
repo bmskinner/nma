@@ -83,6 +83,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     }
 
     private void run() {
+    	LOGGER.fine("Running consensus averaging on "+dataset.getName());
         try {
             List<IPoint> border = getPointAverage();
             Consensus<Nucleus> refoldNucleus = makeConsensus(border);
@@ -116,7 +117,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         // Calculate the stats for the new consensus
         // Required for angle window size calculation
         double perim = ComponentMeasurer.calculatePerimeter(n);
-        LOGGER.fine("Consensus perimeter is "+perim);
+        LOGGER.finer("Consensus perimeter is "+perim);
         n.setStatistic(PlottableStatistic.PERIMETER, perim);
         n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
@@ -131,7 +132,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
                         Stats.MEDIAN);
                 int newIndex = cons.component().getProfile(ProfileType.ANGLE).findBestFitOffset(median);
-                LOGGER.fine(String.format("Setting %s in consensus to %s ", tag, newIndex));
+                LOGGER.finer(String.format("Setting %s in consensus to %s ", tag, newIndex));
                 cons.component().setBorderTag(tag, newIndex);
                 n.setBorderTag(tag, newIndex);
             }
@@ -142,11 +143,11 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	ISegmentedProfile profile = cons.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
         	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
-        	LOGGER.fine(profile.toString());
+        	LOGGER.finest(profile.toString());
         	for(IBorderSegment s : segs)
-        		LOGGER.fine(s.toString());
+        		LOGGER.finest(s.toString());
         	for(IBorderSegment s : newSegs)
-        		LOGGER.fine(s.toString());
+        		LOGGER.finest(s.toString());
         	profile.setSegments(newSegs);
         	cons.component().setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
         	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
@@ -203,7 +204,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             IPoint avg = calculateMedianPoint(list);
 
             if(averagedPoints.isEmpty() || !averagedPoints.get(averagedPoints.size()-1).equals(avg)) {
-//            	LOGGER.fine(avg.getX()+"\t"+avg.getY());
             	averagedPoints.add(avg);
             }
             fireProgressEvent();

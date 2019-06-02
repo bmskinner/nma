@@ -34,7 +34,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Default implementation of the filtering options
@@ -42,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.14.0
  *
  */
-public class DefaultFilteringOptions extends AbstractHashOptions implements FilteringOptions, Loggable {
+public class DefaultFilteringOptions extends AbstractHashOptions implements FilteringOptions {
 	
 	private static final long serialVersionUID = 1L;
 	private final Map<Key, Double> minima = new HashMap<>();

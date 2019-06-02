@@ -28,10 +28,9 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener, Loggable {
+public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener {
 
     protected List<ActionListener> listeners = new ArrayList<>();
     private final List<EventListener> interfaceListeners = new ArrayList<>();

@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @Deprecated
-public class ShellResult implements Serializable, Loggable, IShellResult {
+public class ShellResult implements Serializable, IShellResult {
 
     private static final long serialVersionUID = 1L;
     private List<Double>      means;                // percent signal pre-DAPI

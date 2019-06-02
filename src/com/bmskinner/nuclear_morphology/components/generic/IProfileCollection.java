@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public interface IProfileCollection extends Serializable, Loggable {
+public interface IProfileCollection extends Serializable {
 
     static final int ZERO_INDEX = 0;
     

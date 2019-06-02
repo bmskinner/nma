@@ -31,7 +31,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
@@ -42,7 +41,7 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  * @since 1.13.3
  *
  */
-public interface IAnalysisDataset extends Serializable, Loggable {
+public interface IAnalysisDataset extends Serializable {
 
     /**
      * Get the ID of the dataset

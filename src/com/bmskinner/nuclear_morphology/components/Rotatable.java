@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.components;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Objects implementing this interface can be rotated by arbirtary amounts, and
@@ -28,7 +27,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public interface Rotatable extends Loggable {
+public interface Rotatable {
 
     /**
      * Align the object to vertical using the preferred method. If TOP_VERTICAL

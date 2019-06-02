@@ -22,7 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This monitors the length of the task queue once per second,
@@ -33,7 +32,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class TaskListMonitor extends JLabel
-implements Runnable, Loggable {
+implements Runnable {
     
     private static final int PREFERRED_WIDTH = 50;
     private static final int PREFERRED_HEIGHT = 20;

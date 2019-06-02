@@ -36,7 +36,7 @@ import ij.process.ImageProcessor;
  * @since 1.14.0
  *
  */
-public interface IWarpedSignal extends Serializable, Loggable {
+public interface IWarpedSignal extends Serializable {
 	
 	/**
 	 * Create a byte array from the given image processor

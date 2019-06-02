@@ -40,7 +40,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.3
  *
  */
-public interface ISignalCollection extends Serializable, Loggable {
+public interface ISignalCollection extends Serializable {
 	
 	/**
 	 * Create a copy of this collection
