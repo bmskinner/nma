@@ -28,11 +28,10 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private List<Double>       magnitudes = new ArrayList<>();
     private int                iterations;

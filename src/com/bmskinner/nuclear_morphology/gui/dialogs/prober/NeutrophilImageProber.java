@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class NeutrophilImageProber extends IntegratedImageProber {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String DIALOG_TITLE_BAR_LBL = "Neutrophil detection settings";
 

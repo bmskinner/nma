@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -36,12 +35,11 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public NuclearBoxplotsPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEUS);

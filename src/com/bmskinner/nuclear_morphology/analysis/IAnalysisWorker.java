@@ -19,8 +19,6 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.beans.PropertyChangeListener;
 import java.util.concurrent.RunnableFuture;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * Describes the methods required for a worker. An analysis worker will contain
  * a method for an analysis, and will communicate progress through the method to

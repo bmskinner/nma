@@ -24,7 +24,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
@@ -34,7 +33,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverla
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This class takes a chart and adds a single draggable rectangle overlay. The
@@ -48,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class PositionSelectionChartPanel extends ExportableChartPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     protected RectangleOverlayObject overlayRectangle = null;
 

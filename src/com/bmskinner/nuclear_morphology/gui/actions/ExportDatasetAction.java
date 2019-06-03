@@ -33,11 +33,10 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ExportDatasetAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private File saveFile = null;
     private ExportFormat format = ExportFormat.JAVA;

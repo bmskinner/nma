@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> implements IAnalysisWorker {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private long progressTotal;     // the maximum value for the progress bar
     private long progressCount = 0; // the current value for the progress bar

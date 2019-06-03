@@ -41,8 +41,6 @@ import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.OneWayAnova;
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 

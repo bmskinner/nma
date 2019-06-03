@@ -22,14 +22,14 @@
  */
 package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 
-import ij.gui.Roi;
-
 import java.io.File;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.AsymmetricNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+
+import ij.gui.Roi;
 
 @Deprecated
 public class SpermNucleus extends AsymmetricNucleus {

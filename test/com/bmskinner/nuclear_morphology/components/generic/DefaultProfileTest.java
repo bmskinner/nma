@@ -3,12 +3,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,9 +12,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**

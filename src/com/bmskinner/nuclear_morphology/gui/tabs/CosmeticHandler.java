@@ -42,7 +42,6 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
@@ -54,7 +53,7 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  */
 public class CosmeticHandler {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     
     private static final String CHOOSE_A_NEW_NAME_LBL = "Choose a new name";
 	private final TabPanel parent;

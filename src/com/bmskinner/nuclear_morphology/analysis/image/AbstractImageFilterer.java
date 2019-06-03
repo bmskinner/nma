@@ -26,7 +26,6 @@ import javax.swing.ImageIcon;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.process.ByteProcessor;
@@ -47,7 +46,7 @@ public abstract class AbstractImageFilterer {
 	
 	protected static final String DIMENSIONS_DO_NOT_MATCH_ERROR = "Dimensions do not match";
 
-	private static Logger logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final int RGB_WHITE = 16777215;
     private static final int RGB_BLACK = 0;

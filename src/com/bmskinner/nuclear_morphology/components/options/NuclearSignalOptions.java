@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * An early implementation of nuclear signal options. Use a hash version instead
@@ -36,7 +35,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class NuclearSignalOptions implements INuclearSignalOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

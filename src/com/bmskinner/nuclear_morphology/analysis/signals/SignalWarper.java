@@ -64,7 +64,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public static final boolean STRAIGHTEN_MESH = true;
 	public static final boolean REGULAR_MESH = false;

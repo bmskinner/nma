@@ -29,7 +29,6 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
@@ -40,7 +39,7 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  */
 public class ExportWorkspaceAction extends VoidResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PROGRESS_LBL = "Saving workspace";
 

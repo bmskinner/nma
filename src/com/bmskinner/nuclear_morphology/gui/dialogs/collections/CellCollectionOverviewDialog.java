@@ -57,8 +57,8 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -72,7 +72,7 @@ import ij.process.ImageProcessor;
 @SuppressWarnings("serial")
 public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String MAKE_NEW_COLLECTION_LBL = "Make new collection from selected";
 	private static final String SELECT_ALL_LBL = "Select all";

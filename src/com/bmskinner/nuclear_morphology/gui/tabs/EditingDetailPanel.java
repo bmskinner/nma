@@ -28,12 +28,11 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class EditingDetailPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     
     private static final String PANEL_TITLE_LBL = "Editing";
     

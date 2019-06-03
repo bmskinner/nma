@@ -35,7 +35,7 @@ import ij.gui.Roi;
  */
 public class NucleusXMLReader extends XMLReader<Nucleus>{
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private final NucleusFactory fact;
 	private final double windowProportion;

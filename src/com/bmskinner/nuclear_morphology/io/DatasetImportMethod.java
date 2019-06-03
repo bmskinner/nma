@@ -61,7 +61,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("deprecation")
 public class DatasetImportMethod extends AbstractAnalysisMethod implements Importer {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private final File       file;
     private IAnalysisDataset dataset      = null;

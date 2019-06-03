@@ -47,7 +47,6 @@ import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public abstract class AbstractMainWindow extends JFrame implements MainView, EventListener, DatasetSelectionListener, PopulationListUpdateListener {
 	
@@ -66,7 +65,7 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 
 	protected boolean isStandalone = false;
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	/**
      * Create the frame.

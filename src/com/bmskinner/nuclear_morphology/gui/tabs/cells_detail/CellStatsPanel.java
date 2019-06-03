@@ -23,7 +23,6 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -48,7 +47,6 @@ import com.bmskinner.nuclear_morphology.gui.components.renderers.ConsistentRowTa
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Display for overall stats per cell
@@ -58,7 +56,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class CellStatsPanel extends AbstractCellDetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PANEL_TITLE_LBL = "Info";
     

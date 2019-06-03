@@ -44,7 +44,7 @@ import com.jujutsu.utils.TSneUtils;
  */
 public class TsneMethod  extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final int OUTPUT_DIMENSIONS = 2;
 	

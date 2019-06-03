@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -43,7 +42,7 @@ import ij.process.ImageProcessor;
 @Deprecated
 public class SpermTail extends AbstractCellularComponent implements Serializable, Flagellum {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

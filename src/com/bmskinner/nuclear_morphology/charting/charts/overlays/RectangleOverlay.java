@@ -36,8 +36,6 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * An overlay for a {@link ChartPanel} that draws a rectangle on a plot.
  *
@@ -46,7 +44,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class RectangleOverlay extends AbstractOverlay
         implements Overlay, PropertyChangeListener, Serializable{
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private RectangleOverlayObject rectangle = null;
 

@@ -37,7 +37,6 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Action for constructing hierarchical trees based on dataset parameters
@@ -48,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
         implements EventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PROGRESS_BAR_LABEL = "Building tree";
 

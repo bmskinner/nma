@@ -48,7 +48,7 @@ import ij.process.ImageProcessor;
 @Deprecated
 public class SignalCollection implements ISignalCollection {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.Data
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Allows options to be set when merging datasets. E.g. which signal groups are
@@ -51,7 +50,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class DatasetMergingDialog extends LoadingIconDialog implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String SIGNAL_GROUP_COL_LBL = "Signal group";
 

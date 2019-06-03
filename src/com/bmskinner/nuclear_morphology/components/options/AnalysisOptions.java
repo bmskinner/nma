@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The old implementation of the IAnalysisOptions interface. This stores details
@@ -47,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class AnalysisOptions implements IAnalysisOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
     private int               nucleusThreshold;

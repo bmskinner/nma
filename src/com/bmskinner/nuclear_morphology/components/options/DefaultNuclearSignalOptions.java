@@ -23,8 +23,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * The default implementation of the nuclear signal options interface
  * 
@@ -35,7 +33,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implements INuclearSignalOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

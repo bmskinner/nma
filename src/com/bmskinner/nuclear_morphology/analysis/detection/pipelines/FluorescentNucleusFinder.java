@@ -52,7 +52,7 @@ import ij.process.ImageProcessor;
 
 public class FluorescentNucleusFinder extends CellFinder {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private final ComponentFactory<Nucleus> nuclFactory;
     private final IDetectionOptions nuclOptions;

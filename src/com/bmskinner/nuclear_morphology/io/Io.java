@@ -134,8 +134,8 @@ public interface Io  {
                     dir = dir.getParentFile();
                 return dir;
             } catch (URISyntaxException e) {
-            	Logger.getLogger(Loggable.ROOT_LOGGER).log(Level.WARNING, "Error getting program dir");
-            	Logger.getLogger(Loggable.ROOT_LOGGER).log(Loggable.STACK, e.getMessage(), e);
+            	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Error getting program dir");
+            	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Loggable.STACK, e.getMessage(), e);
                 return null;
             }
 

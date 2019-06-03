@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.Serializable;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The parameters for edge detection using the Canny algorithm, and the image

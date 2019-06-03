@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ProfileIndexFinder {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
      * Thrown when no indexes are found by a ruleset

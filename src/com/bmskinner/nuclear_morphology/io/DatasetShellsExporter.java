@@ -38,7 +38,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregat
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Export shell analysis results to a file

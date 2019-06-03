@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for chart dataset creators

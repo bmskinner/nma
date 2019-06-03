@@ -51,7 +51,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.ShellDistributionTester;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
@@ -64,7 +63,7 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
  */
 public class DemoReportGenerator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String NEWLINE = System.getProperty("line.separator");
 	private static final String P_VALUE_FORMAT = "0.##E0";

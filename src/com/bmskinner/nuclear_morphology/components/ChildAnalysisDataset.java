@@ -34,7 +34,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is the virtual child dataset, which retains only the pointer to its
@@ -45,7 +44,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private static final long serialVersionUID = 1L;
 

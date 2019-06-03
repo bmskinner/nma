@@ -27,7 +27,6 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import com.bmskinner.nuclear_morphology.io.CountedOutputStream;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for XML writers

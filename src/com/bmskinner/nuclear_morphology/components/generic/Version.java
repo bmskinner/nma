@@ -22,8 +22,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * Hold version information, and parsing methods
  * 
@@ -33,7 +31,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class Version implements Serializable {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

@@ -63,7 +63,7 @@ import ij.process.ImageProcessor;
  */
 public class ShellOverviewDialog extends CollectionOverviewDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String HEADER_LBL = "Double click a nucleus to export image to ";
 	

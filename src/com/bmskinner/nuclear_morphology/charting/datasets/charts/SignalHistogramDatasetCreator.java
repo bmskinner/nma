@@ -47,7 +47,7 @@ import weka.estimators.KernelEstimator;
  */
 public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	public SignalHistogramDatasetCreator(final ChartOptions o) {
 		super(o);

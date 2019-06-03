@@ -46,20 +46,16 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.data.xy.XYZDataset;
 
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import com.bmskinner.nuclear_morphology.charting.datasets.FloatXYDataset;
-import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.io.SaveDialog;
 
 /**
  * This extension to a standard ChartPanel adds a popup menu item for copying
@@ -74,7 +70,7 @@ import ij.io.SaveDialog;
 @SuppressWarnings("serial")
 public class ExportableChartPanel extends ChartPanel implements ChartSetEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String EXPORT_LBL = "Export data";
 	private static final String COPY_LBL   = "Copy data";

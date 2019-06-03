@@ -52,7 +52,6 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This panel shows any cluster groups that have been created, and the
@@ -65,7 +64,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PANEL_TITLE_LBL = "Clusters";
     private static final String NEW_CLUSTER_LBL = "Cluster automatically";

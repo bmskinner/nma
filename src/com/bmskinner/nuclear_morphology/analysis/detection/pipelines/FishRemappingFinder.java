@@ -24,9 +24,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import ij.ImageStack;
 import ij.process.ImageProcessor;
 
 /**
@@ -39,7 +37,7 @@ import ij.process.ImageProcessor;
  */
 public class FishRemappingFinder extends VoidFinder {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String FISH_FOLDER_IS_FILE_ERROR = "FISH directory is not a folder";
     private final File          dir;

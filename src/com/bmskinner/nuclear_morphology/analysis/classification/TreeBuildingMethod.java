@@ -56,7 +56,7 @@ import weka.core.SparseInstance;
 
 public class TreeBuildingMethod extends CellClusteringMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     protected String newickTree = null;
 

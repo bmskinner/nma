@@ -33,7 +33,6 @@ public class Loggable {
 		// private
 	}
 
-    public static final String ROOT_LOGGER    = "ProgramLogger";
     public static final Level STACK = new StackLevel();
     
     /**

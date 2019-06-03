@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class RefoldNucleusAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PROGRESS_LBL = "Refolding";
     private static final int PROGRESS_BAR_LENGTH = 100;

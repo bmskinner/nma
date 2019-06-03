@@ -39,7 +39,6 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Contains methods for laying out panels in settings dialog options
@@ -47,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class SettingsDialog extends JDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     protected boolean readyToRun = false;
     private final List<EventListener> interfaceListeners = new ArrayList<>();

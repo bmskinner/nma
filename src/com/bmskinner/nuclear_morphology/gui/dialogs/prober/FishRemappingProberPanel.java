@@ -55,7 +55,6 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The image panel for FISH remapping. Stores the cells selected for remapping
@@ -68,7 +67,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class FishRemappingProberPanel extends GenericImageProberPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final int    ORIGINAL_IMG_COL        = 0;
     private static final int    ORIGINAL_IMG_ROW        = 0;

@@ -23,7 +23,6 @@ import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;

@@ -31,7 +31,6 @@ import com.bmskinner.nuclear_morphology.analysis.detection.Kuwahara_Filter;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImagePlus;
@@ -52,7 +51,7 @@ import inra.ijpb.morphology.strel.DiskStrel;
  */
 public class ImageFilterer extends AbstractImageFilterer {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public ImageFilterer(ImageProcessor ip) {
         super(ip);

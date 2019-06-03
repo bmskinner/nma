@@ -1,20 +1,13 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
-import java.awt.BorderLayout;
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.swing.JDialog;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -23,7 +16,6 @@ import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimil
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -32,13 +24,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.DefaultWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
-import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog.WarpingSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -56,7 +44,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalWarpingDialogController {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private SignalWarpingModel model;
 	private ChartPanel chart;

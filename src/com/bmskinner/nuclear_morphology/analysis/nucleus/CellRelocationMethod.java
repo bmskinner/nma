@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String TAB          = "\\t";
     private static final String UUID_KEY     = "UUID";

@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.estimators.KernelEstimator;
 
@@ -45,7 +44,7 @@ import weka.estimators.KernelEstimator;
  */
 public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public static final int MIN_ROUNDED = 0;
     public static final int MAX_ROUNDED = 1;

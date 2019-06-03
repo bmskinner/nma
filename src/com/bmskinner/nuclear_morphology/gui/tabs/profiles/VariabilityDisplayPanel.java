@@ -19,10 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.ParseException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JComponent;
@@ -30,8 +27,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -61,7 +56,7 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 @SuppressWarnings("serial")
 public class VariabilityDisplayPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PANEL_TITLE_LBL = "Variability";
     private JPanel                 buttonPanel = new JPanel(new FlowLayout());

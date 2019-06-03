@@ -42,7 +42,6 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Generate the test datasets for the current version, which will be used for comparison
@@ -64,7 +63,7 @@ public class TestImageDatasetCreator {
 
 	@Before
 	public void setUp(){
-		logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+		logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		logger.setLevel(Level.FINE);
 
 		boolean hasHandler = false;

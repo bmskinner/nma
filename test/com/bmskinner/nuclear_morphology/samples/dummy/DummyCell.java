@@ -19,19 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.Flagellum;
-import com.bmskinner.nuclear_morphology.components.IAcrosome;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICytoplasm;
-import com.bmskinner.nuclear_morphology.components.IMitochondrion;
-import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * A dummy cell for testing

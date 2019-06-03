@@ -20,8 +20,6 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * Describes the basics of all analyses on datasets. A method has no interaction
  * with the UI - it just carries out the analysis. The method will fire a

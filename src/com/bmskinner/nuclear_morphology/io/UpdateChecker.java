@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -22,7 +21,7 @@ import com.google.gson.JsonParser;
  */
 public class UpdateChecker {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private static final String DOWNLOAD_URL = "https://api.bitbucket.org/2.0/repositories/bmskinner/nuclear_morphology/downloads/";
 	private static final String NAME_PATTERN = "Nuclear_Morphology_Analysis_(\\d+\\.\\d+\\.\\d+)";
 	

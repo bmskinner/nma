@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -40,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class Profile implements IProfile {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

@@ -46,9 +46,9 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This chart panel provides a list of draggable markers as crosshair overlays,
@@ -61,7 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 @SuppressWarnings("serial")
 public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private volatile ISegmentedProfile profile = null;
 

@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethodTest;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 
 import ij.IJ;

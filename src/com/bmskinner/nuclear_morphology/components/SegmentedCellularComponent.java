@@ -63,7 +63,7 @@ import ij.gui.Roi;
  */
 public abstract class SegmentedCellularComponent extends ProfileableCellularComponent {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private static final long serialVersionUID = 1L;
 

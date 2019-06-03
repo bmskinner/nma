@@ -10,7 +10,6 @@ import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -29,7 +28,7 @@ import ij.process.ImageProcessor;
 
 public class SectorQuantificationDialog extends JDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String DIALOG_TITLE = "Quantification scores";
 	

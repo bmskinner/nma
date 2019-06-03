@@ -8,7 +8,6 @@ import org.junit.Before;
 
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 import ij.Prefs;
@@ -19,7 +18,7 @@ public abstract class AnalysisPipelineTest {
 
     @Before
 	public void setUp(){
-		logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+		logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		logger.setLevel(Level.FINE);
 
 		boolean hasHandler = false;

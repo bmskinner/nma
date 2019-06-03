@@ -77,7 +77,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private ICellCollection sourceCollection = null;
 	

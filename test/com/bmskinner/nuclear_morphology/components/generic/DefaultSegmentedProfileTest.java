@@ -1,9 +1,6 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	

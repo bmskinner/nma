@@ -39,12 +39,11 @@ import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class MainHeaderPanel extends JPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String NEW_ANALYSIS_LBL   = "New analysis";
     private static final String NEW_STANDARD_LBL   = "Fluorescent nuclei";

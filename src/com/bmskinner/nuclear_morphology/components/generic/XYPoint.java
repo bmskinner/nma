@@ -29,8 +29,6 @@ import java.io.Serializable;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 

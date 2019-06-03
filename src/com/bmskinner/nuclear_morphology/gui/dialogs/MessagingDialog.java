@@ -31,7 +31,6 @@ import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This extension to a JDialog can fire DatasetEvents and InterfaceEvents to

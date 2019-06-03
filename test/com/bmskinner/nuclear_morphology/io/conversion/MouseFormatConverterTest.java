@@ -19,17 +19,15 @@
 
 package com.bmskinner.nuclear_morphology.io.conversion;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
  * Test conversion and opening of old dataset versions

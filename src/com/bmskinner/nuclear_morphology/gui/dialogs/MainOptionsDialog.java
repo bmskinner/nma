@@ -49,7 +49,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 
     private static final String DIALOG_TITLE = "Options";
     
-    private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private JComboBox<Level>        programLevelBox;
     private JComboBox<Level>        consoleLevelBox;

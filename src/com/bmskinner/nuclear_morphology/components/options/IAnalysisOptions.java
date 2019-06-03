@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This stores details of an analysis setup for an IAnalysisDataset.

@@ -77,7 +77,7 @@ import ij.process.ImageProcessor;
 @SuppressWarnings("serial")
 public class ImagesTabPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private JTree  tree;      // hold the image list
     private JPanel imagePanel;

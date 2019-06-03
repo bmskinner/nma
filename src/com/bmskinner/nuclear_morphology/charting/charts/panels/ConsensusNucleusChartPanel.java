@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.charting.charts.panels;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.awt.event.ActionEvent;
 import java.util.Iterator;
 
 import javax.swing.JMenuItem;

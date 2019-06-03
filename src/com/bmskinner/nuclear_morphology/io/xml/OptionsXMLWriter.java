@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Write the complete set of options for all analyses in a dataset
@@ -35,7 +34,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class OptionsXMLWriter extends XMLWriter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public void write(@NonNull IAnalysisDataset dataset, @NonNull File outFile) {
 		

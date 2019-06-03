@@ -43,7 +43,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -57,8 +56,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
@@ -90,7 +87,7 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends MessagingDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     
     private static final String ANALYSE_LBL = "Analyse new clusters";
     private static final String SHOW_MGE_SRC_LBL = "Show merge sources";

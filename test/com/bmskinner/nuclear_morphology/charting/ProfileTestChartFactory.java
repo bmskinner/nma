@@ -22,7 +22,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ProfileTestChartFactory extends ProfileChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	public ProfileTestChartFactory(ChartOptions o) {
 		super(o);

@@ -62,7 +62,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class MergesDetailPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private ExportableTable sourceParametersTable;
     private JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);

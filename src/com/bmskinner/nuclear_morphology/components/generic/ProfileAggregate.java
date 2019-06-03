@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -42,7 +41,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 @Deprecated
 public class ProfileAggregate implements Serializable, IProfileAggregate {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long               serialVersionUID = 1L;
     private Map<Double, Collection<Double>> aggregate        = new HashMap<Double, Collection<Double>>();

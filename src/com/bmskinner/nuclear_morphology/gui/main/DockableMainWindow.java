@@ -56,7 +56,6 @@ import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.javadocking.DockingManager;
 import com.javadocking.dock.Position;
 import com.javadocking.dock.TabDock;
@@ -78,7 +77,7 @@ public class DockableMainWindow extends AbstractMainWindow {
     private PopulationsPanel populationsPanel;
     private TabDock tabDock; // bottom panel tabs
     
-    private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
      * Create the frame.

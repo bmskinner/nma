@@ -42,7 +42,6 @@ import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.Blitter;
 import ij.process.ColorProcessor;
@@ -57,7 +56,7 @@ import ij.process.ImageProcessor;
  */
 public abstract class InteractiveCellPanel extends JPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	protected JLabel imageLabel;
 	

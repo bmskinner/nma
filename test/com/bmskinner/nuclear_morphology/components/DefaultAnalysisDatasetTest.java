@@ -24,7 +24,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.io.File;
 import java.util.UUID;
 

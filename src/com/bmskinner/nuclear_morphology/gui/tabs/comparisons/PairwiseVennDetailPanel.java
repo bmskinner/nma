@@ -20,7 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
@@ -44,7 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class PairwiseVennDetailPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PANEL_TITLE_LBL = "Detailed Venn";
     private static final String HEADER_LBL      = "Shows a dataset by dataset comparison of shared and non-shared nuclei";

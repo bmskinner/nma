@@ -16,12 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -50,6 +46,9 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+
 /**
  * The standard rodent sperm nucleus
  * 
@@ -59,7 +58,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

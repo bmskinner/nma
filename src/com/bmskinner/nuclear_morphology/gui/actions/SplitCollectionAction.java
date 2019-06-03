@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -34,7 +33,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class SplitCollectionAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String PROGRESS_BAR_LABEL = "Splitting collection";
 

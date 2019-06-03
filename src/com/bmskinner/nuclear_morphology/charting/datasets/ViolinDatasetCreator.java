@@ -52,7 +52,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final int STEP_COUNT = 100;
 

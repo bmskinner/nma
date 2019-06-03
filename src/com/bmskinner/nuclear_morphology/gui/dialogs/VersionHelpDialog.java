@@ -5,18 +5,14 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.ScrollPane;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -30,7 +26,6 @@ import javax.swing.UIManager;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.main.MainView;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 
 /**

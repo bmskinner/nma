@@ -29,7 +29,6 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -43,7 +42,7 @@ import ij.process.FloatPolygon;
  */
 public class NucleusFactory implements ComponentFactory<Nucleus> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String NULL_NUCLEUS_ERROR = "Error making nucleus; constructed object is null";
 	private static final String NULL_COM_ERROR = "Centre of mass cannot be null in nucleus factory";

@@ -53,7 +53,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 @Deprecated
 public class ProfileCollection implements IProfileCollection {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

@@ -89,7 +89,7 @@ import ij.gui.Roi;
  */
 public class DatasetConverter implements Importer {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private IAnalysisDataset oldDataset;
     private boolean wasConverted = false;

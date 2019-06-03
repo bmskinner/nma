@@ -38,7 +38,6 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Display boxplots for whole cell data
@@ -50,7 +49,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public CellsBoxplotsPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.WHOLE_CELL);

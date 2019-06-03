@@ -37,13 +37,11 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 @SuppressWarnings("serial")
 public class EllipticalOverlay extends AbstractOverlay
         implements Overlay, PropertyChangeListener, Serializable{
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private EllipticalOverlayObject ellipse = null;
 

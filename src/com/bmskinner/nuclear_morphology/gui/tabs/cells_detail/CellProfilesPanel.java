@@ -36,8 +36,8 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Editing panel for the border tags of a single cell.
@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptions
 @SuppressWarnings("serial")
 public class CellProfilesPanel extends AbstractCellDetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PANEL_TITLE_LBL = "Profiles";
     private ExportableChartPanel chartPanel;

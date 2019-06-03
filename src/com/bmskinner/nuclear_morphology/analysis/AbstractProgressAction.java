@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * The abstract class for actions that can be split into fork-join tasks.
  * Progress through a task can be signalled to listeners via ProgressEvents.

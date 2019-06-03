@@ -45,7 +45,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
     private static final double SCALE_STEP_SIZE = 1;
     private static final double SCALE_MIN       = 1;

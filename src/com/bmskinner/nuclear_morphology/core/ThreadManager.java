@@ -28,7 +28,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Manages the threading and task queue. Analysis methods and UI
@@ -39,7 +38,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ThreadManager {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private static ThreadManager instance   = null;
     
     /** Object to lock on for synchronisation */

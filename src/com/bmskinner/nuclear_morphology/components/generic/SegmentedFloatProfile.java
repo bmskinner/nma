@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class SegmentedFloatProfile extends FloatProfile implements ISegmentedProfile {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private static final long serialVersionUID = 1L;
 
     // the segments

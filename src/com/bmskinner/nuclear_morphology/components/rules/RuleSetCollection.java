@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This holds the rulesets for identifying each of the BorderTags in a profile.
@@ -42,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class RuleSetCollection implements Serializable {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
     @Override
     public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta)

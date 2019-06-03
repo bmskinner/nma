@@ -27,8 +27,8 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEventListener;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A combined settings panel allowing setup for neutrophil detection using
@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 @SuppressWarnings("serial")
 public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements PanelUpdatingEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private IAnalysisOptions options;
 

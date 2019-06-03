@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -37,8 +36,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-
-import com.bmskinner.nuclear_morphology.samples.dummy.*; //samples.dummy.DummyCellularComponent;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;

@@ -16,7 +16,6 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ComponentXYDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -30,7 +29,7 @@ import ij.process.ImageProcessor;
  */
 public class ImageThumbnailGenerator implements ChartMouseListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public static final boolean COLOUR_RGB = true;
 	public static final boolean COLOUR_GREYSCALE = false;

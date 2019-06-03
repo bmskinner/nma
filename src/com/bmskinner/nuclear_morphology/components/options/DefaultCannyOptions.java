@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * A default implementation of the ICannyOptions interface
  * 
@@ -33,7 +31,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class DefaultCannyOptions implements ICannyOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

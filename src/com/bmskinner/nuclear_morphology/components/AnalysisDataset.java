@@ -38,7 +38,6 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This holds a CellCollection, the analyses that have been run on it and the
@@ -51,7 +50,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class AnalysisDataset implements IAnalysisDataset {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long          serialVersionUID = 1L;
     private Map<UUID, AnalysisDataset> childCollections = new HashMap<UUID, AnalysisDataset>(); // hold

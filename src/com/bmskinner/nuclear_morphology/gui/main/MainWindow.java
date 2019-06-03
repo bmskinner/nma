@@ -56,7 +56,6 @@ import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is the core of the program UI. All display panels are contained here.
@@ -70,7 +69,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class MainWindow extends AbstractMainWindow {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
     private JPanel contentPane;
 
@@ -127,7 +126,7 @@ public class MainWindow extends AbstractMainWindow {
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             textHandler.setLevel(Level.INFO);
-            Logger.getLogger(Loggable.ROOT_LOGGER).addHandler(textHandler);
+            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).addHandler(textHandler);
             
                 		
             // ---------------

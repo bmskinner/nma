@@ -19,17 +19,11 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.awt.geom.Point2D;
 
 import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.FloatEquation;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 
 /**
  * Tests for the floating point line equations

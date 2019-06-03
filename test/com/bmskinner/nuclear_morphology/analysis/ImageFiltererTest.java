@@ -1,14 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
-import static org.junit.Assert.fail;
-import ij.IJ;
-import ij.ImagePlus;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-
-import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 
 /**
  * Tests for image filterer

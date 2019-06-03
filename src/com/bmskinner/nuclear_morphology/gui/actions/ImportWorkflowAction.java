@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ImportWorkflowAction  extends VoidResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private File file;
     private static final String PROGRESS_BAR_LABEL = "Running workflow...";

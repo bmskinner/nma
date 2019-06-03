@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 import com.bmskinner.nuclear_morphology.components.Filterable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The filterer filters any collection implementing the Filterable interface.

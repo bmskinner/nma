@@ -2,12 +2,10 @@ package com.bmskinner.nuclear_morphology.samples.dummy;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 import ij.gui.PolygonRoi;

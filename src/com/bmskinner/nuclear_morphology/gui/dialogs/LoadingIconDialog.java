@@ -22,7 +22,6 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.net.URL;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -40,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class LoadingIconDialog extends MessagingDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     
     private static final String RESOURCE_FOLDER  = "icons/";
     private static final String LOADING_GIF_NAME = "ajax-loader.gif";

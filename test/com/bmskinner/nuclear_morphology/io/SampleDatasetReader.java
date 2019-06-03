@@ -32,9 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
-import com.bmskinner.nuclear_morphology.io.DatasetImportMethod.UnloadableDatasetException;
 import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLReader;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * Provides a simple access point to open datasets for testing classes

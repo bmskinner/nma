@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Check datasets are equal
@@ -31,7 +30,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetComparator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	/**
 	 * Test if the datasets have the same values, except in ID

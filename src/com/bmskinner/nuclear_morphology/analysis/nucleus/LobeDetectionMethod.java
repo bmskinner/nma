@@ -67,7 +67,7 @@ import inra.ijpb.watershed.Watershed;
  */
 public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final double DEFAULT_MIN_LOBE_AREA = 10;
 

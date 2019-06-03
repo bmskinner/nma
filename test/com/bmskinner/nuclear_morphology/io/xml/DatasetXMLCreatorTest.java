@@ -11,7 +11,6 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;

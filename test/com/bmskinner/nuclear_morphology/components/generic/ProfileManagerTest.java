@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -43,7 +42,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 @RunWith(Parameterized.class)
 public class ProfileManagerTest {
 	
-	private static final Logger logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private static final long RNG_SEED = 42;
 	private ProfileManager manager;
 	private ICellCollection collection;

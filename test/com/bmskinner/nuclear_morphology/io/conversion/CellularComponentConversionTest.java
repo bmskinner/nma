@@ -1,24 +1,21 @@
 package com.bmskinner.nuclear_morphology.io.conversion;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.io.OptionalDataException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
-import com.bmskinner.nuclear_morphology.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -32,13 +29,10 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.io.CountedInputStream;
-import com.bmskinner.nuclear_morphology.io.PackageReplacementObjectInputStream;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod.UnloadableDatasetException;
+import com.bmskinner.nuclear_morphology.io.PackageReplacementObjectInputStream;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**

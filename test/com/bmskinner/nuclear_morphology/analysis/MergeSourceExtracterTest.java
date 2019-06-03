@@ -40,11 +40,10 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class MergeSourceExtracterTest extends SampleDatasetReader {
     
@@ -56,7 +55,7 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
         
     @Before
     public void setUp() throws Exception {
-    	logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+    	logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		logger.setLevel(Level.FINE);
 
 		boolean hasHandler = false;

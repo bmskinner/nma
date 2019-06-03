@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is the most primitive information an analysis dataset requires. This

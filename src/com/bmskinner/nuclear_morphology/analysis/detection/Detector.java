@@ -32,8 +32,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.PolygonRoi;
@@ -65,7 +63,7 @@ import ij.process.ShortStatistics;
  */
 public abstract class Detector {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of
                                                 // open or closed objects

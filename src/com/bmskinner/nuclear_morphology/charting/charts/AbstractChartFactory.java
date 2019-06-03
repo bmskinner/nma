@@ -40,7 +40,6 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for chart generation. Contains static methods to create loading and
@@ -50,7 +49,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public abstract class AbstractChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	/** The X and Y axis positive & negative range magnitude for empty charts  */
     protected static final int DEFAULT_EMPTY_RANGE         = 10;

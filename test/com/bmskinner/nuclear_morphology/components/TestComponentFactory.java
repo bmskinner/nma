@@ -4,7 +4,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import java.awt.Color;
-import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.util.UUID;
 

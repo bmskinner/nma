@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The interface for shell analysis results

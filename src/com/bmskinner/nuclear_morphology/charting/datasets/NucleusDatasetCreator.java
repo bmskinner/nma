@@ -74,7 +74,7 @@ import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String UNABLE_TO_GET_BORDER_POINT_ERROR = "Unable to get border point";
 	private static final String UNABLE_TO_GET_MEDIAN_PROFILE_ERROR = "Unable to get median profile";

@@ -53,7 +53,7 @@ public class Nuclear_Morphology_Analysis {
 	 * Keep a strong reference to the logger so they can be accessed
 	 * by all other classes implementing the Loggable interface
 	 */
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 //	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 

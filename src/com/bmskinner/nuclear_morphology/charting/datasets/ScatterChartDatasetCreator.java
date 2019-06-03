@@ -53,7 +53,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
     /**
      * Construct with an options

@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements ChangeListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String MIN_SIZE_LBL = "Min area (pixels)";
     private static final String MAX_SIZE_LBL = "Max fraction";

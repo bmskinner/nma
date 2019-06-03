@@ -15,12 +15,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.junit.Before;
 
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -32,7 +30,6 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for testing the charting functions. This provides methods for 
@@ -45,7 +42,7 @@ public abstract class ChartFactoryTest {
 	
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+		Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		logger.setLevel(Level.FINEST);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}

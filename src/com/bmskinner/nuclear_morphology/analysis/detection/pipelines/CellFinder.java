@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
      * Construct the finder using an options

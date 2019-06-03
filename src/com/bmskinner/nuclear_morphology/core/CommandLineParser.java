@@ -29,7 +29,6 @@ import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 
@@ -41,7 +40,7 @@ import ij.IJ;
  */
 public class CommandLineParser {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	/**
 	 * Construct with an array of parameters for the program 

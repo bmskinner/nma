@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Exporter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	/**
      * Create specifying the folder cell files will be exported into

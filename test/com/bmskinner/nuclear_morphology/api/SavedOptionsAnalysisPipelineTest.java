@@ -12,10 +12,8 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 /**
  * Test the workflows can save a valid dataset

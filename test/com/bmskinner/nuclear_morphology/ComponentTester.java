@@ -22,7 +22,6 @@ import org.junit.Before;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Base class for the component tests
@@ -39,7 +38,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	
 	@Before
 	public void setUp() throws Exception{
-		logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+		logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		for(Handler h : logger.getHandlers())
 			logger.removeHandler(h);
 

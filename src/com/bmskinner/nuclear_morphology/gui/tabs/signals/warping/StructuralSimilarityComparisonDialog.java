@@ -2,51 +2,27 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Rectangle;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.CategoryPlot;
 
-import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
-import com.bmskinner.ViolinPlots.ViolinRenderer;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
-import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
@@ -63,7 +39,7 @@ import ij.process.ImageProcessor;
  */
 public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 	

@@ -18,8 +18,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 /**
  * An implementation of the canny options using the hash options
  * 
@@ -29,7 +27,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DefaultCannyHashOptions extends AbstractHashOptions implements ICannyOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long serialVersionUID = 1L;
 

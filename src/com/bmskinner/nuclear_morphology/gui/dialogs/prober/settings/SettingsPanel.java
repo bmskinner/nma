@@ -35,7 +35,6 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEventListener;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The class from which all detection settings panels will derive
@@ -48,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public abstract class SettingsPanel extends JPanel
         implements OptionsChangeListener, PanelUpdatingEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     protected static final int BOX_WIDTH  = 80;
     protected static final int BOX_HEIGHT = 20;

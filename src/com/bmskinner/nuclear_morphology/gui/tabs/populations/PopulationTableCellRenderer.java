@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * @author ben

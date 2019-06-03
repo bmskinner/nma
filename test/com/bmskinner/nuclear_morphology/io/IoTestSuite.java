@@ -5,8 +5,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import com.bmskinner.nuclear_morphology.io.conversion.IoConversionTestSuite;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReaderTest;
-import com.bmskinner.nuclear_morphology.io.xml.XMLWriterTest;
 import com.bmskinner.nuclear_morphology.io.xml.IoXmlTestSuite;
 
 /**

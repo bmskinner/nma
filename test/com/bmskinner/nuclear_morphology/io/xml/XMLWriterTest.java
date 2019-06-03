@@ -2,7 +2,6 @@ package com.bmskinner.nuclear_morphology.io.xml;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,17 +9,10 @@ import java.util.UUID;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
-import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 public class XMLWriterTest {
 

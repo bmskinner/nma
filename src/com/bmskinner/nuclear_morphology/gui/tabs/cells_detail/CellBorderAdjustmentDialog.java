@@ -103,7 +103,7 @@ import ij.process.FloatPolygon;
 public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implements BorderPointEventListener,
          MouseListener, MouseMotionListener, MouseWheelListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private DualChartPanel dualPanel;
 

@@ -58,7 +58,7 @@ import ij.process.ImageProcessor;
  */
 public class Hough_Circles implements PlugInFilter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public int radiusMin;      // Find circles with radius grater or equal
                                // radiusMin

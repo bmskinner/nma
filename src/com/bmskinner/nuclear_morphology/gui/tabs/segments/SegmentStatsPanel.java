@@ -20,7 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.text.NumberFormat;
-import java.util.logging.Level;
 
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;

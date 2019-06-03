@@ -10,7 +10,6 @@ import com.bmskinner.nuclear_morphology.analysis.AnalysisTestSuite;
 import com.bmskinner.nuclear_morphology.api.ApiTestSuite;
 import com.bmskinner.nuclear_morphology.components.ComponentTestSuite;
 import com.bmskinner.nuclear_morphology.io.IoTestSuite;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This suite runs the test file creators, then runs the
@@ -29,6 +28,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 	})
 public class CreateAllTestFilesAndRunTests {
 	
-	static final Logger logger = Logger.getLogger(Loggable.ROOT_LOGGER);
+	static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 }

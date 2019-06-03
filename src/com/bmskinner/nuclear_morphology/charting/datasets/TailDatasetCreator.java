@@ -22,7 +22,6 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class TailDatasetCreator {
 

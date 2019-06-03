@@ -1,19 +1,13 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.jdom2.Document;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 

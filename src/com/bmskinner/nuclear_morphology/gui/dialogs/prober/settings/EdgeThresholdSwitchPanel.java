@@ -31,7 +31,6 @@ import javax.swing.JRadioButton;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Holds a canny settings panel and a threshold settings panel. Uses a card
@@ -44,7 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String THRESHOLD_LBL = "Threshold";
     private static final String EDGE_LBL      = "Edge detection";

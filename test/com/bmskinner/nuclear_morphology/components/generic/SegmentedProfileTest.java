@@ -18,12 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyRodentSpermNucleus;
 

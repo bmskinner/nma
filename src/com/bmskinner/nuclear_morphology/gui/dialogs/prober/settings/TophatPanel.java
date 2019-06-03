@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class TophatPanel extends SettingsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.ROOT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public static final Integer TOPHAT_RADIUS_MIN  = Integer.valueOf(1);
     public static final Integer TOPHAT_RADIUS_MAX  = Integer.valueOf(100);
