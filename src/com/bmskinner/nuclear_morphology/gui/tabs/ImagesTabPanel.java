@@ -199,6 +199,8 @@ public class ImagesTabPanel extends DetailPanel {
     	
     	ImageTreeNode datasetRoot = new ImageTreeNode(dataset.getName()+" ("+files.size()+")");
                 
+    	// We want the image names sorted 'sensibly', which is not the same as alphabetically.
+    	// An image s2 should be before s10
         // The only pattern to recognise for now is eg. "s12.tiff"
         Pattern p = Pattern.compile("^.?(\\d+)\\.tiff?$");
         
@@ -221,10 +223,9 @@ public class ImagesTabPanel extends DetailPanel {
                 	LOGGER.log(Loggable.STACK, "Error parsing number", e);
                     return f1.compareTo(f2);
                 }
-                
-            } else {
-                return f1.compareTo(f2);
             }
+            return f1.compareTo(f2);
+            
         };
         
         Comparator<File> defaultComp = (f1, f2) -> {

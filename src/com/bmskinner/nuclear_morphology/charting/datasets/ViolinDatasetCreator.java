@@ -115,7 +115,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             double[] stats = c.getRawValues(stat, CellularComponent.WHOLE_CELL, scale);
             List<Number> list = new ArrayList<Number>();
             for (double d : stats) {
-                list.add(new Double(d));
+                list.add(d);
             }
 
             ds.add(list, rowKey, colKey);
@@ -143,12 +143,11 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             String colKey = stat.toString();
 
             // Add the boxplot values
-
             double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
             List<Number> list = new ArrayList<Number>();
-            for (double d : stats) {
-                list.add(new Double(d));
-            }
+            for (double d : stats) 
+                list.add(d);
+            
             ds.add(list, rowKey, colKey);
         }
 
