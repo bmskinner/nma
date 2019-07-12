@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  * and UI options
  * 
  * @since 1.7.0
+ * @deprecated
  *
  */
 @Deprecated
@@ -53,18 +54,12 @@ public class AnalysisDataset implements IAnalysisDataset {
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final long          serialVersionUID = 1L;
-    private Map<UUID, AnalysisDataset> childCollections = new HashMap<UUID, AnalysisDataset>(); // hold
-                                                                                                // the
-                                                                                                // UUID
-                                                                                                // of
-                                                                                                // any
-                                                                                                // child
-                                                                                                // collections
+    private Map<UUID, AnalysisDataset> childCollections = new HashMap<>();
 
     // Other datasets associated with this dataset, that will need to be saved
     // out.
     // Includes merge sources. Scope for expansion
-    private Map<UUID, AnalysisDataset> otherCollections = new HashMap<UUID, AnalysisDataset>();
+    private Map<UUID, AnalysisDataset> otherCollections = new HashMap<>();
 
     private CellCollection thisCollection;
     private File           savePath;      // the file to save the analysis to
@@ -74,22 +69,16 @@ public class AnalysisDataset implements IAnalysisDataset {
     private Paint datasetColour = null; // use for colouring the dataset in
                                         // comparison with other datasets
 
-    private List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0); // hold
-                                                                                 // groups
-                                                                                 // of
-                                                                                 // cluster
-                                                                                 // results
+    private List<IClusterGroup> clusterGroups = new ArrayList<>(0); 
 
     // The ids of datasets merged to create this dataset. The IDs must be
     // present in
     // otherCollections
-    private List<UUID> mergeSources = new ArrayList<UUID>(0);
+    private List<UUID> mergeSources = new ArrayList<>(0);
 
     private File debugFile;
 
     private final Version version;
-
-    // private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
 
     private boolean isRoot = false; // is this a root dataset
 
@@ -118,11 +107,6 @@ public class AnalysisDataset implements IAnalysisDataset {
         this.version = new Version(Version.VERSION_MAJOR, Version.VERSION_MINOR, Version.VERSION_REVISION);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#duplicate()
-     */
     @Override
     public IAnalysisDataset duplicate() throws Exception {
         IAnalysisDataset result = new AnalysisDataset(this.getCollection());
@@ -130,46 +114,14 @@ public class AnalysisDataset implements IAnalysisDataset {
 
             result.getCollection().addCell(new DefaultCell(c));
         }
-
-        // TODO: Add child collections, clusters etc
-
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getLogHandler()
-     */
-//    @Override
-//    public Handler getLogHandler() throws Exception {
-//
-//        if (debugFile == null || !debugFile.exists()) {
-//            return null;
-//        }
-//
-////        Handler fileHandler = new DebugFileHandler(this.getDebugFile());
-//        fileHandler.setFormatter(new DebugFileFormatter());
-//
-//        return fileHandler;
-//    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getVersion()
-     */
     @Override
     public Version getVersion() {
         return this.version;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * analysis.IAnalysisDataset#addChildCollection(components.CellCollection)
-     */
     @Override
     public void addChildCollection(ICellCollection collection) {
         if (collection == null) {
@@ -184,11 +136,6 @@ public class AnalysisDataset implements IAnalysisDataset {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#addChildDataset(analysis.AnalysisDataset)
-     */
     @Override
     public void addChildDataset(IAnalysisDataset dataset) {
         if (dataset == null) {
@@ -309,7 +256,7 @@ public class AnalysisDataset implements IAnalysisDataset {
     @Override
     public Set<UUID> getAllChildUUIDs() {
         Set<UUID> idlist = this.getChildUUIDs();
-        Set<UUID> result = new HashSet<UUID>();
+        Set<UUID> result = new HashSet<>();
         result.addAll(idlist);
 
         for (UUID id : idlist) {
@@ -342,7 +289,7 @@ public class AnalysisDataset implements IAnalysisDataset {
     @Override
     public Set<IAnalysisDataset> getAllMergeSources() {
 
-        Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>();
+        Set<IAnalysisDataset> result = new HashSet<>();
 
         for (UUID id : getMergeSourceIDs()) {
 
@@ -356,25 +303,15 @@ public class AnalysisDataset implements IAnalysisDataset {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#addMergeSource(analysis.AnalysisDataset)
-     */
     @Override
     public void addMergeSource(IAnalysisDataset dataset) {
         this.mergeSources.add(dataset.getId());
         this.addAssociatedDataset(dataset);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getMergeSources()
-     */
     @Override
     public Set<IAnalysisDataset> getMergeSources() {
-        Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>();
+        Set<IAnalysisDataset> result = new HashSet<>();
 
         for (UUID id : mergeSources) {
             result.add(this.getAssociatedDataset(id));
@@ -382,29 +319,19 @@ public class AnalysisDataset implements IAnalysisDataset {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getMergeSourceIDs()
-     */
     @Override
     public Set<UUID> getMergeSourceIDs() {
-        Set<UUID> result = new HashSet<UUID>();
+        Set<UUID> result = new HashSet<>();
         for (UUID id : mergeSources) {
             result.add(id);
         }
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getAllMergeSourceIDs()
-     */
     @Override
     public Set<UUID> getAllMergeSourceIDs() {
 
-        Set<UUID> result = new HashSet<UUID>();
+        Set<UUID> result = new HashSet<>();
 
         for (UUID id : this.getMergeSourceIDs()) {
             result.addAll(getMergeSource(id).getAllMergeSourceIDs());
@@ -413,77 +340,35 @@ public class AnalysisDataset implements IAnalysisDataset {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasMergeSource(java.util.UUID)
-     */
     @Override
     public boolean hasMergeSource(UUID id) {
-        if (this.mergeSources.contains(id)) {
-            return true;
-        } else {
-            return false;
-        }
+    	return mergeSources.contains(id);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasMergeSource(analysis.IAnalysisDataset)
-     */
     @Override
     public boolean hasMergeSource(IAnalysisDataset dataset) {
         return this.hasMergeSource(dataset.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasMergeSources()
-     */
     @Override
     public boolean hasMergeSources() {
-        if (this.mergeSources.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
+        return !mergeSources.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getChildCount()
-     */
     @Override
     public int getChildCount() {
         return this.childCollections.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasChildren()
-     */
     @Override
     public boolean hasChildren() {
-        if (this.childCollections.size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+    	return !childCollections.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getChildDatasets()
-     */
     @Override
     public Collection<IAnalysisDataset> getChildDatasets() {
 
-        List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>(childCollections.size());
+        List<IAnalysisDataset> result = new ArrayList<>(childCollections.size());
 
         for (AnalysisDataset d : childCollections.values()) {
             result.add(d);
@@ -492,15 +377,10 @@ public class AnalysisDataset implements IAnalysisDataset {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getAllChildDatasets()
-     */
     @Override
     public List<IAnalysisDataset> getAllChildDatasets() {
 
-        List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>(0);
+        List<IAnalysisDataset> result = new ArrayList<>(0);
         for (IAnalysisDataset d : this.getChildDatasets()) { // the direct
                                                              // descendents of
                                                              // this dataset
@@ -513,66 +393,31 @@ public class AnalysisDataset implements IAnalysisDataset {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getCollection()
-     */
     @Override
     public CellCollection getCollection() {
         return this.thisCollection;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getAnalysisOptions()
-     */
     @Override
     public Optional<IAnalysisOptions> getAnalysisOptions() {
         return Optional.ofNullable(analysisOptions);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasAnalysisOptions()
-     */
     @Override
     public boolean hasAnalysisOptions() {
-        if (this.analysisOptions == null) {
-            return false;
-        } else {
-            return true;
-        }
+    	return analysisOptions!=null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
-     */
     @Override
     public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#addClusterGroup(components.ClusterGroup)
-     */
     @Override
     public void addClusterGroup(IClusterGroup group) {
         this.clusterGroups.add(group);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getMaxClusterGroupNumber()
-     */
     @Override
     public int getMaxClusterGroupNumber() {
         int number = 0;
@@ -589,7 +434,7 @@ public class AnalysisDataset implements IAnalysisDataset {
                 if (m.find()) {
                     String s = m.group(1);
 
-                    int n = Integer.valueOf(s);
+                    int n = Integer.parseInt(s);
                     if (n > number) {
                         number = n;
                     }
@@ -599,11 +444,6 @@ public class AnalysisDataset implements IAnalysisDataset {
         return number;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasCluster(java.util.UUID)
-     */
     @Override
     public boolean hasCluster(UUID id) {
 
@@ -634,48 +474,29 @@ public class AnalysisDataset implements IAnalysisDataset {
      */
     @Override
     public List<UUID> getClusterIDs() {
-        List<UUID> result = new ArrayList<UUID>();
+        List<UUID> result = new ArrayList<>();
         for (IClusterGroup g : this.clusterGroups) {
             result.addAll(g.getUUIDs());
         }
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasClusters()
-     */
     @Override
     public boolean hasClusters() {
-        if (this.clusterGroups != null && this.clusterGroups.size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+       return clusterGroups != null && !clusterGroups.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasClusterGroup(components.ClusterGroup)
-     */
     @Override
     public boolean hasClusterGroup(IClusterGroup group) {
         return clusterGroups.contains(group);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#refreshClusterGroups()
-     */
     @Override
     public void refreshClusterGroups() {
 
         if (this.hasClusters()) {
             // Find the groups that need removing
-            List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
+            List<IClusterGroup> groupsToDelete = new ArrayList<>();
             for (IClusterGroup g : this.getClusterGroups()) {
                 boolean clusterRemains = false;
 
@@ -788,82 +609,35 @@ public class AnalysisDataset implements IAnalysisDataset {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasChild(java.util.UUID)
-     */
     @Override
     public boolean hasChild(UUID child) {
-        if (this.childCollections.containsKey(child)) {
-            return true;
-        } else {
-            return false;
-        }
+    	return childCollections.containsKey(child);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#setDatasetColour(java.awt.Color)
-     */
     @Override
     public void setDatasetColour(Color colour) {
         this.datasetColour = colour;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getDatasetColour()
-     */
     @Override
     public Optional<Color> getDatasetColour() {
         return Optional.ofNullable( (Color)this.datasetColour);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#hasDatasetColour()
-     */
     @Override
     public boolean hasDatasetColour() {
-        return this.getDatasetColour() != null;
+    	return getDatasetColour().isPresent();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#toString()
-     */
-    // public ColourSwatch getSwatch() {
-    // return swatch;
-    // }
 
     @Override
     public String toString() {
         return this.getName();
     }
 
-    // /**
-    // * Set the swatch
-    // * @param swatch
-    // */
-    // public void setSwatch(ColourSwatch swatch) {
-    // this.swatch = swatch;
-    // }
-
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        // this.swatch = ColourSwatch.REGULAR_SWATCH;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#updateSourceImageDirectory(java.io.File)
-     */
     @Override
     public void updateSourceImageDirectory(File expectedImageDirectory) {
 
@@ -908,12 +682,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @return
      */
     private boolean checkName(File expectedImageDirectory, IAnalysisDataset dataset) {
-        if (dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName())) {
-            return true;
-        } else {
-            return false;
-        }
-
+         return dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName());
     }
 
     /**

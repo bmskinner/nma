@@ -144,7 +144,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             // Add the boxplot values
             double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
-            List<Number> list = new ArrayList<Number>();
+            List<Number> list = new ArrayList<>();
             for (double d : stats) 
                 list.add(d);
             
@@ -248,21 +248,21 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 List<Number> list = new ArrayList<>();
 
                 for (Nucleus n : collection.getNuclei()) {
-                	
+
                 	try {
 
-                    IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
+                		IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
 
-                    double length = 0;
-                    int indexLength = seg.length();
-                    double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                    length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
-                    list.add(length);
-                    
+                		double length = 0;
+                		int indexLength = seg.length();
+                		double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
+                		length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+                		list.add(length);
+
                 	} catch (UnavailableComponentException e) {
-                        LOGGER.log(Loggable.STACK, "Error fetching segment for nucleus "+n.getNameAndNumber(), e);
-                        throw new ChartDatasetCreationException("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
-                    }
+                		LOGGER.log(Loggable.STACK, "Error fetching segment for nucleus "+n.getNameAndNumber(), e);
+                		throw new ChartDatasetCreationException("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
+                	}
                 }
 
                 String rowKey = IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i;

@@ -419,12 +419,9 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
             this.label = label;
         }
 
+        @Override
         public String toString() {
-            if (enabled) {
-                return label;
-            } else {
-                return label + " (disabled)";
-            }
+        	return enabled ? label : label + " (disabled)";
         }
 
         public ImageIcon getSmallIcon() {

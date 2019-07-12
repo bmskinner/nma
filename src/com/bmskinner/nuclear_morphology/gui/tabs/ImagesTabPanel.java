@@ -193,7 +193,7 @@ public class ImagesTabPanel extends DetailPanel {
     	
     	// Each folder of images should be a node. Find the unique folders
     	List<File> parents = files.stream()
-    			.map(f->f.getParentFile())
+    			.map(File::getParentFile)
     			.distinct()
     			.collect(Collectors.toList());
     	
@@ -228,9 +228,7 @@ public class ImagesTabPanel extends DetailPanel {
             
         };
         
-        Comparator<File> defaultComp = (f1, f2) -> {
-        	return f1.compareTo(f2);
-        };
+        Comparator<File> defaultComp = (f1, f2) -> f1.compareTo(f2);
         
         
         for (File parent : parents) {
@@ -239,18 +237,16 @@ public class ImagesTabPanel extends DetailPanel {
         	
         	try{
         		inParent.sort(comp);
-        	} catch(IllegalArgumentException e){
+        	} catch(IllegalArgumentException e){ // not the expected format
         		inParent.sort(defaultComp);
         	}
         	ImageTreeNode parentNode = new ImageTreeNode(parent);
         	
-        	for (File f : inParent) {
-                String name = f.getName();
+        	for (File f : inParent)
                 parentNode.add(new ImageTreeNode(f));
-            }
+
             datasetRoot.add(parentNode);
         }
-        
         
         root.add(datasetRoot);
 
@@ -274,7 +270,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     private TreeSelectionListener makeListener() {
 
-    	TreeSelectionListener l = (TreeSelectionEvent e) -> {
+    	return (TreeSelectionEvent e) -> {
     		ImageTreeNode data = (ImageTreeNode) e.getPath().getLastPathComponent();
 
     		File f = data.getFile();
@@ -310,7 +306,6 @@ public class ImagesTabPanel extends DetailPanel {
     		ThreadManager.getInstance().submit(r);
 
     	};
-    	return l;
     }
 
     /**
@@ -318,7 +313,7 @@ public class ImagesTabPanel extends DetailPanel {
      * @return
      */
     private MouseListener makeDoubleClickListener(){
-    	MouseListener l = new MouseAdapter(){
+    	return new MouseAdapter(){
     		@Override
     		public void mouseClicked(MouseEvent e) {
 
@@ -338,41 +333,49 @@ public class ImagesTabPanel extends DetailPanel {
     	        if(node.isLeaf())
     	        	return; // folders only can be double clicked
     	        
-    	        File oldFolder = node.getFile();
-    	        
-    	        if(oldFolder==null)
-    	        	return;
+    	        updateImageFolder(node);
 
-
-    	        try {
-    	        	
-    	        	oldFolder = getExistingParent(oldFolder);
-    	        	File newFolder = getInputSupplier().requestFolder(oldFolder);
-    	        	node.setFile(newFolder); // update node
-
-    	        	Enumeration<ImageTreeNode> children = node.children();
-    	        	while(children.hasMoreElements()){
-    	        		ImageTreeNode imageData = children.nextElement(); 	        
-    	        		File imageFile = imageData.getFile();
-    	        		if(imageFile==null)
-    	        			continue;
-
-    	        		// Replace the source folder for all nuclei in the current image
-    	        		getDatasets().stream()
-	    	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
-	    	        		.flatMap(c->c.getNuclei().stream())
-	    	        		.forEach(n->n.setSourceFile(new File(newFolder, imageFile.getName())));
-    	        		imageData.setFile( new File(newFolder, imageFile.getName()));
-    	        	}
-    	        } catch (RequestCancelledException e1) {
-    	        	return;
-    	        }
     	        tree.repaint();
     	        getInterfaceEventHandler().fire(InterfaceEvent.of(this, InterfaceMethod.RECACHE_CHARTS));
     		}
 
     	};
-    	return l;
+    }
+    
+    /**
+     * Update the folder for the given node
+     * @param node thenode to be updated
+     */
+    private void updateImageFolder(ImageTreeNode node) {
+    	
+    	File oldFolder = node.getFile();
+        
+        if(oldFolder==null)
+        	return;
+    	try {
+        	
+        	oldFolder = getExistingParent(oldFolder);
+        	File newFolder = getInputSupplier().requestFolder(oldFolder);
+        	node.setFile(newFolder); // update node
+
+        	// Unchecked conversion here
+        	Enumeration<ImageTreeNode> children = node.children();
+        	while(children.hasMoreElements()){
+        		ImageTreeNode imageData = children.nextElement(); 	        
+        		File imageFile = imageData.getFile();
+        		if(imageFile==null)
+        			continue;
+
+        		// Replace the source folder for all nuclei in the current image
+        		getDatasets().stream()
+	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
+	        		.flatMap(c->c.getNuclei().stream())
+	        		.forEach(n->n.setSourceFile(new File(newFolder, imageFile.getName())));
+        		imageData.setFile( new File(newFolder, imageFile.getName()));
+        	}
+        } catch (RequestCancelledException e1) {
+        	// No action
+        }
     }
     
     /**

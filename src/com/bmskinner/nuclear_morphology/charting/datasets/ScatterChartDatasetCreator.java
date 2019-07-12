@@ -180,7 +180,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
             ICellCollection c = datasets.get(i).getCollection();
             SignalManager m = c.getSignalManager();
 
-            for (UUID id : m.getSignalGroupIDs()) {
+            for (@NonNull UUID id : m.getSignalGroupIDs()) {
 
                 ISignalGroup gp = c.getSignalGroup(id).get();
 
@@ -192,10 +192,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
                 List<INuclearSignal> list = m.getSignals(id);
 
                 for (int j = 0; j < signalCount; j++) {
-
                     xpoints[j] = list.get(j).getStatistic(statA, scale);
                     ypoints[j] = list.get(j).getStatistic(statB, scale);
-
                 }
 
                 double[][] data = { xpoints, ypoints };

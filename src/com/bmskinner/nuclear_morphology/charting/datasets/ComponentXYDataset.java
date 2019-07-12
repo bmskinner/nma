@@ -20,10 +20,6 @@ public class ComponentXYDataset<T> extends DefaultXYDataset {
 		super();
 	}
 	
-//	public Class getType() {
-//		return T;
-//	}
-	
 	/**
 	 * Add a series	
 	 * @param seriesKey the series key

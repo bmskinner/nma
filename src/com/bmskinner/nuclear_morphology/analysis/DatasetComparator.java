@@ -36,7 +36,7 @@ public class DatasetComparator {
 	 * Test if the datasets have the same values, except in ID
 	 * @param d1 the first dataset
 	 * @param d2 the second dataset
-	 * @return
+	 * @return true if the datasets are equal, false otherwise
 	 */
 	public boolean compare(@NonNull IAnalysisDataset d1, @NonNull IAnalysisDataset d2) {
 		LOGGER.fine("Comparing "+d1.getName()+" to "+d2.getName());

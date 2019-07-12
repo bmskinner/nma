@@ -509,33 +509,14 @@ public class AnalysisOptions implements IAnalysisOptions {
         edgeDetection.put(type, options);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisOptions#getCannyOptionTypes()
-     */
     public Set<String> getCannyOptionTypes() {
         return edgeDetection.keySet();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisOptions#hasCannyOptions(java.lang.String)
-     */
     public boolean hasCannyOptions(String type) {
-        if (this.edgeDetection.containsKey(type)) {
-            return true;
-        } else {
-            return false;
-        }
+    	return edgeDetection.containsKey(type);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisOptions#getNuclearSignalGroups()
-     */
     @Override
     public Set<UUID> getNuclearSignalGroups() {
         return signalDetection.keySet();
