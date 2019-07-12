@@ -233,9 +233,7 @@ public abstract class AbstractChartFactory {
 
         plot.getRenderer().setBaseToolTipGenerator(null);
         plot.getRenderer().setURLGenerator(null);
-//        chart.setAntiAlias(true);
         chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias()); // disabled for performance testing
-
         return chart;
     }
 

@@ -369,7 +369,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
             // All the set share this new id
             Set<DatasetSignalId> id2Set = pairedSignalGroups.get(id1);
             for (DatasetSignalId id2 : id2Set) {
-                LOGGER.finest( "Adding " + id2 + " to " + newID);
+                LOGGER.finest(()->String.format("Adding %s to %s",id2, newID));
                 mergedSignalGroups.put(id2, newID);
             }
         }
@@ -390,7 +390,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         
     }
 
-    //
     /**
      * Check if the new dataset filename already exists. If so, append _1 to the
      * end and check again

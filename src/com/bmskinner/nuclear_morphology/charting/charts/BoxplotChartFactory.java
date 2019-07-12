@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -98,7 +97,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
         String yLabel = options.getStat().label(options.getScale());
 
         JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false);
-        formatBoxplotChart(boxplotChart, options.getDatasets());
+        formatBoxplotChart(boxplotChart);
         return boxplotChart;
 
     }
@@ -106,8 +105,6 @@ public class BoxplotChartFactory extends AbstractChartFactory {
     /**
      * Create a segment length boxplot for the given segment name
      * 
-     * @param ds
-     *            the dataset
      * @return
      */
     private JFreeChart createSegmentBoxplot() {
@@ -151,9 +148,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
     /**
      * Create a signal boxplot with the given options
      * 
-     * @param options
      * @return
-     * @throws Exception
      */
     private JFreeChart createSignalStatisticBoxplot() {
 
@@ -205,11 +200,11 @@ public class BoxplotChartFactory extends AbstractChartFactory {
     }
 
     /**
-     * Apply the default formatting to a boxplot with list
+     * Apply the default formatting to a boxplot
      * 
-     * @param boxplot
+     * @param boxplot the boxplot
      */
-    private void formatBoxplotChart(JFreeChart boxplot, List<IAnalysisDataset> list) {
+    private void formatBoxplotChart(JFreeChart boxplot) {
         formatBoxplot(boxplot);
         CategoryPlot plot = boxplot.getCategoryPlot();
         BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();

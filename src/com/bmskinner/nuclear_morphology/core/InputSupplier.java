@@ -240,6 +240,8 @@ public interface InputSupplier {
 	 * @since 1.14.0
 	 *
 	 */
-	public class RequestCancelledException extends Exception {	}
+	public class RequestCancelledException extends Exception {
+		private static final long serialVersionUID = 1L;
+	}
 
 }

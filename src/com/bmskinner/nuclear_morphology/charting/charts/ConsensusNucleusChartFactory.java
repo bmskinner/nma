@@ -249,9 +249,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     
     /**
      * Get the maximum absolute range of the axes of the chart for
-     * the given dataset.
+     * the given component
      * 
-     * @param dataset the dataset to range test
+     * @param component the component to find the range for
      * @return the maximum range value
      */
     private double getConsensusChartRange(CellularComponent component) {
@@ -269,12 +269,12 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     }
     
     /**
-     * Get the maximum absolute range of the axes of the chart. The minimum
-     * returned value will be 1.
+     * Get the maximum absolute range of the axes of the chart given the existing datasets. 
+     * The minimum returned value will be 1. Checks the range for each dataset's consensus nucleus.
      * 
-     * @return the chart maximum range in x or y
+     * @return the chart maximum range value
      */
-    public double getconsensusChartRange() {
+    public double getConsensusChartRange() {
 
         double max = 1;
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -389,7 +389,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
         XYPlot plot = chart.getXYPlot();
 
-        double max = getconsensusChartRange();
+        double max = getConsensusChartRange();
 
         plot.getDomainAxis().setRange(-max, max);
         plot.getRangeAxis().setRange(-max, max);
