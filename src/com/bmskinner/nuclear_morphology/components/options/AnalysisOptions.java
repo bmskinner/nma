@@ -55,9 +55,9 @@ public class AnalysisOptions implements IAnalysisOptions {
     private double            minNucleusCirc;
     private double            maxNucleusCirc;
 
-    private Map<String, ICannyOptions> edgeDetection = new HashMap<String, ICannyOptions>(0);
+    private Map<String, ICannyOptions> edgeDetection = new HashMap<>();
 
-    private Map<UUID, INuclearSignalOptions> signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
+    private Map<UUID, INuclearSignalOptions> signalDetection = new HashMap<>();
 
     private boolean normaliseContrast = false;
 

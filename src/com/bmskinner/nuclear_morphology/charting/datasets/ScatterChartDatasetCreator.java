@@ -247,6 +247,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	}
     	
     	if(type.equals(ColourByType.CLUSTER)) {
+    		// colourGroup cannot be null here, we changed type earlier if it was
     		for(UUID childId : colourGroup.getUUIDs()) {
     			IAnalysisDataset childDataset = d.getChildDataset(childId);
     			List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
@@ -270,9 +271,6 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
         	xpoints[i] = n.getStatistic(tsne1);
         	ypoints[i] = n.getStatistic(tsne2);
         }
-
-
-    	double[][] data = { xpoints, ypoints };
-    	return data;
+    	return new double[][] { xpoints, ypoints };
     }
 }

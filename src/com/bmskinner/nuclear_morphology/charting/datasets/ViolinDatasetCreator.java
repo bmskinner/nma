@@ -113,7 +113,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             // Add the boxplot values
 
             double[] stats = c.getRawValues(stat, CellularComponent.WHOLE_CELL, scale);
-            List<Number> list = new ArrayList<Number>();
+            List<Number> list = new ArrayList<>();
             for (double d : stats) {
                 list.add(d);
             }
@@ -190,11 +190,10 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
                     List<Number> list = new ArrayList<>();
                     for (double value : values) {
-                        list.add(new Double(value));
+                        list.add(value);
                     }
-                    if(list.size()>0) {
+                    if(!list.isEmpty())
                         ds.add(list, rowKey, colKey);
-                    }
                 }
             }
         }
@@ -311,7 +310,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             	throw new ChartDatasetCreationException("Cannot get median profile");
             }
 
-            List<Number> list = new ArrayList<Number>(0);
+            List<Number> list = new ArrayList<>(0);
 
             for (Nucleus n : collection.getNuclei()) {
 

@@ -66,10 +66,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    /*
-     * STATIC DISPLAY VALUES
-     */
-    // public static final int DEFAULT_COLUMN_COUNT = 2;
+    /*  STATIC DISPLAY VALUES */
 
     protected static final String NULL_FILE_ERROR = "File is null";
 
@@ -85,19 +82,11 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
     private static final String LOOKING_LBL             = "Looking for images...";
     private static final double IMAGE_SCREEN_PROPORTION = 0.80;
 
-    /*
-     * PRIVATE VALUES
-     */
+    private Window parentWindow;
+    private JLabel imageLabel;
+    private JLabel headerLabel; // Basic info. Default to HEADER_LBL
 
-    private Window                           parent;
-    private JLabel                           imageLabel;
-    private JLabel                           headerLabel; // Basic info. Default to HEADER_LBL
-
-    private List<PanelUpdatingEventListener> updatingListeners = new ArrayList<PanelUpdatingEventListener>();
-
-    /*
-     * PROTECTED VALUES
-     */
+    private List<PanelUpdatingEventListener> updatingListeners = new ArrayList<>();
 
     protected Finder<?> finder;
 
@@ -125,7 +114,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
     public GenericImageProberPanel(File folder, Finder<?> finder, Window parent) throws MissingOptionException {
 
         this.folder = folder;
-        this.parent = parent;
+        this.parentWindow = parent;
         this.finder = finder;
         createUI();
     }
@@ -207,7 +196,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
     }
 
     protected Window getWindow() {
-        return parent;
+        return parentWindow;
     }
 
     /**
@@ -283,9 +272,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
         } else {
             fileIndex++;
         }
-        File f = imageFiles.get(fileIndex);
-        return f;
-
+        return imageFiles.get(fileIndex);
     }
 
     /**
@@ -301,8 +288,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
             fileIndex--;
         }
 
-        File f = imageFiles.get(fileIndex);
-        return f;
+        return imageFiles.get(fileIndex);
     }
 
     public void cancel() {
@@ -396,7 +382,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
                     if (selectedData != null) {
 
                         if (selectedData.getLargeIcon() != null) {
-                            new LargeImageDialog(selectedData, parent);
+                            new LargeImageDialog(selectedData, parentWindow);
                         }
                     }
 

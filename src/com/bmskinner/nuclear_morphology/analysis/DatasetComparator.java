@@ -42,34 +42,37 @@ public class DatasetComparator {
 		LOGGER.fine("Comparing "+d1.getName()+" to "+d2.getName());
 		if(d1==d2)
 			return true;
+		
+		// Using ()-> for lazy evaluation
+		
 		if(d1.isRoot() !=d2.isRoot()) {
-			LOGGER.fine(String.format("Difference in root: %s versus %s", d1.isRoot(), d2.isRoot()));
+			LOGGER.fine(()->String.format("Difference in root: %s versus %s", d1.isRoot(), d2.isRoot()));
 			return false;
 		}
 			
 		
 		if(!d1.getAnalysisOptions().equals(d2.getAnalysisOptions())) {
-			LOGGER.fine(String.format("Difference in options: %s versus %s", d1.getAnalysisOptions(), d2.getAnalysisOptions()));
+			LOGGER.fine(()->String.format("Difference in options: %s versus %s", d1.getAnalysisOptions(), d2.getAnalysisOptions()));
 			return false;
 		}
 		
 		if(d1.getChildCount()!=d2.getChildCount()) {
-			LOGGER.fine(String.format("Difference in child count: %s versus %s", d1.getChildCount(), d2.getChildCount()));
+			LOGGER.fine(()->String.format("Difference in child count: %s versus %s", d1.getChildCount(), d2.getChildCount()));
 			return false;
 		}
 		
 		if(!d1.getAllMergeSourceIDs().equals(d2.getMergeSourceIDs())) {
-			LOGGER.fine(String.format("Difference in merge source ids: %s versus %s", d1.getMergeSourceIDs(), d2.getMergeSourceIDs()));
+			LOGGER.fine(()->String.format("Difference in merge source ids: %s versus %s", d1.getMergeSourceIDs(), d2.getMergeSourceIDs()));
 			return false;
 		}
 		
 		if(!d1.getName().equals(d2.getName())) {
-			LOGGER.fine(String.format("Difference in name: %s versus %s", d1.getName(), d2.getName()));
+			LOGGER.fine(()->String.format("Difference in name: %s versus %s", d1.getName(), d2.getName()));
 			return false;
 		}
 		
 		if(!d1.getCollection().getCells().equals(d2.getCollection().getCells())) {
-			LOGGER.fine(String.format("Difference in cells: %s versus %s", d1.getCollection().getCells(), d2.getCollection().getCells()));
+			LOGGER.fine(()->String.format("Difference in cells: %s versus %s", d1.getCollection().getCells(), d2.getCollection().getCells()));
 			return false;
 		}
 		return true;
