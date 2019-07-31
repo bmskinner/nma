@@ -396,6 +396,12 @@
 			<groupId>com.github.lejon</groupId>
 			<artifactId>T-SNE-Java</artifactId>
 			<version>2.5.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.lejon.T-SNE-Java</groupId>
+					<artifactId>tsne-demos</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>fr.inra.ijpb</groupId>
