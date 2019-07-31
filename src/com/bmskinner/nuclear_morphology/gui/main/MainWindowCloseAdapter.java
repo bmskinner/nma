@@ -83,14 +83,16 @@ public class MainWindowCloseAdapter extends WindowAdapter {
     }
 
     public void close() {
+    	LOGGER.config("Clearing loaded datasets");
         DatasetListManager.getInstance().clear();
         GlobalOptions.getInstance().setDefaults();
-
+        LOGGER.config("Closing logging handlers");
         for (Handler h : Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).getHandlers()) {
             h.close();
         }
 
         mw.dispose();
+        LOGGER.config("Disposed GUI; quitting JVM");
         if (mw.isStandalone())
             System.exit(0);
     }
