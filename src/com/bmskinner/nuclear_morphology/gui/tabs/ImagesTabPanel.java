@@ -25,6 +25,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
@@ -46,6 +47,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -358,8 +360,7 @@ public class ImagesTabPanel extends DetailPanel {
         	File newFolder = getInputSupplier().requestFolder(oldFolder);
         	node.setFile(newFolder); // update node
 
-        	// Unchecked conversion here
-        	Enumeration<ImageTreeNode> children = node.children();
+        	Enumeration<ImageTreeNode> children = node.convertChildren();
         	while(children.hasMoreElements()){
         		ImageTreeNode imageData = children.nextElement(); 	        
         		File imageFile = imageData.getFile();
@@ -428,6 +429,20 @@ public class ImagesTabPanel extends DetailPanel {
     		name = f.getAbsolutePath();
     		
         }
+    	
+    	
+    	/**
+    	 * A conversion method to avoid casting the super.children()
+    	 * method directly (fails in Java 12).
+    	 * @return the converted enumeration
+    	 */
+    	public Enumeration<ImageTreeNode> convertChildren() {
+    		List<ImageTreeNode> list = new ArrayList<>();
+    		Enumeration<TreeNode> nodes = children();
+    		while(nodes.hasMoreElements())
+    			list.add((ImageTreeNode)nodes.nextElement());
+    		return Collections.enumeration(list);
+    	}
     	
     	@Override
 		public String toString() {
