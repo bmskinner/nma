@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.jujutsu.tsne.TSneConfiguration;
+import com.jujutsu.tsne.barneshut.BHTSne;
 import com.jujutsu.tsne.barneshut.BarnesHutTSne;
 import com.jujutsu.tsne.barneshut.ParallelBHTsne;
 import com.jujutsu.utils.TSneUtils;
@@ -82,7 +83,9 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 		double[][] profileMatrix = makeProfileMatrix(nuclei, initialDims);
 
 	    TSneConfiguration config = TSneUtils.buildConfig(profileMatrix, OUTPUT_DIMENSIONS, initialDims, perplexity, maxIterations);
-	    BarnesHutTSne tsne = new ParallelBHTsne(); // may not play well with the thread manager. If single thread, use BHTSne()
+	    BarnesHutTSne tsne = new BHTSne(); // ParallelBHTSne may not play well with the threading. 
+	    // Note that using ParallelBHTSne does not play nice with the OpenJDK 12:
+	    // Potentially dangerous stack overflow in ReservedStackAccess annotated method java.util.concurrent.locks.ReentrantLock$Sync.nonfairTryAcquire(I)Z
 		double [][] tSneResult = tsne.tsne(config); 
 		
 		// store this in the cell collection, attached to each cell. This is a temporary store - 
