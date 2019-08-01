@@ -173,9 +173,9 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         
         Map<Roi, StatsMap> rois = gd.getRois(img.duplicate());
-        LOGGER.fine("Image: "+imageFile.getName()+": "+rois.size()+" rois");
+        LOGGER.finer("Image: "+imageFile.getName()+": "+rois.size()+" rois");
         
-        for (Roi roi : rois.keySet()) {
+        for(Roi roi : rois.keySet()) {
             StatsMap s = rois.get(roi);
 
             try {
@@ -185,8 +185,8 @@ public class FluorescentNucleusFinder extends CellFinder {
             	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
             }
         }
+        LOGGER.finer("Detected nuclei in "+imageFile.getName());
         return list;
-
     }
 
     private synchronized Nucleus makeNucleus(final Roi roi, final File f,
@@ -221,6 +221,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         double prop = options.getProfileWindowProportion();
         result.initialise(prop);
         result.findPointsAroundBorder();
+        LOGGER.finer("Created nucleus from roi "+f.getName());
         return result;
     }
 

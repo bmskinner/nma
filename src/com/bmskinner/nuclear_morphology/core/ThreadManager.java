@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater;
 
+import ij.Prefs;
+
 /**
  * Manages the threading and task queue. Analysis methods and UI
  * updates are treated separately for smoother UI refreshes.
@@ -69,9 +71,8 @@ public class ThreadManager {
     	if(maxThreads>2) // if this is a dual core machine, we can't afford to be nice
     		maxThreads-=1; // otherwise, leave something for the OS, EDT etc.
     	
-    	    	
-    	int maxUiThreads = Math.max(1, maxThreads-1);
-    	int maxMethodThreads = Math.max(1, maxThreads-maxUiThreads);
+    	int maxMethodThreads = maxThreads<4 ? 1 : 2; //Math.max(1, maxThreads-maxUiThreads);   	
+    	int maxUiThreads = Math.max(1, maxThreads-maxMethodThreads);
     	
     	int maxForkJoinThreads =  Math.max(1, maxUiThreads-1); // ensure FJPs don't block the ui
     	System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", String.valueOf(maxForkJoinThreads));

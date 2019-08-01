@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOption
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
@@ -66,8 +67,10 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @see ImageProcessor#threshold(int)
      */
     public ImageFilterer threshold(int threshold) {
+    	LOGGER.finest("Running thresholding");
         if (ip.isGrayscale()) 
             ip.threshold(threshold);
+        LOGGER.finest("Ran thresholding");
         return this;
     }
 
@@ -79,7 +82,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return a new ImageFilterer with the processed image
      */
     public ImageFilterer kuwaharaFilter(int kernelRadius) {
-
+    	LOGGER.finest("Running Kuwahara filter");
         Kuwahara_Filter kw = new Kuwahara_Filter();
         ImagePlus img = new ImagePlus("", ip);
         kw.setup("", img);
@@ -88,6 +91,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 
         kw.filter(result, kernelRadius);
         ip = result;
+        LOGGER.finest("Ran Kuwahara filter");
         return this;
     }
 
@@ -132,7 +136,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return this filterer
      */
     public ImageFilterer setMaximumPixelValue(int threshold) {
-
+    	LOGGER.finest("Setting max pixel value");
         ImageProcessor result = ip.duplicate();
 
         for (int i = 0; i < result.getPixelCount(); i++) {
@@ -142,6 +146,7 @@ public class ImageFilterer extends AbstractImageFilterer {
             }
         }
         ip = result;
+        LOGGER.finest("Set max pixel value");
         return this;
     }
 
@@ -398,16 +403,21 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return a new ByteProcessor containing the closed image
      */
     public ImageFilterer close(int closingRadius) {
+    	LOGGER.finest("Running gap closing");
+    	LOGGER.finest("RankFilters threads: "+Prefs.getThreads());
 
     	// using the MorphoLibJ library
         ImageProcessor result = ip.convertToByteProcessor();
         
         Strel strel = DiskStrel.fromRadius(closingRadius);
-        
-        result = Morphology.dilation(result, strel);
+        LOGGER.finest("Dilating");
+        result = strel.dilation(result);
+
         fill(result);
-        result = Morphology.erosion(result, strel);
+        LOGGER.finest("Eroding");
+        result = strel.erosion(result);
         ip = result;
+        LOGGER.finest("Ran gap closing");
         return this;
     }
 
@@ -419,6 +429,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return this filterer with a new ByteProcessor containing the closed image
      */
     public ImageFilterer dilate(int amount) {
+    	LOGGER.finest("Running dilation");
     	// using the MorphoLibJ library
         ImageProcessor result = ip.convertToByteProcessor();
         
@@ -426,6 +437,7 @@ public class ImageFilterer extends AbstractImageFilterer {
         
         result = Morphology.dilation(result, strel);
         ip = result;
+        LOGGER.finest("Ran dilation");
         return this;
     }
 
@@ -436,6 +448,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @param ip the image to fill
      */
     private void fill(ImageProcessor ip) {
+    	LOGGER.finest("Running fill");
 
         int foreground = 255;
         int background = 0;
@@ -464,6 +477,7 @@ public class ImageFilterer extends AbstractImageFilterer {
             else
                 pixels[i] = (byte) foreground;
         }
+        LOGGER.finest("Ran fill");
     }
 
     /**
@@ -473,6 +487,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return this filterer with a new ByteProcessor containing the edge detected image
      */
     public ImageFilterer cannyEdgeDetection(@NonNull ICannyOptions options) {
+    	LOGGER.finest("Running Canny edge detection");
         ByteProcessor result = null;
 
         // // calculation of auto threshold
@@ -494,6 +509,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 
         converted = null;
         ip = result;
+        LOGGER.finest("Ran Canny edge detection");
         return this;
     }
 
@@ -505,7 +521,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      */
     public List<IPoint> houghCircleDetection(@NonNull IHoughDetectionOptions options) {
 
-        LOGGER.fine("Running hough detection");
+        LOGGER.finest("Running hough detection");
 
         Hough_Circles circ = new Hough_Circles();
 
@@ -519,18 +535,17 @@ public class ImageFilterer extends AbstractImageFilterer {
 
         circ.run(ip);
 
-        List<IPoint> list = new ArrayList<IPoint>();
+        List<IPoint> list = new ArrayList<>();
         Point[] points = circ.centerPoint;
 
         if (points != null) {
-
             for (Point p : points) {
                 if (p != null) {
-
                     list.add(IPoint.makeNew(p.getX(), p.getY()));
                 }
             }
         }
+        LOGGER.finest("Ran hough detection");
         return list;
     }
 

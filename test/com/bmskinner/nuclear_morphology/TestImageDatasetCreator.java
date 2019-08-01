@@ -43,6 +43,8 @@ import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 
+import ij.Prefs;
+
 /**
  * Generate the test datasets for the current version, which will be used for comparison
  * testing with older versions by other classes. This class should be run first in test
@@ -64,7 +66,7 @@ public class TestImageDatasetCreator {
 	@Before
 	public void setUp(){
 		logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		logger.setLevel(Level.FINE);
+		logger.setLevel(Level.FINEST);
 
 		boolean hasHandler = false;
 		for(Handler h : logger.getHandlers()) {
@@ -73,6 +75,8 @@ public class TestImageDatasetCreator {
 		}
 		if(!hasHandler)
 			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+		
+		Prefs.setThreads(2); // Attempt to avoid issue 162
 	}
 
 	

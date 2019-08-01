@@ -126,7 +126,9 @@ public class ConfigFileReader {
             
             if (GlobalOptions.IS_DEBUG_INTERFACE_KEY.equals(key))
                 op.setBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY, Boolean.valueOf(value));
-
+            
+            if(GlobalOptions.NUM_IMAGEJ_THREADS_KEY.equals(key))
+            	op.setInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY, Integer.valueOf(value));
         }
     }
 

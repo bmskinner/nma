@@ -110,7 +110,7 @@ public class Nuclear_Morphology_Analysis {
 
 			Handler consoleHander = new ConsoleHandler(new ConsoleFormatter());
 			LOGGER.addHandler(consoleHander);
-			consoleHander.setLevel(Level.FINE);
+			consoleHander.setLevel(Level.FINER);
 
 			/* Get the location of the jar file
 			 * and create a log file in the same

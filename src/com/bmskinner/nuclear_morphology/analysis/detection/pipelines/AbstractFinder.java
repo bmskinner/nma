@@ -44,9 +44,9 @@ import ij.process.ImageProcessor;
  */
 public abstract class AbstractFinder<E> implements Finder<E>{
 
-    protected volatile IAnalysisOptions             options;
-    protected volatile List<DetectionEventListener> detectionlisteners = new ArrayList<>();
-    protected volatile List<ProgressListener>       progressListeners  = new ArrayList<>();
+    protected IAnalysisOptions             options;
+    protected List<DetectionEventListener> detectionlisteners = new ArrayList<>();
+    protected List<ProgressListener>       progressListeners  = new ArrayList<>();
 
     /**
      * The minimum size of an object to detect for {@link Profileable} objects
@@ -56,8 +56,7 @@ public abstract class AbstractFinder<E> implements Finder<E>{
     /**
      * Construct with an analysis options
      * 
-     * @param op
-     *            the analysis options
+     * @param op the analysis options
      */
     public AbstractFinder(@NonNull final IAnalysisOptions op) {
         options = op;
@@ -142,10 +141,8 @@ public abstract class AbstractFinder<E> implements Finder<E>{
 
         ProgressEvent event = new ProgressEvent(this);
         Iterator<ProgressListener> iterator = progressListeners.iterator();
-        while (iterator.hasNext()) {
-
+        while (iterator.hasNext())
             iterator.next().progressEventReceived(event);
-        }
     }
 
 }

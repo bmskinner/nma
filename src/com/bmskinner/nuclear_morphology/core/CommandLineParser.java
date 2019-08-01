@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
 
 import ij.IJ;
+import ij.Prefs;
 
 /**
  * Handle arguments passed to the program via the command line.
@@ -86,6 +87,7 @@ public class CommandLineParser {
 		}
 		// load the config file
 		new ConfigFileReader();
+		Prefs.setThreads(GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY));
 
 		if(headless){
 			LOGGER.fine("Running headless");

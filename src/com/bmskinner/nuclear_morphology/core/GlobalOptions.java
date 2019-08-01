@@ -57,6 +57,9 @@ public class GlobalOptions extends AbstractHashOptions {
     public static final String IS_DOCKABLE_INTERFACE_KEY    = "DOCKABLE_INTERFACE";
     
     public static final String IS_DEBUG_INTERFACE_KEY    = "USE_DEBUG_INTERFACE";
+    
+    /** The number of threads that should be used by ImageJ's image filtering methods */
+    public static final String NUM_IMAGEJ_THREADS_KEY    = "NUM_IMAGEJ_THREADS";
 
     private File defaultDir; // where to fall back to for finding images or
                              // saving files
@@ -107,6 +110,7 @@ public class GlobalOptions extends AbstractHashOptions {
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
         setBoolean(IS_DOCKABLE_INTERFACE_KEY, true);
         setBoolean(IS_DEBUG_INTERFACE_KEY, false);
+        setInt(NUM_IMAGEJ_THREADS_KEY, 2);
         this.datasetExportFormat = ExportFormat.JAVA;
     }
 
