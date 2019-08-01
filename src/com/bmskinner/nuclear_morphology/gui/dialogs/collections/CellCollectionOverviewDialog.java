@@ -239,12 +239,18 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
     }
 
     private void makeNewCollection() {
+    	LOGGER.finer("Creating new collection from selected cells");
     	List<ICell> cells = model.getSelected();
+    	LOGGER.fine("Selection has "+cells.size()+" cells");
 
         ICellCollection newCollection = new VirtualCellCollection(dataset, dataset.getName() + "_Curated");
         for (ICell c : cells) {
-            newCollection.addCell(c);
+        	if(c==null)
+        		LOGGER.fine("Null cell encountered!");
+        	else
+        		newCollection.addCell(c);
         }
+        
         LOGGER.info("Added " + cells.size() + " cells to new collection");
 
         /* We don;t want to run a new profiling because this will bugger up the

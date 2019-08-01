@@ -53,14 +53,14 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 	public void setAllSelected(boolean b) {
 		for (int r = 0; r < getRowCount(); r++) 
             for (int c = 0; c <getColumnCount(); c++) 
-                setSelected(r, c,b);
+                setSelected(r, c, b);
 	}
 	
 	
 	/**
 	 * Set the selection of the given cell
-	 * @param c
-	 * @param b
+	 * @param c the cell to update
+	 * @param b the selection state
 	 */
 	public void setSelected(ICell c, boolean b) {
 		for (int row = 0; row < getRowCount(); row++) {
@@ -90,12 +90,16 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 	 * @param b
 	 */
 	public void setSelected(int r, int c, boolean b) {
-		Object o = getValueAt(r, c);
-		((SelectableCellIcon)o).setSelected(b);
+
+		SelectableCellIcon icon = (SelectableCellIcon)getValueAt(r, c);
+		if(icon.getCell()==null) // don't select empty table rows
+			return;
+		
+		icon.setSelected(b);
 		if(b)
-			selected.add(o);
+			selected.add(icon);
 		else
-			selected.remove(o);
+			selected.remove(icon);
 	}
 				
 	/**

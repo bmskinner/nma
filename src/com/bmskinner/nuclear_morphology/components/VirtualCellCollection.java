@@ -109,13 +109,13 @@ public class VirtualCellCollection implements ICellCollection {
 
     private transient ProfileManager profileManager = new ProfileManager(this);
     private transient SignalManager  signalManager  = new SignalManager(this);
-    private volatile transient StatsCache statsCache = new StatsCache();
+    private transient StatsCache statsCache = new StatsCache();
 
     /**
      * Create from a parent dataset, and provide a name
      * 
-     * @param parent
-     * @param name
+     * @param parent the parent dataset
+     * @param name the name of the new collection
      */
     public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name) {
         this(parent, name, UUID.randomUUID());
