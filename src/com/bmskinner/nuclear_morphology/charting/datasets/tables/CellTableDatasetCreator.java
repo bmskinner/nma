@@ -280,12 +280,14 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         rowData.add(n.getScale());
 
         addNuclearStatisticsToTable(fieldNames, rowData, n);
+        
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
         fieldNames.add("Original bounding width");
-        rowData.add(n.getBounds().getWidth());
+        rowData.add(df.format(n.getBounds().getWidth()));
 
         fieldNames.add("Original bounding height");
-        rowData.add(n.getBounds().getHeight());
+        rowData.add(df.format(n.getBounds().getHeight()));
 
         fieldNames.add("Nucleus CoM");
         rowData.add(n.getCentreOfMass().toString());
@@ -297,7 +299,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         rowData.add("x: " + n.getPosition()[0] + " : y: " + n.getPosition()[1]);
 
         fieldNames.add("Current nucleus position");
-        rowData.add("x: " + n.getMinX() + " : y: " + n.getMinY());
+        rowData.add("x: " + df.format(n.getMinX()) + " : y: " + df.format(n.getMinY()));
         
         fieldNames.add("Is RP clockwise?");
         rowData.add(n.isClockwiseRP());
