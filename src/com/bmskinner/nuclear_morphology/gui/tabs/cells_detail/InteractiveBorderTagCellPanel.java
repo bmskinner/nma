@@ -124,7 +124,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
 
 			for(Nucleus n : cell.getNuclei()){
-				an2.annotateTagsOnCroppedNucleus(n);
+				an2.annotatesignalsOnCroppedNucleus(n);
 			}    
 			
 			
@@ -194,100 +194,7 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			if(p==null)
 				return;
 			updateImage(p.getXAsInt(), p.getYAsInt());
-		}
-		
-		private synchronized void updateTag(Tag tag, int newIndex) {
-
-			ThreadManager.getInstance().execute(()->{
-				boolean wasLocked = cell.getNucleus().isLocked();
-				cell.getNucleus().setLocked(false);
-
-				cell.getNucleus().setBorderTag(tag, newIndex);
-				cell.getNucleus().updateVerticallyRotatedNucleus();
-
-				if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
-					cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
-				}
-				cell.getNucleus().updateDependentStats();
-				cell.getNucleus().setLocked(wasLocked);
-				dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
-				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
-				createImage();
-			});
-		}
-
-		private synchronized JPopupMenu createPopup(IBorderPoint point) {
-			List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
-			JPopupMenu popupMenu = new JPopupMenu("Popup");
-			Collections.sort(tags);
-
-			for (Tag tag : tags) {
-
-				if (tag.equals(Tag.INTERSECTION_POINT))
-					continue; // The IP is determined solely by the OP
-
-				JMenuItem item = new JMenuItem(tag.toString());
-
-				item.addActionListener(a -> {
-					int index = cell.getNucleus().getBorderIndex(point);
-					updateTag(tag, index);
-					repaint();
-				});
-				popupMenu.add(item);
-			}
-
-			// Find border tags with rulesets that have not been assigned in the median
-			List<Tag> unassignedTags = new ArrayList<Tag>();
-			for (Tag tag : BorderTagObject.values()) {
-				if (tag.equals(Tag.INTERSECTION_POINT))
-					continue;
-				if (!tags.contains(tag)) {
-					unassignedTags.add(tag);
-				}
-			}
-
-			if (!unassignedTags.isEmpty()) {
-				Collections.sort(unassignedTags);
-
-				popupMenu.addSeparator();
-
-				for (Tag tag : unassignedTags) {
-					JMenuItem item = new JMenuItem(tag.toString());
-					item.setForeground(Color.DARK_GRAY);
-
-					item.addActionListener(a -> {
-						int index = cell.getNucleus().getBorderIndex(point);
-						updateTag(tag, index);
-					});
-					popupMenu.add(item);
-				}
-			}
-			return popupMenu;
-		}
-
-		@Override
-		public synchronized void mouseClicked(MouseEvent e) {
-			if(imageLabel.getIcon()==null)
-				return;
-			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
-
-			Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
-					.stream().filter(p->{
-						return clickedPoint.getX()>=p.getX()-0.4 && 
-								clickedPoint.getX()<=p.getX()+0.4 &&
-								clickedPoint.getY()>=p.getY()-0.4 && 
-								clickedPoint.getY()<=p.getY()+0.4;
-						
-					})
-					.findFirst();
-
-			if(point.isPresent()) {
-				JPopupMenu popup = createPopup(point.get());
-				popup.show(imageLabel, e.getX(), e.getY());
-			}
-
-		}
-		
+		}		
 	}
 	
 	private void createMeshImage() {

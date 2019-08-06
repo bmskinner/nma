@@ -83,17 +83,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         warpMeshPanel.addActionListener(this);
         warpMeshPanel.setEnabled(false);
-        
-        WrappedLabel lbl1 = new WrappedLabel("Click a border point to reassign tags");
-        
+         
         JButton adjustBtn = new JButton("Adjust border");
         adjustBtn.addActionListener(e-> cellBorderAdjustmentDialog.load(getCellModel().getCell(), activeDataset()));
 
         panel.add(rotatePanel);
         panel.add(makeMeshPanel);
         panel.add(warpMeshPanel);
-        panel.add(Box.createHorizontalGlue());
-        panel.add(lbl1);
 //        panel.add(adjustBtn);
         
         return panel;

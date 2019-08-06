@@ -146,33 +146,10 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param n the nucleus to draw
      * @return this annotator
      */
-    public ImageAnnotator annotateTagsOnCroppedNucleus(final Nucleus n) {
+    public ImageAnnotator annotatesignalsOnCroppedNucleus(final Nucleus n) {
         
         try {
         	annotateOutlineOnCroppedComponent(n, Color.BLACK, 3);
-            
-            annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), Color.ORANGE, RP_POINT_SIZE);
-            annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER), Color.BLUE, BORDER_TAG_POINT_SIZE);
-            
-            
-            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
-                    n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), 
-                    Color.ORANGE, 3);
-            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                    , n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER)
-                    , Color.BLUE, 3);
-            
-            if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
-                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                        , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GREEN, 3);
-                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                        , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GREEN, 3);
-                
-                annotatePoint(n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, BORDER_TAG_POINT_SIZE);
-                annotatePoint(n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER), Color.GREEN, BORDER_TAG_POINT_SIZE);
-            }
             annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, RP_POINT_SIZE);
             annotateSignals(n);
 
@@ -194,6 +171,24 @@ public class ImageAnnotator extends AbstractImageFilterer {
         try {
             for(IBorderPoint p : n.getBorderList()) {
             	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
+            }
+            
+            // Draw lines for the border tags            
+            
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
+                    n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), 
+                    Color.ORANGE, 3);
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                    , n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER)
+                    , Color.BLUE, 3);
+            
+            if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
+                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                        , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                        , Color.GREEN, 3);
+                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                        , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                        , Color.GREEN, 3);
             }
             
             // Colour the border points for segments    

@@ -85,7 +85,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     private JPanel makeHeader() {
     	JPanel panel = new JPanel(new FlowLayout());
         
-        WrappedLabel lbl1 = new WrappedLabel("Click a border point to update segments");
+        WrappedLabel lbl1 = new WrappedLabel("Click a border point to update segments or border tags");
         panel.add(lbl1);    
         
         resegmentButton = new JButton("Resegment");

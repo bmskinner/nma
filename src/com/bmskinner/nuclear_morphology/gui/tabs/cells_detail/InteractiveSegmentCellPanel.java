@@ -26,6 +26,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +39,9 @@ import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -46,7 +50,9 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
@@ -58,15 +64,15 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.process.ImageProcessor;
 
 public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	
+
 	/** When a clicking a feature in an image, allow the clicked point to be 
 	 * this many pixels away from the true point */
 	private static final double POINT_CLICK_RADIUS_PIXELS = 0.4;
-	
+
 	protected List<SegmentEventListener> listeners = new ArrayList<>();
-	
+
 	public InteractiveSegmentCellPanel(CellUpdatedEventListener parent){
 		super(parent);
 		MouseAdapter mouseListener = new ImageMouseAdapter();
@@ -99,7 +105,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			for(Nucleus n : cell.getNuclei()){
 				an2.annotateSegmentsOnCroppedNucleus(n);
 			}    
-			
+
 			imageLabel.setIcon(an2.toImageIcon());
 			input = an2.toProcessor().getBufferedImage();
 			sourceWidth = an.toProcessor().getWidth();
@@ -107,29 +113,29 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		};
 		new Thread(u).start(); // avoid thread manager
 	}
-	
+
 	public synchronized void addSegmentEventListener(SegmentEventListener l) {
-        listeners.add(l);
-    }
+		listeners.add(l);
+	}
 
-    public synchronized void removeSegmentEventListener(SegmentEventListener l) {
-        listeners.remove(l);
-    }
+	public synchronized void removeSegmentEventListener(SegmentEventListener l) {
+		listeners.remove(l);
+	}
 
-    /**
-     * Fire a segmentation event
-     * @param id the segment to be altered
-     * @param index the index to be altered
-     * @param type the update type. Types are specified as static ints in SegmentEvent
-     */
-    protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
-        SegmentEvent e = new SegmentEvent(this, id, index, type);
+	/**
+	 * Fire a segmentation event
+	 * @param id the segment to be altered
+	 * @param index the index to be altered
+	 * @param type the update type. Types are specified as static ints in SegmentEvent
+	 */
+	protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
+		SegmentEvent e = new SegmentEvent(this, id, index, type);
 
-        for (SegmentEventListener l : listeners) {
-        	l.segmentEventReceived(e);
-        }
-    }
-		
+		for (SegmentEventListener l : listeners) {
+			l.segmentEventReceived(e);
+		}
+	}
+
 	/**
 	 * Respond to mouse inputs
 	 * @author bms41
@@ -138,26 +144,26 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 	 */
 	private class ImageMouseAdapter extends MouseAdapter {
 		@Override
-        public synchronized void mouseWheelMoved(MouseWheelEvent e) {
+		public synchronized void mouseWheelMoved(MouseWheelEvent e) {
 			if(imageLabel.getIcon()==null)
 				return;
-            if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
-                InputEvent.CTRL_DOWN_MASK){
-            	int temp = smallRadius +( 1*e.getWheelRotation());
-            	temp = temp>100?100:temp;
-            	temp = temp<5?5:temp;
-                smallRadius = temp;
-            } else {
-            	int temp = bigRadius +( 3 * e.getWheelRotation());
-            	temp = temp>200?200:temp;
-            	temp = temp<10?10:temp;
-            	bigRadius = temp;
-            }
-            IPoint p = translatePanelLocationToRenderedImage(e); 
+			if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
+					InputEvent.CTRL_DOWN_MASK){
+				int temp = smallRadius +( 1*e.getWheelRotation());
+				temp = temp>100?100:temp;
+				temp = temp<5?5:temp;
+				smallRadius = temp;
+			} else {
+				int temp = bigRadius +( 3 * e.getWheelRotation());
+				temp = temp>200?200:temp;
+				temp = temp<10?10:temp;
+				bigRadius = temp;
+			}
+			IPoint p = translatePanelLocationToRenderedImage(e); 
 			updateImage(p.getXAsInt(), p.getYAsInt());
-        }
-		
-		
+		}
+
+
 		@Override
 		public synchronized void mouseMoved(MouseEvent e){
 			if(imageLabel.getIcon()==null)
@@ -165,13 +171,13 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			IPoint p = translatePanelLocationToRenderedImage(e); 
 			updateImage(p.getXAsInt(), p.getYAsInt());
 		}
-		
+
 		@Override
 		public synchronized void mouseClicked(MouseEvent e) {
 			if(imageLabel.getIcon()==null)
 				return;
 			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
-			
+
 			// Not a circle around the valid point to click, but close enough
 			Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
 					.stream().filter(p->{
@@ -179,7 +185,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 								clickedPoint.getX()<=p.getX()+POINT_CLICK_RADIUS_PIXELS &&
 								clickedPoint.getY()>=p.getY()-POINT_CLICK_RADIUS_PIXELS && 
 								clickedPoint.getY()<=p.getY()+POINT_CLICK_RADIUS_PIXELS;
-						
+
 					})
 					.findFirst();
 
@@ -190,27 +196,47 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 		}
 		
+		private synchronized void updateTag(Tag tag, int newIndex) {
+
+			ThreadManager.getInstance().execute(()->{
+				boolean wasLocked = cell.getNucleus().isLocked();
+				cell.getNucleus().setLocked(false);
+
+				cell.getNucleus().setBorderTag(tag, newIndex);
+				cell.getNucleus().updateVerticallyRotatedNucleus();
+
+				if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
+					cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
+				}
+				cell.getNucleus().updateDependentStats();
+				cell.getNucleus().setLocked(wasLocked);
+				dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
+				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+				createImage();
+			});
+		}
+
 		private synchronized JPopupMenu createPopup(IBorderPoint point) {
 			JPopupMenu popupMenu = new JPopupMenu("Popup");
 			if(cell==null)
 				return popupMenu;
-			
+
 			try {
-				
+
 				int rawIndex = cell.getNucleus().getBorderIndex(point);
-				
+
 				int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
-				
+
 				// Get the index of the clicked point in the RP-indexed profile
 				int index = cell.getNucleus().wrapIndex(rawIndex-rpIndex);
 
 				IBorderSegment seg = cell.getNucleus().getProfile(ProfileType.ANGLE)
 						.getSegmentContaining(rawIndex);
 
-				
+
 				IBorderSegment prev = seg.prevSegment();
 				IBorderSegment next = seg.nextSegment();
-				
+
 				JMenuItem prevItem = new JMenuItem("Extend "+prev.getName()+" to here");
 				prevItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
 				prevItem.setBorderPainted(true);
@@ -224,11 +250,11 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				popupMenu.add(prevItem);
 
 				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
-				
+
 				JMenuItem nextItem = new JMenuItem("Extend "+next.getName()+" to here");
 				nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 3));
 				nextItem.setBorderPainted(true);
-				
+
 				nextItem.addActionListener(e->{
 					LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), index));
 					fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
@@ -237,31 +263,79 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				});
 				popupMenu.add(nextItem);
 				
+				popupMenu.addSeparator();
+				
+				List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+
+				Collections.sort(tags);
+
+				for (Tag tag : tags) {
+
+					if (tag.equals(Tag.INTERSECTION_POINT))
+						continue; // The IP is determined solely by the OP
+
+					JMenuItem item = new JMenuItem("Move "+tag.toString().toLowerCase()+" here");
+
+					item.addActionListener(a -> {
+						int pIndex = cell.getNucleus().getBorderIndex(point);
+						updateTag(tag, pIndex);
+						repaint();
+					});
+					popupMenu.add(item);
+				}
+
+				// Find border tags with rulesets that have not been assigned in the median
+				List<Tag> unassignedTags = new ArrayList<Tag>();
+				for (Tag tag : BorderTagObject.values()) {
+					if (tag.equals(Tag.INTERSECTION_POINT))
+						continue;
+					if (!tags.contains(tag)) {
+						unassignedTags.add(tag);
+					}
+				}
+
+				if (!unassignedTags.isEmpty()) {
+					Collections.sort(unassignedTags);
+
+					popupMenu.addSeparator();
+
+					for (Tag tag : unassignedTags) {
+						JMenuItem item = new JMenuItem("Set "+tag.toString().toLowerCase()+" here");
+						item.setForeground(Color.DARK_GRAY);
+
+						item.addActionListener(a -> {
+							int pIndex = cell.getNucleus().getBorderIndex(point);
+							updateTag(tag, pIndex);
+						});
+						popupMenu.add(item);
+					}
+				}
+
 			} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
 				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
 			}
 			return popupMenu;
 		}
-		
+
 	}
-	
+
 	@Override
 	protected synchronized void computeBulgeImage(BufferedImage input, int cx, int cy, 
-	        int small, int big, BufferedImage output){
-		
+			int small, int big, BufferedImage output){
+
 		int dx1 = cx-big; // the big rectangle
 		int dy1 = cy-big;
 		int dx2 = cx+big;
 		int dy2 = cy+big;
-		
+
 		int sx1 = cx-small; // the small source rectangle
 		int sy1 = cy-small;
 		int sx2 = cx+small;
 		int sy2 = cy+small;
-		
+
 		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
 
-		
+
 		// Find the point that was clicked
 		Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
 				.stream().filter(p->{
@@ -269,19 +343,42 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 							clickedPoint.getX()<=p.getX()+0.4 &&
 							clickedPoint.getY()>=p.getY()-0.4 && 
 							clickedPoint.getY()<=p.getY()+0.4;
-					
+
 				})
 				.findFirst();
 
 		Graphics2D g2 = output.createGraphics();
-		
+
 		g2.drawImage(input, 0, 0, null);
 		g2.drawImage(input, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
 		Color c = g2.getColor();
 		Stroke s = g2.getStroke();
-		
+
 		if(point.isPresent()) {
 			g2.setColor(Color.CYAN);
+			// Highlight the border depending on what border tags are present
+			try {
+
+				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
+						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.GREEN);
+				}
+				if(cell.getNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
+						cell.getNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.GREEN);
+				}
+				if(cell.getNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
+						cell.getNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.ORANGE);
+				}
+				if(cell.getNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
+						cell.getNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(Color.BLUE);
+				}
+
+			} catch (UnavailableBorderTagException e) {
+				// no action needed, colour remains cyan
+			}
 			g2.setStroke(new BasicStroke(3));
 		} else {
 			g2.setColor(Color.BLACK);
@@ -289,10 +386,10 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		}
 
 		g2.drawRect(dx1, dy1, big*2, big*2);
-		
+
 		g2.setColor(c);
 		g2.setStroke(s);
 	}
 
-	
+
 }
