@@ -499,11 +499,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     
     private String createNucleusCircFilterString(@Nullable IDetectionOptions nucleusOptions) {
     	StringBuilder builder = new StringBuilder();
+    	DecimalFormat formatter = new DecimalFormat("#.##");
     	if(nucleusOptions==null) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
-    	builder.append("Min: "+nucleusOptions.getMinCirc()+Io.NEWLINE+"Max: "+nucleusOptions.getMaxCirc());
+    	builder.append("Min: "+formatter.format(nucleusOptions.getMinCirc())+Io.NEWLINE+"Max: "+formatter.format(nucleusOptions.getMaxCirc()));
 		return builder.toString();
     }
     

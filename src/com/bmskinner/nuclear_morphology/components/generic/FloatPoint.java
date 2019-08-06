@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -181,7 +182,8 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
     @Override
     public String toString() {
-    	return getX() + " - " + getY();
+    	DecimalFormat df = new DecimalFormat("#0.##");
+    	return df.format(getX()) + " - " + df.format(getY());
     }
 
     @Override
