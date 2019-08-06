@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.table.DefaultTableModel;
@@ -323,6 +324,19 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 }
             }
         }
+        
+        try {
+        	ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Tag.REFERENCE_POINT);
+        	for(IBorderSegment s : sp.getOrderedSegments()) {
+        		fieldNames.add(s.getName());
+        		rowData.add(s.toString());
+        	}
+        } catch(Exception e) {
+        	LOGGER.log(Level.SEVERE, "Cannot get segmented cell profile", e);
+        	fieldNames.add("Segments");
+        	rowData.add("N/A");
+        }
+
 
         addNuclearSignalsToTable(fieldNames, rowData, n, d);
     }
