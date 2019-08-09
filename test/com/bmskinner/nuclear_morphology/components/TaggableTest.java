@@ -154,5 +154,16 @@ public class TaggableTest extends ComponentTester {
 		assertEquals("Default segment start", templateDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
 		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
 	}
+	
+	@Test
+	public void testSettingBorderTags() throws Exception {
+		
+		int rpIndex = taggable.getBorderIndex(Tag.REFERENCE_POINT);
+		
+		int newRpIndex = CellularComponent.wrapIndex(rpIndex+10, taggable.getBorderLength());
+		
+		taggable.setBorderTag(Tag.REFERENCE_POINT, newRpIndex);
+		assertEquals(newRpIndex, taggable.getBorderIndex(Tag.REFERENCE_POINT));
+	}
 
 }
