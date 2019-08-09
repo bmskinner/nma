@@ -200,14 +200,14 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 
                 // Create a new clusterer with the desired number of clusters
                 
-                HierarchicalClusterer hc2 = new HierarchicalClusterer();
+//                HierarchicalClusterer hc2 = new HierarchicalClusterer();
 
-                hc2.setOptions(optionArray); // set the options
-                hc2.setDistanceFunction(new EuclideanDistance());
-                hc2.setDistanceIsBranchLength(true);
-                hc2.setNumClusters(options.getClusterNumber());
-                hc2.buildClusterer(instances); // build the clusterer
-                assignClusters(hc2);
+//                hc2.setOptions(optionArray); // set the options
+//                hc2.setDistanceFunction(new EuclideanDistance());
+//                hc2.setDistanceIsBranchLength(true);
+                hc1.setNumClusters(options.getClusterNumber());
+                hc1.buildClusterer(instances); // build the clusterer
+                assignClusters(hc1);
             }
 
             if (options.getClusteringMethod().equals(ClusteringMethod.EM)) {

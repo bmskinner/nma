@@ -232,9 +232,8 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         // Create the attributes
         LOGGER.finer("Creating attributes");
         FastVector attributes = new FastVector(attributeCount);
-        
+        int profileAttCounter = 0;
         for(ProfileType t : ProfileType.displayValues()) {
-        	int profileAttCounter = 0;
         	if(options.getBoolean(t.toString()))    {	
         		LOGGER.finer("Creating attributes for profile " + t);
                 for (int i = 0; i < profileAttributeCount; i++) {
@@ -380,16 +379,16 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         int pointsToSample = (int) Math.floor(1d / windowProportion);
         
-        
         for(ProfileType t : ProfileType.displayValues()) {
+        	
         	if(options.getBoolean(t.toString()))    {	
         		LOGGER.finer("Adding attribute for "+t.toString());
         		// Interpolate the profile to the median length
                 IProfile p = n.getProfile(t, Tag.REFERENCE_POINT);
 
-                for (int profileAtt = 0; profileAtt < pointsToSample; profileAtt++) {
-                    Attribute att = (Attribute) attributes.elementAt(profileAtt);
-                    inst.setValue(att, p.get(profileAtt * windowProportion));
+                for (int i = 0; i < pointsToSample; i++) {
+                    Attribute att = (Attribute) attributes.elementAt(attNumber);
+                    inst.setValue(att, p.get(i * windowProportion));
                     attNumber++;
                 }
         	}
@@ -430,8 +429,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             Attribute att = (Attribute) attributes.elementAt(attNumber++);
             inst.setValue(att, uniqueName);
         }
-        
-
 
         instances.add(inst);
         cellToInstanceMap.put(inst, c.getId());
