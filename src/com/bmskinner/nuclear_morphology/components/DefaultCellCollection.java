@@ -666,31 +666,30 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
 			throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
+		
 		Set<Nucleus> list = this.getNuclei();
 
 		// No need to check profiles if there is only one nucleus
-		if (list.size() == 1) {
-			for (Nucleus p : list)
-				return p;
-		}
+		if (this.size() == 1)
+			return list.stream().findFirst().get();
 
 		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
 
-		Nucleus n = null;
+		Nucleus result = null;
 
-		double difference = Arrays.stream(getNormalisedDifferencesToMedianFromPoint(pointType)).max().orElse(0);
+		double difference = Double.MAX_VALUE;
 		for (Nucleus p : list) {
-			IProfile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
-			double nDifference = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
+			IProfile profile = p.getProfile(ProfileType.ANGLE, pointType);
+			double nDifference = profile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
 			if (nDifference < difference) {
 				difference = nDifference;
-				n = p;
+				result = p;
 			}
 		}
 
-		if (n == null)
+		if (result == null)
 			throw new ProfileException("Error finding nucleus similar to median");
-		return n;
+		return result;
 	}
 
 	/*
