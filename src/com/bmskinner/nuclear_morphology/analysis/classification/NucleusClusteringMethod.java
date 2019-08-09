@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 dataset.addChildCollection(c);
 
                 // attach the clusters to their parent collection
-                LOGGER.info("Cluster " + cluster + ": " + c.size() + " nuclei");
+                LOGGER.fine("Cluster " + cluster + ": " + c.size() + " nuclei");
                 IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
                 clusterDataset.setRoot(false);
 
@@ -121,6 +122,8 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 dataset.getCollection().setSharedCount(c, c.size());
 
                 list.add(clusterDataset);
+            } else {
+            	LOGGER.info("No cells assigned to cluster "+cluster);
             }
         }
         LOGGER.fine("Profiles copied to all clusters");
@@ -184,26 +187,27 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             }
 
             if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
-                HierarchicalClusterer clusterer = new HierarchicalClusterer();
+                HierarchicalClusterer hc1 = new HierarchicalClusterer();
 
-                clusterer.setOptions(optionArray); // set the options
-                clusterer.setDistanceFunction(new EuclideanDistance());
-                clusterer.setDistanceIsBranchLength(true);
-                clusterer.setNumClusters(1);
+                hc1.setOptions(optionArray);
+                hc1.setDistanceFunction(new EuclideanDistance());
+                hc1.setDistanceIsBranchLength(true);
+                hc1.setNumClusters(1); // this is only to get the tree
+                hc1.buildClusterer(instances);
+                hc1.setPrintNewick(true);
+                newickTree = hc1.graph();
+                LOGGER.finest(newickTree);
+                
+                // Create a new clusterer with the desired number of clusters
+                
+                HierarchicalClusterer hc2 = new HierarchicalClusterer();
 
-                LOGGER.finest( "Building clusterer for tree");
-                // firePropertyChange("Cooldown", getProgress(),
-                // Constants.Progress.FINISHED.code());
-                clusterer.buildClusterer(instances); // build the clusterer with
-                                                     // one cluster for the tree
-                clusterer.setPrintNewick(true);
-
-                this.newickTree = clusterer.graph();
-
-                clusterer.setNumClusters(options.getClusterNumber());
-                clusterer.buildClusterer(instances); // build the clusterer
-                assignClusters(clusterer);
-
+                hc2.setOptions(optionArray); // set the options
+                hc2.setDistanceFunction(new EuclideanDistance());
+                hc2.setDistanceIsBranchLength(true);
+                hc2.setNumClusters(options.getClusterNumber());
+                hc2.buildClusterer(instances); // build the clusterer
+                assignClusters(hc2);
             }
 
             if (options.getType().equals(ClusteringMethod.EM)) {
@@ -236,6 +240,8 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 			LOGGER.log(Loggable.STACK, "Unable to cluster cells", e1);
 			return;
 		}
+		
+		LOGGER.fine("Clustering found "+numberOfClusters+" clusters");
 
     	for (int i = 0; i <numberOfClusters ; i++) {
     		ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
@@ -249,8 +255,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     		try {
 
     			UUID cellID = entry.getValue();
-    			int clusterNumber = clusterer.clusterInstance(entry.getKey());
-
+    			int clusterNumber = clusterer.clusterInstance(entry.getKey());    			
     			ICellCollection cluster = clusterMap.get(clusterNumber);
 
     			// should never be null

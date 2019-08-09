@@ -113,11 +113,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
                 LOGGER.finer( "Clusterer is type " + options.getType());
                 for (String s : optionArray) {
-
                     LOGGER.finest( "Clusterer options: " + s);
                 }
 
-                // Cobweb clusterer = new Cobweb();
                 HierarchicalClusterer clusterer = new HierarchicalClusterer();
 
                 clusterer.setOptions(optionArray); // set the options
@@ -177,36 +175,45 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	protected FastVector makeAttributes() throws ClusteringMethodException{
     	
     	// Shortcuts if dimensional reduction is chosen
+    	LOGGER.finer("Checking if tSNE clustering is set");
     	if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY))
         	return makeTsneAttributes();
     	
+    	LOGGER.finer("Checking if PCA clustering is set");
     	if(options.getBoolean(IClusteringOptions.USE_PCA_KEY))
         	return makePCAttributes();   	
 
+    	LOGGER.finer("Creating attribute count on values directly");
         // Determine the number of attributes required
         int attributeCount = 0;
         int profileAttributeCount = 0;
 
+     // How many attributes per profile?  
         double profileWindow = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
+        if (dataset.hasAnalysisOptions()) 
+        	profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
+        
+        profileAttributeCount = (int) Math.floor(1d / profileWindow);
 
-        if (options.isIncludeProfile()) { // An attribute for each angle in the
-                                          // median profile, spaced <windowSize>
-                                          // apart          
-            if (dataset.hasAnalysisOptions()) 
-                profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
-
-            profileAttributeCount = (int) Math.floor(1d / profileWindow);
-            attributeCount += profileAttributeCount;
+        // An attribute for each index in each selected profile, spaced <windowSize> apart   
+        for(ProfileType t : ProfileType.displayValues()) {
+        	if(options.getBoolean(t.toString()))    {	
+        		LOGGER.finer("Creating attribute count for "+t.toString());
+        		attributeCount += profileAttributeCount;
+        	}
         }
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
-            if (options.isIncludeStatistic(stat))
+            if (options.isIncludeStatistic(stat)) {
+            	LOGGER.finer("Adding attribute count for "+stat);
                 attributeCount++;
+            }
         }
 
         Mesh<Nucleus> mesh = null;
 
         if(options.isIncludeMesh() && collection.hasConsensus()){
+        	LOGGER.finer("Adding attribute count for mesh");
             try {
 				mesh = new DefaultMesh(collection.getConsensus());
 				attributeCount += mesh.getFaces().size();
@@ -218,23 +225,29 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         }
 
         if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+        	LOGGER.finer("Adding attribute count for name - hierarchical only");
             attributeCount++;
         }
         
         // Create the attributes
-
+        LOGGER.finer("Creating attributes");
         FastVector attributes = new FastVector(attributeCount);
-
-        if (options.isIncludeProfile()) {
-            LOGGER.fine("Including profile " + options.getProfileType());
-            for (int i = 0; i < profileAttributeCount; i++) {
-                Attribute a = new Attribute("att_" + i);
-                attributes.addElement(a);
-            }
+        
+        for(ProfileType t : ProfileType.displayValues()) {
+        	int profileAttCounter = 0;
+        	if(options.getBoolean(t.toString()))    {	
+        		LOGGER.finer("Creating attributes for profile " + t);
+                for (int i = 0; i < profileAttributeCount; i++) {
+                    Attribute a = new Attribute("att_" + profileAttCounter);
+                    attributes.addElement(a);
+                    profileAttCounter++;
+                }
+        	}
         }
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
             if (options.isIncludeStatistic(stat)) {
+            	LOGGER.finer("Creating attribute for "+stat);
                 Attribute a = new Attribute(stat.toString());
                 attributes.addElement(a);
             }
@@ -242,7 +255,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         for (UUID segID : options.getSegments()) {
             if (options.isIncludeSegment(segID)) {
-                LOGGER.finer( "Including segment" + segID.toString());
+                LOGGER.finer( "Creating attribute for segment" + segID.toString());
                 Attribute a = new Attribute("att_" + segID.toString());
                 attributes.addElement(a);
             }
@@ -251,13 +264,14 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         if (options.isIncludeMesh() && collection.hasConsensus() && mesh!=null ){
 
             for (MeshFace face : mesh.getFaces()) {
-                LOGGER.finer( "Including face " + face.toString());
+                LOGGER.finer( "Creating attribute for face " + face.toString());
                 Attribute a = new Attribute("mesh_" + face.toString());
                 attributes.addElement(a);
             }
         }
 
         if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+        	LOGGER.finer("Creating attribute for name - hierarchical only");
             Attribute name = new Attribute("name", (FastVector) null);
             attributes.addElement(name);
         }
@@ -271,7 +285,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
      */
     @Override
 	protected Instances makeInstances() throws ClusteringMethodException {
-
+    	LOGGER.finer("Creating clusterable instances");
         double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options
             windowProportion = dataset.getAnalysisOptions().get().getProfileWindowProportion();
@@ -365,18 +379,20 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         Instance inst = new SparseInstance(attributes.size());
 
         int pointsToSample = (int) Math.floor(1d / windowProportion);
+        
+        
+        for(ProfileType t : ProfileType.displayValues()) {
+        	if(options.getBoolean(t.toString()))    {	
+        		LOGGER.finer("Adding attribute for "+t.toString());
+        		// Interpolate the profile to the median length
+                IProfile p = n.getProfile(t, Tag.REFERENCE_POINT);
 
-        if (options.isIncludeProfile()) {
-
-            // Interpolate the profile to the median length
-            IProfile p = n.getProfile(options.getProfileType(), Tag.REFERENCE_POINT);
-
-            for (int profileAtt = 0; profileAtt < pointsToSample; profileAtt++) {
-                Attribute att = (Attribute) attributes.elementAt(profileAtt);
-                inst.setValue(att, p.get(profileAtt * windowProportion));
-                attNumber++;
-            }
-
+                for (int profileAtt = 0; profileAtt < pointsToSample; profileAtt++) {
+                    Attribute att = (Attribute) attributes.elementAt(profileAtt);
+                    inst.setValue(att, p.get(profileAtt * windowProportion));
+                    attNumber++;
+                }
+        	}
         }
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
@@ -394,7 +410,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                 try {
                     length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
                 } catch (UnavailableComponentException e) {
-                	LOGGER.log(Loggable.STACK, "Unabel to find segment", e);
+                	LOGGER.log(Loggable.STACK, "Unable to find segment", e);
                 }
                 inst.setValue(att, length);
             }
