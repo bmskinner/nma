@@ -242,9 +242,10 @@ public class SignalWarpingModel extends DefaultTableModel{
 	}
 	
 	/**
-	 * Get the image for a given key.
-	 * @param k
-	 * @return
+	 * Get the image for a given key. This does not have thresholding
+	 * or pseudocolouring applied.
+	 * @param k the key of the image to fetch
+	 * @return the raw image for the key 
 	 */
 	public ImageProcessor getImage(WarpedImageKey k) {
 		return cache.get(k);
@@ -300,7 +301,8 @@ public class SignalWarpingModel extends DefaultTableModel{
     }
 	
 	/**
-     * Create an image for display
+     * Create an image for display. This applies thresholding and
+     * pseudocolouring.
      * 
      * @param image
      * @return

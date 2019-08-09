@@ -166,6 +166,10 @@ public class SignalWarpingDialogController {
 		chart.setChart(ch);
 	}
 
+	/**
+	 * Export the selected warped image with no chart decorations. The image is pseudocoloured,
+	 * enhanced and thresholded according to the settings in the key.
+	 */
 	public void exportImage() {
 		ImageProcessor ip = model.getDisplayImage(settingsPanel.isPseudocolour(), settingsPanel.isEnhance());
 		ip.flipVertical();
