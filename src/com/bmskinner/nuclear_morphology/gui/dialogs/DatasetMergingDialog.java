@@ -123,7 +123,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        upperPanel.add(new JLabel("Datasets have signals. Choose which signal groups to merge"));
+        upperPanel.add(new JLabel("Datasets have signals. Choose which signal groups (if any) to merge"));
 
         datasetBoxOne = new DatasetSelectionPanel(datasets);
         datasetBoxTwo = new DatasetSelectionPanel(datasets);
