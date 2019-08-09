@@ -142,11 +142,16 @@ public interface IClusteringOptions extends Serializable, HashOptions {
      */
     boolean isIncludeStatistic(PlottableStatistic stat);
 
-    boolean isIncludeProfile();
+    /**
+     * Test if the given profile type is to be included in clustering
+     * @param t the profile type to test
+     * @return true if the profile type is included, false otherwise
+     */
+    boolean isIncludeProfile(ProfileType t);
 
     boolean isUseSimilarityMatrix();
 
-    ClusteringMethod getType();
+    ClusteringMethod getClusteringMethod();
 
     /**
      * Get the desired number of hierarchical clusters
@@ -163,8 +168,6 @@ public interface IClusteringOptions extends Serializable, HashOptions {
     HierarchicalClusterMethod getHierarchicalMethod();
 
     int getIterations();
-
-    ProfileType getProfileType();
 
     boolean isIncludeMesh();
 

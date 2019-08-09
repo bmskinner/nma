@@ -1254,7 +1254,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     	
     	IClusteringOptions op = opn.get();
     	
-    	ClusteringMethod method = op.getType();
+    	ClusteringMethod method = op.getClusteringMethod();
     	builder.append(method+Io.NEWLINE);
     	if(method.equals(ClusteringMethod.EM)) {
     		builder.append(op.getIterations()+" iterations"+Io.NEWLINE);

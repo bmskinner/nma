@@ -111,7 +111,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
             try {
 
-                LOGGER.finer( "Clusterer is type " + options.getType());
+                LOGGER.finer( "Clusterer is type " + options.getClusteringMethod());
                 for (String s : optionArray) {
                     LOGGER.finest( "Clusterer options: " + s);
                 }
@@ -146,7 +146,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	FastVector attributes = new FastVector(2);
     	attributes.addElement(new Attribute("tSNE_X"));
     	attributes.addElement(new Attribute("tSNE_Y"));
-    	 if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+    	 if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
              Attribute name = new Attribute("name", (FastVector) null);
              attributes.addElement(name);
          }
@@ -164,7 +164,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     		attributes.addElement(new Attribute("PC_"+i));
 
     	
-    	 if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+    	 if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
              Attribute name = new Attribute("name", (FastVector) null);
              attributes.addElement(name);
          }
@@ -224,7 +224,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             
         }
 
-        if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+        if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
         	LOGGER.finer("Adding attribute count for name - hierarchical only");
             attributeCount++;
         }
@@ -270,7 +270,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             }
         }
 
-        if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+        if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
         	LOGGER.finer("Creating attribute for name - hierarchical only");
             Attribute name = new Attribute("name", (FastVector) null);
             attributes.addElement(name);
@@ -329,7 +329,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
     	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
     	
-    	if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+    	if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
             Attribute att = (Attribute) attributes.elementAt(attNumber++);
             inst.setValue(att, uniqueName);
@@ -350,7 +350,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     		inst.setValue(att, pc);
     	}
     	
-    	if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+    	if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
             Attribute att = (Attribute) attributes.elementAt(attNumber++);
             inst.setValue(att, uniqueName);
@@ -425,7 +425,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             }
         }
 
-        if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+        if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
             Attribute att = (Attribute) attributes.elementAt(attNumber++);
             inst.setValue(att, uniqueName);

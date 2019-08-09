@@ -75,10 +75,10 @@ public class ClusteringOptions implements IClusteringOptions {
      * @param oldOptions
      */
     public ClusteringOptions(IClusteringOptions oldOptions) {
-        this.type = oldOptions.getType();
+        this.type = oldOptions.getClusteringMethod();
         this.hierarchicalMethod = oldOptions.getHierarchicalMethod();
         this.useSimilarityMatrix = oldOptions.isUseSimilarityMatrix();
-        this.includeProfile = oldOptions.isIncludeProfile();
+        this.includeProfile = oldOptions.isIncludeProfile(ProfileType.ANGLE);
 
         for (PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats()) {
             statMap.put(stat, oldOptions.isIncludeStatistic(stat));
@@ -88,7 +88,7 @@ public class ClusteringOptions implements IClusteringOptions {
             segmentMap.put(i, oldOptions.isIncludeSegment(i));
         }
 
-        this.profileType = oldOptions.getProfileType();
+        this.profileType = includeProfile ? ProfileType.ANGLE : null;
         this.includeMesh = oldOptions.isIncludeMesh();
 
     }
@@ -180,16 +180,9 @@ public class ClusteringOptions implements IClusteringOptions {
         this.statMap.put(stat, b);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#
-     * isIncludeProfile()
-     */
     @Override
-    public boolean isIncludeProfile() {
-        return this.includeProfile;
+    public boolean isIncludeProfile(ProfileType t) {
+        return this.includeProfile && t.equals(ProfileType.ANGLE);
     }
 
     @Override
@@ -232,7 +225,7 @@ public class ClusteringOptions implements IClusteringOptions {
      * getType()
      */
     @Override
-    public ClusteringMethod getType() {
+    public ClusteringMethod getClusteringMethod() {
         return type;
     }
 
@@ -306,18 +299,6 @@ public class ClusteringOptions implements IClusteringOptions {
     @Override
     public int getIterations() {
         return iterations;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#
-     * getProfileType()
-     */
-    @Override
-    public ProfileType getProfileType() {
-        return profileType;
     }
 
     @Override

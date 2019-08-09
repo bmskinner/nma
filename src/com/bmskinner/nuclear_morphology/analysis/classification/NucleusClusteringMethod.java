@@ -186,7 +186,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 LOGGER.finest( "Clusterer options: " + s);
             }
 
-            if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+            if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
                 HierarchicalClusterer hc1 = new HierarchicalClusterer();
 
                 hc1.setOptions(optionArray);
@@ -210,7 +210,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 assignClusters(hc2);
             }
 
-            if (options.getType().equals(ClusteringMethod.EM)) {
+            if (options.getClusteringMethod().equals(ClusteringMethod.EM)) {
                 EM clusterer = new EM(); // new instance of clusterer
                 clusterer.setOptions(optionArray); // set the options
                 clusterer.buildClusterer(instances); // build the clusterer

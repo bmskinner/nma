@@ -53,6 +53,8 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 
 		for (PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats())
 			setBoolean(stat.toString(), false);
+		
+		setBoolean(DEFAULT_PROFILE_TYPE.toString(), DEFAULT_INCLUDE_PROFILE);
 	}
 
 	public DefaultClusteringOptions(@NonNull IClusteringOptions oldOptions) {
@@ -90,9 +92,9 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 
 
 	@Override
-	public boolean isIncludeProfile() {
-		if(boolMap.containsKey(INCLUDE_PROFILE_KEY))
-			return boolMap.get(INCLUDE_PROFILE_KEY);
+	public boolean isIncludeProfile(ProfileType t) {
+		if(boolMap.containsKey(t.toString()))
+			return boolMap.get(t.toString());
 		return false;
 	}
 
@@ -104,7 +106,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	}
 
 	@Override
-	public ClusteringMethod getType() {
+	public ClusteringMethod getClusteringMethod() {
 		if(stringMap.containsKey(CLUSTER_METHOD_KEY))
 			return ClusteringMethod.valueOf(stringMap.get(CLUSTER_METHOD_KEY));
 		return null;
@@ -131,12 +133,12 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 		return 0;
 	}
 
-	@Override
-	public ProfileType getProfileType() {
-		if(stringMap.containsKey(PROFILE_TYPE_KEY))
-			return ProfileType.valueOf(stringMap.get(PROFILE_TYPE_KEY));
-		return null;
-	}
+//	@Override
+//	public ProfileType getProfileType() {
+//		if(stringMap.containsKey(PROFILE_TYPE_KEY))
+//			return ProfileType.valueOf(stringMap.get(PROFILE_TYPE_KEY));
+//		return null;
+//	}
 
 	@Override
 	public boolean isIncludeMesh() {
@@ -149,13 +151,13 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	public String[] getOptions() {
 		String[] options = null;
 
-        if (this.getType().equals(ClusteringMethod.EM)) {
+        if (this.getClusteringMethod().equals(ClusteringMethod.EM)) {
             options = new String[2];
             options[0] = "-I"; // max. iterations
             options[1] = String.valueOf(getIterations());
         }
 
-        if (this.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+        if (this.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             options = new String[4];
             options[0] = "-N"; // number of clusters
             options[1] = String.valueOf(getClusterNumber());
