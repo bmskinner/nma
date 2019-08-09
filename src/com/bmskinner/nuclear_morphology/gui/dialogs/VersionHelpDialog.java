@@ -6,8 +6,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -26,6 +29,7 @@ import javax.swing.UIManager;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.main.MainView;
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 
 /**
@@ -36,7 +40,7 @@ import com.bmskinner.nuclear_morphology.io.Io;
  */
 public class VersionHelpDialog extends SettingsDialog {
 		
-	private static final Logger LOGGER = Logger.getLogger(VersionHelpDialog.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String DIALOG_TITLE = "About";
 	private static final String SITE_URL     = "https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Home/";
@@ -49,10 +53,13 @@ public class VersionHelpDialog extends SettingsDialog {
 
 	        this.setLayout(new BorderLayout());
 	        this.setTitle(DIALOG_TITLE);
-	        
-	        this.add(createMainPanel(), BorderLayout.CENTER);
-	        this.add(createFooter(), BorderLayout.SOUTH);
-
+	        	        
+	        try {
+	        	this.add(createMainPanel(), BorderLayout.CENTER);
+	        	this.add(createFooter(), BorderLayout.SOUTH);
+	        } catch(Exception e) {
+	        	LOGGER.log(Loggable.STACK, "Error creating help dialog", e);
+	        }
 	        this.setLocationRelativeTo(null);
 	        this.setMinimumSize(new Dimension(100, 70));
 	        
@@ -99,22 +106,17 @@ public class VersionHelpDialog extends SettingsDialog {
 	 
 	 private String readTextFile(String fileName) {
 		 ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-
-		 URL urlToFile = classLoader.getResource(fileName);
-		 String path = urlToFile.getPath();
-		 path = path.replaceAll("%20", " "); // spaces converted to %20 in URL
-		 LOGGER.fine("Path to license file: "+path);
-
-		 File pathToLicenses = new File(path);
-		 if(!pathToLicenses.exists())
-			 LOGGER.fine("Cannot find "+pathToLicenses);
+		 
+		 // Cannot use a URI since it will break when packaged to exe
+		 InputStream in = getClass().getResourceAsStream(fileName); 
+		 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
 		 StringBuilder sb = new StringBuilder();
-		 try (Stream<String> lines = Files.lines(pathToLicenses.toPath(), StandardCharsets.UTF_8)) {
+		 try (Stream<String> lines = reader.lines()) {
 			 lines.forEachOrdered(l->sb.append(l+Io.NEWLINE));
-		 } catch(IOException e) {
+		 } catch(Exception e) {
 			 LOGGER.fine("Cannot read license text");
-			 sb.append("Unable to read license file");
+			 sb.append("Unable to read text file");
 		 }
 		 return sb.toString();
 	 }
@@ -123,7 +125,7 @@ public class VersionHelpDialog extends SettingsDialog {
 		 JTextArea textBox = new JTextArea();
 		 textBox.setFont(UIManager.getFont("Label.font"));
 
-		 String fileName = "licenses/GNU-GPLv3.txt";
+		 String fileName = "/licenses/GNU-GPLv3.txt";
 
 		 textBox.setText(readTextFile(fileName));
 		 textBox.setEditable(false);
@@ -136,7 +138,7 @@ public class VersionHelpDialog extends SettingsDialog {
 		 JTextArea textBox = new JTextArea();
 		 textBox.setFont(UIManager.getFont("Label.font"));
 
-		 String fileName = "licenses/DependencyLicenses.txt";
+		 String fileName = "/licenses/DependencyLicenses.txt";
 		 
 		 textBox.setText(readTextFile(fileName));
 		 textBox.setEditable(false);
