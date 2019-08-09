@@ -117,6 +117,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			LOGGER.fine("Coercing RP to zero, round " + coercionCounter);
 			rpIndex = coerceRPToZero(collection);
 		}
+		if(coercionCounter==MAX_COERCION_ATTEMPTS && rpIndex!=0)
+			LOGGER.fine("Unable to coerce RP to index zero");
 		
 		identifyNonCoreTags(collection);
 	}
