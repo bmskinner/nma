@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 
@@ -34,16 +35,14 @@ public abstract class ComponentTester extends FloatArrayTester {
 	protected static final long RNG_SEED = 1234;
 	protected static final int N_CELLS = 10;
 	protected static final int N_CHILD_DATASETS = 2;
-	protected Logger logger;
+	protected static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	@Before
 	public void setUp() throws Exception{
-		logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		for(Handler h : logger.getHandlers())
 			logger.removeHandler(h);
-
-		Handler h = new ConsoleHandler(new LogPanelFormatter());
-		h.setLevel(Level.FINE);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		h.setLevel(Level.FINEST);
 		logger.addHandler(h);
 	}
 	

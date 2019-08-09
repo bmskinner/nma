@@ -54,12 +54,11 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
     private static final UUID CHILD_ID_NULL = UUID.fromString("00000000-0000-0000-0000-000000000000");
     
-    
     @Rule
     public final ExpectedException exception = ExpectedException.none();
     
     @Before
-    public void loadDataset() throws Exception {
+    public void loadDataset() throws Exception {    	
     	d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 				.ofType(NucleusType.ROUND)
 				.withMaxSizeVariation(10)
@@ -163,12 +162,12 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 
     @Test
     public void testHasChildIAnalysisDataset() {
-        
+        //TODO
     }
 
     @Test
     public void testHasChildUUID() {
-    	
+    	//TODO
     }
 
 }

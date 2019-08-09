@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
@@ -32,6 +33,8 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
  *
  */
 public class TestDatasetBuilder {
+	
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public static final String TEST_DATASET_NAME = "Test";
 	public static final String TEST_DATASET_IMAGE_FOLDER = "Image folder";
@@ -117,7 +120,7 @@ public class TestDatasetBuilder {
 	 * @throws Exception
 	 */
 	public IAnalysisDataset build() throws Exception {
-				
+		LOGGER.finest("Building dataset");		
 		switch(nucleusShape) {
 		case SQUARE: 
 		default: d = createRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
@@ -129,6 +132,7 @@ public class TestDatasetBuilder {
 			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
 		
 		if(nClusters>0) {
+			LOGGER.finest("Clustering dataset");		
 			IClusteringOptions o = OptionsFactory.makeClusteringOptions();
 			o.setClusterNumber(nClusters);
 			new NucleusClusteringMethod(d, o).call();
