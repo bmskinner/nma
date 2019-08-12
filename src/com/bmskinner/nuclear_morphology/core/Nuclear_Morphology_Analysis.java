@@ -106,11 +106,11 @@ public class Nuclear_Morphology_Analysis {
 			for(Handler h : LOGGER.getHandlers())
 				LOGGER.removeHandler(h);
 			
-			LOGGER.setLevel(Level.FINE);
+			LOGGER.setLevel(Level.FINER);
 
 			Handler consoleHander = new ConsoleHandler(new ConsoleFormatter());
 			LOGGER.addHandler(consoleHander);
-			consoleHander.setLevel(Level.FINER);
+			consoleHander.setLevel(Level.FINE);
 
 			/* Get the location of the jar file
 			 * and create a log file in the same
@@ -127,7 +127,7 @@ public class Nuclear_Morphology_Analysis {
 			// Log stack traces to the log file for debugging
 			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
 			LOGGER.addHandler(fileHandler);
-			fileHandler.setLevel(Loggable.STACK);			
+			fileHandler.setLevel(Level.FINE);			
 			ThreadManager.getInstance();
 			
 		} catch (SecurityException |IOException e ) {
