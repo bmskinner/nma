@@ -61,6 +61,7 @@ import javax.swing.text.ViewFactory;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetRepairer;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
@@ -277,21 +278,37 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
     
 
-    private void validateDatasets() {
+    private void validateDatasets(boolean isDetail) {
 
         DatasetValidator v = new DatasetValidator();
         for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
             LOGGER.info("Validating " + d.getName() + "...");
             if (!v.validate(d)) {
-                for (String s : v.getErrors()) {
-                	LOGGER.warning(s);
-                }
+            	
+            	if(isDetail) {
+            		for (String s : v.getErrors()) {
+                    	LOGGER.warning(s);
+                    }
+            	} else {
+            		for (String s : v.getSummary()) {
+                    	LOGGER.warning(s);
+                    }
+            		LOGGER.warning("Use 'check detail' for full list of errors");
+            	}                
             } else {
             	LOGGER.info("Dataset OK");
             }
 
         }
+    }
+    
+    private void repairDatasets() {
 
+        DatasetRepairer r = new DatasetRepairer();
+        for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
+            LOGGER.info("Repairing " + d.getName() + "...");
+            r.repair(d);
+        }
     }
 
     @Override
@@ -366,12 +383,14 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
         private static final String HIST_CMD  = "history";
         private static final String CHECK_CMD = "check";
+        private static final String CHECK_DETAIL_CMD = "check detail";
+        private static final String REPAIR_BASIC_CMD = "repair"; // fix existing issues without resegmenting
         private static final String HELP_CMD  = "help";
         private static final String CLEAR_CMD = "clear";
         private static final String THROW_CMD = "throw";
         private static final String LIST_CMD  = "list";
         private static final String KILL_CMD  = "kill";
-        private static final String REPAIR_CMD  = "unfuck";
+        private static final String REPAIR_CMD  = "unfuck"; // start from scratch
         private static final String TASKS_CMD  = "tasks";
         private static final String HASH_CMD  = "check hash";
         private static final String EXPORT_CMD = "export xml";
@@ -464,7 +483,9 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
                 }
             });
             
-            runnableCommands.put(CHECK_CMD,  () -> validateDatasets());
+            runnableCommands.put(CHECK_CMD,  () -> validateDatasets(false));
+            runnableCommands.put(CHECK_DETAIL_CMD,  () -> validateDatasets(true));
+            runnableCommands.put(REPAIR_BASIC_CMD,  () -> repairDatasets());
             runnableCommands.put(CLEAR_CMD,  () -> clear());
             runnableCommands.put(LIST_CMD,   () -> listDatasets());
             runnableCommands.put(KILL_CMD,   () -> killAllTasks());
