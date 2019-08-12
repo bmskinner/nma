@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -154,13 +154,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param c
      * @throws UnprofilableObjectException
      */
-    protected ProfileableCellularComponent(@NonNull final ProfileableCellularComponent c) throws UnprofilableObjectException {
+    protected ProfileableCellularComponent(@NonNull final ProfileableCellularComponent c) {
     	 super(c);
 
     	 this.angleWindowProportion = c.angleWindowProportion;
          this.angleProfileWindowSize = c.angleProfileWindowSize;
          for(Tag t : c.borderTags.keySet())
-        	 borderTags.put(t, c.borderTags.get(t).intValue());
+        	 borderTags.put(t, c.borderTags.get(t));
          this.segsLocked = c.segsLocked;
          
          for (ProfileType type : c.profileMap.keySet()) {
@@ -174,16 +174,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
          }
     }
     
-
-    /*
-     * Finds the key points of interest around the border of the Nucleus. Can
-     * use several different methods, and take a best-fit, or just use one. The
-     * default in a round nucleus is to get the longest diameter and set this as
-     * the head/tail axis.
-     */
-    @Override
-	public abstract void findPointsAroundBorder() throws ComponentCreationException;
-
     @Override
 	public void initialise(double proportion) throws ComponentCreationException {
         if (proportion <= 0 || proportion >= 1)
@@ -276,11 +266,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public Tag getBorderTag(int index) {
-
-        for (Tag b : this.borderTags.keySet()) {
-            if (this.borderTags.get(b) == index) {
-                return b;
-            }
+        for (Entry<Tag, Integer> entry : borderTags.entrySet()) {
+            if (entry.getValue() == index)
+                return entry.getKey();
         }
         return null;
     }
@@ -301,8 +289,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if (segsLocked)
             return;
         borderTags.clear();
-        for(Tag t : m.keySet())
-        	borderTags.put(t, m.get(t).intValue());
+        for(Entry<Tag, Integer> entry : m.entrySet())
+        	borderTags.put(entry.getKey(), entry.getValue());
     }
 
     @Override
@@ -340,7 +328,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 
         } catch (UnavailableProfileTypeException e) {
-        	LOGGER.log(Loggable.STACK, String.format("Unable to find angle profile in object"), e);
+        	LOGGER.log(Loggable.STACK, "Unable to find angle profile in object", e);
         } catch(UnavailableBorderTagException e) {
         	LOGGER.log(Loggable.STACK, String.format("Error getting border tag %s for object", tag), e);
         }
@@ -471,13 +459,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         // fetch the index of the pointType (the new zero)
         int tagIndex = borderTags.get(tag);
-//        fine("Getting "+tag+" at index "+tagIndex);
-        // offset the angle profile to start at the pointIndex
         
+        // offset the angle profile to start at the pointIndex
         ISegmentedProfile profile = getProfile(type);
-        ISegmentedProfile offsetProfile = profile.offset(tagIndex);
-//        fine("Offset to "+offsetProfile.toString());
-        return offsetProfile;
+        return profile.offset(tagIndex);
     }
     
     /**
@@ -595,25 +580,23 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if (segsLocked) {
             return;
         }
-        for (ProfileType type : profileMap.keySet()) {
-
-            ISegmentedProfile profile = profileMap.get(type);
+        for (Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
+            ISegmentedProfile profile = entry.getValue();
             profile.reverse();
-            assignProfile(type, profile);
+            assignProfile(entry.getKey(), profile);
         }
 
         // replace the tag positions also
-        Set<Tag> keys = borderTags.keySet();
-        for (Tag s : keys) {
-            int index = borderTags.get(s);
-            int newIndex = this.getBorderLength() - index - 1; // if was 0, will
-                                                               // now be
-                                                               // <length-1>; if
-                                                               // was length-1,
-                                                               // will be 0
+        for (Entry<Tag, Integer> entry : borderTags.entrySet()) {
+            int index = entry.getValue();
+
+            // if was 0, will be  <length-1>; if
+            // was length-1,  will be 0
+            int newIndex = this.getBorderLength() - index - 1;
+            
             // update the bordertag map directly to avoid segmentation changes
             // due to RP shift
-            borderTags.put(s, newIndex);
+            borderTags.put(entry.getKey(), newIndex);
         }
     }
 

@@ -320,6 +320,8 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
     
     class WrapEditorKit extends StyledEditorKit {
         ViewFactory defaultFactory=new WrapColumnFactory();
+        
+        @Override
         public ViewFactory getViewFactory() {
             return defaultFactory;
         }
@@ -352,7 +354,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         public WrapLabelView(Element elem) {
             super(elem);
         }
- 
+        @Override
         public float getMinimumSpan(int axis) {
             switch (axis) {
                 case View.X_AXIS:

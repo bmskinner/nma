@@ -7,15 +7,11 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -74,7 +70,7 @@ public class VersionHelpDialog extends SettingsDialog {
 		 JPanel panel = new JPanel(new BorderLayout());
 
 		 JTabbedPane pane = new JTabbedPane(JTabbedPane.TOP);
-		 pane.addTab("About", createAboutPanel());
+		 pane.addTab(DIALOG_TITLE, createAboutPanel());
 
 		 JScrollPane licPane = createGPLLicensePanel();
 		 JScrollPane depPane = createDependencyPanel();
@@ -104,9 +100,7 @@ public class VersionHelpDialog extends SettingsDialog {
 		 return textBox;
 	 }
 	 
-	 private String readTextFile(String fileName) {
-		 ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		 
+	 private String readTextFile(String fileName) {		 
 		 // Cannot use a URI since it will break when packaged to exe
 		 InputStream in = getClass().getResourceAsStream(fileName); 
 		 BufferedReader reader = new BufferedReader(new InputStreamReader(in));

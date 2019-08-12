@@ -730,8 +730,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     
     @Override
 	public int[][] getUnsmoothedBorderCoordinates(){
-    	int[][] points = { xpoints, ypoints};
-    	return points;
+    	return new int[][] { xpoints, ypoints};
     }
 
     /**
@@ -1383,11 +1382,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public void rotatePointToBottom(IPoint bottomPoint) {
         this.alignPointsOnVertical(centreOfMass, bottomPoint);
     }
-
-    @Override
-	public abstract void alignVertically();
-
-
     
     @Override
     public void rotate(double angle) {

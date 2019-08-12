@@ -145,7 +145,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasetsToUpdate);
 
         Thread thr = new Thread() {
-
+        	@Override
             public void run() {
 
                 /*

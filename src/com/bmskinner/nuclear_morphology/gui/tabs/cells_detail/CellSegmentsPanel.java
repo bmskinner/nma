@@ -135,6 +135,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
 
     @Override
     public void chartSetEventReceived(ChartSetEvent e) {
+    	// No actions
     }
 
     @Override

@@ -403,9 +403,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			double desiredDistanceFromStart = array.length * d;
 
-			int target = (int) desiredDistanceFromStart;
-
-			return target;
+			return (int) desiredDistanceFromStart;
 		}
 
 		@Override
@@ -1464,8 +1462,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			IProfile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
 
 			// interpolate the test segments to the length of the median segments
-			IProfile revisedProfile = testSegProfile.interpolate(newLength);
-			return revisedProfile;
+			return testSegProfile.interpolate(newLength);
 		}
 
 
