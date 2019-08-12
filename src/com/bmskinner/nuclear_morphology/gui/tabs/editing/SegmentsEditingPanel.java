@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -159,8 +160,12 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         segmentButton.addActionListener(e->{
         	try {
 				boolean ok = getInputSupplier().requestApproval("This action will resegment the dataset. Manual segments will be lost. Continue?", "Continue?");
-				if(ok)
+				if(ok) {
+					for(IAnalysisDataset d : getDatasets()) {
+						d.getCollection().getProfileManager().setLockOnAllNucleusSegments(false);
+					}
 					getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
+				}
 			} catch (RequestCancelledException e1) {}
         	 
         });
