@@ -319,7 +319,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
             yMax += yDiff;
 
             if (yMin >= yMax) {
-                LOGGER.finer( "Min and max are equal");
+                LOGGER.finest( "Min and max are equal");
                 xMin = -DEFAULT_AUTO_RANGE;
                 yMin = -DEFAULT_AUTO_RANGE;
                 xMax = DEFAULT_AUTO_RANGE;
