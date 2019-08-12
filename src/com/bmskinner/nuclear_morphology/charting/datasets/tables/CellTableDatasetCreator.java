@@ -411,7 +411,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
 
                 fieldNames.add("Source channel");
-                rowData.add(signalOptions.getChannel());
+                rowData.add(signalOptions==null?Labels.NA:signalOptions.getChannel());
 
                 fieldNames.add("Number of signals");
                 rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
