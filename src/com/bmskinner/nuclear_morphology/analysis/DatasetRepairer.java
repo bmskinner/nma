@@ -16,6 +16,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -65,6 +66,13 @@ public class DatasetRepairer {
 			// allow isOk to fall through
 			LOGGER.fine("No border tag present");
 		}
+		
+		if(dv.validate(d)) {
+			LOGGER.info("Dataset repaired: "+d.getName());
+		} else{
+			LOGGER.info("Could not repair "+d.getName());
+		}
+
 
 	}
 	
@@ -76,29 +84,32 @@ public class DatasetRepairer {
 	 * @param expectedRPSegmentStart the segment id which the RP should lie on the start index of
 	 */
 	private void repairNucleusRPNotAtSegmentBoundary(Nucleus n, UUID expectedRPSegmentStart) {		
-		// Currently duplicating the validator code
+		boolean wasLocked = n.isLocked();
+		if(wasLocked)
+			n.setLocked(false);
 		try {
 			int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
 			IBorderSegment s  = profile.getSegment(expectedRPSegmentStart);
 			int segStart = s.getStartIndex();
-			
-			boolean wasLocked = n.isLocked();
-			if(wasLocked)
-				n.setLocked(false);
 
 			if(s.getStartIndex()!=rpIndex) {
 				// We can't just set RP since setting RP will update segments by the same amount
 				// Need to copy the profile and segments as is, then reload them after the RP has been changed
-				LOGGER.fine("RP at "+rpIndex+"; expected at "+segStart);
+				LOGGER.finest("RP at "+rpIndex+"; expected at "+segStart);
 				n.setBorderTag(Tag.REFERENCE_POINT, segStart);
-				LOGGER.fine(n.getNameAndNumber()+": updated RP to index "+segStart);
+				LOGGER.finest(n.getNameAndNumber()+": updated RP to index "+segStart);
 				n.setProfile(ProfileType.ANGLE, profile);
 			}
-			LOGGER.fine(n.getNameAndNumber()+": Seg start index now "+ n.getProfile(ProfileType.ANGLE).getSegment(expectedRPSegmentStart).getStartIndex());
-			n.setLocked(wasLocked);
-		} catch (UnavailableComponentException e) {
+			LOGGER.finest(n.getNameAndNumber()+": Seg start index now "+ n.getProfile(ProfileType.ANGLE).getSegment(expectedRPSegmentStart).getStartIndex());
+			
+		} catch (UnavailableBorderTagException e) {
 			LOGGER.fine("No RP tag present in "+n.getNameAndNumber());
-		}		
+		} catch (UnavailableProfileTypeException e) {
+			LOGGER.fine("No angle profile present in "+n.getNameAndNumber());
+		} catch (UnavailableComponentException e) {
+			LOGGER.fine("No segment with id "+expectedRPSegmentStart+" in "+n.getNameAndNumber());
+		}	
+		n.setLocked(wasLocked);
 	}
 }

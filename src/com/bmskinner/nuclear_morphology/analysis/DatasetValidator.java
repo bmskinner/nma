@@ -55,19 +55,37 @@ public class DatasetValidator {
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	public static final List<String> errorList = new ArrayList<>();
+	public static final List<String> summaryList = new ArrayList<>();
 	public static final Set<ICell> errorCells  = new HashSet<>();
 
 	public DatasetValidator() {
 
 	}
+	
+	/**
+	 * Get the overall summary of errors in the dataset
+	 * @return
+	 */
+	public List<String> getSummary() {
+		return summaryList;
+	}
 
+	/**
+	 * Get a detailed list of every error in the dataset
+	 * @return
+	 */
 	public List<String> getErrors() {
 		return errorList;
 	}
 
+	/**
+	 * Get the cells in the dataset with errors
+	 * @return
+	 */
 	public Set<ICell> getErrorCells(){
 		return errorCells;
 	}
+
 
 	/**
 	 * Run validation on a single collection. This will test the consistency
@@ -75,32 +93,43 @@ public class DatasetValidator {
 	 * @param collection
 	 * @return
 	 */
-	public boolean validate(final @NonNull ICellCollection collection) {
+	public boolean validate(final @NonNull ICellCollection collection) {	
+		
 		errorList.clear();
 		errorCells.clear();
+		summaryList.clear();
 		
 		int errors = 0;
 		
-		if (!checkAllNucleiHaveProfiles(collection)) {
-			errorList.add("Error in nucleus profiling");
+		int rpErrors = checkAllNucleiHaveRP(collection);
+		if (rpErrors!=0) {
+			summaryList.add(String.format("Error in RP assignment for %s nuclei", rpErrors));
 			errors++;
 		}
 		
-		if (!checkSegmentsAreConsistentInAllCells(collection)) {
-			errorList.add("Error in segmentation between cells");
+		int profileErrors = checkAllNucleiHaveProfiles(collection);
+		if (profileErrors!=0) {
+			summaryList.add(String.format("Error in nucleus profiling for %s nuclei", profileErrors));
 			errors++;
 		}
 		
-		if (!checkNucleiHaveRPOnASegmentBoundary(collection)) {
-			errorList.add("Error in RP placement between cells");
+		int segErrors = checkSegmentsAreConsistentInAllCells(collection);
+		if (segErrors!=0) {
+			summaryList.add(String.format("Error in segmentation between cells: %s errors", segErrors));
+			errors++;
+		}
+		
+		int rpBoundaryErrors = checkNucleiHaveRPOnASegmentBoundary(collection);
+		if (rpBoundaryErrors!=0) {
+			summaryList.add(String.format("Error in RP/segment placement in %s cells", rpBoundaryErrors));
 			errors++;
 		}
 
 		if (errors == 0) {
-			errorList.add("Collection OK");
+			summaryList.add("Collection OK");
 			return true;
 		}
-		errorList.add(String.format("collection failed validation: %s out of %s cells have errors", errorCells.size(), collection.getCells().size()));
+		summaryList.add(String.format("collection failed validation: %s out of %s cells have errors", errorCells.size(), collection.size()));
 		return false;
 	}
 	
@@ -113,55 +142,82 @@ public class DatasetValidator {
 
 		errorList.clear();
 		errorCells.clear();
+		summaryList.clear();
 		
 		int errors = 0;
-
-		if (!checkAllNucleiHaveProfiles(d)) {
-			errorList.add("Error in nucleus profiling");
+		
+		int rpErrors = checkAllNucleiHaveRP(d.getCollection());
+		if (rpErrors!=0) {
+			summaryList.add(String.format("Error in RP assignment for %s nuclei", rpErrors));
 			errors++;
 		}
 		
-		if (!checkChildDatasetsHaveProfileCollections(d)) {
-			errorList.add("Error in child dataset profiling");
+		int profileErrors = checkAllNucleiHaveProfiles(d);
+		if (profileErrors!=0) {
+			summaryList.add(String.format("Error in nucleus profiling for %s nuclei", profileErrors));
+			errors++;
+		}
+		
+		int pcErrors = checkChildDatasetsHaveProfileCollections(d);
+		if (pcErrors!=0) {
+			summaryList.add(String.format("Error in child dataset profiling for %s profiles", pcErrors));
 			errors++;
 		}
 		
 		
 		if (!checkSegmentsAreConsistentInProfileCollections(d)) {
-			errorList.add("Error in segmentation between datasets");
+			summaryList.add("Error in segmentation between datasets");
 			errors++;
 		}
 		
 		if (!checkChildDatasetsHaveBorderTagsPresentInRoot(d)) {
-			errorList.add("Error in segmentation between datasets");
+			summaryList.add("Error in segmentation between datasets");
 			errors++;
 		}
 
-		if (!checkSegmentsAreConsistentInAllCells(d)) {
-			errorList.add("Error in segmentation between cells");
+		int segErrors = checkSegmentsAreConsistentInAllCells(d);
+		if (segErrors!=0) {
+			summaryList.add(String.format("Error in segmentation between cells: %s errors", segErrors));
 			errors++;
 		}
 		
-		if (!checkNucleiHaveRPOnASegmentBoundary(d)) {
-			errorList.add("Error in RP placement between cells");
+		int rpBoundaryErrors = checkNucleiHaveRPOnASegmentBoundary(d);
+		if (rpBoundaryErrors!=0) {
+			summaryList.add(String.format("Error in RP/segment placement in %s cells", rpBoundaryErrors));
 			errors++;
 		}
 
 		if (errors == 0) {
-			errorList.add("Dataset OK");
+			summaryList.add("Dataset OK");
 			return true;
 		}
-		errorList.add(String.format("Dataset failed validation: %s out of %s cells have errors", errorCells.size(), d.getCollection().getCells().size()));
+		summaryList.add(String.format("Dataset failed validation: %s out of %s cells have errors", errorCells.size(), d.getCollection().getCells().size()));
 		return false;
 
 	}
 	
-	private boolean checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
+	private int checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
 		return checkAllNucleiHaveProfiles(d.getCollection());
 	}
 	
-	private boolean checkAllNucleiHaveProfiles(@NonNull ICellCollection collection) {
-		boolean isOk = true;
+	
+	private int checkAllNucleiHaveRP(@NonNull ICellCollection collection) {
+		int withErrors = 0;
+
+		for(ICell c : collection) {
+			for (Nucleus n : c.getNuclei()) {
+				if(!n.hasBorderTag(Tag.REFERENCE_POINT)) {
+					errorList.add(String.format("Nucleus %s does not have RP", n.getNameAndNumber()));
+					errorCells.add(c);
+					withErrors++;
+				}
+			}
+		}
+		return withErrors;	
+	}
+	
+	private int checkAllNucleiHaveProfiles(@NonNull ICellCollection collection) {
+		int withErrors = 0;
 
 		for (ProfileType type : ProfileType.values()) {
 			for(ICell c : collection) {
@@ -171,32 +227,32 @@ public class DatasetValidator {
 					} catch (UnavailableProfileTypeException e) {
 						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
 						errorCells.add(c);
-						isOk = false;
+						withErrors++;
 					}
 				}
 			}
 		}
-		return isOk;	
+		return withErrors;	
 	}
 	
-	private boolean checkChildDatasetsHaveProfileCollections(@NonNull IAnalysisDataset d) {
+	private int checkChildDatasetsHaveProfileCollections(@NonNull IAnalysisDataset d) {
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
-		boolean isOk = true;
+		int withErrors = 0;
 		
 		IProfileCollection pc = d.getCollection().getProfileCollection();
 		for (ProfileType type : ProfileType.values()) {
 			try {
 				pc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
 			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
-				errorList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
-				isOk = false;
+				summaryList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
+				withErrors++;
 			}
 			
 			try {
 				pc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
 			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
-				errorList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
-				isOk = false;
+				summaryList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
+				withErrors++;
 			}
 			
 
@@ -206,20 +262,20 @@ public class DatasetValidator {
 				try {
 					childPc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
 				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
-					errorList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
-					isOk = false;
+					summaryList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
+					withErrors++;
 				}
 				
 				try {
 					childPc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
 				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
-					errorList.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
-					isOk = false;
+					summaryList.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
+					withErrors++;
 				}
 			}
 			
 		}
-		return isOk;	
+		return withErrors;	
 	}
 
 	/**
@@ -230,14 +286,14 @@ public class DatasetValidator {
 	 */
 	private boolean checkChildDatasetsHaveBorderTagsPresentInRoot(@NonNull IAnalysisDataset d) {
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
-		boolean isOk = true;
+		boolean withErrors = true;
 
 		List<Tag> rootTags = d.getCollection().getProfileCollection().getBorderTags();
 		for(ICell c : d.getCollection()) {
 			for(Nucleus n : c.getNuclei()) {
 				for(Tag t : rootTags) {
 					if(!n.hasBorderTag(t)) {
-						isOk = false;
+						withErrors = false;
 						errorList.add(String.format("Nucleus %s does not have root collection tag %s", n.getNameAndNumber(), t));
 						errorCells.add(c);
 					}
@@ -248,7 +304,7 @@ public class DatasetValidator {
 		if(d.getCollection().hasConsensus()) {
 			for(Tag t : rootTags) {
 				if(!d.getCollection().getConsensus().hasBorderTag(t)) {
-					isOk = false;
+					withErrors = false;
 					errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
 				}
 			}
@@ -258,7 +314,7 @@ public class DatasetValidator {
 		for (IAnalysisDataset child : children) {
 			for(Tag t : rootTags) {
 				if(!child.getCollection().getProfileCollection().getBorderTags().contains(t)) {
-					isOk = false;
+					withErrors = false;
 					errorList.add(String.format("Child dataset %s does not have root collection tag %s", child.getName(), t));
 				}
 			}
@@ -266,52 +322,53 @@ public class DatasetValidator {
 			if(child.getCollection().hasConsensus()) {
 				for(Tag t : rootTags) {
 					if(!child.getCollection().getConsensus().hasBorderTag(t)) {
-						isOk = false;
+						withErrors = false;
 						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
 					}
 				}
 			}
 		}
 
-		return isOk;	
+		return withErrors;	
 	}
 	
 	
-	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull IAnalysisDataset d) {
+	private int checkNucleiHaveRPOnASegmentBoundary(@NonNull IAnalysisDataset d) {
 		return checkNucleiHaveRPOnASegmentBoundary(d.getCollection());
 	}
 	
 	/**
-	 * Check if the RP is at a segment boundary in all cells
+	 * Check if the RP is at a segment boundary in all cells. Does not check which
+	 * segment boundary the RP is at
 	 * @param d
 	 * @return
 	 */
-	private boolean checkNucleiHaveRPOnASegmentBoundary(@NonNull ICellCollection collection) {
-		boolean allOk = true;
+	private int checkNucleiHaveRPOnASegmentBoundary(@NonNull ICellCollection collection) {
+		int allErrors = 0;
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
-				boolean isOk = false;
+				int rpIsOk = 0;
 				
 				try {
 					int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
 					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
 					for(IBorderSegment s : profile.getSegments()){
 						if(s.getStartIndex()==rpIndex)
-							isOk = true;
+							rpIsOk++;
 					}
 				} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
-					// allow isOk to fall through
+					// allow withErrors to fall through
 					LOGGER.fine("No border tag present");
 				}
 
-				if(!isOk) {
+				if(rpIsOk==0) {
 					errorList.add(String.format("Nucleus %s does not have RP at a segment boundary", n.getNameAndNumber()));
 					errorCells.add(c);
-					allOk = false;
+					allErrors++;
 				}
 			}
 		}
-		return allOk;
+		return allErrors;
 	}
 
 		
@@ -334,7 +391,7 @@ public class DatasetValidator {
 			List<UUID> childList = child.getCollection().getProfileCollection().getSegmentIDs();
 
 			if(idList.size()!=childList.size()) {
-				errorList.add(String.format("Root dataset %s segments; child dataset has %s", idList.size(), childList.size()));
+				summaryList.add(String.format("Root dataset %s segments; child dataset has %s", idList.size(), childList.size()));
 				return false;
 			}
 
@@ -365,7 +422,7 @@ public class DatasetValidator {
 	 * @param d the dataset collection to test
 	 * @return
 	 */
-	private boolean checkSegmentsAreConsistentInAllCells(@NonNull IAnalysisDataset d) {
+	private int checkSegmentsAreConsistentInAllCells(@NonNull IAnalysisDataset d) {
 		return checkSegmentsAreConsistentInAllCells(d.getCollection());
 	}
 	
@@ -376,7 +433,7 @@ public class DatasetValidator {
 	 * @param collection the cell collection to test
 	 * @return
 	 */
-	private boolean checkSegmentsAreConsistentInAllCells(@NonNull ICellCollection collection) {
+	private int checkSegmentsAreConsistentInAllCells(@NonNull ICellCollection collection) {
 		
 		ISegmentedProfile medianProfile;
 		try {
@@ -385,7 +442,7 @@ public class DatasetValidator {
 		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
 				| UnsegmentedProfileException e) {
 			errorList.add("Unable to fetch median profile for collection");
-			return false;
+			return 1;
 		}
 
 		List<UUID> idList = collection.getProfileCollection().getSegmentIDs();
@@ -414,7 +471,7 @@ public class DatasetValidator {
 			errorList.add(String.format("Segments are not consistent in all cells"));
 		}
 
-		return errorCount==0;
+		return errorCount;
 	}
 	
 	/**

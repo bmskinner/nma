@@ -68,11 +68,9 @@ public class IterativeSegmentFitter {
      * @param target the profile to fit to the current template profile 
      * @return the profile with fitted segments, or on error, the original profile
      */
-    public ISegmentedProfile fit(@NonNull final IProfile target) {
-    	LOGGER.finer( "-------------------------");
+    public ISegmentedProfile fit(@NonNull final IProfile target) throws ProfileException {
     	LOGGER.finer( "Beginning segment fitting");
-    	LOGGER.finer( "-------------------------");
-    	
+
         if (target==null)
             throw new IllegalArgumentException("Target profile is null");
         
@@ -81,11 +79,9 @@ public class IterativeSegmentFitter {
 
 		try {
 			return remapSegmentEndpoints(target);
-		} catch (UnavailableComponentException | ProfileException e) {
-			LOGGER.log(Loggable.STACK, "Unable to remap segments in profile: "+e.getMessage(), e);
-			if(target instanceof ISegmentedProfile)
-				return (ISegmentedProfile)target;
-			throw new IllegalArgumentException("Could not segment profile");
+		} catch (UnavailableComponentException e) {
+			LOGGER.log(Loggable.STACK, "Could not segment target profile: unable to remap segments in profile: "+e.getMessage(), e);
+			throw new ProfileException("Could not segment target profile", e);
 		}
     }
 
@@ -103,7 +99,7 @@ public class IterativeSegmentFitter {
         // fit each segment in turn
         for(IBorderSegment templateSegment : templateProfile.getOrderedSegments())
         	newSegments = bestFitSegment(profile, newSegments, templateSegment.getID());
-
+        LOGGER.finer(String.format("Created %s segments in target profile", newSegments.size()));
         for(IBorderSegment s : newSegments) // unlock after fitting
         	s.setLocked(false);
         return new SegmentedFloatProfile(profile, newSegments);
@@ -193,7 +189,7 @@ public class IterativeSegmentFitter {
     	
     	LOGGER.finer( "Template end index: "+templateProfile.get(templateSegment.getEndIndex()));
     	LOGGER.finer( String.format("Template segment length %s, profile length %s, from %s",templateSegment.length(), template.size(), templateSegment.toString()));
-    	LOGGER.finer( String.format("Target profile length %s",tempProfile.size()));
+    	LOGGER.finest( String.format("Target profile length %s",tempProfile.size()));
     	
     	// Find indexes that are minima or maxima. 
     	// If these are clear, they should be retained
@@ -201,7 +197,7 @@ public class IterativeSegmentFitter {
     	double bestScore = Double.MAX_VALUE;
         int bestIndex = 0;
         
-        LOGGER.finer( String.format("Testing variation of end index from %s to %s", minIndex, maxIndex));
+        LOGGER.finest( String.format("Testing variation of end index from %s to %s", minIndex, maxIndex));
         
         for (int endIndex=minIndex; endIndex <maxIndex; endIndex+=stepSize) {
         	
@@ -218,11 +214,10 @@ public class IterativeSegmentFitter {
         	
         	if(minimaMaxima.get(endIndex)) {
         		score *= 0.25; //TODO: formalise this rule and find the best value to use
-//        		fine(String.format("End index %s is a local min or max! Score altered to %s", endIndex, score));
         	}
         	
-        	if(startIndex==11)
-        		LOGGER.finer( endIndex+"\t"+score+"\t"+tempProfile.get(endIndex));
+//        	if(startIndex==11) // one more than minimum length - check scoring working
+//        		LOGGER.finer( endIndex+"\t"+score+"\t"+tempProfile.get(endIndex));
 
             if (score < bestScore) {
             	bestIndex = endIndex;

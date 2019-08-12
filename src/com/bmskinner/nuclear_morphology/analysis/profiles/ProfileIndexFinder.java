@@ -202,10 +202,10 @@ public class ProfileIndexFinder {
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
         
         try {
-        return identifyIndex(collection, list);
+        	return identifyIndex(collection, list);
         } catch(NoDetectedIndexException e) {
-        	// No index was found, fall back 
-        	LOGGER.warning("No reference point could be found using the default rules; falling back on longest diameter");
+        	// No index was found for the collection, fall back 
+        	LOGGER.fine("No reference point could be found for the collection using the default rules; falling back on longest diameter");
         	List<RuleSet> rules = new ArrayList<>();
         	rules.add(RuleSet.roundRPRuleSet());
         	return identifyIndex(collection, rules);

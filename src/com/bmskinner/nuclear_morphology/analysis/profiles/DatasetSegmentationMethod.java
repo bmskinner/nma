@@ -198,7 +198,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		// Make a new collection and aggregate to invalidate previous cached data, possibly
 		// with different profile lengths
 		dataset.getCollection().createProfileCollection();
-		
+				
 		dataset.getCollection().getProfileCollection().addSegments(median.getSegments());
 		
 		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei 
@@ -298,11 +298,14 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @throws SegmentUpdateException 
 	 * @throws ProfileException 
 	 */
-	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template) throws ProfileException, SegmentUpdateException, UnavailableComponentException {
+	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template) throws ProfileException, UnavailableComponentException {
 		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
 		for(Nucleus n : collection.getNuclei()) {
-			if (n.isLocked())
-				continue;
+			
+			// Ensure new segments can be assigned
+			boolean wasLocked = n.isLocked();
+			if(wasLocked)
+				n.setLocked(false);
 			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
 			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, segProfile);
@@ -315,6 +318,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 					throw new ProfileException("Single segment does not start at RP in nucleus");
 				}
 			}
+			n.setLocked(wasLocked);
 		}
 	}
 	

@@ -125,7 +125,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 	private synchronized void identifyNonCoreTags(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		// Identify the border tags in the median profile
-		for (Tag tag : BorderTagObject.values()) {
+		for(Tag tag : BorderTagObject.values()) {
 
 			// Don't identify the RP again, it could cause off-by-one errors
 			// We do need to assign the RP in other ProfileTypes though
@@ -133,7 +133,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 				LOGGER.fine("Checking location of RP in profile");
 				int index = finder.identifyIndex(collection, tag);
-				LOGGER.fine("RP is found at index " + index);
+				LOGGER.fine("RP in collection is at index " + index);
 				continue;
 			}
 
