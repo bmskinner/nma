@@ -248,7 +248,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     private void makeBorderList() {
 
-    	LOGGER.finer( "Creating border list from "+xpoints.length+" integer points");
+    	LOGGER.finest( "Creating border list from "+xpoints.length+" integer points");
     	
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates

@@ -132,8 +132,8 @@ public class ProfileManager {
             int topIndex = finder.identifyIndex(collection, Tag.TOP_VERTICAL);
             int btmIndex = finder.identifyIndex(collection, Tag.BOTTOM_VERTICAL);
 
-            LOGGER.fine("TV in median is located at index " + topIndex);
-            LOGGER.fine("BV in median is located at index " + btmIndex);
+            LOGGER.fine(()->String.format("TV in median is located at index %i", topIndex));
+            LOGGER.fine(()->String.format("BV in median is located at index %i ", btmIndex));
 
             updateProfileCollectionOffsets(Tag.TOP_VERTICAL, topIndex);
 

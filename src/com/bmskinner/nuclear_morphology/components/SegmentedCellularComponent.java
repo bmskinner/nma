@@ -165,9 +165,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	@Override
 	public void setProfile(@NonNull ProfileType type, @NonNull Tag tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
-		if (segsLocked)
+		if (segsLocked) {
+			LOGGER.finer("Cannot set profile, segments are locked");
 			return;
+		}
 
+			
 		if (!this.hasBorderTag(tag))
 			throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
 
@@ -1786,6 +1789,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			protected BorderSegmentTree(@NonNull UUID id, int start, int end, @Nullable BorderSegmentTree parent){
 				if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && start!=end)
 					throw new IllegalArgumentException(String.format("Cannot make default segment %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
+				if(!id.equals(IProfileCollection.DEFAULT_SEGMENT_ID)&&start==end)
+					throw new IllegalArgumentException(String.format("Cannot make non-default segment %s-%s; it would cover the entire profile", startIndex, endIndex));
 				if(start<0 || start>=size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
 				if(end<0 || end>=size())
