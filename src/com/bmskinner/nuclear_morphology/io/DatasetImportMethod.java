@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DatasetRepairer;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -240,9 +241,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      */
     private void validateDataset() {
     	 // Check the validity of the loaded dataset
+    	// Repair if possible, or warn if not
+    	DatasetRepairer dr = new DatasetRepairer();
+    	dr.repair(dataset);
+    	
         DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(dataset)) {
-            for (String s : dv.getErrors()) {
+            for (String s : dv.getSummary()) {
                 LOGGER.log(Loggable.STACK, s);
             }
             LOGGER.warning("The dataset is not properly segmented");
