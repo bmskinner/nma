@@ -40,7 +40,8 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	private static final long serialVersionUID = 1L;
 	private final UUID id;
 
-	/** ImageProcessors are not serializable, so store the byte array and convert back as needed */
+	/** ImageProcessors are not serializable, so store the byte array and convert back as needed.
+	 * Note this provides only 8-bit images */
 	private final Map<WarpedSignalKey, byte[][]> images = new HashMap<>();
 	
 	private final Map<WarpedSignalKey, String> targetNames = new HashMap<>();

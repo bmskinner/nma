@@ -122,7 +122,7 @@ public class SignalWarpingDialogController {
 	public void warpingComplete(SignalWarper warper) {
 		try {
 
-			ImageProcessor image = warper.get();
+			ImageProcessor image = warper.get(); // get the 16-bit result of warping
 			IAnalysisDataset targetDataset = settingsPanel.getTarget();
 			CellularComponent consensusTemplate = targetDataset.getCollection().getConsensus();
 			IAnalysisDataset signalSource = settingsPanel.getSource();
