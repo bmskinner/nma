@@ -96,8 +96,9 @@ public class ExportableTable extends JTable {
     
     @Override
     public void validate() {
-    	updateRowHeights();
-    	super.validate();
+    	updateRowHeights(); // make sure all rows will fit contents
+    	super.validate(); // redraw all components
+    	resizeAndRepaint();
     }
     
     @Override
