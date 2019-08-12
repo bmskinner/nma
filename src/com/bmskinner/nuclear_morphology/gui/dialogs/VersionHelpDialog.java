@@ -130,6 +130,7 @@ public class VersionHelpDialog extends SettingsDialog {
 		 textBox.setText(readTextFile(fileName));
 		 textBox.setEditable(false);
 		 textBox.setLineWrap(true);
+		 textBox.setCaretPosition(0);
 		 return new JScrollPane(textBox);
 	 }
 	 
@@ -143,7 +144,7 @@ public class VersionHelpDialog extends SettingsDialog {
 		 textBox.setText(readTextFile(fileName));
 		 textBox.setEditable(false);
 		 textBox.setLineWrap(true);
-
+		 textBox.setCaretPosition(0);
 		 return new JScrollPane(textBox);
 	 }
 
