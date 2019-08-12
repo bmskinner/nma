@@ -31,10 +31,13 @@ public class DatasetXMLReaderTest extends ComponentTester {
 	private void testXMLRead(File f) throws Exception {
 		logger.fine("Opening serialised template dataset");
 		IAnalysisDataset d = SampleDatasetReader.openDataset(f.getAbsoluteFile());
+		
+		// Create the XML file from the serialised file
 		DatasetXMLCreator dxc = new DatasetXMLCreator(d);
-		File xmlFile = new File(d.getSavePath().getParentFile(), d.getName()+".xml.nmd");
+		File xmlFile = new File(makeXmlFileName(d.getSavePath().getAbsolutePath()));
 		XMLWriter.writeXML(dxc.create(), xmlFile);
 
+		// Read the XML file back in and check it's the same
 		logger.fine("Opening XML dataset");
 		IAnalysisDataset read =  SampleDatasetReader.openXMLDataset(xmlFile);
 		
@@ -74,6 +77,15 @@ public class DatasetXMLReaderTest extends ComponentTester {
 //		assertEquals(d.getCollection(), read.getCollection());
 //		
 //		assertEquals(d, read);
+	}
+	
+	/**
+	 * Make the xml version of test dataset file names
+	 * @param fileName the nae to convert e.g. TestResources.MOUSE_TEST_DATASET
+	 * @return the file name of the xml nmd
+	 */
+	private static String makeXmlFileName(String fileName) {
+		return fileName.replace(".nmd", ".xml.nmd");
 	}
 	
 	@Test 

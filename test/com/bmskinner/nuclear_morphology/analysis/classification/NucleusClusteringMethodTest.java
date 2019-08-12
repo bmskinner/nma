@@ -37,16 +37,16 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	
 	private static final int CELLS_PER_CLUSTER = 50;
 	private static final int TWO_CLUSTERS = 2;
-	
-	private IAnalysisDataset dataset1;
-	private IAnalysisDataset dataset2;
+
 	private IAnalysisDataset merged;
 	
 	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		dataset1 = new TestDatasetBuilder(RNG_SEED).cellCount(CELLS_PER_CLUSTER)
+		
+		// Create two datasets with differently sized nuclei and merge them
+		IAnalysisDataset dataset1 = new TestDatasetBuilder(RNG_SEED).cellCount(CELLS_PER_CLUSTER)
 				.ofType(NucleusType.ROUND)
 				.baseHeight(60)
 				.baseWidth(50)
@@ -54,7 +54,7 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 				.randomOffsetProfiles(false)
 				.segmented().build();
 		
-		dataset2 = new TestDatasetBuilder(RNG_SEED).cellCount(CELLS_PER_CLUSTER)
+		IAnalysisDataset dataset2 = new TestDatasetBuilder(RNG_SEED).cellCount(CELLS_PER_CLUSTER)
 				.ofType(NucleusType.ROUND)
 				.baseHeight(20)
 				.baseWidth(30)
@@ -81,9 +81,7 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 		assertTrue(merged.hasClusters());
 		assertTrue(merged.getClusterGroups().size()==1);
 		
-		IClusterGroup group = merged.getClusterGroups().stream().findFirst().get();
-//		LOGGER.info(group.getTree());
-		
+		IClusterGroup group = merged.getClusterGroups().stream().findFirst().get();		
 		assertEquals(TWO_CLUSTERS, group.getUUIDs().size());
 		
 		for(UUID childId : group.getUUIDs()) {
