@@ -165,13 +165,15 @@ public class DatasetValidator {
 		}
 		
 		
-		if (!checkSegmentsAreConsistentInProfileCollections(d)) {
-			summaryList.add("Error in segmentation between datasets");
+		int segMatch = checkSegmentsAreConsistentInProfileCollections(d);
+		if (segMatch!=0) {
+			summaryList.add("There are "+segMatch+" errors in segmentation between datasets");
 			errors++;
 		}
 		
-		if (!checkChildDatasetsHaveBorderTagsPresentInRoot(d)) {
-			summaryList.add("Error in segmentation between datasets");
+		int childErrors = checkChildDatasetsHaveBorderTagsPresentInRoot(d);
+		if (childErrors!=0) {
+			summaryList.add("There are "+childErrors+" errors in segmentation between child datasets");
 			errors++;
 		}
 
@@ -193,7 +195,6 @@ public class DatasetValidator {
 		}
 		summaryList.add(String.format("Dataset failed validation: %s out of %s cells have errors", errorCells.size(), d.getCollection().getCells().size()));
 		return false;
-
 	}
 	
 	private int checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
@@ -284,16 +285,16 @@ public class DatasetValidator {
 	 * @param d
 	 * @return
 	 */
-	private boolean checkChildDatasetsHaveBorderTagsPresentInRoot(@NonNull IAnalysisDataset d) {
+	private int checkChildDatasetsHaveBorderTagsPresentInRoot(@NonNull IAnalysisDataset d) {
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
-		boolean withErrors = true;
+		int withErrors = 0;
 
 		List<Tag> rootTags = d.getCollection().getProfileCollection().getBorderTags();
 		for(ICell c : d.getCollection()) {
 			for(Nucleus n : c.getNuclei()) {
 				for(Tag t : rootTags) {
 					if(!n.hasBorderTag(t)) {
-						withErrors = false;
+						withErrors++;
 						errorList.add(String.format("Nucleus %s does not have root collection tag %s", n.getNameAndNumber(), t));
 						errorCells.add(c);
 					}
@@ -304,7 +305,7 @@ public class DatasetValidator {
 		if(d.getCollection().hasConsensus()) {
 			for(Tag t : rootTags) {
 				if(!d.getCollection().getConsensus().hasBorderTag(t)) {
-					withErrors = false;
+					withErrors++;
 					errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
 				}
 			}
@@ -314,7 +315,7 @@ public class DatasetValidator {
 		for (IAnalysisDataset child : children) {
 			for(Tag t : rootTags) {
 				if(!child.getCollection().getProfileCollection().getBorderTags().contains(t)) {
-					withErrors = false;
+					withErrors++;
 					errorList.add(String.format("Child dataset %s does not have root collection tag %s", child.getName(), t));
 				}
 			}
@@ -322,7 +323,7 @@ public class DatasetValidator {
 			if(child.getCollection().hasConsensus()) {
 				for(Tag t : rootTags) {
 					if(!child.getCollection().getConsensus().hasBorderTag(t)) {
-						withErrors = false;
+						withErrors++;
 						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
 					}
 				}
@@ -380,8 +381,9 @@ public class DatasetValidator {
 	 * @param d the root dataset to check
 	 * @return
 	 */
-	private boolean checkSegmentsAreConsistentInProfileCollections(@NonNull IAnalysisDataset d) {
+	private int checkSegmentsAreConsistentInProfileCollections(@NonNull IAnalysisDataset d) {
 
+		int numErrors = 0;
 		List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
 
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
@@ -392,14 +394,14 @@ public class DatasetValidator {
 
 			if(idList.size()!=childList.size()) {
 				summaryList.add(String.format("Root dataset %s segments; child dataset has %s", idList.size(), childList.size()));
-				return false;
+				numErrors++;
 			}
 
 			// check all parent segments are in child
 			for (UUID id : idList) {
 				if (!childList.contains(id)) {
 					errorList.add("Segment " + id + " not found in child " + child.getName());
-					return false;
+					numErrors++;
 				}
 			}
 
@@ -407,12 +409,12 @@ public class DatasetValidator {
 			for (UUID id : childList) {
 				if (!idList.contains(id)) {
 					errorList.add(child.getName() + " segment " + id + " not found in parent");
-					return false;
+					numErrors++;
 				}
 			}
 		}
 
-		return true;
+		return numErrors;
 	}
 
 	/**
