@@ -17,10 +17,12 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -85,9 +87,8 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     private JPanel makeHeader() {
     	JPanel panel = new JPanel(new FlowLayout());
         
-        WrappedLabel lbl1 = new WrappedLabel("Click a border point to update segments or border tags");
-        panel.add(lbl1);    
-        
+        JLabel headerLabel = new JLabel("<html>"+ "Click a border point to update segments or border tags" +"</html>");
+        panel.add(headerLabel);
         resegmentButton = new JButton("Resegment");
         resegmentButton.setEnabled(false);
         resegmentButton.addActionListener(e -> {
