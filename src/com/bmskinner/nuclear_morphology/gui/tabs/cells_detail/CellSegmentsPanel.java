@@ -87,7 +87,8 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
     private JPanel makeHeader() {
     	JPanel panel = new JPanel(new FlowLayout());
         
-        JLabel headerLabel = new JLabel("<html>"+ "Click a border point to update segments or border tags."
+        JLabel headerLabel = new JLabel("<html><body style='width: 90%'>"
+        		+ "Click a border point to update segments or border tags."
         		+ " Tags: <font color='orange'>Reference point</font>, "
         		+"<font color='blue'>Orientation point</font>, "
         		+"<font color='green'>Top/Bottom vertical</font>"
