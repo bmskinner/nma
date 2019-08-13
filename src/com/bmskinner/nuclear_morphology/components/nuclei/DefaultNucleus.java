@@ -399,7 +399,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
         // Make an exact copy of the nucleus
-        LOGGER.finer( "Creating vertical nucleus");
+        LOGGER.finest( "Creating vertical nucleus");
         Nucleus verticalNucleus = this.duplicate();
 
         // At this point the new nucleus was created at the original image

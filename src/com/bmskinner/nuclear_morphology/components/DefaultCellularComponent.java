@@ -317,7 +317,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param a the template component
      */
     protected DefaultCellularComponent(CellularComponent a) {
-    	LOGGER.finer( "Constructing a new component from existing template component");
+    	LOGGER.finest( "Constructing a new component from existing template component");
         this.id = UUID.fromString(a.getID().toString());
         this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);
         this.originalCentreOfMass = IPoint.makeNew(a.getOriginalCentreOfMass());

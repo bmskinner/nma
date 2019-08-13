@@ -33,6 +33,9 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.nuclear.DefaultWarpedSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -632,7 +635,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         	 LOGGER.warning("Unable to update profile aggregates in child datasets");
         	 LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
-
     }
 
     private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
