@@ -17,6 +17,8 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 
 /**
  * Interface for signals that have been derived from warping signal from 
@@ -38,11 +41,11 @@ import ij.process.ImageProcessor;
 public interface IWarpedSignal extends Serializable {
 	
 	/**
-	 * Create a byte array from the given image processor
+	 * Create a byte array from the given byte processor.
 	 * @param ip
 	 * @return
 	 */
-	static byte[][] toByteArrayArray(ByteProcessor ip) {
+	static byte[][] toArrayArray(ByteProcessor ip) {
 		byte[][] arr = new byte[ip.getWidth()][ip.getHeight()];
 
 		for(int w=0; w<ip.getWidth(); w++) {
@@ -53,10 +56,42 @@ public interface IWarpedSignal extends Serializable {
 		return arr;
 	}
 	
-	static byte[] toByteArray(ByteProcessor ip) {
-		byte[] arr = new byte[ip.getWidth()*ip.getHeight()];
-		return (byte[])ip.getPixels();
+	/**
+	 * Create a byte array from the given image processor
+	 * @param ip the image to be converted
+	 * @return the byte array or an empty array if the image processor cannot be converted
+	 */
+	static byte[] toArray(ImageProcessor ip) {
+		if(ip instanceof ByteProcessor)
+			return (byte[])ip.getPixels();
+		if(ip instanceof ShortProcessor)
+			return shortToByteArray( (short[])ip.getPixels());
+		return new byte[0];
 	}
+		
+	/**
+	 * Convert a short array to a byte array for serialising
+	 * @param shortArray the array of shorts
+	 * @return the byte array representation
+	 */
+	static byte[] shortToByteArray(short[] shortArray) {
+        ByteBuffer buf = ByteBuffer.allocate(Short.SIZE / Byte.SIZE * shortArray.length);
+        buf.asShortBuffer().put(shortArray);
+        return buf.array();
+    }
+	
+	/**
+	 * Convert a byte array to a short array for deserialising
+	 * @param bytes the byte array encoding a short array
+	 * @return the short array
+	 */
+	static short[] byteToshortArray(byte[] bytes) {
+        ShortBuffer buf = ByteBuffer.wrap(bytes).asShortBuffer();
+        short[] shortArray = new short[buf.limit()];
+        buf.get(shortArray);
+        return shortArray;
+    }
+	
 	
 	/**
 	 * Create a byte processor from the given array
@@ -64,7 +99,25 @@ public interface IWarpedSignal extends Serializable {
 	 * @return
 	 */
 	static ImageProcessor toImageProcessor(byte[][] arr) {
-		ByteProcessor image = new ByteProcessor(arr.length, arr[0].length);
+		
+		
+		ShortProcessor image = new ShortProcessor(arr.length, arr[0].length);
+	
+		for(int w=0; w<image.getWidth(); w++) {
+			for(int h=0; h<image.getHeight(); h++) {
+				image.set(w, h, arr[w][h]);
+			}
+		}
+		return image;
+	}
+	
+	/**
+	 * Create a short processor from the given array
+	 * @param arr
+	 * @return
+	 */
+	static ImageProcessor toImageProcessor(short[][] arr) {
+		ShortProcessor image = new ShortProcessor(arr.length, arr[0].length);
 		for(int w=0; w<image.getWidth(); w++) {
 			for(int h=0; h<image.getHeight(); h++) {
 				image.set(w, h, arr[w][h]);

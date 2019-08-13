@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -190,6 +191,5 @@ public class SignalGroup implements ISignalGroup {
 		} else if (!warpedSignals.equals(other.warpedSignals))
 			return false;
 		return true;
-	}   
-    
+	}      
 }

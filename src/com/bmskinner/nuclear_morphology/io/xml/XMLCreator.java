@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 /**
  * Base class for creating XML representations of datasets 
@@ -347,14 +348,13 @@ public abstract class XMLCreator<T> {
 			warp.addContent(createElement(WARPED_SIG_ONLY_KEY, String.valueOf(key.isCellWithSignalsOnly())));
 			
 			// Fetch the byte array corresponding to the warped image and stringify
-			ByteProcessor bp = (ByteProcessor) warpedSignal.getWarpedImage(key).get();
+			ImageProcessor bp = warpedSignal.getWarpedImage(key).get();
 			
 			StringBuilder sb = new StringBuilder();
-			sb.append(Base64.getEncoder().encodeToString(IWarpedSignal.toByteArray(bp)));
+			sb.append(Base64.getEncoder().encodeToString(IWarpedSignal.toArray(bp)));
 
 			warp.addContent(createElement(W_BASE_KEY, String.valueOf(bp.getWidth())));
 			warp.addContent(createElement(H_BASE_KEY, String.valueOf(bp.getHeight())));
-//			warp.addContent(createElement(WARPED_BYTE_KEY, sb.toString() ));
 			e.addContent(warp);
 		}		
 		return e;

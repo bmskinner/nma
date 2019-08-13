@@ -77,12 +77,13 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	@Override
 	public void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId,  @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ByteProcessor image) {
 
-		byte[][] arr = IWarpedSignal.toByteArrayArray(image);
-		
-		WarpedSignalKey k = new WarpedSignalKey(template, templateId, isCellWithSignalsOnly, threshold);
-		
-		images.put(k, arr);
-		targetNames.put(k, name);
+		// TODO - reenable once this is working for 16-bit images
+//		byte[][] arr = IWarpedSignal.toArrayArray(image);
+//		
+//		WarpedSignalKey k = new WarpedSignalKey(template, templateId, isCellWithSignalsOnly, threshold);
+//		
+//		images.put(k, arr);
+//		targetNames.put(k, name);
 	}
 	
 	@Override
