@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -30,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -66,7 +66,7 @@ public class PopulationsPanel extends DetailPanel  {
 
     private static final String PANEL_TITLE_LBL = "Populations";
     
-    final private PopulationTreeTable treeTable;
+    private final PopulationTreeTable treeTable;
 
     private PopulationListPopupMenu populationPopup;
 
@@ -74,9 +74,9 @@ public class PopulationsPanel extends DetailPanel  {
      * This tracks which datasets are currently selected, and the order in which
      * they were selected.
      */
-    private final Set<IAnalysisDataset> datasetSelectionOrder = new LinkedHashSet<IAnalysisDataset>();
+    private final Set<IAnalysisDataset> datasetSelectionOrder = new LinkedHashSet<>();
 
-    final private TreeSelectionHandler treeListener = new TreeSelectionHandler();
+    private final TreeSelectionHandler treeListener = new TreeSelectionHandler();
     
     private boolean ctrlPressed = false;
 
@@ -101,36 +101,27 @@ public class PopulationsPanel extends DetailPanel  {
         JScrollPane populationScrollPane = new JScrollPane(treeTable);
 
         // Track when the Ctrl key is down
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(ke -> {
 
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent ke) {
-                synchronized (PopulationsPanel.class) {
-                    switch (ke.getID()) {
-                    case KeyEvent.KEY_PRESSED:
-                        if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
-                            ctrlPressed = true;
-                        }
-                        break;
+        	synchronized (PopulationsPanel.class) {
+        		switch (ke.getID()) {
+        		case KeyEvent.KEY_PRESSED:
+        			if (ke.getKeyCode() == KeyEvent.VK_CONTROL)
+        				ctrlPressed = true;
+        			break;
+        		case KeyEvent.KEY_RELEASED:
+        			if (ke.getKeyCode() == KeyEvent.VK_CONTROL)
+        				ctrlPressed = false;
+        			break;
+        		default:
+        			break;
+        		}
 
-                    case KeyEvent.KEY_RELEASED:
-                        if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
-                            ctrlPressed = false;
-                        }
-                        break;
-                    default: {
-                        break;
-                    }
-                    }
-
-                    return false;
-                }
-            }
-
+        		return false;
+        	}
         });
 
         this.add(populationScrollPane, BorderLayout.CENTER);
-
     }
 
     @Override
@@ -139,14 +130,15 @@ public class PopulationsPanel extends DetailPanel  {
     }
     
     @Override
-    public void update(final List<IAnalysisDataset> list) {
+    public synchronized void update(final List<IAnalysisDataset> list) {
         this.update();
         treeTable.selectDatasets(list);
         treeTable.repaint();
     }
-
-    public void update(final IAnalysisDataset dataset) {
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>(1);
+    
+    @Override
+    public synchronized void update(final IAnalysisDataset dataset) {
+        List<IAnalysisDataset> list = new ArrayList<>(1);
         list.add(dataset);
         update(list);
     }
@@ -156,6 +148,7 @@ public class PopulationsPanel extends DetailPanel  {
      * chooser. Root populations are ordered according to position in the
      * treeListOrder map.
      */
+    @Override
     public synchronized void update() {
 
         int nameColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).getWidth();
@@ -180,7 +173,8 @@ public class PopulationsPanel extends DetailPanel  {
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
+    	// No charts or tables to load
     }
 
     private PopulationTreeTable createTreeTable() {
@@ -272,7 +266,7 @@ public class PopulationsPanel extends DetailPanel  {
      */
     public void selectDataset(@NonNull IAnalysisDataset dataset) {
         if (dataset != null) {
-            List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+            List<IAnalysisDataset> list = new ArrayList<>();
             list.add(dataset);
             treeTable.selectDatasets(list);
         }
@@ -370,6 +364,7 @@ public class PopulationsPanel extends DetailPanel  {
      * Set the possible menu options accordingly, and call the panel updates
      */
     public class TreeSelectionHandler implements TreeSelectionListener {
+    	@Override
     	public void valueChanged(TreeSelectionEvent e) {
     		try {
 
@@ -412,35 +407,35 @@ public class PopulationsPanel extends DetailPanel  {
     		return cellTotal;
     	}
 
+    	/**
+    	 * Get the currently selected indexes containing datasets in the table, mapped to the dataset order
+    	 * @param lsm
+    	 * @return a map of which indexes are selected: table index : dataset index in the selection order
+    	 */
     	private Map<Integer, Integer> getSelectedIndexes(TreeSelectionModel lsm){
-    		Map<Integer, Integer> selectedIndexes = new HashMap<>(0);
-    		List<IAnalysisDataset> datasets = new ArrayList<>(8);
+    		Map<Integer, Integer> selectedIndexes = new HashMap<>();
+    		List<IAnalysisDataset> datasets = new ArrayList<>();
     		
     		if (!lsm.isSelectionEmpty()) {
     			// Find out which indexes are selected.
     			int minIndex = lsm.getMinSelectionRow();
     			int maxIndex = lsm.getMaxSelectionRow();
     			for (int i = minIndex; i <= maxIndex; i++) {
-    				if (lsm.isRowSelected(i)) {
+    				if (lsm.isRowSelected(i) && treeTable.isDataset(i)) {
 
-    					if (treeTable.isDataset(i)) {
+    					IAnalysisDataset d = treeTable.getDatasetAtRow(i);
+    					datasets.add(d);
+    					datasetSelectionOrder.add(d);
 
-    						IAnalysisDataset d = treeTable.getDatasetAtRow(i);
-    						datasets.add(d);
-    						datasetSelectionOrder.add(d);
+    					int selectionIndex = 0;
+    					for (IAnalysisDataset an : datasetSelectionOrder) {
 
-    						int selectionIndex = 0;
-    						for (IAnalysisDataset an : datasetSelectionOrder) {
-
-    							if (an == d) {
-    								selectedIndexes.put(i, selectionIndex);
-    								break;
-    							}
-    							selectionIndex++;
+    						if (an == d) {
+    							selectedIndexes.put(i, selectionIndex);
+    							break;
     						}
-
+    						selectionIndex++;
     					}
-
     				}
     			}
 
@@ -468,25 +463,23 @@ public class PopulationsPanel extends DetailPanel  {
 
     	private Map<Integer, Integer> fixDiscontinuousPositions(Map<Integer, Integer> selectedIndexes) {
     		// Find a discontinuity in the indexes - one value is missing
-    		List<Integer> values = new ArrayList<Integer>(selectedIndexes.values());
+    		List<Integer> values = new ArrayList<>(selectedIndexes.values());
     		Collections.sort(values);
 
     		int prev = -1;
     		for (int i : values) {
     			if (i - prev > 1) {
     				// a value was skipped
-    				for (int k : selectedIndexes.keySet()) {
-    					int j = selectedIndexes.get(k);
+    				for (Entry<Integer, Integer> entry : selectedIndexes.entrySet()) {
+    					int k = entry.getKey();
+    					int j = entry.getValue();
     					if (j == i) { // this is the entry that is too high
     						selectedIndexes.put(k, j - 1); // Move index down by
     						// 1
     					}
     				}
-    				fixDiscontinuousPositions(selectedIndexes); // there will
-    				// now be a new
-    				// discontinuity.
-    				// Fix until end
-    				// of list
+    				fixDiscontinuousPositions(selectedIndexes); // there will now be a new
+    				// discontinuity. Fix until end of list
     			}
     			prev = i;
     		}

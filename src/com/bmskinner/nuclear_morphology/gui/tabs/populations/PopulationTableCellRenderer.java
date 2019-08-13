@@ -26,22 +26,20 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
+ * Allows for cell background to be coloured based on position in the
+ * population list
+ * 
  * @author ben
  *
  */
 @SuppressWarnings("serial")
-public /**
-        * Allows for cell background to be coloured based on position in the
-        * population list
-        *
-        */
-class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
     /**
      * Stores the row index of a cell that was selected as a key, and the order
      * in which it was selected as a value
      */
-    Map<Integer, Integer> indexList = new HashMap<Integer, Integer>(0);
+    private Map<Integer, Integer> indexList = new HashMap<>();
 
     public PopulationTableCellRenderer(Map<Integer, Integer> list) {
         super();
@@ -56,6 +54,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
         indexList = list;
     }
 
+    @Override
     public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 

@@ -27,6 +27,11 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 
+/**
+ * A node in the populations tree table.
+ * @author ben
+ *
+ */
 public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 
     Object[] columnData = new Object[3];
@@ -35,10 +40,17 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
     IClusterGroup    group   = null;
     IWorkspace          ws   = null;
     
+    /**
+     * Create with no content. This should be used only for the root node 
+     */
     public PopulationTreeTableNode(){
         super();
     }
     
+    /**
+     * Create to hold an analysis dataset
+     * @param dataset
+     */
     public PopulationTreeTableNode(IAnalysisDataset dataset) {
         super(dataset.getId().toString());
         this.dataset = dataset;
@@ -46,6 +58,10 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
         columnData[1] = dataset.getCollection().size();
     }
 
+    /**
+     * Create to hold a cluster group
+     * @param dataset
+     */
     public PopulationTreeTableNode(IClusterGroup group) {
         super(UUID.randomUUID().toString());
         this.group = group;
@@ -54,6 +70,10 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 
     }
     
+    /**
+     * Create to hold a workspace
+     * @param dataset
+     */
     public PopulationTreeTableNode(IWorkspace ws) {
         super(UUID.randomUUID().toString());
         this.ws = ws;
@@ -86,19 +106,22 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
         return ws;
     }
     
-
+    @Override
     public int getColumnCount() {
         return 3;
     }
 
+    @Override
     public Object getValueAt(int column) {
         return columnData[column];
     }
 
+    @Override
     public void setValueAt(Object aValue, int column) {
         columnData[column] = aValue;
     }
 
+    @Override
     public String toString() {
         if (this.hasDataset()) {
             return dataset.getName();
@@ -117,14 +140,9 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
      * This method recursively (or not) sorts the nodes, ascending, or
      * descending by the specified column.
      * 
-     * @param sortColumn
-     *            Column to do the sorting by.
-     * @param sortAscending
-     *            Boolean value of weather the sorting to be done ascending or
-     *            not (descending).
-     * @param recursive
-     *            Boolean value of weather or not the sorting should be
-     *            recursively applied to children nodes.
+     * @param sortColumn Column to sort by.
+     * @param sortAscending Should sorting be ascending (true) or descending (false).
+     * @param recursive Should sorting be recursively applied to children nodes.
      * @author Alex Burdu Burdusel
      */
     public void sortNode(int sortColumn, boolean sortAscending, boolean recursive) {
@@ -135,7 +153,7 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 
         for (int i = 0; i < childCount; i++) {
             PopulationTreeTableNode child = (PopulationTreeTableNode) this.getChildAt(i);
-            if (child.getChildCount() > 0 & recursive) {
+            if (child.getChildCount() > 0 && recursive) {
                 child.sortNode(sortColumn, sortAscending, recursive);
             }
             Object key = child.getValueAt(sortColumn);

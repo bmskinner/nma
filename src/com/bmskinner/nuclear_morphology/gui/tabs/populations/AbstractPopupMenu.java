@@ -78,7 +78,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
 
         		boolean enabled = true;
         		
-        		if(objects.size()==0)
+        		if(objects.isEmpty())
         			enabled=false;
         		if(objects.size()==1)
         			enabled &= ((context&ACTIVE_ON_SINGLE_OBJECT)==ACTIVE_ON_SINGLE_OBJECT);
@@ -145,7 +145,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
 
         		boolean enabled = true;
         		
-        		if(objects.size()==0)
+        		if(objects.isEmpty())
         			enabled=false;
         		if(objects.size()==1)
         			enabled &= ((context&ACTIVE_ON_SINGLE_OBJECT)==ACTIVE_ON_SINGLE_OBJECT);

@@ -79,7 +79,7 @@ public class DatasetDeleter {
             deleteDatasetsInList(list);
             DatasetListManager.getInstance().refreshClusters();
         } catch (RequestCancelledException e) {
-            return;
+        	// No action needed
         } catch (Exception e) {
             LOGGER.warning("Error deleting dataset");
             LOGGER.log(Loggable.STACK, "Error deleting dataset", e);
@@ -88,15 +88,13 @@ public class DatasetDeleter {
 
     private boolean rootHasChanged(Deque<UUID> list) {
 
-        for (UUID id : list) {
+    	for (UUID id : list) {
 
-            IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
+    		IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
 
-            if (d.isRoot()) {
-                if (DatasetListManager.getInstance().hashCodeChanged(d))
-                    return true;
-            }
-        }
+    		if (d.isRoot() && DatasetListManager.getInstance().hashCodeChanged(d))
+    			return true;
+    	}
         return false;
     }
 
@@ -155,7 +153,7 @@ public class DatasetDeleter {
      * @return
      */
     private Deque<UUID> unique(List<IAnalysisDataset> list) {
-        Set<UUID> set = new HashSet<UUID>();
+        Set<UUID> set = new HashSet<>();
         for (IAnalysisDataset d : list) {
             set.add(d.getId());
 
@@ -167,7 +165,7 @@ public class DatasetDeleter {
             }
         }
 
-        Deque<UUID> result = new ArrayDeque<UUID>();
+        Deque<UUID> result = new ArrayDeque<>();
         result.addAll(set);
 
         return result;
