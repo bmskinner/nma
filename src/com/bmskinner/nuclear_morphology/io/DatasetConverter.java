@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -57,9 +58,11 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.DefaultWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -166,7 +169,29 @@ public class DatasetConverter implements Importer {
     		result = convertUpTo1_14_0(result);
     	if(result.getVersion().isOlderThan(Version.v_1_15_0))
     		result = convertUpTo1_15_0(result);
+    	if(result.getVersion().isOlderThan(Version.v_1_16_0))
+    		result = convertUpTo1_16_0(result);
     	return result;
+    }
+    
+    /**
+     * Update earlier formats to 1.6.0.
+     * @param template
+     * @return
+     * @throws DatasetConversionException
+     */
+    private IAnalysisDataset convertUpTo1_16_0(@NonNull IAnalysisDataset template) throws DatasetConversionException {
+    	// Warped signals are improperly saved prior to 1.16.0. Remove them. 
+    	ICellCollection collection = template.getCollection();
+    	LOGGER.fine("Removing any warped signals from pre-1.16.0 dataset");
+    	for(UUID signalGroupID : collection.getSignalGroupIDs()) {
+    		Optional<ISignalGroup> signalOpt = collection.getSignalGroup(signalGroupID);
+    		
+    		if(signalOpt.isPresent())
+    			signalOpt.get().setWarpedSignals(new DefaultWarpedSignal(signalGroupID));
+    	}
+        return template;
+    	
     }
     
     /**
