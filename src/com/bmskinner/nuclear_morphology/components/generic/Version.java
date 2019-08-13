@@ -67,6 +67,7 @@ public class Version implements Serializable {
     public static final Version v_1_15_2 = new Version(1, 15, 2);
     public static final Version v_1_15_3 = new Version(1, 15, 3);
     public static final Version v_1_15_4 = new Version(1, 15, 4);
+    public static final Version v_1_16_0 = new Version(1, 16, 0);
 
     public Version(final int major, final int minor, final int revision) {
         this.major = major;
