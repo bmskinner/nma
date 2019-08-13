@@ -579,7 +579,7 @@ public abstract class AbstractImageFilterer {
     }
     
     /**
-     * Create a new 16-bit image processor with the sum of all the non-null
+     * Create a new 16-bit short processor with the sum of all the non-null
      * 8-bit images in the given list.
      * 
      * @return

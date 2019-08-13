@@ -63,7 +63,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclear.ShortWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
@@ -187,8 +189,15 @@ public class DatasetConverter implements Importer {
     	for(UUID signalGroupID : collection.getSignalGroupIDs()) {
     		Optional<ISignalGroup> signalOpt = collection.getSignalGroup(signalGroupID);
     		
-    		if(signalOpt.isPresent())
-    			signalOpt.get().setWarpedSignals(new DefaultWarpedSignal(signalGroupID));
+    		if(signalOpt.isPresent()) {
+    			ISignalGroup sg = signalOpt.get();
+    			if(sg.hasWarpedSignals()) {
+    				IWarpedSignal ws = sg.getWarpedSignals().get();
+    				if(ws instanceof DefaultWarpedSignal) // delete the old type of signals, not new
+    					signalOpt.get().setWarpedSignals(new ShortWarpedSignal(signalGroupID));
+    			}
+    			
+    		}
     	}
         return template;
     	

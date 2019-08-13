@@ -23,6 +23,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ShortWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -135,13 +136,15 @@ public class SignalWarpingDialogController {
 			int minThreshold = settingsPanel.getMinThreshold();
 
 			ISignalGroup sg  = signalSource.getCollection().getSignalGroup(signalGroupId).get();
-			IWarpedSignal ws = sg.getWarpedSignals().orElse(new DefaultWarpedSignal(signalGroupId));
+			IWarpedSignal ws = sg.getWarpedSignals().orElse(new ShortWarpedSignal(signalGroupId));
 
-			ws.addWarpedImage(consensusTemplate, signalSource.getId(), targetDataset.getName(), isCellsWithSignals, minThreshold, image.convertToByteProcessor());
+			ws.addWarpedImage(consensusTemplate, signalSource.getId(), targetDataset.getName(), 
+					isCellsWithSignals, minThreshold, image);
 			sg.setWarpedSignals(ws);
 
 			model.clearSelection();
-			model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, isCellsWithSignals, isBinarise, minThreshold, image);
+			model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, 
+					isCellsWithSignals, isBinarise, minThreshold, image);
 
 			updateChart();
 			settingsPanel.setSettingsEnabled(true);

@@ -45,7 +45,7 @@ public interface IWarpedSignal extends Serializable {
 	 * @param ip
 	 * @return
 	 */
-	static byte[][] toArrayArray(ByteProcessor ip) {
+	static byte[][] toByteArrayArray(ByteProcessor ip) {
 		byte[][] arr = new byte[ip.getWidth()][ip.getHeight()];
 
 		for(int w=0; w<ip.getWidth(); w++) {
@@ -98,16 +98,9 @@ public interface IWarpedSignal extends Serializable {
 	 * @param arr
 	 * @return
 	 */
-	static ImageProcessor toImageProcessor(byte[][] arr) {
-		
-		
-		ShortProcessor image = new ShortProcessor(arr.length, arr[0].length);
-	
-		for(int w=0; w<image.getWidth(); w++) {
-			for(int h=0; h<image.getHeight(); h++) {
-				image.set(w, h, arr[w][h]);
-			}
-		}
+	static ImageProcessor toImageProcessor(byte[] arr, int width) {
+		ByteProcessor image = new ByteProcessor(width, arr.length/width);
+		image.setPixels(arr);
 		return image;
 	}
 	
@@ -116,13 +109,9 @@ public interface IWarpedSignal extends Serializable {
 	 * @param arr
 	 * @return
 	 */
-	static ImageProcessor toImageProcessor(short[][] arr) {
-		ShortProcessor image = new ShortProcessor(arr.length, arr[0].length);
-		for(int w=0; w<image.getWidth(); w++) {
-			for(int h=0; h<image.getHeight(); h++) {
-				image.set(w, h, arr[w][h]);
-			}
-		}
+	static ImageProcessor toImageProcessor(short[] arr, int width) {
+		ShortProcessor image = new ShortProcessor(width, arr.length/width);
+		image.setPixels(arr);
 		return image;
 	}
 	
@@ -153,7 +142,7 @@ public interface IWarpedSignal extends Serializable {
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset
 	 * @param image the warped image
 	 */	
-	void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId, @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ByteProcessor image);
+	void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId, @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ImageProcessor image);
 	
 	
 	/**
