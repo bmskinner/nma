@@ -13,3 +13,39 @@ Redistribution and use in source and binary forms, with or without modification,
     Neither the name of Tilburg University nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Leif Jonsson or Laurens van der Maaten BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------
+MS-SSIM index from http://www.ucm.es/info/fismed/MSSIM/MSSIM.htm:
+----------
+
+MS-SSIM index by Zhou Wang and MS-SSIM* Index by David Rouse and Sheila Hemami
+
+The equivalent of Zhou Wang's MS-SSIM (SUPRA-THRESHOLD LEVEL PROBLEM) MatLab code as a Java plugin inside ImageJ.
+Also, this plugin performs the equivalent of David Rouse and Sheila Hemami's MSSIM* (RECOGNITION THRESHOLD PROBLEM).
+This plugin works with 8, 16 and 32 bits gray levels.
+
+Main references:
+
+Zhou Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli, 
+"Image quality assessment: From error visibility to structural similarity", 
+IEEE Trans. Image Processing, vol. 13, pp. 600-612, Apr. 2004.
+
+David M. Rouse and Sheila S. Hemami, "Analyzing the Role of Visual Structure in the Recognition of Natural Image Content with Multi-Scale SSIM," 
+Proc. SPIE Vol. 6806, Human Vision and Electronic Imaging 2008.
+
+ImageJ by W. Rasband, U. S. National Institutes of Health, Bethesda, Maryland, USA, 
+http://rsb.info.nih.gov/ij/.  1997-2008. January 22th  2009.
+
+Java Code by Gabriel Prieto, Margarita Chevalier, Eduardo Guibelalde 22/01/2009.gprietor@med.ucm.es
+
+Permission to use, copy, or modify this software and its documentation for educational and research purposes only and without fee is hereby
+granted, provided that this copyright notice and the original authors' names appear on all copies and supporting documentation. This program
+shall not be used, rewritten, or adapted as the basis of a commercial software or hardware product without first obtaining permission of the
+authors. The authors make no representations about the suitability of this software for any purpose. It is provided "as is" without express
+or implied warranty.
+
+Please, refer to this version as:
+
+Gabriel Prieto, Margarita Chevalier, Eduardo Guibelalde. "MS_SSIM Index and MS_SSIM* Index as a Java plugin for ImageJ"
+Department of Radiology, Faculty of Medicine. Universidad Complutense. Madrid. SPAIN.
+http://www.ucm.es/info/fismed/MSSIM/MSSIM.htm
