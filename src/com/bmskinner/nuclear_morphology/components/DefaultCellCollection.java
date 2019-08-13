@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -91,8 +92,8 @@ public class DefaultCellCollection implements ICellCollection {
 	private final UUID uuid;
 
 	/** The image folder with the source of the cells */
-	@Deprecated // this should be only specified in the analysis options, and per cell
-	private File folder;
+	// this should be only specified in the analysis options, and per cell
+	@Deprecated private File folder;
 	
 	/** The name of the folder to save outputs */
 	private String outputFolder;
@@ -293,9 +294,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public Set<UUID> getCellIDs() {
-
-		return cells.parallelStream().map(c -> c.getId()).collect(Collectors.toSet());
-
+		return cells.parallelStream().map(ICell::getId).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -465,7 +464,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public synchronized Set<File> getImageFiles() {
-		return getNuclei().stream().map(n->n.getSourceFile()).collect(Collectors.toSet());
+		return getNuclei().stream().map(Nucleus::getSourceFile).collect(Collectors.toSet());
 	}
 
 	/**
@@ -474,11 +473,11 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @return
 	 */
 	private synchronized int[] getArrayLengths() {
-		return getNuclei().stream().mapToInt(n->n.getBorderLength()).toArray();
+		return getNuclei().stream().mapToInt(Nucleus::getBorderLength).toArray();
 	}
 
 	public synchronized double[] getMedianDistanceBetweenPoints() {
-		return getNuclei().stream().mapToDouble(n->n.getMedianDistanceBetweenPoints()).toArray();
+		return getNuclei().stream().mapToDouble(Nucleus::getMedianDistanceBetweenPoints).toArray();
 	}
 
 	@Override
@@ -751,13 +750,13 @@ public class DefaultCellCollection implements ICellCollection {
 		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return getSegmentStatistics(stat, scale, id);
 		default: {
 			LOGGER.warning("No component of type " + component + " can be handled");
-			return null;
+			return new double[0];
 		}
 		}
 	}
 
 	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
-			UUID id) throws Exception {
+			UUID id) {
 
 		if (statsCache.hasMedian(stat, component, scale, id))
 			return statsCache.getMedian(stat, component, scale, id);
@@ -1057,14 +1056,13 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public void updateVerticalNuclei() {
-		getNuclei().parallelStream().forEach(n -> n.updateDependentStats());
+		getNuclei().parallelStream().forEach(Nucleus::updateDependentStats);
 		statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
 		statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
 	}
 
 	@Override
 	public void setSourceFolder(@NonNull File newFolder) {
-		File oldFile = getFolder();
 		if(!newFolder.exists())
 			return;   
 		folder = newFolder;
@@ -1241,8 +1239,9 @@ public class DefaultCellCollection implements ICellCollection {
 		b.append(this.ruleSets.toString() + newLine);
 
 		b.append("Signal groups:" + newLine);
-		for (UUID signalGroupID : this.signalGroups.keySet()) {
-			ISignalGroup group = this.signalGroups.get(signalGroupID);
+		for(Entry<UUID, ISignalGroup> entry : signalGroups.entrySet()) {
+			UUID signalGroupID = entry.getKey();
+			ISignalGroup group = entry.getValue();
 			int count = this.getSignalManager().getSignalCount(signalGroupID);
 			b.append(signalGroupID.toString() + ": " + group.toString() + " | " + count + newLine);
 		}

@@ -221,7 +221,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		} catch (ProfileException | UnavailableComponentException e) {
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
-			return; // do not perform an update if things will get out of sync
+			// do not perform an update if things will get out of sync
 		}
 
     }
@@ -256,7 +256,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		} catch (ProfileException | UnavailableComponentException e) {
 			LOGGER.log(Loggable.STACK, e.getMessage(),  e);
-			return; // do not perform an update if things will get out of sync
+			// do not perform an update if things will get out of sync
 		}
 
     }
@@ -466,20 +466,20 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 
-		/**
-		 * Check the lengths of the two profiles. Return the first profile
-		 * interpolated to the length of the longer.
-		 * 
-		 * @param profile1 the profile to return interpolated
-		 * @param profile2 the profile to compare
-		 * @return a new profile with the length of the longest input profile
-		 * @throws ProfileException
-		 */
-		private IProfile equaliseLengths(@NonNull IProfile profile1, @NonNull IProfile profile2) throws ProfileException {
-			if (profile2.size() <= profile1.size())
-				return profile1;
-			return profile1.interpolate(profile2.size()); // profile 1 is smaller; interpolate to profile 2 length
-		}
+//		/**
+//		 * Check the lengths of the two profiles. Return the first profile
+//		 * interpolated to the length of the longer.
+//		 * 
+//		 * @param profile1 the profile to return interpolated
+//		 * @param profile2 the profile to compare
+//		 * @return a new profile with the length of the longest input profile
+//		 * @throws ProfileException
+//		 */
+//		private IProfile equaliseLengths(@NonNull IProfile profile1, @NonNull IProfile profile2) throws ProfileException {
+//			if (profile2.size() <= profile1.size())
+//				return profile1;
+//			return profile1.interpolate(profile2.size()); // profile 1 is smaller; interpolate to profile 2 length
+//		}
 
 		@Override
 		public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
@@ -614,12 +614,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				// go through each lookup position and get the appropriate angles
 				for (int j = 0; j < prevValues.length; j++) {
 
-					int prev_i = CellularComponent.wrapIndex(i - (j + 1), this.size()); // the
-					int next_i = CellularComponent.wrapIndex(i + (j + 1), this.size()); // the
+					int prev = CellularComponent.wrapIndex(i - (j + 1), this.size()); // the
+					int next = CellularComponent.wrapIndex(i + (j + 1), this.size()); // the
 
 					// fill the lookup array
-					prevValues[j] = array[prev_i];
-					nextValues[j] = array[next_i];
+					prevValues[j] = array[prev];
+					nextValues[j] = array[next];
 				}
 
 				boolean ok = true;
@@ -985,7 +985,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @return the merged profile
 		 */
 		public IProfile merge(List<IProfile> profiles) {
-			if (profiles == null || profiles.size() == 0) {
+			if (profiles == null || profiles.isEmpty()) {
 				throw new IllegalArgumentException("Profile list is null or empty");
 			}
 
@@ -1854,7 +1854,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 			
 			public List<UUID> getChildIds(){
-				return leaves.stream().map(s->s.getID()).collect(Collectors.toList());
+				return leaves.stream().map(IBorderSegment::getID).collect(Collectors.toList());
 			}
 
 			@Override

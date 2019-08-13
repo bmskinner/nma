@@ -69,6 +69,8 @@ public class DemoReportGenerator {
 	private static final String P_VALUE_FORMAT = "0.##E0";
 	private static final String DOMAIN_FORMAT = "0.0000";
 	
+	private static final String ZERO_STRING = "\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000";	
+	
 	public void generateShellReport(@NonNull final IAnalysisDataset dataset) throws IOException {
 		
 		// Store visibility states of each signal
@@ -150,8 +152,6 @@ public class DemoReportGenerator {
 	 */
 	private void generateDomainAnalysisOutputFormat(@NonNull final IAnalysisDataset dataset) {
 
-		DecimalFormat formatter = new DecimalFormat(DOMAIN_FORMAT);
-
 		Map<Integer, UUID> channelMap = new HashMap<>();
 		for(UUID id : dataset.getAnalysisOptions().get().getNuclearSignalGroups()) {
 			int channel = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id).getChannel();
@@ -162,73 +162,21 @@ public class DemoReportGenerator {
 		builder.append(String.format("Raw pixel intensity proportions; not normalised"+NEWLINE));
 		builder.append("Band 1 innermost. Band 5 outermost."+NEWLINE);
 		builder.append("Chan\tBand 1\tBand 2\tBand 3\tBand 4\tBand 5"+NEWLINE);
-
-		String zeroString = "\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000";	
 		
 		for(ICell cell : dataset.getCollection().getCells()) {
 
-			nucleusLoop: for(Nucleus n :cell.getNuclei()) {
+			for(Nucleus n : cell.getNuclei()) {
 
 				String cellLine = String.format("x=%s y=%s"+NEWLINE, n.getCentreOfMass().getXAsInt(), n.getCentreOfMass().getYAsInt());
 
-				// Red
-				String redLine = "Red";
-				if(channelMap.containsKey(0)) {
-					ISignalGroup red = dataset.getCollection().getSignalGroup(channelMap.get(0)).get();
-					if(red.hasShellResult()) {
-						double[] reds = red.getShellResult().get().getProportions(CountType.SIGNAL, cell, n, null);	
-						for(int i=reds.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine
-							redLine+="\t"+formatter.format(reds[i]);	
-					}else {
-						redLine+=zeroString;	
-					}
-				} else {
-					redLine+=zeroString;	
-				}
-				redLine+=NEWLINE;
-				
+				String redLine   = createChannelString(0, n, cell, dataset, channelMap);
+				String greenLine = createChannelString(1, n, cell, dataset, channelMap);
 
-				// Green
-				String greenLine = "Green";
-				if(channelMap.containsKey(0)) {
-					ISignalGroup green = dataset.getCollection().getSignalGroup(channelMap.get(1)).get();
-					if(green.hasShellResult()) {
-						double[] greens = green.getShellResult().get().getProportions(CountType.SIGNAL, cell, n, null);	
-						for(int i=greens.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine		
-							greenLine+="\t"+formatter.format(greens[i]);	
-					} else {
-						greenLine+=zeroString;	
-					}
-				}else {
-					greenLine+=zeroString;	
-				}
-				greenLine+=NEWLINE;
-
-				// Blue
-				String blueLine = "Blue";
-				ISignalGroup blue = null;
-				if(channelMap.containsKey(0)) {
-					blue = dataset.getCollection().getSignalGroup(channelMap.get(0)).get();
-					if(!blue.hasShellResult() && channelMap.containsKey(1))
-						blue = dataset.getCollection().getSignalGroup(channelMap.get(1)).get();
-				} else {
-					if(channelMap.containsKey(1))
-						blue = dataset.getCollection().getSignalGroup(channelMap.get(1)).get();
-				}
-				
+				ISignalGroup blue = chooseCounterstainGroup(dataset, channelMap);
 				if(blue==null || !blue.hasShellResult())
-					continue nucleusLoop;
+					continue;
 				
-				double[] blues = blue.getShellResult().get().getProportions(CountType.COUNTERSTAIN, cell, n, null);	
-				for(int i=blues.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine
-					blueLine+="\t"+formatter.format(blues[i]);	
-				blueLine+=NEWLINE;
-				
-				// Sanity check - can't export something with no counterstain signal
-				for(double d : blues)
-					if(d==0)
-						continue nucleusLoop;
-				
+				String blueLine = createCounterstainString(blue, cell, n);				
 				builder.append(cellLine);
 				builder.append(redLine);
 				builder.append(greenLine);
@@ -246,6 +194,65 @@ public class DemoReportGenerator {
 			LOGGER.warning("Unable to write domain file");
 		}
 
+	}
+	
+	/**
+	 * Create the domain analysis format string for the red or green channel
+	 * @param channel the channel to use (0 or 1)
+	 * @param n the nucleus
+	 * @param cell the cell
+	 * @param dataset the dataset
+	 * @param channelMap the map of signal group to channel
+	 * @return
+	 */
+	private String createChannelString(int channel, Nucleus n, ICell cell, IAnalysisDataset dataset, Map<Integer, UUID> channelMap) {
+		DecimalFormat formatter = new DecimalFormat(DOMAIN_FORMAT);
+
+		StringBuilder line = new StringBuilder(channel==0?"Red":"Green");
+		if(channelMap.containsKey(channel)) {
+			ISignalGroup sg = dataset.getCollection().getSignalGroup(channelMap.get(channel)).get();
+			if(sg.hasShellResult()) {
+				double[] values = sg.getShellResult().get().getProportions(CountType.SIGNAL, cell, n, null);	
+				for(int i=values.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine
+					line.append("\t"+formatter.format(values[i]));	
+			}else {
+				line.append(ZERO_STRING);	
+			}
+		} else {
+			line.append(ZERO_STRING);	
+		}
+		line.append(NEWLINE);
+		return line.toString();
+	}
+	
+	public ISignalGroup chooseCounterstainGroup(IAnalysisDataset dataset, Map<Integer, UUID> channelMap) {
+		ISignalGroup blue = null;
+		if(channelMap.containsKey(0)) {
+			blue = dataset.getCollection().getSignalGroup(channelMap.get(0)).get();
+			if(!blue.hasShellResult() && channelMap.containsKey(1))
+				blue = dataset.getCollection().getSignalGroup(channelMap.get(1)).get();
+		} else {
+			if(channelMap.containsKey(1))
+				blue = dataset.getCollection().getSignalGroup(channelMap.get(1)).get();
+		}
+		return blue;
+	}
+	
+	private String createCounterstainString(ISignalGroup blue, ICell cell, Nucleus n) {
+		DecimalFormat formatter = new DecimalFormat(DOMAIN_FORMAT);
+		StringBuilder line = new StringBuilder("Blue");
+		double[] blues = blue.getShellResult().get().getProportions(CountType.COUNTERSTAIN, cell, n, null);	
+		for(double d : blues) { // Sanity check - can't export something with no counterstain signal
+			if(d==0) {
+				line.append(ZERO_STRING);
+				return line.toString();
+			}
+		}
+				
+		for(int i=blues.length-1; i>=0; i--) // Domain analysis shells are opposite way round to mine
+			line.append("\t"+formatter.format(blues[i]));	
+		line.append(NEWLINE);
+		return line.toString();
 	}
 
 }

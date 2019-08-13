@@ -303,6 +303,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public void deleteChild(@NonNull UUID id) {
+    	// do not allow
     }
 
     @Override

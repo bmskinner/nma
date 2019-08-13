@@ -464,24 +464,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             return ip;
         if (!getSourceFile().exists())
         	throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
-        
-        // Get the stack, make greyscale and invert
-        int stack = ImageImporter.rgbToStack(getChannel());
 
         try {
-//        	ImageStack imageStack = new ImageImporter(getSourceFile()).importImage(getChannel());
-//        	ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
-//        	ip.invert();
-
         	ip = new ImageImporter(getSourceFile()).importImage(getChannel());
         	ip = new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
 
-        	
-        	imageRef = new WeakReference <>(ip);
+        	imageRef = new WeakReference<>(ip);
         	return ip;
-        	
-        	 
-
         } catch (ImageImportException e) {
         	LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
         	throw new UnloadableImageException("Source image is not available");
@@ -986,7 +975,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale scale) {
 
-        if (borderList.size() == 0)
+        if (borderList.isEmpty())
             throw new IllegalArgumentException("Border list is empty");
 
         if (shapeCache.has(xOffset, yOffset, scale)) {

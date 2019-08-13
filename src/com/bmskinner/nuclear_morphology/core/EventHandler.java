@@ -230,7 +230,7 @@ public class EventHandler implements EventListener {
             				return;
             			File f = new File(s);
 
-            			new NewAnalysisAction(acceptor, EventHandler.this, f).run();;
+            			new NewAnalysisAction(acceptor, EventHandler.this, f).run();
             		};
             	}
             
@@ -320,7 +320,7 @@ public class EventHandler implements EventListener {
             				.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
             		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
             				ws.remove(d);
-            		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList<IAnalysisDataset>()));
+            		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(), new ArrayList<IAnalysisDataset>()));
             	};
             
         	if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
@@ -331,7 +331,7 @@ public class EventHandler implements EventListener {
         			
         			for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
         				ws.add(d);
-        			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList<IAnalysisDataset>()));
+        			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(), new ArrayList<IAnalysisDataset>()));
         		};
 
     		if (event.type().startsWith(SignalChangeEvent.NEW_BIOSAMPLE_PREFIX))
@@ -385,6 +385,73 @@ public class EventHandler implements EventListener {
                 return new RelocateFromFileAction(selectedDataset, acceptor, EventHandler.this, new CountDownLatch(1));
 
             return null;
+        }
+        
+        /**
+         * Create a new workspace
+         */
+        private void createWorkspace() {
+
+    		try {
+    			String workspaceName = ic.requestString("New workspace name");
+    			IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
+    			DatasetListManager.getInstance().addWorkspace(w);
+        		LOGGER.info("New workspace created: "+workspaceName);
+        		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(), new ArrayList<>()));
+    			
+    		} catch (RequestCancelledException e) {
+    			// no action needed
+    		}
+        	
+        }
+        
+        /**
+         * Set the scale of the given datasets
+         * @param selectedDatasets
+         */
+        private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
+        	if(selectedDatasets.isEmpty())
+        		return;
+        	
+        	try {
+        		double d0scale = 1; 
+        		double currentScale = 1; 
+        		
+        		// is there a common scale in the datasets already?
+        		// Get the first dataset scale
+        		Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
+        		if(d0Options.isPresent()) {
+        			Optional<IDetectionOptions> d0NucleusOptions = d0Options.get().getNuclusDetectionOptions();
+        			if(d0NucleusOptions.isPresent()) {
+        				d0scale = d0NucleusOptions.get().getScale();
+        			}
+        		}
+        		
+        		// check any other datasets match
+        		final double d0scaleFinal = d0scale;
+        		boolean allMatch = selectedDatasets.stream().allMatch(d->{
+        			Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
+        			if(dOptions.isPresent()) {
+        				Optional<IDetectionOptions> dNucleusOptions = dOptions.get().getNuclusDetectionOptions();
+        				if(dNucleusOptions.isPresent()) {
+        					return dNucleusOptions.get().getScale()==d0scaleFinal;
+        				}
+        			}
+        			return false;
+        		});
+        		if(allMatch)
+        			currentScale = d0scale;
+        		
+        		// request the new scale
+    			double scale = ic.requestDouble("Pixels per micron", currentScale, 1d, 100000d, 1d);
+    			if (scale > 0) { // don't allow a scale to cause divide by zero errors
+    				selectedDatasets.stream().forEach(d->d.setScale(scale));
+    				eventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
+    			}
+    				
+    		} catch (RequestCancelledException e) {
+    			//No action needed
+    		}
         }
 
         /**
@@ -452,7 +519,7 @@ public class EventHandler implements EventListener {
             			try {
             				saveLatch.await();
             				LOGGER.fine("Starting recache action");
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, EventHandler.class.getName(), selectedDatasets));
             			} catch(InterruptedException e) {
             				return;
             			}
@@ -502,7 +569,7 @@ public class EventHandler implements EventListener {
             			try {
             				segmentLatch.await();
             				LOGGER.fine("Adding datasets");
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, EventHandler.class.getName(), selectedDatasets));
             			} catch(InterruptedException e) {
             				return;
             			}
@@ -708,68 +775,6 @@ public class EventHandler implements EventListener {
         }
     }
 
-    
-    private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
-    	if(selectedDatasets.isEmpty())
-    		return;
-    	
-    	try {
-    		double d0scale = 1; 
-    		double currentScale = 1; 
-    		
-    		// is there a common scale in the datasets already?
-    		// Get the first dataset scale
-    		Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
-    		if(d0Options.isPresent()) {
-    			Optional<IDetectionOptions> d0NucleusOptions = d0Options.get().getNuclusDetectionOptions();
-    			if(d0NucleusOptions.isPresent()) {
-    				d0scale = d0NucleusOptions.get().getScale();
-    			}
-    		}
-    		
-    		// check any other datasets match
-    		final double d0scaleFinal = d0scale;
-    		boolean allMatch = selectedDatasets.stream().allMatch(d->{
-    			Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
-    			if(dOptions.isPresent()) {
-    				Optional<IDetectionOptions> dNucleusOptions = dOptions.get().getNuclusDetectionOptions();
-    				if(dNucleusOptions.isPresent()) {
-    					return dNucleusOptions.get().getScale()==d0scaleFinal;
-    				}
-    			}
-    			return false;
-    		});
-    		if(allMatch)
-    			currentScale = d0scale;
-    		
-    		// request the new scale
-			double scale = ic.requestDouble("Pixels per micron", currentScale, 1d, 100000d, 1d);
-			if (scale > 0) { // don't allow a scale to cause divide by zero errors
-				selectedDatasets.stream().forEach(d->d.setScale(scale));
-				eventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
-			}
-				
-		} catch (RequestCancelledException e) {
-			return;
-		}
-    }
-        
-    private void createWorkspace() {
-
-		try {
-			String workspaceName = ic.requestString("New workspace name");
-			IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
-			DatasetListManager.getInstance().addWorkspace(w);
-    		LOGGER.info("New workspace created: "+workspaceName);
-    		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
-			
-		} catch (RequestCancelledException e) {
-			return;
-		}
-    	
-    }
-    
-    
     /**
      * Save all the root datasets in the populations panel
      */

@@ -66,7 +66,6 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
      */
     public ShellAnalysisAction(@NonNull final IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
-
     }
 
     @Override

@@ -11,15 +11,40 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public interface Consensus<E extends CellularComponent> {
 
+	/**
+	 * Move the consensus by the given amount in X and Y axes
+	 * @param xOffset
+	 * @param yOffset
+	 */
 	void offset(double xOffset, double yOffset);
 
+	/**
+	 * Add a rotation by the given number of degrees clockwise
+	 * @param angle
+	 */
 	void addRotation(double angle);
 
+	/**
+	 * Get the current rotation applied
+	 * @return
+	 */
 	double currentRotation();
 
+	/**
+	 * Get the current offset applied
+	 * @return
+	 */
 	IPoint currentOffset();
 	
+	/**
+	 * Create a duplicate of this consensus
+	 * @return
+	 */
 	Consensus<E> duplicateConsensus();
 	
+	/**
+	 * Get the component this consensus was based on
+	 * @return
+	 */
 	E component();
 }

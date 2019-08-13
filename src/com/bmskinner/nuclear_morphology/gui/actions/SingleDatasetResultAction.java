@@ -118,6 +118,6 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
     }
 
     protected synchronized boolean hasRemainingDatasetsToProcess() {
-        return processList.size() > 0;
+        return !processList.isEmpty();
     }
 }
