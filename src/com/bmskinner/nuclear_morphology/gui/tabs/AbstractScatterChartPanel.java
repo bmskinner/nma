@@ -274,7 +274,11 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         
         for (IAnalysisDataset d : getDatasets()) {
         	try {
+        		
+        		// Get the filtered cells as a real collection
         		ICellCollection filtered  = f.filter(d.getCollection(), options.getPredicate(d.getCollection()));
+        		
+        		// Put them into a virtual collection
         		ICellCollection virt = new VirtualCellCollection(d, filtered.getName());
         		filtered.getCells().forEach(c->virt.addCell(c));
         		virt.setName("Filtered_" + statA + "_" + statB);

@@ -122,6 +122,31 @@ public abstract class AbstractAnalysisDataset implements Serializable {
         return false;
     }
     
+    /**
+     * Given a potential name, avoid conflicts with existing
+     * names of this or child datasets by appending a digit
+     * @param baseName the name to test
+     * @return the name unaltered, or with a non-conflicting suffix.
+     */
+    protected String chooseSuffix(String baseName) {
+    	int appender = 1;
+    	boolean isValidName = false;
+    	String testName = baseName;
+    	
+    	while(!isValidName) {
+    		testName = baseName+"_"+appender;
+    		isValidName = true;
+    		if(testName.equals(getName()))
+    			isValidName = false;
+    		for(IAnalysisDataset d : childDatasets ) {
+            	if(d.getName().equals(testName))
+            		isValidName = false;
+            }
+    		appender++;
+    	}
+    	return testName;
+    }
+    
     public abstract void deleteClusterGroup(@NonNull IClusterGroup group);
 
     public void addClusterGroup(IClusterGroup group) {

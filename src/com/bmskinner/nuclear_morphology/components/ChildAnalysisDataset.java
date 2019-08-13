@@ -94,14 +94,15 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public void addChildDataset(@NonNull IAnalysisDataset dataset) {
-		// Ensure no duplicate dataset names - TODO: this is a temp fix for issue 159
-		if(getName().equals(dataset.getName()))
-			dataset.setName(dataset.getName()+"_1");
-		for(IAnalysisDataset d : childDatasets ) {
-			if(d.getName().equals(dataset.getName()))
-				dataset.setName(dataset.getName()+"_1");
-		}
-		childDatasets.add(dataset);
+        // Ensure no duplicate dataset names
+        // If the name is the same as this dataset, or one of the child datasets, 
+        // apply a suffix
+        if(getName().equals(dataset.getName()) || 
+        		childDatasets.stream().map(IAnalysisDataset::getName).anyMatch(s->s.equals(dataset.getName()))) {
+        	String newName = chooseSuffix(dataset.getName());
+        	dataset.setName(newName);
+        }
+        childDatasets.add(dataset);
 
 	}
 
