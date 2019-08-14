@@ -66,7 +66,7 @@ public class Screenshotter {
 	/** Sleep time after loading a dataset */
 	private static final int LOAD_TIME_MILLIS = 5000;
 	
-	private static final String SCREENSHOT_FOLDER = "screens/";
+	private static final String SCREENSHOT_FOLDER = "screens/"+Version.currentVersion()+"/";
 	private static final String NULL_DATASET_FOLDER = "Blank";
 	private static final String SINGLE_ROUND_DATASET_FOLDER = "Single_round";
 	private static final String SINGLE_MOUSE_DATASET_FOLDER = "Single_mouse";
@@ -101,6 +101,8 @@ public class Screenshotter {
 	}
 	
 	private void deleteFiles(File folder) {
+		if(!folder.exists())
+			return;
 		for(File f : folder.listFiles()) {
 			if(f.isDirectory())
 				deleteFiles(f);
