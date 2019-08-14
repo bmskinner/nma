@@ -49,13 +49,19 @@ public class DetailPanelScreenshotter {
 	private Robot robot;
 	private DockableMainWindow mw;
 	
+	/**
+	 * Create with a main window to control, and a robot to take screenshots
+	 * @param mw
+	 * @param robot
+	 */
 	public DetailPanelScreenshotter(DockableMainWindow mw, Robot robot) {
 		this.robot = robot;		
 		this.mw = mw;
 	}
 	
 	/**
-	 * @param c
+	 * Adjust the crop of images to fit components
+	 * @param c the display component to crop
 	 * @return
 	 */
 	private Rectangle makeCroppedBounds(Component c) {
@@ -67,6 +73,13 @@ public class DetailPanelScreenshotter {
 		return new Rectangle(p.x+leftCrop, p.y+topCrop, c.getWidth()-(rightCrop+leftCrop), c.getHeight()-(topCrop+btmCrop));
 	}
 	
+	/**
+	 * Take screenshots of the given panel
+	 * @param panel the panel to image
+	 * @param folder the location for saved images
+	 * @param title the title for the image
+	 * @throws IOException
+	 */
 	public void takeScreenShots(DetailPanel panel, File folder, String title) throws IOException {
 		if(panel instanceof ImagesTabPanel)
 			selectImage((ImagesTabPanel) panel);
@@ -78,6 +91,13 @@ public class DetailPanelScreenshotter {
 		}
 	}
 	
+	/**
+	 * Take screenshots of an AWT component
+	 * @param panel the component
+	 * @param folder the location for saved images
+	 * @param title the title for the image
+	 * @throws IOException
+	 */
 	private void takeScreenShots(Component panel, File folder, String title) throws IOException {
 		if(panel instanceof DetailPanel) {
 			DetailPanel dp = (DetailPanel)panel;
@@ -112,6 +132,10 @@ public class DetailPanelScreenshotter {
 		}
 	}
 	
+	/**
+	 * Select a single cell in the cells list panel
+	 * @param dp
+	 */
 	private void selectSingleCell(CellsListPanel dp) {
 		Point listPos = dp.getLocationOnScreen();
 		robot.mouseMove(listPos.x+60, listPos.y+120);
@@ -124,6 +148,10 @@ public class DetailPanelScreenshotter {
 		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
 	
+	/**
+	 * Select a single image in the images tab panel
+	 * @param dp
+	 */
 	private void selectImage(ImagesTabPanel dp) {
 		Point listPos = dp.getLocationOnScreen();
 		robot.mouseMove(listPos.x+90, listPos.y+90);
@@ -142,6 +170,13 @@ public class DetailPanelScreenshotter {
 	}
 	
 	
+	/**
+	 * Take a screenshot and draw a border around the given panel
+	 * @param panel the panel to highlight
+	 * @param folder the location for saved images
+	 * @param title the title for the image
+	 * @throws IOException
+	 */
 	private void takeAnnotatedScreenShot(DetailPanel panel, File folder, String title) throws IOException {
 		Point topLeft = mw.getLocationOnScreen();
 		BufferedImage img = robot.createScreenCapture(makeCroppedBounds(mw));
@@ -158,6 +193,12 @@ public class DetailPanelScreenshotter {
 		ImageIO.write(img, "png", outputfile);
 	}
 	
+	/**
+	 * Take a screenshot of the main window.
+	 * @param folder the location for saved images
+	 * @param title the title for the image
+	 * @throws IOException
+	 */
 	private void takeScreenShot(File folder, String title) throws IOException {
 		BufferedImage img = robot.createScreenCapture(makeCroppedBounds(mw));
 		File outputfile = new File(folder, title+Io.PNG_FILE_EXTENSION);

@@ -52,10 +52,18 @@ public class TabPanelSwitcher {
 		
 	}
 	
+	/**
+	 * Test if there is another tab to visit
+	 * @return true if there is another tab, false otherwise
+	 */
 	public boolean hasNext() {
 		return currentTab < totalTabs-1;
 	}
 	
+	/**
+	 * Fetch the DetailPanel in the next tab 
+	 * @return
+	 */
 	public DetailPanel nextTab() {
 		currentTab++;
 		dock.setSelectedDockable(dock.getDockable(currentTab));

@@ -162,6 +162,11 @@ public class Screenshotter {
 		return new Rectangle(p.x+leftCrop, p.y+topCrop, c.getWidth()-(rightCrop+leftCrop), c.getHeight()-(topCrop+btmCrop));
 	}
 
+	/**
+	 * Take screenshots of the program, stepping though each tab
+	 * @param rootFolder the folder in which to save the images
+	 * @param prefix the prefix to apply to file names
+	 */
 	private void takeScreens(File rootFolder, String prefix) {
 		System.out.println("Imaging "+prefix);
 		try {
