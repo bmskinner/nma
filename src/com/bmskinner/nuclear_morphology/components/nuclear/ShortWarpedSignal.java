@@ -13,7 +13,8 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import ij.process.ImageProcessor;
 
 /**
- * Implementation of a warped signal using shorts
+ * Implementation of a warped signal using shorts. Replaces the DefaultWarpedSignal,
+ * which was limited to saving 8-bit images.
  * @author ben
  * @since 1.16.0
  *

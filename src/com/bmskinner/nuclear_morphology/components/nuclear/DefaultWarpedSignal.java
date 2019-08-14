@@ -26,15 +26,16 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
-import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 /**
  * Default implementation of a warped signal
  * @author ben
  * @since 1.14.0
+ * @deprecated since 1.16.0 - it saves 8-bit images, not 16-bit. Use a ShortWarpedSignal instead
  *
  */
+@Deprecated
 public class DefaultWarpedSignal implements IWarpedSignal {
 
 	private static final long serialVersionUID = 1L;
