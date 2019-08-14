@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -69,15 +68,15 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
         this.parent = merged;
         
-        if(mergeSource.getAnalysisOptions().isPresent())
-        	analysisOptions = mergeSource.getAnalysisOptions().get().duplicate();
+        Optional<IAnalysisOptions> optionalOptions = mergeSource.getAnalysisOptions();
+        if(optionalOptions.isPresent())
+        	analysisOptions = optionalOptions.get().duplicate();
 
         this.datasetColour = mergeSource.getDatasetColour().orElse(null);
 
-        
         try {
         	getCollection().createProfileCollection();
-            mergeSource.getCollection().getProfileManager().copyCollectionOffsets(this.getCollection());
+            mergeSource.getCollection().getProfileManager().copyCollectionOffsets(getCollection());
         } catch (ProfileException e) {
             LOGGER.warning("Unable to create merge source dataset");
             LOGGER.log(Loggable.STACK, "Error copying offsets", e);
@@ -203,11 +202,9 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public Set<UUID> getMergeSourceIDs() {
-        Set<UUID> result = new HashSet<UUID>(childDatasets.size());
-        for (IAnalysisDataset c : childDatasets) {
+        Set<UUID> result = new HashSet<>();
+        for (IAnalysisDataset c : childDatasets)
             result.add(c.getId());
-        }
-
         return result;
     }
 
@@ -322,6 +319,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public void updateSourceImageDirectory(@NonNull File expectedImageDirectory) {
+    	// No action needed
     }
 
     @Override

@@ -362,6 +362,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public void deleteMergeSource(@NonNull UUID id) {
+		// No action
 	}
 
 	@Override
