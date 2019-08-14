@@ -163,7 +163,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      */
     @Override
     public List<INuclearSignal> getAllSignals() {
-        List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
+        List<INuclearSignal> result = new ArrayList<>(0);
         for (UUID signalGroup : this.getSignalGroupIds()) {
             result.addAll(getSignals(signalGroup));
         }

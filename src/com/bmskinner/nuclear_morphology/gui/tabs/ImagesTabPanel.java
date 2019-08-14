@@ -358,6 +358,14 @@ public class ImagesTabPanel extends DetailPanel {
         	
         	oldFolder = getExistingParent(oldFolder);
         	File newFolder = getInputSupplier().requestFolder(oldFolder);
+        	
+        	// Should signal groups be updated at the same time?
+        	// Check if the dataset has signals, and if so, ask if their images should be 
+        	// updated to the same folder.
+        	
+//        	boolean isUpdateSignals = getInputSupplier()
+//        			.requestApproval("Update signals to use the same images?",
+//        					"Update signals?");
         	node.setFile(newFolder); // update node
 
         	Enumeration<ImageTreeNode> children = node.convertChildren();
@@ -371,7 +379,16 @@ public class ImagesTabPanel extends DetailPanel {
         		getDatasets().stream()
 	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
 	        		.flatMap(c->c.getNuclei().stream())
-	        		.forEach(n->n.setSourceFile(new File(newFolder, imageFile.getName())));
+	        		.forEach(n->{
+	        			n.setSourceFile(new File(newFolder, imageFile.getName()));
+	        			
+	        			// Update signals in the same file
+	        			n.getSignalCollection().getAllSignals().stream()
+	        			.forEach(s->{
+	        				if(s.getSourceFile().equals(imageFile))
+	        					s.setSourceFile(new File(newFolder, imageFile.getName()));
+	        			});
+	        		});        		
         		imageData.setFile( new File(newFolder, imageFile.getName()));
         	}
         } catch (RequestCancelledException e1) {
