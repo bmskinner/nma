@@ -218,7 +218,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 				mesh = new DefaultMesh(collection.getConsensus());
 				attributeCount += mesh.getFaces().size();
 			} catch (MeshCreationException e) {
-				e.printStackTrace();
+				LOGGER.log(Loggable.STACK, "Cannot create mesh", e);
 				throw new ClusteringMethodException(e);
 			}
             
@@ -231,7 +231,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         
         // Create the attributes
         LOGGER.finer("Creating attributes");
-        FastVector attributes = new FastVector(attributeCount);
+        FastVector<Attribute> attributes = new FastVector<>(attributeCount);
         int profileAttCounter = 0;
         for(ProfileType t : ProfileType.displayValues()) {
         	if(options.getBoolean(t.toString()))    {	
@@ -299,8 +299,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             try {
 				template = new DefaultMesh(collection.getConsensus());
 			} catch (MeshCreationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Loggable.STACK, "Cannot create mesh", e);
 				throw new ClusteringMethodException(e);
 			}
         }
@@ -311,8 +310,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                      addNucleus(c, n, attributes, instances, template, windowProportion);
                  } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
                          | MeshCreationException e) {
-                     // TODO Auto-generated catch block
-                     e.printStackTrace();
+                	 LOGGER.log(Loggable.STACK, "Cannot add nucleus data", e);
                  }
         	}
         }
@@ -397,7 +395,12 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
             if (options.isIncludeStatistic(stat)) {
                 Attribute att = (Attribute) attributes.elementAt(attNumber++);
-                inst.setValue(att, n.getStatistic(stat, MeasurementScale.MICRONS));
+                
+                if(PlottableStatistic.VARIABILITY.equals(stat)) {
+                	 inst.setValue(att, collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n));
+                } else {
+                	inst.setValue(att, n.getStatistic(stat, MeasurementScale.MICRONS));
+                }
 
             }
         }

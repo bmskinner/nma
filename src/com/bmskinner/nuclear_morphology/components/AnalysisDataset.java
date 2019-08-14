@@ -32,10 +32,15 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
@@ -550,24 +555,36 @@ public class AnalysisDataset implements IAnalysisDataset {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * analysis.IAnalysisDataset#deleteClusterGroup(components.ClusterGroup)
-     */
     @Override
-    public void deleteClusterGroup(IClusterGroup group) {
+    public void deleteClusterGroup(@NonNull final IClusterGroup group) {
 
         if (hasClusterGroup(group)) {
-
-            for (UUID id : group.getUUIDs()) {
-                if (hasChild(id)) {
-                    this.deleteChild(id);
-                }
+        	UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
+        	
+        	for(UUID id : groupIds)
+        		deleteChild(id);
+            
+            // Remove saved values associated with the cluster group
+            // e.g. tSNE, PCA
+            for(Nucleus n : getCollection().getNuclei()) {
+            	for(PlottableStatistic s : n.getStatistics()) {
+            		if(s.toString().endsWith(group.getId().toString()))
+            			n.clearStatistic(s);
+            	}
             }
             this.clusterGroups.remove(group);
         }
+    }
+    
+    @Override
+    public void deleteClusterGroups() {
+    	LOGGER.fine("Deleting all cluster groups in "+getName());
+    	// Use arrays to avoid concurrent modifications to cluster groups
+    	Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
+    	for(Object id : ids) {
+    		IClusterGroup g = clusterGroups.stream().filter(group->group.getId().equals(id)).findFirst().get();
+    		deleteClusterGroup(g);
+    	}
     }
 
     /*

@@ -291,8 +291,12 @@ public interface IAnalysisDataset extends Serializable {
      */
     boolean hasCluster(@NonNull UUID id);
 
+    /**
+     * Get the cluster groups in the dataset
+     * @return
+     */
     List<IClusterGroup> getClusterGroups();
-
+    
     /**
      * Get the UUIDs of all datasets in clusters
      * 
@@ -331,25 +335,31 @@ public interface IAnalysisDataset extends Serializable {
     /**
      * Set the dataset root status
      * 
-     * @param b
-     *            is the dataset root
+     * @param b is the dataset root
      */
     void setRoot(boolean b);
 
     /**
-     * Delete the child AnalysisDataset specified
+     * Delete a child dataset. Has no effect if no child with the
+     * given id is present.
      * 
-     * @param id
-     *            the UUID of the child to delete
+     * @param id the UUID of the child to delete
      */
     void deleteChild(@NonNull UUID id);
 
     /**
-     * Delete the cluster with the given id
+     * Delete the cluster with the given id. This will delete both 
+     * the cluster group metadata, and the individual child datasets
+     * within the group.
      * 
-     * @param id
+     * @param group the cluster group to delete
      */
     void deleteClusterGroup(@NonNull IClusterGroup group);
+    
+    /**
+     * Delete all cluster groups and associated child datasets.
+     */
+    void deleteClusterGroups();
 
     /**
      * Delete an associated dataset
@@ -361,8 +371,7 @@ public interface IAnalysisDataset extends Serializable {
     /**
      * Check if the given dataset is a child dataset of this
      * 
-     * @param child
-     *            the dataset to test
+     * @param child the dataset to test
      * @return
      */
     boolean hasChild(@NonNull IAnalysisDataset child);

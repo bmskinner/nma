@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -413,7 +414,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
         if (this.hasClusters()) {
             // Find the groups that need removing
-            List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
+            List<IClusterGroup> groupsToDelete = new ArrayList<>();
             for (IClusterGroup g : this.getClusterGroups()) {
                 boolean clusterRemains = false;
 
@@ -435,10 +436,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     public void deleteClusterGroup(@NonNull final IClusterGroup group) {
 
         if (hasClusterGroup(group)) {
-
-            for (UUID id : group.getUUIDs())
-                if (hasChild(id))
-                    this.deleteChild(id);
+        	UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
+        	
+        	for(UUID id : groupIds)
+        		deleteChild(id);
             
             // Remove saved values associated with the cluster group
             // e.g. tSNE, PCA
@@ -450,6 +451,17 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             }
             this.clusterGroups.remove(group);
         }
+    }
+    
+    @Override
+    public void deleteClusterGroups() {
+    	LOGGER.fine("Deleting all cluster groups in "+getName());
+    	// Use arrays to avoid concurrent modifications to cluster groups
+    	Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
+    	for(Object id : ids) {
+    		IClusterGroup g = clusterGroups.stream().filter(group->group.getId().equals(id)).findFirst().get();
+    		deleteClusterGroup(g);
+    	}
     }
 
     @Override

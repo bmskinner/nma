@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -327,27 +328,37 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 		}
 	}
 
-	@Override
-	public void deleteClusterGroup(IClusterGroup group) {
-		if (hasClusterGroup(group)) {
+    @Override
+    public void deleteClusterGroup(@NonNull final IClusterGroup group) {
 
-			for (UUID id : group.getUUIDs()) {
-				if (hasChild(id)) {
-					this.deleteChild(id);
-				}
-			}
-
-			// Remove saved values associated with the cluster group
-			// e.g. tSNE, PCA
-			for(Nucleus n : getCollection().getNuclei()) {
-				for(PlottableStatistic s : n.getStatistics()) {
-					if(s.toString().endsWith(group.getId().toString()))
-						n.clearStatistic(s);
-				}
-			}
-			this.clusterGroups.remove(group);
-		}
-	}
+        if (hasClusterGroup(group)) {
+        	UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
+        	
+        	for(UUID id : groupIds)
+        		deleteChild(id);
+            
+            // Remove saved values associated with the cluster group
+            // e.g. tSNE, PCA
+            for(Nucleus n : getCollection().getNuclei()) {
+            	for(PlottableStatistic s : n.getStatistics()) {
+            		if(s.toString().endsWith(group.getId().toString()))
+            			n.clearStatistic(s);
+            	}
+            }
+            this.clusterGroups.remove(group);
+        }
+    }
+    
+    @Override
+    public void deleteClusterGroups() {
+    	LOGGER.fine("Deleting all cluster groups in "+getName());
+    	// Use arrays to avoid concurrent modifications to cluster groups
+    	Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
+    	for(Object id : ids) {
+    		IClusterGroup g = clusterGroups.stream().filter(group->group.getId().equals(id)).findFirst().get();
+    		deleteClusterGroup(g);
+    	}
+    }
 
 	@Override
 	public void deleteMergeSource(@NonNull UUID id) {

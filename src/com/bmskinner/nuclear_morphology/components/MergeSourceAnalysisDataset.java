@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -330,6 +331,12 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public void deleteClusterGroup(@NonNull IClusterGroup group) {
+    	// No groups present
+    }
+    
+    @Override
+    public void deleteClusterGroups() {
+    	// No groups present
     }
 
 	@Override

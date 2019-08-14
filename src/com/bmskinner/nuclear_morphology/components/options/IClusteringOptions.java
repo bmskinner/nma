@@ -117,6 +117,10 @@ public interface IClusteringOptions extends Serializable, HashOptions {
         }
     }
     
+    /**
+     * Create a copy of these options
+     * @return
+     */
     IClusteringOptions duplicate();
     
     /**
@@ -187,16 +191,19 @@ public interface IClusteringOptions extends Serializable, HashOptions {
 
     void setUseSimilarityMatrix(boolean defaultUseSimilarityMatrix);
 
-    void setIncludeProfile(boolean defaultIncludeProfile);
-
-    void setProfileType(ProfileType defaultProfileType);
+    /**
+     * Set whether the given profile type should be included
+     * @param profileType
+     * @param isIncluded
+     */
+    void setIncludeProfileType(ProfileType profileType, boolean isIncluded);
 
     void setIncludeMesh(boolean defaultIncludeMesh);
 
-    void setIncludeStatistic(PlottableStatistic stat, boolean selected);
+    void setIncludeStatistic(PlottableStatistic stat, boolean isIncluded);
 
-    void setIncludeSegment(UUID id, boolean selected);
+    void setIncludeSegment(UUID id, boolean isIncluded);
 
-    void setType(ClusteringMethod hierarchical);
+    void setClusteringMethod(ClusteringMethod hierarchical);
 
 }

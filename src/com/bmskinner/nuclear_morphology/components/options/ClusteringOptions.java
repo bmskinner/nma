@@ -184,19 +184,13 @@ public class ClusteringOptions implements IClusteringOptions {
     public boolean isIncludeProfile(ProfileType t) {
         return this.includeProfile && t.equals(ProfileType.ANGLE);
     }
+    
+	@Override
+	public void setIncludeProfileType(ProfileType profileType, boolean b) {
+		setBoolean(profileType.toString(), b);
+	}
 
-    @Override
-	public void setIncludeProfile(boolean b) {
-        this.includeProfile = b;
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#
-     * isUseSimilarityMatrix()
-     */
     @Override
     public boolean isUseSimilarityMatrix() {
         return useSimilarityMatrix;
@@ -213,7 +207,7 @@ public class ClusteringOptions implements IClusteringOptions {
      * @param type
      */
     @Override
-	public void setType(ClusteringMethod type) {
+	public void setClusteringMethod(ClusteringMethod type) {
         this.type = type;
     }
 
@@ -289,30 +283,11 @@ public class ClusteringOptions implements IClusteringOptions {
         return hierarchicalMethod;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#
-     * getIterations()
-     */
     @Override
     public int getIterations() {
         return iterations;
     }
 
-    @Override
-	public void setProfileType(ProfileType profileType) {
-        this.profileType = profileType;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#
-     * isIncludeMesh()
-     */
     @Override
     public boolean isIncludeMesh() {
         return includeMesh;

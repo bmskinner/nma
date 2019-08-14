@@ -4,27 +4,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
-import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
  * Tests for the nucleus clustering
@@ -35,7 +28,6 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-	private static final int CELLS_PER_CLUSTER = 50;
 	private static final int TWO_CLUSTERS = 2;
 
 	private IAnalysisDataset merged;
@@ -44,49 +36,52 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		
-		// Create two datasets with differently sized nuclei and merge them
-		IAnalysisDataset dataset1 = new TestDatasetBuilder(RNG_SEED).cellCount(CELLS_PER_CLUSTER)
-				.ofType(NucleusType.ROUND)
-				.baseHeight(60)
-				.baseWidth(50)
-				.withMaxSizeVariation(0)
-				.randomOffsetProfiles(false)
-				.segmented().build();
-		
-		IAnalysisDataset dataset2 = new TestDatasetBuilder(RNG_SEED).cellCount(CELLS_PER_CLUSTER)
-				.ofType(NucleusType.ROUND)
-				.baseHeight(20)
-				.baseWidth(30)
-				.withMaxSizeVariation(0)
-				.randomOffsetProfiles(false)
-				.segmented().build();
-		
-		List<IAnalysisDataset> toMerge = new ArrayList<>();
-		toMerge.add(dataset1);
-		toMerge.add(dataset2);
-		merged = new DatasetMergeMethod(toMerge, new File(TestResources.DATASET_FOLDER)).call().getFirstDataset();
-		
-		new DatasetProfilingMethod(merged)
-		.then(new DatasetSegmentationMethod(merged, MorphologyAnalysisMode.NEW))
-		.call();
+		merged = SampleDatasetReader.openTestRodentDataset();
+		List<IClusterGroup> groups = merged.getClusterGroups();
+		merged.deleteClusterGroups();
 	}
-
+	
 	@Test
-	public void testCorrectNumberOfClustersReturned() throws Exception {
-		IClusteringOptions o = OptionsFactory.makeClusteringOptions();
-		o.setClusterNumber(TWO_CLUSTERS);
-		new NucleusClusteringMethod(merged, o).call();
-		assertNotNull(merged.getCollection());
-		assertTrue(merged.hasClusters());
-		assertTrue(merged.getClusterGroups().size()==1);
-		
-		IClusterGroup group = merged.getClusterGroups().stream().findFirst().get();		
-		assertEquals(TWO_CLUSTERS, group.getUUIDs().size());
-		
-		for(UUID childId : group.getUUIDs()) {
-			assertEquals(CELLS_PER_CLUSTER, merged.getChildDataset(childId).getCollection().size());
+	public void testCanClusterOnProfiles() throws Exception {
+		for(ProfileType type : ProfileType.displayValues()) {
+			setUp();
+			testCanClusterOnProfile(type);
 		}
 	}
 
+	private void testCanClusterOnProfile(ProfileType type) throws Exception {
+		IClusteringOptions o = OptionsFactory.makeClusteringOptions();
+		o.setIncludeProfileType(ProfileType.ANGLE, false);
+		o.setIncludeProfileType(type, true);
+		o.setClusterNumber(TWO_CLUSTERS);
+		new NucleusClusteringMethod(merged, o).call();
+		assertNotNull(merged.getCollection());
+		assertTrue(type.toString()+" has clusters:",merged.hasClusters());
+		assertEquals(type.toString()+" has single cluster group:",1, merged.getClusterGroups().size());
+		
+		IClusterGroup group = merged.getClusterGroups().stream().findFirst().get();		
+		assertEquals(type.toString()+" should have two clusters in group:",TWO_CLUSTERS, group.getUUIDs().size());
+	}
+	
+	@Test
+	public void testCanClusterOnIndividualStatistics() throws Exception {
+		for(PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats()) {
+			setUp();
+			testCanClusterOnStatistic(stat);
+		}
+	}
+	
+	private void testCanClusterOnStatistic(PlottableStatistic stat) throws Exception {
+		IClusteringOptions o = OptionsFactory.makeClusteringOptions();
+		o.setIncludeProfileType(ProfileType.ANGLE, false);
+		o.setIncludeStatistic(stat, true);
+		o.setClusterNumber(TWO_CLUSTERS);
+		new NucleusClusteringMethod(merged, o).call();
+		assertNotNull(merged.getCollection());
+		assertTrue(stat.toString()+" has clusters:",merged.hasClusters());
+		assertEquals(stat.toString()+" has single cluster group:",1, merged.getClusterGroups().size());
+		
+		IClusterGroup group = merged.getClusterGroups().stream().findFirst().get();		
+		assertEquals(stat.toString()+" should have two clusters in group:",TWO_CLUSTERS, group.getUUIDs().size());
+	}
 }

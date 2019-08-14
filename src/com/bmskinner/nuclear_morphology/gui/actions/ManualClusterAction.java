@@ -19,6 +19,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
@@ -163,8 +164,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
             int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
             
             IClusteringOptions op = OptionsFactory.makeClusteringOptions();
-            op.setType(ClusteringMethod.MANUAL);
-            op.setIncludeProfile(false);
+            op.setClusteringMethod(ClusteringMethod.MANUAL);
+            op.setIncludeProfileType(ProfileType.ANGLE, false);
             
             IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);
 

@@ -133,13 +133,6 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 		return 0;
 	}
 
-//	@Override
-//	public ProfileType getProfileType() {
-//		if(stringMap.containsKey(PROFILE_TYPE_KEY))
-//			return ProfileType.valueOf(stringMap.get(PROFILE_TYPE_KEY));
-//		return null;
-//	}
-
 	@Override
 	public boolean isIncludeMesh() {
 		if(boolMap.containsKey(INCLUDE_MESH_KEY))
@@ -189,13 +182,8 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	}
 
 	@Override
-	public void setIncludeProfile(boolean defaultIncludeProfile) {
-		setBoolean(INCLUDE_PROFILE_KEY, defaultIncludeProfile);
-	}
-
-	@Override
-	public void setProfileType(ProfileType defaultProfileType) {
-		setString(PROFILE_TYPE_KEY, defaultProfileType.name());
+	public void setIncludeProfileType(ProfileType profileType, boolean b) {
+		setBoolean(profileType.toString(), b);
 	}
 
 	@Override
@@ -214,7 +202,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	}
 
 	@Override
-	public void setType(ClusteringMethod hierarchical) {
+	public void setClusteringMethod(ClusteringMethod hierarchical) {
 		setString(CLUSTER_METHOD_KEY, hierarchical.name());
 	}
 

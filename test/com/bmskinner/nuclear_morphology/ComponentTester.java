@@ -42,8 +42,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 		for(Handler h : logger.getHandlers())
 			logger.removeHandler(h);
 		Handler h = new ConsoleHandler(new ConsoleFormatter());
-		h.setLevel(Level.FINEST);
+		logger.setLevel(Level.FINER);
+		h.setLevel(Level.FINER);
 		logger.addHandler(h);
+		
 	}
 	
 	
