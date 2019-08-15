@@ -88,6 +88,9 @@ public class ImagesTabPanel extends DetailPanel {
     private static final String IMAGES_LBL = "Images in dataset";
     private static final String PANEL_TITLE_LBL = "Images";
     private static final String HEADER_LBL = "Double click a folder to update image paths";
+    
+    /** Store the last folder opened when changing paths */
+    private File lastSelectedFolder = null;
 
       
     /**
@@ -159,7 +162,7 @@ public class ImagesTabPanel extends DetailPanel {
         for(IAnalysisDataset d : getDatasets()){
             createNodes(root, d);
         }
-        
+                
         tree.setEnabled(true);
 
         TreeModel model = new DefaultTreeModel(root);
@@ -197,6 +200,7 @@ public class ImagesTabPanel extends DetailPanel {
     	List<File> parents = files.stream()
     			.map(File::getParentFile)
     			.distinct()
+    			.sorted()
     			.collect(Collectors.toList());
     	
     	ImageTreeNode datasetRoot = new ImageTreeNode(dataset.getName()+" ("+files.size()+")");
@@ -357,15 +361,17 @@ public class ImagesTabPanel extends DetailPanel {
     	try {
         	
         	oldFolder = getExistingParent(oldFolder);
-        	File newFolder = getInputSupplier().requestFolder(oldFolder);
+        	
+        	File folderToRequest = lastSelectedFolder!=null ? lastSelectedFolder : null;
+        	File newFolder = getInputSupplier().requestFolder(folderToRequest);
+        	lastSelectedFolder = newFolder;
+        	LOGGER.finer("Image tab last selected folder is now "+lastSelectedFolder.getAbsolutePath());
         	
         	// Should signal groups be updated at the same time?
-        	// Check if the dataset has signals, and if so, ask if their images should be 
-        	// updated to the same folder.
-        	
-//        	boolean isUpdateSignals = getInputSupplier()
-//        			.requestApproval("Update signals to use the same images?",
-//        					"Update signals?");
+        	// Check if the dataset has signals, and if so update
+        	// images to the same folder if they use the same image as
+        	// the nucleus
+
         	node.setFile(newFolder); // update node
 
         	Enumeration<ImageTreeNode> children = node.convertChildren();

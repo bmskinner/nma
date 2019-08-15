@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
@@ -38,7 +39,8 @@ import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
  *
  */
 public class DefaultInputSupplier implements InputSupplier {
-
+	
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	@Override
 	public String requestString(@NonNull String message) throws RequestCancelledException {
@@ -159,6 +161,8 @@ public class DefaultInputSupplier implements InputSupplier {
 	
 	@Override
 	public File requestFolder(@Nullable String message, @Nullable File defaultFolder) throws RequestCancelledException {
+		if(defaultFolder!=null)
+			LOGGER.finer("Requesting folder, default: "+defaultFolder.getAbsolutePath());
 		File f = FileSelector.chooseFolder(message, defaultFolder);
 		if(f==null)
 			throw new RequestCancelledException();

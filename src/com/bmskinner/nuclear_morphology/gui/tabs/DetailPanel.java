@@ -539,7 +539,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
         for (TabPanel panel : this.subPanels) {
             panel.clearChartCache();
         }
-//        finest("Chart cache cleared");
     }
 
     /**
