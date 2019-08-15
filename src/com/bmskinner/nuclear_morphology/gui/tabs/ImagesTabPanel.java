@@ -386,13 +386,13 @@ public class ImagesTabPanel extends DetailPanel {
 	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
 	        		.flatMap(c->c.getNuclei().stream())
 	        		.forEach(n->{
-	        			n.setSourceFile(new File(newFolder, imageFile.getName()));
+	        			n.setSourceFolder(newFolder);
 	        			
 	        			// Update signals in the same file
 	        			n.getSignalCollection().getAllSignals().stream()
 	        			.forEach(s->{
 	        				if(s.getSourceFile().equals(imageFile))
-	        					s.setSourceFile(new File(newFolder, imageFile.getName()));
+	        					s.setSourceFolder(newFolder);
 	        			});
 	        		});        		
         		imageData.setFile( new File(newFolder, imageFile.getName()));
