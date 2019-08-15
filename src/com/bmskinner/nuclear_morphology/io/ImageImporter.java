@@ -203,6 +203,8 @@ public class ImageImporter implements Importer {
     public ImageProcessor importImage(int channel) throws ImageImportException {
         ImageStack s = importToStack();
         int stack = rgbToStack(channel);
+        if(stack>s.getSize())
+        	throw new ImageImportException(f.getAbsolutePath()+" has only "+s.getSize()+" slices; trying to fetch slice "+stack);
         return s.getProcessor(stack);
     }
     

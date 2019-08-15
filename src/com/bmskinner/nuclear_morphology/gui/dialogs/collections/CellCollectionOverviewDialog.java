@@ -364,10 +364,11 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    	// signal was detected in this nucleus of not.
 	    	File signalFile = chooseSignalFile(signal, c);
 	    	
-	    	if(!signalFile.exists())
+	    	if(!signalFile.exists()) {
+	    		LOGGER.fine("Could not find image: "+signalFile.getAbsolutePath());
 	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
+	    	}
 
-	    	LOGGER.fine("Loading signal image "+signalFile.getAbsolutePath());
 	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getChannel());
 	    	ip.invert();
 	    	ImageAnnotator an = new ImageAnnotator(ip);
@@ -412,7 +413,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	            return new SelectableCellIcon(ip, c);
 	            
 	        } catch (UnloadableImageException | ImageImportException e) {
-	            LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
+	            LOGGER.fine("Cannot load image for component: "+e.getMessage());
 	            return new SelectableCellIcon(ImageFilterer.createBlackColorProcessor(150, 150), c);
 	        }
 
