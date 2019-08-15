@@ -423,7 +423,8 @@ public interface IAnalysisDataset extends Serializable {
 
     /**
      * Update the source image paths in the dataset and its children to use the
-     * given directory
+     * given directory. If the nuclei have signals in the same image as the nuclear
+     * stain, these will also be updated.
      * 
      * @param expectedImageDirectory
      * @param dataset

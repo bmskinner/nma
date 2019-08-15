@@ -1068,7 +1068,17 @@ public class DefaultCellCollection implements ICellCollection {
 		folder = newFolder;
 		cells.stream()
 		.flatMap(c->c.getNuclei().stream())
-		.forEach(n->n.setSourceFolder(newFolder));
+		.forEach(n->{
+			File oldFolder = n.getSourceFolder();
+			n.setSourceFolder(newFolder);
+			// Update signals in the same file
+			n.getSignalCollection().getAllSignals().stream()
+			.forEach(s->{
+				if(s.getSourceFolder().equals(oldFolder))
+					s.setSourceFolder(newFolder);
+			});
+
+		});
 
 	}
 
