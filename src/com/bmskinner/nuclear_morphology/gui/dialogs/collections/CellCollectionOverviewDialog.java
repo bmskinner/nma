@@ -360,7 +360,13 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    	if(signalOptions==null)
 	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
 	    	
-	    	File signalFile = new File(signalOptions.getFolder(),c.getNucleus().getSourceFileName());
+	    	// We need to import the image in which signals are found, whether a
+	    	// signal was detected in this nucleus of not.
+	    	File signalFile = chooseSignalFile(signal, c);
+	    	
+	    	if(!signalFile.exists())
+	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
+
 	    	LOGGER.fine("Loading signal image "+signalFile.getAbsolutePath());
 	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getChannel());
 	    	ip.invert();
@@ -372,6 +378,17 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	    	}
 	    	ip = an.toProcessor();
 	    	return flipAndScaleImage(c, ip);
+	    }
+	    
+	    private File chooseSignalFile(UUID signal, ICell c) {
+	    	// Ideally, find the folder containing the signals, and get the appropriate file name
+	    	// But if the dataset is merged, we can't use the value in the signal detection options,
+	    	// so hack it for now
+	    	if(c.getNucleus().getSignalCollection().hasSignal(signal))
+	    		return c.getNucleus().getSignalCollection().getSourceFile(signal);
+	    	
+	    	// Otherwise try the nucleus image and hope it's RGB
+	    	return c.getNucleus().getSourceFile();
 	    }
 	    
 	    @Override
