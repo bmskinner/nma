@@ -30,6 +30,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -76,13 +77,13 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        channelSelection = new JComboBox<String>(channelOptionStrings);
+        channelSelection = new JComboBox<>(channelOptionStrings);
         channelSelection.addActionListener(this);
         contentPanel.add(channelSelection);
 
         ICannyOptions canny = null;
         try {
-            canny = options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).get().getCannyOptions();
+            canny = options.getDetectionOptions(CellularComponent.SPERM_TAIL).get().getCannyOptions();
         } catch (MissingOptionException e) {
             LOGGER.warning("Missing canny options");
         }

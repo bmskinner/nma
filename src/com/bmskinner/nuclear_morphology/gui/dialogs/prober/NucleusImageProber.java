@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
@@ -57,12 +58,12 @@ public class NucleusImageProber extends IntegratedImageProber {
             this.options = o;
 
             optionsSettingsPanel = new ConstructableSettingsPanel(options)
-                    .addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS)
-                    .addImageChannelPanel(IAnalysisOptions.NUCLEUS)
-                    .addImageProcessingPanel(IAnalysisOptions.NUCLEUS)
-                    .addEdgeThresholdSwitchPanel(IAnalysisOptions.NUCLEUS)
-                    .addSizePanel(IAnalysisOptions.NUCLEUS)
-                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
+                    .addCopyFromOpenPanel(CellularComponent.NUCLEUS)
+                    .addImageChannelPanel(CellularComponent.NUCLEUS)
+                    .addImageProcessingPanel(CellularComponent.NUCLEUS)
+                    .addEdgeThresholdSwitchPanel(CellularComponent.NUCLEUS)
+                    .addSizePanel(CellularComponent.NUCLEUS)
+                    .addNucleusProfilePanel(CellularComponent.NUCLEUS)
                     .build();
             optionsSettingsPanel.setEnabled(false);
 

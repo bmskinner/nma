@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -90,10 +91,10 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
         this.outputFolder = outputFolder;
         this.analysisOptions = options;
         
-        if(!options.getDetectionOptions(IAnalysisOptions.NUCLEUS).isPresent())
+        if(!options.getDetectionOptions(CellularComponent.NUCLEUS).isPresent())
         	throw new IllegalArgumentException("Input options does not have nucleus options");
         
-        folder = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder();
+        folder = options.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
         finder = new NeutrophilFinder(options);
 
     }
@@ -113,10 +114,10 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
             countTotalImagesToAnalyse();
 
             LOGGER.info("Running neutrophil detector");
-            processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder());
+            processFolder(analysisOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder());
 
             LOGGER.fine("Detected nuclei in "
-                    + analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder().getAbsolutePath());
+                    + analysisOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().getAbsolutePath());
 
             LOGGER.fine("Creating cell collections");
 
@@ -138,7 +139,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
     private void countTotalImagesToAnalyse() {
      LOGGER.info("Calculating number of images to analyse");
-    	File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder();
+    	File folder = analysisOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
     	int totalImages = countSuitableImages(folder);
     	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
      LOGGER.info("Analysing " + totalImages + " images");

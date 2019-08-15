@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -61,7 +62,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
         	File defaultDir = null;
         	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         	if(op.isPresent()) {
-        		Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        		Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         		if(im.isPresent())
         			defaultDir = im.get().getFolder();
         	}

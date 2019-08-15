@@ -301,10 +301,10 @@ public class DatasetConverter implements Importer {
              	IAnalysisOptions oldOptions = template.getAnalysisOptions().get();
              	IAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
 
-                 IDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+                 IDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
 
                  IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
-                 newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+                 newOptions.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
 
                  for (UUID id : oldOptions.getNuclearSignalGroups()) {
                      INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);

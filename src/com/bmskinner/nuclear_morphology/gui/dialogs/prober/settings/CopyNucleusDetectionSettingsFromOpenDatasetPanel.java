@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -73,7 +74,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
             	File folder = options.getFolder();
             	Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
             	if(op.isPresent()){
-            		Optional<IDetectionOptions> srcOptions = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            		Optional<IDetectionOptions> srcOptions = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
             		options.set(srcOptions.get());
             		options.setFolder(folder);
                     parent.setNucleusType(op.get().getNucleusType());
@@ -94,7 +95,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 
 			try {
 				IAnalysisOptions o = new OptionsXMLReader(f).read();
-				options.set(o.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
+				options.set(o.getDetectionOptions(CellularComponent.NUCLEUS).get());
 				parent.setNucleusType(o.getNucleusType());
 				parent.setAngleWindowProportion(o.getProfileWindowProportion());
 				options.setFolder(folder);

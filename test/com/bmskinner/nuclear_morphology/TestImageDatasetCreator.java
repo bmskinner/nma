@@ -166,7 +166,7 @@ public class TestImageDatasetCreator {
 
     	File testFolder = new File(TestResources.TESTING_MOUSE_SIGNALS_FOLDER).getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-    	IDetectionOptions nucleus = op.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+    	IDetectionOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setMaxSize(12000);
     	nucleus.setMinSize(4000);
     	File saveFile = new File(TestResources.MOUSE_SIGNALS_DATASET).getAbsoluteFile();;
@@ -179,7 +179,7 @@ public class TestImageDatasetCreator {
 
     	File testFolder = new File(TestResources.TESTING_PIG_SIGNALS_FOLDER).getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
-    	IDetectionOptions nucleus = op.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+    	IDetectionOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setMaxSize(15000);
     	nucleus.setMinSize(4000);
     	File saveFile = new File(TestResources.PIG_SIGNALS_DATASET).getAbsoluteFile();;

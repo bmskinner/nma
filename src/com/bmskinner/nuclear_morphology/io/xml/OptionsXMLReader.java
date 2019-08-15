@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -97,7 +98,7 @@ public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 	public Map<UUID, String> readSignalGroupNames(){
 		Map<UUID, String> result = new HashMap<>();
 		for(Element signal : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY)) {
-			if(signal.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+			if(signal.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue().equals(CellularComponent.NUCLEAR_SIGNAL)) {
 				
 				// A specific signal group id may have been specified
 				Element idElement = signal.getChild(XMLCreator.ID_KEY);

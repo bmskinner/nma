@@ -219,13 +219,13 @@ public abstract class XMLCreator<T> {
 		for(String key : options.getDetectionOptionTypes()){
 			Element element = new Element(DETECTION_METHOD_KEY);
 			if(isUUID(key) || key.startsWith(IAnalysisOptions.SIGNAL_GROUP)){ // signal group without prefix
-				element.setAttribute(DETECTED_OBJECT_KEY, IAnalysisOptions.NUCLEAR_SIGNAL);
+				element.setAttribute(DETECTED_OBJECT_KEY, CellularComponent.NUCLEAR_SIGNAL);
 			} else {
 				element.setAttribute(DETECTED_OBJECT_KEY, key);
 			}
 			
 			// add signal group names
-			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(CellularComponent.NUCLEAR_SIGNAL)) {
 				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
 				element.addContent(createElement(ID_KEY, signalGroup));
 			}

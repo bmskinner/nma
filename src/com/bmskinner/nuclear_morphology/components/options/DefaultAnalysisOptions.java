@@ -145,7 +145,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     public Set<UUID> getNuclearSignalGroups() {
     	Set<UUID> result = new HashSet<>();
     	for(String s : detectionOptions.keySet()) {
-    		if(s.equals(NUCLEUS) || s.equals(CYTOPLASM) || s.equalsIgnoreCase(SPERM_TAIL))
+    		if(s.equals(CellularComponent.NUCLEUS) || s.equals(CellularComponent.CYTOPLASM) || s.equalsIgnoreCase(CellularComponent.SPERM_TAIL))
     			continue;
     		
     		

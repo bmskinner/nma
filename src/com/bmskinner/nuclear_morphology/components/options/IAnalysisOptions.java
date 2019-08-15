@@ -35,12 +35,8 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
  */
 public interface IAnalysisOptions extends Serializable {
 
-    // Standard detection keys
-    String NUCLEUS        = "Nucleus";
-    String CYTOPLASM      = "Cytoplasm";
-    String SPERM_TAIL     = "SpermTail";
+    // Standard detection keys are in CellularComponent
     String SIGNAL_GROUP   = "SignalGroup_";
-    String NUCLEAR_SIGNAL = "NuclearSignal";
     
     // Standard secondary options
     String TSNE = "t-SNE";

@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Profileable;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -71,7 +72,7 @@ public abstract class AbstractFinder<E> implements Finder<E>{
     @Override
     public E find() throws Exception {
 
-    	Optional<? extends IDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+    	Optional<? extends IDetectionOptions> op = options.getDetectionOptions(CellularComponent.CYTOPLASM);
     	if(!op.isPresent())
     		throw new MissingOptionException("No cytoplasm options");
     	

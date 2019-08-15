@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.CellFactory;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -60,7 +61,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op) {
         super(op);
         nuclFactory = new NucleusFactory(op.getNucleusType());
-        Optional<? extends IDetectionOptions> n = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<? extends IDetectionOptions> n = options.getDetectionOptions(CellularComponent.NUCLEUS);
         if(!n.isPresent())
         	throw new IllegalArgumentException("No nucleus options");
         nuclOptions = n.get();

@@ -28,6 +28,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -145,7 +146,7 @@ public class FileSelector {
         if(!op.isPresent())
         	return null;
         
-        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
@@ -300,7 +301,7 @@ public class FileSelector {
         if(!op.isPresent())
         	return null;
         
-        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
@@ -320,7 +321,7 @@ public class FileSelector {
         if(!op.isPresent())
         	return null;
         
-        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         if(!im.isPresent())
         	return null;
         

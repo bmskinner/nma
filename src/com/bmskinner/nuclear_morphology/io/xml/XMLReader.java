@@ -11,6 +11,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
@@ -172,9 +173,9 @@ public abstract class XMLReader<T> {
 		
 		String detectedObject = e.getAttribute(OptionsXMLCreator.DETECTED_OBJECT_KEY).getValue();
 		
-		if(detectedObject.equals(IAnalysisOptions.NUCLEUS)) {			
-			File f = op.getDetectionOptions(IAnalysisOptions.NUCLEUS).isPresent() 
-					? op.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder() : EMPTY_FILE;
+		if(detectedObject.equals(CellularComponent.NUCLEUS)) {			
+			File f = op.getDetectionOptions(CellularComponent.NUCLEUS).isPresent() 
+					? op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder() : EMPTY_FILE;
 
 			IDetectionOptions o = OptionsFactory.makeNucleusDetectionOptions(f);
 			
@@ -202,10 +203,10 @@ public abstract class XMLReader<T> {
 					o.setSubOptions(subType, canny);
 				}
 			}
-			op.setDetectionOptions(IAnalysisOptions.NUCLEUS, o);
+			op.setDetectionOptions(CellularComponent.NUCLEUS, o);
 		}
 		
-		if(detectedObject.startsWith(IAnalysisOptions.NUCLEAR_SIGNAL) ) {
+		if(detectedObject.startsWith(CellularComponent.NUCLEAR_SIGNAL) ) {
 			try {
 				Element idElement = e.getChild(XMLCreator.ID_KEY);
 				UUID id = idElement==null ? UUID.randomUUID() : UUID.fromString(idElement.getText());				

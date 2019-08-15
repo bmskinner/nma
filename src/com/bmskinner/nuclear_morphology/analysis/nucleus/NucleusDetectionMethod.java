@@ -75,7 +75,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param options the options to detect with
      */
     public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
-        this(new File(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(), outputFolder), options);
+        this(new File(options.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder(), outputFolder), options);
     }
     
     /**
@@ -104,7 +104,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
             LOGGER.info("Running nucleus detector");
             
-            Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
             if(!op.isPresent()){
             	LOGGER.warning("No nucleus detection options present");
             	return;
@@ -132,7 +132,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     private int getTotalImagesToAnalyse() {
 
         LOGGER.info("Counting images to analyse");
-        Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
         if(!op.isPresent())
         	return 0;
         

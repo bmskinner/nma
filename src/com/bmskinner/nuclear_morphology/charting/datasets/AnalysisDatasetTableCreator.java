@@ -106,40 +106,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         return createBlankTable();
     }
 
-    public TableModel createMergeSourcesTable() {
-
-        if (!options.hasDatasets()) {
-            DefaultTableModel model = new DefaultTableModel();
-
-            Vector<Object> names = new Vector<>();
-            Vector<Object> nuclei = new Vector<>();
-
-            names.add(Labels.Merges.NO_MERGE_SOURCES);
-            nuclei.add(EMPTY_STRING);
-
-            model.addColumn(Labels.Merges.MERGE_SOURCE, names);
-            model.addColumn("Nuclei", nuclei);
-            return model;
-        }
-
-        if (options.firstDataset().hasMergeSources()) {
-
-            DefaultTableModel model = new DefaultTableModel();
-
-            Vector<Object> names = new Vector<>();
-            Vector<Object> nuclei = new Vector<>();
-
-            for (IAnalysisDataset mergeSource : options.firstDataset().getMergeSources()) {
-                names.add(mergeSource.getName());
-                nuclei.add(mergeSource.getCollection().size());
-            }
-            model.addColumn("Merge source", names);
-            model.addColumn("Nuclei", nuclei);
-            return model;
-        }
-        return createBlankTable();
-    }
-
     /**
      * Create a table of segment stats for median profile of the given dataset.
      * 
@@ -399,19 +365,22 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      */
     private List<Object> createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         
+    	int numberOfRows = 9;
     	List<Object> dataList = new ArrayList<>();
-    	Optional<IAnalysisOptions> o = dataset.getAnalysisOptions();
-    	if(options == null && !o.isPresent())
-    		return makeStringList("Error", 9);
+    	Optional<IAnalysisOptions> optOptions = dataset.getAnalysisOptions();
+    	if(options == null && !optOptions.isPresent())
+    		return makeStringList("Error - no options present", numberOfRows);
     	
-    	options = options == null ? o.get() : options;
+    	
+    	// If no options were supplied, use the dataset's own options 
+    	options = options == null ? optOptions.get() : options;
         String folder;
 
-        Optional<IDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> nO = options.getDetectionOptions(CellularComponent.NUCLEUS);
         
         if(!nO.isPresent()) {
         	LOGGER.log(Loggable.STACK, "No nucleus options in dataset "+dataset.getName());
-        	return makeStringList("Error", 9);
+        	return makeStringList("Error", numberOfRows);
         }
         
         if (dataset.hasMergeSources()) {

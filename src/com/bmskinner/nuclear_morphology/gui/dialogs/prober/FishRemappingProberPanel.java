@@ -45,6 +45,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -82,19 +83,19 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
     /**
      * Nuclei selected with the left button
      */
-    private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96);
+    private List<UUID> selectedNucleiLeft  = new ArrayList<>(96);
     
     /**
      * Nuclei selected with the right button
      */
-    private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96);
+    private List<UUID> selectedNucleiRight = new ArrayList<>(96);
 
-    private Set<ICell> openCells = new HashSet<ICell>();
+    private Set<ICell> openCells = new HashSet<>();
 
     public FishRemappingProberPanel(@NonNull IAnalysisDataset dataset, @NonNull Finder<?> finder, Window parent)
             throws MissingOptionException {
 
-        super(dataset.getAnalysisOptions().get().getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(), finder, parent);
+        super(dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder(), finder, parent);
 
         this.setHeaderLabelText(HEADER_LBL);
         this.dataset = dataset;

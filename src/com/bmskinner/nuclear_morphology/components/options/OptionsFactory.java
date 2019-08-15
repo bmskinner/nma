@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
@@ -154,7 +155,7 @@ public class OptionsFactory {
      */
     public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = makeAnalysisOptions();
-        op.setDetectionOptions(IAnalysisOptions.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder));
+        op.setDetectionOptions(CellularComponent.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder));
         return op;
     }
     
@@ -171,7 +172,7 @@ public class OptionsFactory {
         nop.setMinCirc(0.1);
         nop.setMaxCirc(0.9);
         
-        op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
+        op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
         return op;
     }
     
@@ -188,7 +189,7 @@ public class OptionsFactory {
         nop.setMinCirc(0.6);
         nop.setMaxCirc(1.0);
         
-        op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
+        op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
         return op;
     }
 
@@ -311,8 +312,8 @@ public class OptionsFactory {
         IDetectionOptions cytoOptions = OptionsFactory.makeDefaultNeutrophilCytoplasmDetectionOptions(folder);
         IDetectionOptions nucleusOptions = OptionsFactory.makeDefaultNeutrophilNucleusDetectionOptions(folder);
 
-        options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-        options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);
+        options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
+        options.setDetectionOptions(CellularComponent.CYTOPLASM, cytoOptions);
         return options;
 
     }

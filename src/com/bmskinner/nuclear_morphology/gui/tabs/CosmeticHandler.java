@@ -78,7 +78,7 @@ public class CosmeticHandler {
     		double initialScale = 1;
     		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
     		if(op.isPresent()){
-    			Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+    			Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
     			if(nOp.isPresent())
     				initialScale = nOp.get().getScale();
     		}

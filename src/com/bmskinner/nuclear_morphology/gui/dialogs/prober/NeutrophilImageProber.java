@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
@@ -46,12 +47,12 @@ public class NeutrophilImageProber extends IntegratedImageProber {
             Finder<?> finder = new NeutrophilFinder(options);
 
             optionsSettingsPanel = new ConstructableSettingsPanel(options)
-                    .addColourThresholdWatershedSwitchPanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm detection")
-                    .addSizePanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm filtering")
-                    .addTopHatPanel(IAnalysisOptions.NUCLEUS, "Nucleus detection")
-                    .addThresholdPanel(IAnalysisOptions.NUCLEUS, "Nucleus threshold")
-                    .addSizePanel(IAnalysisOptions.NUCLEUS, "Nucleus filtering")
-                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL).build();
+                    .addColourThresholdWatershedSwitchPanel(CellularComponent.CYTOPLASM, "Cytoplasm detection")
+                    .addSizePanel(CellularComponent.CYTOPLASM, "Cytoplasm filtering")
+                    .addTopHatPanel(CellularComponent.NUCLEUS, "Nucleus detection")
+                    .addThresholdPanel(CellularComponent.NUCLEUS, "Nucleus threshold")
+                    .addSizePanel(CellularComponent.NUCLEUS, "Nucleus filtering")
+                    .addNucleusProfilePanel(CellularComponent.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL).build();
             // make the panel
             // optionsSettingsPanel = new
             // NeutrophilDetectionSettingsPanel(options);

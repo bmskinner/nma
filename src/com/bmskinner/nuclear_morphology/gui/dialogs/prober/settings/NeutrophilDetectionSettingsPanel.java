@@ -24,6 +24,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEventListener;
@@ -68,22 +69,22 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
             SettingsPanel cytoPanel = new ConstructableSettingsPanel(options)
                     // .addImageChannelPanel(IAnalysisOptions.CYTOPLASM,
                     // ConstructableSettingsPanel.CHANNEL_LBL)
-                    .addColourThresholdWatershedSwitchPanel(IAnalysisOptions.CYTOPLASM,
+                    .addColourThresholdWatershedSwitchPanel(CellularComponent.CYTOPLASM,
                             ConstructableSettingsPanel.THRESHOLDING_LBL)
                     // .addColorThresholdPanel(IAnalysisOptions.CYTOPLASM,
                     // ConstructableSettingsPanel.THRESHOLDING_LBL)
-                    .addSizePanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm filtering")
-                    .addTopHatPanel(IAnalysisOptions.NUCLEUS, "Nucleus detection")
-                    .addSizePanel(IAnalysisOptions.NUCLEUS, "Nucleus filtering")
-                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL).build();
+                    .addSizePanel(CellularComponent.CYTOPLASM, "Cytoplasm filtering")
+                    .addTopHatPanel(CellularComponent.NUCLEUS, "Nucleus detection")
+                    .addSizePanel(CellularComponent.NUCLEUS, "Nucleus filtering")
+                    .addNucleusProfilePanel(CellularComponent.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL).build();
 
-            SettingsPanel nuclPanel = new ConstructableSettingsPanel(options).addTopHatPanel(IAnalysisOptions.NUCLEUS)
-                    // .addImageChannelPanel(IAnalysisOptions.NUCLEUS,
+            SettingsPanel nuclPanel = new ConstructableSettingsPanel(options).addTopHatPanel(CellularComponent.NUCLEUS)
+                    // .addImageChannelPanel(CellularComponent.NUCLEUS,
                     // ConstructableSettingsPanel.CHANNEL_LBL)
-                    // .addColorThresholdPanel(IAnalysisOptions.NUCLEUS,
+                    // .addColorThresholdPanel(CellularComponent.NUCLEUS,
                     // ConstructableSettingsPanel.THRESHOLDING_LBL)
-                    .addSizePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
-                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL).build();
+                    .addSizePanel(CellularComponent.NUCLEUS, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
+                    .addNucleusProfilePanel(CellularComponent.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL).build();
 
             cytoPanel.setBorder(BorderFactory.createTitledBorder(CYTO_SETTINGS_LBL));
             nuclPanel.setBorder(BorderFactory.createTitledBorder(NUCL_SETTINGS_LBL));

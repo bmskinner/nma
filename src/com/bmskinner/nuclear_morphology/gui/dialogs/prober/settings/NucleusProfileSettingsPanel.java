@@ -31,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -77,7 +78,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
         typeBox.addActionListener(e -> {
 
-        	Optional<IDetectionOptions> nOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IDetectionOptions> nOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
         	if(!nOptions.isPresent())
         		return;
         	IDetectionOptions nucleusOptions = nOptions.get();

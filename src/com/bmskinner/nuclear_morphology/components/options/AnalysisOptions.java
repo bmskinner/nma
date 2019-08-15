@@ -106,7 +106,7 @@ public class AnalysisOptions implements IAnalysisOptions {
      */
     public AnalysisOptions(IAnalysisOptions template) {
         try {
-        	Optional<IDetectionOptions> op = template.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IDetectionOptions> op = template.getDetectionOptions(CellularComponent.NUCLEUS);
         	if(!op.isPresent())
         		throw new IllegalArgumentException("No nucleus options");
         	
@@ -121,7 +121,7 @@ public class AnalysisOptions implements IAnalysisOptions {
 
             edgeDetection = new HashMap<String, ICannyOptions>(0);
 
-            edgeDetection.put(IAnalysisOptions.NUCLEUS,
+            edgeDetection.put(CellularComponent.NUCLEUS,
                     n.getCannyOptions());
 
             signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
@@ -1201,7 +1201,7 @@ public class AnalysisOptions implements IAnalysisOptions {
 
     @Override
     public Optional<IDetectionOptions> getDetectionOptions(String key) {
-        if (key.equals(IAnalysisOptions.NUCLEUS)) {
+        if (key.equals(CellularComponent.NUCLEUS)) {
 
         	IDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
 
@@ -1228,13 +1228,13 @@ public class AnalysisOptions implements IAnalysisOptions {
     public Set<String> getDetectionOptionTypes() {
 
         Set<String> result = new HashSet<String>();
-        result.add(IAnalysisOptions.NUCLEUS);
+        result.add(CellularComponent.NUCLEUS);
         return result;
     }
 
     @Override
     public boolean hasDetectionOptions(String type) {
-        return type.equals(IAnalysisOptions.NUCLEUS);
+        return type.equals(CellularComponent.NUCLEUS);
     }
 
     @Override

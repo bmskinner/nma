@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.CytoplasmFactory;
@@ -97,13 +98,13 @@ public class NeutrophilFinder extends CellFinder {
     public NeutrophilFinder(IAnalysisOptions op) {
         super(op);
         
-        Optional<? extends IDetectionOptions> c = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+        Optional<? extends IDetectionOptions> c = options.getDetectionOptions(CellularComponent.CYTOPLASM);
         if(!c.isPresent())
         	throw new IllegalArgumentException("No cytoplasm options");
 
         cytoOptions = c.get();
         
-        Optional<? extends IDetectionOptions> n = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<? extends IDetectionOptions> n = options.getDetectionOptions(CellularComponent.NUCLEUS);
         if(!n.isPresent())
         	throw new IllegalArgumentException("No nucleus options");
         nuclOptions = n.get();

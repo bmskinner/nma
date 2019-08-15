@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.DatasetSignalId;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -247,11 +248,11 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		List<IDetectionOptions> templates = new ArrayList<>();
 		for (IAnalysisDataset d : datasets) {
 			IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-			templates.add(dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get());
+			templates.add(dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get());
 		}
 		mergeDetectionOptions(nucleus, templates);
 
-    	mergedOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleus);
+    	mergedOptions.setDetectionOptions(CellularComponent.NUCLEUS, nucleus);
     	mergedOptions.setNucleusType(d1Options.getNucleusType());
     	mergedOptions.setAngleWindowProportion(d1Options.getProfileWindowProportion());
 
@@ -274,7 +275,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
 				canAdd &= nOptions.getFloat(s)==result;
 			}
 			if(canAdd)
@@ -288,7 +289,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
 				canAdd &= nOptions.getDouble(s)==result;
 			}
 			if(canAdd)
@@ -302,7 +303,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
 				canAdd &= nOptions.getInt(s)==result;
 			}
 			if(canAdd)
@@ -316,7 +317,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
 				canAdd &= nOptions.getString(s).equals(result);
 			}
 			if(canAdd)
@@ -330,7 +331,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
 				if(nOptions.hasSubOptions(s))
 					canAdd &= nOptions.getSubOptions(s).equals(mergedOptions);
 				else

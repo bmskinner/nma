@@ -6,6 +6,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
@@ -64,13 +65,13 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> {
 		for(String key : options.getDetectionOptionTypes()){
 			Element element = new Element(DETECTION_METHOD_KEY);
 			if(isUUID(key) || key.startsWith(IAnalysisOptions.SIGNAL_GROUP)){ // signal group without prefix
-				element.setAttribute(DETECTED_OBJECT_KEY, IAnalysisOptions.NUCLEAR_SIGNAL);
+				element.setAttribute(DETECTED_OBJECT_KEY, CellularComponent.NUCLEAR_SIGNAL);
 			} else {
 				element.setAttribute(DETECTED_OBJECT_KEY, key);
 			}
 			
 			// add signal group names
-			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(IAnalysisOptions.NUCLEAR_SIGNAL)) {
+			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(CellularComponent.NUCLEAR_SIGNAL)) {
 				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
 				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
 				
