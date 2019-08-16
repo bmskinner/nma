@@ -22,6 +22,9 @@ import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
@@ -33,7 +36,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  *
  */
 @SuppressWarnings("serial")
-public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+public class PopulationTableCellRenderer extends DefaultTableCellRenderer {
 
     /**
      * Stores the row index of a cell that was selected as a key, and the order
@@ -55,7 +58,7 @@ public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableC
     }
 
     @Override
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+    public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
         Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

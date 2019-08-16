@@ -106,14 +106,12 @@ public class SegmentStatsPanel extends DetailPanel {
     }
 
     private TableOptions makeOptions() {
-
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+    	return new TableOptionsBuilder().setDatasets(getDatasets())
                 .setScale(GlobalOptions.getInstance().getScale())
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setTarget(table)
                 .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
                 .build();
-        return options;
     }
 
     @Override
@@ -130,7 +128,8 @@ public class SegmentStatsPanel extends DetailPanel {
 
         private static final long serialVersionUID = 1L;
 
-        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+        @Override
+        public Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
 
             // Cells are by default rendered as a JLabel.
@@ -150,7 +149,7 @@ public class SegmentStatsPanel extends DetailPanel {
                     segment = 0;
                 }
 
-                colour = (Color) ColourSelecter.getColor(segment);
+                colour = ColourSelecter.getColor(segment);
             }
 
             String rowName = table.getModel().getValueAt(row, 0).toString();

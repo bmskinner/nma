@@ -35,6 +35,7 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
+	@Override
     public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
@@ -47,29 +48,22 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 
                 int nextRow = row + 1;
 
-                if (nextRow < table.getModel().getRowCount()) { // ignore if no
-                                                                // data
+                if (nextRow < table.getModel().getRowCount()) { // ignore if no data
 
                     // get the value in the first column of the row below
                     String nextRowHeader = table.getModel().getValueAt(nextRow, 0).toString();
+                    Object nextRowValue  = table.getModel().getValueAt(nextRow, column);
+                	// Check if the signal block has a signal group by
+                	// looking at the next row
+                    if (nextRowHeader.equals("Signal group") &&
+                    		nextRowValue != null && 
+                    		!nextRowValue.toString().equals("") &&
+                    		nextRowValue instanceof SignalTableCell) {
 
-                    if (nextRowHeader.equals("Signal group")) {
-
-                        // Check if the signal block has a signal group by
-                        // looking at the next row
-                        if (table.getModel().getValueAt(nextRow, column) != null) {
-                            if (!table.getModel().getValueAt(nextRow, column).toString().equals("")) {
-
-                                if (table.getModel().getValueAt(nextRow, column) instanceof SignalTableCell) {
-                                    SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(nextRow,
-                                            column);
-
-                                    colour = cell.getColor();
-                                }
-                            }
-                        }
-
+                    	SignalTableCell cell = (SignalTableCell) nextRowValue;
+                    	colour = cell.getColor();
                     }
+                    
                 }
             }
         } catch (Exception e) {

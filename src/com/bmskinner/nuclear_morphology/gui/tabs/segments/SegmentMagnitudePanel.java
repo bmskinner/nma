@@ -74,7 +74,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
     }
 
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         tablePanel = createTablePanel();
         scrollPane.setColumnHeaderView(null);
 
@@ -82,13 +82,12 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
         labelPanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
         tablePanel.add(labelPanel);
         scrollPane.setViewportView(tablePanel);
-        ;
         tablePanel.repaint();
 
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
         tablePanel = createTablePanel();
         scrollPane.setColumnHeaderView(null);
 
@@ -133,13 +132,12 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
         }
 
         scrollPane.setViewportView(tablePanel);
-        ;
         tablePanel.repaint();
 
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         tablePanel = createTablePanel();
         scrollPane.setColumnHeaderView(null);
 
@@ -149,7 +147,6 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
         tablePanel.add(labelPanel);
 
         scrollPane.setViewportView(tablePanel);
-        ;
         tablePanel.repaint();
 
     }

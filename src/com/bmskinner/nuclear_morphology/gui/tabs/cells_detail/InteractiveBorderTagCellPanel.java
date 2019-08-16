@@ -137,7 +137,6 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			sourceHeight = an.toProcessor().getHeight();
 		};
 		new Thread(u).start();
-//		ThreadManager.getInstance().submit(u);
 	}
 	
 	/**
@@ -275,13 +274,11 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
 
 		Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
-				.stream().filter(p->{
-					return clickedPoint.getX()>=p.getX()-0.4 && 
+				.stream().filter(
+					p->clickedPoint.getX()>=p.getX()-0.4 && 
 							clickedPoint.getX()<=p.getX()+0.4 &&
 							clickedPoint.getY()>=p.getY()-0.4 && 
-							clickedPoint.getY()<=p.getY()+0.4;
-					
-				})
+							clickedPoint.getY()<=p.getY()+0.4)
 				.findFirst();
 
 		Graphics2D g2 = output.createGraphics();
