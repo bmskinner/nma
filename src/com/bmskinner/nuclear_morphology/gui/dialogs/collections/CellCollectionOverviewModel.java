@@ -1,7 +1,8 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.table.DefaultTableModel;
@@ -17,7 +18,52 @@ import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
  */
 public class CellCollectionOverviewModel extends DefaultTableModel {
 	
-	private transient List<Object> selected = new ArrayList<>();
+	/** Track which cells have been highlighted */
+	private transient Set<Key> selected = new HashSet<>();
+	
+	/**
+	 * Combine row and column to track selected cells 
+	 * @author ben
+	 *
+	 */
+	private final class Key {
+		int r, c;
+		public Key(int r, int c) {
+			this.r = r;
+			this.c = c;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + c;
+			result = prime * result + r;
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Key other = (Key) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (c != other.c)
+				return false;
+			if (r != other.r)
+				return false;
+			return true;
+		}
+		private CellCollectionOverviewModel getOuterType() {
+			return CellCollectionOverviewModel.this;
+		}
+		
+		
+	}
 	
 	/**
 	 * Create a model with a desired number of rows and columns
@@ -34,7 +80,6 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 				setValueAt(new SelectableCellIcon(), row, col);
 			}
 		}
-
 	}
 		
 	@Override
@@ -80,7 +125,7 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 	 */
 	public synchronized void toggleSelected(int r, int c) {
 		Object o = getValueAt(r, c);
-		setSelected(r, c, !selected.contains(o));
+		setSelected(r, c, !selected.contains(new Key(r, c)));
 	}
 	
 	/**
@@ -96,10 +141,12 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 			return;
 		
 		icon.setSelected(b);
+		
+		Key k = new Key(r,c);
 		if(b)
-			selected.add(icon);
+			selected.add(k);
 		else
-			selected.remove(icon);
+			selected.remove(k);
 	}
 				
 	/**
@@ -107,7 +154,9 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 	 * @return
 	 */
 	public List<ICell> getSelected(){
-		return selected.stream().map(o -> ((SelectableCellIcon)o).getCell()).collect(Collectors.toList());
+		return selected.stream()
+				.map(k -> getCell(k.r, k.c))
+				.collect(Collectors.toList());
 	}
 	
 	

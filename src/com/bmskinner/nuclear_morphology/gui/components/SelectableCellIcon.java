@@ -62,6 +62,7 @@ public class SelectableCellIcon extends ImageIcon {
         return cell;
     }
 
+    @Override
     public String toString() {
         return cell == null ? "" : cell.getNucleus().getNameAndNumber();
     }
