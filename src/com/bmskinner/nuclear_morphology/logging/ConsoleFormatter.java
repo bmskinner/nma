@@ -26,7 +26,7 @@ public class ConsoleFormatter extends Formatter {
     	String date = calcDate(record.getMillis());
 
     	buffer.append(date);
-    	buffer.append("  "); // no need for a full tab, constant width
+    	buffer.append(SEPARATOR);
     	buffer.append(record.getLevel());
     	buffer.append(SEPARATOR);
     	buffer.append(record.getSourceMethodName());

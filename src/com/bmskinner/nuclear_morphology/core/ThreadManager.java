@@ -29,8 +29,6 @@ import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater;
 
-import ij.Prefs;
-
 /**
  * Manages the threading and task queue. Analysis methods and UI
  * updates are treated separately for smoother UI refreshes.

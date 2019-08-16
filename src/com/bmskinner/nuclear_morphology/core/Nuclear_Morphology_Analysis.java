@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 import ij.Prefs;

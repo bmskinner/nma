@@ -38,7 +38,6 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 /**

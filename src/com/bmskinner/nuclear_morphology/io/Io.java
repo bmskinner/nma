@@ -80,7 +80,7 @@ public interface Io  {
      * @author ben
      *
      */
-    public interface Exporter extends Io {
+    interface Exporter extends Io {
         
         
         static void writeString(final String s, final File f){
@@ -99,7 +99,7 @@ public interface Io  {
         }
     }
     
-    public interface Importer extends Io {
+    interface Importer extends Io {
         
         /**
          * Replace the old file extension in the given file and return a new file

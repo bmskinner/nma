@@ -96,7 +96,7 @@ public class SVGWriter implements Exporter{
             x+=r.getWidth()+Imageable.COMPONENT_BUFFER;
         }
 
-        write(file, g2);
+        write(g2);
         
     }
     
@@ -130,7 +130,7 @@ public class SVGWriter implements Exporter{
     		x+=r.getWidth();
     	}
 
-    	write(file, g2);
+    	write(g2);
     }
     
     public void export(@NonNull CellularComponent c, @NonNull String name) {
@@ -144,7 +144,7 @@ public class SVGWriter implements Exporter{
     	double minX = -r.getMinX();
     	double minY = r.getMinY();
     	export(s, g2, minX, minY);
-    	write(file, g2);
+    	write(g2);
 
     }
     
@@ -200,7 +200,7 @@ public class SVGWriter implements Exporter{
     }
     
     
-    private void write(File f, SVGGraphics2D g2){
+    private void write(SVGGraphics2D g2){
     	String svgElement = g2.getSVGElement();
 
         try (PrintWriter out = new PrintWriter(file)) {
