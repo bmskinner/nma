@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.table.DefaultTableModel;
@@ -17,6 +18,8 @@ import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
  *
  */
 public class CellCollectionOverviewModel extends DefaultTableModel {
+	
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	/** Track which cells have been highlighted */
 	private transient Set<Key> selected = new HashSet<>();
@@ -91,6 +94,10 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 		return ((SelectableCellIcon)getValueAt(r, c)).getCell();
 	}
 	
+	public synchronized int selectedCount() {
+		return selected.size();
+	}
+	
 	/**
 	 * Set the selection for all elements
 	 * @param b
@@ -154,6 +161,7 @@ public class CellCollectionOverviewModel extends DefaultTableModel {
 	 * @return
 	 */
 	public List<ICell> getSelected(){
+		LOGGER.fine("There are "+selected.size()+" selected keys in curation model");
 		return selected.stream()
 				.map(k -> getCell(k.r, k.c))
 				.collect(Collectors.toList());

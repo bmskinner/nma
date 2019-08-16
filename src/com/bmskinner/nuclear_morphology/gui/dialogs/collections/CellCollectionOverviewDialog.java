@@ -220,12 +220,13 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         
         table.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public synchronized void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
                     Point pnt = e.getPoint();
                     int row = table.rowAtPoint(pnt);
                     int col = table.columnAtPoint(pnt);
                     model.toggleSelected(row,  col);
+                    setTitle(String.format("Showing %s cells in %s: %s selected", dataset.getCollection().size(), dataset.getName(), model.selectedCount()));
                     table.repaint(table.getCellRect(row, col, true)); // need to trigger otherwise it will only update on the next click
                 }
             }
@@ -233,9 +234,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(table);
-
         getContentPane().add(scrollPane, BorderLayout.CENTER);
-
     }
 
     private void makeNewCollection() {
@@ -257,7 +256,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
          * segment patterns of the original cells. We need to copy the segments
          *  over as with FISH remapping */
 
-        if (cells.size() > 0) {
+        if (!cells.isEmpty()) {
             dataset.addChildCollection(newCollection);
             List<IAnalysisDataset> list = new ArrayList<>();
             list.add(dataset.getChildDataset(newCollection.getID()));
