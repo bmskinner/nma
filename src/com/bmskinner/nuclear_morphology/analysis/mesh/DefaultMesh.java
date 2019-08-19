@@ -345,8 +345,8 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
         if (!this.isComparableTo(mesh))
             throw new IllegalArgumentException("Cannot compare meshes");
 
-        LOGGER.finer( "Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
-        LOGGER.finer( "Mesh has " + mesh.getFaceCount() + " faces");
+        LOGGER.finest( "Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
+        LOGGER.finest( "Mesh has " + mesh.getFaceCount() + " faces");
 
         DefaultMesh<E> result = new DefaultMesh<E>(this);
 
@@ -436,7 +436,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
      */
     private void determineVertexProportions() throws MeshCreationException {
 
-    	LOGGER.finer( "Determining vertex proportions");
+    	LOGGER.finest( "Determining vertex proportions");
 
     	try {
     		List<IBorderSegment> segments = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
@@ -477,7 +477,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
      * @throws MeshCreationException
      */
     private void createPeripheralVertices() throws MeshCreationException {
-        LOGGER.finer( "Creating peripheral vertices");
+        LOGGER.finest( "Creating peripheral vertices");
         try {
             List<IBorderSegment> list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 
@@ -486,7 +486,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
 
                 IBorderSegment segment = list.get(segIndex);
                 Set<MeshVertex> segVertices = segmentFaces.get(segIndex);
-                LOGGER.finer( "Segment " + segIndex + ": " + segment.length());
+                LOGGER.finest( "Segment " + segIndex + ": " + segment.length());
 
                 List<Double> proportions = segmentVertexProportions.get(segIndex);
 
@@ -553,7 +553,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
      */
     private void createInternalVertices() {
 
-        LOGGER.finer( "Creating internal vertices");
+        LOGGER.finest( "Creating internal vertices");
         /*
          * The first index in the list is the reference point. Take the second
          * and last, the third and next-to-last etc
@@ -575,7 +575,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
         // Build the edges
 
         // Link peripheral vertices
-        LOGGER.finer( "Creating peripheral edges");
+        LOGGER.finest( "Creating peripheral edges");
         for (int i = 0, j = 1; j < peripheralVertices.size(); i++, j++) {
 
             MeshVertex v1 = peripheralVertices.get(i);
@@ -593,7 +593,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
             }
         }
 
-        LOGGER.finer( "Creating internal edges");
+        LOGGER.finest( "Creating internal edges");
         // Link the internal vertices, from peripheral vertex 0
         for (int i = 0, j = 1; j < internalVertices.size(); i++, j++) {
 
@@ -607,10 +607,10 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
         // Link between peripheral and internal vertices
         int halfArray = (int) Math.floor(((double) peripheralVertices.size() / 2));
 
-        LOGGER.finer( "Linking peripheral edges and internal edges");
-        LOGGER.finer( "Peripheral vertices: " + peripheralVertices.size());
-        LOGGER.finer( "Internal vertices: " + internalVertices.size());
-        LOGGER.finer( "Half array: " + halfArray);
+        LOGGER.finest( "Linking peripheral edges and internal edges");
+        LOGGER.finest( "Peripheral vertices: " + peripheralVertices.size());
+        LOGGER.finest( "Internal vertices: " + internalVertices.size());
+//        LOGGER.finest( "Half array: " + halfArray);
 
         try {
 
@@ -658,7 +658,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
                 this.getFace(p2_x, i1, i2);
             }
 
-            LOGGER.finer( "Created first face set");
+            LOGGER.finest( "Created first face set");
 
             // create the top faces - RP to nearest peripheral indexes to I0
             getEdge(peripheralVertices.get(0), internalVertices.get(0));
@@ -670,13 +670,13 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
             this.getFace(peripheralVertices.get(0), peripheralVertices.get(peripheralVertices.size() - 1),
                     internalVertices.get(0));
 
-            LOGGER.finer( "Created top face set");
+            LOGGER.finest( "Created top face set");
 
             // if needed, create the bottom face (final intenal vertex to
             // central peripheral vertices)
             if (peripheralVertices.size() % 2 != 0) {
 
-                LOGGER.finer( "Need bottom face set");
+                LOGGER.finest( "Creating bottom face set");
 
                 MeshVertex p1 = peripheralVertices.get(halfArray);
                 MeshVertex p2 = peripheralVertices.get(halfArray + 1);
@@ -689,7 +689,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
 
                 this.getFace(p1, p2, i1);
 
-                LOGGER.finer( "Created bottom face set");
+                LOGGER.finest( "Created bottom face set");
             }
 
         } catch (Exception e) {

@@ -78,7 +78,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
         if (!mesh.isComparableTo(template))
             throw new UncomparableMeshImageException("Meshes do not match");
         
-        LOGGER.finer( "Drawing image onto mesh");
+        LOGGER.finest( "Drawing image onto mesh");
 
         Rectangle r = mesh.toPath().getBounds();
 
@@ -111,8 +111,8 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
 
         }
 
-        LOGGER.finer( missingFaces + " faces could not be found in the target mesh");
-        LOGGER.finer( missingPixels + " points lay outside the new image bounds");
+        LOGGER.finest( missingFaces + " faces could not be found in the target mesh");
+        LOGGER.finest( missingPixels + " points lay outside the new image bounds");
 
         interpolateMissingPixels(ip);
 
@@ -135,12 +135,9 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
         int missingPixels = 0;
 
         List<MeshPixel> faceMap = map.get(templateFace);
-        LOGGER.finer( "Found " + faceMap.size() + " pixels in face");
+        LOGGER.finest( "Found " + faceMap.size() + " pixels in face");
 
         for (MeshPixel c : faceMap) {
-
-            LOGGER.finest( "Pixel:");
-
             int pixelValue = c.getValue();
             LOGGER.finest( "\t" + c.toString());
             IPoint p = c.getCoordinate().getCartesianCoordinate(targetFace);
@@ -155,7 +152,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
             try {
                 ip.set(x, y, pixelValue);
             } catch (ArrayIndexOutOfBoundsException e) {
-                LOGGER.finer( "\tPoint outside image bounds: " + x + ", " + y);
+                LOGGER.finest( "\tPoint outside image bounds: " + x + ", " + y);
                 missingPixels++;
             }
 
@@ -271,7 +268,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
 
         int missedCount = 0;
 
-        LOGGER.finer( "Creating MeshPixels for the template mesh based on the image processor");
+        LOGGER.finest( "Creating MeshPixels for the template mesh based on the image processor");
 
         // Add an empty list of MeshPixels to each face
         for (MeshFace face : template.getFaces()) {
@@ -344,7 +341,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
         }
 
         if (missedCount > 0) {
-            LOGGER.finer( "Faces could not be found for " + missedCount + " points");
+            LOGGER.finest( "Faces could not be found for " + missedCount + " points");
         }
     }
 

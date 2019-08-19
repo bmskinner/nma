@@ -505,7 +505,10 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
         			String columnName = ds.getColumnKey(column).toString();
         			for (int row = 0; row < ds.getRowCount(); row++) {
         				String rowName = ds.getRowKey(row).toString();
-        				double value = ds.getValue(row, column).doubleValue();
+        				Number number =  ds.getValue(row, column); 	
+        				double value = Double.NaN;
+        				if(number !=null)
+        					value = number.doubleValue();
         				
         				List rawData = ((ExportableBoxAndWhiskerCategoryDataset) ds).getRawData(rowName, columnName);
                 		Collections.sort(rawData);
