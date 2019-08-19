@@ -511,6 +511,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
         					value = number.doubleValue();
         				
         				List rawData = ((ExportableBoxAndWhiskerCategoryDataset) ds).getRawData(rowName, columnName);
+        				if(rawData==null)
+        					continue;
+        					
                 		Collections.sort(rawData);
 
         				builder.append(rowName+Io.TAB+columnName+Io.TAB+"Min_value"+Io.TAB+df.format(rawData.get(0)) + Io.NEWLINE);

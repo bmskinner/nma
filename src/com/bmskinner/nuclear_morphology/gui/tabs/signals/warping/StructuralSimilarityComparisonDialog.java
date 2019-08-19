@@ -104,9 +104,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 				comparisonTable.setModel(compModel);
 				comparisonTable.setRowSorter(new TableRowSorter(compModel));
 			});
-			
-//			makePerCellCharts();
-			
+						
 		} catch(Exception e) {
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			comparisonTable.setModel(AbstractTableCreator.createBlankTable());
