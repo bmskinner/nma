@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -81,7 +82,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		super();
 		LOGGER.finer("Creating MS-SSIM dialog");
 		this.model = model;
-		chartPanel = new ExportableChartPanel(ViolinChartFactory.createLoadingChart());
+		chartPanel = new ExportableChartPanel(ViolinChartFactory.createEmptyChart());
 		comparisonTable = new ExportableTable(AbstractTableCreator.createLoadingTable());
 		
 		JPanel headerPanel = createHeaderPanel();
@@ -117,9 +118,15 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	}
 	
 	private JPanel createHeaderPanel() {
-		JPanel headerPanel = new JPanel(new FlowLayout());
+		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		
+		JButton runPerCellBtn = new JButton("Calculate per-cell scores");
+		runPerCellBtn.addActionListener(e->makePerCellCharts());
+		
+		headerPanel.add(runPerCellBtn);
 		headerPanel.add(getLoadingLabel());
 		headerPanel.add(progressBar);
+		progressBar.setVisible(false);
 		return headerPanel;
 	}
 	
@@ -130,7 +137,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		JScrollPane scrollPane = new JScrollPane(comparisonTable);
 		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
 		centrePanel.add(scrollPane, BorderLayout.CENTER);
-//		centrePanel.add(chartPanel, BorderLayout.SOUTH);
+		centrePanel.add(chartPanel, BorderLayout.SOUTH);
 		
         return centrePanel;
 	}
@@ -227,7 +234,8 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	private void makePerCellCharts() {
 		LOGGER.fine("Creating per cell charts");
 		
-		
+		chartPanel.setChart(ViolinChartFactory.createLoadingChart());
+		progressBar.setVisible(true);
 		PerCellMSSSIMCalculationMethod calc = new PerCellMSSSIMCalculationMethod(model);
 		calc.addPropertyChangeListener( evt ->{
 			if (evt.getNewValue() instanceof Integer) {
