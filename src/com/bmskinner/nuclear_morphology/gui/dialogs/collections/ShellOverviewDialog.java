@@ -45,6 +45,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -81,7 +83,16 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	@Override
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
-		header.add(new JLabel(HEADER_LBL + dataset.getCollection().getOutputFolder().getAbsolutePath()));
+		
+		String folderPath = "";
+		Optional<IAnalysisOptions> analOpt = dataset.getAnalysisOptions();
+		if(analOpt.isPresent()) {
+			Optional<IDetectionOptions> nuclOpt = analOpt.get().getNuclusDetectionOptions();
+			if(nuclOpt.isPresent())
+				folderPath = nuclOpt.get().getFolder().getAbsolutePath();
+		}
+
+		header.add(new JLabel(HEADER_LBL + folderPath));
         return header;
 		
 	}
@@ -118,7 +129,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         			Point pnt = e.getPoint();
         			int row = table.rowAtPoint(pnt);
         			int col = table.columnAtPoint(pnt);                    
-        			export(model.getCell(rows,  col));
+        			export(model.getCell(row,  col));
         		}
         	}
         });
@@ -173,7 +184,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
  				List<Shell> shells = new ShellDetector(n, shellCount, t, false).getShells();
  				
  				for(Shell shell : shells){
- 					LOGGER.fine("Drawing shell at "+shell.getBase().toString());
+ 					LOGGER.finest("Drawing shell at "+shell.getBase().toString());
  					an = an.annotate(shell, Color.ORANGE);
  				}
  			} catch (ShellAnalysisException e1) {

@@ -364,7 +364,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 			    	unMappedPoints++;
 			    }
 			}
-			LOGGER.finer("Random signal: "+unMappedPoints+" points were not in a shell");
+			LOGGER.finest(String.format("Random signal: %s of %s points were not in a shell", unMappedPoints, iterations));
 
         }
 
