@@ -81,6 +81,8 @@ public class DatasetEvent extends EventObject {
     public static final String RESEGMENT          = "Resegment dataset";
     public static final String RECALCULATE_MEDIAN = "Recalculate median profiles";
     public static final String RUN_SHELL_ANALYSIS = "Run shell analysis";
+    
+    public static final String RUN_GLCM_ANALYSIS  = "Run GLCM analysis";
        
 
     private static final long      serialVersionUID = 1L;

@@ -144,6 +144,17 @@ public interface Imageable {
      *             if the image can't be loaded
      */
     ImageProcessor getComponentImage() throws UnloadableImageException;
+    
+    /**
+     * Get the image from which the component was detected. Opens the image via
+     * the {@link com.bmskinner.nuclear_morphology.io.ImageImporter}, fetches
+     * the appropriate channel. This will return the 8-bit greyscale image used for
+     * object detection, cropped it to the region containing the component.
+     * 
+     * @return an 8-bit greyscale image
+     * @throws UnloadableImageException if the image can't be loaded
+     */
+    ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException;
 
     /**
      * Get the image from which the component was detected, and crops it to only

@@ -390,6 +390,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         private static final String HELP_CMD  = "help";
         private static final String CLEAR_CMD = "clear";
         private static final String THROW_CMD = "throw";
+        private static final String GLCM_CMD = "glcm";
         private static final String LIST_CMD  = "list";
         private static final String KILL_CMD  = "kill";
         private static final String REPAIR_CMD  = "unfuck"; // start from scratch
@@ -493,6 +494,8 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
             runnableCommands.put(KILL_CMD,   () -> killAllTasks());
             runnableCommands.put(TASKS_CMD,  () -> listTasks());
             runnableCommands.put(REPAIR_CMD, () -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets()));
+            runnableCommands.put(GLCM_CMD,   () -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_GLCM_ANALYSIS, DatasetListManager.getInstance().getSelectedDatasets()));
+            
             runnableCommands.put(EXPORT_CMD, () -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_XML_DATASET));
         }
     	

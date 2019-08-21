@@ -529,6 +529,32 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         return ip;
     }
+    
+    @Override
+    public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
+    	ImageProcessor ip = getGreyscaleImage().duplicate();
+    	if (ip == null) {
+            throw new UnloadableImageException("Source image is not available");
+        }
+
+        int[] positions = getPosition();
+
+        int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
+                                                          // beyond the cell
+                                                          // boundary
+        int wideW = positions[Imageable.WIDTH] + (padding * 2);
+        int wideH = positions[Imageable.HEIGHT] + (padding * 2);
+        int wideX = positions[Imageable.X_BASE] - padding;
+        int wideY = positions[Imageable.Y_BASE] - padding;
+
+        wideX = wideX < 0 ? 0 : wideX;
+        wideY = wideY < 0 ? 0 : wideY;
+
+        ip.setRoi(wideX, wideY, wideW, wideH);
+        ip = ip.crop();
+
+        return ip;
+    }
 
     @Override
 	public ImageProcessor getComponentRGBImage() throws UnloadableImageException {

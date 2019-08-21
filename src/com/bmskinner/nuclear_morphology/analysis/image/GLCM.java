@@ -51,6 +51,9 @@ import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -108,6 +111,32 @@ public class GLCM {
 		CONSTRAST, ENERGY, ENTROPY,
 		HOMOGENEITY, VARIANCE, SHADE, PROMINENCE, 
 		INERTIA, CORRELATION, SUM;
+		
+		/**
+		 * Convert to plottable stat for charting
+		 * @return
+		 */
+		public PlottableStatistic toStat() {
+			return new GenericStatistic(toString(), StatisticDimension.DIMENSIONLESS);
+		}
+		
+		/**
+		 * Convert all to plottable stats for charting
+		 * @return
+		 */
+		public static PlottableStatistic[] toStats() {
+			GLCMValue[] values = values();
+			PlottableStatistic[] result = new PlottableStatistic[values.length];
+			for(int i=0; i<values.length; i++)
+				result[i] = values[i].toStat();
+			return result;
+		}
+		
+		@Override
+		public String toString() {
+			// Capitalise first letter
+			return super.toString().substring(0, 1).toUpperCase() + super.toString().substring(1).toLowerCase();
+		}
 	}
 	
 	/**
@@ -397,7 +426,7 @@ public class GLCM {
 		Roi roi = component.toRoi();
 		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
 		try {
-			ImageProcessor ip = component.getComponentImage().convertToByte(false);
+			ImageProcessor ip = component.getGreyscaleComponentImage();
 			
 			ip.setRoi(roi);
 			GLCMResult r = calculate(ip);

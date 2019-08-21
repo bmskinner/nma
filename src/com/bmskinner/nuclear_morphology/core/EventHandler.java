@@ -61,6 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
+import com.bmskinner.nuclear_morphology.gui.actions.RunGLCMAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
@@ -536,7 +537,6 @@ public class EventHandler implements EventListener {
                 		SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
             
             if (event.method().equals(DatasetEvent.SAVE)) {
-
             	return () -> {
             		final CountDownLatch latch = new CountDownLatch(1);
             		new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch, GlobalOptions.getInstance().getExportFormat()).run();
@@ -631,6 +631,12 @@ public class EventHandler implements EventListener {
             if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN))
                 return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
             
+            if (event.method().equals(DatasetEvent.RUN_GLCM_ANALYSIS)) {
+            	return () -> {
+            		final CountDownLatch latch = new CountDownLatch(1);
+            		new RunGLCMAction(selectedDatasets, latch, acceptor, EventHandler.this).run();
+            	};
+            }
             
             if (event.method().equals(DatasetEvent.EXTRACT_SOURCE))
                 return new MergeSourceExtractionAction(event.getDatasets(), acceptor, EventHandler.this);

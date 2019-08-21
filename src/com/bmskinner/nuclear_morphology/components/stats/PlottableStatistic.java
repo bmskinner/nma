@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMValue;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -278,6 +279,10 @@ public interface PlottableStatistic extends Serializable {
         list.add(VARIABILITY);
         list.add(BOUNDING_HEIGHT);
         list.add(BOUNDING_WIDTH);
+        
+        for(PlottableStatistic s : GLCMValue.toStats())
+        	list.add(s);
+        	
         return list;
     }
 

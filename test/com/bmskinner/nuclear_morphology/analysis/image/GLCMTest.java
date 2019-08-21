@@ -20,6 +20,9 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
@@ -94,7 +97,10 @@ public class GLCMTest {
 		List<GLCMResult> results = new ArrayList<>();
 		for(ICell c : d.getCollection()) {
 			for(Nucleus n : c.getNuclei()) {
-				results.add(glcm.calculate(n));
+				GLCMResult r = glcm.calculate(n);
+				results.add(r);
+				for(GLCMValue v : GLCMValue.values())
+					n.setStatistic(v.toStat(), r.get(v));
 			}
 		}
 		
