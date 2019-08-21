@@ -952,7 +952,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public Roi toRoi() {
-        return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+    	Roi r = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+    	r.setLocation(0, 0);
+    	return r;
     }
 
     @Override

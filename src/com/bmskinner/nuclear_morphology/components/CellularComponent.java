@@ -324,7 +324,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
     Shape toOriginalShape();
 
     /**
-     * Create an ImageJ ROI encompassing the component
+     * Create an ImageJ ROI encompassing the component.
      * 
      * @return
      */

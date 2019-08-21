@@ -38,24 +38,26 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 //     2004/05/05 07:34:19 (2004)
 
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.EnumMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
 import ij.gui.EllipseRoi;
 import ij.gui.Roi;
-import ij.process.ByteProcessor;
-import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
@@ -101,7 +103,9 @@ public class GLCM {
 	 *
 	 */
 	public enum GLCMValue {
-		ASM, IDM, CONSTRAST, ENERGY, ENTROPY,
+		/** Angular Second Moment */ ASM, 
+		/** Inverse Difference Moment */ IDM, 
+		CONSTRAST, ENERGY, ENTROPY,
 		HOMOGENEITY, VARIANCE, SHADE, PROMINENCE, 
 		INERTIA, CORRELATION, SUM;
 	}
@@ -164,7 +168,8 @@ public class GLCM {
 	 */
 	public class GLCMResult {
 		
-		private Map<GLCMValue, Double> values = new HashMap<>();
+		private Map<GLCMValue, Double> values = new EnumMap<>(GLCMValue.class);
+		private String identifier = null;
 		
 		public void set(GLCMValue key, double value) {
 			values.put(key, value);
@@ -176,33 +181,33 @@ public class GLCM {
 			return 0;
 		}
 		
-//		/** Angular Second Moment */
-//		public double asm = 0;
-//		
-//		/** Inverse Difference Moment */
-//		public double idm = 0;
-//		
-//		/** Contrast */
-//		public double contrast = 0;
-//		
-//		/** Energy */
-//		public double energy = 0;
-//		
-//		public double entropy = 0;
-//		
-//		public double homgeneity = 0;
-//		
-//		public double variance = 0;
-//		
-//		public double shade = 0;
-//		
-//		public double prominence = 0;
-//
-//		public double inertia = 0;
-//
-//		public double correlation = 0;
-//
-//		public double sum = 0;
+		/**
+		 * Set an identifier for this result
+		 * @param s
+		 */
+		public void setIdentifier(String s) {
+			identifier = s;
+		}
+		
+		/**
+		 * Get the identifier for this result.
+		 * Can be null.
+		 * @return
+		 */
+		public String getIdentifier() {
+			return identifier;
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			if(identifier!=null)
+				builder.append(identifier+Io.NEWLINE);
+			for(Entry<GLCMValue, Double> entry : values.entrySet()) {
+				builder.append(entry.getKey()+": "+entry.getValue()+Io.NEWLINE);
+			}
+			return builder.toString();
+		}
 	}
 	
 	/**
@@ -380,6 +385,31 @@ public class GLCM {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Calculate the GLCM across the entire component. Pixels
+	 * outside the component roi are masked.
+	 * @param component
+	 * @return
+	 */
+	public GLCMResult calculate(CellularComponent component) {
+		Roi roi = component.toRoi();
+		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
+		try {
+			ImageProcessor ip = component.getComponentImage().convertToByte(false);
+			
+			ip.setRoi(roi);
+			GLCMResult r = calculate(ip);
+			if(component instanceof Nucleus)
+				r.setIdentifier( ((Nucleus)component).getNameAndNumber());
+			else
+				r.setIdentifier(component.getID().toString());
+			return r;
+		} catch (UnloadableImageException e) {
+			LOGGER.log(Loggable.STACK, "Cannot open component image", e);
+			return new GLCMResult();
+		}
 	}
 
 	/**
