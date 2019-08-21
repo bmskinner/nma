@@ -530,6 +530,11 @@ public class ShellDetector extends Detector {
         public ImageProcessor getGreyscaleImage() throws UnloadableImageException {
             return source.getGreyscaleImage();
         }
+        
+        @Override
+        public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
+            return source.getGreyscaleComponentImage();
+        }
 
 		@Override
 		public ImageProcessor getRGBImage() throws UnloadableImageException {
