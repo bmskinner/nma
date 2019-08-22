@@ -25,7 +25,7 @@ public class RunGLCMAction extends SingleDatasetResultAction {
 	}
 	
 	public RunGLCMAction(IAnalysisDataset dataset, int noFlag, ProgressBarAcceptor acceptor, EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+		super(dataset, dataset.getName()+": "+PROGRESS_BAR_LABEL, acceptor, eh);
 	}
 	
 	

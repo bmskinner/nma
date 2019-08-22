@@ -395,4 +395,9 @@ public class DummyCellularComponent implements CellularComponent {
 		component.clearStatistic(stat);
 	}
 
+	@Override
+	public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
+		return component.getGreyscaleComponentImage();
+	}
+
 }
