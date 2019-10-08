@@ -280,8 +280,9 @@ public interface PlottableStatistic extends Serializable {
         list.add(BOUNDING_HEIGHT);
         list.add(BOUNDING_WIDTH);
         
-        for(PlottableStatistic s : GLCMValue.toStats())
-        	list.add(s);
+        // Enable when ready to display GLCM in GUI
+//        for(PlottableStatistic s : GLCMValue.toStats())
+//        	list.add(s);
         	
         return list;
     }
