@@ -42,14 +42,14 @@ public class CountedOutputStream extends FilterOutputStream {
 	public void write(int b) throws IOException{
 		totalBytes++; 
 		fireCountEvent();
-        out.write(b);;
+        out.write(b);
 	}
 	
 	@Override
 	public void write(byte[] b) throws IOException {
 		totalBytes+=b.length; 
 		fireCountEvent();
-        out.write(b);;
+        out.write(b);
 	}
 	
 	@Override

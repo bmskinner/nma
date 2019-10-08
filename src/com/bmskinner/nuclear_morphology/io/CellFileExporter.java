@@ -76,7 +76,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements E
 
         String fileName = d.getName() + "." + Importer.LOC_FILE_EXTENSION;
         File exportFile = new File(d.getCollection().getOutputFolder(), fileName);
-
+        
         if (!exportFile.getParentFile().isDirectory()) {
             // the desired output folder does not exist
             LOGGER.warning("The intended export folder does not exist");
@@ -87,9 +87,8 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements E
 
         LOGGER.info("Exporting cells to " + exportFile.getAbsolutePath());
 
-        if (exportFile.exists()) {
+        if (exportFile.exists())
             exportFile.delete();
-        }
 
         StringBuilder builder = new StringBuilder();
 
@@ -145,16 +144,12 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements E
 
         for (ICell c : d.getCollection().getCells()) {
 
-            // IJ.log("Cell "+c.getNucleus().getNameAndNumber());
-
             int[] originalPosition = c.getNucleus().getPosition();
 
             IPoint com = c.getNucleus().getCentreOfMass();
 
             double x = com.getX() + originalPosition[CellularComponent.X_BASE];
             double y = com.getY() + originalPosition[CellularComponent.Y_BASE];
-
-            // IJ.log(" Found position: "+x+"-"+y);
 
             try {
 

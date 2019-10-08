@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -69,9 +70,9 @@ public class SVGWriter implements Exporter{
     public void exportConsensusOutlines(@NonNull List<IAnalysisDataset> datasets) {
         List<Nucleus> consensi = datasets.stream()
                 .map(d -> d.getCollection().getConsensus())
-                .filter(n -> n!=null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        
+                
         double w = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
         double h = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);
         
@@ -90,7 +91,7 @@ public class SVGWriter implements Exporter{
 
             Rectangle2D r = s.getBounds();
 
-            export(s, g2, x, Imageable.COMPONENT_BUFFER+10);
+            export(s, g2, x, Imageable.COMPONENT_BUFFER+10d);
             export(d.getName(), g2, (float) x, Imageable.COMPONENT_BUFFER);
             export(String.valueOf(d.getCollection().size()), g2, (float)x, (float)(Imageable.COMPONENT_BUFFER+(r.getHeight()/2)));
             x+=r.getWidth()+Imageable.COMPONENT_BUFFER;
@@ -133,7 +134,12 @@ public class SVGWriter implements Exporter{
     	write(g2);
     }
     
-    public void export(@NonNull CellularComponent c, @NonNull String name) {
+    /**
+     * Export the given component outline to file
+     * 
+     * @param c
+     */
+    public void export(@NonNull CellularComponent c) {
     	Shape s = c.toShape();
 
     	//     // Make a canvas of the correct size
@@ -145,7 +151,6 @@ public class SVGWriter implements Exporter{
     	double minY = r.getMinY();
     	export(s, g2, minX, minY);
     	write(g2);
-
     }
     
     /**

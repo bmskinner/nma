@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,7 +36,7 @@ import ij.IJ;
 public class TableExporter implements Exporter {
 
     private File                      exportFolder;
-    private Map<String, List<String>> columns = new LinkedHashMap<String, List<String>>();
+    private Map<String, List<String>> columns = new LinkedHashMap<>();
 
     public TableExporter(File f) {
         if (f.exists()) {
@@ -66,14 +67,14 @@ public class TableExporter implements Exporter {
             throw new IllegalArgumentException("Column or array is null");
         }
 
-        String[] values = DoubleStream.of(array).mapToObj(d->String.valueOf(d)).toArray(String[]::new);
+        String[] values = DoubleStream.of(array).mapToObj(String::valueOf).toArray(String[]::new);
         this.addColumn(s, values);
     }
 
     public void addColumn(String s, Integer[] array) {
         if (s == null || array == null)
             throw new IllegalArgumentException("Column or array is null");
-        String[] values = Stream.of(array).map(i->String.valueOf(i)).toArray(String[]::new);
+        String[] values = Stream.of(array).map(String::valueOf).toArray(String[]::new);
         this.addColumn(s, values);
     }
 
@@ -81,7 +82,7 @@ public class TableExporter implements Exporter {
         if (s == null || array == null) {
             throw new IllegalArgumentException("Column or array is null");
         }
-        String[] values = IntStream.of(array).mapToObj(d->String.valueOf(d)).toArray(String[]::new);
+        String[] values = IntStream.of(array).mapToObj(String::valueOf).toArray(String[]::new);
         this.addColumn(s, values);
     }
 
@@ -90,7 +91,7 @@ public class TableExporter implements Exporter {
             throw new IllegalArgumentException("Column heading is null");
         }
         if (!columns.containsKey(s)) {
-            List<String> values = new ArrayList<String>();
+            List<String> values = new ArrayList<>();
             columns.put(s, values);
         } else {
             throw new IllegalArgumentException("Specified column (" + s + ") already exists");
@@ -144,8 +145,8 @@ public class TableExporter implements Exporter {
 
     public int length() {
         int size = 0;
-        for (String heading : columns.keySet()) {
-            size = columns.get(heading).size();
+        for(Entry<String, List<String>> entry : columns.entrySet()) {
+        	size = entry.getValue().size();
         }
         return size;
     }

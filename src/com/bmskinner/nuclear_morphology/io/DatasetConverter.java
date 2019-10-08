@@ -94,6 +94,10 @@ import ij.gui.Roi;
  */
 public class DatasetConverter implements Importer {
 	
+	private static final String UNABLE_TO_GET_BORDER_POINT_ERROR = "Unable to get border point";
+
+	private static final String CANNOT_SET_ID_ERROR = "Cannot set ID";
+
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private IAnalysisDataset oldDataset;
@@ -567,8 +571,8 @@ public class DatasetConverter implements Importer {
             }
 
         } catch (UnavailableBorderPointException e) {
-            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
-            throw new DatasetConversionException("Unable to get border point");
+            LOGGER.log(Loggable.STACK, UNABLE_TO_GET_BORDER_POINT_ERROR, e);
+            throw new DatasetConversionException(UNABLE_TO_GET_BORDER_POINT_ERROR);
         }
 
         PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
@@ -599,8 +603,8 @@ public class DatasetConverter implements Importer {
                 ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
             }
         } catch (UnavailableBorderPointException e) {
-            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
-            throw new DatasetConversionException("Unable to get border point");
+            LOGGER.log(Loggable.STACK, UNABLE_TO_GET_BORDER_POINT_ERROR, e);
+            throw new DatasetConversionException(UNABLE_TO_GET_BORDER_POINT_ERROR);
         }
         PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 
@@ -647,8 +651,8 @@ public class DatasetConverter implements Importer {
                 ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
             }
         } catch (UnavailableBorderPointException e) {
-            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
-            throw new DatasetConversionException("Unable to get border point");
+            LOGGER.log(Loggable.STACK, UNABLE_TO_GET_BORDER_POINT_ERROR, e);
+            throw new DatasetConversionException(UNABLE_TO_GET_BORDER_POINT_ERROR);
         }
 
         PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
@@ -680,19 +684,19 @@ public class DatasetConverter implements Importer {
 
         } catch (NoSuchFieldException e) {
             LOGGER.log(Loggable.STACK, "No field", e);
-            throw new DatasetConversionException("Cannot set ID", e);
+            throw new DatasetConversionException(CANNOT_SET_ID_ERROR, e);
         } catch (SecurityException e) {
             LOGGER.log(Loggable.STACK, "Security error", e);
-            throw new DatasetConversionException("Cannot set ID", e);
+            throw new DatasetConversionException(CANNOT_SET_ID_ERROR, e);
         } catch (IllegalArgumentException e) {
             LOGGER.log(Loggable.STACK, "Illegal argument", e);
-            throw new DatasetConversionException("Cannot set ID", e);
+            throw new DatasetConversionException(CANNOT_SET_ID_ERROR, e);
         } catch (IllegalAccessException e) {
             LOGGER.log(Loggable.STACK, "Illegal access", e);
-            throw new DatasetConversionException("Cannot set ID", e);
+            throw new DatasetConversionException(CANNOT_SET_ID_ERROR, e);
         } catch (Exception e) {
             LOGGER.log(Loggable.STACK, "Unexpected exception", e);
-            throw new DatasetConversionException("Cannot set ID", e);
+            throw new DatasetConversionException(CANNOT_SET_ID_ERROR, e);
         }
 
         // LOGGER.fine("New nucleus id is "+newNucleus.getID());
@@ -849,7 +853,7 @@ public class DatasetConverter implements Importer {
                     newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
                 } catch (UnavailableBorderPointException e) {
                     LOGGER.warning("Could not convert signal " + s.toString());
-                    LOGGER.log(Loggable.STACK, "Unable to get border point", e);
+                    LOGGER.log(Loggable.STACK, UNABLE_TO_GET_BORDER_POINT_ERROR, e);
                 }
 
             }

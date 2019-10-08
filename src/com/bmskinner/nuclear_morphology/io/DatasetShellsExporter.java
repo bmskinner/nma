@@ -121,7 +121,11 @@ public class DatasetShellsExporter extends StatsExporter {
         
         
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
-            ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
+        	
+        	Optional<ISignalGroup> groupOptn =  d.getCollection().getSignalGroup(signalGroupId);
+        	if(groupOptn.isEmpty())
+        		continue;
+            ISignalGroup signalGroup = groupOptn.get();
             String groupName   = signalGroup.getGroupName();
             String groupFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).getFolder().getAbsolutePath();            
             Optional<IShellResult> oShellResult = signalGroup.getShellResult();
