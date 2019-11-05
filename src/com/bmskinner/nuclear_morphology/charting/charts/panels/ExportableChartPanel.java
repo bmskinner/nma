@@ -493,6 +493,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
         CategoryPlot plot = this.getChart().getCategoryPlot();
         StringBuilder builder = new StringBuilder();
         DecimalFormat df = new DecimalFormat("#0.000");
+        
+        builder.append("Row_name"+Io.TAB+"Column_name"+Io.TAB+"ValueType"+Io.TAB+"Value" + Io.NEWLINE);
 
         for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
 
