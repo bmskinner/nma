@@ -179,8 +179,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * Merge the given datasets, copying each cell into the new collection and removing
      * existing segmentation patterns.
      * 
-     * @param newCollection
-     * @param sources
+     * @param newCollection the new collection to copy cells into
      * @return the merged dataset
      * @throws UnavailableProfileTypeException 
      * @throws MissingOptionException 
@@ -345,6 +344,11 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     
     
 
+    /**
+     * Merge any signal groups in the new collection, as described by the 
+     * paired signal groups map
+     * @param newCollection
+     */
     private void mergeSignalGroups(ICellCollection newCollection) {
         if (pairedSignalGroups == null || pairedSignalGroups.isEmpty()) {
             LOGGER.finer( "No signal groups to merge");
