@@ -78,9 +78,14 @@ public class EditingDetailPanel extends DetailPanel {
 
     @Override
     public void eventReceived(SignalChangeEvent event) {
-
+        // Swallow signals we don't need to pass onwards
+        if(event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION))
+        	return;
+        	
         super.eventReceived(event);
         LOGGER.finer("Editing panel heard signal: " + event.type());
+        
+
 
         // Pass downwards if the signal was not generated internally
         if (!this.getSubPanels().contains(event.getSource())) {

@@ -143,7 +143,7 @@ public abstract class LoadingIconDialog extends MessagingDialog {
     private ImageIcon loadURL(URL url) {
         ImageIcon icon = null;
         if (url != null) {
-            LOGGER.finer( "URL found: " + url.toString());
+            LOGGER.finest( "URL found: " + url.toString());
             icon = new ImageIcon(url);
 
             String status = "";
@@ -163,7 +163,7 @@ public abstract class LoadingIconDialog extends MessagingDialog {
                 break;
             }
 
-            LOGGER.finer("Load status: " + status);
+            LOGGER.finest("Load status: " + status);
         }
         return icon;
     }

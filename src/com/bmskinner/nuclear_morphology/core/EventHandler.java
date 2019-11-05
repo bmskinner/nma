@@ -56,6 +56,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ManualClusterAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
+import com.bmskinner.nuclear_morphology.gui.actions.MergeSignalsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
@@ -282,6 +283,11 @@ public class EventHandler implements EventListener {
             
             if (event.type().equals(SignalChangeEvent.MERGE_DATASETS_ACTION))
                 return new MergeCollectionAction(selectedDatasets, acceptor, EventHandler.this);
+            
+            if (event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION)) {
+            	LOGGER.finer("Event handler heard new merge signals action request on dataset "+selectedDataset.getName());
+                return new MergeSignalsAction(selectedDataset, acceptor, EventHandler.this);
+            }
 
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
                 return () -> setScale(selectedDatasets);

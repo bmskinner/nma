@@ -69,26 +69,33 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
                     if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
 
-                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2, column);
-                        cosmeticHandler.updateSignalSource(d, signalGroup.getID());
-                        SignalTableCell newValue = new SignalTableCell(signalGroup.getID(), 
-                        		d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).getFolder().getAbsolutePath(),
-                        		signalGroup.getColor());
-                        table.getModel().setValueAt(newValue, row, column);
-                        table.repaint();
+                    	SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2, column);
+                    	if(signalGroup!=null) {
+
+                    		cosmeticHandler.updateSignalSource(d, signalGroup.getID());
+                    		SignalTableCell newValue = new SignalTableCell(signalGroup.getID(), 
+                    				d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).getFolder().getAbsolutePath(),
+                    				signalGroup.getColor());
+                    		table.getModel().setValueAt(newValue, row, column);
+                    		table.repaint();
+                    	}
                     }
 
                     if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
-                        cosmeticHandler.renameSignalGroup(d, signalGroup.getID());
+                        if(signalGroup!=null) {
+                        	cosmeticHandler.renameSignalGroup(d, signalGroup.getID());
+                        }
                     }
 
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
                     if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        cosmeticHandler.changeSignalColour(d, signalGroup.getID());
-                        update(getDatasets());
-                        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+                        if(signalGroup!=null) {
+                        	cosmeticHandler.changeSignalColour(d, signalGroup.getID());
+                        	update(getDatasets());
+                        	getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+                        }
                     }
 
                 }
@@ -101,7 +108,10 @@ public class SignalsAnalysisPanel extends DetailPanel {
     }
     
     private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
-        return (SignalTableCell) table.getModel().getValueAt(row, column);
+    	Object o = table.getModel().getValueAt(row, column);
+    	if(o instanceof SignalTableCell)
+    		return (SignalTableCell)o;
+        return null;
     }
 
     @Override

@@ -127,15 +127,18 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 
         datasetBoxOne = new DatasetSelectionPanel(datasets);
         datasetBoxTwo = new DatasetSelectionPanel(datasets);
+        
+        IAnalysisDataset d0 = datasets.get(0);
+        IAnalysisDataset d1 = datasets.size()>1 ? datasets.get(1) : datasets.get(0);
 
-        datasetBoxOne.setSelectedDataset(datasets.get(0));
-        datasetBoxTwo.setSelectedDataset(datasets.get(1));
+        datasetBoxOne.setSelectedDataset(d0);
+        datasetBoxTwo.setSelectedDataset(d1);
 
         datasetBoxOne.addActionListener(this);
         datasetBoxTwo.addActionListener(this);
 
-        signalBoxOne = new SignalGroupSelectionPanel(datasets.get(0));
-        signalBoxTwo = new SignalGroupSelectionPanel(datasets.get(1));
+        signalBoxOne = new SignalGroupSelectionPanel(d0);
+        signalBoxTwo = new SignalGroupSelectionPanel(d1);
 
         setEqualButton = new JButton("Set equal");
         setEqualButton.addActionListener(this);
@@ -219,7 +222,9 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         }
 
         if (e.getSource() == mergeButton) {
-            LOGGER.info("Merging datasets");
+            LOGGER.info("Signal pairing complete");
+            
+            LOGGER.fine("Merged pairs: "+pairedSignalGroups.toString());
             this.setVisible(false);
         }
 

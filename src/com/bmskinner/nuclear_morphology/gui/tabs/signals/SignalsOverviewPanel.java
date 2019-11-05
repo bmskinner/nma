@@ -82,6 +82,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
 
     /** Launch signal warping */
     private JButton warpButton;
+    
+    /** Launch signal merging */
+    private JButton mergeButton;
 
     /** Show signal radius or just CoM */
     boolean isShowAnnotations = false;
@@ -233,6 +236,15 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
         warpButton.setEnabled(false);
         panel.add(warpButton);
         
+        mergeButton = new JButton(Labels.Signals.MERGE_BTN_LBL);
+        mergeButton.addActionListener(e -> {
+        	LOGGER.finer("Firing merge signal action request");
+        	getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.MERGE_SIGNALS_ACTION);
+        });
+        mergeButton.setEnabled(false);
+        panel.add(mergeButton);
+        
+        
         JCheckBox showAnnotationsBox = new JCheckBox(Labels.Signals.SHOW_SIGNAL_RADII_LBL, isShowAnnotations);
         showAnnotationsBox.addActionListener(e -> {
         	isShowAnnotations = showAnnotationsBox.isSelected();
@@ -280,8 +292,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
     /**
      * Update the signal stats with the given datasets
      * 
-     * @param list
-     *            the datasets
+     * @param list the datasets
      * @throws Exception
      */
     private void updateSignalStatsPanel() {
@@ -312,10 +323,14 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
                     && activeDataset().getCollection().getSignalManager().hasSignals()) {
                 warpButton.setEnabled(true);
             }
+            
+            if(activeDataset().getCollection().getSignalManager().getSignalGroupCount()>1)
+            	mergeButton.setEnabled(true);
 
         }
 
         if (isMultipleDatasets()) {
+        	mergeButton.setEnabled(false);
             if (IAnalysisDataset.haveConsensusNuclei(getDatasets())) {
 
                 // Check at least one of the selected datasets has signals

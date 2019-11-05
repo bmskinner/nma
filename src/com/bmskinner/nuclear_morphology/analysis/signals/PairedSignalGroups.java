@@ -3,10 +3,13 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
  * Map dataset signal groups for merging datasets
@@ -56,8 +59,23 @@ public class PairedSignalGroups {
 		return map.keySet();
 	}
 	
+	public Set<Entry<DatasetSignalId, Set<DatasetSignalId>>> entrySet(){
+		return map.entrySet();
+	}
+	
 	public Set<DatasetSignalId> get(DatasetSignalId key) {
 		return map.get(key);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for(Entry<DatasetSignalId, Set<DatasetSignalId>> entry : map.entrySet()) {			
+			for(DatasetSignalId id : entry.getValue()) {
+				sb.append( entry.getKey().s + " : " + id.s + Io.NEWLINE);
+			}
+		}
+		return sb.toString();
 	}
 	
 	/**
