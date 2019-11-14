@@ -99,7 +99,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 
 	@Override
 	public IAnalysisMethod getMethod() {
-		return new TreeBuildingMethod(dataset, options);
+		return new TreeBuildingMethod(getFirstDataset(), options);
 	}
 	
 	@Override
@@ -117,8 +117,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 	private JPanel createOptionsPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		panel.add(new ParameterSelectionPanel(dataset, options));
-		panel.add(new DimensionalReductionSelectionPanel(dataset, options));
+		panel.add(new ParameterSelectionPanel(getFirstDataset(), options));
+		panel.add(new DimensionalReductionSelectionPanel(getFirstDataset(), options));
 		panel.add(createClusterMethodPanel());
 		return panel;
 	}

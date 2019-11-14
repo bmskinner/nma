@@ -66,7 +66,7 @@ public class ClusteringSetupDialog extends SubAnalysisSetupDialog  {
 
     @Override
     public IAnalysisMethod getMethod() {
-    	return new NucleusClusteringMethod(dataset, options);
+    	return new NucleusClusteringMethod(getFirstDataset(), options);
     }
     
 	@Override
@@ -84,9 +84,9 @@ public class ClusteringSetupDialog extends SubAnalysisSetupDialog  {
     private JPanel createOptionsPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		panel.add(new ParameterSelectionPanel(dataset, options));
-		panel.add(new DimensionalReductionSelectionPanel(dataset, options));
-		panel.add(new ClusteringMethodSelectionPanel(dataset, options));
+		panel.add(new ParameterSelectionPanel(getFirstDataset(), options));
+		panel.add(new DimensionalReductionSelectionPanel(getFirstDataset(), options));
+		panel.add(new ClusteringMethodSelectionPanel(getFirstDataset(), options));
 		return panel;
 	}
 }

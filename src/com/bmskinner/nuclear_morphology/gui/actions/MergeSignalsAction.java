@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -48,7 +49,9 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 		try {
 			// Choose the paired signals
 			LOGGER.fine("Creating signal selection dialog");
-			DatasetMergingDialog dialog = new DatasetMergingDialog(List.of(dataset));
+			List<IAnalysisDataset> datasets = new ArrayList<>();
+			datasets.add(dataset);
+			DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
 			PairedSignalGroups pairs = dialog.getPairedSignalGroups();
 
 			if(pairs.isEmpty()) {

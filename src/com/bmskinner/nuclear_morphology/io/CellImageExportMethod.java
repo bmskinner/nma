@@ -11,11 +11,13 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 /**
@@ -31,13 +33,20 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static final String IMAGE_FOLDER = "SingleNucleusImages_";
+	
+	private final HashOptions options;
+	
+	public static final String MASK_BACKGROUND = "Mask background";
+	public static final boolean DEAULT_MASK_BACKGROUND = false;
 
-	public CellImageExportMethod(IAnalysisDataset dataset) {
+	public CellImageExportMethod(IAnalysisDataset dataset, HashOptions options) {
 		super(dataset);
+		this.options = options;
 	}
 	
-	public CellImageExportMethod(List<IAnalysisDataset> datasets) {
+	public CellImageExportMethod(List<IAnalysisDataset> datasets, HashOptions options) {
 		super(datasets);
+		this.options = options;
 	}
 
 	@Override
@@ -82,6 +91,18 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	private ImageProcessor cropToSquare(Nucleus n) throws UnloadableImageException {
 		int[] positions = n.getPosition();
 		ImageProcessor ip = n.getGreyscaleImage();
+		
+		if(options.getBoolean(MASK_BACKGROUND)) {
+			// mask out everything not inside the nucleus ROI
+			Roi roi = n.toOriginalRoi();
+			for(int x=0;x<ip.getWidth(); x++) {
+				for(int y=0; y<ip.getHeight(); y++) {
+					if(roi.contains(x, y))
+						continue;
+					ip.set(x, y, 0);
+				}
+			}
+		}
 
 		int padding = CellularComponent.COMPONENT_BUFFER;
 		

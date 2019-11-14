@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -41,7 +43,7 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 @SuppressWarnings("serial")
 public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 
-    protected final @NonNull IAnalysisDataset dataset;
+    protected final @NonNull List<IAnalysisDataset> datasets = new ArrayList<>();
 
     /**
      * Construct with a program window to listen for actions, and a dataset
@@ -52,7 +54,26 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
      */
     public SubAnalysisSetupDialog(final Frame parent, final @NonNull IAnalysisDataset dataset, final String title) {
         super(parent, true);
-        this.dataset = dataset;
+        this.datasets.add(dataset);
+        this.setTitle(title);
+        this.setModal(true);
+        
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPanel);
+    }
+    
+    /**
+     * Construct with a program window to listen for actions, and a dataset
+     * to operate on
+     * 
+     * @param parent
+     * @param dataset
+     */
+    public SubAnalysisSetupDialog(final Frame parent, final @NonNull List<IAnalysisDataset> datasets, final String title) {
+        super(parent, true);
+        this.datasets.addAll(datasets);
         this.setTitle(title);
         this.setModal(true);
         
@@ -71,7 +92,7 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
      */
     public SubAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
         super(true);
-        this.dataset = dataset;
+        this.datasets.add(dataset);
         this.setTitle(title);
         
         JPanel contentPanel = new JPanel();
@@ -79,11 +100,35 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPanel);
     }
+    
+    /**
+     * Construct with a main program window to listen for actions, and a dataset
+     * to operate on
+     * 
+     * @param mw
+     * @param dataset
+     */
+    public SubAnalysisSetupDialog(final @NonNull List<IAnalysisDataset> datasets, final String title) {
+        super(true);
+        this.datasets.addAll(datasets);
+        this.setTitle(title);
+        
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPanel);
+    }
+    
+    
 
     protected void packAndDisplay() {
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+    
+    protected IAnalysisDataset getFirstDataset() {
+    	return datasets.get(0);
     }
 
     /**

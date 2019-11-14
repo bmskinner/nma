@@ -123,7 +123,7 @@ public class DatasetShellsExporter extends StatsExporter {
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
         	
         	Optional<ISignalGroup> groupOptn =  d.getCollection().getSignalGroup(signalGroupId);
-        	if(groupOptn.isEmpty())
+        	if(!groupOptn.isPresent())
         		continue;
             ISignalGroup signalGroup = groupOptn.get();
             String groupName   = signalGroup.getGroupName();

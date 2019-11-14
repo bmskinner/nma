@@ -68,7 +68,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
 
     @Override
     public IAnalysisMethod getMethod() {
-    	return new TsneMethod(dataset, options);
+    	return new TsneMethod(getFirstDataset(), options);
     }
     
     @Override
@@ -144,7 +144,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
      * @return
      */
     private JSpinner makePerplexitySpinner() {
-        int nNuclei = dataset.getCollection().getNucleusCount();
+        int nNuclei = getFirstDataset().getCollection().getNucleusCount();
         double initialPerplexity = Math.max(MIN_PERPLEXITY, nNuclei/20d);
         options.setDouble(TsneMethod.PERPLEXITY_KEY, initialPerplexity);
         
