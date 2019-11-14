@@ -92,17 +92,7 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 		int[] positions = n.getPosition();
 		ImageProcessor ip = n.getGreyscaleImage();
 		
-		if(options.getBoolean(MASK_BACKGROUND)) {
-			// mask out everything not inside the nucleus ROI
-			Roi roi = n.toOriginalRoi();
-			for(int x=0;x<ip.getWidth(); x++) {
-				for(int y=0; y<ip.getHeight(); y++) {
-					if(roi.contains(x, y))
-						continue;
-					ip.set(x, y, 0);
-				}
-			}
-		}
+		
 
 		int padding = CellularComponent.COMPONENT_BUFFER;
 		
@@ -120,6 +110,24 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 
 		x = x < 0 ? 0 : x;
 		y = y < 0 ? 0 : y;
+		
+		if(options.getBoolean(MASK_BACKGROUND)) {
+			// mask out everything not inside the nucleus ROI
+			// Only check the region we are cropping to
+			Roi roi = n.toOriginalRoi();
+			for(int xx=x; xx<x+totalWidth; xx++) {
+				if(xx>=ip.getWidth())
+					continue;
+				for(int yy=y; yy<y+totalWidth; yy++) {
+					if(yy>=ip.getHeight())
+						continue;
+					if(roi.contains(xx, yy))
+						continue;
+					ip.set(xx, yy, 0);
+				}
+			}
+		}
+		
 
 		ip.setRoi(x, y, totalWidth, totalWidth);
 		return ip.crop();
