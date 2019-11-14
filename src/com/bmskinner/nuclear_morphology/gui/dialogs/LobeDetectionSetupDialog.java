@@ -69,14 +69,14 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
     @Override
     public IAnalysisMethod getMethod() {
 
-    	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> op = getFirstDataset().getAnalysisOptions();
     	if(op.isPresent()){
     		Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
     		
     		if(nOp.isPresent())
     			nOp.get().setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
     	}
-        return new LobeDetectionMethod(dataset, options);
+        return new LobeDetectionMethod(getFirstDataset(), options);
     }
     
     @Override
