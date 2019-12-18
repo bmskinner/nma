@@ -21,7 +21,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSu
 	RuleSetTester.class,
 	AnalysisProfilesTestSuite.class,
 	AnalysisClassificationTestSuite.class,
-	AnalysisImageTestSuite.class})
+	AnalysisImageTestSuite.class,
+	NucleusDetectionTest.class})
 public class AnalysisTestSuite {
 
 }

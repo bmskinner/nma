@@ -1,5 +1,19 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
+import static org.junit.Assert.assertFalse;
+
+import java.io.File;
+
+import org.junit.Test;
+
+import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+
 /**
  * Test that nuclei in an image are detected,
  * and all parameters are calculated. For mouse
@@ -10,5 +24,17 @@ package com.bmskinner.nuclear_morphology.analysis;
  *
  */
 public class NucleusDetectionTest {
+	
+	@Test
+	public void testAllNuclearParametersCalculated() throws Exception {
+		File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
+		IAnalysisDataset test = SampleDatasetReader.openDataset(saveFile);
+		
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+			double value = test.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			assertFalse("Error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==value);
+			assertFalse("Did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==value);
+		}
+	}
 
 }
