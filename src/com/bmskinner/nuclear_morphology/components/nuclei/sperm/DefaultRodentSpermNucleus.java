@@ -167,70 +167,79 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         return stat;
 
     }
+    
+    /**
+     * Given a test nucleus, determine the hook length and body width.
+     * Used because invoking Nucleus::getVerticallyRotatedNucleus clears
+     * these stats
+     * @param n
+     */
+    private synchronized void calculateHookAndBodyLength(Nucleus n) {
+    	 if (n == null) {
+             setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+             setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
+             return;
+         }
+
+         if (!n.hasBorderTag(Tag.TOP_VERTICAL) || !n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+             setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
+             setStatistic(PlottableStatistic.BODY_WIDTH, BORDER_POINT_NOT_PRESENT);
+             return;
+         }
+
+         /*
+          * Get the X position of the top vertical
+          */
+         double vertX;
+         try {
+             vertX = n.getBorderPoint(Tag.TOP_VERTICAL).getX();
+         } catch (UnavailableBorderTagException e) {
+             LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
+             setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
+             setStatistic(PlottableStatistic.BODY_WIDTH, BORDER_POINT_NOT_PRESENT);
+             return;
+         }
+
+         /* Find the x values in the bounding box of the vertical nucleus.  */
+         FloatPolygon p = n.toPolygon();
+         double maxBoundingX = p.getBounds().getMaxX();
+         double minBoundingX = p.getBounds().getMinX();
+
+         if (vertX < minBoundingX || vertX > maxBoundingX) {
+             // The chosen vertical points is outside the bounding box of the nucleus
+             IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical point x is outside nucleus bounds");
+             LOGGER.log(Loggable.STACK, String.format("Vertical point %s is out of bounds %s-%s", vertX, minBoundingX, maxBoundingX), e);
+             setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+             setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
+             return;
+         }
+         
+         /*
+          * To determine if the point is hook or hump, take the X position of the
+          * tip. This must lie on the hook side of the vertX
+          */
+
+         double dHook = 0;
+         double dBody = 0;
+
+         if(n.isClockwiseRP()){
+         	dBody = vertX - minBoundingX;
+         	dHook = maxBoundingX - vertX;
+         	
+         } else{
+         	dHook = vertX - minBoundingX;
+         	dBody = maxBoundingX - vertX;
+         }
+
+         setStatistic(PlottableStatistic.HOOK_LENGTH, dHook);
+         setStatistic(PlottableStatistic.BODY_WIDTH, dBody);
+    }
+    
 
     private void calculateHookAndBodyLength() {
-
         // Start with the vertically rotated nucleus
         Nucleus testNucleus = getVerticallyRotatedNucleus();
-
-        if (testNucleus == null) {
-            setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-            setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
-            return;
-        }
-
-        if (!testNucleus.hasBorderTag(Tag.TOP_VERTICAL) || !testNucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-            setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
-            setStatistic(PlottableStatistic.BODY_WIDTH, BORDER_POINT_NOT_PRESENT);
-            return;
-        }
-
-        /*
-         * Get the X position of the top vertical
-         */
-        double vertX;
-        try {
-            vertX = testNucleus.getBorderPoint(Tag.TOP_VERTICAL).getX();
-        } catch (UnavailableBorderTagException e) {
-            LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
-            setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
-            setStatistic(PlottableStatistic.BODY_WIDTH, BORDER_POINT_NOT_PRESENT);
-            return;
-        }
-
-        /* Find the x values in the bounding box of the vertical nucleus.  */
-        FloatPolygon p = testNucleus.toPolygon();
-        double maxBoundingX = p.getBounds().getMaxX();
-        double minBoundingX = p.getBounds().getMinX();
-
-        if (vertX < minBoundingX || vertX > maxBoundingX) {
-            // The chosen vertical points is outside the bounding box of the nucleus
-            IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical point x is outside nucleus bounds");
-            LOGGER.log(Loggable.STACK, String.format("Vertical point %s is out of bounds %s-%s", vertX, minBoundingX, maxBoundingX), e);
-            setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-            setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
-            return;
-        }
-        
-        /*
-         * To determine if the point is hook or hump, take the X position of the
-         * tip. This must lie on the hook side of the vertX
-         */
-
-        double dHook = 0;
-        double dBody = 0;
-
-        if(testNucleus.isClockwiseRP()){
-        	dBody = vertX - minBoundingX;
-        	dHook = maxBoundingX - vertX;
-        	
-        } else{
-        	dHook = vertX - minBoundingX;
-        	dBody = maxBoundingX - vertX;
-        }
-
-        setStatistic(PlottableStatistic.HOOK_LENGTH, dHook);
-        setStatistic(PlottableStatistic.BODY_WIDTH, dBody);
+        calculateHookAndBodyLength(testNucleus);
     }
 
 
@@ -379,11 +388,12 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     }
     
     @Override
-    public Nucleus getVerticallyRotatedNucleus() {
-//    	if(orientationChecked && verticalNucleus!=null)
-//    		return verticalNucleus;
-    	return createVerticallyRotatedNucleus();
-    }
+   public Nucleus getVerticallyRotatedNucleus() {
+       // Ensure that the hook and body are recalculated
+       Nucleus testNucleus = super.getVerticallyRotatedNucleus();
+       calculateHookAndBodyLength(testNucleus);
+       return testNucleus;
+   }
 
 
     /*
