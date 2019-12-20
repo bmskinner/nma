@@ -296,10 +296,6 @@ public class DockableMainWindow extends AbstractMainWindow {
     	for(IAnalysisDataset dataset : datasets) {
     		LOGGER.fine("Adding dataset "+dataset.getName()+": "+dataset.hashCode());
     		DatasetListManager.getInstance().addDataset(dataset);
-    		getPopulationsPanel().addDataset(dataset);
-    		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-    			getPopulationsPanel().addDataset(child);
-    		}
     		last = dataset;
     	}
     	// This will also trigger a dataset update event as the dataset

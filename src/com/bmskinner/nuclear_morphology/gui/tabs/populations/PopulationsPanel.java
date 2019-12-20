@@ -247,18 +247,6 @@ public class PopulationsPanel extends DetailPanel  {
     }
 
     /**
-     * Add the given dataset to the main population list Check that the name is
-     * valid, and update if needed
-     * 
-     * @param dataset
-     *            the dataset to add
-     */
-    public void addDataset(@NonNull IAnalysisDataset dataset) {
-        if (dataset.isRoot())
-            DatasetListManager.getInstance().addDataset(dataset);
-    }
-
-    /**
      * Select the given dataset in the tree table
      * 
      * @param dataset

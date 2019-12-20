@@ -331,10 +331,10 @@ public class MainWindow extends AbstractMainWindow {
      */
     private synchronized void addDataset(final IAnalysisDataset dataset) {
 
-    	getPopulationsPanel().addDataset(dataset);
-        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-        	getPopulationsPanel().addDataset(child);
-        }
+//    	getPopulationsPanel().addDataset(dataset);
+//        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+//        	getPopulationsPanel().addDataset(child);
+//        }
 
         // This will also trigger a dataset update event as the dataset
         // is selected, so don't trigger another update here.

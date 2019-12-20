@@ -48,6 +48,13 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 
+
+/**
+ * Base class for main windows
+ * @author Ben Skinner
+ *
+ */
+@SuppressWarnings("serial")
 public abstract class AbstractMainWindow extends JFrame implements MainView, EventListener, DatasetSelectionListener, PopulationListUpdateListener {
 	
 	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
