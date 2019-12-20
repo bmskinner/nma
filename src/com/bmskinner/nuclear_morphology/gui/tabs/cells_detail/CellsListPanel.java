@@ -160,12 +160,12 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
     }
 
     public class NodeData {
-        private String name;
-        private UUID   id;
+        private final String name;
+        private final UUID   id;
         private String imageName;
         private int    nucleusNumber;
 
-        public NodeData(String name, UUID id) {
+        public NodeData(final String name, final UUID id) {
             this.name = name;
             this.id = id;
             if (!name.equals("Cells")) {
@@ -174,7 +174,15 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
                                                          // leaving filename and
                                                          // nucleus number
                 this.imageName = array[0];
-                this.nucleusNumber = Integer.valueOf(array[1]);
+                
+                try {
+                	nucleusNumber = Integer.valueOf(array[1]);
+                } catch(NumberFormatException e) {
+                	// Not the expected format of xxxx.tif-01
+                	// Maybe single nucleus images - xxxx.tif-01-uuid
+                	// Try parsing it out
+                	nucleusNumber = Integer.valueOf(array[1].split("_")[0]);
+                }
             }
 
         }
@@ -187,6 +195,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
             return id;
         }
 
+        @Override
         public String toString() {
             if (name.equals("Cells")) {
                 return name;
