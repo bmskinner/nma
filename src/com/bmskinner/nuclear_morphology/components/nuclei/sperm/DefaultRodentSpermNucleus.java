@@ -390,7 +390,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     @Override
    public Nucleus getVerticallyRotatedNucleus() {
        // Ensure that the hook and body are recalculated
-       Nucleus testNucleus = super.getVerticallyRotatedNucleus();
+       Nucleus testNucleus = createVerticallyRotatedNucleus();
        calculateHookAndBodyLength(testNucleus);
        return testNucleus;
    }
