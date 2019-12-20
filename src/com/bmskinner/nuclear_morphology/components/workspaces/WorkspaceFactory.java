@@ -23,7 +23,16 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 
+/**
+ * Utility class for creating workspaces
+ * @author Ben Skinner
+ *
+ */
 public class WorkspaceFactory {
+	
+	private WorkspaceFactory() {
+		// private constructor does nothing
+	}
 	
 	/**
 	 * Create an empty workspace with the given name. The save file location

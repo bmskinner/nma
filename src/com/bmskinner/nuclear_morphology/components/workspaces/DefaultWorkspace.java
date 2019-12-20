@@ -58,15 +58,18 @@ public class DefaultWorkspace implements IWorkspace {
         this.name = name;
     }
     
-    public UUID getId() {
+    @Override
+	public UUID getId() {
     	return id;
     }
     
-    public void setName(@NonNull String s){
+    @Override
+	public void setName(@NonNull String s){
         this.name = s;
     }
     
-    public @NonNull String getName() {
+    @Override
+	public @NonNull String getName() {
     	return name;
     }
 
