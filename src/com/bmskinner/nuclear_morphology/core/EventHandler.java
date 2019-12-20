@@ -713,16 +713,10 @@ public class EventHandler implements EventListener {
             if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET))
             	fireDatasetSelectionEvent(event.firstDataset());
 
-            if (event.method().equals(DatasetEvent.RECACHE_CHARTS))
+            if (event.method().equals(DatasetEvent.RECACHE_CHARTS) ||
+        		event.method().equals(DatasetEvent.CLEAR_CACHE) ||
+        		event.method().equals(DatasetEvent.ADD_DATASET))
             	fireDatasetEvent(event);
-
-            if (event.method().equals(DatasetEvent.CLEAR_CACHE))
-            	fireDatasetEvent(event);
-
-            if (event.method().equals(DatasetEvent.ADD_DATASET)) {
-            	fireDatasetEvent(event);
-            }
-
         }
 
     }
