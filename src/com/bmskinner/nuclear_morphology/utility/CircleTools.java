@@ -33,6 +33,11 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public class CircleTools {
 	
+	/**
+	 * Private constructor. All methods are static.
+	 */
+	private CircleTools() {}
+	
     /**
      * Find if the given circles overlap
      * 

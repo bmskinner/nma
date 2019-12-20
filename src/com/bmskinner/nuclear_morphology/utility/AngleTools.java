@@ -28,8 +28,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  *
  */
 public class AngleTools {
-	
-	
+		
 	/**
 	 * Private constructor. All methods are static.
 	 */
@@ -65,7 +64,7 @@ public class AngleTools {
      * @param p the point to be moved
      * @param centre the centre of rotation
      * @param angle the angle to rotate in degrees
-     * @return
+     * @return the point following transformation
      */
     public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double degrees) {
     	double rad = Math.toRadians(-degrees); // Negative since the AT is anti-clockwise rotation (+x towards +y)
@@ -77,11 +76,11 @@ public class AngleTools {
     /**
      * Calculate the angle between two lines in radians
      * 
-     * @param line1Start
-     * @param line1End
-     * @param line2Start
-     * @param line2End
-     * @return
+     * @param line1Start the starting point of the first line
+     * @param line1End the end point of the first line
+     * @param line2Start the starting point of the second line
+     * @param line2End the end point of the second line
+     * @return the angle between the lines, in radians
      */
     public static double angleBetweenLines(IPoint line1Start, IPoint line1End, IPoint line2Start, IPoint line2End) {
         double a = line1End.getX() - line1Start.getX();
