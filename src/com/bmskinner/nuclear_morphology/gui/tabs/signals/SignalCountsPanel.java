@@ -34,11 +34,11 @@ import javax.swing.border.EmptyBorder;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultFilteringOptions;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer.CollectionFilteringException;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
@@ -47,7 +47,6 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -189,17 +188,16 @@ public class SignalCountsPanel extends DetailPanel {
         }
         
         public void filter() {
-//        	log(String.format("Filtering group %s for range %d-%d", groupPanel.getSelectedGroup().getGroupName(), minSignals, maxSignals));
-        	FilteringOptions options = new DefaultFilteringOptions(false);
+        	
+        	FilteringOptions options = new CellCollectionFilterBuilder()
+        			.setMatchType(FilterMatchType.ALL_MATCH)
+        			.add(PlottableStatistic.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(), minSignals, maxSignals)
+        			.build();
+        	
+        	CellCollectionFilterer f = new CellCollectionFilterer(options);
             
-            options.addMinimumThreshold(PlottableStatistic.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(), minSignals);
-            options.addMaximumThreshold(PlottableStatistic.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(), maxSignals);
-            
-            Filterer<ICellCollection, ICell> f = new CellCollectionFilterer();
-            
-
             try {
-            	ICellCollection filtered  = f.filter(dataset.getCollection(), options.getPredicate(dataset.getCollection()));
+            	ICellCollection filtered  = f.filter(dataset.getCollection());
             	ICellCollection virt = new VirtualCellCollection(dataset, filtered.getName());
             	filtered.getCells().forEach(c->virt.addCell(c));
             	virt.setName("Filtered_signal_count_"+groupPanel.getSelectedGroup().getGroupName());

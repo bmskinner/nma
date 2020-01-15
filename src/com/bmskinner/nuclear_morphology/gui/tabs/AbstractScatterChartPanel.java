@@ -33,11 +33,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultFilteringOptions;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer.CollectionFilteringException;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
 //import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer;
 //import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -53,7 +53,6 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -257,26 +256,25 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
         
-        FilteringOptions options = new DefaultFilteringOptions(true);
         Range domain = getDomainBounds();
         Range range = getRangeBounds();
         PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
         PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
         
-        options.addMinimumThreshold(statA, component, scale, domain.getLowerBound());
-        options.addMaximumThreshold(statA, component, scale, domain.getUpperBound());
+        FilteringOptions options = new CellCollectionFilterBuilder()
+        		.setMatchType(FilterMatchType.ALL_MATCH)
+        		.add(statA, component, scale, domain.getLowerBound(),domain.getUpperBound() )
+        		.add(statB, component, scale, range.getLowerBound(), range.getUpperBound())
+        		.build();
         
-        options.addMinimumThreshold(statB, component, scale, range.getLowerBound());
-        options.addMaximumThreshold(statB, component, scale, range.getUpperBound());
-        
-        Filterer<ICellCollection, ICell> f = new CellCollectionFilterer();
+        CellCollectionFilterer f = new CellCollectionFilterer(options);
         
         
         for (IAnalysisDataset d : getDatasets()) {
         	try {
         		
         		// Get the filtered cells as a real collection
-        		ICellCollection filtered  = f.filter(d.getCollection(), options.getPredicate(d.getCollection()));
+        		ICellCollection filtered  = f.filter(d.getCollection());
         		
         		// Put them into a virtual collection
         		ICellCollection virt = new VirtualCellCollection(d, filtered.getName());
@@ -288,7 +286,6 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         		d.addChildCollection(virt);		
         	} catch (CollectionFilteringException | ProfileException e1) {
         		LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);
-        		continue;
         	}
         }
 

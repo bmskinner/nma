@@ -47,13 +47,15 @@ public class DefaultFilteringOptions extends AbstractHashOptions implements Filt
 	private final Map<Key, Double> minima = new HashMap<>();
 	private final Map<Key, Double> maxima = new HashMap<>();
 	
+	private static final String ALL_MATCH_KEY = "All_match";
+	
 	/**
 	 * Construct with default multiple matching rules:
 	 * all sub-components must pass their filter for a cell
 	 * to be included.
 	 */
 	public DefaultFilteringOptions() {
-		this(true);
+		this(FilterMatchType.ALL_MATCH);
 	}
 	
 	/**
@@ -63,9 +65,16 @@ public class DefaultFilteringOptions extends AbstractHashOptions implements Filt
 	 * to pass, or should any signals pass the filter for the cell to pass? 
 	 * @param allMatch should all cell components pass the filter?
 	 */
-	public DefaultFilteringOptions(boolean allMatch) {
-		setBoolean(ALL_MATCH_KEY, allMatch);
+	public DefaultFilteringOptions(FilterMatchType matchType) {
+		setMatchState(matchType);
 	}
+	
+
+	@Override
+	public void setMatchState(FilterMatchType type) {
+		setBoolean(ALL_MATCH_KEY, type.equals(FilterMatchType.ALL_MATCH));
+	}
+	
 
 	@Override
 	public void addMinimumThreshold(@NonNull PlottableStatistic stat, @NonNull String component, double value) {
@@ -273,5 +282,4 @@ public class DefaultFilteringOptions extends AbstractHashOptions implements Filt
 		}
 
 	}
-
 }
