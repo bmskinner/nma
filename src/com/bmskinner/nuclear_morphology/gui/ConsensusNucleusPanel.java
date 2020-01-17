@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Refoldable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -434,8 +435,23 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         
         try {
         	File exportFile = getInputSupplier().requestFileSave(defaultFolder, defaultFileName, Io.SVG_FILE_EXTENSION_NODOT);
+        	
+        	// If the file exists, confirm before overwriting
+        	if(exportFile.exists()) {
+        		if(!getInputSupplier().requestApproval("Overwrite existing file?", "Confirm overwrite"))
+        			return;
+        	}
+        	
         	SVGWriter wr = new SVGWriter(exportFile);
-        	wr.exportConsensusOutlines(getDatasets()); 
+        	
+        	
+        	String[] scaleChoices = new String[] {MeasurementScale.MICRONS.toString() ,
+        			MeasurementScale.PIXELS.toString()};
+        	
+        	int scaleChoice = getInputSupplier().requestOption(scaleChoices,"Choose scale");
+        	
+        	MeasurementScale scale = scaleChoice==0 ?MeasurementScale.MICRONS : MeasurementScale.PIXELS;
+        	wr.exportConsensusOutlines(getDatasets(), scale); 
 		} catch (RequestCancelledException e) {}
     }
 
