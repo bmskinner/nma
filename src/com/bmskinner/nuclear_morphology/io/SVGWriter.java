@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Shape;
@@ -34,7 +35,7 @@ import org.jfree.graphics2d.svg.SVGGraphics2D;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -51,7 +52,7 @@ public class SVGWriter implements Exporter{
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private File file;
-
+    
     /**
      * Create with a destination file
      * 
@@ -67,34 +68,48 @@ public class SVGWriter implements Exporter{
      * 
      * @param datasets the datasets to export
      */
-    public void exportConsensusOutlines(@NonNull List<IAnalysisDataset> datasets) {
+    public void exportConsensusOutlines(@NonNull List<IAnalysisDataset> datasets, MeasurementScale scale) {
         List<Nucleus> consensi = datasets.stream()
                 .map(d -> d.getCollection().getConsensus())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
                 
-        double w = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
-        double h = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);
+        double w = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getWidth()*2).sum();
+        double h = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getHeight()).max().orElse(100);
+               
+       
+        // A buffer scaled to the size of the nuclei
+        double buffer = h/10;
+        w += buffer*(consensi.size()+1)*2;
+        h += buffer*2;
         
-        w += Imageable.COMPONENT_BUFFER*(consensi.size()+1);
-        h += Imageable.COMPONENT_BUFFER*2;
+        // A font cannot be less than 1
+        int fontSize = (int)(h/20);
+        fontSize = Math.max(fontSize, 1);
+        
+        
+        float strokeWidth = (float) h/100;
         SVGGraphics2D g2 = new SVGGraphics2D((int) w, (int) h);
         
-        double x = Imageable.COMPONENT_BUFFER;
+        double x = buffer;
 
         for(IAnalysisDataset d : datasets){
             if(!d.getCollection().hasConsensus()){
                 continue;
             }
             CellularComponent c = d.getCollection().getConsensus();
-            Shape s = c.toShape();
+            Shape s = c.toShape(scale);
 
             Rectangle2D r = s.getBounds();
 
-            export(s, g2, x, Imageable.COMPONENT_BUFFER+10d);
-            export(d.getName(), g2, (float) x, Imageable.COMPONENT_BUFFER);
-            export(String.valueOf(d.getCollection().size()), g2, (float)x, (float)(Imageable.COMPONENT_BUFFER+(r.getHeight()/2)));
-            x+=r.getWidth()+Imageable.COMPONENT_BUFFER;
+            export(s, g2, x, buffer*2, strokeWidth);
+            export(d.getName(), g2, (float) x, (float)buffer, fontSize);
+            export(String.valueOf(d.getCollection().size()), 
+            		g2, 
+            		(float)x, 
+            		(float)(buffer+(r.getHeight()/2)), 
+            		fontSize);
+            x+=(r.getWidth()*2)+buffer;
         }
 
         write(g2);
@@ -127,7 +142,7 @@ public class SVGWriter implements Exporter{
             }
             double minY = r.getMinY();
             
-    		export(s, g2, x, minY);
+    		export(s, g2, x, minY, 1);
     		x+=r.getWidth();
     	}
 
@@ -149,7 +164,7 @@ public class SVGWriter implements Exporter{
     	SVGGraphics2D g2 = new SVGGraphics2D((int) r.getWidth(), (int) r.getHeight());
     	double minX = -r.getMinX();
     	double minY = r.getMinY();
-    	export(s, g2, minX, minY);
+    	export(s, g2, minX, minY, 1);
     	write(g2);
     }
     
@@ -161,7 +176,7 @@ public class SVGWriter implements Exporter{
      * @param x the x coordinate in the graphics context
      * @param y the y coordinate in the graphics context
      */
-    private void export(@NonNull final Shape s, @NonNull final SVGGraphics2D g, double x, double y) {
+    private void export(@NonNull final Shape s, @NonNull final SVGGraphics2D g, double x, double y, float strokeSize) {
         
         SVGGraphics2D g2 = (SVGGraphics2D) g.create();
         
@@ -181,6 +196,7 @@ public class SVGWriter implements Exporter{
         // Draw the shape
         g2.setPaint(Color.BLACK);
         g2.setTransform(at);
+        g2.setStroke(new BasicStroke(strokeSize));
         g2.draw(newS);
         g2.dispose();
     }
@@ -193,11 +209,11 @@ public class SVGWriter implements Exporter{
      * @param x the x coordinate in the graphics context
      * @param y the y coordinate in the graphics context
      */
-    private void export(final String s, final SVGGraphics2D g, float x, float y){
+    private void export(final String s, final SVGGraphics2D g, float x, float y, int fontSize){
         SVGGraphics2D g2 = (SVGGraphics2D) g.create();
 
         if(s !=null){
-            g2.setFont(new Font("Arial", Font.PLAIN, 10)); 
+            g2.setFont(new Font("Arial", Font.PLAIN, fontSize));
             g2.setPaint(Color.BLACK);
             g2.drawString(s, x, y);
         }
