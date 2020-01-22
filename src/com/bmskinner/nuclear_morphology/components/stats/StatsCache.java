@@ -95,9 +95,9 @@ public class StatsCache {
 
     }
 
-    private Map<Key, Double>   cache  = new HashMap<Key, Double>();   // median
+    private Map<Key, Double>   cache  = new HashMap<>();   // median
                                                                       // values
-    private Map<Key, double[]> values = new HashMap<Key, double[]>(); // individual
+    private Map<Key, double[]> values = new HashMap<>(); // individual
                                                                       // component
                                                                       // values
 
@@ -137,10 +137,8 @@ public class StatsCache {
         if (this.hasMedian(stat, component, scale, id)) {
             Key key = new Key(stat, component, scale, id);
             return cache.get(key);
-        } else {
-            return 0;
         }
-
+        return 0;
     }
 
     /**
@@ -204,10 +202,8 @@ public class StatsCache {
         if (this.hasValues(stat, component, scale, id)) {
             Key key = new Key(stat, component, scale, id);
             return values.get(key);
-        } else {
-            return new double[0];
         }
-
+        return new double[0];
     }
 
     public boolean hasMedian(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {

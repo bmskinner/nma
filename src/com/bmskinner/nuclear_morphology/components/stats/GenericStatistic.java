@@ -32,7 +32,7 @@ public class GenericStatistic implements PlottableStatistic {
     private final StatisticDimension dim;
 
     public GenericStatistic(String s, StatisticDimension d) {
-        name = s;
+        name = s.intern();
         dim = d;
     }
     
@@ -60,15 +60,12 @@ public class GenericStatistic implements PlottableStatistic {
     public String label(MeasurementScale scale) {
 
         StringBuilder b = new StringBuilder(name);
-
-        switch (dim) {
-        case DIMENSIONLESS:
-            break;
-        default:
-            b.append(" (").append(units(scale)).append(")");
-            break;
-        }
-
+        
+        if(!dim.equals(StatisticDimension.DIMENSIONLESS))
+        	b.append(" (")
+        	.append(units(scale))
+        	.append(")");
+        
         return b.toString();
     }
 
