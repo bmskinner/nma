@@ -58,9 +58,11 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 
 	@Override
 	public IAnalysisResult call() throws Exception {
+		
+		CellCollectionFilterer filterer = new CellCollectionFilterer(options);
 
 		for(IAnalysisDataset d : datasets) {
-			ICellCollection filtered = d.getCollection().filter(options.getPredicate(d.getCollection()));
+			ICellCollection filtered = filterer.filter(d.getCollection());
 			if(filtered==null)
 				continue;
 			if (!filtered.hasCells())

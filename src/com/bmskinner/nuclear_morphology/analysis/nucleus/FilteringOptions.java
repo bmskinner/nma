@@ -34,12 +34,22 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public interface FilteringOptions {
+		
+	public enum FilterMatchType {
+		ALL_MATCH,
+		ANY_MATCH
+	}
 	
-	/** Should a cell be passed only if all statistics of a type pass filters,
-	 * or if any statistics of a type pass filters? For example, if a nuclear signal
+	
+	/**
+	 * Set the match state. Should a cell be passed only if all statistics of a type pass filters,
+	 * (ALL_MATCH) or if any statistics of a type pass filters (ANY_MATCH)? 
+	 * For example, if a nuclear signal
 	 * filter is set, must all signals meet the criteria, or do we want the cell even if
-	 * it has signals that don't match? */
-	String ALL_MATCH_KEY = "All_match";
+	 * it has signals that don't match
+	 * @param type the match type
+	 */
+	void setMatchState(FilterMatchType type);
 	
 	/**
 	 * Add a minimum value for the given statistic. The measurement scale is assumed to be pixels.

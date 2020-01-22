@@ -16,113 +16,82 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * A filterer that filters cell collections on measured values
+ * Filters cell collections on measured values
  * 
  * @author bms41
  * @since 1.13.5
  *
  */
-public class CellCollectionFilterer extends Filterer<ICellCollection, ICell> {
+public class CellCollectionFilterer {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-    @Override
-    public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta)
-            throws CollectionFilteringException {
+	private final FilteringOptions options;
+		
+	/**
+	 * Create with options describing what filters to apply
+	 * @param options
+	 */
+	public CellCollectionFilterer(FilteringOptions options) {
+		this.options = options;
+	}
+		
+	/**
+	 * Filter the collection using the internal filtering options
+	 * @param collection the collection to filter
+	 * @return the filtered collection
+	 * @throws CollectionFilteringException
+	 */
+	public ICellCollection filter(ICellCollection collection)
+			throws CollectionFilteringException {
+		
+		ICellCollection filtered = collection.filter(options.getPredicate(collection));
 
-        List<PlottableStatistic> stats = new ArrayList<>();
-        stats.add(PlottableStatistic.AREA);
-        stats.add(PlottableStatistic.PERIMETER);
-        stats.add(PlottableStatistic.PATH_LENGTH);
-        stats.add(PlottableStatistic.MAX_FERET);
+        if (filtered == null || !filtered.hasCells())
+            throw new CollectionFilteringException("No collection returned");
+        try {
+            collection.getProfileManager().copyCollectionOffsets(filtered);
+            collection.getSignalManager().copySignalGroups(filtered);
 
-        // Make the predicate for the stats
-        // Fails if outside the given range
-        Predicate<ICell> pred = (t) -> {
-        	for (Nucleus n : t.getNuclei()) {
-        		for (PlottableStatistic stat : stats) {
-        			double med;
-        			try {
-        				med = collection.getMedian(stat, CellularComponent.NUCLEUS,
-        						MeasurementScale.PIXELS);
-        			} catch (Exception e) {
-        				LOGGER.log(Loggable.STACK, "Cannot get median stat", e);
-        				return false;
-        			}
-        			double max = med * delta;
-        			double min = med / delta;
-
-        			double value = n.getStatistic(stat);
-
-        			if (value > max || value < min)
-        				return false;
-        		}
-        	}
-        	return true;
-        };
-
-        // Test each cell for the predicate
-        Iterator<ICell> it = collection.getCells().iterator();
-        while (it.hasNext()) {
-            ICell c = it.next();
-            if (!pred.test(c)) {
-                if (failCollection != null)
-                    failCollection.addCell(new DefaultCell(c));
-                it.remove();
-            }
+        } catch (ProfileException e) {
+            LOGGER.warning("Error copying collection offsets");
+            LOGGER.log(Loggable.STACK, "Error in offsetting", e);
         }
-        LOGGER.fine("Remaining: " + collection.size() + " nuclei");
-    }
+        return filtered;
+	}
+	
+    /**
+     * Thrown when a cell collection cannot be filtered
+     * 
+     * @author bms41
+     * @since 1.13.3
+     *
+     */
+    public static class CollectionFilteringException extends Exception {
+        private static final long serialVersionUID = 1L;
 
-    @Override
-    public ICellCollection filter(ICellCollection collection, Predicate<ICell> pred) throws CollectionFilteringException {
-    	 ICellCollection filtered = collection.filter(pred);
+        public CollectionFilteringException() {
+            super();
+        }
 
-         if (filtered == null || !filtered.hasCells())
-             throw new CollectionFilteringException("No collection returned");
-         try {
-             collection.getProfileManager().copyCollectionOffsets(filtered);
-             collection.getSignalManager().copySignalGroups(filtered);
+        public CollectionFilteringException(String message) {
+            super(message);
+        }
 
-         } catch (ProfileException e) {
-             LOGGER.warning("Error copying collection offsets");
-             LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-         }
-         return filtered;
-    }
+        public CollectionFilteringException(String message, Throwable cause) {
+            super(message, cause);
+        }
 
-    @Override
-    public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
-            throws CollectionFilteringException {
-    	return filter(collection, CellularComponent.NUCLEUS, stat, lower, upper, scale);
-    }
-    
-    @Override
-    public ICellCollection filter(ICellCollection collection, String component, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
-            throws CollectionFilteringException {
-    	
-    	FilteringOptions op = new DefaultFilteringOptions();
-    	op.addMinimumThreshold(stat, component, scale, lower);
-    	op.addMaximumThreshold(stat, component, scale, upper);
-    	
-    	Predicate<ICell> pred = op.getPredicate(collection);         
-        return filter(collection, pred);
+        public CollectionFilteringException(Throwable cause) {
+            super(cause);
+        }
+
     }
 }
