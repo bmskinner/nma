@@ -60,6 +60,9 @@ public class GlobalOptions extends AbstractHashOptions {
     
     /** The number of threads that should be used by ImageJ's image filtering methods */
     public static final String NUM_IMAGEJ_THREADS_KEY    = "NUM_IMAGEJ_THREADS";
+    
+    /** The default format to save NMD files. Specified in @{link ExportFormat} */
+    public static final String DEFAULT_EXPORT_FORMAT_KEY = "DEFAULT_EXPORT_FORMAT";
 
     private File defaultDir; // where to fall back to for finding images or
                              // saving files
