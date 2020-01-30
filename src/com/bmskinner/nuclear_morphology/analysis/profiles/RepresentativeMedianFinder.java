@@ -68,19 +68,24 @@ public class RepresentativeMedianFinder {
 	 */
 	public IProfile findMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
     	LOGGER.fine("Beginning median finding");
+    	
+    	// Get normalised pairwise differences between nuclei profiles
 		float[][] differences  = buildDifferenceMatrix();
 		float[][] similarities = buildSimilarityMatrix(differences);
         
-        // Calculate the median of each column
+        // Calculate the standard deviation of each column
         float[] deviations = calculateDistanceColumnDeviation(differences);
         
-        // The column with the lowest median has the largest number of similar nuclei
+        // The column with the lowest stdev has the largest number of similar nuclei
         int index = findIndexOfLowestValue(deviations);
         
         // Get this best profile
         ISegmentedProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        
+        // Find the other nuclei in the collection that are similar to this one
         List<IProfile> profiles = findBestProfiles(bestProfile);
 
+        // Construct the representative median from the selected subset of similar nuclei
         return buildMedianFromProfiles(profiles, collection.getMedianArrayLength());
 	}
 	
@@ -190,8 +195,8 @@ public class RepresentativeMedianFinder {
 	}
 	
 	/**
-	 * Create a matrix containing the pairwise differences between nuclear profiles
-	 * @return
+	 * Create a matrix containing the pairwise differences between nuclear profiles.
+	 * @return a matrix in which each nucleus profile is compared to every other nucleus profile
 	 * @throws UnavailableBorderTagException
 	 * @throws UnavailableProfileTypeException
 	 * @throws ProfileException
@@ -208,6 +213,19 @@ public class RepresentativeMedianFinder {
 		return matrix;
 	}
 	
+	/**
+	 * Calculate the similarity between the first nucleus of a set and every other nucleus. A normalised
+	 * form of the input matrix.
+	 * 
+	 * Input [0, 4, 5] becomes: [0, 0, 0]
+	 * 		 [4, 0, 3]          [-4, 4, 2]
+	 *       [5, 3, 0]          [-5, 1, 5]
+	 * @param matrix the matrix of pairwise differences between nuclear profiles
+	 * @return a matrix showing the pairwise differences normalised to each nucleus in turn 
+	 * @throws UnavailableBorderTagException
+	 * @throws UnavailableProfileTypeException
+	 * @throws ProfileException
+	 */
 	private float[][] buildSimilarityMatrix(float[][] matrix) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
 		float[][] dist = new float[matrix[0].length][matrix[0].length];
 		for(int i=0; i<matrix[0].length; i++) {
