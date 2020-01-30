@@ -143,10 +143,10 @@ public class IterativeSegmentFitter {
     	// Lock the segment
 
         // The start index for the segment is fixed
-        int startIndex = segmentsSoFar.size()>0 ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex():0;
+        int startIndex = !segmentsSoFar.isEmpty() ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex():0;
         
         // the lowest index that can be applied to the end of this segment
-        int minEnd = segmentsSoFar.size()>0 ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex() + IBorderSegment.MINIMUM_SEGMENT_LENGTH :IBorderSegment.MINIMUM_SEGMENT_LENGTH;
+        int minEnd = !segmentsSoFar.isEmpty() ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex() + IBorderSegment.MINIMUM_SEGMENT_LENGTH :IBorderSegment.MINIMUM_SEGMENT_LENGTH;
 
         // the maximum index that can be applied allowing all remaining segments to be added
         int segsRemaining = templateProfile.getSegmentCount()-templateSegment.getPosition();

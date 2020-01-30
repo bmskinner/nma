@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -117,7 +117,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     		// ensure the new file name is valid
     		newDatasetFile = checkName(newDatasetFile);
 
-    		String newDatasetName = newDatasetFile.getName().replace(Importer.SAVE_FILE_EXTENSION, "");
+    		String newDatasetName = newDatasetFile.getName().replace(Io.SAVE_FILE_EXTENSION, "");
     		LOGGER.fine("Checked new file names");
 
     		// make a new collection
@@ -196,7 +196,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
             // All the existing signal groups before merging
             for (UUID signalGroupID : d.getCollection().getSignalGroupIDs()) {
                 newCollection.addSignalGroup(signalGroupID,
-                        new SignalGroup(d.getCollection().getSignalGroup(signalGroupID).get(), COPY_WARPED));
+                        new SignalGroup(d.getCollection().getSignalGroup(signalGroupID).orElseThrow(), COPY_WARPED));
             }
         }
         
@@ -242,12 +242,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	IDetectionOptions nucleus = OptionsFactory.makeNucleusDetectionOptions((File)null);
 
     	IAnalysisDataset d1 = datasets.get(0);
-    	IAnalysisOptions d1Options = d1.getAnalysisOptions().get();
+    	IAnalysisOptions d1Options = d1.getAnalysisOptions().orElseThrow();
 		
 		List<IDetectionOptions> templates = new ArrayList<>();
 		for (IAnalysisDataset d : datasets) {
-			IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-			templates.add(dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get());
+			IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow();
+			templates.add(dOptions.getNuclusDetectionOptions().orElseThrow());
 		}
 		mergeDetectionOptions(nucleus, templates);
 
@@ -267,14 +267,38 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	return mergedOptions;
     }
     
+    /**
+     * Merge the detection options from the given templates, and put the merged result in the given
+     * target. If values cannot be merged sensibly (e.g. multiple different float values), then they will be
+     * set to: float and double:NaN; int: MAX_VALUE; String: NA_MERGE.
+     * @param merged
+     * @param templates
+     * @throws MissingOptionException
+     */
     private void mergeDetectionOptions(IDetectionOptions merged, List<IDetectionOptions> templates) throws MissingOptionException {
+    	
+    	// Get a base template to compare the others to
     	IDetectionOptions t1 = templates.get(0);
-    	for(String s : t1.getFloatKeys()){
-			float result = t1.getFloat(s);
+    	
+    	mergeFloatOptions(merged, t1);
+    	
+    	mergeDoubleOptions(merged, t1);
+    	
+    	mergeIntOptions(merged, t1);
+
+    	mergeStringOptions(merged, t1);
+		
+    	mergeSubOptions(merged, t1);
+    	
+    }
+    
+    private void mergeFloatOptions(IDetectionOptions merged, IDetectionOptions template) {
+    	for(String s : template.getFloatKeys()){
+			float result = template.getFloat(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
-				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
+				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow();
+				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow();
 				canAdd &= nOptions.getFloat(s)==result;
 			}
 			if(canAdd)
@@ -282,13 +306,16 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			else
 				merged.setFloat(s, Float.NaN);
 		}
-    	
-    	for(String s : t1.getDoubleKeys()){
-			double result = t1.getDouble(s);
+    }
+    
+    
+    private void mergeDoubleOptions(IDetectionOptions merged, IDetectionOptions template) {
+    	for(String s : template.getDoubleKeys()){
+			double result = template.getDouble(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
-				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
+				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow();
+				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow();
 				canAdd &= nOptions.getDouble(s)==result;
 			}
 			if(canAdd)
@@ -296,13 +323,15 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			else
 				merged.setDouble(s, Double.NaN);
 		}
-		
-		for(String s : t1.getIntegerKeys()){
-			int result = t1.getInt(s);
+    }
+    
+    private void mergeIntOptions(IDetectionOptions merged, IDetectionOptions template) {
+    	for(String s : template.getIntegerKeys()){
+			int result = template.getInt(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
-				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
+				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow();
+				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow();
 				canAdd &= nOptions.getInt(s)==result;
 			}
 			if(canAdd)
@@ -310,13 +339,15 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			else
 				merged.setInt(s, Integer.MAX_VALUE);
 		}
-		
-		for(String s : t1.getStringKeys()){
-			String result = t1.getString(s);
+    }
+    
+    private void mergeStringOptions(IDetectionOptions merged, IDetectionOptions template) {
+    	for(String s : template.getStringKeys()){
+			String result = template.getString(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
-				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
+				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow();
+				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow();
 				canAdd &= nOptions.getString(s).equals(result);
 			}
 			if(canAdd)
@@ -324,13 +355,15 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			else
 				merged.setString(s, Labels.NA_MERGE);
 		}
-		
-		for(String s : t1.getSubOptionKeys()){
-			IDetectionSubOptions mergedOptions = t1.getSubOptions(s);
+    }
+    
+    private void mergeSubOptions(IDetectionOptions merged, IDetectionOptions template) throws MissingOptionException {
+    	for(String s : template.getSubOptionKeys()){
+			IDetectionSubOptions mergedOptions = template.getSubOptions(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
-				IAnalysisOptions dOptions = d.getAnalysisOptions().get();
-				IDetectionOptions nOptions = dOptions.getDetectionOptions(CellularComponent.NUCLEUS).get();
+				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow();
+				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow();
 				if(nOptions.hasSubOptions(s))
 					canAdd &= nOptions.getSubOptions(s).equals(mergedOptions);
 				else
@@ -339,10 +372,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			if(canAdd)
 				merged.setSubOptions(s, mergedOptions);
 		}
-    	
     }
-    
-    
 
     /**
      * Merge any signal groups in the new collection, as described by the 
@@ -404,12 +434,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      */
     private File checkName(File name) {
         String fileName = name.getName();
-        String datasetName = fileName.replace(Importer.SAVE_FILE_EXTENSION, "");
+        String datasetName = fileName.replace(Io.SAVE_FILE_EXTENSION, "");
 
-        File newFile = new File(name.getParentFile(), datasetName + Importer.SAVE_FILE_EXTENSION);
+        File newFile = new File(name.getParentFile(), datasetName + Io.SAVE_FILE_EXTENSION);
         if (name.exists()) {
             datasetName += "_1";
-            newFile = new File(name.getParentFile(), datasetName + Importer.SAVE_FILE_EXTENSION);
+            newFile = new File(name.getParentFile(), datasetName + Io.SAVE_FILE_EXTENSION);
             newFile = checkName(newFile);
         }
         return newFile;

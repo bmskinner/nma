@@ -133,6 +133,9 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
                 Thread.sleep(millisToSleep);
             } catch (InterruptedException e) {
                 LOGGER.log(Loggable.STACK, "Thread interrupted", e);
+                Thread.currentThread().interrupt();
+                
+                // End loop early
                 return;
             }
         }

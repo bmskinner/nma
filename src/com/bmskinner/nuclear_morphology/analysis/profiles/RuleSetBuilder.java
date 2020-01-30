@@ -36,8 +36,8 @@ public class RuleSetBuilder {
 	
 	private static final Logger LOGGER = Logger.getLogger(RuleSetBuilder.class.getName());
 
-    List<Rule>  rules;
-    ProfileType type;
+	private List<Rule>  rules;
+	private ProfileType type;
 
     /**
      * Construct a builder for the given profile type
@@ -45,7 +45,7 @@ public class RuleSetBuilder {
      * @param type
      */
     public RuleSetBuilder(final ProfileType type) {
-        rules = new ArrayList<Rule>();
+        rules = new ArrayList<>();
         this.type = type;
     }
 
@@ -182,7 +182,7 @@ public class RuleSetBuilder {
      * @return
      */
     public RuleSetBuilder isNotLocalMaximum(double window) {
-        Rule r = new Rule(RuleType.IS_LOCAL_MINIMUM, false);
+        Rule r = new Rule(RuleType.IS_LOCAL_MAXIMUM, false);
         r.addValue(window);
         rules.add(r);
         return this;

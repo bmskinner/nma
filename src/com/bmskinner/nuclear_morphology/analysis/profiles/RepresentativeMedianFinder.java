@@ -54,6 +54,10 @@ public class RepresentativeMedianFinder {
 	private final ICellCollection collection;
 	private final List<Nucleus> nuclei;
 	
+	/**
+	 * Construct from the nuclei in the given collection.
+	 * @param c
+	 */
 	public RepresentativeMedianFinder(@NonNull ICellCollection c) {
 		collection = c;
 		nuclei = new ArrayList<>(collection.getNuclei());

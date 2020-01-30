@@ -44,7 +44,7 @@ public class ProfileOffsetter {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    final private ICellCollection collection;
+    private final ICellCollection collection;
 
     public ProfileOffsetter(@NonNull final ICellCollection collection) {
 
@@ -91,8 +91,6 @@ public class ProfileOffsetter {
         /* Go through each nucleus and apply the position  */
         for (Nucleus nucleus : collection.getNuclei()) {
         	try {
-        		
-//        		int oldNIndex = nucleus.getBorderIndex(tag);
 
                 IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE).getSegment(segID);
 

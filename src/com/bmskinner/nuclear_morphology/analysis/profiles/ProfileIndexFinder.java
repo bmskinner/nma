@@ -508,15 +508,8 @@ public class ProfileIndexFinder {
                 }
             } else {
                 if (b.get(i)) {
-
-                    if (foundFirst) {
-                        result.set(i, true);
-                    } else {
-                        result.set(i, false);
-                    }
-
+                	result.set(i, foundFirst);
                     foundFirst = true;
-
                 }
 
             }
@@ -527,12 +520,9 @@ public class ProfileIndexFinder {
     /**
      * Find the last true value in a BooleanProfile
      * 
-     * @param b
-     *            the limits to test within
-     * @param v
-     *            find the last true value [true], or true values that are not
+     * @param b the limits to test within
+     * @param v find the last true value [true], or true values that are not
      *            the last true value [false]
-     * @param p
      * @return
      */
     private BooleanProfile findLastTrue(final BooleanProfile b, boolean v) {

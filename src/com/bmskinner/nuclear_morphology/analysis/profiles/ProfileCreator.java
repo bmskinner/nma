@@ -74,7 +74,7 @@ public class ProfileCreator {
 	            case FRANKEN:      LOGGER.finest( "Frankenprofile");
 	            default:           return calculateAngleProfile();
             }
-        } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
+        } catch (UnavailableBorderPointException e) {
             throw new ProfileException("Cannot create profile " + type, e);
         } catch(Exception e) {
         	throw new ProfileException("Unexpected exception creating profile " + type+" due to "+e.getMessage(), e);
@@ -184,8 +184,7 @@ public class ProfileCreator {
      * @throws UnavailableBorderPointException
      * @throws UnavailableBorderTagException
      */
-    private ISegmentedProfile calculateZahnRoskiesProfile()
-            throws UnavailableBorderPointException, UnavailableBorderTagException {
+    private ISegmentedProfile calculateZahnRoskiesProfile() {
 
         float[] profile = new float[target.getBorderLength()];
         int index = 0;
@@ -272,7 +271,7 @@ public class ProfileCreator {
         return newProfile;
     }
 
-    private ISegmentedProfile calculateRadiusProfile() throws UnavailableBorderPointException {
+    private ISegmentedProfile calculateRadiusProfile() {
 
         float[] profile = new float[target.getBorderLength()];
 
@@ -293,7 +292,6 @@ public class ProfileCreator {
         	newProfile = new SegmentedFloatProfile(profile);
         }
         return newProfile;
-//        return new SegmentedFloatProfile(profile);
     }
 
     /**
@@ -314,20 +312,14 @@ public class ProfileCreator {
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
         }
 
-        // LOGGER.finer( "Iterating border");
         while (it.hasNext()) {
-            // LOGGER.finest( "Getting points");
 
             IBorderPoint point = it.next();
 
             IBorderPoint pointBefore = point.prevPoint(pointOffset);
-
-            // IBorderPoint pointAfter = point.nextPoint(pointOffset);
-
             double distance = point.getLengthTo(pointBefore);
 
             profile[index] = (float) distance;
-
             index++;
         }
 
@@ -339,12 +331,6 @@ public class ProfileCreator {
         	newProfile = new SegmentedFloatProfile(profile);
         }
         return newProfile;
-        // LOGGER.finer( "Making new profile");
-        // Make a new profile. This will have two segments by default
-        //        ISegmentedProfile newProfile = new SegmentedFloatProfile(profile);
-
-        //        return newProfile;
-
     }
 
 }

@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,8 +55,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     @Override
     public IAnalysisResult call() throws Exception {
         List<IAnalysisDataset> extracted = extractSourceDatasets();
-        IAnalysisResult r = new DefaultAnalysisResult(extracted);
-        return r;
+        return new DefaultAnalysisResult(extracted);
     }
     
     private List<IAnalysisDataset> extractSourceDatasets(){
@@ -80,11 +80,19 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
         return result;
     }
     
-    private IAnalysisDataset extractMergeSource(IAnalysisDataset template) {
+    /**
+     * Extract the merge source for the given dataset into a real collection
+     * @param template
+     * @return
+     * @throws NoSuchElementException if the template analysis options are not present
+     */
+    private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template) {
 
     	ICellCollection templateCollection = template.getCollection();
+    	
     	// Make a new real cell collection from the virtual collection
-    	ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), null,
+    	File imageFolder = template.getAnalysisOptions().orElseThrow().getNuclusDetectionOptions().orElseThrow().getFolder();
+    	ICellCollection newCollection = new DefaultCellCollection(imageFolder, null,
     			templateCollection.getName(), templateCollection.getNucleusType());
 
     	templateCollection.getCells().forEach(c->newCollection.addCell(c.duplicate()));
@@ -109,7 +117,6 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     		copySignalGroups(templateCollection, newDataset);
 
     		// Child datasets are not present in merge sources
-//    		copyChildDatasets(template, newDataset);
 
     	} catch (ProfileException e) {
     		LOGGER.log(Loggable.STACK, "Cannot copy profile offsets to recovered merge source", e);
@@ -122,7 +129,12 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
          return newDataset;
     }
     
-    private IAnalysisDataset getRootParent(IAnalysisDataset dataset) {
+    /**
+     * Get the root parent of the dataset. IF the dataset is root, returns unchanged.
+     * @param dataset the dataset to get the root parent of
+     * @return the root parent of the dataset
+     */
+    private @NonNull IAnalysisDataset getRootParent(@NonNull IAnalysisDataset dataset) {
     	if(dataset.isRoot())
     		return dataset;
     	if (dataset instanceof MergeSourceAnalysisDataset) {
@@ -133,33 +145,15 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
      			return parent;
      		return getRootParent(parent);
      	}
-    	return null;
+    	return dataset;
     }
     
-    
-//    private void copyChildDatasets(IAnalysisDataset template, IAnalysisDataset newDataset) throws ProfileException{
-//    	 LOGGER.fine("Adding children of "+template.getName());
-//    	for(IAnalysisDataset childTemplate : template.getChildDatasets()) {
-//    		LOGGER.fine("Adding child "+childTemplate.getName());
-//    		ICellCollection templateCollection = childTemplate.getCollection();
-//    		
-//            // Make a new real cell collection from the virtual collection
-//            ICellCollection newCollection = new VirtualCellCollection(newDataset, templateCollection.getName());
-//            
-//            templateCollection.getCells().forEach(c->newCollection.addCell(c));
-//
-//            IAnalysisDataset newChildDataset = new ChildAnalysisDataset(newDataset, newCollection);
-//            newDataset.addChildDataset(newChildDataset);
-//            newChildDataset.getCollection().createProfileCollection();
-//            
-//            // Recursive copy
-//            copyChildDatasets(childTemplate, newChildDataset);
-//    		
-//    	}
-//    	
-//    	
-//    }
-    
+    /**
+     * Copy any signal groups in the template collection into the new dataset.
+     * @param templateCollection the collection to copy signal groups from
+     * @param newDataset the dataset to copy the signal groups to
+     * @throws NoSuchElementException if a template signal group is not present
+     */
     private void copySignalGroups(ICellCollection templateCollection, IAnalysisDataset newDataset){
         ICellCollection newCollection = newDataset.getCollection();
         for (UUID signalGroupId : templateCollection.getSignalGroupIDs()) {
@@ -173,7 +167,8 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 			}
 
 			if (addSignalGroup) {
-				ISignalGroup newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId).get(), false);
+				ISignalGroup oldGroup = templateCollection.getSignalGroup(signalGroupId).orElseThrow();
+				ISignalGroup newGroup = new SignalGroup(oldGroup, false);
 			    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
 			}
         }
