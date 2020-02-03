@@ -29,6 +29,11 @@ import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDeta
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 
+/**
+ * Tab pane; holding panels to edit datasets
+ * @author Ben Skinner
+ *
+ */
 @SuppressWarnings("serial")
 public class EditingDetailPanel extends DetailPanel {
 	

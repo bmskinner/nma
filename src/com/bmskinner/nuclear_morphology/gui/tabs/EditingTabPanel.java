@@ -31,6 +31,12 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
  */
 public interface EditingTabPanel extends TabPanel {
 
+    /**
+     * Check the lock state of all cells in the dataset being
+     * edited. If a lock has been set, get confirmation from the 
+     * user whether cells should be unlocked for editing, or kept
+     * locked and protected from impending changes.
+     */
     void checkCellLock();
 
     /**

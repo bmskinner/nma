@@ -180,7 +180,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
         private JPanel main;
 
         private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
-        List<RulePanel>                 rules          = new ArrayList<RulePanel>();
+        
+        List<RulePanel> rules          = new ArrayList<>();
 
         public RuleSetPanel() {
 
@@ -246,10 +247,16 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
 
     public class RulePanel extends JPanel implements ActionListener {
 
-        private JComboBox<RuleType> typeBox = new JComboBox<RuleType>(RuleType.values());
+        private static final String SMOOTHING_WINDOW_SIZE_LBL = "Smoothing window size";
+
+		private static final String VALUE_LBL = "Value";
+
+		private static final String FRACTION_OF_PROFILE_LBL = "Fraction of profile 0-1";
+
+		private JComboBox<RuleType> typeBox = new JComboBox<>(RuleType.values());
 
         private final Dimension SPINNER_DIMENSION = new Dimension(80, 20);
-        private final Dimension PANEL_DIMENSION   = new Dimension(200, 30);
+        private final Dimension PANEL_DIMENSION = new Dimension(200, 30);
 
         private final Dimension PANEL_MAX_DIMENSION = new Dimension(600, 50);
         private final Dimension PANEL_MIN_DIMENSION = new Dimension(400, 50);
@@ -258,7 +265,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
 
         private RuleSetPanel parent;
 
-        List<JComponent> components = new ArrayList<JComponent>();
+        List<JComponent> components = new ArrayList<>();
 
         public RulePanel(RuleSetPanel parent) {
             this.parent = parent;
@@ -298,7 +305,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
             Rule result = null;
             try {
 
-                List<Double> values = new ArrayList<Double>();
+                List<Double> values = new ArrayList<>();
 
                 for (JComponent component : components) {
 
@@ -337,13 +344,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
             for (JComponent component : components) {
                 this.remove(component);
             }
-            components = new ArrayList<JComponent>();
+            components = new ArrayList<>();
 
-            // for(JSpinner spinner : spinners){
-            // this.remove(spinner);
-            // }
-
-            // spinners = new ArrayList<JSpinner>();
             RuleType type = (RuleType) typeBox.getSelectedItem();
 
             switch (type) {
@@ -351,32 +353,20 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
             case IS_MINIMUM: {
                 TrueFalsePanel p = new TrueFalsePanel();
                 components.add(p);
-                // JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 0,
-                // 1, 1));
-                // spinner.setToolTipText("1=True; 0=False");
-                // spinners.add( spinner );
                 break;
             }
 
             case IS_MAXIMUM: {
                 TrueFalsePanel p = new TrueFalsePanel();
                 components.add(p);
-                // JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 0,
-                // 1, 1));
-                // spinner.setToolTipText("1=True; 0=False");
-                // spinners.add( spinner );
                 break;
             }
 
             case IS_LOCAL_MINIMUM: {
                 TrueFalsePanel p = new TrueFalsePanel();
                 components.add(p);
-                // JSpinner spinner1 = new JSpinner(new SpinnerNumberModel(1, 0,
-                // 1, 1));
                 JSpinner spinner2 = new JSpinner(new SpinnerNumberModel(5, 1, 100, 1));
-                // spinner1.setToolTipText("1=True; 0=False");
-                spinner2.setToolTipText("Smoothing window size");
-                // spinners.add( spinner1 );
+                spinner2.setToolTipText(SMOOTHING_WINDOW_SIZE_LBL);
                 components.add(spinner2);
                 break;
             }
@@ -384,40 +374,36 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
             case IS_LOCAL_MAXIMUM: {
                 TrueFalsePanel p = new TrueFalsePanel();
                 components.add(p);
-                // JSpinner spinner1 = new JSpinner(new SpinnerNumberModel(1, 0,
-                // 1, 1));
                 JSpinner spinner2 = new JSpinner(new SpinnerNumberModel(5, 1, 100, 1));
-                // spinner1.setToolTipText("1=True; 0=False");
-                spinner2.setToolTipText("Smoothing window size");
-                // spinners.add( spinner1 );
+                spinner2.setToolTipText(SMOOTHING_WINDOW_SIZE_LBL);
                 components.add(spinner2);
                 break;
             }
 
             case VALUE_IS_LESS_THAN: {
                 JSpinner spinner = new JSpinner();
-                spinner.setToolTipText("Value");
+                spinner.setToolTipText(VALUE_LBL);
                 components.add(spinner);
                 break;
             }
 
             case VALUE_IS_MORE_THAN: {
                 JSpinner spinner = new JSpinner();
-                spinner.setToolTipText("Value");
+                spinner.setToolTipText(VALUE_LBL);
                 components.add(spinner);
                 break;
             }
 
             case INDEX_IS_LESS_THAN: {
                 JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.5, 0, 1, 0.01));
-                spinner.setToolTipText("Fraction of profile 0-1");
+                spinner.setToolTipText(FRACTION_OF_PROFILE_LBL);
                 components.add(spinner);
                 break;
             }
 
             case INDEX_IS_MORE_THAN: {
                 JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.5, 0, 1, 0.01));
-                spinner.setToolTipText("Fraction of profile 0-1");
+                spinner.setToolTipText(FRACTION_OF_PROFILE_LBL);
                 components.add(spinner);
                 break;
             }
@@ -427,7 +413,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
                 JSpinner spinner1 = new JSpinner();
                 JSpinner spinner2 = new JSpinner();
                 JSpinner spinner3 = new JSpinner();
-                spinner1.setToolTipText("Value");
+                spinner1.setToolTipText(VALUE_LBL);
                 spinner2.setToolTipText("Minimum length of region");
                 spinner3.setToolTipText("Maximum permitted difference from value");
                 components.add(spinner1);
@@ -450,14 +436,14 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
 
             case INDEX_IS_WITHIN_FRACTION_OF: {
                 JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.1, 0, 1, 0.01));
-                spinner.setToolTipText("Fraction of profile 0-1");
+                spinner.setToolTipText(FRACTION_OF_PROFILE_LBL);
                 components.add(spinner);
                 break;
             }
 
             case INDEX_IS_OUTSIDE_FRACTION_OF: {
                 JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.1, 0, 1, 0.01));
-                spinner.setToolTipText("Fraction of profile 0-1");
+                spinner.setToolTipText(FRACTION_OF_PROFILE_LBL);
                 components.add(spinner);
                 break;
             }
@@ -497,7 +483,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
             private JRadioButton falseButton = new JRadioButton("False");
             private ButtonGroup  group       = new ButtonGroup();
 
-            List<Object> listeners = new ArrayList<Object>();
+            List<Object> listeners = new ArrayList<>();
 
             public TrueFalsePanel() {
                 this.setLayout(new FlowLayout());

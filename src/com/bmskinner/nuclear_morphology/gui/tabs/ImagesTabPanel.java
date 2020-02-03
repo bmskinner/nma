@@ -40,6 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
+import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -53,6 +54,7 @@ import javax.swing.tree.TreePath;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
@@ -124,10 +126,10 @@ public class ImagesTabPanel extends DetailPanel {
 
         imagePanel = new JPanel(new BorderLayout());
         label = new JLabel();
-        label.setHorizontalAlignment(JLabel.CENTER);
-        label.setVerticalAlignment(JLabel.CENTER);
-        label.setHorizontalTextPosition(JLabel.CENTER);
-        label.setVerticalTextPosition(JLabel.CENTER);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setVerticalAlignment(SwingConstants.CENTER);
+        label.setHorizontalTextPosition(SwingConstants.CENTER);
+        label.setVerticalTextPosition(SwingConstants.CENTER);
         imagePanel.add(label, BorderLayout.CENTER);
         JPanel headerPanel = new JPanel();
         headerPanel.add(new JLabel(HEADER_LBL));
@@ -288,7 +290,7 @@ public class ImagesTabPanel extends DetailPanel {
     		InterfaceUpdater r = () -> {
     			try {
     				ImageProcessor ip = f.exists() ? new ImageImporter(f).importToColorProcessor()
-    						: ImageAnnotator.createWhiteColorProcessor(1500, 1500); //TODO - check space needed by cells
+    						: AbstractImageFilterer.createWhiteColorProcessor(1500, 1500); //TODO - check space needed by cells
     				
     				// If an 8bit image was read in, make it colour greyscale
     				ImageConverter cn = new ImageConverter(ip);
@@ -310,7 +312,6 @@ public class ImagesTabPanel extends DetailPanel {
     		};
 
     		ThreadManager.getInstance().submit(r);
-
     	};
     }
 

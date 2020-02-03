@@ -33,7 +33,7 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
@@ -61,7 +61,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
     private static final String STR_SHOW_RULESETS = "Rulesets";
 
-    private BorderTagDualChartPanel dualPanel;
+    private transient BorderTagDualChartPanel dualPanel;
 
     public BorderTagEditingPanel(@NonNull InputSupplier context) {
 
@@ -169,22 +169,22 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
     @Override
     protected synchronized void updateMultiple() {
-        JFreeChart mainChart = ProfileChartFactory.createMultipleDatasetEmptyChart();
-        JFreeChart rangeChart = ProfileChartFactory.createMultipleDatasetEmptyChart();
+        JFreeChart mainChart = AbstractChartFactory.createMultipleDatasetEmptyChart();
+        JFreeChart rangeChart = AbstractChartFactory.createMultipleDatasetEmptyChart();
         dualPanel.setCharts(mainChart, rangeChart);
         setButtonsEnabled(false);
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         setButtonsEnabled(false);
-        dualPanel.setCharts(MorphologyChartFactory.createEmptyChart(), MorphologyChartFactory.createEmptyChart());
+        dualPanel.setCharts(AbstractChartFactory.createEmptyChart(), AbstractChartFactory.createEmptyChart());
     }
 
     @Override
     public void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
-        dualPanel.setCharts(MorphologyChartFactory.createLoadingChart(), MorphologyChartFactory.createLoadingChart());
+        dualPanel.setCharts(AbstractChartFactory.createLoadingChart(), AbstractChartFactory.createLoadingChart());
     }
 
     @Override

@@ -42,9 +42,8 @@ import com.bmskinner.nuclear_morphology.charting.Cache;
 import com.bmskinner.nuclear_morphology.charting.ChartCache;
 import com.bmskinner.nuclear_morphology.charting.TableCache;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -84,33 +83,33 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
 	protected static final int SINGLE_CLICK = 1;
 	protected static final int DOUBLE_CLICK = 2;
 
-    private final List<Object> listeners = new CopyOnWriteArrayList<>();
+    private final transient List<Object> listeners = new CopyOnWriteArrayList<>();
     
-    private final InputSupplier inputSupplier;
+    private final transient InputSupplier inputSupplier;
 
-    private final TabPanel parentPanel;
-    private final List<TabPanel> subPanels = new ArrayList<>();
+    private final transient TabPanel parentPanel;
+    private final transient List<TabPanel> subPanels = new ArrayList<>();
     
     /** Holds rendered charts for all selected options */
-    protected final Cache chartCache = new ChartCache();
+    protected final transient Cache chartCache = new ChartCache();
     
     /** Holds rendered tables for all selected options */
-    protected final Cache tableCache = new TableCache();
+    protected final transient Cache tableCache = new TableCache();
     
     private static final String DEFAULT_TAB_TITLE = "Default";
     private final String panelTabTitleLbl;
 
     /** Track if the panel is currently in the process of updating */
-    volatile private AtomicBoolean isUpdating = new AtomicBoolean(false);
+    private AtomicBoolean isUpdating = new AtomicBoolean(false);
     
     /** Event handlers for sending events */
-    private final DatasetEventHandler       dh  = new DatasetEventHandler(this);
-    private final InterfaceEventHandler     ih  = new InterfaceEventHandler(this);
-    private final DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
-    private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
+    private final transient DatasetEventHandler       dh  = new DatasetEventHandler(this);
+    private final transient InterfaceEventHandler     ih  = new InterfaceEventHandler(this);
+    private final transient DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
+    private final transient SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
     
     /** Perform cosmetic operations on datasets - renaming, changing colours etc. */
-    protected final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
+    protected final transient CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
     
     private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
 
@@ -169,7 +168,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
 
     @Override
     public boolean hasSubPanels() {
-        return subPanels.size() > 0;
+        return !subPanels.isEmpty();
     }
     
     @Override
@@ -298,13 +297,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
      */
     private synchronized void updateSize(Container container) {
         for (Component c : container.getComponents()) {
-            if (c instanceof ExportableChartPanel) {
-
-                if (c.isShowing()) {
+            if (c instanceof ExportableChartPanel && c.isShowing()) {
                     this.refreshChartCache();
                     return;
-                }
-
             }
 
             if (c instanceof Container) {
@@ -332,7 +327,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
      * @param d
      */
     protected synchronized void update(final IAnalysisDataset d) {
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
         list.add(d);
         update(list);
     }
@@ -448,7 +443,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
             // update the target chart panel when done
             TableFactoryWorker worker = new TableFactoryWorker(options);
 
-            ThreadManager.getInstance().submit(worker);// worker.execute();
+            ThreadManager.getInstance().submit(worker);
         }
     }
 
@@ -461,20 +456,22 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
      */
     protected synchronized JFreeChart getChart(@NonNull ChartOptions options) {
 
-        if (chartCache.has(options)) {
-            return chartCache.get(options);
-        } else { // No cached chart
+    	if (chartCache.has(options)) {
+    		return chartCache.get(options);
+    	}
 
-            try {
-                JFreeChart chart = createPanelChartType(options);
-                chartCache.add(options, chart);
-                return chart;
-            } catch (Exception e) {
-            	LOGGER.log(Level.WARNING, "Error creating chart: " + this.getClass().getSimpleName());
-                LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating chart", e);
-                return ScatterChartFactory.createErrorChart();
-            }
-        }
+    	// Otherwise, no cached chart
+
+    	try {
+    		JFreeChart chart = createPanelChartType(options);
+    		chartCache.add(options, chart);
+    		return chart;
+    	} catch (Exception e) {
+    		LOGGER.log(Level.WARNING, "Error creating chart: " + this.getClass().getSimpleName());
+    		LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating chart", e);
+    		return AbstractChartFactory.createErrorChart();
+    	}
+
     }
 
     /**
@@ -488,7 +485,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
 
         TableModel model;
         if (getTableCache().has(options)) {
-//            finest("Fetched cached table");
             model = getTableCache().get(options);
         } else {
             try {
@@ -496,9 +492,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
             } catch (Exception e) {
             	LOGGER.log(Level.WARNING, "Error creating table: " + this.getClass().getSimpleName());
                 LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating table", e);
-                model = AnalysisDatasetTableCreator.createBlankTable();
+                model = AbstractTableCreator.createBlankTable();
             }
-//            finest("Added cached table");
             getTableCache().add(options, model);
         }
         return model;
@@ -761,7 +756,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
      */
     protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable, InterfaceUpdater {
 
-        final private ChartOptions options;
+        private final ChartOptions options;
 
         public ChartFactoryWorker(final ChartOptions o) {
             options = o;
@@ -799,6 +794,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
             } catch (InterruptedException e) {
             	LOGGER.log(Level.WARNING, "Interruption to charting in " + DetailPanel.this.getClass().getName());
                 LOGGER.log(Loggable.STACK, "Interruption to charting", e);
+                Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
             	LOGGER.log(Level.WARNING, "Excecution error in charting in " + DetailPanel.this.getClass().getName());
                 LOGGER.log(Loggable.STACK, "Excecution error charting", e);
@@ -821,7 +817,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
      */
     protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable, InterfaceUpdater {
 
-        final private TableOptions options;
+        private final TableOptions options;
 
         public TableFactoryWorker(@NonNull final TableOptions o) {
             options = o;
@@ -865,6 +861,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdate
             } catch (InterruptedException e) {
             	LOGGER.log(Level.WARNING, "Interruption to table creation in " + DetailPanel.this.getClass().getName());
             	LOGGER.log(Loggable.STACK, "Error in table worker", e);
+            	Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
             	LOGGER.log(Level.WARNING, "Excecution error in table creation in " + DetailPanel.this.getClass().getName());
             	LOGGER.log(Loggable.STACK, "Error in table worker", e);
