@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 @Deprecated
 public class AddTailStainAction extends SingleDatasetResultAction {
 	
-	private static final String PROGRESS_BAR_LABEL = "Tail detection";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Tail detection";
 
     public AddTailStainAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);

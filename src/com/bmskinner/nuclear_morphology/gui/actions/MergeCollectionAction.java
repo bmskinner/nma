@@ -50,8 +50,8 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static final String PROGRESS_BAR_LABEL   = "Merging";
-    private static final String DEFAULT_DATASET_NAME = "Merge_of_datasets";
+    private static final @NonNull String PROGRESS_BAR_LABEL   = "Merging";
+    private static final @NonNull String DEFAULT_DATASET_NAME = "Merge_of_datasets";
     private static final int NUMBER_OF_STEPS = 100;
 
     public MergeCollectionAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {

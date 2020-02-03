@@ -50,7 +50,7 @@ public class ImportDatasetAction extends VoidResultAction {
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private final File          file;
-    private static final String PROGRESS_BAR_LABEL = "Opening file...";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Opening file...";
     private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology datasets";
 
     /**

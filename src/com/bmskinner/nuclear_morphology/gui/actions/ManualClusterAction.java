@@ -37,7 +37,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-	private static final String PROGRESS_BAR_LABEL = "Clustering cells";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Clustering cells";
 
     public ManualClusterAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);

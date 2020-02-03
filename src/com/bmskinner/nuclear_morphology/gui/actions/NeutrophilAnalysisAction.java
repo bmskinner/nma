@@ -56,7 +56,7 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
     private File folder = null;
 
     public static final int NEW_ANALYSIS = 0;
-    private static final String PROGRESS_BAR_LABEL = "Neutrophil detection";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Neutrophil detection";
 
     /**
      * Create a new analysis. The folder of images to analyse will be requested

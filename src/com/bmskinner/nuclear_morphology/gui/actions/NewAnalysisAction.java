@@ -61,7 +61,7 @@ public class NewAnalysisAction extends VoidResultAction {
 
     public static final int NEW_ANALYSIS = 0;
 
-    private static final String PROGRESS_BAR_LABEL = "Nucleus detection";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Nucleus detection";
 
     /**
      * Create a new analysis. The folder of images to analyse will be requested

@@ -37,7 +37,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-	private static final String PROGRESS_BAR_LABEL = "Profiling";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Profiling";
 
     public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);

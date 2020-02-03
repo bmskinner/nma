@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 public class ImportWorkspaceAction extends VoidResultAction {
 
     private final File          file;
-    private static final String PROGRESS_BAR_LABEL = "Opening workspace...";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Opening workspace...";
     private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology workspace";
     
     /**

@@ -41,7 +41,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
     private File saveFile = null;
     private ExportFormat format = ExportFormat.JAVA;
     
-    private static final String PROGRESS_BAR_LABEL = "Saving dataset";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Saving dataset";
 
     /**
      * Constructor to save the current dataset. This gives programmatic access

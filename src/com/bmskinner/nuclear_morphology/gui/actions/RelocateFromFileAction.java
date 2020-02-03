@@ -39,9 +39,9 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
  */
 public class RelocateFromFileAction extends SingleDatasetResultAction {
 
-    private static final String PROGRESS_LBL = "Relocating cells";
+    private static final @NonNull String PROGRESS_LBL = "Relocating cells";
 
-    public RelocateFromFileAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+    public RelocateFromFileAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
         super(dataset, PROGRESS_LBL, acceptor, eh);
         this.setLatch(latch);
         setProgressBarIndeterminate();

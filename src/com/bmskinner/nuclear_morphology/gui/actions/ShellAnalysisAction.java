@@ -57,7 +57,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 	private static final String CIRC_ERROR_MESSAGE = "Min nucleus circularity is too low to make shells";
 	private static final String AREA_ERROR_MESSAGE = "Min nucleus area is too small to break into shells";
 	
-	private static final String PROGRESS_BAR_LABEL = "Shell analysis";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Shell analysis";
 	
     /**
      * Construct with a dataset and main event window

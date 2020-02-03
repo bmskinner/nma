@@ -34,15 +34,18 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Trigger methods to perform boolean operations on datasets
+ * @author Ben Skinner
+ *
+ */
 public class DatasetArithmeticAction extends MultiDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private IAnalysisDataset datasetOne = null;
+    private static final @NonNull String PROGRESS_LBL = "Dataset arithmetic";
 
-    private static final String PROGRESS_LBL = "Dataset arithmetic";
-
-    public DatasetArithmeticAction(List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+    public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(list, PROGRESS_LBL, acceptor, eh);
         this.setProgressBarIndeterminate();
     }
@@ -60,7 +63,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
             if (dialog.isReadyToRun()) {
 
-                datasetOne = dialog.getDatasetOne();
+            	IAnalysisDataset datasetOne = dialog.getDatasetOne();
                 IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
                 DatasetArithmeticOperation operation = dialog.getOperation();
 
@@ -113,7 +116,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
     }
 
     private void makeNewDataset(ICellCollection newCollection) {
-        if (newCollection != null && newCollection.size() > 0) {
+        if (newCollection != null && !newCollection.isEmpty()) {
 
             LOGGER.info("Found " + newCollection.size() + " cells");
             IAnalysisDataset newDataset;
@@ -125,7 +128,6 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
                 try {
 					root.getCollection().getProfileManager().copyCollectionOffsets(newCollection);
 					root.addChildCollection(newCollection);
-	                newDataset = root.getChildDataset(newCollection.getID());
 	                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 				} catch (ProfileException e) {
 					LOGGER.warning("Error: unable to complete operation");

@@ -34,7 +34,7 @@ public class LobeDetectionAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static final String PROGRESS_BAR_LABEL = "Detecting lobes";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Detecting lobes";
 
     public LobeDetectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);

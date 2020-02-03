@@ -42,7 +42,7 @@ public class ImportWorkflowAction  extends VoidResultAction {
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private File file;
-    private static final String PROGRESS_BAR_LABEL = "Running workflow...";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Running workflow...";
     private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology workflow";
     
     /**

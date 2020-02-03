@@ -34,11 +34,17 @@ import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Action to trigger assignment of nuclei to clusters based on 
+ * an input definition file
+ * @author Ben Skinner
+ *
+ */
 public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static final String PROGRESS_BAR_LABEL = "Assigning clustered cells";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Assigning clustered cells";
 
     public ClusterFileAssignmentAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
@@ -74,6 +80,7 @@ public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.warning("Error clustering");
             LOGGER.log(Loggable.STACK, "Error clustering", e);
+            Thread.currentThread().interrupt();
         }
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         super.finished();

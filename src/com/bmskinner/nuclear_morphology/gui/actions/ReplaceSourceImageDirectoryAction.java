@@ -31,7 +31,7 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-	private static final String PROGRESS_BAR_LABEL = "Replacing images";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Replacing images";
 
     public ReplaceSourceImageDirectoryAction(@NonNull final IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);

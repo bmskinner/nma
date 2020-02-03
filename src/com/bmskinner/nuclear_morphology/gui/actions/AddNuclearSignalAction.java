@@ -47,10 +47,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class AddNuclearSignalAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-
-    private File folder;
-    
-    private static final String PROGRESS_BAR_LABEL = "Signal detection";
+	
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Signal detection";
 
     public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
@@ -66,6 +64,8 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
         		if(im.isPresent())
         			defaultDir = im.get().getFolder();
         	}
+        	
+        	File folder = null;
         	
         	try {
         		folder = eh.getInputSupplier().requestFolder("Choose FISH signal image folder", defaultDir);
@@ -83,7 +83,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
                 IAnalysisMethod m = new SignalDetectionMethod(dataset, options, analysisSetup.getId());
 
-                String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).get().getGroupName();
+                String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).orElseThrow().getGroupName();
 
                 worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 
@@ -92,7 +92,6 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
                 ThreadManager.getInstance().submit(worker);
             } else {
                 this.cancel();
-                return;
             }
 
         } catch (Exception e) {

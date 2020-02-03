@@ -37,7 +37,7 @@ public class MergeSourceExtractionAction extends MultiDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     
-    private static final String PROGRESS_BAR_LABEL = "Extracting merge source";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Extracting merge source";
     
     /**
      * Refold the given selected dataset

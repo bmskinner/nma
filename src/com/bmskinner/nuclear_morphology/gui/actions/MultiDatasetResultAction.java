@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
  */
 public abstract class MultiDatasetResultAction extends VoidResultAction {
 
-    protected final List<IAnalysisDataset> datasets = new ArrayList<>();
+    protected final @NonNull List<IAnalysisDataset> datasets = new ArrayList<>();
 
     public MultiDatasetResultAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String barMessage,
     		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {

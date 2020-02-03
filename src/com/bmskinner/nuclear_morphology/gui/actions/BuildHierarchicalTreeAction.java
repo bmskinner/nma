@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -49,9 +50,9 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static final String PROGRESS_BAR_LABEL = "Building tree";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Building tree";
 
-    public BuildHierarchicalTreeAction(IAnalysisDataset dataset,@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+    public BuildHierarchicalTreeAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
@@ -61,11 +62,8 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
         SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(dataset);
 
         if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
-            IAnalysisMethod m = clusterSetup.getMethod();// new
-                                                         // TreeBuildingMethod(dataset,
-                                                         // options);
+            IAnalysisMethod m = clusterSetup.getMethod();
 
-//            int maxProgress = dataset.getCollection().size() * 2;
             worker = new DefaultAnalysisWorker(m);
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
@@ -95,14 +93,10 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
             cleanup(); // do not cancel, we need the MainWindow listener to
                        // remain attached
 
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (InterruptedException | ExecutionException e) {
+        	LOGGER.log(Level.SEVERE, "Error making cluster tree dialog", e);
+        	Thread.currentThread().interrupt();
         }
-
     }
 
     @Override
@@ -122,20 +116,17 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
-		// TODO Auto-generated method stub
-		
+		// No action		
 	}
 
 	@Override
 	public void eventReceived(SignalChangeEvent event) {
-		// TODO Auto-generated method stub
-		
+		// No action	
 	}
 
 	@Override
 	public void eventReceived(ChartOptionsRenderedEvent event) {
-		// TODO Auto-generated method stub
-		
+		// No action	
 	}
 
 }

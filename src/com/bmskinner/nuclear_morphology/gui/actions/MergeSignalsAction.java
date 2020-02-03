@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -28,7 +30,7 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-	private static final String PROGRESS_BAR_LABEL   = "Merging";
+	private static final @NonNull String PROGRESS_BAR_LABEL   = "Merging";
     private static final int NUMBER_OF_STEPS = 100;
 
 	/**

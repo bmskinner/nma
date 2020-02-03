@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCMCalculationMethod;
@@ -13,18 +15,23 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
+/**
+ * Trigger a GLCM calculation
+ * @author Ben Skinner
+ *
+ */
 public class RunGLCMAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-	private static final String PROGRESS_BAR_LABEL = "Calculating GLCM";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Calculating GLCM";
 	
-	public RunGLCMAction(List<IAnalysisDataset> datasets, CountDownLatch latch, ProgressBarAcceptor acceptor, EventHandler eh) {
+	public RunGLCMAction(@NonNull List<IAnalysisDataset> datasets, @NonNull CountDownLatch latch, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
 		super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
 		this.setLatch(latch);
 	}
 	
-	public RunGLCMAction(IAnalysisDataset dataset, int noFlag, ProgressBarAcceptor acceptor, EventHandler eh) {
+	public RunGLCMAction(@NonNull IAnalysisDataset dataset, int noFlag, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
 		super(dataset, dataset.getName()+": "+PROGRESS_BAR_LABEL, acceptor, eh);
 	}
 	
@@ -36,7 +43,6 @@ public class RunGLCMAction extends SingleDatasetResultAction {
         worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
         worker.addPropertyChangeListener(this);
         ThreadManager.getInstance().submit(worker);
-		
 	}
 	
 	@Override

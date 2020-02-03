@@ -35,7 +35,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-	private static final String PROGRESS_BAR_LABEL = "Splitting collection";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Splitting collection";
 
     public SplitCollectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);

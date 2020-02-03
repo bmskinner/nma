@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusterin
 import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalComponentAnalysis;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -49,7 +50,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static final String PROGRESS_BAR_LABEL = "Clustering cells";
+    private static final @NonNull String PROGRESS_BAR_LABEL = "Clustering cells";
 
     public ClusterAnalysisAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
@@ -59,36 +60,24 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
     public void run() {
 
         SubAnalysisSetupDialog clusterSetup = new ClusteringSetupDialog(dataset);
-
+        
         if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
-
+        	HashOptions setupOptions = clusterSetup.getOptions();
         	boolean canRunClusteringDirectly = true;
-        	if(clusterSetup.getOptions().getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	
+        	if(setupOptions.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
         		canRunClusteringDirectly = false;
-        		IAnalysisMethod m = new TsneMethod(dataset, clusterSetup.getOptions());
-        		worker = new DefaultAnalysisWorker(m);
-        		worker.addPropertyChangeListener(e->{
-        			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
-        				runClustering((IClusteringOptions) clusterSetup.getOptions());
-        			}
-        		});
-        		ThreadManager.getInstance().submit(worker);
+        		runTsne(setupOptions);
         	}
         	
         	if(clusterSetup.getOptions().getBoolean(IClusteringOptions.USE_PCA_KEY)) {
         		canRunClusteringDirectly = false;
-        		IAnalysisMethod m = new PrincipalComponentAnalysis(dataset, clusterSetup.getOptions());
-        		worker = new DefaultAnalysisWorker(m);
-        		worker.addPropertyChangeListener(e->{
-        			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
-        				runClustering((IClusteringOptions) clusterSetup.getOptions());
-        			}
-        		});
-        		ThreadManager.getInstance().submit(worker);
+        		runPca(setupOptions);
         	}
         	
+        	// Only run clustering on profiles if no dimensionality reduction
         	if(canRunClusteringDirectly)
-        		runClustering((IClusteringOptions) clusterSetup.getOptions());
+        		runClustering((IClusteringOptions) setupOptions);
 
         } else {
         	this.cancel();
@@ -96,6 +85,40 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         clusterSetup.dispose();
     }
     
+    /**
+     * Run a t-SNE method with the given options
+     * @param setupOptions
+     */
+    private void runTsne(HashOptions setupOptions) {
+		IAnalysisMethod m = new TsneMethod(dataset, setupOptions);
+		worker = new DefaultAnalysisWorker(m);
+		worker.addPropertyChangeListener(e->{
+			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
+				runClustering((IClusteringOptions) setupOptions);
+			}
+		});
+		ThreadManager.getInstance().submit(worker);
+    }
+    
+    /**
+     * Run a PCA method with the given options
+     * @param setupOptions
+     */
+    private void runPca(HashOptions setupOptions) {
+    	IAnalysisMethod m = new PrincipalComponentAnalysis(dataset, setupOptions);
+		worker = new DefaultAnalysisWorker(m);
+		worker.addPropertyChangeListener(e->{
+			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
+				runClustering((IClusteringOptions) setupOptions);
+			}
+		});
+		ThreadManager.getInstance().submit(worker);
+    }
+    
+    /**
+     * Run clustering on the nuclear profiles with the given options
+     * @param setupOptions
+     */
     private void runClustering(IClusteringOptions options) {
     	IAnalysisMethod m2 = new NucleusClusteringMethod(dataset, options);
 		worker = new DefaultAnalysisWorker(m2);
@@ -115,6 +138,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.warning("Error clustering");
             LOGGER.log(Loggable.STACK, "Error clustering", e);
+            Thread.currentThread().interrupt();
         }
 
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
