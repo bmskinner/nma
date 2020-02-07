@@ -33,6 +33,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> implements IAnalysisWorker {
 	
+	private static final String ERROR_PROPERTY = "Error";
+
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private long progressTotal;     // the maximum value for the progress bar
@@ -124,18 +126,19 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
         } catch (StackOverflowError e) {
             LOGGER.warning("Stack overflow detected");
             LOGGER.log(Loggable.STACK, "Stack overflow in worker", e);
-            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+            firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
             LOGGER.warning("Interruption to swing worker: " + e.getMessage());
             LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
-            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+            firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
+            Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
             LOGGER.warning("Execution error in swing worker: " + e.getMessage());
             LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
             Throwable cause = e.getCause();
             LOGGER.warning("Causing error: " + cause.getMessage());
             LOGGER.log(Loggable.STACK, "Causing error: ", cause);
-            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+            firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
         }
 
     }
