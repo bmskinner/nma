@@ -17,7 +17,11 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -26,6 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.Io.Exporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 
@@ -36,10 +41,11 @@ import ij.IJ;
  *
  */
 public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implements Exporter {
+	
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     
     private File exportFile;
-    private static final String EXPORT_MESSAGE          = "Exporting...";
-    private static final String DEFAULT_MULTI_FILE_NAME = "Stats_export" + Exporter.TAB_FILE_EXTENSION;
+    private static final String DEFAULT_MULTI_FILE_NAME = "Stats_export" + Io.TAB_FILE_EXTENSION;
     
     /**
      * Create specifying the folder stats will be exported into
@@ -73,8 +79,12 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
 
         exportFile = file;
 
-        if (exportFile.exists())
-            exportFile.delete();
+        try {
+			Files.deleteIfExists(exportFile.toPath());
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Unable to delete file: "+exportFile);
+			LOGGER.log(Loggable.STACK, "Unable to delete existing file", e);
+		}
     }
     
     /**

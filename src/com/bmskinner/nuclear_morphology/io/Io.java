@@ -37,6 +37,7 @@ public interface Io  {
 	String NEWLINE = System.getProperty("line.separator");
 	String TAB = "\t";
 	String DOT = ".";
+	String COMMA = ",";
 	
 	String TAB_FILE_EXTENSION = ".txt";
 		

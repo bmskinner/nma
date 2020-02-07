@@ -94,16 +94,16 @@ public class DatasetStatsExporter extends StatsExporter {
 
         for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
 
-            String label = s.label(MeasurementScale.PIXELS).replaceAll(" ", "_").replaceAll("\\(", "_")
-                    .replaceAll("\\)", "").replaceAll("__", "_");
+            String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("\\(", "_")
+                    .replace("\\)", "").replace("__", "_");
             outLine.append(label + TAB);
 
             if (!s.isDimensionless() && !s.isAngle()) { // only give micron
                                                         // measurements when
                                                         // length or area
 
-                label = s.label(MeasurementScale.MICRONS).replaceAll(" ", "_").replaceAll("\\(", "_")
-                        .replaceAll("\\)", "").replaceAll("__", "_");
+                label = s.label(MeasurementScale.MICRONS).replace(" ", "_").replace("\\(", "_")
+                        .replace("\\)", "").replace("__", "_");
 
                 outLine.append(label + TAB);
             }
@@ -112,7 +112,7 @@ public class DatasetStatsExporter extends StatsExporter {
 
         if (includeProfiles) {
             for (ProfileType type : ProfileType.exportValues()) {
-                String label = type.toString().replaceAll(" ", "_");
+                String label = type.toString().replace(" ", "_");
                 for (int i = 0; i < 100; i++) {
                     outLine.append(label + "_" + i + TAB);
                 }
@@ -141,26 +141,6 @@ public class DatasetStatsExporter extends StatsExporter {
         outLine.append(NEWLINE);
     }
 
-    /**
-     * Test if the given component is present in the dataset
-     * 
-     * @param d
-     * @param component
-     * @return
-     */
-    private boolean hasComponent(IAnalysisDataset d, String component) {
-
-        if (CellularComponent.CYTOPLASM.equals(component)) {
-            return d.getCollection().getCells().stream().allMatch(ICell::hasCytoplasm);
-        }
-
-        if (CellularComponent.NUCLEUS.equals(component)) {
-            return d.getCollection().getCells().stream().allMatch(ICell::hasNucleus);
-        }
-
-        return false;
-
-    }
 
     /**
      * Append the given dataset stats into the string builder
@@ -185,7 +165,7 @@ public class DatasetStatsExporter extends StatsExporter {
                         .append(n.getSourceFolder() + TAB)
                         .append(n.getSourceFileName() + TAB)
                         .append(n.getOriginalCentreOfMass().toString() + TAB);
-                    appendNucleusStats(outLine, d, cell, n);
+                    appendNucleusStats(outLine, d, n);
 
                     if (includeProfiles) {
                         appendProfiles(outLine, n);
@@ -208,7 +188,7 @@ public class DatasetStatsExporter extends StatsExporter {
         }
     }
 
-    private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, ICell cell, CellularComponent c) {
+    private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, CellularComponent c) {
 
         for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
             double varP = 0;

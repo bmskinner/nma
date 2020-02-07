@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportOptionsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportSingleCellImagesAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearProfilesAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportShellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportSignalsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
@@ -184,7 +185,9 @@ public class EventHandler implements EventListener {
      */
     private class ActionFactory {
 
-        public ActionFactory() { }
+        public ActionFactory() { 
+        	// No fields
+        }
 
         /**
          * Create a runnable action for the given event
@@ -265,6 +268,9 @@ public class EventHandler implements EventListener {
 
             if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
                 return new ExportNuclearStatsAction(selectedDatasets, acceptor, EventHandler.this);
+            
+            if (event.type().equals(SignalChangeEvent.EXPORT_PROFILES))
+                return new ExportNuclearProfilesAction(selectedDatasets, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_SIGNALS))
             	return new ExportSignalsAction(selectedDatasets, acceptor, EventHandler.this);
@@ -497,6 +503,7 @@ public class EventHandler implements EventListener {
             				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG,
             						acceptor, EventHandler.this, segmentLatch).run();
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}	
             		}).start();
@@ -507,6 +514,7 @@ public class EventHandler implements EventListener {
             				LOGGER.fine("Starting refolding action");
             				new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch).run();
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}
             		}).start();   
@@ -517,6 +525,7 @@ public class EventHandler implements EventListener {
             				LOGGER.fine("Starting save action");
             				new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch, GlobalOptions.getInstance().getExportFormat()).run();
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}	
             		}).start();
@@ -528,6 +537,7 @@ public class EventHandler implements EventListener {
             				LOGGER.fine("Starting recache action");
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, EventHandler.class.getName(), selectedDatasets));
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}
             		}).start();
@@ -566,6 +576,7 @@ public class EventHandler implements EventListener {
             				profileLatch.await();
             				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this, segmentLatch).run();
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}
             			
@@ -577,6 +588,7 @@ public class EventHandler implements EventListener {
             				LOGGER.fine("Adding datasets");
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, EventHandler.class.getName(), selectedDatasets));
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}
             		}).start();
@@ -608,6 +620,7 @@ public class EventHandler implements EventListener {
             				LOGGER.fine("Adding datasets");
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}
             		}).start();
@@ -660,6 +673,7 @@ public class EventHandler implements EventListener {
             				refoldLatch.await();
             				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
             			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
             				return;
             			}	
             		}).start();
@@ -797,6 +811,7 @@ public class EventHandler implements EventListener {
     					latch.await();
     				} catch (InterruptedException e) {
     					LOGGER.log(Loggable.STACK, "Interruption to thread", e);
+    					Thread.currentThread().interrupt();
     				}
 
     				Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);

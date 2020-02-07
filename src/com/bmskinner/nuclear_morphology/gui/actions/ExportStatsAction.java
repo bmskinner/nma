@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.DatasetProfileExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
@@ -74,6 +75,42 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
             worker = new DefaultAnalysisWorker(m, datasets.size());
             worker.addPropertyChangeListener(this);
             this.setProgressMessage("Exporting stats");
+            ThreadManager.getInstance().submit(worker);
+
+        }
+
+    }
+    
+    
+    /**
+     * The action for exporting nuclear stats from datasets
+     * 
+     * @author bms41
+     * @since 1.17.2
+     *
+     */
+    public static class ExportNuclearProfilesAction extends ExportStatsAction {
+
+        private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
+
+        public ExportNuclearProfilesAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
+        }
+
+        @Override
+        public void run() {
+
+            File file = FileSelector.chooseStatsExportFile(datasets, "profiles");
+
+            if (file == null) {
+                cancel();
+                return;
+            }
+
+            IAnalysisMethod m = new DatasetProfileExporter(file, datasets);
+            worker = new DefaultAnalysisWorker(m, datasets.size());
+            worker.addPropertyChangeListener(this);
+            this.setProgressMessage("Exporting profiles");
             ThreadManager.getInstance().submit(worker);
 
         }
