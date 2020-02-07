@@ -32,12 +32,12 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagTy
  */
 public interface Tag extends Comparable<Tag>, Serializable {
 
-    @NonNull public static final BorderTagObject REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
-    @NonNull public static final BorderTagObject ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
-    @NonNull public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
-    @NonNull public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
-    @NonNull public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
-    @NonNull public static final BorderTagObject CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
+    @NonNull public static final Tag REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
+    @NonNull public static final Tag ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
+    @NonNull public static final Tag TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
+    @NonNull public static final Tag BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
+    @NonNull public static final Tag INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
+    @NonNull public static final Tag CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
 
     
     /**

@@ -886,7 +886,7 @@ public class CellCollection implements ICellCollection {
      * @return an array of normalised differences
      * @throws UnavailableBorderTagException
      */
-    public double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType)
+    public double[] getNormalisedDifferencesToMedianFromPoint(Tag pointType)
             throws UnavailableBorderTagException {
         // List<Double> list = new ArrayList<Double>();
         int count = this.getNucleusCount();

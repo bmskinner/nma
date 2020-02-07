@@ -43,17 +43,22 @@ public class DefaultCell implements ICell {
 
     protected UUID uuid;
 
-    @Deprecated
-    protected volatile Nucleus              nucleus   = null;// use the list
+    /**
+     * @deprecated since we should use the nuclei list
+     * 
+     * instead
+     */
+    @Deprecated(forRemoval=true)
+    protected Nucleus              nucleus   = null;
     
-    protected volatile List<IMitochondrion> mitochondria;
-    protected volatile List<Flagellum>      tails;
-    protected volatile List<IAcrosome>      acrosomes;
-    protected volatile ICytoplasm           cytoplasm = null;
-    protected volatile List<Nucleus>        nuclei;
+    protected List<IMitochondrion> mitochondria;
+    protected List<Flagellum>      tails;
+    protected List<IAcrosome>      acrosomes;
+    protected ICytoplasm           cytoplasm = null;
+    protected List<Nucleus>        nuclei;
 
     /** The statistical values stored for this object */
-    private volatile Map<PlottableStatistic, Double> statistics;
+    private Map<PlottableStatistic, Double> statistics;
 
     /**
      * Create a new cell with a random ID
@@ -174,8 +179,7 @@ public class DefaultCell implements ICell {
     public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
 
         // Get the scale of one of the components of the cell
-        double sc = this.hasNucleus() ? this.getNucleus().getScale()
-                : this.hasCytoplasm() ? this.getCytoplasm().getScale() : 1d;
+        double sc = chooseScale();
 
         if (hasStatistic(stat)) {
             double result = statistics.get(stat);
@@ -185,8 +189,18 @@ public class DefaultCell implements ICell {
         double result = calculateStatistic(stat);
         statistics.put(stat, result);
         return result;
-
-
+    }
+    
+    private double chooseScale() {
+    	
+    	if(hasNucleus()) {
+    		return getNucleus().getScale();
+    	}
+    	if(hasCytoplasm()) {
+    		return getCytoplasm().getScale();
+    	}
+    	
+    	return 1d;
     }
 
     protected double calculateStatistic(PlottableStatistic stat) {
@@ -352,7 +366,7 @@ public class DefaultCell implements ICell {
     
     @Override
     public List<Taggable> getTaggables() {
-        List<Taggable> result = new ArrayList<Taggable>(0);
+        List<Taggable> result = new ArrayList<>(0);
         
         result.addAll(getTaggables(acrosomes));
         result.addAll(getTaggables(mitochondria));

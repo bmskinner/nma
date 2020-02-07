@@ -59,7 +59,7 @@ public class ProfileCollection implements IProfileCollection {
 
     private IProfileAggregate aggregate = null;
 
-    private Map<BorderTagObject, Integer> indexes  = new HashMap<>();
+    private Map<Tag, Integer> indexes  = new HashMap<>();
     private List<IBorderSegment>          segments = new ArrayList<>();
 
     private final ProfileCache profileCache = new ProfileCache();
@@ -76,17 +76,7 @@ public class ProfileCollection implements IProfileCollection {
     
 	@Override
 	public IProfileCollection duplicate() {
-//		DefaultProfileCollection pc = new DefaultProfileCollection();
-//		
-//		pc.length = length;
-//		for(Tag t : indexes.keySet())
-//			pc.indexes.put(t, indexes.get(t));
-//		
-//		pc.segments = new IBorderSegment[segments.length];
-//		for(int i=0; i<segments.length; i++)
-//			pc.segments[i] = segments[i].copy();
-//		
-//		return pc;
+		//TODO: Not yet implemented
 		return null;
 	}
     
@@ -707,7 +697,7 @@ public class ProfileCollection implements IProfileCollection {
         // segments = (List<NucleusBorderSegment>) in.readObject();
         //// profileCache = (ProfileCache) in.readObject();
 
-        Map<BorderTagObject, Integer> newIndexes = new HashMap<BorderTagObject, Integer>();
+        Map<Tag, Integer> newIndexes = new HashMap<>();
 
         Iterator<?> it = indexes.keySet().iterator();
 

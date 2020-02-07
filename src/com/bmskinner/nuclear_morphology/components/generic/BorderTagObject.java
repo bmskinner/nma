@@ -46,60 +46,39 @@ public class BorderTagObject implements Tag {
         this.name = name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.Tag#getName()
-     */
     @Override
     public String getName() {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.Tag#getTag()
-     */
     @Override
     public BorderTag getTag() {
         return tag;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.Tag#type()
-     */
     @Override
     public BorderTagType type() {
         return tag.type();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.Tag#toString()
-     */
     @Override
     public String toString() {
         return name;
     }
 
-    public static BorderTagObject[] values() {
-        BorderTagObject[] result = { REFERENCE_POINT, 
+    public static Tag[] values() {
+        return new Tag[] { REFERENCE_POINT, 
         		ORIENTATION_POINT, 
         		TOP_VERTICAL, 
         		BOTTOM_VERTICAL,
                 INTERSECTION_POINT };
-        return result;
     }
 
     public static BorderTagObject[] values(BorderTagType type) {
 
-        List<BorderTagObject> list = new ArrayList<BorderTagObject>();
-        for (BorderTagObject o : values()) {
-            if (o.tag.type().equals(type)) {
+        List<Tag> list = new ArrayList<>();
+        for (Tag o : values()) {
+            if (o.type().equals(type)) {
                 list.add(o);
             }
         }
@@ -108,11 +87,6 @@ public class BorderTagObject implements Tag {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.Tag#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -122,11 +96,6 @@ public class BorderTagObject implements Tag {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.Tag#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -146,11 +115,6 @@ public class BorderTagObject implements Tag {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.Tag#compareTo(components.generic.BorderTagObject)
-     */
     @Override
     public int compareTo(Tag tag) {
         return name.compareTo(tag.getName());
