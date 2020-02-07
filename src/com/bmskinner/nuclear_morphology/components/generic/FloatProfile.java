@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -881,5 +883,10 @@ public class FloatProfile implements IProfile {
         if (index < size())
             return index;
         return index % size();
+	}
+
+	@Override
+	public Iterator<Integer> iterator() {
+		return IntStream.range(0, array.length).iterator();
 	}
 }

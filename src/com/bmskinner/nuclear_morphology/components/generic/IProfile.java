@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
  * @since 1.13.3
  *
  */
-public interface IProfile extends Serializable {
+public interface IProfile extends Serializable, Iterable<Integer> {
 
     static final int ARRAY_BEFORE = -1;
     static final int ARRAY_AFTER  = 1;

@@ -1012,7 +1012,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return wrapIndex(index);
 		}
 		
-		
+		@Override
+		public Iterator<Integer> iterator() {
+			return IntStream.range(0, array.length).iterator();
+		}
 		
 	}
 

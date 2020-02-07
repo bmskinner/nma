@@ -1264,6 +1264,13 @@ public class IProfileTester {
 		profile.normaliseAmplitude(100, 100);
 	}
 	
+	@Test
+	public void testIteratorReturnsFullRange() {	
+		for(int i : profile) {
+			assertTrue(i>=0 && i<profile.size());
+		}
+	}
+	
 	/**
 	 * Test float array equality. Not in junit.
 	 * @param exp
@@ -1309,4 +1316,6 @@ public class IProfileTester {
 	 return equals(exp, obs, 0.001f);
 	}
 
+	
+	
 }
