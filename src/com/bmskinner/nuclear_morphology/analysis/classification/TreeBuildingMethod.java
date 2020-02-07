@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -49,7 +51,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
 import weka.core.EuclideanDistance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
@@ -77,8 +78,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
                 newickTree);
-        IAnalysisResult r = new ClusterAnalysisResult(dataset, group);
-        return r;
+        return new ClusterAnalysisResult(dataset, group);
     }
 
     /**
@@ -142,37 +142,37 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         return true;
     }
     
-    private FastVector makeTsneAttributes() {
-    	FastVector attributes = new FastVector(2);
-    	attributes.addElement(new Attribute("tSNE_X"));
-    	attributes.addElement(new Attribute("tSNE_Y"));
+    private ArrayList<Attribute> makeTsneAttributes() {
+    	ArrayList<Attribute> attributes = new ArrayList<>();
+    	attributes.add(new Attribute("tSNE_X"));
+    	attributes.add(new Attribute("tSNE_Y"));
     	 if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
-             Attribute name = new Attribute("name", (FastVector) null);
-             attributes.addElement(name);
+             Attribute name = new Attribute("name", (List<String>) null);
+             attributes.add(name);
          }
     	return attributes;
     }
     
-    private FastVector makePCAttributes() {
+    private ArrayList<Attribute> makePCAttributes() {
     	
     	// From the first nucleus, find the number of PCs to cluster on
-    	Nucleus n = dataset.getCollection().getCells().stream().findFirst().get().getNucleus();
+    	Nucleus n = dataset.getCollection().getCells().stream().findFirst().orElseThrow().getNucleus();
     	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N); 
 
-    	FastVector attributes = new FastVector(nPcs);
+    	ArrayList<Attribute> attributes = new ArrayList<>();
     	for(int i=1; i<=nPcs; i++)
-    		attributes.addElement(new Attribute("PC_"+i));
+    		attributes.add(new Attribute("PC_"+i));
 
     	
     	 if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
-             Attribute name = new Attribute("name", (FastVector) null);
-             attributes.addElement(name);
+             Attribute name = new Attribute("name", (List<String>) null);
+             attributes.add(name);
          }
     	return attributes;
     }
 
     @Override
-	protected FastVector makeAttributes() throws ClusteringMethodException{
+	protected ArrayList<Attribute> makeAttributes() throws ClusteringMethodException{
     	
     	// Shortcuts if dimensional reduction is chosen
     	LOGGER.finer("Checking if tSNE clustering is set");
@@ -191,7 +191,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
      // How many attributes per profile?  
         double profileWindow = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions()) 
-        	profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
+        	profileWindow = dataset.getAnalysisOptions().orElseThrow().getProfileWindowProportion();
         
         profileAttributeCount = (int) Math.floor(1d / profileWindow);
 
@@ -231,14 +231,14 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         
         // Create the attributes
         LOGGER.finer("Creating attributes");
-        FastVector<Attribute> attributes = new FastVector<>(attributeCount);
+        ArrayList<Attribute> attributes = new ArrayList<>(attributeCount);
         int profileAttCounter = 0;
         for(ProfileType t : ProfileType.displayValues()) {
         	if(options.getBoolean(t.toString()))    {	
         		LOGGER.finer("Creating attributes for profile " + t);
                 for (int i = 0; i < profileAttributeCount; i++) {
                     Attribute a = new Attribute("att_" + profileAttCounter);
-                    attributes.addElement(a);
+                    attributes.add(a);
                     profileAttCounter++;
                 }
         	}
@@ -248,7 +248,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             if (options.isIncludeStatistic(stat)) {
             	LOGGER.finer("Creating attribute for "+stat);
                 Attribute a = new Attribute(stat.toString());
-                attributes.addElement(a);
+                attributes.add(a);
             }
         }
 
@@ -256,7 +256,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             if (options.isIncludeSegment(segID)) {
                 LOGGER.finer( "Creating attribute for segment" + segID.toString());
                 Attribute a = new Attribute("att_" + segID.toString());
-                attributes.addElement(a);
+                attributes.add(a);
             }
         }
 
@@ -265,14 +265,14 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             for (MeshFace face : mesh.getFaces()) {
                 LOGGER.finer( "Creating attribute for face " + face.toString());
                 Attribute a = new Attribute("mesh_" + face.toString());
-                attributes.addElement(a);
+                attributes.add(a);
             }
         }
 
         if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
         	LOGGER.finer("Creating attribute for name - hierarchical only");
-            Attribute name = new Attribute("name", (FastVector) null);
-            attributes.addElement(name);
+            Attribute name = new Attribute("name", (List<String>) null);
+            attributes.add(name);
         }
         return attributes;
     }
@@ -287,10 +287,10 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	LOGGER.finer("Creating clusterable instances");
         double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options
-            windowProportion = dataset.getAnalysisOptions().get().getProfileWindowProportion();
+            windowProportion = dataset.getAnalysisOptions().orElseThrow().getProfileWindowProportion();
 
         // Weka clustering uses a table in which columns are attributes and rows are instances
-        FastVector attributes = makeAttributes();
+        ArrayList<Attribute> attributes = makeAttributes();
 
         Instances instances = new Instances(collection.getName(), attributes, collection.size());
 
@@ -318,17 +318,17 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
     }
     
-    private void addTsneNucleus(ICell c, Nucleus n, FastVector attributes, Instances instances) {
+    private void addTsneNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes, Instances instances) {
     	int attNumber = 0;
     	Instance inst = new SparseInstance(attributes.size());
-    	Attribute attX = (Attribute) attributes.elementAt(attNumber++);
+    	Attribute attX = attributes.get(attNumber++);
     	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_1));
-    	Attribute attY = (Attribute) attributes.elementAt(attNumber++);
+    	Attribute attY = attributes.get(attNumber++);
     	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
     	
     	if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
-            Attribute att = (Attribute) attributes.elementAt(attNumber++);
+            Attribute att = attributes.get(attNumber++);
             inst.setValue(att, uniqueName);
         }
     	 instances.add(inst);
@@ -336,20 +336,20 @@ public class TreeBuildingMethod extends CellClusteringMethod {
          fireProgressEvent();
     }
     
-    private void addPCANucleus(ICell c, Nucleus n, FastVector attributes, Instances instances) {
+    private void addPCANucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes, Instances instances) {
     	int attNumber = 0;
     	Instance inst = new SparseInstance(attributes.size());
     	
     	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);
     	for(int i=1; i<=nPcs; i++) {
-    		Attribute att = (Attribute) attributes.elementAt(attNumber++);
+    		Attribute att = attributes.get(attNumber++);
     		double pc = n.getStatistic(PlottableStatistic.makePrincipalComponent(i));
     		inst.setValue(att, pc);
     	}
     	
     	if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
-            Attribute att = (Attribute) attributes.elementAt(attNumber++);
+            Attribute att = attributes.get(attNumber++);
             inst.setValue(att, uniqueName);
         }
     	 instances.add(inst);
@@ -357,7 +357,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
          fireProgressEvent();
     }
 
-    private void addNucleus(ICell c, Nucleus n, FastVector attributes, Instances instances, Mesh<Nucleus> template,
+    private void addNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes, Instances instances, Mesh<Nucleus> template,
             double windowProportion) throws UnavailableBorderTagException, UnavailableProfileTypeException,
             ProfileException, MeshCreationException {
 
@@ -385,7 +385,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                 IProfile p = n.getProfile(t, Tag.REFERENCE_POINT);
 
                 for (int i = 0; i < pointsToSample; i++) {
-                    Attribute att = (Attribute) attributes.elementAt(attNumber);
+                    Attribute att = attributes.get(attNumber);
                     inst.setValue(att, p.get(i * windowProportion));
                     attNumber++;
                 }
@@ -394,7 +394,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
             if (options.isIncludeStatistic(stat)) {
-                Attribute att = (Attribute) attributes.elementAt(attNumber++);
+                Attribute att = attributes.get(attNumber++);
                 
                 if(PlottableStatistic.VARIABILITY.equals(stat)) {
                 	 inst.setValue(att, collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n));
@@ -407,7 +407,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         for (UUID segID : options.getSegments()) {
             if (options.isIncludeSegment(segID)) {
-                Attribute att = (Attribute) attributes.elementAt(attNumber++);
+                Attribute att = attributes.get(attNumber++);
                 double length = 0;
                 try {
                     length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
@@ -422,14 +422,14 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
             Mesh<Nucleus> mesh = new DefaultMesh(n, template);
             for (MeshFace face : mesh.getFaces()) {
-                Attribute att = (Attribute) attributes.elementAt(attNumber++);
+                Attribute att = attributes.get(attNumber++);
                 inst.setValue(att, face.getArea());
             }
         }
 
         if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
-            Attribute att = (Attribute) attributes.elementAt(attNumber++);
+            Attribute att = attributes.get(attNumber++);
             inst.setValue(att, uniqueName);
         }
 

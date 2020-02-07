@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -27,7 +28,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -61,6 +61,6 @@ public abstract class CellClusteringMethod extends SingleDatasetAnalysisMethod {
 	 * Create the columns of the matrix to be analysed
 	 * @return
 	 */
-	protected abstract FastVector makeAttributes() throws ClusteringMethodException;
+	protected abstract ArrayList makeAttributes() throws ClusteringMethodException;
 	
 }
