@@ -717,7 +717,7 @@ public class ProfileIndexFinder {
 
         BooleanProfile result = new BooleanProfile(p);
 
-        for (int i = 0; i < result.size(); i++) {
+        for (int i : result) {
 
             if (p.get(i) < value) {
                 result.set(i, true);
@@ -739,7 +739,7 @@ public class ProfileIndexFinder {
 
         BooleanProfile result = new BooleanProfile(p);
 
-        for (int i = 0; i < result.size(); i++) {
+        for (int i : result) {
 
             if (p.get(i) > value) {
                 result.set(i, true);

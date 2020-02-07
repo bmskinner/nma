@@ -19,6 +19,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -31,7 +33,7 @@ import ij.IJ;
  * maxima.
  *
  */
-public class BooleanProfile implements Serializable {
+public class BooleanProfile implements Serializable, Iterable<Integer> {
 
     private static final long serialVersionUID = 1L;
     final protected boolean[] array;
@@ -241,6 +243,11 @@ public class BooleanProfile implements Serializable {
     public int countFalse(){
         return array.length - countTrue();
     }
+    
+	@Override
+	public Iterator<Integer> iterator() {
+		return IntStream.range(0, array.length).iterator();
+	}
     
     @Override
     public String toString(){

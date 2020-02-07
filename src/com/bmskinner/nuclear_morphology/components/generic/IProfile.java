@@ -62,7 +62,7 @@ public interface IProfile extends Serializable, Iterable<Integer> {
     }
     
     static IProfile merge(@NonNull List<IProfile> list){
-        if (list == null || list.size() == 0)
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException("Profile list is null or empty");
 
         int totalLength = 0;
@@ -187,10 +187,7 @@ public interface IProfile extends Serializable, Iterable<Integer> {
 		double diffFraction = index - indexFloor;
 
 		// Calculate the linear interpolation
-		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
-
-		return interpolate;
-
+		return array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
 	}
 
     /**
@@ -207,7 +204,7 @@ public interface IProfile extends Serializable, Iterable<Integer> {
      * @return the value at the index
      * @throws IndexOutOfBoundsException if the index is not in the profile
      */
-    double get(int index) throws IndexOutOfBoundsException;
+    double get(int index);
 
     /**
      * Get the value at the given proportion along the profile

@@ -371,7 +371,7 @@ public class SignalDetector extends Detector {
 
         double fractionThreshold = (p.getMax() - p.getMin()) * range;
 
-        for (int i = 0; i < p.size(); i++) {
+        for (int i : p) {
                 values[i] = minima.get(i) && (p.get(i) > fractionThreshold || p.get(i) < -fractionThreshold);
         }
         return new BooleanProfile(values);

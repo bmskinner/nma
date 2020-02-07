@@ -130,13 +130,10 @@ public class DipTester implements SignificanceTest {
      */
     public BooleanProfile testCollectionIsUniModal(Tag tag, double significance, ProfileType type) {
 
-        BooleanProfile resultProfile = null;
-        boolean[] modes = null;
-
         IProfile pvals = testCollectionGetPValues(tag, type);
-        modes = new boolean[pvals.size()];
+        boolean[]  modes = new boolean[pvals.size()];
 
-        for (int i = 0; i < pvals.size(); i++) {
+        for (int i : pvals) {
 
             if (pvals.get(i) < significance) {
                 modes[i] = true;
@@ -145,9 +142,7 @@ public class DipTester implements SignificanceTest {
             }
 
         }
-        resultProfile = new BooleanProfile(modes);
-
-        return resultProfile;
+        return new BooleanProfile(modes);
     }
 
     /**
