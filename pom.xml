@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nuclear_morphology</artifactId>
-	<version>1.17.2</version>
+	<version>1.18.0</version>
 
 	<!-- Define custom properties to be exported -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
-		<project.code.name>Federation</project.code.name>
+		<project.code.name>Galaxy</project.code.name>
 		<version>${project.version}</version>
 		<version.suffix></version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
