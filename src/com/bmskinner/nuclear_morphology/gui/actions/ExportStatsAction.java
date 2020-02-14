@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.DatasetOutlinesExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetProfileExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
@@ -111,6 +112,41 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
             worker = new DefaultAnalysisWorker(m, datasets.size());
             worker.addPropertyChangeListener(this);
             this.setProgressMessage("Exporting profiles");
+            ThreadManager.getInstance().submit(worker);
+
+        }
+
+    }
+    
+    /**
+     * The action for exporting cell component outlines from datasets
+     * 
+     * @author bms41
+     * @since 1.17.2
+     *
+     */
+    public static class ExportNuclearOutlinesAction extends ExportStatsAction {
+
+        private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
+
+        public ExportNuclearOutlinesAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
+        }
+
+        @Override
+        public void run() {
+
+            File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
+
+            if (file == null) {
+                cancel();
+                return;
+            }
+
+            IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets);
+            worker = new DefaultAnalysisWorker(m, datasets.size());
+            worker.addPropertyChangeListener(this);
+            this.setProgressMessage("Exporting outlines");
             ThreadManager.getInstance().submit(worker);
 
         }

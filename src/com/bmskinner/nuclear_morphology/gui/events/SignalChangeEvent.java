@@ -35,6 +35,7 @@ public class SignalChangeEvent extends EventObject {
     public static final String LOBE_DETECTION              = "LobeDetection";
     public static final String EXPORT_STATS                = "ExportStatsAction";
     public static final String EXPORT_PROFILES             = "ExportProfilesAction";
+    public static final String EXPORT_OUTLINES             = "ExportOutlinesAction";
     public static final String EXPORT_SIGNALS              = "ExportSignalsAction";
     public static final String EXPORT_SHELLS               = "ExportShellsAction";
     public static final String EXPORT_CELL_LOCS            = "SaveCellLocations";

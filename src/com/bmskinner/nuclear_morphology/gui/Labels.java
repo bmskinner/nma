@@ -109,7 +109,8 @@ public class Labels {
              
         public static final String EXPORT                 = "Export...";
         public static final String EXPORT_STATS           = "Nuclear statistics";
-        public static final String EXPORT_PROFILES        = "Nuclear profiles";
+        public static final String EXPORT_PROFILES        = "Full nuclear profiles";
+        public static final String EXPORT_OUTLINES        = "Full nuclear outlines";
         public static final String EXPORT_SIGNALS         = "Nuclear signal statistics";
         public static final String EXPORT_SHELLS          = "Nuclear signal shells";
         public static final String EXPORT_CELL_LOCS       = "Cell locations within images";

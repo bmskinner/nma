@@ -38,6 +38,7 @@ public interface Io  {
 	String TAB = "\t";
 	String DOT = ".";
 	String COMMA = ",";
+	String PIPE = "|";
 	
 	String TAB_FILE_EXTENSION = ".txt";
 		

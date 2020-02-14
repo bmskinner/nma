@@ -11,20 +11,18 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
- * Class to export only profiles from nuclei
+ * Export the outlines of cellular components
  * @author Ben Skinner
- * @since 1.17.2
+ * @since 1.18.0
  *
  */
-public class DatasetProfileExporter extends StatsExporter {
+public class DatasetOutlinesExporter extends StatsExporter {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
@@ -33,7 +31,7 @@ public class DatasetProfileExporter extends StatsExporter {
      * 
      * @param folder
      */
-    public DatasetProfileExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
+    public DatasetOutlinesExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
         super(file, list);
     }
 
@@ -42,14 +40,14 @@ public class DatasetProfileExporter extends StatsExporter {
      * 
      * @param folder
      */
-    public DatasetProfileExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
+    public DatasetOutlinesExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
         super(file, dataset);
     }
     
 
 	@Override
 	protected void appendHeader(@NonNull StringBuilder outLine) {
-		outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tProfile");
+		outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCoordinates");
 		outLine.append(NEWLINE);
 	}
 
@@ -76,30 +74,31 @@ public class DatasetProfileExporter extends StatsExporter {
                         .append(n.getSourceFolder() + TAB)
                         .append(n.getSourceFileName() + TAB);
 
-                    appendProfiles(outLine, n);
-                    
-                    // Remove final separator 
-                    if (outLine.length() > 0)
-                        outLine.setLength(outLine.length() - 1);
-
-                    outLine.append(NEWLINE);
+                    appendOutlines(outLine, n);
                 }
             }
-        }
-    }
-    
-    private void appendProfiles(StringBuilder outLine, Taggable c){
-    	
-    	try {
-    		IProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
-    		for(int i : p) {
-    			double value = p.get(i);
-    			outLine.append(value +COMMA);
-    		}
-    		
-    	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-    		LOGGER.severe("Unable to get profile for component "+c.getID());
+            if(cell.hasCytoplasm()) {
+            	outLine.append(d.getName() + TAB)
+	            	.append(cell.getId() + TAB)
+	            	.append(CellularComponent.CYTOPLASM+"_" + cell.getCytoplasm().getID() + TAB)
+	            	.append(cell.getCytoplasm().getSourceFolder() + TAB)
+	            	.append(cell.getCytoplasm().getSourceFileName() + TAB);
+
+            	appendOutlines(outLine, cell.getCytoplasm());
+            }
     	}
     }
+    
+    private void appendOutlines(StringBuilder outLine, CellularComponent c){
+    	for(IBorderPoint p : c.getBorderList()) {
+    		outLine.append(p.getX()+PIPE+p.getY()+COMMA);
+    	}
+    	// Remove final separator and add newline
+        if (outLine.length() > 0)
+            outLine.setLength(outLine.length() - 1);
+
+        outLine.append(NEWLINE);
+    }
+
 }
