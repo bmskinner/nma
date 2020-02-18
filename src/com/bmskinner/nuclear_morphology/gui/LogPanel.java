@@ -397,6 +397,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
         private static final String TASKS_CMD  = "tasks";
         private static final String HASH_CMD  = "check hash";
         private static final String EXPORT_CMD = "export xml";
+        private static final String EXPORT_TPS = "export tps";
 
         private final Map<String, Runnable> runnableCommands = new HashMap<>();
 
@@ -473,6 +474,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
                 LOGGER.info(" check - validate the open root datasets");
                 LOGGER.info(" list  - list the open root datasets");
                 LOGGER.info(" export xml - export the selected dataset in XML format");
+                LOGGER.info(" export tps - export the selected datasets in TPS format");
                 LOGGER.info(" tasks - list the current task list");
                 LOGGER.info(" "+HASH_CMD+" - print the hashes of the selected datasets");
             });
@@ -497,6 +499,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
             runnableCommands.put(GLCM_CMD,   () -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_GLCM_ANALYSIS, DatasetListManager.getInstance().getSelectedDatasets()));
             
             runnableCommands.put(EXPORT_CMD, () -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_XML_DATASET));
+            runnableCommands.put(EXPORT_TPS, () -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_TPS_DATASET));
         }
     	
         /**

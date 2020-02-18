@@ -41,7 +41,6 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
@@ -51,7 +50,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -94,7 +92,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     }
 
     private Consensus<Nucleus> makeConsensus(List<IPoint> list)
-            throws UnprofilableObjectException, MissingOptionException, ComponentCreationException,
+            throws UnprofilableObjectException, ComponentCreationException,
             UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         IPoint com = IPoint.makeNew(0, 0);
@@ -161,8 +159,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
     }
 
-    private List<IPoint> getPointAverage() throws UnavailableBorderTagException, UnavailableProfileTypeException,
-            ProfileException, UnavailableBorderPointException, MissingOptionException {
+    private List<IPoint> getPointAverage() {
 
         final Map<Double, List<IPoint>> perimeterPoints = new HashMap<>();
 
@@ -188,7 +185,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                     list.add(point);
                 }
             } catch (Exception e1) {
-                LOGGER.log(Loggable.STACK, "Error on nucleus " + n.getNameAndNumber(), e1);
+                LOGGER.log(Loggable.STACK, "Error getting perimeter point on nucleus " + n.getNameAndNumber(), e1);
             }
 
         });

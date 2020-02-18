@@ -65,6 +65,7 @@ public class SignalChangeEvent extends EventObject {
     
     public static final String SAVE_SELECTED_DATASET       = "SaveCollectionAction";
     public static final String EXPORT_XML_DATASET          = "ExportXMLDatasetAction";
+    public static final String EXPORT_TPS_DATASET          = "ExportTPSDatasetAction";
     public static final String MERGE_DATASETS_ACTION       = "MergeCollectionAction";
     public static final String MERGE_SIGNALS_ACTION        = "MergeSignalsAction";
     public static final String DELETE_DATASET              = "DeleteCollectionAction";
