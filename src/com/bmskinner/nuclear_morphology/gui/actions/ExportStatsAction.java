@@ -153,42 +153,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
         }
 
     }
-    
-    /**
-     * The action for exporting cell component outlines from datasets
-     * 
-     * @author bms41
-     * @since 1.17.2
-     *
-     */
-    public static class ExportTPSAction extends ExportStatsAction {
-
-        private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
-
-        public ExportTPSAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-            super(datasets, PROGRESS_LBL, acceptor, eh);
-        }
-
-        @Override
-        public void run() {
-
-            File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
-
-            if (file == null) {
-                cancel();
-                return;
-            }
-
-            IAnalysisMethod m = new TPSexporter(file, datasets);
-            worker = new DefaultAnalysisWorker(m, datasets.size());
-            worker.addPropertyChangeListener(this);
-            this.setProgressMessage("Exporting outlines");
-            ThreadManager.getInstance().submit(worker);
-
-        }
-
-    }
-    
+        
     /**
      * The action for exporting shell data from datasets
      * 

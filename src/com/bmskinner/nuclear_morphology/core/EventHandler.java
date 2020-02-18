@@ -44,12 +44,12 @@ import com.bmskinner.nuclear_morphology.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportOptionsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportSingleCellImagesAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearProfilesAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearOutlinesAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportTPSAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearProfilesAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportShellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportSignalsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportTPSAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExtractRandomCellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
@@ -310,7 +310,7 @@ public class EventHandler implements EventListener {
             	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true, ExportFormat.XML);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_TPS_DATASET))
-            	return new ExportTPSAction(selectedDatasets, acceptor, EventHandler.this);
+            	return new ExportTPSAction(selectedDataset, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.SAVE_ALL_DATASETS))
                 return () -> saveRootDatasets();

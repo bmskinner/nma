@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,7 +10,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
@@ -28,24 +27,23 @@ import ij.IJ;
 /**
  * Export nuclear border landmarks in TPS format suitable
  * for geometric morphometric analysis by packages such
- * as geomorph
+ * as geomorph. Note that this method only works on single datasets
+ * because we cannot guarantee consistentcy of landmark number across 
+ * different datasets.
  * @author Ben Skinner
  * @since 1.18.0
  *
  */
-public class TPSexporter extends MultipleDatasetAnalysisMethod implements Exporter {
+public class TPSexporter extends SingleDatasetAnalysisMethod implements Exporter {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private final File exportFile;
 	private final StringBuilder sb = new StringBuilder();
-	private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_dataset_export.tps";
+	private static final int TPS_VERTEX_SPACING = 5;
 	
-	public TPSexporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
-		super(list);
-
-		if (file.isDirectory())
-			file = new File(file, DEFAULT_MULTI_FILE_NAME);
+	public TPSexporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
+		super(dataset);
 
 		exportFile = file;
 
@@ -60,28 +58,29 @@ public class TPSexporter extends MultipleDatasetAnalysisMethod implements Export
 	@Override
 	public IAnalysisResult call() throws Exception {
 		export();
-        return new DefaultAnalysisResult(datasets);
+        return new DefaultAnalysisResult(dataset);
 	}
 	
 	/**
-	 * Export each dataset in turn 
+	 * Export each dataset in turn. If multiple datasets are selected, 
+	 * we want the outputs to be comparable i.e. the same segmentation and
+	 * number of vertices in each. 
 	 */
 	private void export() {
-		for(IAnalysisDataset d : datasets) {
-			
-			if(!d.getCollection().hasConsensus()) {
-				LOGGER.fine("No consensus in "+d.getName()+", skipping");
-				continue;
-			}
-			try {
-				Mesh<Taggable> consensus = new DefaultMesh<>(d.getCollection().getConsensus());
-				for(Nucleus n : d.getCollection().getNuclei()) {
-					appendPerimeter(n.getVerticallyRotatedNucleus(), consensus);
-				}
-			} catch (MeshCreationException e) {
-				LOGGER.log(Level.SEVERE, "Unable to create mesh for nucleus", e);
-			}
+		if(!dataset.getCollection().hasConsensus()) {
+			LOGGER.fine("No consensus in "+dataset.getName()+", skipping");
+			return;
 		}
+		
+		try {
+			Mesh<Taggable> consensus = new DefaultMesh<>(dataset.getCollection().getConsensus(), TPS_VERTEX_SPACING);
+			for(Nucleus n : dataset.getCollection().getNuclei()) {
+				appendPerimeter(n.getVerticallyRotatedNucleus(), consensus);
+			}
+		} catch (MeshCreationException e) {
+			LOGGER.log(Level.SEVERE, "Unable to create mesh for nucleus", e);
+		}
+		
 		fireIndeterminateState();
         IJ.append(sb.toString(), exportFile.getAbsolutePath());
 	}
@@ -104,7 +103,6 @@ public class TPSexporter extends MultipleDatasetAnalysisMethod implements Export
 		 */
 		
 		// A mesh generates the evenly spaced landmarks by default
-		// Use this 
 		Mesh<Taggable> mesh = new DefaultMesh<>(t, target);
 				
 		int vertexCount = mesh.getPeripheralVertexCount();
