@@ -76,17 +76,44 @@ public interface Io  {
 
 	String INVALID_FILE_ERROR       = "File is not valid for importing";
 	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
+	
+    /**
+     * Get the directory that the program is being run from
+     * 
+     * @return the program directory
+     */
+    static File getProgramDir() {
+
+        try {
+            // Get the location of the jar file
+            File dir = new File(Importer.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            // Difference in path between standalone and jar
+            if (dir.getAbsolutePath().endsWith(".jar") || dir.getAbsolutePath().endsWith(".exe"))
+                dir = dir.getParentFile();
+            return dir;
+        } catch (URISyntaxException e) {
+        	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Error getting program dir");
+        	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Loggable.STACK, e.getMessage(), e);
+            return null;
+        }
+
+    }
 
     /**
-     * Interface for all export classes. Defines file extensions.
+     * Static methods for exporting data
      * 
      * @author ben
      *
      */
-    interface Exporter extends Io {
+    public static class Exporter {
         
         
-        static void writeString(final String s, final File f){
+        /**
+         * Write a string to a given file
+         * @param s
+         * @param f
+         */
+    	public static boolean writeString(final String s, final File f){
 
             if(f==null){
                 throw new IllegalArgumentException("File cannot be null");
@@ -97,8 +124,10 @@ public interface Io  {
                 out.println(s);
 
             } catch (FileNotFoundException e) {
-                return;
+            	// No action
+            	return false;
             }
+            return true;
         }
     }
     
@@ -119,28 +148,6 @@ public interface Io  {
             }
             String newFileName = f.getAbsolutePath().replace(oldExt, newExt);
             return new File(newFileName);
-
-        }
-
-        /**
-         * Get the directory that the program is being run from
-         * 
-         * @return the program directory
-         */
-        static File getProgramDir() {
-
-            try {
-                // Get the location of the jar file
-                File dir = new File(Importer.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-                // Difference in path between standalone and jar
-                if (dir.getAbsolutePath().endsWith(".jar") || dir.getAbsolutePath().endsWith(".exe"))
-                    dir = dir.getParentFile();
-                return dir;
-            } catch (URISyntaxException e) {
-            	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING, "Error getting program dir");
-            	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Loggable.STACK, e.getMessage(), e);
-                return null;
-            }
 
         }
 

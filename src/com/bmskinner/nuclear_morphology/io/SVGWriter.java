@@ -37,7 +37,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -47,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.5
  *
  */
-public class SVGWriter implements Exporter{
+public class SVGWriter implements Io {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 

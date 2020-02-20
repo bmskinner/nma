@@ -29,7 +29,6 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
-import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -40,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public abstract class WorkspaceExporter extends XMLWriter implements Exporter {
+public abstract class WorkspaceExporter extends XMLWriter implements Io {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	

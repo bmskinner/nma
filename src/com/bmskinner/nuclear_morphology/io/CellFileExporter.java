@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -42,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author ben
  *
  */
-public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Exporter {
+public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Io {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	

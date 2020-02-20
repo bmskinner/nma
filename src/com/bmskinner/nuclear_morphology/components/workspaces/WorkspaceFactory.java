@@ -21,7 +21,7 @@ import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.io.Io.Exporter;
+import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
  * Utility class for creating workspaces
@@ -61,7 +61,7 @@ public class WorkspaceFactory {
 	 * @return
 	 */
 	public static IWorkspace createWorkspace(@NonNull IAnalysisDataset dataset) {
-		File f = new File(dataset.getSavePath().getParent(), dataset.getName()+Exporter.WRK_FILE_EXTENSION);
+		File f = new File(dataset.getSavePath().getParent(), dataset.getName()+Io.WRK_FILE_EXTENSION);
 		IWorkspace w = new DefaultWorkspace(f, dataset.getName());
 		w.add(dataset);
 		return w;
@@ -75,7 +75,7 @@ public class WorkspaceFactory {
 	 * @return
 	 */
 	public static IWorkspace createWorkspace(@NonNull IAnalysisDataset dataset, @NonNull String name) {
-		File f = new File(dataset.getSavePath().getParent(), dataset.getName()+Exporter.WRK_FILE_EXTENSION);
+		File f = new File(dataset.getSavePath().getParent(), dataset.getName()+Io.WRK_FILE_EXTENSION);
 		IWorkspace w = new DefaultWorkspace(f, name);
 		w.add(dataset);
 		return w;

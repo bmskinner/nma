@@ -28,7 +28,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -47,7 +46,7 @@ public class ConfigFileReader {
         try {
 
             // Get the location of the jar file
-            File dir = Importer.getProgramDir();
+            File dir = Io.getProgramDir();
 
             File ini = new File(dir, INI_FILE);
             LOGGER.config("Config file: " + ini.getAbsolutePath());

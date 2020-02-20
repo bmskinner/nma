@@ -28,7 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogFileFormatter;
@@ -115,7 +115,7 @@ public class Nuclear_Morphology_Analysis {
 			 * and create a log file in the same
 			 * directory if not present
 			 */
-			File dir =  Importer.getProgramDir();
+			File dir =  Io.getProgramDir();
 			LOGGER.config("Program dir: "+dir.getAbsolutePath());
 			File errorFile = new File(dir, "error.log");
 			LOGGER.config("Log file: "+errorFile.getAbsolutePath());
