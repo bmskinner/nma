@@ -84,7 +84,6 @@ public class ConfigFileReader {
         properties.setProperty(GlobalOptions.DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
         properties.setProperty(GlobalOptions.DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
         properties.setProperty(GlobalOptions.REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
-        properties.setProperty(GlobalOptions.IS_DOCKABLE_INTERFACE_KEY, String.valueOf(op.isUseDockableInterface()));
         properties.setProperty(GlobalOptions.IS_DEBUG_INTERFACE_KEY, String.valueOf(op.getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)));
         properties.setProperty(GlobalOptions.DEFAULT_EXPORT_FORMAT_KEY, String.valueOf(op.getExportFormat()));
         return properties;
@@ -124,9 +123,6 @@ public class ConfigFileReader {
 
             if (GlobalOptions.REFOLD_OVERRIDE_KEY.equals(key))
                 op.setBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY, Boolean.valueOf(value));
-            
-            if (GlobalOptions.IS_DOCKABLE_INTERFACE_KEY.equals(key))
-                op.setBoolean(GlobalOptions.IS_DOCKABLE_INTERFACE_KEY, Boolean.valueOf(value));
             
             if (GlobalOptions.IS_DEBUG_INTERFACE_KEY.equals(key))
                 op.setBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY, Boolean.valueOf(value));

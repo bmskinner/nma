@@ -19,6 +19,13 @@ import com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis;
 import ij.IJ;
 import ij.plugin.PlugIn;
 
+/**
+ * ImageJ plugins require their runnable class to be in 
+ * the default package. This stub invokes the real main 
+ * class in its appropriate package.
+ * @author Ben Skinner
+ *
+ */
 public class ImageJLoader implements PlugIn {
 	
 	/* 

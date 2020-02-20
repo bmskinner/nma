@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.api.SavedOptionsAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
 
 import ij.IJ;
@@ -149,15 +148,8 @@ public class CommandLineParser {
 				InputSupplier is = new DefaultInputSupplier();
 				EventHandler eh = new EventHandler(is);
 
-				boolean useDockable = GlobalOptions.getInstance().isUseDockableInterface();
-
-				if(useDockable) {
-					DockableMainWindow mw = new DockableMainWindow(useStandalone,eh);
-					mw.setVisible(true);
-				} else {
-					MainWindow mw = new MainWindow(useStandalone, eh);
-					mw.setVisible(true);
-				}
+				DockableMainWindow mw = new DockableMainWindow(useStandalone,eh);
+				mw.setVisible(true);
 			};
 			
 			EventQueue.invokeLater( r );

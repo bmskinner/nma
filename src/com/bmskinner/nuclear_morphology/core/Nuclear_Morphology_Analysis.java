@@ -54,8 +54,6 @@ public class Nuclear_Morphology_Analysis {
 	 */
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
-//	private static final ThreadManager threadManager = ThreadManager.getInstance();		
-
 	/**
 	 * Private constructor used when launching as a standalone program
 	 * @param args
@@ -105,8 +103,10 @@ public class Nuclear_Morphology_Analysis {
 			for(Handler h : LOGGER.getHandlers())
 				LOGGER.removeHandler(h);
 			
+			// Overall level for the logger to respond to 
 			LOGGER.setLevel(Level.FINER);
 
+			// Output to the console
 			Handler consoleHander = new ConsoleHandler(new ConsoleFormatter());
 			LOGGER.addHandler(consoleHander);
 			consoleHander.setLevel(Level.FINE);
@@ -123,10 +123,10 @@ public class Nuclear_Morphology_Analysis {
 				LOGGER.fine("Created new log file");
 			}
 
-			// Log stack traces to the log file for debugging
+			// Log stack traces and config to the log file for debugging
 			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
 			LOGGER.addHandler(fileHandler);
-			fileHandler.setLevel(Level.FINE);			
+			fileHandler.setLevel(Level.CONFIG);			
 			ThreadManager.getInstance();
 			
 		} catch (SecurityException |IOException e ) {

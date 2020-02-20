@@ -54,6 +54,7 @@ public class GlobalOptions extends AbstractHashOptions {
     
     public static final String IS_CONVERT_DATASETS_KEY      = "CONVERT_DATASETS";
     
+    @Deprecated
     public static final String IS_DOCKABLE_INTERFACE_KEY    = "DOCKABLE_INTERFACE";
     
     public static final String IS_DEBUG_INTERFACE_KEY    = "USE_DEBUG_INTERFACE";
@@ -111,7 +112,6 @@ public class GlobalOptions extends AbstractHashOptions {
         this.defaultType = NucleusType.RODENT_SPERM;
         setBoolean(REFOLD_OVERRIDE_KEY, false);
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
-        setBoolean(IS_DOCKABLE_INTERFACE_KEY, true);
         setBoolean(IS_DEBUG_INTERFACE_KEY, false);
         setInt(NUM_IMAGEJ_THREADS_KEY, 2);
         this.datasetExportFormat = ExportFormat.JAVA;
@@ -197,14 +197,6 @@ public class GlobalOptions extends AbstractHashOptions {
 
     public synchronized void setConvertDatasets(boolean convertDatasets) {
     	setBoolean(IS_CONVERT_DATASETS_KEY, convertDatasets);
-    }
-    
-    public synchronized boolean isUseDockableInterface() {
-    	return getBoolean(IS_DOCKABLE_INTERFACE_KEY);
-    }
-
-    public synchronized void setUseDockableInterface(boolean b) {
-    	setBoolean(IS_DOCKABLE_INTERFACE_KEY, b);
     }
 
     /**
