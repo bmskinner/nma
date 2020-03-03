@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -36,7 +37,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
         super(context);
 
         this.setLayout(new BorderLayout());
-        tabPane = new JTabbedPane(JTabbedPane.TOP);
+        tabPane = new JTabbedPane(SwingConstants.TOP);
 
         DetailPanel nuclearStatsPanel = new NuclearStatsPanel(context);
         DetailPanel boxplotPanel = new NuclearBoxplotsPanel(context);
@@ -45,25 +46,28 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
         DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel(context);
         DetailPanel nuclearLobesPanel = new NuclearLobesPanel(context);
+//        DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel(context);
 
-        this.addSubPanel(nuclearStatsPanel);
-        this.addSubPanel(boxplotPanel);
-        this.addSubPanel(wilcoxonPanel);
-        this.addSubPanel(nucleusMagnitudePanel);
-
-        this.addSubPanel(nuclearScatterChartPanel);
-        this.addSubPanel(nuclearLobesPanel);
-
-        tabPane.addTab(nuclearStatsPanel.getPanelTitle(), nuclearStatsPanel);
-        tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
-        tabPane.addTab(wilcoxonPanel.getPanelTitle(), wilcoxonPanel);
-        tabPane.addTab(nucleusMagnitudePanel.getPanelTitle(), null, nucleusMagnitudePanel, "Pop, pop");
-        tabPane.addTab(nuclearScatterChartPanel.getPanelTitle(), nuclearScatterChartPanel);
-        tabPane.addTab(nuclearLobesPanel.getPanelTitle(), nuclearLobesPanel);
+        addPanel(nuclearStatsPanel);
+        addPanel(boxplotPanel);
+        addPanel(wilcoxonPanel);
+        addPanel(nucleusMagnitudePanel);
+        addPanel(nuclearScatterChartPanel);
+        addPanel(nuclearLobesPanel);
 
         this.add(tabPane, BorderLayout.CENTER);
     }
     
+   
+    /**
+     * Register a sub panel and add to the tab pane
+     * @param panel
+     */
+    private void addPanel(DetailPanel panel) {
+    	this.addSubPanel(panel);
+    	tabPane.addTab(panel.getPanelTitle(), panel);
+    }
+
     @Override
     public String getPanelTitle(){
         return PANEL_TITLE_LBL;

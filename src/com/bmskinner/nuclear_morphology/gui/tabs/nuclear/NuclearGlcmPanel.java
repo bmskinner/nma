@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Ben Skinner
+ * Copyright (C) 2020 Ben Skinner
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,17 +35,24 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 
+/**
+ * Display GLCM values measured for nuclei
+ * @author Ben Skinner
+ * @since 1.18.0
+ *
+ */
 @SuppressWarnings("serial")
-public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
+public class NuclearGlcmPanel extends BoxplotsTabPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-
-    public NuclearBoxplotsPanel(@NonNull InputSupplier context) {
-        super(context, CellularComponent.NUCLEUS);
+	private static final String PANEL_TITLE_LBL = "GLCM";
+	
+	public NuclearGlcmPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEUS, PANEL_TITLE_LBL);
 
         Dimension preferredSize = new Dimension(200, 300);
         
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+        for (PlottableStatistic stat : PlottableStatistic.getGlcmStats()) {
 
         	JFreeChart chart = AbstractChartFactory.createEmptyChart();
             ViolinChartPanel panel = new ViolinChartPanel(chart);
@@ -59,9 +66,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         update(getDatasets());
-
     }
 
     @Override
@@ -76,12 +81,14 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
     protected synchronized void updateMultiple() {
         super.updateMultiple();
 
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+        for (PlottableStatistic stat : PlottableStatistic.getGlcmStats()) {
 
             ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+            		.addStatistic(stat)
+                    .setScale(GlobalOptions.getInstance().getScale())
+                    .setSwatch(GlobalOptions.getInstance().getSwatch())
                     .setTarget(panel).build();
 
             setChart(options);
@@ -100,7 +107,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
     public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
 
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+        for (PlottableStatistic stat : PlottableStatistic.getGlcmStats()) {
             ExportableChartPanel panel = chartPanels.get(stat.toString());
             panel.setChart(AbstractChartFactory.createLoadingChart());
 

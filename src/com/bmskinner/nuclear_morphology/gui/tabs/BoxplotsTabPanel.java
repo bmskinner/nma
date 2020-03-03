@@ -54,7 +54,7 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String PANEL_TITLE_LBL = "Violin plots";
-    protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
+    protected Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
 
     protected JPanel mainPanel;   // hold the charts
     protected JPanel headerPanel; // hold buttons
@@ -63,8 +63,22 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 
     protected String component;
 
+    /**
+     * Create with the default panel title label
+     * @param context
+     * @param component
+     */
     public BoxplotsTabPanel(@NonNull InputSupplier context, String component) {
-        super(context, PANEL_TITLE_LBL);
+    	this(context, component, PANEL_TITLE_LBL);
+    }
+    
+    /**
+     * Create with a custom panel title label
+     * @param context
+     * @param component
+     */
+    public BoxplotsTabPanel(@NonNull InputSupplier context, String component, String panelTitle) {
+    	super(context, panelTitle);
         this.component = component;
         this.setLayout(new BorderLayout());
 
@@ -89,7 +103,6 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
         } catch (Exception e) {
         	LOGGER.log(Loggable.STACK, "Error creating panel", e);
         }
-
     }
     
     @Override

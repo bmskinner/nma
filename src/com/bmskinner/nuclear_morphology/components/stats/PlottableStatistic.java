@@ -278,13 +278,15 @@ public interface PlottableStatistic extends Serializable {
     	list.add(REGULARITY);
         list.add(VARIABILITY);
         list.add(BOUNDING_HEIGHT);
-        list.add(BOUNDING_WIDTH);
-        
-        // Enable when ready to display GLCM in GUI
-//        for(PlottableStatistic s : GLCMValue.toStats())
-//        	list.add(s);
-        	
+        list.add(BOUNDING_WIDTH);	
         return list;
+    }
+    
+    static List<PlottableStatistic> getGlcmStats() {
+    	List<PlottableStatistic> list = new ArrayList<>();
+    	for(PlottableStatistic s : GLCMValue.toStats())
+    		list.add(s);
+    	return list;
     }
 
     /**
@@ -330,7 +332,7 @@ public interface PlottableStatistic extends Serializable {
      * @return
      */
     static List<PlottableStatistic> getSegmentStats() {
-        List<PlottableStatistic> list = new ArrayList<PlottableStatistic>(2);
+        List<PlottableStatistic> list = new ArrayList<>(2);
         list.add(LENGTH);
         list.add(DISPLACEMENT);
         return list;
