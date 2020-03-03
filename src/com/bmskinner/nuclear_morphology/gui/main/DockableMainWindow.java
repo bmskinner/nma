@@ -77,7 +77,7 @@ public class DockableMainWindow extends AbstractMainWindow {
     private PopulationsPanel populationsPanel;
     private TabDock tabDock; // bottom panel tabs
     
-    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    private static final Logger LOGGER = Logger.getLogger(DockableMainWindow.class.getName());
 
     /**
      * Create the frame.
@@ -131,7 +131,9 @@ public class DockableMainWindow extends AbstractMainWindow {
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setLevel(Level.INFO);
             textHandler.setFormatter(new LogPanelFormatter());
-            LOGGER.addHandler(textHandler);
+            
+            // Add to the root program logger
+            Logger.getLogger("com.bmskinner.nuclear_morphology").addHandler(textHandler);
             
             
     		

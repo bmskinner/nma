@@ -17,10 +17,8 @@
 package com.bmskinner.nuclear_morphology.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,12 +26,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
-
-import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogFileFormatter;
-import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
 
 import ij.IJ;
 import ij.Prefs;
@@ -47,22 +39,27 @@ import ij.Prefs;
 public class Nuclear_Morphology_Analysis {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
-//	private CommandLineParser parser; // parse command line arguments and launch the UI
 	
-	/*
-	 * Keep a strong reference to the logger so they can be accessed
-	 * by all other classes implementing the Loggable interface
-	 */
 	private static final Logger LOGGER;
-//	private static final Logger LOGGER = LoggerFactory.getLogger(Nuclear_Morphology_Analysis.class);
+	
+    private static final String LOG_FOLDER_NAME = "logs";
+    
+    private static final File LOG_FOLDER;
 	
 	
 	static {
+		
+		// Create a log folder in the user home dir if needed
+		LOG_FOLDER = new File(System.getProperty("user.home")+"/"+LOG_FOLDER_NAME+"/");
+    	
+    	if(!Files.exists(LOG_FOLDER.toPath())) {
+    		LOG_FOLDER.mkdirs();
+    	}
+		
+    	// Read the logging properties
 		String path = Nuclear_Morphology_Analysis.class.getClassLoader()
                 .getResource("logging.properties")
                 .getFile();
-//		System.out.println(path);
-//		System.out.println("Logging properties file exists: "+Files.exists(new File(path).toPath()));
 		System.setProperty("java.util.logging.config.file", path);
 		LOGGER = Logger.getLogger(Nuclear_Morphology_Analysis.class.getName());
 	}
@@ -72,7 +69,7 @@ public class Nuclear_Morphology_Analysis {
 	 * @param args
 	 */
 	private Nuclear_Morphology_Analysis(String[] args){
-		loadLogger();
+		logConfiguration();
 	    new CommandLineParser(args);
 	}
 	
@@ -108,47 +105,17 @@ public class Nuclear_Morphology_Analysis {
 		return true;
 	}
 	
-	private void loadLogger(){
+	private void logConfiguration(){
 		
 		try {
+			LOGGER.config("Logger properties file: "+System.getProperty("java.util.logging.config.file"));
+			LOGGER.config("Log file location: "+LOG_FOLDER.getAbsolutePath());
 			
-			// Load the log file
-			LOGGER.config("Loaded logger properties from: "+System.getProperty("java.util.logging.config.file"));
-			LOGGER.config("Log file location: "+System.getProperty("user.dir"));
-//			LOGGER.info("Loaded logging properties file");
-//			LOGGER.config("Debug message");
-//			LOGGER.warning("Warning message");
+			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
+			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));
 			
-			// Remove existing handlers
-//			for(Handler h : LOGGER.getHandlers())
-//				LOGGER.removeHandler(h);
-			
-			// Overall level for the logger to respond to 
-//			LOGGER.setLevel(Level.FINER);
-
-			// Output to the console
-//			Handler consoleHander = new ConsoleHandler(new ConsoleFormatter());
-//			LOGGER.addHandler(consoleHander);
-//			consoleHander.setLevel(Level.FINE);
-
-			/* Get the location of the jar file
-			 * and create a log file in the same
-			 * directory if not present
-			 */
-//			File dir =  Io.getProgramDir();
-//			LOGGER.config("Program dir: "+dir.getAbsolutePath());
-//			File errorFile = new File(dir, "error.log");
-//			LOGGER.config("Log file: "+errorFile.getAbsolutePath());
-//			if(errorFile.createNewFile()) {
-//				LOGGER.fine("Created new log file");
-//			}
-
-			// Log stack traces and config to the log file for debugging
-//			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
-//			LOGGER.addHandler(fileHandler);
-//			fileHandler.setLevel(Level.CONFIG);			
+			// First invokation will create and log resources 
 			ThreadManager.getInstance();
-			
 		} catch (SecurityException e ) {
 			LOGGER.log(Level.SEVERE, "Error initialising logger", e);
 		}
@@ -162,7 +129,7 @@ public class Nuclear_Morphology_Analysis {
 		if(!checkJavaVersion())
 			return;
 		
-		loadLogger();
+		logConfiguration();
 		
 		/*
 		 * Add a splash screen for long load times

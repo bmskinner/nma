@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater
  */
 public class ThreadManager {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ThreadManager.class.getName());
     private static ThreadManager instance   = null;
     
     /** Object to lock on for synchronisation */

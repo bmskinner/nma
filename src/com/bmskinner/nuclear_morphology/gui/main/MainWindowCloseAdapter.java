@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class MainWindowCloseAdapter extends WindowAdapter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(MainWindowCloseAdapter.class.getName());
 
     private MainView mw;
 
@@ -86,10 +86,10 @@ public class MainWindowCloseAdapter extends WindowAdapter {
     	LOGGER.config("Clearing loaded datasets");
         DatasetListManager.getInstance().clear();
         GlobalOptions.getInstance().setDefaults();
-        LOGGER.config("Closing logging handlers");
-        for (Handler h : Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).getHandlers()) {
-            h.close();
-        }
+//        LOGGER.config("Closing logging handlers");
+//        for (Handler h : Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).getHandlers()) {
+//            h.close();
+//        }
 
         mw.dispose();
         LOGGER.config("Disposed GUI; quitting JVM");

@@ -23,15 +23,21 @@ import java.util.logging.Formatter;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+/**
+ * Custom logging handler
+ * @author Ben Skinner
+ *
+ */
 public class LogFileHandler extends FileHandler {
 
     private static boolean APPEND = true;
     private static int     LIMIT  = 10000000;
     private static int     COUNT  = 1;
-    
+        
     public LogFileHandler() throws SecurityException, IOException {
     	super();
     }
+    
 
     public LogFileHandler(@NonNull File logFile) throws SecurityException, IOException {
         super(logFile.getAbsolutePath(), LIMIT, COUNT, APPEND);
