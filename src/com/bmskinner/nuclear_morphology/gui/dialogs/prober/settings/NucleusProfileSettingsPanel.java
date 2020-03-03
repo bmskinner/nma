@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class NucleusProfileSettingsPanel extends SettingsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NucleusProfileSettingsPanel.class.getName());
 
     private static final double MIN_PROFILE_PROP  = 0;
     private static final double MAX_PROFILE_PROP  = 1;

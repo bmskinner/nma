@@ -55,7 +55,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileDatasetCreator.class.getName());
 
 	public static final int DEFAULT_PROFILE_LENGTH = 1000;
 

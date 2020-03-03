@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
  */
 public class ExportOptionsAction extends MultiDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ExportOptionsAction.class.getName());
 	
 	private static final String PROGRESS_LBL = "Exporting options";
 	

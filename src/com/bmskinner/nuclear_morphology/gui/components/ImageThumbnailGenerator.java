@@ -29,7 +29,7 @@ import ij.process.ImageProcessor;
  */
 public class ImageThumbnailGenerator implements ChartMouseListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ImageThumbnailGenerator.class.getName());
 	
 	public static final boolean COLOUR_RGB = true;
 	public static final boolean COLOUR_GREYSCALE = false;

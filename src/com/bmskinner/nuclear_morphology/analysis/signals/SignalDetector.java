@@ -61,7 +61,7 @@ import ij.process.ImageStatistics;
  */
 public class SignalDetector extends Detector {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalDetector.class.getName());
 
     private INuclearSignalOptions                  options;
     private final ComponentFactory<INuclearSignal> factory = new SignalFactory();

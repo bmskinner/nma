@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ProfileManager {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileManager.class.getName());
     private final ICellCollection collection;
 
     public ProfileManager(final ICellCollection collection) {

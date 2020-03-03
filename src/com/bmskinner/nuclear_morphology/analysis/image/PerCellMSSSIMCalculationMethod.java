@@ -39,7 +39,7 @@ import ij.process.ImageProcessor;
  */
 public class PerCellMSSSIMCalculationMethod extends SwingWorker<Map<ViolinKey, List<MSSIMScore>>, Integer> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(PerCellMSSSIMCalculationMethod.class.getName());
 	
 	private final SignalWarpingModel model;
 	

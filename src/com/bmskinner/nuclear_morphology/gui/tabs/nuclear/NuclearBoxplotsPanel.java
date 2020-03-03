@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 @SuppressWarnings("serial")
 public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NuclearBoxplotsPanel.class.getName());
 
     public NuclearBoxplotsPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEUS);

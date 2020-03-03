@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class WatershedSettingsPanel extends DetectionSettingsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(WatershedSettingsPanel.class.getName());
 
     private static final Integer DYNAMIC_MIN_RANGE = Integer.valueOf(1);
     private static final Integer DYNAMIC_MAX_RANGE = Integer.valueOf(255);

@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class ThresholdSettingsPanel extends DetectionSettingsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ThresholdSettingsPanel.class.getName());
 
     private static final Integer MIN_RANGE = Integer.valueOf(0);
     private static final Integer MAX_RANGE = Integer.valueOf(255);

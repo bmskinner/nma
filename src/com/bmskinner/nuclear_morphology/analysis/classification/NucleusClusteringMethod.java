@@ -60,7 +60,7 @@ import weka.core.Instances;
  */
 public class NucleusClusteringMethod extends TreeBuildingMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NucleusClusteringMethod.class.getName());
 
     public static final int EM           = 0; // expectation maximisation
     public static final int HIERARCHICAL = 1;

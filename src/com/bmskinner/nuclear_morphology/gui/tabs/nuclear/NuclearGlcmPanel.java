@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 @SuppressWarnings("serial")
 public class NuclearGlcmPanel extends BoxplotsTabPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NuclearGlcmPanel.class.getName());
 	private static final String PANEL_TITLE_LBL = "GLCM";
 	
 	public NuclearGlcmPanel(@NonNull InputSupplier context) {

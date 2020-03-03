@@ -55,7 +55,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalDetectionMethod.class.getName());
 
     protected final INuclearSignalOptions options;
     protected final File folder;

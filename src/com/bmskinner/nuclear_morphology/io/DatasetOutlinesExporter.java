@@ -24,7 +24,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  */
 public class DatasetOutlinesExporter extends StatsExporter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetOutlinesExporter.class.getName());
 	
 	 /**
      * Create specifying the folder profiles will be exported into

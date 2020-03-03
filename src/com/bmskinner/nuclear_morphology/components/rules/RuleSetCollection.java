@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  */
 public class RuleSetCollection implements Serializable {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
 
     private static final long serialVersionUID = 1L;
 

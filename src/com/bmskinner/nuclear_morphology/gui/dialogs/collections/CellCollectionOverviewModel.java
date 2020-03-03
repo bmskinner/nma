@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
  */
 public class CellCollectionOverviewModel extends DefaultTableModel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellCollectionOverviewModel.class.getName());
 	
 	/** Track which cells have been highlighted */
 	private transient Set<Key> selected = new HashSet<>();

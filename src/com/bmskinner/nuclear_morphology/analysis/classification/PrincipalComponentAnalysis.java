@@ -57,7 +57,7 @@ import weka.core.SparseInstance;
  */
 public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(PrincipalComponentAnalysis.class.getName());
 	
 	private final HashOptions options;	
 	

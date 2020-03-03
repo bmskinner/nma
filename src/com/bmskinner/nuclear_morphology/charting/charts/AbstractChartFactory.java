@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  */
 public abstract class AbstractChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractChartFactory.class.getName());
 
 	/** The X and Y axis positive & negative range magnitude for empty charts  */
     protected static final int DEFAULT_EMPTY_RANGE         = 10;

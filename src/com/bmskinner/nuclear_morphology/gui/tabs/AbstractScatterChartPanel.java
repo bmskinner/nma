@@ -75,7 +75,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class AbstractScatterChartPanel extends DetailPanel  {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractScatterChartPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Scatter";
     private static final String FILTER_BTN_LBL  = "Filter visible";

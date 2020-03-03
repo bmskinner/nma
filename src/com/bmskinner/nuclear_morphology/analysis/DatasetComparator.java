@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public class DatasetComparator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetComparator.class.getName());
 	
 	/**
 	 * Test if the datasets have the same values, except in ID

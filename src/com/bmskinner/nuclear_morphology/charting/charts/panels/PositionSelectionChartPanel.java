@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 @SuppressWarnings("serial")
 public class PositionSelectionChartPanel extends ExportableChartPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(PositionSelectionChartPanel.class.getName());
 
     protected RectangleOverlayObject overlayRectangle = null;
 

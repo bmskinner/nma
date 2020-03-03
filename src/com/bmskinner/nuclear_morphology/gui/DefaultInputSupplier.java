@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
  */
 public class DefaultInputSupplier implements InputSupplier {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultInputSupplier.class.getName());
 
 	@Override
 	public String requestString(@NonNull String message) throws RequestCancelledException {

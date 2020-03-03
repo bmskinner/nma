@@ -58,7 +58,7 @@ import ij.process.FloatPolygon;
  */
 public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultRodentSpermNucleus.class.getName());
 
     private static final long serialVersionUID = 1L;
 

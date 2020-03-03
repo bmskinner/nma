@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 @Deprecated
 public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultNucleusDetectionOptions.class.getName());
 
     public static final int     DEFAULT_MIN_NUCLEUS_SIZE  = 2000;
     public static final int     DEFAULT_MAX_NUCLEUS_SIZE  = 10000;

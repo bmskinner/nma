@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 @Deprecated
 public class DefaultCannyOptions implements ICannyOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultCannyOptions.class.getName());
 
     private static final long serialVersionUID = 1L;
 

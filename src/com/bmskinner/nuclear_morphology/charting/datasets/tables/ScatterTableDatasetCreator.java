@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class ScatterTableDatasetCreator extends AbstractTableCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ScatterTableDatasetCreator.class.getName());
 	
     public ScatterTableDatasetCreator(@NonNull final TableOptions options) {
         super(options);

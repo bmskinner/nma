@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 public abstract class AbstractEditingPanel extends DetailPanel
         implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {  
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractEditingPanel.class.getName());
     
     public AbstractEditingPanel(@NonNull InputSupplier context, String title){
         super(context, title);

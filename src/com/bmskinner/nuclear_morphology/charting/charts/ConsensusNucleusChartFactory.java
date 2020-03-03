@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ConsensusNucleusChartFactory.class.getName());
 	
 	private static final String MULTIPLE_DATASETS_NO_CONSENSUS_ERROR = "No consensus in dataset(s)";
 

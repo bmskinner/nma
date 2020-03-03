@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class ClusteringMethodSelectionPanel  extends OptionsPanel implements ActionListener {
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ClusteringMethodSelectionPanel.class.getName());
 
 	private static final String CLUSTER_METHOD_LBL  = "Distance method";
 	private static final String CLUSTER_NUMBER_LBL = "Number of clusters";

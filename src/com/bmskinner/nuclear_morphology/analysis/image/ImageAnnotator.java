@@ -65,7 +65,7 @@ import ij.process.ImageProcessor;
  */
 public class ImageAnnotator extends AbstractImageFilterer {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ImageAnnotator.class.getName());
     
     private static final int BORDER_TAG_POINT_SIZE = 7;
 	private static final int RP_POINT_SIZE = 9;

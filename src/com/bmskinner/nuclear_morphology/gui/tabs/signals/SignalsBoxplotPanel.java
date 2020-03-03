@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalsBoxplotPanel.class.getName());
 
     public SignalsBoxplotPanel(@NonNull InputSupplier context) {
         super(context, CellularComponent.NUCLEAR_SIGNAL);

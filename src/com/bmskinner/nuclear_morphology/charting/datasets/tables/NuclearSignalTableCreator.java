@@ -55,7 +55,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class NuclearSignalTableCreator extends AbstractTableCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NuclearSignalTableCreator.class.getName());
 
     /**
      * Create with a set of table options

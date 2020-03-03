@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  */
 public class ExportWorkspaceAction extends VoidResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ExportWorkspaceAction.class.getName());
 
     private static final String PROGRESS_LBL = "Saving workspace";
 

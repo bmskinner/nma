@@ -52,7 +52,7 @@ import inra.ijpb.morphology.strel.DiskStrel;
  */
 public class ImageFilterer extends AbstractImageFilterer {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ImageFilterer.class.getName());
 
     public ImageFilterer(ImageProcessor ip) {
         super(ip);

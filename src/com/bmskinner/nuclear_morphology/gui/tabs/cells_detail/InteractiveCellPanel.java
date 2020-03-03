@@ -56,7 +56,7 @@ import ij.process.ImageProcessor;
  */
 public abstract class InteractiveCellPanel extends JPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(InteractiveCellPanel.class.getName());
 	
 	protected JLabel imageLabel;
 	

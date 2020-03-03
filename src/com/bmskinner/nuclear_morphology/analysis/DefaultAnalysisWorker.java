@@ -35,7 +35,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
 	
 	private static final String ERROR_PROPERTY = "Error";
 
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultAnalysisWorker.class.getName());
 
     private long progressTotal;     // the maximum value for the progress bar
     private long progressCount = 0; // the current value for the progress bar

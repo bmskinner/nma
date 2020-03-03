@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(TailDetectionSettingsDialog.class.getName());
 
     private static final long serialVersionUID = 1L;
 

@@ -60,7 +60,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class RandomSamplingDialog extends LoadingIconDialog
         implements ChangeListener, PropertyChangeListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(RandomSamplingDialog.class.getName());
 
     private IAnalysisDataset     dataset;
     private ExportableChartPanel chartPanel;

@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 
 public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ReplaceSourceImageDirectoryAction.class.getName());
 	
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Replacing images";
 

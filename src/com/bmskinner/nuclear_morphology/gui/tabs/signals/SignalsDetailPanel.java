@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalsDetailPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Nuclear signals";
     private JTabbedPane signalsTabPane;

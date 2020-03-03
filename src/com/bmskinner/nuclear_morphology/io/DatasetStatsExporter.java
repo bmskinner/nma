@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DatasetStatsExporter extends StatsExporter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetStatsExporter.class.getName());
 
     private boolean includeProfiles = true;
     private boolean includeSegments = false;

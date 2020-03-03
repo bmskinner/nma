@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
  */
 public class ProfileCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileCreator.class.getName());
 
     private Taggable target;
 

@@ -44,7 +44,7 @@ import weka.estimators.KernelEstimator;
  */
 public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(HistogramDatasetCreator.class.getName());
 	
 	public static final int MIN_ROUNDED = 0;
     public static final int MAX_ROUNDED = 1;

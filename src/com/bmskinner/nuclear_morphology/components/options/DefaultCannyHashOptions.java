@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class DefaultCannyHashOptions extends AbstractHashOptions implements ICannyOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultCannyHashOptions.class.getName());
 
     private static final long serialVersionUID = 1L;
 

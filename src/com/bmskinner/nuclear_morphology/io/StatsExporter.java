@@ -41,7 +41,7 @@ import ij.IJ;
  */
 public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implements Io {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(StatsExporter.class.getName());
     
     private File exportFile;
     private static final String DEFAULT_MULTI_FILE_NAME = "Stats_export" + Io.TAB_FILE_EXTENSION;

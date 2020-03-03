@@ -79,7 +79,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AnalysisDatasetTableCreator.class.getName());
 
     /**
      * Create with a set of table options

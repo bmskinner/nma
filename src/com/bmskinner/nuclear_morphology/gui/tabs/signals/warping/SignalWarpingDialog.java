@@ -88,7 +88,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialog.class.getName());
 
     private static final String EXPORT_IMAGE_LBL    = "Export image";
 	private static final String SOURCE_DATASET_LBL  = "Source dataset";

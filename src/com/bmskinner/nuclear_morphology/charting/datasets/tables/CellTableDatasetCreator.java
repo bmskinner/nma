@@ -68,7 +68,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellTableDatasetCreator.class.getName());
 
     public CellTableDatasetCreator(final DisplayOptions options, final ICell c) {
         super(options, c);

@@ -68,7 +68,7 @@ import ij.process.ImageProcessor;
 @Deprecated
 public abstract class AbstractCellularComponent implements CellularComponent {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractCellularComponent.class.getName());
 
     private static final long serialVersionUID = 1L;
     private final UUID        id;

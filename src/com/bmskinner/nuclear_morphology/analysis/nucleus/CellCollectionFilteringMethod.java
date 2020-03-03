@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellCollectionFilteringMethod.class.getName());
 		
 	private final FilteringOptions options;
 	private final String newCollectionName;

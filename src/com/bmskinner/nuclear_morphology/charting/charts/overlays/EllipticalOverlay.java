@@ -41,7 +41,7 @@ import org.jfree.ui.RectangleEdge;
 public class EllipticalOverlay extends AbstractOverlay
         implements Overlay, PropertyChangeListener, Serializable{
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(EllipticalOverlay.class.getName());
 
     private EllipticalOverlayObject ellipse = null;
 

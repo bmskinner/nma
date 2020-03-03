@@ -84,7 +84,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DefaultCellCollection implements ICellCollection {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultCellCollection.class.getName());
 
 	private static final long serialVersionUID = 1L;
 

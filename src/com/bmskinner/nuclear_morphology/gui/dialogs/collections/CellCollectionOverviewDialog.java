@@ -72,7 +72,7 @@ import ij.process.ImageProcessor;
 @SuppressWarnings("serial")
 public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellCollectionOverviewDialog.class.getName());
 	
 	private static final String MAKE_NEW_COLLECTION_LBL = "Make new collection from selected";
 	private static final String SELECT_ALL_LBL = "Select all";

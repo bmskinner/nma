@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 @SuppressWarnings("serial")
 public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(EdgeThresholdSwitchPanel.class.getName());
 
     private static final String THRESHOLD_LBL = "Threshold";
     private static final String EDGE_LBL      = "Edge detection";

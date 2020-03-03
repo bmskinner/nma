@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetArithmeticAction extends MultiDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetArithmeticAction.class.getName());
 
     private static final @NonNull String PROGRESS_LBL = "Dataset arithmetic";
 

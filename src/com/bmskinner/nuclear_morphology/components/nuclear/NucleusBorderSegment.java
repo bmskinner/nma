@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentE
 @Deprecated
 public class NucleusBorderSegment implements IBorderSegment {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NucleusBorderSegment.class.getName());
 
     private static final long serialVersionUID = 1L;
 

@@ -87,7 +87,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(LogPanel.class.getName());
 
     private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
     

@@ -49,7 +49,7 @@ import ij.process.ImageProcessor;
  */
 public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ImageImportWorker.class.getName());
 
 	protected final IAnalysisDataset dataset;
 	protected final TableModel       model;

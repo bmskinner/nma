@@ -77,7 +77,7 @@ import inra.ijpb.watershed.ExtendedMinimaWatershed;
  */
 public class NeutrophilFinder extends CellFinder {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NeutrophilFinder.class.getName());
 
     private final ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
     private final ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);

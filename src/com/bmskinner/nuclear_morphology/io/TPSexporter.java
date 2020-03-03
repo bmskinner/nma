@@ -36,7 +36,7 @@ import ij.IJ;
  */
 public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(TPSexporter.class.getName());
 	
 	private final File exportFile;
 	private final StringBuilder sb = new StringBuilder();

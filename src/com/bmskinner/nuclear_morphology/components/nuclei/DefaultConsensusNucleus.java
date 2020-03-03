@@ -45,7 +45,7 @@ import ij.process.FloatPolygon;
  */
 public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implements Consensus<Nucleus>  {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultConsensusNucleus.class.getName());
 
     private static final long serialVersionUID = 1L;
 

@@ -55,7 +55,7 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
 @Deprecated
 public class AnalysisDataset implements IAnalysisDataset {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AnalysisDataset.class.getName());
 
     private static final long          serialVersionUID = 1L;
     private Map<UUID, AnalysisDataset> childCollections = new HashMap<>();

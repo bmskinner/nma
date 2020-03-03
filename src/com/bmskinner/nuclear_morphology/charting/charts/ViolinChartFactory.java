@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ViolinChartFactory extends AbstractChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ViolinChartFactory.class.getName());
 
     public ViolinChartFactory(@NonNull final ChartOptions o) {
         super(o);

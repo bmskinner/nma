@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 @SuppressWarnings("serial")
 public abstract class SettingsDialog extends JDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SettingsDialog.class.getName());
 
     protected boolean readyToRun = false;
     private final List<EventListener> interfaceListeners = new ArrayList<>();

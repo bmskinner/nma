@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class TsneSetupDialog extends SubAnalysisSetupDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(TsneSetupDialog.class.getName());
 
     private static final String DIALOG_TITLE = "t-SNE options";
     

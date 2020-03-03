@@ -41,7 +41,7 @@ import jdistlib.disttest.NormalityTest;
  */
 public class DipTester implements SignificanceTest {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DipTester.class.getName());
 
     private ICellCollection collection;
 

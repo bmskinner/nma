@@ -58,7 +58,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalWarpingModel extends DefaultTableModel{
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalWarpingModel.class.getName());
 
 	public static final int THRESHOLD_ALL_VISIBLE = 255;
 	private static final int KEY_COLUMN_INDEX = 5;

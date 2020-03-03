@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class ImagePreprocessingSettingsPanel extends SettingsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ImagePreprocessingSettingsPanel.class.getName());
 
     public static final Integer KUWAHARA_WIDTH_MIN  = Integer.valueOf(1);
     public static final Integer KUWAHARA_WIDTH_MAX  = Integer.valueOf(11);

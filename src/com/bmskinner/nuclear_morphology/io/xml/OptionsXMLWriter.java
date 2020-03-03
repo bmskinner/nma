@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public class OptionsXMLWriter extends XMLWriter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(OptionsXMLWriter.class.getName());
 	
 	public void write(@NonNull IAnalysisDataset dataset, @NonNull File outFile) {
 		

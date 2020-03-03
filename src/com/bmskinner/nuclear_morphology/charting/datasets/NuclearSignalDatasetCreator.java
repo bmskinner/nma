@@ -54,7 +54,7 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NuclearSignalDatasetCreator.class.getName());
 
     public NuclearSignalDatasetCreator(@NonNull final ChartOptions o) {
         super(o);

@@ -42,7 +42,7 @@ import ij.process.ImageProcessor;
 @Deprecated
 public class SpermTail extends AbstractCellularComponent implements Serializable, Flagellum {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SpermTail.class.getName());
 
     private static final long serialVersionUID = 1L;
 

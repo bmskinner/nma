@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class CannySettingsPanel extends SettingsPanel implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CannySettingsPanel.class.getName());
 
     public static final double THRESHOLD_STEP_SIZE = 0.05;
 

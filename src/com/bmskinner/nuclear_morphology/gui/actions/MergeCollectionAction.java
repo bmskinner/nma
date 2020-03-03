@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class MergeCollectionAction extends MultiDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(MergeCollectionAction.class.getName());
 
     private static final @NonNull String PROGRESS_BAR_LABEL   = "Merging";
     private static final @NonNull String DEFAULT_DATASET_NAME = "Merge_of_datasets";

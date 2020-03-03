@@ -59,7 +59,7 @@ import ij.gui.Roi;
  */
 public abstract class ProfileableCellularComponent extends DefaultCellularComponent implements Taggable {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileableCellularComponent.class.getName());
 
 	private static final long serialVersionUID = 1L;
 

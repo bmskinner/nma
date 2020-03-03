@@ -70,7 +70,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ProfileChartFactory extends AbstractChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileChartFactory.class.getName());
 	
 	private static final String IQR_AXIS_LBL = "IQR";
 	private static final String POSITION_AXIS_LBL = "Position";

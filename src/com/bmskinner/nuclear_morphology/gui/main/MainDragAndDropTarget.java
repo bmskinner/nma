@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(MainDragAndDropTarget.class.getName());
 
 	SignalChangeEventHandler sh = new SignalChangeEventHandler(this);
 

@@ -47,7 +47,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	
 	private static final String BORDER_LABEL = "Dimensional reduction";
 
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DimensionalReductionSelectionPanel.class.getName());
 
 	public DimensionalReductionSelectionPanel(IAnalysisDataset dataset, HashOptions options) {
 		super(dataset, options);

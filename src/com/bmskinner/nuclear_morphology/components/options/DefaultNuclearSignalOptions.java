@@ -33,7 +33,7 @@ import org.eclipse.jdt.annotation.NonNull;
 @Deprecated
 public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implements INuclearSignalOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultNuclearSignalOptions.class.getName());
 
     private static final long serialVersionUID = 1L;
 

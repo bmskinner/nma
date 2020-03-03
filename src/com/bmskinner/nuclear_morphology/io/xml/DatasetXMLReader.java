@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetXMLReader.class.getName());
 
 	private NucleusFactory fact = null;
 	private double windowProportion = 0.05;

@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class NeutrophilAnalysisAction extends VoidResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NeutrophilAnalysisAction.class.getName());
 
     private IAnalysisOptions options;
     private Date                    startTime;

@@ -97,7 +97,7 @@ import ij.process.ImageProcessor;
  */
 public class OutlineChartFactory extends AbstractChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(OutlineChartFactory.class.getName());
 	
 	protected static final String NO_CONSENSUS_ERROR_LBL = "No consensus nucleus in dataset";
 

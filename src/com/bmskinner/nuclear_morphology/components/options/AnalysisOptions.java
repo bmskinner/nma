@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 @Deprecated
 public class AnalysisOptions implements IAnalysisOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AnalysisOptions.class.getName());
 
     private static final long serialVersionUID = 1L;
     private int               nucleusThreshold;

@@ -59,7 +59,7 @@ import ij.gui.Roi;
  */
 public class DefaultNucleus extends SegmentedCellularComponent implements Nucleus {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
 
     private static final long serialVersionUID = 1L;
 

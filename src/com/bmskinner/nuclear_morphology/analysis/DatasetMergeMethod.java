@@ -57,7 +57,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetMergeMethod.class.getName());
 	
     /** Should warped signals be copied into new signal groups  */
     private static final boolean COPY_WARPED = false;

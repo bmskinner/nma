@@ -68,7 +68,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 @SuppressWarnings("serial")
 public class FishRemappingProberPanel extends GenericImageProberPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(FishRemappingProberPanel.class.getName());
 
     private static final int    ORIGINAL_IMG_COL        = 0;
     private static final int    ORIGINAL_IMG_ROW        = 0;

@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class NucleusTableCreator extends AbstractTableCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NucleusTableCreator.class.getName());
 
     public NucleusTableCreator(final TableOptions options) {
         super(options);

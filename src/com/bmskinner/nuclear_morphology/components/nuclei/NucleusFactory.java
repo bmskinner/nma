@@ -42,7 +42,7 @@ import ij.process.FloatPolygon;
  */
 public class NucleusFactory implements ComponentFactory<Nucleus> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NucleusFactory.class.getName());
 
     private static final String NULL_NUCLEUS_ERROR = "Error making nucleus; constructed object is null";
 	private static final String NULL_COM_ERROR = "Centre of mass cannot be null in nucleus factory";

@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class LoadingIconDialog extends MessagingDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(LoadingIconDialog.class.getName());
     
     private static final String RESOURCE_FOLDER  = "icons/";
     private static final String LOADING_GIF_NAME = "ajax-loader.gif";

@@ -74,7 +74,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 @SuppressWarnings("serial")
 public class RulesetDialog extends LoadingIconDialog implements TreeSelectionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(RulesetDialog.class.getName());
 
     private IAnalysisDataset dataset;
 

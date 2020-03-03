@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @Deprecated
 public class Profile implements IProfile {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(Profile.class.getName());
 
     private static final long serialVersionUID = 1L;
 

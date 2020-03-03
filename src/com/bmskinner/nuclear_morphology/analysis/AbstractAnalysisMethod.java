@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public abstract class AbstractAnalysisMethod implements IAnalysisMethod, ProgressListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractAnalysisMethod.class.getName());
 
     private List<Object>       listeners = new ArrayList<>();
     protected IAnalysisResult  result    = null;

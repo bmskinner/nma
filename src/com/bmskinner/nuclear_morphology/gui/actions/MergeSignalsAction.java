@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class MergeSignalsAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(MergeSignalsAction.class.getName());
 	
 	private static final @NonNull String PROGRESS_BAR_LABEL   = "Merging";
     private static final int NUMBER_OF_STEPS = 100;

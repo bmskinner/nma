@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 @Deprecated
 public class ProfileAggregate implements Serializable, IProfileAggregate {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileAggregate.class.getName());
 
     private static final long               serialVersionUID = 1L;
     private Map<Double, Collection<Double>> aggregate        = new HashMap<Double, Collection<Double>>();

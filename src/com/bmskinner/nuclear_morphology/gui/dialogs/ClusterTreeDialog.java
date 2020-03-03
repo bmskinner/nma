@@ -87,7 +87,7 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends MessagingDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ClusterTreeDialog.class.getName());
     
     private static final String ANALYSE_LBL = "Analyse new clusters";
     private static final String SHOW_MGE_SRC_LBL = "Show merge sources";

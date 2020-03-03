@@ -64,7 +64,7 @@ import ij.process.ImageProcessor;
  */
 public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(InteractiveBorderTagCellPanel.class.getName());
 
 	public InteractiveBorderTagCellPanel(@NonNull CellUpdatedEventListener parent){
 		super(parent);

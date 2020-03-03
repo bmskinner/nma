@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
  */
 public class ProfileSegmenter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileSegmenter.class.getName());
 
     /**
      * The smallest number of points a segment can contain. Increasing this

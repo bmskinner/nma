@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class PairwiseVennDetailPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(PairwiseVennDetailPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Detailed Venn";
     private static final String HEADER_LBL      = "Shows a dataset by dataset comparison of shared and non-shared nuclei";

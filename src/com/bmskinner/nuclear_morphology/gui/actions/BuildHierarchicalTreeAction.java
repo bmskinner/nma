@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
         implements EventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(BuildHierarchicalTreeAction.class.getName());
 
     private static final @NonNull String PROGRESS_BAR_LABEL = "Building tree";
 

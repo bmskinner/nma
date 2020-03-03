@@ -65,7 +65,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ConsensusAveragingMethod.class.getName());
 
 	/** This length was chosen to avoid issues copying segments */
     private static final double PROFILE_LENGTH = 1000d;

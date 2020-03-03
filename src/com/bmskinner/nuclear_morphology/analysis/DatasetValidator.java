@@ -52,7 +52,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DatasetValidator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetValidator.class.getName());
 
 	public static final List<String> errorList = new ArrayList<>();
 	public static final List<String> summaryList = new ArrayList<>();

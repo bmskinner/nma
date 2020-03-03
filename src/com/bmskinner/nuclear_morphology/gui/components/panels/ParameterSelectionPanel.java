@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ParameterSelectionPanel extends OptionsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ParameterSelectionPanel.class.getName());
 	
 	public ParameterSelectionPanel(IAnalysisDataset dataset, HashOptions options) {
 		super(dataset, options);

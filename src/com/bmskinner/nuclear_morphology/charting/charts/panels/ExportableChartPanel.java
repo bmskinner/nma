@@ -70,7 +70,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class ExportableChartPanel extends ChartPanel implements ChartSetEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ExportableChartPanel.class.getName());
 	
 	private static final String EXPORT_LBL = "Export data";
 	private static final String COPY_LBL   = "Copy data";

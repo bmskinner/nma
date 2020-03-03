@@ -64,7 +64,7 @@ import ij.process.ImageProcessor;
  */
 public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(StructuralSimilarityComparisonDialog.class.getName());
 	
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 	

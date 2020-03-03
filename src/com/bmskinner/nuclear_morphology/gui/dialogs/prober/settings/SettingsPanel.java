@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEventList
 public abstract class SettingsPanel extends JPanel
         implements OptionsChangeListener, PanelUpdatingEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SettingsPanel.class.getName());
 
     protected static final int BOX_WIDTH  = 80;
     protected static final int BOX_HEIGHT = 20;

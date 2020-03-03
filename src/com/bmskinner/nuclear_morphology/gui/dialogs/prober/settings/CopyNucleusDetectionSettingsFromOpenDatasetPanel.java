@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOpenDatasetPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CopyNucleusDetectionSettingsFromOpenDatasetPanel.class.getName());
 
     /**
      * Create with an analysis options and the detection options to copy to

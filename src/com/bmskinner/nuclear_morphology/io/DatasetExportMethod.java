@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetExportMethod.class.getName());
 
     private File saveFile = null;
     private ExportFormat format;

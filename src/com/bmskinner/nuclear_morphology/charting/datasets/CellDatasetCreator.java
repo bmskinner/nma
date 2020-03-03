@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellDatasetCreator.class.getName());
 
     public CellDatasetCreator(@NonNull final ChartOptions options) {
         super(options);

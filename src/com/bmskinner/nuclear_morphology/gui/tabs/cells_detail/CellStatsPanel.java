@@ -56,7 +56,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 @SuppressWarnings("serial")
 public class CellStatsPanel extends AbstractCellDetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellStatsPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Info";
     

@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
  */
 public abstract class SingleDatasetResultAction extends VoidResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SingleDatasetResultAction.class.getName());
 
     
     // Flags to pass to ProgressableActions to determine the analyses

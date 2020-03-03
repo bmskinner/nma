@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(LobeDetectionSetupDialog.class.getName());
 
     private static final String DIALOG_TITLE = "Lobe detection options";
 

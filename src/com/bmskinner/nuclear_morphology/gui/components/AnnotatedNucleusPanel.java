@@ -45,7 +45,7 @@ import ij.process.ImageProcessor;
 @SuppressWarnings("serial")
 public class AnnotatedNucleusPanel extends JPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AnnotatedNucleusPanel.class.getName());
 
     private ICell  cell;
     private JLabel imageLabel = new JLabel();

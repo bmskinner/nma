@@ -87,7 +87,7 @@ import com.bmskinner.nuclear_morphology.reports.DemoReportGenerator;
 @SuppressWarnings("serial")
 public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalShellsPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Shells";
     private static final String WITHIN_SIGNALS_LBL = "Within signals";

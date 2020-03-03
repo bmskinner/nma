@@ -63,7 +63,7 @@ import ij.process.ShortStatistics;
  */
 public abstract class Detector {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(Detector.class.getName());
 
     public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of
                                                 // open or closed objects

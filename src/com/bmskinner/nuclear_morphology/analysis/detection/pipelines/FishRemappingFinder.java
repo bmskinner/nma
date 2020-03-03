@@ -37,7 +37,7 @@ import ij.process.ImageProcessor;
  */
 public class FishRemappingFinder extends VoidFinder {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(FishRemappingFinder.class.getName());
 
     private static final String FISH_FOLDER_IS_FILE_ERROR = "FISH directory is not a folder";
     private final File          dir;

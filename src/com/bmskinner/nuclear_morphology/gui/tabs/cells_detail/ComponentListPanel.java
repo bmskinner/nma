@@ -45,7 +45,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 @SuppressWarnings("serial")
 public class ComponentListPanel extends AbstractCellDetailPanel implements ListSelectionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ComponentListPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Components";
     private JList<ComponentListCell> list;

@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(BoxplotsTabPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Violin plots";
     protected Map<String, ExportableChartPanel> chartPanels = new HashMap<>();

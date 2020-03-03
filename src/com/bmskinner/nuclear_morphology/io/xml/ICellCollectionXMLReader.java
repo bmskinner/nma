@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ICellCollectionXMLReader.class.getName());
 	
 	private final NucleusFactory fact;
 	private final double windowProportion;

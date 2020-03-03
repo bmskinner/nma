@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel.Tr
 @SuppressWarnings("serial")
 public class PopulationTreeTable extends JXTreeTable {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(PopulationTreeTable.class.getName());
 
     /**
      * The column index for the dataset name

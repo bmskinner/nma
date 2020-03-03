@@ -63,7 +63,7 @@ import ij.ImageStack;
  */
 public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ShellAnalysisMethod.class.getName());
 
 	public static final int MINIMUM_AREA_PER_SHELL = 50;
 	public static final double MINIMUM_CIRCULARITY = 0.07;

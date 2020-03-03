@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DefaultMesh<E extends Taggable> implements Mesh<E> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultMesh.class.getName());
 	
 	private static final boolean IS_PERIPERHAL = true;
 	private static final boolean IS_INTERNAL   = false;

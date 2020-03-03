@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("deprecation")
 public class PackageReplacementObjectInputStream extends ObjectInputStream {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(PackageReplacementObjectInputStream.class.getName());
 
     /**
      * Migration table. Holds old to new classes representation.

@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 @Deprecated
 public class NuclearSignalOptions implements INuclearSignalOptions {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NuclearSignalOptions.class.getName());
 
     private static final long serialVersionUID = 1L;
 

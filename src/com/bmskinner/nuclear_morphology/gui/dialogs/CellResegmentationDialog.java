@@ -79,7 +79,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class CellResegmentationDialog extends AbstractCellEditingDialog implements BorderPointEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellResegmentationDialog.class.getName());
 
     private CoupledProfileOutlineChartPanel panel;
 

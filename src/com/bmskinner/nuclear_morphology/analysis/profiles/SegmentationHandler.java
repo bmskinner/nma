@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class SegmentationHandler {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SegmentationHandler.class.getName());
 
     private static final String SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL = "Segments are out of sync with median";
 	private final IAnalysisDataset dataset;

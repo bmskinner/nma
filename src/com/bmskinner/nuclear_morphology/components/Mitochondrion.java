@@ -27,7 +27,7 @@ import ij.process.ImageProcessor;
 @Deprecated
 public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(Mitochondrion.class.getName());
 
     private static final long serialVersionUID = 1L;
 

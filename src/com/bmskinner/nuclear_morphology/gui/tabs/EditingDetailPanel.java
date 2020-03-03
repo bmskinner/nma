@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 @SuppressWarnings("serial")
 public class EditingDetailPanel extends DetailPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(EditingDetailPanel.class.getName());
     
     private static final String PANEL_TITLE_LBL = "Editing";
     

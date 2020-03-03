@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class ColourThresholdingSettingsPanel extends SettingsPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ColourThresholdingSettingsPanel.class.getName());
 
     public static final Integer THRESHOLD_MIN  = Integer.valueOf(0);
     public static final Integer THRESHOLD_MAX  = Integer.valueOf(255);

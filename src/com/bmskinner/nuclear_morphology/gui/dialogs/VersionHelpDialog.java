@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class VersionHelpDialog extends SettingsDialog {
 		
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(VersionHelpDialog.class.getName());
 	
 	private static final String DIALOG_TITLE = "About";
 	private static final String SITE_URL     = "https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Home/";

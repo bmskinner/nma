@@ -55,7 +55,7 @@ import weka.estimators.KernelEstimator;
  */
 public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NuclearHistogramDatasetCreator.class.getName());
 
     public NuclearHistogramDatasetCreator(final ChartOptions o) {
         super(o);

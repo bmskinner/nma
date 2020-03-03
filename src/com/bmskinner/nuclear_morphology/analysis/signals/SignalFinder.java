@@ -51,7 +51,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalFinder.class.getName());
 
     private SignalDetector              detector;
     private final INuclearSignalOptions signalOptions;

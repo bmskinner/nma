@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public abstract class WorkspaceImporter implements Importer {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(WorkspaceImporter.class.getName());
 	
 	private static final String VERSION_1_13_x = "1.13.x";
 	private static final String VERSION_1_14_0 = "1.14.0";

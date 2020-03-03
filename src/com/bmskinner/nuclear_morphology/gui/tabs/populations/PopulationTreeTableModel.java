@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
  */
 public class PopulationTreeTableModel extends DefaultTreeTableModel {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(PopulationTreeTableModel.class.getName());
 
     private static final String DATASET_COLUMN_LBL = "Dataset (0)";
     private static final String CELL_COLUMN_LBL    = "Cells (0)";

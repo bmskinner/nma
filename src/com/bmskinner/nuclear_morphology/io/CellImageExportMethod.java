@@ -29,7 +29,7 @@ import ij.process.ImageProcessor;
  */
 public class CellImageExportMethod extends MultipleDatasetAnalysisMethod implements Io {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellImageExportMethod.class.getName());
 	
 	private static final String IMAGE_FOLDER = "SingleNucleusImages_";
 	

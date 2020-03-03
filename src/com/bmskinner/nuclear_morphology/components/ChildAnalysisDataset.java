@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ChildAnalysisDataset.class.getName());
 
 	private static final long serialVersionUID = 1L;
 

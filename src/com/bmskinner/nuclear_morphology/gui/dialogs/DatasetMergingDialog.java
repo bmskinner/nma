@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
 @SuppressWarnings("serial")
 public class DatasetMergingDialog extends LoadingIconDialog implements ActionListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetMergingDialog.class.getName());
 
     private static final String SIGNAL_GROUP_COL_LBL = "Signal group";
 

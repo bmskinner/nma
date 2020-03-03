@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class AddNuclearSignalAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AddNuclearSignalAction.class.getName());
 	
     private static final @NonNull String PROGRESS_BAR_LABEL = "Signal detection";
 

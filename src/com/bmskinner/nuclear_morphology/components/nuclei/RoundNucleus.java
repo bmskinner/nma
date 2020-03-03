@@ -83,7 +83,7 @@ import ij.process.FloatPolygon;
 @Deprecated
 public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(RoundNucleus.class.getName());
 
     private static final long serialVersionUID = 1L;
 

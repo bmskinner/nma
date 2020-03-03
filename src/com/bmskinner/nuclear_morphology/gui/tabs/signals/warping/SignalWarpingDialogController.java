@@ -44,7 +44,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalWarpingDialogController {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialogController.class.getName());
 
 	private SignalWarpingModel model;
 	private ChartPanel chart;

@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements PanelUpdatingEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NeutrophilDetectionSettingsPanel.class.getName());
 
     private IAnalysisOptions options;
 

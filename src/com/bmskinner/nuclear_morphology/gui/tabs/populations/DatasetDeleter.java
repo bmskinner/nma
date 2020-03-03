@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetDeleter {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetDeleter.class.getName());
 
     private static final String DELETE_LBL = "Close";
     private static final String KEEP_LBL   = "Don't close";

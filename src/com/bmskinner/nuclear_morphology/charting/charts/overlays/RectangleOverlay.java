@@ -44,7 +44,7 @@ import org.jfree.ui.RectangleEdge;
 public class RectangleOverlay extends AbstractOverlay
         implements Overlay, PropertyChangeListener, Serializable{
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(RectangleOverlay.class.getName());
 
     private RectangleOverlayObject rectangle = null;
 

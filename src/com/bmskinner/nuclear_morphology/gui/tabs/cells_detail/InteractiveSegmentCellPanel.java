@@ -65,7 +65,7 @@ import ij.process.ImageProcessor;
 
 public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(InteractiveSegmentCellPanel.class.getName());
 
 	/** When a clicking a feature in an image, allow the clicked point to be 
 	 * this many pixels away from the true point */

@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class CellImageDialog extends LoadingIconDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CellImageDialog.class.getName());
 
     private AnnotatedNucleusPanel panel;
 

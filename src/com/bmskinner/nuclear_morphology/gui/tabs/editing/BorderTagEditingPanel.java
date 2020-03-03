@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 @SuppressWarnings("serial")
 public class BorderTagEditingPanel extends AbstractEditingPanel implements ActionListener, BorderTagEventListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(BorderTagEditingPanel.class.getName());
 
     private static final String PANEL_TITLE_LBL = "Border tags";
     

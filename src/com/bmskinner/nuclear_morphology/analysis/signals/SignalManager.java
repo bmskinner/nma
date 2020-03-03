@@ -58,7 +58,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalManager {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SignalManager.class.getName());
 
     private ICellCollection collection;
 

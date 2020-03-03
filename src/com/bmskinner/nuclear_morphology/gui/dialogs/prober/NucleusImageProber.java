@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class NucleusImageProber extends IntegratedImageProber {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(NucleusImageProber.class.getName());
 
     private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
 

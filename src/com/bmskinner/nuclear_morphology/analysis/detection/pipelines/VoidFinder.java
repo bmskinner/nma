@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public abstract class VoidFinder extends AbstractFinder<Void> {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(VoidFinder.class.getName());
 
     public VoidFinder(IAnalysisOptions op) {
         super(op);

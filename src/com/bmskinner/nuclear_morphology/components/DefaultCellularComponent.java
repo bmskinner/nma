@@ -73,7 +73,7 @@ import ij.process.ImageProcessor;
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
 
 	/** the distance from a point to allow for searching an opposite border point*/
     private static final int OPPOSITE_BORDER_INTERVAL_PIXELS = 4;

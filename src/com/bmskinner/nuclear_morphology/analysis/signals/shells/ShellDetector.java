@@ -65,7 +65,7 @@ import ij.process.ImageProcessor;
  */
 public class ShellDetector extends Detector {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ShellDetector.class.getName());
 
     public static final int DEFAULT_SHELL_COUNT = 5;
     

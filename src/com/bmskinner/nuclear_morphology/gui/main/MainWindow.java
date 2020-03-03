@@ -69,7 +69,7 @@ import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
 @Deprecated
 public class MainWindow extends AbstractMainWindow {
 
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
 	
     private JPanel contentPane;
 

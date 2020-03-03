@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ScatterChartFactory extends AbstractChartFactory {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ScatterChartFactory.class.getName());
 
     public ScatterChartFactory(ChartOptions o) {
         super(o);

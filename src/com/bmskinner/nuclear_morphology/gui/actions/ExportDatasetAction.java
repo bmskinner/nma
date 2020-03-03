@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 
 public class ExportDatasetAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ExportDatasetAction.class.getName());
 
     private File saveFile = null;
     private ExportFormat format = ExportFormat.JAVA;

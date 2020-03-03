@@ -28,7 +28,7 @@ import ij.process.ImageProcessor;
 
 public class SectorQuantificationDialog extends JDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(SectorQuantificationDialog.class.getName());
 	
 	private static final String DIALOG_TITLE = "Quantification scores";
 	

@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class AbstractCellEditingDialog extends MessagingDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractCellEditingDialog.class.getName());
 
     protected ICell            cell    = null;
     protected ICell            workingCell;

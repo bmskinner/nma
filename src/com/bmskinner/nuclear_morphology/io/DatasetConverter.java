@@ -98,7 +98,7 @@ public class DatasetConverter implements Importer {
 
 	private static final String CANNOT_SET_ID_ERROR = "Cannot set ID";
 
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetConverter.class.getName());
 
     private IAnalysisDataset oldDataset;
     private boolean wasConverted = false;

@@ -72,7 +72,7 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 
 	protected boolean isStandalone = false;
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractMainWindow.class.getName());
 	
 	/**
      * Create the frame.

@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 
 public class LobeDetectionAction extends SingleDatasetResultAction {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(LobeDetectionAction.class.getName());
 
     private static final @NonNull String PROGRESS_BAR_LABEL = "Detecting lobes";
 
