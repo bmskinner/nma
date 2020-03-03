@@ -40,7 +40,7 @@ import ij.Prefs;
  */
 public class CommandLineParser {
 
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(CommandLineParser.class.getName());
 
 	/**
 	 * Construct with an array of parameters for the program 

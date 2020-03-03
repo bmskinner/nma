@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.core;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,7 +53,19 @@ public class Nuclear_Morphology_Analysis {
 	 * Keep a strong reference to the logger so they can be accessed
 	 * by all other classes implementing the Loggable interface
 	 */
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER;
+//	private static final Logger LOGGER = LoggerFactory.getLogger(Nuclear_Morphology_Analysis.class);
+	
+	
+	static {
+		String path = Nuclear_Morphology_Analysis.class.getClassLoader()
+                .getResource("logging.properties")
+                .getFile();
+//		System.out.println(path);
+//		System.out.println("Logging properties file exists: "+Files.exists(new File(path).toPath()));
+		System.setProperty("java.util.logging.config.file", path);
+		LOGGER = Logger.getLogger(Nuclear_Morphology_Analysis.class.getName());
+	}
 	
 	/**
 	 * Private constructor used when launching as a standalone program
@@ -85,11 +98,11 @@ public class Nuclear_Morphology_Analysis {
 	private boolean checkJavaVersion(){
 		
 		if( ! IJ.isJava18() ){
-			IJ.log("Unable to open Nuclear Morphology Analysis");
-			IJ.log("Java version 8 is required");
-			IJ.log("Update ImageJ to a version bundled with Java 8");
-			IJ.log("This is the version called 'bundled with Java 1.8.0_xx' here:");
-			IJ.log("http://rsb.info.nih.gov/ij/download.html");
+			LOGGER.warning("Unable to open Nuclear Morphology Analysis");
+			LOGGER.warning("Java version 8 is required");
+			LOGGER.warning("Update ImageJ to a version bundled with Java 8");
+			LOGGER.warning("This is the version called 'bundled with Java 1.8.0_xx' here:");
+			LOGGER.warning("http://rsb.info.nih.gov/ij/download.html");
 			return false;
 		}
 		return true;
@@ -99,38 +112,45 @@ public class Nuclear_Morphology_Analysis {
 		
 		try {
 			
+			// Load the log file
+			LOGGER.config("Loaded logger properties from: "+System.getProperty("java.util.logging.config.file"));
+			LOGGER.config("Log file location: "+System.getProperty("user.dir"));
+//			LOGGER.info("Loaded logging properties file");
+//			LOGGER.config("Debug message");
+//			LOGGER.warning("Warning message");
+			
 			// Remove existing handlers
-			for(Handler h : LOGGER.getHandlers())
-				LOGGER.removeHandler(h);
+//			for(Handler h : LOGGER.getHandlers())
+//				LOGGER.removeHandler(h);
 			
 			// Overall level for the logger to respond to 
-			LOGGER.setLevel(Level.FINER);
+//			LOGGER.setLevel(Level.FINER);
 
 			// Output to the console
-			Handler consoleHander = new ConsoleHandler(new ConsoleFormatter());
-			LOGGER.addHandler(consoleHander);
-			consoleHander.setLevel(Level.FINE);
+//			Handler consoleHander = new ConsoleHandler(new ConsoleFormatter());
+//			LOGGER.addHandler(consoleHander);
+//			consoleHander.setLevel(Level.FINE);
 
 			/* Get the location of the jar file
 			 * and create a log file in the same
 			 * directory if not present
 			 */
-			File dir =  Io.getProgramDir();
-			LOGGER.config("Program dir: "+dir.getAbsolutePath());
-			File errorFile = new File(dir, "error.log");
-			LOGGER.config("Log file: "+errorFile.getAbsolutePath());
-			if(errorFile.createNewFile()) {
-				LOGGER.fine("Created new log file");
-			}
+//			File dir =  Io.getProgramDir();
+//			LOGGER.config("Program dir: "+dir.getAbsolutePath());
+//			File errorFile = new File(dir, "error.log");
+//			LOGGER.config("Log file: "+errorFile.getAbsolutePath());
+//			if(errorFile.createNewFile()) {
+//				LOGGER.fine("Created new log file");
+//			}
 
 			// Log stack traces and config to the log file for debugging
-			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
-			LOGGER.addHandler(fileHandler);
-			fileHandler.setLevel(Level.CONFIG);			
+//			LogFileHandler fileHandler = new LogFileHandler(errorFile, new LogFileFormatter());			
+//			LOGGER.addHandler(fileHandler);
+//			fileHandler.setLevel(Level.CONFIG);			
 			ThreadManager.getInstance();
 			
-		} catch (SecurityException |IOException e ) {
-			LOGGER.log(Level.SEVERE, "Error initialising logger: "+e.getMessage(), e);
+		} catch (SecurityException e ) {
+			LOGGER.log(Level.SEVERE, "Error initialising logger", e);
 		}
 	}
 	

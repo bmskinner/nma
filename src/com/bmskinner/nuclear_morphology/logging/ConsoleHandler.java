@@ -22,6 +22,10 @@ import java.util.logging.StreamHandler;
 
 public class ConsoleHandler extends StreamHandler {
 	
+	public ConsoleHandler() {
+		super();
+	}
+	
 	public ConsoleHandler(Formatter formatter) {
 		super();
 		this.setFormatter(formatter);

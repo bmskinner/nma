@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public final class DatasetListManager {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(DatasetListManager.class.getName());
 
     private static DatasetListManager instance   = null;
     private static final Object                lockObject = new Object(); // synchronisation
