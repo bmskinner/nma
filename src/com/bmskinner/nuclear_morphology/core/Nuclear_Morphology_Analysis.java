@@ -110,6 +110,7 @@ public class Nuclear_Morphology_Analysis {
 		try {
 			LOGGER.config("Logger properties file: "+System.getProperty("java.util.logging.config.file"));
 			LOGGER.config("Log file location: "+LOG_FOLDER.getAbsolutePath());
+			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, LOG_FOLDER.getAbsolutePath());
 			
 			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
 			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));

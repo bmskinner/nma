@@ -64,6 +64,8 @@ public class GlobalOptions extends AbstractHashOptions {
     
     /** The default format to save NMD files. Specified in @{link ExportFormat} */
     public static final String DEFAULT_EXPORT_FORMAT_KEY = "DEFAULT_EXPORT_FORMAT";
+    
+    public static final String LOG_DIRECTORY_KEY = "LOG_DIRECTORY";
 
     private File defaultDir; // where to fall back to for finding images or
                              // saving files

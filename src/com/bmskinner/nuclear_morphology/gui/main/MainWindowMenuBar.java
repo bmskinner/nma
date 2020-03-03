@@ -16,11 +16,15 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.main;
 
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -51,7 +55,14 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 
+/**
+ * Menu bar for the main window
+ * @author Ben Skinner
+ *
+ */
 public class MainWindowMenuBar extends JMenuBar  {
+	
+	private static final Logger LOGGER = Logger.getLogger(MainWindowMenuBar.class.getName());
 	
 	private static final String TASK_QUEUE_LBL = "Task queue:";
 	private static final String MEMORY_LBL     = "Memory:";
@@ -69,6 +80,7 @@ public class MainWindowMenuBar extends JMenuBar  {
 	
 	private static final String VIEW_MENU_LBL     = "View";
 	private static final String CHECK_FOR_UPDATES_ITEM_LBL = "Check for updates";
+	private static final String OPEN_LOG_DIR_LBL = "Open log directory";
 	private static final String ABOUT_ITEM_LBL = "About";
 	private static final String HELP_MENU_LBL = "Help";
 	private static final String TASK_MONITOR_ITEM_LBL = "Task monitor";
@@ -273,35 +285,33 @@ public class MainWindowMenuBar extends JMenuBar  {
 				} else {
 					JOptionPane.showMessageDialog(this, "You have the latest version: "+Version.currentVersion(), "No updates", JOptionPane.INFORMATION_MESSAGE);
 				}
-
-
 			};
 			ThreadManager.getInstance().submit(r);
 		});
 		menu.add(checkItem);
 		
 		
-		return menu;
-	}
-	
-	
-	
-	private JMenu createWorkspaceMenu() {
-		JMenu menu = new JMenu("Workspace");
+		JMenuItem logItem = new JMenuItem(OPEN_LOG_DIR_LBL);
+		logItem.addActionListener(e-> {
+			Runnable r = () ->{
+				File dir = new File(GlobalOptions.getInstance().getString(GlobalOptions.LOG_DIRECTORY_KEY));
+				LOGGER.fine("Opening log directory: "+dir.getAbsolutePath());
+				try {
+					Desktop.getDesktop().open(dir);
+				} catch(Exception ex) {
+					LOGGER.log(Level.SEVERE, "Unable to open folder", ex);
+				}
+			};
+			ThreadManager.getInstance().submit(r);
+		});
+		menu.add(logItem);
 		
-		return menu;
-	}
-	
-	private JMenu createClusterGroupMenu() {
-		JMenu menu = new JMenu("Cluster");
 		
 		return menu;
 	}
 	
 	private JMenu createDatasetMenu() {
-		JMenu menu = new JMenu("Dataset");
-		
-		return menu;
+		return new JMenu("Dataset");
 	}
 
 }
