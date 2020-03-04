@@ -115,7 +115,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         
         // Single dataset
         
-        LOGGER.fine("Single dataset, making consenusus chart");
+        LOGGER.finer("Single dataset, making consenusus chart");
         
         if (options.isShowMesh()) {
         	try {
@@ -297,7 +297,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         if (!dataset.getCollection().hasConsensus())
         	return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
         
-        LOGGER.fine("Making segmented consenusus chart");
+        LOGGER.finer("Making segmented consenusus chart");
         XYDataset ds = null;
 
         ICellCollection collection = dataset.getCollection();
