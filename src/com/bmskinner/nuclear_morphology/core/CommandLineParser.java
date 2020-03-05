@@ -62,12 +62,12 @@ public class CommandLineParser {
 		File folder = null; 
 		File options = null;
 		for(String s : arr){
-			System.out.println("Argument: "+s);
+			LOGGER.config("Argument: "+s);
 
 			if(s.startsWith("-h")) {
-				System.out.println("Arguments:");
-				System.out.println("\t-folder=<image_folder>");
-				System.out.println("\t-options=<xml_options>");
+				LOGGER.config("Arguments:");
+				LOGGER.config("\t-folder=<image_folder>");
+				LOGGER.config("\t-options=<xml_options>");
 				System.exit(0);
 			}
 
@@ -86,16 +86,15 @@ public class CommandLineParser {
 		}
 		// load the config file
 		new ConfigFileReader();
-		Prefs.setThreads(GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY));
+		int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
+		Prefs.setThreads(ijThreads);
+		LOGGER.config("Internal ImageJ PluginFilter thread count set to "+ijThreads);
 
 		if(headless){
-			LOGGER.fine("Running headless");
 			runHeadless(folder, options);
 		} else {
-			LOGGER.fine("Launching GUI");
 			runWithGUI();
 		}
-
 	}
 
 	/**
@@ -105,6 +104,7 @@ public class CommandLineParser {
 	 * @param options
 	 */
 	private void runHeadless(final File folder, final File options) {
+		LOGGER.config("Running headless");
 		if(folder!=null) {
 			LOGGER.info("Running on folder: "+folder.getAbsolutePath());
 
@@ -131,30 +131,43 @@ public class CommandLineParser {
 	 * Load the program user interface
 	 */
 	private void runWithGUI(){
-		try {
-			Runnable r = () -> {
-
-				IJ.setBackgroundColor(0, 0, 0);  // default background is black
-				try {
-					String lAndF = UIManager.getLookAndFeel().getName();
-					LOGGER.config("Setting look and feel to "+lAndF);
-					UIManager.setLookAndFeel(lAndF);
-				} catch (Exception e) {
-					LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
-				}
-
-				boolean useStandalone = true;
-
-				InputSupplier is = new DefaultInputSupplier();
-				EventHandler eh = new EventHandler(is);
-
-				DockableMainWindow mw = new DockableMainWindow(useStandalone,eh);
-				mw.setVisible(true);
-			};
-			
+		LOGGER.config("Launching GUI");
+		try {			
+			Runnable r = new RunWithGui();
 			EventQueue.invokeLater( r );
 		} catch(Exception e){
-			LOGGER.log(Level.SEVERE, "Error loading main window", e);
+			LOGGER.log(Level.SEVERE, "Error loading GUI", e);
 		} 
+	}
+	
+	/**
+	 * Runnable launcher that can be sent to the EDT
+	 * @author Ben Skinner
+	 * @since 1.18.0
+	 *
+	 */
+	private class RunWithGui implements Runnable {
+
+		@Override
+		public void run() {
+			IJ.setBackgroundColor(0, 0, 0);  // default background is black
+			try {
+				String lAndF = UIManager.getSystemLookAndFeelClassName();
+				UIManager.setLookAndFeel(lAndF);
+				LOGGER.config("Set look and feel to "+UIManager.getLookAndFeel().getName());
+				
+			} catch (Exception e) {
+				LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
+			}
+
+			boolean useStandalone = true;
+
+			InputSupplier is = new DefaultInputSupplier();
+			EventHandler eh = new EventHandler(is);
+
+			DockableMainWindow mw = new DockableMainWindow(useStandalone,eh);
+			mw.setVisible(true);
+		}
+		
 	}
 }
