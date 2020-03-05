@@ -59,7 +59,6 @@ public class Nuclear_Morphology_Analysis {
     	}
 		
 		try {
-			System.out.println("Attempting to create logger");
 			// If a logging properties file is specified in the launch parameters,
 			// use it. Otherwise, default to the file within the jar
 			String logFile = System.getProperty("java.util.logging.config.file");
