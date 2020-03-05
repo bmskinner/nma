@@ -136,7 +136,7 @@ public class CommandLineParser {
 
 				IJ.setBackgroundColor(0, 0, 0);  // default background is black
 				try {
-					String lAndF = UIManager.getSystemLookAndFeelClassName();
+					String lAndF = UIManager.getLookAndFeel().getName();
 					LOGGER.config("Setting look and feel to "+lAndF);
 					UIManager.setLookAndFeel(lAndF);
 				} catch (Exception e) {

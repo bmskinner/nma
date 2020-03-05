@@ -17,9 +17,11 @@
 package com.bmskinner.nuclear_morphology.core;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -56,11 +58,19 @@ public class Nuclear_Morphology_Analysis {
     		LOG_FOLDER.mkdirs();
     	}
 		
-    	// Read the logging properties
-		String path = Nuclear_Morphology_Analysis.class.getClassLoader()
-                .getResource("logging.properties")
-                .getFile();
-		System.setProperty("java.util.logging.config.file", path);
+		try {
+			System.out.println("Attempting to create logger");
+			// If a logging properties file is specified in the launch parameters,
+			// use it. Otherwise, default to the file within the jar
+			String logFile = System.getProperty("java.util.logging.config.file");
+			if(logFile==null) {
+				LogManager.getLogManager().readConfiguration(Nuclear_Morphology_Analysis.class.getClassLoader()
+						.getResourceAsStream("logging.properties"));
+			}
+		} catch (SecurityException | IOException e) {
+			// Since a logger has not yet been set up, print to console only
+			e.printStackTrace();
+		}
 		LOGGER = Logger.getLogger(Nuclear_Morphology_Analysis.class.getName());
 	}
 	
@@ -108,9 +118,14 @@ public class Nuclear_Morphology_Analysis {
 	private void logConfiguration(){
 		
 		try {
-			LOGGER.config("Logger properties file: "+System.getProperty("java.util.logging.config.file"));
-			LOGGER.config("Log file location: "+LOG_FOLDER.getAbsolutePath());
-			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, LOG_FOLDER.getAbsolutePath());
+			String logFile = System.getProperty("java.util.logging.config.file");
+			if(logFile!=null) {
+				LOGGER.config("Logger properties file specified: "+System.getProperty("java.util.logging.config.file"));
+			} else {
+				LOGGER.config("No external logging properties specified; using default logging config");
+				LOGGER.config("Log file location: "+LOG_FOLDER.getAbsolutePath());
+				GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, LOG_FOLDER.getAbsolutePath());
+			}
 			
 			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
 			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));
@@ -133,7 +148,8 @@ public class Nuclear_Morphology_Analysis {
 		logConfiguration();
 		
 		/*
-		 * Add a splash screen for long load times
+		 * Add a splash screen for long load times.
+		 * Applies to ImageJ launch only
 		 */
 		final JWindow splash = createSplash();
 		Prefs.blackBackground = true;		

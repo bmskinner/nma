@@ -54,12 +54,11 @@ public class ConfigFileReader {
             if (ini.exists()) {
                 // Read the properties
                 Properties properties = new Properties();
-
                 properties.load(new FileInputStream(ini));
 
                 assignOptions(properties);
             } else {
-            	LOGGER.fine("No config file: creating default");
+            	LOGGER.config("Config file does not exist; creating with default values");
                 Properties properties = createDefaultProperties();
                 properties.store(new FileOutputStream(ini), null);
             }
