@@ -72,14 +72,15 @@ public class SVGWriter implements Io {
                 .map(d -> d.getCollection().getConsensus())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-                
+        
+        // Set the width of the canvas to double the sum of the individual consensus nucleus bounding widths
         double w = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getWidth()*2).sum();
-        double h = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getHeight()).max().orElse(100);
+        double h = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getHeight()*1.25).max().orElse(100);
                
        
-        // A buffer scaled to the size of the nuclei
+        // A buffer around the edges scaled to the size of the nuclei
         double buffer = h/10;
-        w += buffer*(consensi.size()+1)*2;
+        w += buffer*consensi.size()*2;
         h += buffer*2;
         
         // A font cannot be less than 1
@@ -99,13 +100,16 @@ public class SVGWriter implements Io {
             CellularComponent c = d.getCollection().getConsensus();
             Shape s = c.toShape(scale);
 
-            Rectangle2D r = s.getBounds();
+            Rectangle2D r = s.getBounds2D();
+            
+            double xMin = x;
+            double xMax = xMin+(r.getWidth()*2);
 
-            export(s, g2, x, buffer*2, strokeWidth);
-            export(d.getName(), g2, (float) x, (float)buffer, fontSize);
+            export(s, g2, xMin, buffer*2, strokeWidth);
+            export(d.getName(), g2, (float) xMin, (float)buffer, fontSize);
             export(String.valueOf(d.getCollection().size()), 
             		g2, 
-            		(float)x, 
+            		(float)((xMin+xMax)/2), 
             		(float)(buffer+(r.getHeight()/2)), 
             		fontSize);
             x+=(r.getWidth()*2)+buffer;
