@@ -28,14 +28,13 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
  * 
  * @author ben
  *
- * @param <E>
- *            the component class to be drawn
+ * @param <E> the component class to be drawn
  */
 @SuppressWarnings("serial")
 public class ComponentOutlineDataset<E extends CellularComponent> extends DefaultXYDataset
         implements OutlineDataset<E> {
 
-    Map<Comparable, E> components = new HashMap<Comparable, E>();
+    Map<Comparable, E> components = new HashMap<>();
 
     /**
      * Set the component for the given series

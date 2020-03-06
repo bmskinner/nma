@@ -39,6 +39,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.charting.datasets.charts.HistogramDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.charts.NuclearHistogramDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.charts.SignalHistogramDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -147,7 +148,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
      * @throws Exception
      */
     public static JFreeChart createRandomSampleHistogram(List<Double> list) throws ChartDatasetCreationException {
-        HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
+        HistogramDataset ds = HistogramDatasetCreator.createHistogramDatasetFromList(list);
         JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
         chart.getXYPlot().addDomainMarker(new ValueMarker(1, Color.BLACK, ChartComponents.MARKER_STROKE));
         return chart;

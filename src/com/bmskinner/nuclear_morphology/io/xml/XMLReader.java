@@ -94,8 +94,8 @@ public abstract class XMLReader<T> {
 	}
 
 	protected IPoint readPoint(Element e) {
-		float x = Float.valueOf(e.getChildText(XMLCreator.X));
-		float y = Float.valueOf(e.getChildText(XMLCreator.Y));
+		float x = Float.parseFloat(e.getChildText(XMLCreator.X));
+		float y = Float.parseFloat(e.getChildText(XMLCreator.Y));
 		return IPoint.makeNew(x, y);
 	}
 		
@@ -123,47 +123,47 @@ public abstract class XMLReader<T> {
 	
 	protected void addKeyedValues(@NonNull Element e, @NonNull HashOptions o) {
 		// Primary keys
-		List<Element> boolContainer = e.getChildren(OptionsXMLCreator.BOOLEAN_KEY);
+		List<Element> boolContainer = e.getChildren(XMLCreator.BOOLEAN_KEY);
 		if(!boolContainer.isEmpty()) {
-			for(Element el : boolContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
-				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
-				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+			for(Element el : boolContainer.get(0).getChildren(XMLCreator.PAIR_KEY)) {
+				String key = el.getChild(XMLCreator.KEY_KEY).getText();
+				String val = el.getChild(XMLCreator.VALUE_KEY).getText();
 				o.setBoolean(key, Boolean.valueOf(val));
 			}
 		}
 		
-		List<Element> floatContainer = e.getChildren(OptionsXMLCreator.FLOAT_KEY);
+		List<Element> floatContainer = e.getChildren(XMLCreator.FLOAT_KEY);
 		if(!floatContainer.isEmpty()) {
-			for(Element el : floatContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
-				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
-				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+			for(Element el : floatContainer.get(0).getChildren(XMLCreator.PAIR_KEY)) {
+				String key = el.getChild(XMLCreator.KEY_KEY).getText();
+				String val = el.getChild(XMLCreator.VALUE_KEY).getText();
 				o.setFloat(key, Float.valueOf(val));
 			}
 		}
 		
-		List<Element> intContainer = e.getChildren(OptionsXMLCreator.INT_KEY);
+		List<Element> intContainer = e.getChildren(XMLCreator.INT_KEY);
 		if(!intContainer.isEmpty()) {
-			for(Element el : intContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
-				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
-				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+			for(Element el : intContainer.get(0).getChildren(XMLCreator.PAIR_KEY)) {
+				String key = el.getChild(XMLCreator.KEY_KEY).getText();
+				String val = el.getChild(XMLCreator.VALUE_KEY).getText();
 				o.setInt(key, Integer.valueOf(val));
 			}
 		}
 		
-		List<Element> doubleContainer = e.getChildren(OptionsXMLCreator.DOUBLE_KEY);
+		List<Element> doubleContainer = e.getChildren(XMLCreator.DOUBLE_KEY);
 		if(!doubleContainer.isEmpty()) {
-			for(Element el : doubleContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
-				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
-				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+			for(Element el : doubleContainer.get(0).getChildren(XMLCreator.PAIR_KEY)) {
+				String key = el.getChild(XMLCreator.KEY_KEY).getText();
+				String val = el.getChild(XMLCreator.VALUE_KEY).getText();
 				o.setDouble(key, Double.valueOf(val));
 			}
 		}
 		
-		List<Element> stringContainer = e.getChildren(OptionsXMLCreator.STRING_KEY);
+		List<Element> stringContainer = e.getChildren(XMLCreator.STRING_KEY);
 		if(!stringContainer.isEmpty()) {
-			for(Element el : stringContainer.get(0).getChildren(OptionsXMLCreator.PAIR_KEY)) {
-				String key = el.getChild(OptionsXMLCreator.KEY_KEY).getText();
-				String val = el.getChild(OptionsXMLCreator.VALUE_KEY).getText();
+			for(Element el : stringContainer.get(0).getChildren(XMLCreator.PAIR_KEY)) {
+				String key = el.getChild(XMLCreator.KEY_KEY).getText();
+				String val = el.getChild(XMLCreator.VALUE_KEY).getText();
 				o.setString(key, val);
 			}
 		}
@@ -171,7 +171,7 @@ public abstract class XMLReader<T> {
 	
 	protected void addComponent(@NonNull Element e, @NonNull IAnalysisOptions op) {
 		
-		String detectedObject = e.getAttribute(OptionsXMLCreator.DETECTED_OBJECT_KEY).getValue();
+		String detectedObject = e.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue();
 		
 		if(detectedObject.equals(CellularComponent.NUCLEUS)) {			
 			File f = op.getDetectionOptions(CellularComponent.NUCLEUS).isPresent() 
@@ -182,8 +182,8 @@ public abstract class XMLReader<T> {
 			// Primary keys
 			addKeyedValues(e, o);
 
-			for(Element component : e.getChildren(OptionsXMLCreator.SUB_OPTION_KEY)) {
-				String subType = component.getAttribute(OptionsXMLCreator.SUB_TYPE_KEY).getValue();
+			for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
+				String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
 				
 				if(subType.equals(IDetectionSubOptions.BACKGROUND_OPTIONS)) {
 					IPreprocessingOptions pre = new PreprocessingOptions();
@@ -212,8 +212,8 @@ public abstract class XMLReader<T> {
 				UUID id = idElement==null ? UUID.randomUUID() : UUID.fromString(idElement.getText());				
 				INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
 				addKeyedValues(e, n);				
-				for(Element component : e.getChildren(OptionsXMLCreator.SUB_OPTION_KEY)) {
-					String subType = component.getAttribute(OptionsXMLCreator.SUB_TYPE_KEY).getValue();
+				for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
+					String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
 					if(subType.equals(IDetectionSubOptions.SHELL_OPTIONS)) {
 						IShellOptions s = new DefaultShellOptions();
 						addKeyedValues(component, s);

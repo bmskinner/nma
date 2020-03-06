@@ -72,7 +72,7 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> {
 			
 			// add signal group names
 			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(CellularComponent.NUCLEAR_SIGNAL)) {
-				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
+				UUID signalGroup = UUID.fromString(key.replace(IAnalysisOptions.SIGNAL_GROUP, ""));
 				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
 				
 				Element signalId = new Element(XMLCreator.ID_KEY);

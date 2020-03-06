@@ -29,7 +29,6 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -45,6 +44,11 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
+/**
+ * Generate tables to go with scatter charts
+ * @author Ben Skinner
+ *
+ */
 public class ScatterTableDatasetCreator extends AbstractTableCreator {
 	
 	private static final Logger LOGGER = Logger.getLogger(ScatterTableDatasetCreator.class.getName());
@@ -62,11 +66,11 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
     public TableModel createSpearmanCorrlationTable(String component) {
 
         if (!options.hasDatasets()) {
-            return AnalysisDatasetTableCreator.createBlankTable();
+            return createBlankTable();
         }
 
         if (options.getStats().size() != 2) {
-            return AnalysisDatasetTableCreator.createBlankTable();
+            return createBlankTable();
         }
 
         PlottableStatistic firstStat = options.getStat();
@@ -74,7 +78,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
         for (PlottableStatistic stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {
                 LOGGER.fine("Statistic classes are different");
-                createBlankTable();
+                return createBlankTable();
             }
         }
 
@@ -108,8 +112,8 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
         DefaultTableModel model = new DefaultTableModel();
 
-        Vector<Object> names = new Vector<Object>();
-        Vector<Object> rho = new Vector<Object>();
+        Vector<Object> names = new Vector<>();
+        Vector<Object> rho = new Vector<>();
 
         List<IAnalysisDataset> datasets = options.getDatasets();
 
@@ -176,8 +180,8 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
         DefaultTableModel model = new DefaultTableModel();
 
-        Vector<Object> names = new Vector<Object>();
-        Vector<Object> rho = new Vector<Object>();
+        Vector<Object> names = new Vector<>();
+        Vector<Object> rho = new Vector<>();
 
         List<IAnalysisDataset> datasets = options.getDatasets();
 

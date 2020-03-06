@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -35,6 +37,8 @@ import com.bmskinner.nuclear_morphology.io.CountedOutputStream;
  *
  */
 public abstract class XMLWriter {
+	
+	private static final Logger LOGGER = Logger.getLogger(XMLWriter.class.getName());
 	
 	/**
 	 * Write the given XML document to a file
@@ -57,11 +61,9 @@ public abstract class XMLWriter {
 			XMLOutputter xmlOutput = new XMLOutputter();
 			
 			xmlOutput.setFormat(Format.getPrettyFormat());
-//			xmlOutput.output(doc, System.out); 
 			xmlOutput.output(doc, cos);
 		} catch (IOException e) {
-			System.out.println(String.format("Unable to write to file %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Unable to write file: "+outputFile.getAbsolutePath(), e);
 		}
 	}
 	

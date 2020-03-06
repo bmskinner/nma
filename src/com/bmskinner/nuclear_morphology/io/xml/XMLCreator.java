@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.process.ImageProcessor;
@@ -48,6 +50,8 @@ import ij.process.ImageProcessor;
  * @since 1.14.0
  */
 public abstract class XMLCreator<T> {
+	
+	private static final Logger LOGGER = Logger.getLogger(XMLCreator.class.getName());
 	
 	public static final String ANALYSIS_DATASET_KEY           = "AnalysisDataset";
 	public static final String CELL_COLLECTION_KEY            = "CellCollection";
@@ -225,7 +229,7 @@ public abstract class XMLCreator<T> {
 			
 			// add signal group names
 			if(element.getAttribute(DETECTED_OBJECT_KEY).getValue().equals(CellularComponent.NUCLEAR_SIGNAL)) {
-				UUID signalGroup = UUID.fromString(key.replaceAll(IAnalysisOptions.SIGNAL_GROUP, ""));
+				UUID signalGroup = UUID.fromString(key.replace(IAnalysisOptions.SIGNAL_GROUP, ""));
 				element.addContent(createElement(ID_KEY, signalGroup));
 			}
 			
@@ -548,8 +552,7 @@ public abstract class XMLCreator<T> {
 				appendElement(element, options.getSubOptions(key));
 				rootElement.addContent(element);
 			} catch (MissingOptionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Loggable.STACK, "Missing option", e);
 			}
 			
 		}

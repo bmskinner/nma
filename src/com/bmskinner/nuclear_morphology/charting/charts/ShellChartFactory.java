@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
@@ -61,7 +62,7 @@ public class ShellChartFactory extends AbstractChartFactory {
 	
 	private static final String SHELL_CHART_X_LABEL = "Outer <--- Shell ---> Interior";
 
-	public ShellChartFactory(ChartOptions o) {
+	public ShellChartFactory(@NonNull ChartOptions o) {
 		super(o);
 	}
 
@@ -100,70 +101,67 @@ public class ShellChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	private JFreeChart createSingleDatasetShellBarChart() {
-		try {
-			List<CategoryDataset> list = new NuclearSignalDatasetCreator(options).createShellBarChartDataset();
 
-			JFreeChart chart = ChartFactory.createBarChart(null, SHELL_CHART_X_LABEL, "Percent of signal",
-					list.get(0));
-			chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+		List<CategoryDataset> list = new NuclearSignalDatasetCreator(options).createShellBarChartDataset();
 
-			chart.getCategoryPlot().addRangeMarker(ChartComponents.ZERO_MARKER);
+		JFreeChart chart = ChartFactory.createBarChart(null, SHELL_CHART_X_LABEL, "Percent of signal",
+				list.get(0));
+		chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 
-			Range range = new Range(0, 1);
+		chart.getCategoryPlot().addRangeMarker(ChartComponents.ZERO_MARKER);
 
-			int datasetCount = 0;
-			for (CategoryDataset ds : list) {
+		Range range = new Range(0, 1);
 
-				ShellResultDataset shellDataset = (ShellResultDataset) ds;
+		int datasetCount = 0;
+		for (CategoryDataset ds : list) {
 
-				chart.getCategoryPlot().setDataset(datasetCount, ds);
+			ShellResultDataset shellDataset = (ShellResultDataset) ds;
 
-				IAnalysisDataset d = options.getDatasets().get(datasetCount);
+			chart.getCategoryPlot().setDataset(datasetCount, ds);
 
-				ShellResultBarRenderer rend = new ShellResultBarRenderer();
-				rend.setBarPainter(new StandardBarPainter());
-				rend.setShadowVisible(false);
+			IAnalysisDataset d = options.getDatasets().get(datasetCount);
 
-				chart.getCategoryPlot().setRenderer(datasetCount, rend);
+			ShellResultBarRenderer rend = new ShellResultBarRenderer();
+			rend.setBarPainter(new StandardBarPainter());
+			rend.setShadowVisible(false);
 
-				for (int i = 0; i < ds.getColumnCount(); i++) {
-					Comparable<String> colKey = ds.getColumnKey(i).toString();
+			chart.getCategoryPlot().setRenderer(datasetCount, rend);
 
-					for (int j = 0; j < ds.getRowCount(); j++) {
+			for (int i = 0; i < ds.getColumnCount(); i++) {
+				Comparable<String> colKey = ds.getColumnKey(i).toString();
 
-						Comparable<String> rowKey = ds.getRowKey(j).toString();
+				for (int j = 0; j < ds.getRowCount(); j++) {
 
-						// Get the visible range of the chart
-						range = Range.combine(range, shellDataset.getVisibleRange());
+					Comparable<String> rowKey = ds.getRowKey(j).toString();
 
-						UUID signalGroup = shellDataset.getSignalGroup(rowKey, colKey);
+					// Get the visible range of the chart
+					range = Range.combine(range, shellDataset.getVisibleRange());
 
-						rend.setSeriesVisibleInLegend(j, false);
-						rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+					UUID signalGroup = shellDataset.getSignalGroup(rowKey, colKey);
 
-						Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
-						if(g.isPresent()){
-							Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j));
-							rend.setSeriesPaint(j, colour);
-							rend.setSeriesBarWidth(j, 1);
-						}
+					rend.setSeriesVisibleInLegend(j, false);
+					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+
+					Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+					if(g.isPresent()){
+						Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j));
+						rend.setSeriesPaint(j, colour);
+						rend.setSeriesBarWidth(j, 1);
 					}
 				}
-				chart.getCategoryPlot().setRowRenderingOrder(SortOrder.DESCENDING); // ensure the narrower bars are on top
-				datasetCount++;
 			}
-
-			chart.getCategoryPlot().getRangeAxis().setRange(range);
-
-			String percentLabel = options.getNormalisation().equals(Normalisation.DAPI) ? "Normalised percent" : "Percent";
-			String locationLabel = options.getAggregation().equals(Aggregation.BY_NUCLEUS) ? Labels.NUCLEI : "signal borders";
-
-			chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel + " pixel intensity within " + locationLabel);
-
-			return chart;
-		} catch (ChartDatasetCreationException e) {
-			return createErrorChart();
+			chart.getCategoryPlot().setRowRenderingOrder(SortOrder.DESCENDING); // ensure the narrower bars are on top
+			datasetCount++;
 		}
+
+		chart.getCategoryPlot().getRangeAxis().setRange(range);
+
+		String percentLabel = options.getNormalisation().equals(Normalisation.DAPI) ? "Normalised percent" : "Percent";
+		String locationLabel = options.getAggregation().equals(Aggregation.BY_NUCLEUS) ? Labels.NUCLEI : "signal borders";
+
+		chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel + " pixel intensity within " + locationLabel);
+
+		return chart;
 	}
 
 	/**
@@ -171,40 +169,36 @@ public class ShellChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	private JFreeChart createMultipleDatasetShellBarChart() {
-		try {
-			XYZDataset xyz = new NuclearSignalDatasetCreator(options).createMultipleDatasetShellHeatMapDataset();
+		XYZDataset xyz = new NuclearSignalDatasetCreator(options).createMultipleDatasetShellHeatMapDataset();
 
-			// create a paint-scale and a legend showing it
-			LinearPaintScale paintScale = new LinearPaintScale(0,1);
+		// create a paint-scale and a legend showing it
+		LinearPaintScale paintScale = new LinearPaintScale(0,1);
 
-	        PaintScaleLegend psl = new PaintScaleLegend(paintScale, new NumberAxis());
-	        psl.setPosition(RectangleEdge.RIGHT);
-	        psl.setAxisLocation(AxisLocation.TOP_OR_RIGHT);
-	        psl.setMargin(50.0, 20.0, 80.0, 0.0);
-	        
-	        NumberAxis xAxis = new NumberAxis(SHELL_CHART_X_LABEL);
-	        xAxis.setLowerBound(-0.5);
-	        xAxis.setUpperBound(4.5);
-	        xAxis.setVisible(true);
-	        xAxis.setTickUnit(new NumberTickUnit(1.0));
-	        
-	        String labels[] = new String[xyz.getSeriesCount()];
-	        for (int i = 0; i<xyz.getSeriesCount(); i++)
-	            labels[i] = xyz.getSeriesKey(i).toString().replaceAll("_Series_\\d+$", ""); // Series added in case datasets have same name
-	        SymbolAxis yAxis = new SymbolAxis(null, labels);
+		PaintScaleLegend psl = new PaintScaleLegend(paintScale, new NumberAxis());
+		psl.setPosition(RectangleEdge.RIGHT);
+		psl.setAxisLocation(AxisLocation.TOP_OR_RIGHT);
+		psl.setMargin(50.0, 20.0, 80.0, 0.0);
 
-	        // finally a renderer and a plot
-	        XYBlockRenderer renderer = new XYBlockRenderer();
-	        renderer.setPaintScale(paintScale);
-	        
-	        XYPlot plot = new XYPlot(xyz, xAxis, yAxis, renderer);
+		NumberAxis xAxis = new NumberAxis(SHELL_CHART_X_LABEL);
+		xAxis.setLowerBound(-0.5);
+		xAxis.setUpperBound(4.5);
+		xAxis.setVisible(true);
+		xAxis.setTickUnit(new NumberTickUnit(1.0));
 
-	        JFreeChart chart = new JFreeChart(null, null, plot, false);
-	        chart.addSubtitle(psl);
-	        return chart;
-		} catch (ChartDatasetCreationException e) {
-			return createErrorChart();
-		}
+		String[] labels = new String[xyz.getSeriesCount()];
+		for (int i = 0; i<xyz.getSeriesCount(); i++)
+			labels[i] = xyz.getSeriesKey(i).toString().replaceAll("_Series_\\d+$", ""); // Series added in case datasets have same name
+		SymbolAxis yAxis = new SymbolAxis(null, labels);
+
+		// finally a renderer and a plot
+		XYBlockRenderer renderer = new XYBlockRenderer();
+		renderer.setPaintScale(paintScale);
+
+		XYPlot plot = new XYPlot(xyz, xAxis, yAxis, renderer);
+
+		JFreeChart chart = new JFreeChart(null, null, plot, false);
+		chart.addSubtitle(psl);
+		return chart;
 	}
 	
 	/**

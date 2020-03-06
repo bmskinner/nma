@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Write a component to svg format.
+ * Write cellular components to svg format.
  * 
  * @author bms41
  * @since 1.13.5

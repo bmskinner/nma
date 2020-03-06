@@ -35,11 +35,11 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 public class CellDataset {
 
     private ICell                       cell;
-    private Map<String, OutlineDataset> outlines = new HashMap<String, OutlineDataset>();
+    private Map<String, OutlineDataset<?>> outlines = new HashMap<>();
 
-    private Map<String, XYDataset> tags = new HashMap<String, XYDataset>();
+    private Map<String, XYDataset> tags = new HashMap<>();
 
-    private Map<String, XYDataset> lobes = new HashMap<String, XYDataset>();
+    private Map<String, XYDataset> lobes = new HashMap<>();
 
     public CellDataset(ICell cell) {
         this.cell = cell;
@@ -49,7 +49,7 @@ public class CellDataset {
         return cell;
     }
 
-    public void addOutline(String key, OutlineDataset ds) {
+    public void addOutline(String key, OutlineDataset<?> ds) {
         outlines.put(key, ds);
     }
 
@@ -57,11 +57,11 @@ public class CellDataset {
         tags.put(key, ds);
     }
 
-    public void addLobes(String key, OutlineDataset ds) {
+    public void addLobes(String key, OutlineDataset<?> ds) {
         outlines.put(key, ds);
     }
 
-    public Collection<OutlineDataset> getDatasets() {
+    public Collection<OutlineDataset<?>> getDatasets() {
         return outlines.values();
     }
 
@@ -70,7 +70,7 @@ public class CellDataset {
     }
 
     public Set<String> getKeys() {
-        Set<String> keys = new HashSet<String>();
+        Set<String> keys = new HashSet<>();
 
         keys.addAll(outlines.keySet());
         keys.addAll(tags.keySet());

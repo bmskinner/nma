@@ -69,7 +69,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @return the point of the signal centre of mass
      * @throws ChartDatasetCreationException
      */
-    public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline) throws ChartDatasetCreationException {
+    public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline){
         
     	// the anti-clockwise angle from the OP to the signal
     	double angle = n.getStatistic(PlottableStatistic.ANGLE);
@@ -82,8 +82,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         // convert to fractional distance to signal
         double distanceFromCoM = distanceToBorder * fractionalDistance;
         
-//        fine(String.format("Drawing signal with angle %s at distance %s", angle, distanceFromCoM));
-
         // adjust X and Y because we are counting angles from the vertical axis
         // but the angle tools returns angles against the x-axis
         double signalX = AngleTools.getXComponentOfAngle(distanceFromCoM, angle - 90);
@@ -97,7 +95,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @param dataset the dataset
      * @return
      */
-    public XYDataset createSignalCoMDataset() throws ChartDatasetCreationException {
+    public XYDataset createSignalCoMDataset() {
 
     	NuclearSignalXYDataset ds = new NuclearSignalXYDataset();
         ICellCollection collection = options.firstDataset().getCollection();
@@ -147,7 +145,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             throws ChartDatasetCreationException {
 
         ICellCollection collection = dataset.getCollection();
-        List<Shape> result = new ArrayList<Shape>(0);
+        List<Shape> result = new ArrayList<>();
         if(!collection.getSignalManager().hasSignals(signalGroup))
         	return result;
 
@@ -173,7 +171,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @return a boxplot dataset
      * @throws Exception
      */
-    public NuclearSignalBoxAndWhiskerDataset createSignalStatisticBoxplotDataset() throws ChartDatasetCreationException {
+    public NuclearSignalBoxAndWhiskerDataset createSignalStatisticBoxplotDataset() {
         return createMultiDatasetSignalStatisticBoxplotDataset();
     }
 
@@ -184,8 +182,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @return a boxplot dataset
      * @throws ChartDatasetCreationException
      */
-    private NuclearSignalBoxAndWhiskerDataset createMultiDatasetSignalStatisticBoxplotDataset()
-            throws ChartDatasetCreationException {
+    private NuclearSignalBoxAndWhiskerDataset createMultiDatasetSignalStatisticBoxplotDataset() {
 
     	NuclearSignalBoxAndWhiskerDataset result = new NuclearSignalBoxAndWhiskerDataset();
         PlottableStatistic stat = options.getStat();
@@ -206,7 +203,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                     values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
                 }
 
-                List<Double> list = new ArrayList<Double>();
+                List<Double> list = new ArrayList<>();
                 for (double value : values) {
                     list.add(value);
                 }
@@ -225,7 +222,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @return
      * @throws ChartDatasetCreationException
      */
-    public List<CategoryDataset> createShellBarChartDataset() throws ChartDatasetCreationException {
+    public List<CategoryDataset> createShellBarChartDataset() {
 
         List<CategoryDataset> result = new ArrayList<>();
 
@@ -254,7 +251,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @return
      * @throws ChartDatasetCreationException
      */
-    public XYZDataset createMultipleDatasetShellHeatMapDataset() throws ChartDatasetCreationException {
+    public XYZDataset createMultipleDatasetShellHeatMapDataset() {
 
     	DefaultXYZDataset result = new DefaultXYZDataset();
 
@@ -399,7 +396,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			
 		// otherwise use raw counts
 		double[] arr = r.get().getProportions(agg, norm);
-//		log(String.format("Random proportions for %s %s: %s",agg, norm, Arrays.toString(arr)));
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 			double d = -arr[shell]* 100;
 
@@ -431,7 +427,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			return;
 
 		double[] arr = r.get().getProportions(agg, norm);
-//		log(String.format("Real proportions for %s %s: %s",agg, norm, Arrays.toString(arr)));
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 			double d = arr[shell]*100;
 

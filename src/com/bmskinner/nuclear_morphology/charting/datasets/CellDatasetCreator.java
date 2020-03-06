@@ -52,7 +52,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      *            the chart options
      * @return a chart
      */
-    public XYDataset createPositionFeatureDataset() throws ChartDatasetCreationException {
+    public XYDataset createPositionFeatureDataset() {
 
         XYDataset ds = null;
 
@@ -85,7 +85,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * @return
      * @throws Exception
      */
-    private XYDataset createSinglePositionFeatureDataset() throws ChartDatasetCreationException {
+    private XYDataset createSinglePositionFeatureDataset() {
 
         DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -117,7 +117,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * @return
      * @throws Exception
      */
-    private XYDataset createMultiPositionFeatureDataset() throws ChartDatasetCreationException {
+    private XYDataset createMultiPositionFeatureDataset() {
 
         DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -164,8 +164,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * @return
      * @throws Exception
      */
-    public List<IPoint> createAbsolutePositionFeatureList(IAnalysisDataset dataset, UUID segmentID)
-            throws ChartDatasetCreationException {
+    public List<IPoint> createAbsolutePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) {
 
         if (dataset == null) {
             throw new IllegalArgumentException("Dataset is null");
@@ -175,16 +174,13 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             throw new IllegalArgumentException("Segment id is null");
         }
 
-        List<IPoint> result = new ArrayList<IPoint>();
+        List<IPoint> result = new ArrayList<>();
 
         /*
          * Fetch the cells from the dataset, and rotate the nuclei appropriately
          */
         LOGGER.finest( "Fetching segment position for each nucleus");
         for (Nucleus nucleus : dataset.getCollection().getNuclei()) {
-
-            // nucleus.updateVerticallyRotatedNucleus(); // TODO: forcing an
-            // update here because new analyses don't have a proper vertical yet
             Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
             LOGGER.finest( "Fetched vertical nucleus");
 
@@ -214,67 +210,4 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         LOGGER.finest( "Fetched segment position for each nucleus");
         return result;
     }
-
-    /**
-     * Find the xy coordinates of the start point of the given segment in each
-     * nucleus, after the nuclei have been rotated to vertical. The points are
-     * offset relative to the positions within the consensus nucleus
-     * 
-     * @param dataset
-     * @param singleSegment
-     * @return
-     * @throws ChartDatasetCreationException
-     *             if data is not available
-     */
-    public List<IPoint> createRelativePositionFeatureList(IAnalysisDataset dataset, UUID segmentID)
-            throws ChartDatasetCreationException {
-
-        List<IPoint> result = createAbsolutePositionFeatureList(dataset, segmentID);
-
-        /*
-         * Don't worry about changing things if there is not consensus nucleus
-         */
-        if (!dataset.getCollection().hasConsensus()) {
-            return result;
-        }
-
-        /*
-         * Find the start point of the segment in the consensus nucleus
-         */
-        Nucleus consensus = dataset.getCollection().getConsensus();
-
-        // Get the segment start position XY coordinates
-        IBorderSegment segment;
-        try {
-            segment = consensus.getProfile(ProfileType.ANGLE).getSegment(segmentID);
-
-            IPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());
-
-            /*
-             * The list of XYPoints are the absolute positions in cartesian
-             * space. This should be corrected to offsets from the geometric
-             * centre of the cluster
-             */
-
-            /*
-             * Update the result positions to be offsets to the centre
-             */
-
-            for (IPoint p : result) {
-
-                double offsetX = p.getX() - centrePoint.getX();
-                double offsetY = p.getY() - centrePoint.getY();
-
-                // p.setX(offsetX);
-                // p.setY(offsetY);
-
-            }
-
-        } catch (UnavailableComponentException e) {
-            LOGGER.warning("Cannot get angle profile for nucleus");
-        }
-
-        return result;
-    }
-
 }

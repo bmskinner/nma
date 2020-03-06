@@ -72,6 +72,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -97,6 +98,8 @@ import ij.process.ImageProcessor;
  */
 public class OutlineChartFactory extends AbstractChartFactory {
 	
+	private static final String ERROR_CREATING_MESH_MSG = "Error creating mesh";
+
 	private static final Logger LOGGER = Logger.getLogger(OutlineChartFactory.class.getName());
 	
 	protected static final String NO_CONSENSUS_ERROR_LBL = "No consensus nucleus in dataset";
@@ -152,7 +155,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * @throws ChartDatasetCreationException 
 	 * @throws Exception
 	 */
-	private JFreeChart makeSignalCoMNucleusOutlineChart() throws ChartCreationException, ChartDatasetCreationException {
+	private JFreeChart makeSignalCoMNucleusOutlineChart() throws ChartCreationException {
 
 		XYDataset signalCoMs = new NuclearSignalDatasetCreator(options).createSignalCoMDataset();
 
@@ -170,7 +173,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				rend.setSeriesShape(series, circle);
 
 				String name = (String) signalCoMs.getSeriesKey(series);
-				// int seriesGroup = getIndexFromLabel(name);
 				UUID seriesGroup = getSignalGroupFromLabel(name);
 
 				Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(seriesGroup);
@@ -281,7 +283,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         // Get the bounding box size for the consensus, to find the offsets for
         // the images created
-        Rectangle2D r = dataset.getCollection().getConsensus().getBounds(); // .createPolygon().getBounds();
+        Rectangle2D r = dataset.getCollection().getConsensus().getBounds();
         r = r == null ? dataset.getCollection().getConsensus().toPolygon().getBounds() : r; // in
                                                                                             // case
                                                                                             // the
@@ -308,7 +310,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 cellMesh = new DefaultMesh(cell.getNucleus(), meshConsensus);
             } catch (MeshCreationException e1) {
                 LOGGER.fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
-                LOGGER.log(Loggable.STACK, "Error creating mesh", e1);
+                LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e1);
                 return createErrorChart();
             }
 
@@ -326,7 +328,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     warped = im.drawImage(meshConsensus);
                 } catch (UncomparableMeshImageException | MeshImageCreationException e) {
                     LOGGER.fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
-                    LOGGER.log(Loggable.STACK, "Error creating mesh", e);
+                    LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                     return createErrorChart();
                 }
 
@@ -385,7 +387,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return createMeshChart(result, 0.5);
 
                     } catch (MeshCreationException e) {
-                        LOGGER.log(Loggable.STACK, "Error creating mesh", e);
+                        LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
                     }
 
@@ -422,14 +424,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return createErrorChart();
                     } catch (MeshImageCreationException e) {
                         LOGGER.fine("Cannot create mesh for " + options.getCell().getNucleus().getNameAndNumber());
-                        LOGGER.log(Loggable.STACK, "Error creating mesh", e);
+                        LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
                     } catch (UncomparableMeshImageException e) {
                         LOGGER.fine("Cannot compare mesh for " + options.getCell().getNucleus().getNameAndNumber());
                         LOGGER.log(Loggable.STACK, "Error comparing mesh", e);
                         return createErrorChart();
                     } catch (MeshCreationException e) {
-                        LOGGER.log(Loggable.STACK, "Error creating mesh", e);
+                        LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
                     }
 
@@ -660,8 +662,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 }
 
                 if (key.startsWith(CellularComponent.NUCLEAR_LOBE)) {
-                    // rend.setSeriesShape(series,
-                    // ChartComponents.DEFAULT_POINT_SHAPE);
                     rend.setSeriesPaint(series, ColourSelecter.DEFAULT_LOBE_OUTLINE);
                 }
 
@@ -852,10 +852,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
     }
 
     /**
-     * Draw the greyscale image from teh given channel on the plot
+     * Draw the greyscale image from the given channel on the plot
      * 
-     * @param imageFile
-     * @param channel
+     * @param plot the plot to annotate
+     * @param cell the cell to annotate
+     * @param component the component in the cell to annotate
+     * @param isRGB if the annotation should be RGB or greyscale 
      */
     private static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell, @NonNull CellularComponent component, boolean isRGB) {
 
@@ -875,12 +877,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
         XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
                                                    // nucleus outline dataset
 
-        int xBase = positions[CellularComponent.X_BASE];
-        int yBase = positions[CellularComponent.Y_BASE];
+        int xBase = positions[Imageable.X_BASE];
+        int yBase = positions[Imageable.Y_BASE];
 
         int padding = 10; // a border of pixels beyond the cell boundary
-        int wideW = positions[CellularComponent.WIDTH] + (padding * 2);
-        int wideH = positions[CellularComponent.HEIGHT] + (padding * 2);
+        int wideW = positions[Imageable.WIDTH] + (padding * 2);
+        int wideH = positions[Imageable.HEIGHT] + (padding * 2);
         int wideX = xBase - padding;
         int wideY = yBase - padding;
 
@@ -893,11 +895,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
         for (int x = 0; x < openProcessor.getWidth(); x++) {
             for (int y = 0; y < openProcessor.getHeight(); y++) {
 
-                // int pixel = im.getRGB(x, y);
                 int pixel = openProcessor.get(x, y);
                 Color col = new Color(pixel);
-                // Color col = new Color(pixel, pixel, pixel, 255);
-
                 // Ensure the 'pixels' overlap to avoid lines of background
                 // colour seeping through
                 Rectangle2D r = new Rectangle2D.Double(xBase + x - padding - 0.6, yBase + y - padding - 0.6, 1.2, 1.2);
@@ -1176,29 +1175,4 @@ public class OutlineChartFactory extends AbstractChartFactory {
         int b = bValue;
         return new Color(r, g, b);
     }
-
-//    /**
-//     * Create a histogram of log 2 ratios for a NucleusMesh
-//     * 
-//     * @param mesh
-//     *            the comparison mesh with length ratios
-//     * @return
-//     * @throws Exception
-//     */
-//    public JFreeChart createMeshHistogram(Mesh<Nucleus> mesh) throws ChartCreationException {
-//
-//        HistogramDataset ds;
-//        try {
-//            ds = new NucleusDatasetCreator(options).createNucleusMeshHistogramDataset(mesh);
-//        } catch (Exception e) {
-//            throw new ChartCreationException("Cannot make mesh histogram", e);
-//        }
-//        JFreeChart chart = HistogramChartFactory.createHistogram(ds, "Log2 ratio", "Number of edges");
-//        XYPlot plot = chart.getXYPlot();
-//        plot.setBackgroundPaint(Color.WHITE);
-//        plot.addDomainMarker(new ValueMarker(0, Color.BLACK, ChartComponents.PROFILE_STROKE));
-//
-//        return chart;
-//    }
-
 }

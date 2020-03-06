@@ -24,7 +24,8 @@ import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -46,7 +47,7 @@ public class NucleusTableCreator extends AbstractTableCreator {
 	
 	private static final Logger LOGGER = Logger.getLogger(NucleusTableCreator.class.getName());
 
-    public NucleusTableCreator(final TableOptions options) {
+    public NucleusTableCreator(@NonNull final TableOptions options) {
         super(options);
     }
 
@@ -57,7 +58,7 @@ public class NucleusTableCreator extends AbstractTableCreator {
      */
     public TableModel createLobeDetectionOptionsTable() {
         if (!options.hasDatasets())
-            return AnalysisDatasetTableCreator.createBlankTable();
+            return AbstractTableCreator.createBlankTable();
 
         DefaultTableModel model = new DefaultTableModel();
 
@@ -88,7 +89,7 @@ public class NucleusTableCreator extends AbstractTableCreator {
             for (int i = 0; i < datasets.size(); i++) {
 
                 IAnalysisDataset d = datasets.get(i);
-                Vector<Object> values = new Vector<Object>();
+                Vector<Object> values = new Vector<>();
 
                 if (!d.hasAnalysisOptions()) {
                     return createBlankTable();

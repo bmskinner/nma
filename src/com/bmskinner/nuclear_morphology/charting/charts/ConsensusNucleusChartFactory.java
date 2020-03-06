@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -337,19 +338,19 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             String name = (String) ds.getSeriesKey(i);
 
             // colour the segments
-            if (name.startsWith(NucleusDatasetCreator.SEGMENT_SERIES_PREFIX)) {
+            if (name.startsWith(AbstractDatasetCreator.SEGMENT_SERIES_PREFIX)) {
 
                 plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
                 plot.getRenderer().setSeriesPaint(i, Color.BLACK);
             }
 
             // colour the quartiles
-            if (name.startsWith(NucleusDatasetCreator.QUARTILE_SERIES_PREFIX)) {
+            if (name.startsWith(AbstractDatasetCreator.QUARTILE_SERIES_PREFIX)) {
 
                 // get the segment component
                 // The dataset series name is Q25_Seg_1 etc
                 String segmentName = name.replaceAll("Q[2|7]5_", "");
-                int segIndex = MorphologyChartFactory.getIndexFromLabel(segmentName);
+                int segIndex = AbstractChartFactory.getIndexFromLabel(segmentName);
 
                 if (showIQR) {
                     plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
@@ -361,7 +362,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
                 }
             }
             
-            if(name.startsWith(NucleusDatasetCreator.TAG_PREFIX)) {
+            if(name.startsWith(AbstractDatasetCreator.TAG_PREFIX)) {
             	plot.getRenderer().setSeriesStroke(i, new BasicStroke(8));
                 plot.getRenderer().setSeriesPaint(i, Color.BLUE);
             }
@@ -408,7 +409,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
             // get the group id from the name, and make colour
             plot.getRenderer().setSeriesPaint(i, colour);
-            if (name.startsWith(NucleusDatasetCreator.QUARTILE_SERIES_PREFIX)) {
+            if (name.startsWith(AbstractDatasetCreator.QUARTILE_SERIES_PREFIX)) {
                 // make the IQR distinct from the median
                 plot.getRenderer().setSeriesPaint(i, ((Color) colour).darker());
             }

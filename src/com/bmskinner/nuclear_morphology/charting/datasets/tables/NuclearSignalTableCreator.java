@@ -518,7 +518,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				    	pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
 				    }
 
-				    String key = d.getId().toString()+groupName.toString();
+				    String key = d.getId().toString()+groupName;
 				    Object[] rowData = {
 				            d.getName(), 
 				            groupName, 

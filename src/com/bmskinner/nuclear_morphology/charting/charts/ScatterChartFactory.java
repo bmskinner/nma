@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
@@ -45,11 +46,20 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Factory for creating scatter plots from a given options set
+ * @author Ben Skinner
+ *
+ */
 public class ScatterChartFactory extends AbstractChartFactory {
 	
 	private static final Logger LOGGER = Logger.getLogger(ScatterChartFactory.class.getName());
 
-    public ScatterChartFactory(ChartOptions o) {
+    /**
+     * Create with options describing the chart to be built
+     * @param o
+     */
+    public ScatterChartFactory(@NonNull ChartOptions o) {
         super(o);
     }
 
