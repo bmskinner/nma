@@ -49,8 +49,8 @@ public abstract class WorkspaceImporter implements Importer {
 	
 	private static final Logger LOGGER = Logger.getLogger(WorkspaceImporter.class.getName());
 	
-	private static final String VERSION_1_13_x = "1.13.x";
-	private static final String VERSION_1_14_0 = "1.14.0";
+	private static final String WORKSPACE_VERSION_1_13_x = "1.13.x";
+	private static final String WORKSPACE_VERSION_1_14_0 = "1.14.0";
 	
 	public abstract IWorkspace importWorkspace();
     
@@ -64,8 +64,8 @@ public abstract class WorkspaceImporter implements Importer {
     	String fileVersion = getWorkspaceFileVersion(f);
     	switch(fileVersion) {
     	
-    		case VERSION_1_13_x: return new v_1_13_WorkspaceImporter(f);
-    		case VERSION_1_14_0: return new v_1_14_0_WorkspaceImporter(f);
+    		case WORKSPACE_VERSION_1_13_x: return new v_1_13_WorkspaceImporter(f);
+    		case WORKSPACE_VERSION_1_14_0: return new v_1_14_0_WorkspaceImporter(f);
     		default: return new v_1_14_0_WorkspaceImporter(f);
     	}
     	
@@ -82,15 +82,18 @@ public abstract class WorkspaceImporter implements Importer {
     	try( FileInputStream fstream = new FileInputStream(f);
     			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));){
 
+    		// Only version 1.14.0 onwards uses xml, so look for
+    		// the xml version identifier in the first line
     		String firstLine = br.readLine();
     		if(firstLine.startsWith("<?xml version"))
-    			return VERSION_1_14_0;
+    			return WORKSPACE_VERSION_1_14_0;
 
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
 
-    	return VERSION_1_13_x;
+    	// No xml, so it must be the previous workspace type
+    	return WORKSPACE_VERSION_1_13_x;
     }
     
     
