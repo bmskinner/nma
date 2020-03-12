@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -66,7 +68,9 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     	
         for (IAnalysisDataset virtualMergeSource : datasets) {
             
+        	try {
         	IAnalysisDataset extracted = extractMergeSource(virtualMergeSource);
+        	
             LOGGER.fine("Checking new datasets from merge source "+extracted.getName());
          	if(!dv.validate(extracted)) {
          		LOGGER.warning("New dataset failed to validate; resegmentation is recommended");
@@ -74,6 +78,10 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
          	}
 
             result.add(extracted);
+        	} catch(MissingOptionException e) {
+        		LOGGER.warning("Missing analysis options; skipping "+virtualMergeSource.getName());  
+        		LOGGER.log(Loggable.STACK, "Missing analysis options in dataset "+virtualMergeSource.getName(),e);
+        	}
 
         }
         LOGGER.fine("Finished extracting merge sources");
@@ -84,14 +92,15 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
      * Extract the merge source for the given dataset into a real collection
      * @param template
      * @return
+     * @throws MissingOptionException 
      * @throws NoSuchElementException if the template analysis options are not present
      */
-    private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template) {
+    private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template) throws MissingOptionException {
 
     	ICellCollection templateCollection = template.getCollection();
     	
     	// Make a new real cell collection from the virtual collection
-    	File imageFolder = template.getAnalysisOptions().orElseThrow().getNuclusDetectionOptions().orElseThrow().getFolder();
+    	File imageFolder = template.getAnalysisOptions().orElseThrow(MissingOptionException::new).getNuclusDetectionOptions().orElseThrow(MissingOptionException::new).getFolder();
     	ICellCollection newCollection = new DefaultCellCollection(imageFolder, null,
     			templateCollection.getName(), templateCollection.getNucleusType());
 
@@ -152,9 +161,10 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
      * Copy any signal groups in the template collection into the new dataset.
      * @param templateCollection the collection to copy signal groups from
      * @param newDataset the dataset to copy the signal groups to
+     * @throws MissingOptionException 
      * @throws NoSuchElementException if a template signal group is not present
      */
-    private void copySignalGroups(ICellCollection templateCollection, IAnalysisDataset newDataset){
+    private void copySignalGroups(ICellCollection templateCollection, IAnalysisDataset newDataset) throws MissingOptionException{
         ICellCollection newCollection = newDataset.getCollection();
         for (UUID signalGroupId : templateCollection.getSignalGroupIDs()) {
 
@@ -167,7 +177,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 			}
 
 			if (addSignalGroup) {
-				ISignalGroup oldGroup = templateCollection.getSignalGroup(signalGroupId).orElseThrow();
+				ISignalGroup oldGroup = templateCollection.getSignalGroup(signalGroupId).orElseThrow(MissingOptionException::new);
 				ISignalGroup newGroup = new SignalGroup(oldGroup, false);
 			    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
 			}

@@ -156,7 +156,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     private ArrayList<Attribute> makePCAttributes() {
     	
     	// From the first nucleus, find the number of PCs to cluster on
-    	Nucleus n = dataset.getCollection().getCells().stream().findFirst().orElseThrow().getNucleus();
+    	Nucleus n = dataset.getCollection().getCells().stream().findFirst().orElseThrow(NullPointerException::new).getNucleus();
     	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N); 
 
     	ArrayList<Attribute> attributes = new ArrayList<>();
@@ -191,7 +191,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
      // How many attributes per profile?  
         double profileWindow = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions()) 
-        	profileWindow = dataset.getAnalysisOptions().orElseThrow().getProfileWindowProportion();
+        	profileWindow = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new).getProfileWindowProportion();
         
         profileAttributeCount = (int) Math.floor(1d / profileWindow);
 
@@ -287,7 +287,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	LOGGER.finer("Creating clusterable instances");
         double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options
-            windowProportion = dataset.getAnalysisOptions().orElseThrow().getProfileWindowProportion();
+            windowProportion = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new).getProfileWindowProportion();
 
         // Weka clustering uses a table in which columns are attributes and rows are instances
         ArrayList<Attribute> attributes = makeAttributes();

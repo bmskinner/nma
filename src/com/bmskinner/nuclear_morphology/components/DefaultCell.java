@@ -48,7 +48,7 @@ public class DefaultCell implements ICell {
      * 
      * instead
      */
-    @Deprecated(forRemoval=true)
+    @Deprecated
     protected Nucleus              nucleus   = null;
     
     protected List<IMitochondrion> mitochondria;
