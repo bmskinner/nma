@@ -290,10 +290,10 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotatePoint(IPoint p, Color c, int size) {
 
         if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth())
-            throw new IllegalArgumentException("Point x "+p.getXAsInt()+" is out of image bounds "+ip.getWidth());
+            throw new IllegalArgumentException("Point x "+p.getXAsInt()+" is out of image bounds (max width "+ip.getWidth()+")");
 
         if (p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight())
-            throw new IllegalArgumentException("Point y "+p.getYAsInt()+" is out of image bounds"+ip.getHeight());
+            throw new IllegalArgumentException("Point y "+p.getYAsInt()+" is out of image bounds (max height "+ip.getHeight()+")");
 
         ip.setColor(c);
         ip.setLineWidth(size);
