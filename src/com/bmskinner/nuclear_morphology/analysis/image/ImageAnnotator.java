@@ -20,8 +20,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -69,11 +71,20 @@ public class ImageAnnotator extends AbstractImageFilterer {
     
     private static final int BORDER_TAG_POINT_SIZE = 7;
 	private static final int RP_POINT_SIZE = 9;
+	private static final int DEFAULT_LINE_WIDTH = 3;
 	/** Converts resized images to original image dimensions */
     private double scale = 1;
+    
+    private static final Map<Tag, Color> DEFAULT_TAG_COLOURS = new HashMap<>();
 
     public ImageAnnotator(final ImageProcessor ip) {
         super(ip);
+        
+        DEFAULT_TAG_COLOURS.put(Tag.REFERENCE_POINT, Color.ORANGE);
+        DEFAULT_TAG_COLOURS.put(Tag.ORIENTATION_POINT, Color.BLUE);
+        DEFAULT_TAG_COLOURS.put(Tag.TOP_VERTICAL, Color.GREEN);
+        DEFAULT_TAG_COLOURS.put(Tag.BOTTOM_VERTICAL, Color.GREEN);
+        DEFAULT_TAG_COLOURS.put(Tag.INTERSECTION_POINT, Color.CYAN);
     }
     
     /**
@@ -146,10 +157,10 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param n the nucleus to draw
      * @return this annotator
      */
-    public ImageAnnotator annotatesignalsOnCroppedNucleus(final Nucleus n) {
+    public ImageAnnotator annotateSignalsOnCroppedNucleus(final Nucleus n) {
         
         try {
-        	annotateOutlineOnCroppedComponent(n, Color.BLACK, 3);
+        	annotateOutlineOnCroppedComponent(n, Color.DARK_GRAY, 3);
             annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, RP_POINT_SIZE);
             annotateSignals(n);
 
@@ -161,7 +172,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
     
     /**
      * Draw the outline of the given nucleus and any signals marked.
-     * The image is assumed to be cropped to the nuclear border.
+     * The image is assumed to be cropped to the component image size
+     * (bounds plus the component buffer).
      * 
      * @param n the nucleus to draw
      * @return this annotator
@@ -169,26 +181,28 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotateSegmentsOnCroppedNucleus(@NonNull Nucleus n) {
         
         try {
+        	
+        	// Provide a background for all points to increase visibility
             for(IBorderPoint p : n.getBorderList()) {
-            	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.BLACK, 3);
+            	try {
+            		annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.DARK_GRAY, 3);
+            	} catch(IllegalArgumentException e) {
+            		LOGGER.fine("Unable to draw point "+p + " because "+e.getMessage());
+            	}
             }
             
-            // Draw lines for the border tags            
-            
-            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
-                    n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), 
-                    Color.ORANGE, 3);
-            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                    , n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER)
-                    , Color.BLUE, 3);
-            
-            if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
-                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                        , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GREEN, 3);
-                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                        , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                        , Color.GREEN, 3);
+         
+            try {
+                // Draw lines for the border tags   
+            	for(Tag t : n.getBorderTags().keySet()) {
+            		Color c = DEFAULT_TAG_COLOURS.get(t);
+            		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
+                			n.getBorderPoint(t).plus(Imageable.COMPONENT_BUFFER), 
+                			c, DEFAULT_LINE_WIDTH);
+            		
+            	}
+            } catch(IllegalArgumentException e) {
+            	LOGGER.fine("Unable to draw at least one border tag because "+e.getMessage());
             }
             
             // Colour the border points for segments    
@@ -201,9 +215,14 @@ public class ImageAnnotator extends AbstractImageFilterer {
             		int lastIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getEndIndex());
             		while(it.hasNext()) {
             			int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, it.next());
-            			IPoint p = n.getBorderPoint(index).plus(Imageable.COMPONENT_BUFFER);
-            			// since segments overlap, draw the last index larger so the next segment can overlay
-            			annotatePoint(p, (Color) color, lastIndex==index ? 5 : 3);
+        				IPoint p = n.getBorderPoint(index).plus(Imageable.COMPONENT_BUFFER);
+            			try {
+            				
+            				// since segments overlap, draw the last index larger so the next segment can overlay
+            				annotatePoint(p, (Color) color, lastIndex==index ? 5 : 3);
+            			} catch(IllegalArgumentException e) {
+            				LOGGER.fine("Unable to draw point "+p + " because "+e.getMessage());
+            			}
             		}
             	}
             	

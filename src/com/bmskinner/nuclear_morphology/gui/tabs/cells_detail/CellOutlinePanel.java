@@ -45,7 +45,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
             
 //    private RotationSelectionSettingsPanel rotationPanel;
     
-    private InteractiveBorderTagCellPanel imagePanel;
+    private InteractiveCellOutlinePanel imagePanel;
 
     private GenericCheckboxPanel rotatePanel   = new GenericCheckboxPanel("Rotate vertical");
     private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus mesh");
@@ -62,7 +62,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         JPanel header = makeHeader();
         add(header, BorderLayout.NORTH);
 
-        imagePanel = new InteractiveBorderTagCellPanel(this);
+        imagePanel = new InteractiveCellOutlinePanel(this);
 
         add(imagePanel, BorderLayout.CENTER);
         

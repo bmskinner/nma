@@ -54,19 +54,18 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.process.ImageProcessor;
 
 /**
- * Show annotated cell images, and allow selection of tags
- * or other elements of the cell.
+ * Show annotated cell images with signals or other elements of the cell.
  * 
  * The 'bulging' code was adapted from https://stackoverflow.com/questions/22824041/explanation-for-the-bulge-effect-algorithm
  * @author ben
  * @since 1.14.0
  *
  */
-public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
+public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 	
-	private static final Logger LOGGER = Logger.getLogger(InteractiveBorderTagCellPanel.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(InteractiveCellOutlinePanel.class.getName());
 
-	public InteractiveBorderTagCellPanel(@NonNull CellUpdatedEventListener parent){
+	public InteractiveCellOutlinePanel(@NonNull CellUpdatedEventListener parent){
 		super(parent);
 		CellImageMouseListener mouseListener = new CellImageMouseListener();
 		imageLabel.addMouseWheelListener(mouseListener);
@@ -111,10 +110,19 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 			} else{
 				an.crop(cell.getNuclei().get(0));
 			}
-			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
+			
+			// If the image is smaller than the available space, create a new annotator
+			// that fills this space. If the image is larger than the available space, shrink
+			// it later, otherwise there will not be room to draw the features
+			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor());
+			boolean isSmaller = an.toProcessor().getWidth()<getWidth() && an.toProcessor().getHeight()<getHeight();
+			if(isSmaller) {
+				an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
+			}
+			
 
 			for(Nucleus n : cell.getNuclei()){
-				an2.annotatesignalsOnCroppedNucleus(n);
+				an2.annotateSignalsOnCroppedNucleus(n);
 			}    
 			
 			
@@ -131,8 +139,11 @@ public class InteractiveBorderTagCellPanel extends InteractiveCellPanel {
 				}
 			}
 			
-			imageLabel.setIcon(an2.toImageIcon());
-			input = an2.toBufferedImage();
+			// Whatever the canvas size, rescale the final image to the panel
+			ImageAnnotator an3 = new ImageAnnotator(an2.toProcessor(), getWidth(), getHeight());
+
+			imageLabel.setIcon(an3.toImageIcon());
+			input = an3.toBufferedImage();
 			sourceWidth = an.toProcessor().getWidth();
 			sourceHeight = an.toProcessor().getHeight();
 		};
