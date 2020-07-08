@@ -168,13 +168,7 @@ public interface Imageable {
      */
     ImageProcessor getComponentRGBImage() throws UnloadableImageException;
 
-    /**
-     * Get the pixels within this object as a list of points
-     * 
-     * @return a list of points
-     */
-    // List<IPoint> getPixelsAsPoints();
-
+    
     /**
      * Get the bounding rectangle for the object.
      * 
@@ -228,57 +222,6 @@ public interface Imageable {
     void setSourceFolder(@NonNull File sourceFolder);
 
     /**
-     * Translate the given coordinate from the component image of the template
-     * object into the equivalent coordinate component image of the target object.
-     * This assumes the objects lie on the same base coordinates (i.e. they come from
-     * the same image).
-     * 
-     * Source images are cropped and have a buffer added for display (called the
-     * component image).
-     * 
-     * @param point the point to convert
-     * @param template the component image the point has come from
-     * @param target the component image the point should be translated to
-     * @return the point in the coordinate frame of the target object
-     */
-    static IPoint translateCoordinateToComponentImage(IPoint point, Imageable template, Imageable target) {
-
-        /*
-         * When using the component images, there is both a cropping of the
-         * source image, and the addition of a buffer to each side
-         * (#COMPONENT_BUFFER) so that the edges of the object are not obscured.
-         * This means these must be corrected for when translating coordinates
-         * between component images.
-         * 
-		 *               300
-		 *        ___________________
-		 *       |                   |   Source Image
-		 *       |   __________      |                      __
-		 *       |  |   _____  |     |   Component buffer     |
-		 *   195 |  |  |    |  |     |                        |
-		 *   200 |  |  |  X |  | 15  |   Template             | Component image
-		 *       |  |  |____|  |     |                        |
-		 *       |  |__________|     |                      __|
-		 *       |_______15__________|
-		 * 
-		 *             295
-         * 
-         * 
-         * In the template image, point X is at 30, 20. In the target image, X
-         * is at 5, 5. The template x-coordinate must be adjusted by -25 (the
-         * target x - template x)
-         * 
-         */
-
-        IPoint temBase = template.getOriginalBase();
-        IPoint tarBase = target.getOriginalBase();
-        
-        IPoint diff = tarBase.minus(temBase);
-        
-        return point.plus(diff);
-    }
-
-    /**
      * Translate the given coordinate from the component image of the
      * template object into the equivalent coordinate in the source image
      * of the template object.
@@ -323,15 +266,20 @@ public interface Imageable {
          * gives a final position of (300, 200)
          * 
          */
+    	
+    	return point
+    			.minus(COMPONENT_BUFFER)
+    			.plus(template.getOriginalBase().minus(template.getBase()));
+    			
 
-        double xTem = point.getX() - COMPONENT_BUFFER;
-        double yTem = point.getY() - COMPONENT_BUFFER;
-
-        IPoint temBase = template.getOriginalBase();
-        double x = xTem + temBase.getX();
-        double y = yTem + temBase.getY();
-
-        return IPoint.makeNew(x, y);
+//        double xTem = point.getX() - COMPONENT_BUFFER;
+//        double yTem = point.getY() - COMPONENT_BUFFER;
+//
+//        IPoint temBase = template.getOriginalBase();
+//        double x = xTem + temBase.getX();
+//        double y = yTem + temBase.getY();
+//
+//        return IPoint.makeNew(x, y);
 
     }
 
@@ -355,6 +303,9 @@ public interface Imageable {
          * These must be corrected for when translating coordinates between
          * component images.
          * 
+         * Original offsets were performed according to the CoM. 
+         * TODO: should that matter for these offsets?
+         * 
          *                300
 		 *        ___________________
 		 *       |                   |   Source Image
@@ -376,16 +327,9 @@ public interface Imageable {
          * component coordinate again, giving a final position of (15, 15).
          * 
          */
-
-        IPoint temBase = template.getOriginalBase();
-
-        double xCom = point.getX() - temBase.getX();
-        double yCom = point.getY() - temBase.getY();
-
-        double x = xCom + COMPONENT_BUFFER;
-        double y = yCom + COMPONENT_BUFFER;
-
-        return IPoint.makeNew(x, y);
-
+        
+        return point
+        		.minus(template.getOriginalBase().minus(template.getBase()))
+        		.plus(COMPONENT_BUFFER);
     }
 }
