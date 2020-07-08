@@ -139,7 +139,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                             ChartComponents.MARKER_STROKE, seg);
                     xCrosshair.setLabelVisible(false);
 
-                    double value = isChartNormalised ? getRescaledIndex(seg, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH)
+                    double value = isChartNormalised ? getRescaledIndex(seg, (int) getMaximumDomainValue())
                             : seg.getStartIndex();
 
                     xCrosshair.setValue(value);
@@ -191,6 +191,10 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
             }
         }
     }
+    
+    private double getMaximumDomainValue() {
+    	 return this.getChart().getXYPlot().getDomainAxis().getRange().getUpperBound();
+    }
 
     @Override
     public synchronized void mouseReleased(MouseEvent e) {
@@ -210,15 +214,18 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                 LOGGER.fine("Double of domain value is " + xValue);
 
                 // Correct for normalisation
+                
+               
+                
                 if (isChartNormalised) {
 
                     if (xValue < 0)
-                        xValue += ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH; // Wrap values below
+                        xValue += getMaximumDomainValue(); // Wrap values below
 
-                    if (xValue >= ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH) // Wrap values above
-                        xValue -= ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
+                    if (xValue >= getMaximumDomainValue()) // Wrap values above
+                        xValue -= getMaximumDomainValue();
 
-                    xValue = profile.size() * (xValue / ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+                    xValue = profile.size() * (xValue / getMaximumDomainValue());
 
                     LOGGER.fine("Profile position of domain value is " + xValue);
                 }

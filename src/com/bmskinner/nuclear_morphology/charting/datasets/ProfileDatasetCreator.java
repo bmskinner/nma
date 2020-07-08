@@ -57,7 +57,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	
 	private static final Logger LOGGER = Logger.getLogger(ProfileDatasetCreator.class.getName());
 
-	public static final int DEFAULT_PROFILE_LENGTH = 1000;
+	private static final int DEFAULT_PROFILE_LENGTH = 1000;
 
 	public ProfileDatasetCreator(@NonNull ChartOptions options) {
 		super(options);
@@ -73,6 +73,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		private final FloatXYDataset lines = new FloatXYDataset(); // values that will be drawn with a line renderer
 		private final Map<Integer, XYSeriesCollection> ranges = new HashMap<>(); // values that will be drawn with a difference renderer
 		private float maxYValue = -Float.MAX_VALUE;
+		private int maxDomainValue = DEFAULT_PROFILE_LENGTH;
 		
 		/**
 		 * Add a line series
@@ -83,6 +84,14 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		public void addLines(String seriesKey, float[][] data, int datasetIndex) {
 			lines.addSeries(seriesKey, data, datasetIndex);
 			maxYValue = Math.max(maxYValue, Stats.max(data[1]));
+		}
+		
+		public int getMaxDomainValue() {
+			return maxDomainValue;
+		}
+		
+		public void setMaxNormalisedDomainValue(int i) {
+			maxDomainValue = i;
 		}
 		
 		public double maxRangeValue() {
@@ -215,10 +224,14 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		int maxLength = isShowNuclei ? Math.max(maxMedianLength, maxNucleusLength) : maxMedianLength; // the maximum length that needs to be drawn
 		
 		double offset = 0;
+		
+		int normalisedProfileLength = chooseNormalisedProfileLength();
+		ds.setMaxNormalisedDomainValue(normalisedProfileLength);
+		
 		try {
 			IProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(type, borderTag, Stats.MEDIAN);
 
-			IProfile xpoints = createXPositions(medianProfile, isNormalised ? DEFAULT_PROFILE_LENGTH : medianProfileLength);
+			IProfile xpoints = createXPositions(medianProfile, isNormalised ? normalisedProfileLength : medianProfileLength);
 
 			// Offset the x positions depending on the alignment setting a
 			if (alignment.equals(ProfileAlignment.RIGHT))
@@ -238,7 +251,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 //				System.out.println(String.format("Fetched %s median segments for %s", segments.size(), borderTag));
 
 				if (isNormalised) {
-					addSegmentsFromProfile(segments, medianProfile, ds, DEFAULT_PROFILE_LENGTH, 0, 0);
+					addSegmentsFromProfile(segments, medianProfile, ds, normalisedProfileLength, 0, 0);
 				} else {
 					addSegmentsFromProfile(segments, medianProfile, ds, collection.getMedianArrayLength(), offset, 0);
 				}
@@ -273,7 +286,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				for (int j=0; j<nuclei.size(); j++) {
 					Nucleus n = nuclei.get(j);
 
-					int length = isNormalised ? DEFAULT_PROFILE_LENGTH : n.getBorderLength();
+					int length = isNormalised ? normalisedProfileLength : n.getBorderLength();
 
 					IProfile yValues = isNormalised ? n.getProfile(type, borderTag).interpolate(length) : n.getProfile(type, borderTag);
 					IProfile xValues = createXPositions(yValues, length);
@@ -293,6 +306,31 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get median profile", e);
 		}
+	}
+	
+	/**
+	 * When handling large objects, the default normalised profile
+	 * length may not be sufficient. Ensure the normalised length
+	 * is a multiple of DEFAULT_PROFILE_LENGTH and greater than any 
+	 * individual profile.
+	 * @return
+	 * @throws UnavailableProfileTypeException
+	 */
+	private int chooseNormalisedProfileLength() {
+		int profileLength = DEFAULT_PROFILE_LENGTH;
+		
+		try {
+		for(IAnalysisDataset d : options.getDatasets()) {
+			for(Nucleus n : d.getCollection().getNuclei()) {
+				int l = n.getProfile(ProfileType.ANGLE).size();
+				if(l > profileLength)
+					profileLength = (int) Math.ceil(l/DEFAULT_PROFILE_LENGTH)*DEFAULT_PROFILE_LENGTH;
+			}
+		}
+		} catch(UnavailableProfileTypeException e) {
+			LOGGER.fine("Unable to get a profile, defaulting to default profile length");
+		}
+		return profileLength;
 	}
 
 	/**

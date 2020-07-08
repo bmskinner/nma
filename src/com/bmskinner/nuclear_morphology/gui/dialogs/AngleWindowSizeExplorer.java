@@ -255,7 +255,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         int datasetCount = plot.getDatasetCount();
         DefaultXYDataset ds = new DefaultXYDataset();
 
-        IProfile xpoints = createXPositions(profile, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+        IProfile xpoints = createXPositions(profile, (int) plot.getDomainAxis().getRange().getUpperBound());
         double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 
         DecimalFormat df = new DecimalFormat("#0.000");

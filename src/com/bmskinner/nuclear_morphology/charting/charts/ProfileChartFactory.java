@@ -77,6 +77,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	private static final double DEFAULT_POSITION_AXIS_MIN = 0;
 	private static final double DEFAULT_ANGLE_AXIS_MIN = 0;
 	private static final double DEFAULT_ANGLE_AXIS_MAX = 360;
+	
+	private static final int DEFAULT_EMPTY_PROFILE_LENGTH = 1000;
 
 	public ProfileChartFactory(@NonNull final ChartOptions o) {
 		super(o);
@@ -87,7 +89,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public synchronized static JFreeChart createEmptyChart() {
+	public static synchronized JFreeChart createEmptyChart() {
 		return createEmptyChart(ProfileType.ANGLE);
 	}
 
@@ -97,7 +99,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public synchronized static JFreeChart createEmptyChart(ProfileType type) {
+	public static synchronized JFreeChart createEmptyChart(ProfileType type) {
 		if(type==null)
 			return createEmptyChart();
 
@@ -105,7 +107,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 
 		plot.getDomainAxis().setLabel(POSITION_AXIS_LBL);
-		plot.getDomainAxis().setRange(DEFAULT_POSITION_AXIS_MIN, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+		plot.getDomainAxis().setRange(DEFAULT_POSITION_AXIS_MIN, DEFAULT_EMPTY_PROFILE_LENGTH);
 
 		plot.getRangeAxis().setLabel(type.getLabel());
 
@@ -192,7 +194,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		
 		int length = options.isShowProfiles() ? collection.getMaxProfileLength() : collection.getMedianArrayLength();
-		length = options.isNormalised() ? ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH : length; // default if normalised
+		length = options.isNormalised() ? ds.getMaxDomainValue() : length; // default if normalised
 
 		JFreeChart chart = makeProfileChart(ds, length);
 
@@ -216,7 +218,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 					double indexToDraw = index; // convert to a double to allow normalised positioning
 
 					if (options.isNormalised()) // set to the proportion of the point along the profile
-						indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+						indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * ds.getMaxDomainValue());
 
 					if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
 						int maxX = DatasetUtilities.findMaximumDomainValue(ds.getLines()).intValue();
@@ -265,11 +267,11 @@ public class ProfileChartFactory extends AbstractChartFactory {
     	}
     	    	
     	// Set x-axis length
-    	int xLength = ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
+    	int xLength = profiles.getMaxDomainValue();
     	if (!options.isNormalised())	
     		xLength = options.getDatasets().stream()
     		.mapToInt(d->d.getCollection() .getMedianArrayLength())
-    		.max().orElse(ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+    		.max().orElse(profiles.getMaxDomainValue());
 
 		JFreeChart chart = makeProfileChart(profiles, xLength);
 		applyDefaultAxisOptions(chart);
@@ -295,7 +297,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		}
 		
 		plot.getRangeAxis().setAutoRange(false);
-		plot.getDomainAxis().setRange(DEFAULT_ANGLE_AXIS_MIN, options.getType()==ProfileType.ANGLE?DEFAULT_ANGLE_AXIS_MAX:ds.maxRangeValue());
+		plot.getRangeAxis().setRange(DEFAULT_ANGLE_AXIS_MIN, options.getType()==ProfileType.ANGLE?DEFAULT_ANGLE_AXIS_MAX:ds.maxRangeValue());
 		
 		plot.getDomainAxis().setAutoRange(false);
 		// Start the x-axis at -1 so tags can be seen clearly
@@ -429,13 +431,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param plot
 	 */
 	protected void addSegmentTextAnnotations(ISegmentedProfile profile, XYPlot plot) {
+		double xMax = plot.getDomainAxis().getRange().getUpperBound();
 		for (IBorderSegment seg : profile.getOrderedSegments()) {
 
 			int midPoint = seg.getMidpointIndex();
 
 			double x = midPoint;
 			if (options.isNormalised())
-				x = ((double) midPoint / (double) seg.getProfileLength()) * ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
+				x = ((double) midPoint / (double) seg.getProfileLength()) * xMax;
 			XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
 
 			Paint colour = ColourSelecter.getColor(seg.getPosition());
@@ -477,7 +480,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
             return createErrorChart();
         }
 
-        JFreeChart chart = makeProfileChart(ds, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+        JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
         XYPlot plot = chart.getXYPlot();
         plot.getRangeAxis().setLabel(IQR_AXIS_LBL);
         plot.getRangeAxis().setAutoRange(true);
@@ -493,7 +496,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
             // add any regions with bimodal distribution to the chart
             float[] xPositions = new float[modes.size()];
             for (int i = 0; i < xPositions.length; i++) 
-            	xPositions[i] = (float) i / (float) xPositions.length * ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH;
+            	xPositions[i] = (float) i / (float) xPositions.length * ds.getMaxDomainValue();
 
             for (int i = 0; i < modes.size(); i++) {
                 double x = xPositions[i];
@@ -523,7 +526,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
     private JFreeChart makeMultiVariabilityChart() throws ChartDatasetCreationException  {
     	ProfileChartDataset ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
 
-    	JFreeChart chart = makeProfileChart(ds, ProfileDatasetCreator.DEFAULT_PROFILE_LENGTH);
+    	JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
         XYPlot plot = chart.getXYPlot();
 
         plot.getRangeAxis().setAutoRange(true);
