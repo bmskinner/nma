@@ -228,13 +228,18 @@ public interface Imageable {
     void setSourceFolder(@NonNull File sourceFolder);
 
     /**
-     * Translate the given coordinate from the template component image into the
-     * equivalent coordinate in the target image.
+     * Translate the given coordinate from the component image of the template
+     * object into the equivalent coordinate component image of the target object.
+     * This assumes the objects lie on the same base coordinates (i.e. they come from
+     * the same image).
+     * 
+     * Source images are cropped and have a buffer added for display (called the
+     * component image).
      * 
      * @param point the point to convert
      * @param template the component image the point has come from
      * @param target the component image the point should be translated to
-     * @return
+     * @return the point in the coordinate frame of the target object
      */
     static IPoint translateCoordinateToComponentImage(IPoint point, Imageable template, Imageable target) {
 
@@ -245,14 +250,18 @@ public interface Imageable {
          * This means these must be corrected for when translating coordinates
          * between component images.
          * 
-         * 30 _Template____________
-         *  |                      |
-         *  | Target               |
-         *  | _____                |
-         *  |      |               |
-         *  | 20   |               | 
-         *  X |
-         * 5 | | |____| | | 5 | |___________________|
+		 *               300
+		 *        ___________________
+		 *       |                   |   Source Image
+		 *       |   __________      |                      __
+		 *       |  |   _____  |     |   Component buffer     |
+		 *   195 |  |  |    |  |     |                        |
+		 *   200 |  |  |  X |  | 15  |   Template             | Component image
+		 *       |  |  |____|  |     |                        |
+		 *       |  |__________|     |                      __|
+		 *       |_______15__________|
+		 * 
+		 *             295
          * 
          * 
          * In the template image, point X is at 30, 20. In the target image, X
@@ -267,23 +276,19 @@ public interface Imageable {
         IPoint diff = tarBase.minus(temBase);
         
         return point.plus(diff);
-
-//        double xDiff = tarBase.getX() - temBase.getX();
-//        double yDiff = tarBase.getY() - temBase.getY();
-//
-//        double newX = point.getX() + xDiff;
-//        double newY = point.getY() + yDiff;
-//
-//        return IPoint.makeNew(newX, newY);
     }
 
     /**
-     * Translate the given coordinate from the template component image into the
-     * equivalent coordinate in the template source image.
+     * Translate the given coordinate from the component image of the
+     * template object into the equivalent coordinate in the source image
+     * of the template object.
      * 
-     * @param point
-     * @param template
-     * @return
+     * Source images are cropped and have a buffer added for display (called the
+     * component image).
+     * 
+     * @param point the point in the template component image coordinate system
+     * @param template the template object
+     * @return the point in the original coordinate system of the template source image 
      */
     static IPoint translateCoordinateToSourceImage(IPoint point, Imageable template) {
 
@@ -294,12 +299,18 @@ public interface Imageable {
          * These must be corrected for when translating coordinates between
          * component images.
          * 
-         * 300 ___________________ | | Source Image | __________ | __ | | _____
-         * | | Component buffer | 195 | | | | | | | 200 | | | X | | 15 |
-         * Template | Component image | | |____| | | | | |__________| | __|
-         * |_______15__________|
-         * 
-         * 295
+		 *               300
+		 *        ___________________
+		 *       |                   |   Source Image
+		 *       |   __________      |                      __
+		 *       |  |   _____  |     |   Component buffer     |
+		 *   195 |  |  |    |  |     |                        |
+		 *   200 |  |  |  X |  | 15  |   Template             | Component image
+		 *       |  |  |____|  |     |                        |
+		 *       |  |__________|     |                      __|
+		 *       |_______15__________|
+		 * 
+		 *             295
          * 
          * In the template image, point X is at 15, 15. This includes the
          * COMPONENT_BUFFER, so the position within the template object is 15 -
@@ -326,11 +337,14 @@ public interface Imageable {
 
     /**
      * Translate the given point from the source image of the template object to
-     * the equivalent coordinate in the component image
+     * the equivalent coordinate in the component image.
      * 
-     * @param point
-     * @param template
-     * @return
+     * Source images are cropped and have a buffer added for display (called the
+     * component image).
+     * 
+     * @param point the point in the original image coordinate system
+     * @param template the object
+     * @return the position of the point in the component image of the template
      */
     static IPoint translateCoordinateToComponentImage(IPoint point, Imageable template) {
 
@@ -341,12 +355,18 @@ public interface Imageable {
          * These must be corrected for when translating coordinates between
          * component images.
          * 
-         * 300 ___________________ | | Source Image | __________ | __ | | _____
-         * | | Component buffer | 195 | | | | | | | 200 | | | X | | 15 |
-         * Template | Component image | | |____| | | | | |__________| | __|
-         * |_______15__________|
-         * 
-         * 295
+         *                300
+		 *        ___________________
+		 *       |                   |   Source Image
+		 *       |   __________      |                      __
+		 *       |  |   _____  |     |   Component buffer     |
+		 *   195 |  |  |    |  |     |                        |
+		 *   200 |  |  |  X |  | 15  |   Template             | Component image
+		 *       |  |  |____|  |     |                        |
+		 *       |  |__________|     |                      __|
+		 *       |_______15__________|
+		 * 
+		 *             295
          * 
          * In the template source image, point X is at (300,200). To get the
          * point in the component image, we need to subtract the template base
@@ -368,21 +388,4 @@ public interface Imageable {
         return IPoint.makeNew(x, y);
 
     }
-    
-//    /**
-//     * Move the border of the given object so that it lies within the target
-//     * component space. 
-//     * 
-//     * This assumes both objects came from the same image. 
-//     * This takes the absolute position of the object, finds the difference to the
-//     * absolute position of the target, and applies the offset to move the object into
-//     * the component image of the target.
-//     * @param object
-//     * @param target
-//     * @return
-//     */
-//    default Imageable translateObjecttoComponentSpace(Imageable object, Imageable target){
-//    	IPoint difference = object.getBase().minus(target.getBase());
-//    }
-
 }
