@@ -111,7 +111,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			sourceWidth = an.toProcessor().getWidth();
 			sourceHeight = an.toProcessor().getHeight();
 		};
-		new Thread(u).start(); // avoid thread manager
+		new Thread(u).start(); // avoid thread manager so updates are immediate
 	}
 
 	public synchronized void addSegmentEventListener(SegmentEventListener l) {

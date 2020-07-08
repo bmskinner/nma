@@ -250,6 +250,14 @@ public class TestImageDatasetCreator {
     	return d;
     }
     
+    /**
+     * Create and run an analysis
+     * @param folder the folder path of images to analyse
+     * @param op the analysis options
+     * @param makeClusters should clusters be created
+     * @return a dataset with the results of the analysis
+     * @throws Exception if anything goes wrong
+     */
     public static IAnalysisDataset createTestDataset(String folder, IAnalysisOptions op, boolean makeClusters) throws Exception {
     	 if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists())
              throw new IllegalArgumentException("Detection folder does not exist");

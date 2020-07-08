@@ -222,7 +222,7 @@ public interface IPoint {
     
     /**
      * Add the given value to this point. Creates
-     * a new point at x + value and y + value.
+     * a new point at {@code x + value} and {@code y + value}.
      * @param p
      * @return
      */
@@ -230,7 +230,7 @@ public interface IPoint {
     
     /**
      * Subtract the given value from this point. Creates
-     * a new point at x - value and y - value.
+     * a new point at  {@code x - value} and {@code y - value}.
      * @param p
      * @return
      */

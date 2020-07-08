@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.ComponentNucleiTestSui
 	DefaultCellCollectionTest.class, 
 	DefaultCellTest.class,
 	ICellCollectionTest.class, 
+	ImageableTest.class,
 	TaggableTest.class, 
 	RotatableTest.class,
 	TestComponentFactory.class })
