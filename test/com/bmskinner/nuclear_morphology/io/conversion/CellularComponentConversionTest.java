@@ -53,6 +53,9 @@ public class CellularComponentConversionTest extends ComponentTester {
 		// first getProfile() invokation.
 		
 		File f = new File(TestResources.DATASET_FOLDER+OldFormatConverterTest.DIR_1_13_8, MouseFormatConverterTest.MOUSE_BACKUP_FILE);
+		if(!f.exists())
+			fail("Test file does not exist: "+f.getAbsolutePath());
+		
 		IAnalysisDataset d = deserialiseDataset(f);
 		
 		if(d==null) {
@@ -123,6 +126,9 @@ public class CellularComponentConversionTest extends ComponentTester {
 		// first getProfile() invokation.
 
 		File f = new File(TestResources.DATASET_FOLDER+OldFormatConverterTest.DIR_1_13_8, MouseFormatConverterTest.MOUSE_BACKUP_FILE);
+		if(!f.exists())
+			fail("Test file does not exist: "+f.getAbsolutePath());
+		
 		IAnalysisDataset d = deserialiseDataset(f);
 
 		if(d==null) {

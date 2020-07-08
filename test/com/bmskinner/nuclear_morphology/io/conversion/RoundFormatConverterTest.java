@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.io.conversion;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -62,11 +63,11 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     @Test
     public void test_1_13_3_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_3, ROUND_FILE);
+        if(!f.exists())
+        	fail("Test file does not exist: "+f.getAbsolutePath());
         // this version has known issues saving the correct format
         // Don't validate, just check deserialisation succeeded
         IAnalysisDataset d = SampleDatasetReader.openDataset(f);
-//        IAnalysisDataset d = testConvertsToCurrent(f); 
-
         assertTrue(d.getVersion().equals(Version.v_1_13_3));
     }
     
