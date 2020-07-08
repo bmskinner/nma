@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
+import java.util.logging.Logger;
+
 import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;
 
@@ -28,6 +30,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPan
 import ij.process.ImageProcessor;
 
 public class ProberTableModel extends DefaultTableModel implements DetectionEventListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(ProberTableModel.class.getName());
 
     private static final long serialVersionUID = 1L;
     
@@ -60,7 +64,7 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
     @Override
     public void detectionEventReceived(DetectionEvent e) {
         ProberTableCell cell = makeIconCell(e.getProcessor(), e.getMessage(), true);
-        System.out.println(e.getMessage()+": Resizing to "+maxDimension);
+        LOGGER.fine(e.getMessage()+": Resizing to "+maxDimension);
         ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(maxDimension, maxDimension), "", true);
 
         if (getRowCount() == 0) {

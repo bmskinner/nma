@@ -601,7 +601,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
             it.next().panelUpdatingEventReceived(e);
         }
     }
-
+    
     /**
      * Used to alert settings panels that images are being updated
      * @author ben
