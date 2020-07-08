@@ -259,8 +259,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // Creating the border list will set everything to the original image
         // position.
         // Move the border list back over the CoM if needed.
-        IPoint oldCoM = IPoint.makeNew(centreOfMass);
-        centreOfMass = IPoint.makeNew(originalCentreOfMass);
+        IPoint oldCoM = centreOfMass.duplicate();
+        centreOfMass = originalCentreOfMass.duplicate();
 
         borderList = new ArrayList<>();
 
