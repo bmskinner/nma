@@ -195,6 +195,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
             try {
                 // Draw lines for the border tags   
             	for(Tag t : n.getBorderTags().keySet()) {
+            		if(Tag.INTERSECTION_POINT.equals(t)) // Not required to be drawn
+            			continue;
             		Color c = DEFAULT_TAG_COLOURS.get(t);
             		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
                 			n.getBorderPoint(t).plus(Imageable.COMPONENT_BUFFER), 
