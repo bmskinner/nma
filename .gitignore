@@ -1,0 +1,23 @@
+# Specify filepatterns you want git to ignore.
+
+# IDE settings
+.idea/*
+.settings/*
+
+# Generated files
+README.md
+bin/*
+doc/*
+screens/*
+target/*
+test/Samples/*
+
+# Non-project related files
+maven.bat
+Launch4j_config.xml
+src/plugins.config
+manifest
+Nuclear_Morphology.iml
+.classpath
+.project
+
