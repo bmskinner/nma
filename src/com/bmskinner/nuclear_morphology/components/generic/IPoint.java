@@ -80,6 +80,12 @@ public interface IPoint {
     static IPoint makeNew(final Point2D a) {
         return makeNew(a.getX(), a.getY());
     }
+    
+    /**
+     * Create a duplicate of this point
+     * @return a defensive duplicate
+     */
+    IPoint duplicate();
 
     /**
      * Get the x-value
@@ -120,8 +126,7 @@ public interface IPoint {
     /**
      * Tests if the two points overlap with integer precision
      *
-     * @param a
-     *            the point to test against
+     * @param a the point to test against
      * @return boolean whether they overlap as integers
      */
     boolean overlaps(final @NonNull IPoint a);

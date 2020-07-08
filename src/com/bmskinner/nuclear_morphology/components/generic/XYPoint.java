@@ -62,6 +62,11 @@ public class XYPoint implements Serializable, IPoint {
         this.x = p.getX();
         this.y = p.getY();
     }
+    
+    @Override
+    public IPoint duplicate() {
+    	return new XYPoint(x, y);
+    }
 
     @Override
     public double getX() {

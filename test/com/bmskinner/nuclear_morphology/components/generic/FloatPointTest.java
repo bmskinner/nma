@@ -5,6 +5,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.geom.Point2D;
@@ -28,6 +29,16 @@ public class FloatPointTest {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+	
+	@Test
+	public void testDuplicateCopiesDefensively() {
+		FloatPoint p = new FloatPoint(10f, 10f);
+		IPoint q = p.duplicate();
+		assertEquals("Equality test", p, q);
+		q = q.plus(10);
+		assertNotEquals("Defensive test", p, q);
+	}
+	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#FloatPoint(float, float)}.
 	 */

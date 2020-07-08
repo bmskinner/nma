@@ -67,6 +67,11 @@ public class FloatPoint extends Point2D.Float implements IPoint {
     public FloatPoint(@NonNull IPoint p) {    	
         this(p.getX(), p.getY());
     }
+    
+    @Override
+    public IPoint duplicate() {
+    	return new FloatPoint(x, y);
+    }
 
     @Override
     public int getXAsInt() {
