@@ -30,16 +30,17 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
-import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -63,17 +64,20 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(DraggableOverlayChartPanel.class.getName());
 
-    private volatile ISegmentedProfile profile = null;
+    private ISegmentedProfile profile = null;
 
-    private volatile List<SegmentCrosshair> crosses = new ArrayList<>(); // drawing lines on the chart
+    /** All the crosshairs displayed on the chart     */
+    private List<SegmentCrosshair> crosses = new ArrayList<>(); // drawing lines on the chart
 
-    protected volatile Crosshair xCrosshair;
+    /** The currently active crosshair */
+    protected Crosshair xCrosshair;
 
     private volatile boolean isChartNormalised = false;
 
-    protected volatile Overlay overlay = null;
+    protected Overlay overlay = null;
 
-    public DraggableOverlayChartPanel(final JFreeChart chart, final ISegmentedProfile profile, boolean normalised) {
+    public DraggableOverlayChartPanel(@NonNull final JFreeChart chart, 
+    		@NonNull final ISegmentedProfile profile, boolean normalised) {
         super(chart);
         this.profile = profile;
         this.isChartNormalised = normalised;
@@ -95,68 +99,76 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         }
     }
 
+    /**
+     * Remove the current overlay if present
+     * 
+     */
     private synchronized void clearOverlays() {
         if (overlay != null) {
             this.removeOverlay(overlay);
         }
     }
 
+    /**
+     * Get the position of the crosshair in the domain axis
+     * @return the position of the crosshair, or zero is there is no crosshair
+     */
     public synchronized double getDomainCrosshairPosition() {
-
         if (xCrosshair != null) {
             LOGGER.finest( "Domain value is " + xCrosshair.getValue());
             return xCrosshair.getValue();
         }
         return 0;
-
     }
     
     private static double getRescaledIndex(IBorderSegment seg, int newLength) {
         return (float) seg.getStartIndex() / (float) (seg.getProfileLength()) * (float) newLength;
     }
 
+    /**
+     * Redraw the overlays at their approprate positions based on the segment start points
+     */
     private synchronized void updateOverlays() {
-        /*
-         * Create an x-axis overlay for each segment start
-         */
 
         clearOverlays();
+        
+        if(profile==null)
+        	return;
 
-        if (profile != null) {
-            try {
-                overlay = new CrosshairOverlay();
-                List<IBorderSegment> segments = profile.getOrderedSegments();
-                for(int i=0; i<profile.getSegmentCount(); i++) {
-                	// don't draw the first segment marker (the RP)
-                	if(i==0)
-                		continue;
-                	
-                	IBorderSegment seg = segments.get(i);
+        try {
+        	overlay = new CrosshairOverlay();
+        	List<IBorderSegment> segments = profile.getOrderedSegments();
+        	for(int i=0; i<profile.getSegmentCount(); i++) {
+        		// don't draw the first segment marker (the RP); it can never be altered on this chart
+        		if(i==0)
+        			continue;
 
-                    Paint colour = seg.isLocked()? Color.DARK_GRAY : ColourSelecter.getColor(i);
+        		IBorderSegment seg = segments.get(i);
 
-                    SegmentCrosshair xCrosshair = new SegmentCrosshair(Double.NaN, colour,
-                            ChartComponents.MARKER_STROKE, seg);
-                    xCrosshair.setLabelVisible(false);
+        		Paint colour = seg.isLocked() ? Color.DARK_GRAY : ColourSelecter.getColor(i);
+        			
+        		
+        		double maxDomain = getMaximumDomainValue();
+        		double normValue = profile.getFractionOfIndex(seg.getStartIndex())*maxDomain;
+        		double xValue = isChartNormalised ? normValue : seg.getStartIndex();
+        		LOGGER.fine("Crosshair "+seg.getName()+": "+xValue);
+        		SegmentCrosshair xCrosshair = new SegmentCrosshair(xValue, colour,
+        				ChartComponents.MARKER_STROKE, seg);
+        		xCrosshair.setLabelVisible(false);
 
-                    double value = isChartNormalised ? getRescaledIndex(seg, (int) getMaximumDomainValue())
-                            : seg.getStartIndex();
+        		crosses.add(xCrosshair);
+        		((CrosshairOverlay) overlay).addDomainCrosshair(xCrosshair);
+        	}
 
-                    xCrosshair.setValue(value);
-                    crosses.add(xCrosshair);
-                    ((CrosshairOverlay) overlay).addDomainCrosshair(xCrosshair);
-                }
+        	addOverlay(overlay);
 
-                this.addOverlay(overlay);
-
-            } catch (Exception e1) {
-                LOGGER.warning("Error creating segment markers");
-                LOGGER.log(Loggable.STACK, "Error creating segment markers", e1);
-            }
-
-            this.revalidate();
-            this.repaint();
+        } catch (Exception e1) {
+        	LOGGER.warning("Error creating segment markers");
+        	LOGGER.log(Loggable.STACK, "Error creating segment markers", e1);
         }
+
+        this.revalidate();
+        this.repaint();
     }
 
     public synchronized void setChart(JFreeChart chart, ISegmentedProfile profile, boolean normalised) {
@@ -192,8 +204,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         }
     }
     
+    /**
+     * Get the maximum domain value and round it to the nearest 1000
+     * @return
+     */
     private double getMaximumDomainValue() {
-    	 return this.getChart().getXYPlot().getDomainAxis().getRange().getUpperBound();
+		Number maxDomainValue = DatasetUtilities.findMaximumDomainValue(getChart().getXYPlot().getDataset());
+		return Math.ceil(maxDomainValue.doubleValue()/1000)*1000;
     }
 
     @Override
@@ -201,47 +218,34 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
         if (e.getButton() == MouseEvent.BUTTON1) {
             mouseIsDown = false;
-            /*
-             * Get the location on the chart, and send a signal to update the
-             * profile
-             */
+            
+            if(xCrosshair==null){
+            	return;
+            }
 
-            if (xCrosshair != null) {
+            // Get the normalised position
+            double xNormValue = this.getDomainCrosshairPosition();
 
-                // Get the normalised position
-                double xValue = this.getDomainCrosshairPosition();
+            LOGGER.fine("Domain value is " + xNormValue);
+            
+            // ignore any overlays dragged out of profile bounds
+            if(xNormValue<0 || xNormValue>=getMaximumDomainValue())
+            	return;
+            
+            int xValue = (int) Math.round(xNormValue);
 
-                LOGGER.fine("Double of domain value is " + xValue);
+            // Correct for normalisation
+            if (isChartNormalised) {
+            	xValue = profile.getIndexOfFraction(xNormValue / getMaximumDomainValue());
+            	LOGGER.fine("Unnormalised value is: " + xValue);
+            }
 
-                // Correct for normalisation
-                
-               
-                
-                if (isChartNormalised) {
+            // Get the segment associated with the point
+            IBorderSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();
 
-                    if (xValue < 0)
-                        xValue += getMaximumDomainValue(); // Wrap values below
-
-                    if (xValue >= getMaximumDomainValue()) // Wrap values above
-                        xValue -= getMaximumDomainValue();
-
-                    xValue = profile.size() * (xValue / getMaximumDomainValue());
-
-                    LOGGER.fine("Profile position of domain value is " + xValue);
-                }
-
-                // Get the closest integer to the selected point
-                int intXValue = (int) Math.round(xValue);
-
-                LOGGER.fine("Integer of domain value is " + intXValue);
-
-                // Get the segment associated with the point
-                IBorderSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();
-
-                // Trigger the update
-                if (seg != null) {
-                    fireSegmentEvent(seg.getID(), intXValue, SegmentUpdateType.MOVE_START_INDEX);
-                }
+            // Trigger the update
+            if (seg != null) {
+            	fireSegmentEvent(seg.getID(), xValue, SegmentUpdateType.MOVE_START_INDEX);
             }
         }
     }
@@ -254,7 +258,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
         if ( ! mouseIsDown ) {
 
-            if (checkCursorIsOverLine(x, y)) {
+            if (pointIsOverCrosshair(x, y)) {
 
                 if (((SegmentCrosshair) xCrosshair).getSegment().isLocked()) {
                     this.setCursor(Cursor.getDefaultCursor());
@@ -268,16 +272,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
     }
 
     private synchronized void updateActiveCrosshairLocation(int x, int y) {
-
         if (xCrosshair != null) {
-
             Rectangle2D dataArea = getScreenDataArea();
             JFreeChart chart = getChart();
             XYPlot plot = (XYPlot) chart.getPlot();
             ValueAxis xAxis = plot.getDomainAxis();
             double movex = xAxis.java2DToValue(x, dataArea, RectangleEdge.BOTTOM);
             xCrosshair.setValue(movex);
-
         }
     }
 
@@ -340,7 +341,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
      * @param y
      * @return
      */
-    private boolean checkCursorIsOverLine(int x, int y) {
+    private boolean pointIsOverCrosshair(int x, int y) {
         Rectangle2D dataArea = this.getScreenDataArea();
         ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
         xCrosshair = null;
@@ -368,6 +369,11 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         return isOverLine;
     }
 
+    /**
+     * A crosshair that links to a segment
+     * @author ben
+     *
+     */
     private class SegmentCrosshair extends Crosshair {
         private IBorderSegment segment;
 
@@ -379,6 +385,40 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         public IBorderSegment getSegment() {
             return segment;
         }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((segment == null) ? 0 : segment.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SegmentCrosshair other = (SegmentCrosshair) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (segment == null) {
+				if (other.segment != null)
+					return false;
+			} else if (!segment.equals(other.segment))
+				return false;
+			return true;
+		}
+
+		private DraggableOverlayChartPanel getOuterType() {
+			return DraggableOverlayChartPanel.this;
+		}
+        
+        
     }
 
     protected synchronized void fireSignalChangeEvent(String message) {
