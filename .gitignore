@@ -10,6 +10,7 @@ bin/*
 doc/*
 screens/*
 target/*
+wiki/*
 test/Samples/*
 
 # Non-project related files
@@ -21,4 +22,3 @@ Nuclear_Morphology.iml
 .classpath
 .project
 
-/target/

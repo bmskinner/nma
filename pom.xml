@@ -16,6 +16,7 @@
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
 		<project.scripts.directory>scripts</project.scripts.directory>
+		<project.wiki.directory>wiki</project.wiki.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
 	</properties>
 
@@ -187,6 +188,30 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
+					
+					<!-- Copy the wiki pages with version info to the wiki directory so the 
+						wiki is up to date -->
+					<execution>
+						<id>wiki-md</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.wiki.directory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.template.directory}/wiki</directory>
+									<includes>
+										<include>Installation - standalone.md</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+					
 				</executions>
 			</plugin>
 
