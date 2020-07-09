@@ -523,7 +523,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     		refreshEditingPanelCharts();
     		setAnalysing(false);
     	} catch (RequestCancelledException e) {
-    		return;
+    		// No action needed
     	}
     }
 

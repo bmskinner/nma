@@ -151,7 +151,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         		double maxDomain = getMaximumDomainValue();
         		double normValue = profile.getFractionOfIndex(seg.getStartIndex())*maxDomain;
         		double xValue = isChartNormalised ? normValue : seg.getStartIndex();
-        		LOGGER.fine("Crosshair "+seg.getName()+": "+xValue);
+        		LOGGER.finest("Crosshair "+seg.getName()+": "+xValue);
         		SegmentCrosshair xCrosshair = new SegmentCrosshair(xValue, colour,
         				ChartComponents.MARKER_STROKE, seg);
         		xCrosshair.setLabelVisible(false);
@@ -226,7 +226,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
             // Get the normalised position
             double xNormValue = this.getDomainCrosshairPosition();
 
-            LOGGER.fine("Domain value is " + xNormValue);
+            LOGGER.finest("Domain value is " + xNormValue);
             
             // ignore any overlays dragged out of profile bounds
             if(xNormValue<0 || xNormValue>=getMaximumDomainValue())
@@ -237,7 +237,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
             // Correct for normalisation
             if (isChartNormalised) {
             	xValue = profile.getIndexOfFraction(xNormValue / getMaximumDomainValue());
-            	LOGGER.fine("Unnormalised value is: " + xValue);
+            	LOGGER.finest("Unnormalised value is: " + xValue);
             }
 
             // Get the segment associated with the point
