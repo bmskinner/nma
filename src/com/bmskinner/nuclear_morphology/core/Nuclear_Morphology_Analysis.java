@@ -40,10 +40,14 @@ import ij.Prefs;
  */
 public class Nuclear_Morphology_Analysis {
 	
+	private static final String JAVA_UTIL_LOGGING_CONFIG_FILE = "java.util.logging.config.file";
+
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
 	
-	private static final Logger LOGGER;
-	
+	/** Initialise the logger for the project namespace */
+	private static final Logger LOGGER = Logger.getLogger("com.bmskinner.nuclear_morphology");
+
+	/** The folder to write and store logs */
     private static final String LOG_FOLDER_NAME = "logs";
     
     private static final File LOG_FOLDER;
@@ -52,25 +56,24 @@ public class Nuclear_Morphology_Analysis {
 	static {
 		
 		// Create a log folder in the user home dir if needed
-		LOG_FOLDER = new File(System.getProperty("user.home")+"/"+LOG_FOLDER_NAME+"/");
+		LOG_FOLDER = new File(System.getProperty("user.home"), LOG_FOLDER_NAME);
     	
-    	if(!Files.exists(LOG_FOLDER.toPath())) {
+    	if(!LOG_FOLDER.exists()) {
     		LOG_FOLDER.mkdirs();
     	}
 		
 		try {
 			// If a logging properties file is specified in the launch parameters,
 			// use it. Otherwise, default to the file within the jar
-			String logFile = System.getProperty("java.util.logging.config.file");
-			if(logFile==null) {
-				LogManager.getLogManager().readConfiguration(Nuclear_Morphology_Analysis.class.getClassLoader()
+			String logConfigFile = System.getProperty(JAVA_UTIL_LOGGING_CONFIG_FILE);
+			if(logConfigFile==null) {
+				LogManager.getLogManager()
+				.readConfiguration(Nuclear_Morphology_Analysis.class.getClassLoader()
 						.getResourceAsStream("logging.properties"));
 			}
 		} catch (SecurityException | IOException e) {
-			// Since a logger has not yet been set up, print to console only
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Unable to make log manager", e);
 		}
-		LOGGER = Logger.getLogger(Nuclear_Morphology_Analysis.class.getName());
 	}
 	
 	/**
@@ -117,9 +120,9 @@ public class Nuclear_Morphology_Analysis {
 	private void logConfiguration(){
 		
 		try {
-			String logFile = System.getProperty("java.util.logging.config.file");
+			String logFile = System.getProperty(JAVA_UTIL_LOGGING_CONFIG_FILE);
 			if(logFile!=null) {
-				LOGGER.config("Logger properties file specified: "+System.getProperty("java.util.logging.config.file"));
+				LOGGER.config("Logger properties file specified: "+System.getProperty(JAVA_UTIL_LOGGING_CONFIG_FILE));
 			} else {
 				LOGGER.config("No external logging properties specified; using default logging config");
 				LOGGER.config("Log file location: "+LOG_FOLDER.getAbsolutePath());

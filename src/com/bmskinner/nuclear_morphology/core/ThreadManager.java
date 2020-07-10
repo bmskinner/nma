@@ -84,7 +84,10 @@ public class ThreadManager {
     	LOGGER.config(String.format("Thread manager: Allowed processors: %s", maxThreads));
     	LOGGER.config(String.format("Thread manager: UI threads: %s", maxUiThreads));
     	LOGGER.config(String.format("Thread manager: Method threads: %s", maxMethodThreads));
-    	LOGGER.config(String.format("Thread manager: Maximum memory: %s", Runtime.getRuntime().maxMemory()));
+    	
+    	long maxMemory = Runtime.getRuntime().maxMemory();
+    	long maxMemoryMiB = maxMemory / (1024*1024);
+    	LOGGER.config(String.format("Thread manager: Maximum memory: %s MiB (%s)", maxMemoryMiB, maxMemory));
     }
         
     /**
