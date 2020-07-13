@@ -87,67 +87,130 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 	}
 	
 	/**
-	 * Create the default annotated cell image, with border, segments and border tags highlighted
-	 * @param dataset
-	 * @param cell
-	 * @param component
+	 * Create the default annotated cell outline image
 	 */
 	private synchronized void createCellImage() {
 		InterfaceUpdater u = () ->{
-			output= null;
-			ImageProcessor ip;
-			try{
-				ip = component.getImage();
-				
-			} catch(UnloadableImageException e){
-				ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
-			}
-
+			output = null;
+			
+			ImageProcessor ip = loadCellImage();
 			ImageAnnotator an = new ImageAnnotator(ip);
-
-			if(cell.hasCytoplasm()){
-				an.crop(cell.getCytoplasm());
-			} else{
-				an.crop(cell.getNuclei().get(0));
-			}
+			cropImageToCell(an);
+			updateSourceImageDimensions(an);
 			
-			// If the image is smaller than the available space, create a new annotator
-			// that fills this space. If the image is larger than the available space, shrink
-			// it later, otherwise there will not be room to draw the features
-			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor());
-			boolean isSmaller = an.toProcessor().getWidth()<getWidth() && an.toProcessor().getHeight()<getHeight();
-			if(isSmaller) {
-				an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
-			}
-			
+			ImageAnnotator an2 = scaleSmallImageToPanel(an);
 
 			for(Nucleus n : cell.getNuclei()){
 				an2.annotateSignalsOnCroppedNucleus(n);
 			}    
 			
-			
 			if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
-				try {
-					ImageProcessor rot = rotateToVertical(cell, an2.toProcessor());
-					rot.flipVertical(); // Y axis needs inverting since images have 0 at top
-					if(cell.getNucleus().isClockwiseRP())
-						rot.flipHorizontal();
-					an2 = new ImageAnnotator(rot, getWidth(), getHeight());
-					
-				} catch (UnavailableBorderTagException e) {
-					LOGGER.log(Loggable.STACK, e.getMessage(), e);
-				}
+				an2 = rotateVertical(an2);
 			}
 			
 			// Whatever the canvas size, rescale the final image to the panel
-			ImageAnnotator an3 = new ImageAnnotator(an2.toProcessor(), getWidth(), getHeight());
-
-			imageLabel.setIcon(an3.toImageIcon());
-			input = an3.toBufferedImage();
-			sourceWidth = an.toProcessor().getWidth();
-			sourceHeight = an.toProcessor().getHeight();
+			ImageAnnotator an3 = scaleImageToPanel(an2);
+			displayAnnotatorContents(an3);
 		};
 		new Thread(u).start();
+	}
+	
+	/**
+	 * Load the image for the selected component, or
+	 * create a blank canvas on error
+	 * @return
+	 */
+	private ImageProcessor loadCellImage() {
+		ImageProcessor ip;
+		try{
+			ip = component.getImage();
+			
+		} catch(UnloadableImageException e){
+			LOGGER.finer("Unable to load image: "+component.getSourceFile());
+			ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
+		}
+		return ip;
+	}
+	
+	/**
+	 * Crop the annotator to the region of the image 
+	 * containing the object of interest
+	 * @param an
+	 */
+	private void cropImageToCell(ImageAnnotator an) {
+		if(cell.hasCytoplasm()){
+			an.crop(cell.getCytoplasm());
+		} else{
+			an.crop(cell.getNuclei().get(0));
+		}
+	}
+	
+	/**
+	 * If the image is smaller than the available space,
+	 * create a new annotator that fills this space. 
+	 * 
+	 * If the image is larger than the available space,
+	 * shrink it later, otherwise there will not be room 
+	 * to draw the features
+	 * @param an
+	 * @return
+	 */
+	private ImageAnnotator scaleSmallImageToPanel(ImageAnnotator an) {
+		ImageAnnotator an2 = new ImageAnnotator(an.toProcessor());
+		boolean isSmaller = an.toProcessor().getWidth()<getWidth() && an.toProcessor().getHeight()<getHeight();
+		if(isSmaller) {
+			an2 = scaleImageToPanel(an);
+		}
+		return an2;
+	}
+	
+	/**
+	 * Create a new annotator that fills the panel space.
+	 * Images will be up or down-scaled appropriately 
+	 * @param an
+	 * @return
+	 */
+	private ImageAnnotator scaleImageToPanel(ImageAnnotator an) {
+		return new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
+	}
+	
+	/**
+	 * Set the annotator contents to the currently active image
+	 * @param an
+	 */
+	private void displayAnnotatorContents(ImageAnnotator an) {
+		imageLabel.setIcon(an.toImageIcon());
+		input = an.toBufferedImage();
+	}
+	
+	/**
+	 * Set the source image width and height to allow coordinate
+	 * conversion
+	 * @param an
+	 */
+	private void updateSourceImageDimensions(ImageAnnotator an) {
+		sourceWidth = an.toProcessor().getWidth();
+		sourceHeight = an.toProcessor().getHeight();
+	}
+	
+	/**
+	 * Rotate the given annotator to vertical and scale to
+	 * fit the panel size
+	 * @param an
+	 * @return
+	 */
+	private ImageAnnotator rotateVertical(ImageAnnotator an) {
+		try {
+			ImageProcessor rot = rotateToVertical(cell, an.toProcessor());
+			rot.flipVertical(); // Y axis needs inverting since images have 0 at top
+			if(cell.getNucleus().isClockwiseRP())
+				rot.flipHorizontal();
+			return new ImageAnnotator(rot, getWidth(), getHeight());
+			
+		} catch (UnavailableBorderTagException e) {
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			return an;
+		}
 	}
 	
 	/**
@@ -173,7 +236,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
                 InputEvent.CTRL_DOWN_MASK){
             	int temp = smallRadius +( 1*e.getWheelRotation());
             	temp = temp>MAX_SMALL_RADIUS?MAX_SMALL_RADIUS:temp;
-            	temp = temp<MAX_SMALL_RADIUS?MAX_SMALL_RADIUS:temp;
+            	temp = temp<MIN_SMALL_RADIUS?MIN_SMALL_RADIUS:temp;
                 smallRadius = temp;
             } else {
             	// Modify the zoom
@@ -201,29 +264,28 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		InterfaceUpdater u = () ->{
 			try {
 				output= null;
-				ImageProcessor ip;
-				try{
-					ip = component.getImage();
-				} catch(UnloadableImageException e){
-					ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
-				}
+				ImageProcessor ip = loadCellImage();
 				ImageAnnotator an = new ImageAnnotator(ip);
-
-				if(cell.hasCytoplasm()){
-					an.crop(cell.getCytoplasm());
-				} else{
-					an.crop(cell.getNuclei().get(0));
-				}
+				cropImageToCell(an);
 				
-				Mesh<Nucleus> consensusMesh = new DefaultMesh(dataset.getCollection().getConsensus());
+				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
 				for(Nucleus n : cell.getNuclei()) {
-					Mesh<Nucleus> m = new DefaultMesh(n, consensusMesh);
+					
+					Mesh<Nucleus> m = new DefaultMesh<>(n, consensusMesh);
 					Mesh<Nucleus> compMesh = m.comparison(consensusMesh);
 					MeshAnnotator an3 = new MeshAnnotator( an.toProcessor(), getWidth(), getHeight(), compMesh);
 					an3.annotateNucleusMeshEdges();
-					imageLabel.setIcon(an3.toImageIcon());
-					input = an3.toProcessor().getBufferedImage();
+					
+					ImageAnnotator an4 = an3.toAnnotator();
+					if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
+						an4 = rotateVertical(an4);
+					}
+					
+					// Whatever the canvas size, rescale the final image to the panel
+					an4 = scaleImageToPanel(an4);
+					displayAnnotatorContents(an4);
 				}
+
 			} catch (MeshCreationException | IllegalArgumentException e) {
 				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
 				setNull();
@@ -236,30 +298,20 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		InterfaceUpdater u = () ->{
 			try {
 				output= null;
-				ImageProcessor ip;
-				try{
-					ip = component.getImage();
-				} catch(UnloadableImageException e){
-					ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
-				}
+				ImageProcessor ip = loadCellImage();
 				ImageAnnotator an = new ImageAnnotator(ip);
-
-				if(cell.hasCytoplasm()){
-					an.crop(cell.getCytoplasm());
-				} else{
-					an.crop(cell.getNuclei().get(0));
-				}
+				cropImageToCell(an);
+				updateSourceImageDimensions(an);
 				
-				Mesh<Nucleus> consensusMesh = new DefaultMesh(dataset.getCollection().getConsensus());
+				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
         		for(Nucleus n : cell.getNuclei()) {
-        			Mesh<Nucleus> m = new DefaultMesh(n, consensusMesh);
-        			MeshImage im = new DefaultMeshImage(m, ip.duplicate());
+        			Mesh<Nucleus> m = new DefaultMesh<>(n, consensusMesh);
+        			MeshImage<Nucleus> im = new DefaultMeshImage<>(m, ip.duplicate());
         			ImageProcessor drawn = im.drawImage(consensusMesh);
         			drawn.flipVertical();
         			an = new ImageAnnotator(drawn, getWidth(), getHeight());
         		}
-        		input = an.toProcessor().getBufferedImage();
-        		imageLabel.setIcon(an.toImageIcon());
+        		displayAnnotatorContents(an);
 			} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
 				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
 				setNull();

@@ -61,7 +61,7 @@ public abstract class InteractiveCellPanel extends JPanel {
 	protected JLabel imageLabel;
 	
 	protected DatasetEventHandler dh = new DatasetEventHandler(this);
-	protected CelllUpdateEventHandler cellUpdateHandler = new CelllUpdateEventHandler(this);
+	protected transient CelllUpdateEventHandler cellUpdateHandler = new CelllUpdateEventHandler(this);
 	
 	protected IAnalysisDataset dataset = null;
 	protected ICell cell = null;
@@ -69,8 +69,8 @@ public abstract class InteractiveCellPanel extends JPanel {
 	protected HashOptions displayOptions;
 
 	// the undistorted image
-	protected BufferedImage input;
-	protected BufferedImage output;
+	protected transient BufferedImage input;
+	protected transient BufferedImage output;
 	protected int smallRadius = 25;
 	protected int bigRadius   = 50;
 	protected int sourceWidth;
@@ -122,7 +122,10 @@ public abstract class InteractiveCellPanel extends JPanel {
 	 * @param component the cellular component within the cell to draw
 	 * @param cellDisplayOptions how the cell should be displayed; uses the keys in {@link CellDisplayOptions}
 	 */
-	public void setCell(@Nullable IAnalysisDataset dataset, @Nullable ICell cell, @Nullable CellularComponent component, HashOptions cellDisplayOptions) {
+	public void setCell(@Nullable IAnalysisDataset dataset, 
+			@Nullable ICell cell,
+			@Nullable CellularComponent component, 
+			HashOptions cellDisplayOptions) {
 		if(dataset==null || cell==null || component==null) {
 			imageLabel.setIcon(null);
 			return;

@@ -19,7 +19,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.io.Io.Exporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
@@ -28,7 +27,7 @@ import ij.IJ;
  * Export nuclear border landmarks in TPS format suitable
  * for geometric morphometric analysis by packages such
  * as geomorph. Note that this method only works on single datasets
- * because we cannot guarantee consistentcy of landmark number across 
+ * because we cannot guarantee consistency of landmark number across 
  * different datasets.
  * @author Ben Skinner
  * @since 1.18.0
@@ -72,13 +71,20 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 			return;
 		}
 		
+		
 		try {
-			Mesh<Taggable> consensus = new DefaultMesh<>(dataset.getCollection().getConsensus(), TPS_VERTEX_SPACING);
+			Mesh<Taggable> consensus = new DefaultMesh<>(dataset.getCollection().getConsensus());
 			for(Nucleus n : dataset.getCollection().getNuclei()) {
-				appendPerimeter(n.getVerticallyRotatedNucleus(), consensus);
+
+				try {
+					appendPerimeter(n.getVerticallyRotatedNucleus(), consensus);
+				}	catch (MeshCreationException e) {
+					LOGGER.warning("Unable to create mesh for nucleus "+n.getNameAndNumber());
+					LOGGER.fine("Mesh creation error: "+e.getMessage());
+				}
 			}
 		} catch (MeshCreationException e) {
-			LOGGER.log(Level.SEVERE, "Unable to create mesh for nucleus", e);
+			LOGGER.log(Level.SEVERE, "Unable to create mesh for consensus nucleus", e);
 		}
 		
 		fireIndeterminateState();

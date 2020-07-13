@@ -72,7 +72,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     private JPanel makeHeader() {
     	JPanel panel = new JPanel(new FlowLayout());
 
-//        rotationPanel = new RotationSelectionSettingsPanel();
     	rotatePanel.setEnabled(false);
     	rotatePanel.addActionListener(this);
 

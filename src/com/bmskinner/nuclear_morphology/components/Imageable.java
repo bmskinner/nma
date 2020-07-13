@@ -185,15 +185,15 @@ public interface Imageable {
     File getSourceFolder();
 
     /**
-     * Get the folder of the image the component was found in. e.g.
-     * C:\Folder\ImageFolder\1.tiff will return 1.tiff
+     * Get the file the component was found in.
      * 
      * @return the file name
      */
     File getSourceFile();
 
     /**
-     * Get the name of the image the component was found in
+     * Get the name of the image the component was found in.
+     * e.g. C:\Folder\ImageFolder\1.tiff will return 1.tiff
      * 
      * @return the file name
      */

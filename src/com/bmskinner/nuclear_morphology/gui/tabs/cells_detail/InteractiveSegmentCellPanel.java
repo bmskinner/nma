@@ -94,7 +94,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			}
 			
 			// Crop to the relevant part of the image
-			LOGGER.fine("Cell raw image: "+ip.getWidth()+" x "+ip.getHeight());
+			LOGGER.finer("Cell raw image: "+ip.getWidth()+" x "+ip.getHeight());
 			ImageAnnotator an = new ImageAnnotator(ip);
 
 			if(cell.hasCytoplasm()){
@@ -102,7 +102,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			} else{
 				an.crop(cell.getNuclei().get(0));
 			}
-			LOGGER.fine("Cell cropped image: "+an.toProcessor().getWidth()+" x "+an.toProcessor().getHeight());
+			LOGGER.finer("Cell cropped image: "+an.toProcessor().getWidth()+" x "+an.toProcessor().getHeight());
 
 			// If the image is smaller than the available space, create a new annotator
 			// that fills this space. If the image is larger than the available space,

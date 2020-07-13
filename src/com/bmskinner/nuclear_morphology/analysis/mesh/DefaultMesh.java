@@ -136,7 +136,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
             createEdgesAndFaces();
 
         } catch (IllegalArgumentException e) {
-            LOGGER.fine("Error creating mesh");
+            LOGGER.fine("Error creating mesh: "+e.getMessage());
             throw new MeshCreationException("Unable to create mesh for component", e);
         }
     }
