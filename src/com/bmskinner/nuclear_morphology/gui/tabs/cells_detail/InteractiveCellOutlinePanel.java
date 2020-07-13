@@ -275,7 +275,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 					Mesh<Nucleus> compMesh = m.comparison(consensusMesh);
 					MeshAnnotator an3 = new MeshAnnotator( an.toProcessor(), getWidth(), getHeight(), compMesh);
 					an3.annotateNucleusMeshEdges();
-					
+										
 					ImageAnnotator an4 = an3.toAnnotator();
 					if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
 						an4 = rotateVertical(an4);

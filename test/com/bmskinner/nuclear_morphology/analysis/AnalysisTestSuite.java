@@ -6,6 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.AnalysisClassificationTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.image.AnalysisImageTestSuite;
+import com.bmskinner.nuclear_morphology.analysis.mesh.AnalysisMeshTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSuite;
 
 /**
@@ -22,6 +23,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSu
 	AnalysisProfilesTestSuite.class,
 	AnalysisClassificationTestSuite.class,
 	AnalysisImageTestSuite.class,
+	AnalysisMeshTestSuite.class,
 	NucleusDetectionTest.class})
 public class AnalysisTestSuite {
 
