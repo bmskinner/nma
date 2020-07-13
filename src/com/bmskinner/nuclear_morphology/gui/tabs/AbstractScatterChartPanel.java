@@ -38,8 +38,6 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
-//import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer;
-//import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;

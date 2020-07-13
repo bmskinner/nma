@@ -27,15 +27,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 
 public class SignalXYDataset extends DefaultXYDataset {
 
-    private Map<Comparable<?>, ISignalGroup>     groupNames;
-    private Map<Comparable<?>, UUID>             groupIds;
-    private Map<Comparable<?>, IAnalysisDataset> datasets;
+    private Map<Comparable<?>, ISignalGroup>     groupNames = new HashMap<>();
+    private Map<Comparable<?>, UUID>             groupIds = new HashMap<>();
+    private Map<Comparable<?>, IAnalysisDataset> datasets = new HashMap<>();
 
     public SignalXYDataset() {
         super();
-        datasets = new HashMap<Comparable<?>, IAnalysisDataset>();
-        groupNames = new HashMap<Comparable<?>, ISignalGroup>();
-        groupIds = new HashMap<Comparable<?>, UUID>();
     }
 
     public void addDataset(IAnalysisDataset group, Comparable<?> seriesKey) {
