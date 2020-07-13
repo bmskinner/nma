@@ -39,10 +39,15 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 public abstract class XMLReader<T> {
 	
+	/** A placeholder value for missing files */
 	public static final File EMPTY_FILE = new File("empty");
 	
 	protected final Element rootElement;
 	
+	/**
+	 * Create a reader with a root element
+	 * @param e
+	 */
 	public XMLReader(@NonNull final Element e){
 		rootElement = e;
 	}
@@ -72,6 +77,12 @@ public abstract class XMLReader<T> {
 	 */
 	public abstract T read() throws XMLReadingException;
 	
+	/**
+	 * Read the given file as an XML document
+	 * @param file the file to read
+	 * @return the XML representation of the file content
+	 * @throws XMLReadingException if the document could not be read or was not XML
+	 */
 	public static Document readDocument(File file) throws XMLReadingException {
 		SAXBuilder saxBuilder = new SAXBuilder();
 		try {
@@ -81,46 +92,97 @@ public abstract class XMLReader<T> {
 		}
 	}
 	
+	/**
+	 * Parse the given element as an X coordinate
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected int readX(Element e) {
 		return Integer.valueOf(e.getChildText(XMLCreator.X));
 	}
 	
+	/**
+	 * Parse the given element as a Y coordinate
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected int readY(Element e) {
 		return Integer.valueOf(e.getChildText(XMLCreator.Y));
 	}
 	
+	/**
+	 * Parse the given element as a file
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected File readFile(Element e, String key) {
 		return new File(e.getChildText(key));
 	}
 
+	/**
+	 * Parse the given element as an XY point
+	 * @param e the element to parse
+	 * @return a point with the XY coordinates in the element
+	 */
 	protected IPoint readPoint(Element e) {
 		float x = Float.parseFloat(e.getChildText(XMLCreator.X));
 		float y = Float.parseFloat(e.getChildText(XMLCreator.Y));
 		return IPoint.makeNew(x, y);
 	}
 		
+	/**
+	 * Parse the given element as a measured statistic
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected PlottableStatistic readStat(Element e) {
 		String name = e.getChildText(XMLCreator.NAME_KEY);
 		return PlottableStatistic.of(name);
 	}
 	
+	/**
+	 * Parse the given element as a tag
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected Tag readTag(Element e) {
 		String name = e.getChildText(XMLCreator.NAME_KEY);
 		return Tag.of(name);
 	}
 	
+	/**
+	 * Parse the given element as a UUID
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected UUID readUUID(Element e) {
 		return UUID.fromString(e.getChildText(XMLCreator.ID_KEY));
 	}
 	
+	/**
+	 * Parse the given element as an integer
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected int readInt(Element e, String name) {
 		return Integer.valueOf(e.getChildText(name));
 	}
 	
+	/**
+	 * Parse the given element as a double
+	 * @param e the element to parse
+	 * @return
+	 */
 	protected double readDouble(Element e, String name) {
 		return Double.valueOf(e.getChildText(name));
 	}
 	
+	/**
+	 * Parse the given element and add all values to the 
+	 * given options object
+	 * @param e the element to parse
+	 * @param o the options to add values to
+	 */
 	protected void addKeyedValues(@NonNull Element e, @NonNull HashOptions o) {
 		// Primary keys
 		List<Element> boolContainer = e.getChildren(XMLCreator.BOOLEAN_KEY);
@@ -169,63 +231,88 @@ public abstract class XMLReader<T> {
 		}
 	}
 	
+	/**
+	 * Parse the given element as a component and add
+	 * to the given options
+	 * @param e the element to parse
+	 * @param op the options to add values to
+	 */
 	protected void addComponent(@NonNull Element e, @NonNull IAnalysisOptions op) {
 		
 		String detectedObject = e.getAttribute(XMLCreator.DETECTED_OBJECT_KEY).getValue();
 		
 		if(detectedObject.equals(CellularComponent.NUCLEUS)) {			
-			File f = op.getDetectionOptions(CellularComponent.NUCLEUS).isPresent() 
-					? op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder() : EMPTY_FILE;
-
-			IDetectionOptions o = OptionsFactory.makeNucleusDetectionOptions(f);
-			
-			// Primary keys
-			addKeyedValues(e, o);
-
-			for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
-				String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
-				
-				if(subType.equals(IDetectionSubOptions.BACKGROUND_OPTIONS)) {
-					IPreprocessingOptions pre = new PreprocessingOptions();
-					addKeyedValues(component, pre);
-					o.setSubOptions(subType, pre);
-				}
-				
-				if(subType.equals(IDetectionSubOptions.HOUGH_OPTIONS)) {
-					IHoughDetectionOptions hough = new DefaultHoughOptions();
-					addKeyedValues(component, hough);
-					o.setSubOptions(subType, hough);
-				}
-				
-				if(subType.equals(IDetectionSubOptions.CANNY_OPTIONS)) {
-					ICannyOptions canny = new DefaultCannyHashOptions();
-					addKeyedValues(component, canny);
-					o.setSubOptions(subType, canny);
-				}
-			}
-			op.setDetectionOptions(CellularComponent.NUCLEUS, o);
+			addComponentNucleus(e, op);
 		}
 		
 		if(detectedObject.startsWith(CellularComponent.NUCLEAR_SIGNAL) ) {
-			try {
-				Element idElement = e.getChild(XMLCreator.ID_KEY);
-				UUID id = idElement==null ? UUID.randomUUID() : UUID.fromString(idElement.getText());				
-				INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
-				addKeyedValues(e, n);				
-				for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
-					String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
-					if(subType.equals(IDetectionSubOptions.SHELL_OPTIONS)) {
-						IShellOptions s = new DefaultShellOptions();
-						addKeyedValues(component, s);
-						n.setShellOptions(s);
-					}
-				}
-				op.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+id.toString(), n);
-			} catch(IllegalArgumentException e1) {
-				// it wasn't a uuid
-			}
+			addComponentNuclearSignal(e, op);
 		}
 	}
 
+	/**
+	 * Parse the given element as nucleus detection options and add
+	 * to the given options
+	 * @param e the element to parse
+	 * @param op the options to add values to
+	 */
+	private void addComponentNucleus(@NonNull Element e, @NonNull IAnalysisOptions op) {
+		File f = op.getDetectionOptions(CellularComponent.NUCLEUS).isPresent() 
+				? op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder() : EMPTY_FILE;
+
+		IDetectionOptions o = OptionsFactory.makeNucleusDetectionOptions(f);
+		
+		// Primary keys
+		addKeyedValues(e, o);
+
+		for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
+			String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
+			
+			if(subType.equals(IDetectionSubOptions.BACKGROUND_OPTIONS)) {
+				IPreprocessingOptions pre = new PreprocessingOptions();
+				addKeyedValues(component, pre);
+				o.setSubOptions(subType, pre);
+			}
+			
+			if(subType.equals(IDetectionSubOptions.HOUGH_OPTIONS)) {
+				IHoughDetectionOptions hough = new DefaultHoughOptions();
+				addKeyedValues(component, hough);
+				o.setSubOptions(subType, hough);
+			}
+			
+			if(subType.equals(IDetectionSubOptions.CANNY_OPTIONS)) {
+				ICannyOptions canny = new DefaultCannyHashOptions();
+				addKeyedValues(component, canny);
+				o.setSubOptions(subType, canny);
+			}
+		}
+		op.setDetectionOptions(CellularComponent.NUCLEUS, o);
+	}
+	
+	/**
+	 * Parse the given element as nucleus signal detection options and add
+	 * to the given options
+	 * @param e the element to parse
+	 * @param op the options to add values to
+	 */
+	private void addComponentNuclearSignal(@NonNull Element e, @NonNull IAnalysisOptions op) {
+		try {
+			Element idElement = e.getChild(XMLCreator.ID_KEY);
+			UUID id = idElement==null ? UUID.randomUUID() : UUID.fromString(idElement.getText());				
+			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
+			addKeyedValues(e, n);				
+			for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
+				String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
+				if(subType.equals(IDetectionSubOptions.SHELL_OPTIONS)) {
+					IShellOptions s = new DefaultShellOptions();
+					addKeyedValues(component, s);
+					n.setShellOptions(s);
+				}
+			}
+			op.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+id.toString(), n);
+		} catch(IllegalArgumentException e1) {
+			// it wasn't a uuid
+		}
+	}
 	
 }
