@@ -73,7 +73,7 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 		
 		
 		try {
-			Mesh<Taggable> consensus = new DefaultMesh<>(dataset.getCollection().getConsensus());
+			Mesh<Taggable> consensus = new DefaultMesh<>(dataset.getCollection().getConsensus(), TPS_VERTEX_SPACING);
 			for(Nucleus n : dataset.getCollection().getNuclei()) {
 
 				try {
