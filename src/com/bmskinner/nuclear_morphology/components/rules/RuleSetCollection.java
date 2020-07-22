@@ -51,10 +51,10 @@ public class RuleSetCollection implements Serializable {
      * Create a new empty collection
      */
     public RuleSetCollection() {
-        for (Tag tag : BorderTagObject.values()) {
-            clearRuleSets(tag);
-        }
-        clearRuleSets(Tag.CUSTOM_POINT);
+//        for (Tag tag : BorderTagObject.values()) {
+//            clearRuleSets(tag);
+//        }
+//        clearRuleSets(Tag.CUSTOM_POINT);
     }
 
     /**
@@ -73,7 +73,10 @@ public class RuleSetCollection implements Serializable {
      * @param r
      */
     public void addRuleSet(Tag tag, RuleSet r) {
-        map.get(tag).add(r);
+    	if(!map.containsKey(tag)) {
+    		map.put(tag, new ArrayList<>());
+    	}
+    	map.get(tag).add(r);
     }
 
     /**
@@ -121,12 +124,39 @@ public class RuleSetCollection implements Serializable {
 
         return b.toString();
     }
+    
+    
 
     /*
      * Static methods to create the default rulesets for a given NucleusType
      */
 
-    public static RuleSetCollection createDefaultRuleSet(NucleusType type) {
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((map == null) ? 0 : map.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RuleSetCollection other = (RuleSetCollection) obj;
+		if (map == null) {
+			if (other.map != null)
+				return false;
+		} else if (!map.equals(other.map))
+			return false;
+		return true;
+	}
+
+	public static RuleSetCollection createDefaultRuleSet(NucleusType type) {
 
         switch (type) {
         case PIG_SPERM:
