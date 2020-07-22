@@ -65,12 +65,43 @@ public class RuleSet implements Serializable {
         }
         return b.toString();
     }
+    
+    
+    
 
     /*
      * STATIC METHODS FOR BUILT-IN RULESETS
      */
 
-    /**
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((rules == null) ? 0 : rules.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RuleSet other = (RuleSet) obj;
+		if (rules == null) {
+			if (other.rules != null)
+				return false;
+		} else if (!rules.equals(other.rules))
+			return false;
+		if (type != other.type)
+			return false;
+		return true;
+	}
+
+	/**
      * Create a RuleSet that describes how to find the RP in mouse sperm nuclear
      * profiles
      * 

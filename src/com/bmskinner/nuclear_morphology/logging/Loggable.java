@@ -29,6 +29,8 @@ import ij.IJ;
  */
 public class Loggable {
 	
+	public static final String PROJECT_LOGGER = "com.bmskinner.nuclear_morphology";
+	
 	private Loggable() {
 		// private
 	}

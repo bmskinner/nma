@@ -47,7 +47,7 @@ public class RulesetXMLCreator extends XMLCreator<RuleSet> {
 	}
 	
 	private Element createType(ProfileType type) {
-		return createElement(PROFILE_TYPE_KEY, type.toString());
+		return createElement(PROFILE_TYPE_KEY, type.name());
 	}
 	
 	private Element createRule(Rule r) {

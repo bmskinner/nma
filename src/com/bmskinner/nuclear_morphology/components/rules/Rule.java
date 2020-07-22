@@ -79,16 +79,49 @@ public class Rule implements Serializable {
         return type;
     }
 
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(type + " : ");
+        b.append(type);
         for (Double d : values) {
-            b.append(d + " : ");
+            b.append(" : "+ d);
         }
         return b.toString();
     }
+    
+    
 
-    /**
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Rule other = (Rule) obj;
+		if (type != other.type)
+			return false;
+		if (values == null) {
+			if (other.values != null)
+				return false;
+		} else if (!values.equals(other.values))
+			return false;
+		return true;
+	}
+
+
+
+	/**
      * A type of instruction to follow
      * 
      * @author bms41

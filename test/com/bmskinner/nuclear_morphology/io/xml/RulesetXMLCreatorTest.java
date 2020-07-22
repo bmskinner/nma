@@ -93,7 +93,7 @@ public class RulesetXMLCreatorTest {
 				d.getRootElement().getChild(XMLCreator.NAME_KEY).getValue());
 		
 
-		assertEquals(rs.getType().toString(), 
+		assertEquals(rs.getType().name(), 
 				d.getRootElement().getChild(XMLCreator.PROFILE_TYPE_KEY).getValue());
 				
 		List<Element> elements = d.getRootElement().getChildren(XMLCreator.RULE_KEY);
