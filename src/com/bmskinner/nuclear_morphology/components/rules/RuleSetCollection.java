@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**
  * This holds the rulesets for identifying each of the BorderTags in a profile.
- * Multiple RuleSets can be combined for each BorderTag, allowing multiple
+ * Multiple RuleSets can be combined for each tag, allowing multiple
  * ProfileTypes to be used. Designed to be stored within a cell collection
  * 
  * @author bms41
@@ -45,7 +45,7 @@ public class RuleSetCollection implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<Tag, List<RuleSet>> map = new HashMap<Tag, List<RuleSet>>();
+    private Map<Tag, List<RuleSet>> map = new HashMap<>();
 
     /**
      * Create a new empty collection
@@ -182,20 +182,19 @@ public class RuleSetCollection implements Serializable {
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading RulesetCollection");
         in.defaultReadObject();
 
         if (map != null) {
 
-            Map<Tag, List<RuleSet>> newMap = new HashMap<Tag, List<RuleSet>>();
+            Map<Tag, List<RuleSet>> newMap = new HashMap<>();
 
             Iterator<?> it = map.keySet().iterator();
 
+            // We need to convert any old tags using enums to the newer objects
             while (it.hasNext()) {
                 Object tag = it.next();
                 if (tag instanceof BorderTag) {
-                    LOGGER.fine("No BorderTagObject for " + tag.toString() + ": creating");
-
+                    LOGGER.finer("No BorderTagObject for " + tag.toString() + ": creating");
                     newMap.put(new BorderTagObject((BorderTag) tag), map.get(tag));
                 }
 
@@ -206,14 +205,10 @@ public class RuleSetCollection implements Serializable {
             }
 
         }
-
-        // finest("\tRead RulesetCollection");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting RulesetCollection");
         out.defaultWriteObject();
-        // finest("\tWrote RulesetCollection");
     }
 
 }

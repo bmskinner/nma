@@ -29,8 +29,8 @@ import java.util.List;
 public class Rule implements Serializable {
 
     private static final long  serialVersionUID = 1L;
-    final private RuleType     type;
-    final private List<Double> values           = new ArrayList<Double>(); // spare
+    private final RuleType     type;
+    private final List<Double> values           = new ArrayList<>(); // spare
                                                                            // field
 
     public Rule(RuleType type, double value) {

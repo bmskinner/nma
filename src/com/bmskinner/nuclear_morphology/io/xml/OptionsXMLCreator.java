@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
@@ -20,6 +21,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
  *
  */
 public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> {
+	
+	private static final Logger LOGGER = Logger.getLogger(OptionsXMLCreator.class.getName());
 
 	public OptionsXMLCreator(@NonNull IAnalysisDataset dataset) {
 		super(dataset);

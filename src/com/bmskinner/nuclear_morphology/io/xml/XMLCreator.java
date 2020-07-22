@@ -156,6 +156,11 @@ public abstract class XMLCreator<T> {
 	public static final String BORDER_LENGTH_KEY             = "InterpolatedBorderLength";
 	public static final String PROFILE_LENGTH_KEY            = "ProfileLength";
 	
+	public static final String RULE_KEY						 = "Rule";
+	public static final String RULESET_KEY					 = "RuleSet";
+	public static final String PROFILE_TYPE_KEY			     = "ProfileType";
+	public static final String TYPE_KEY			    		 = "Type";
+	
 	protected final T template;
 	
 	public XMLCreator(T template) {
@@ -167,7 +172,7 @@ public abstract class XMLCreator<T> {
 	 * @return
 	 */
 	public abstract Document create();
-	
+		
 	
 	/**
 	 * Create an XML key-value element from an arbitrary object

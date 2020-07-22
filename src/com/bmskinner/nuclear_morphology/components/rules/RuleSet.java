@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSetBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 
@@ -35,19 +37,18 @@ public class RuleSet implements Serializable {
 
     private static final long serialVersionUID = 1L;
     // combine rules with AND conditions
-    List<Rule>  rules;
+    List<Rule>  rules = new ArrayList<>();
     ProfileType type; // the type of profile to which the rules apply
 
     public RuleSet(final ProfileType type) {
-        rules = new ArrayList<Rule>();
         this.type = type;
     }
 
-    public void addRule(final Rule r) {
+    public void addRule(@NonNull final Rule r) {
         rules.add(r);
     }
 
-    public List<Rule> getRules() {
+    public @NonNull List<Rule> getRules() {
         return rules;
     }
 
