@@ -9,7 +9,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DatasetXMLCreatorTest.class, 
 	DatasetXMLReaderTest.class, 
 	OptionsXMLReaderTest.class,
-	RulesetXMLCreatorTest.class,
+	RuleSetCollectionXMLCreatorTest.class,
+	RuleSetCollectionXMLReaderTest.class,
 	XMLWriterTest.class })
 public class IoXmlTestSuite {
 

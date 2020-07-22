@@ -158,8 +158,10 @@ public abstract class XMLCreator<T> {
 	
 	public static final String RULE_KEY						 = "Rule";
 	public static final String RULESET_KEY					 = "RuleSet";
+	public static final String RULESET_COLLECTION_KEY		 = "RuleSetCollection";
 	public static final String PROFILE_TYPE_KEY			     = "ProfileType";
 	public static final String TYPE_KEY			    		 = "Type";
+	public static final String TAG_KEY			    		 = "Tag";
 	
 	protected final T template;
 	
