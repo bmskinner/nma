@@ -19,15 +19,24 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 public class RulesetXMLCreator extends XMLCreator<RuleSet> {
 	
 	private static final Logger LOGGER = Logger.getLogger(RulesetXMLCreator.class.getName());
+	
+	private String name;
 
-	public RulesetXMLCreator(@NonNull final RuleSet template) {
+	/**
+	 * Create with a ruleset and the name to give the ruleset in the XML document.
+	 * This will usually be a tag name, but can be custom
+	 * @param template the ruleset
+	 * @param name the name to give the ruleset
+	 */
+	public RulesetXMLCreator(@NonNull final RuleSet template, @NonNull final String name) {
 		super(template);
+		this.name = name;
 	}
 
 	@Override
 	public Document create() {
 		Element rootElement = new Element(RULESET_KEY);
-		
+		rootElement.addContent(createElement(NAME_KEY, name));
 		rootElement.addContent(createType(template.getType()));
 		
 		for(Rule r : template.getRules()) {

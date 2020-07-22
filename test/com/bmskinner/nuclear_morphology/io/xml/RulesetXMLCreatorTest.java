@@ -3,8 +3,10 @@ package com.bmskinner.nuclear_morphology.io.xml;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -31,26 +33,26 @@ public class RulesetXMLCreatorTest {
 
 	@Test
 	public void testRulesetMouseSpermRulesetsCreated() throws IOException {
-		List<RuleSet> list = new ArrayList<>();
-		list.add(RuleSet.mouseSpermRPRuleSet());
-		list.add(RuleSet.mouseSpermOPRuleSet());
-		list.add(RuleSet.mouseSpermTVRuleSet());
-		list.add(RuleSet.mouseSpermBVRuleSet());
+		Map<String, RuleSet> list = new HashMap<>();
+		list.put("RP", RuleSet.mouseSpermRPRuleSet());
+		list.put("OP", RuleSet.mouseSpermOPRuleSet());
+		list.put("TV", RuleSet.mouseSpermTVRuleSet());
+		list.put("BV", RuleSet.mouseSpermBVRuleSet());
 		
-		for(RuleSet rs : list) {
-			testRuleSetCreated(rs);
+		for(Entry<String, RuleSet> e : list.entrySet()) {
+			testRuleSetCreated(e.getValue(), e.getKey());
 		}
 	}
 	
 	@Test
 	public void testRulesetPigSpermRulesetsCreated() throws IOException {
-		List<RuleSet> list = new ArrayList<>();
-		list.add(RuleSet.pigSpermRPRuleSet());
-		list.add(RuleSet.pigSpermRPBackupRuleSet());
-		list.add(RuleSet.pigSpermOPRuleSet());
+		Map<String, RuleSet> list = new HashMap<>();
+		list.put("RP", RuleSet.pigSpermRPRuleSet());
+		list.put("RP", RuleSet.pigSpermRPBackupRuleSet());
+		list.put("OP", RuleSet.pigSpermOPRuleSet());
 		
-		for(RuleSet rs : list) {
-			testRuleSetCreated(rs);
+		for(Entry<String, RuleSet> e : list.entrySet()) {
+			testRuleSetCreated(e.getValue(), e.getKey());
 		}
 	}
 	
@@ -60,11 +62,11 @@ public class RulesetXMLCreatorTest {
 	 * @param rs the ruleset to test
 	 * @throws IOException
 	 */
-	private void testRuleSetCreated(RuleSet rs) throws IOException {
-		RulesetXMLCreator rxc = new RulesetXMLCreator(rs);		
+	private void testRuleSetCreated(RuleSet rs, String name) throws IOException {
+		RulesetXMLCreator rxc = new RulesetXMLCreator(rs, name);		
 		Document d = rxc.create();
-//		printXML(d);
-		testRuleSetMatches(rs, d);
+		printXML(d);
+		testRuleSetMatches(rs, d,name);
 	}
 	
 	/**
@@ -85,9 +87,12 @@ public class RulesetXMLCreatorTest {
 	 * @param rs
 	 * @param d
 	 */
-	private void testRuleSetMatches(RuleSet rs, Document d) {
+	private void testRuleSetMatches(RuleSet rs, Document d, String name) {
+				
+		assertEquals(name, 
+				d.getRootElement().getChild(XMLCreator.NAME_KEY).getValue());
 		
-		// Check fields filled in correctly
+
 		assertEquals(rs.getType().toString(), 
 				d.getRootElement().getChild(XMLCreator.PROFILE_TYPE_KEY).getValue());
 				
