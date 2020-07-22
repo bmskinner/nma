@@ -22,6 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,9 +66,13 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.io.xml.RuleSetCollectionXMLImporter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -82,7 +87,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
     private JTree tree;
 
-    private Map<String, RuleSetCollection> customCollections = new HashMap<String, RuleSetCollection>();
+    private Map<String, RuleSetCollection> customCollections = new HashMap<>();
 
     public RulesetDialog(IAnalysisDataset dataset) {
         super();
@@ -161,18 +166,40 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
             RuleSetBuildingDialog builder = new RuleSetBuildingDialog();
             if (builder.isOK()) {
-
-                // LOGGER.info("Getting custom collection");
                 RuleSetCollection custom = builder.getCollection();
                 int size = customCollections.size();
                 customCollections.put("Custom_" + size, custom);
-                // LOGGER.info("Added as "+"Custom_"+size);
                 updateTreeNodes();
             }
 
         });
 
         panel.add(addButton);
+        
+        
+        JButton importButton = new JButton("Import ruleset");
+        importButton.addActionListener(e->{
+        	try {
+				File f = InputSupplier.getDefault()
+						.requestFile("Select ruleset file", 
+								dataset.getSavePath().getParentFile(), 
+								"xml", 
+								"XML file");
+				
+				RuleSetCollectionXMLImporter ri = new RuleSetCollectionXMLImporter(f);
+				RuleSetCollection rsc = ri.importRuleset();
+				
+				customCollections.put(f.getName(), rsc);
+				updateTreeNodes();
+				
+			} catch (RequestCancelledException e1) {
+				// User cancelled, no action
+			} catch (XMLReadingException e1) {
+				LOGGER.warning("Unable to import file: "+e1.getMessage());
+				LOGGER.log(Loggable.STACK, "Error importing XML file", e);
+			}
+        });
+        panel.add(importButton);
         return panel;
 
     }
@@ -212,10 +239,18 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
      * collections in this dialog
      */
     private void updateTreeNodes() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData("Root"));
 
-        createNodes(root, dataset);
+        DefaultMutableTreeNode datasetNodes = new DefaultMutableTreeNode(new RuleNodeData("Dataset"));
+        createDatasetNodes(datasetNodes, dataset);
+        
+        DefaultMutableTreeNode customNodes = new DefaultMutableTreeNode(new RuleNodeData("Custom"));
+        createCustomNodes(customNodes);
+        
 
+        root.add(datasetNodes);
+        root.add(customNodes);
+        
         TreeModel model = new DefaultTreeModel(root);
         tree.setModel(model);
 
@@ -246,26 +281,18 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
             // get selected sets
 
             RuleSetCollection r = d.getSelected();
-            // LOGGER.info(r.toString());
-
             for (Tag tag : r.getTags()) {
-
                 if (r.hasRulesets(tag)) {
-
                     dataset.getCollection().getRuleSetCollection().setRuleSets(tag, r.getRuleSets(tag));
                     updateBorderTagAction(tag);
                 }
-
             }
 
             // add the custom sets to the dataset
-
             // trigger a point finding for cells
-
         } else {
             LOGGER.fine("Save was cancelled");
         }
-
     }
 
     private void changeData(RuleNodeData data) {
@@ -326,22 +353,18 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
         } else {
             LOGGER.fine("Tag is null");
-            return;
         }
 
     }
-
+    
     /**
-     * Create the nodes in the tree
+     * Create the nodes in the tree from the dataset's own rulesets
      * 
-     * @param root
-     *            the root node
-     * @param dataset
-     *            the dataset to use
+     * @param root the root node
+     * @param dataset the dataset to use
      */
-    private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
-
-        RuleSetCollection c = dataset.getCollection().getRuleSetCollection();
+    private void createDatasetNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
+    	RuleSetCollection c = dataset.getCollection().getRuleSetCollection();
 
         Set<Tag> tags = c.getTags();
 
@@ -378,69 +401,62 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
                         RuleNodeData ruleData = new RuleNodeData(rule.toString());
                         ruleData.setRuleSet(summedRules);
 
-                        // RuleNodeData ruleData = new
-                        // RuleNodeData(rule.toString());
-                        // ruleData.setRule(rule);
-                        // ruleData.setType(ruleSet.getType());
                         DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
                         profileNode.add(ruleNode);
-
                     }
-
                 }
-
             }
         }
+    }
+
+    /**
+     * Create the nodes in the tree for custom rulesets
+     * 
+     * @param root the root node
+     */
+    private void createCustomNodes(DefaultMutableTreeNode root) {
 
         // Add any custom collections created in ascending order
-        // LOGGER.info("Adding custom nodes");
-        List<String> customList = new ArrayList<String>(customCollections.keySet());
+    	LOGGER.fine("Adding custom nodes");
+        List<String> customList = new ArrayList<>(customCollections.keySet());
         Collections.sort(customList);
+        
         for (String s : customList) {
-            // LOGGER.info("Adding "+s);
+        	LOGGER.fine("Adding "+s);
             RuleSetCollection collection = customCollections.get(s);
 
             RuleNodeData r = new RuleNodeData(s);
-            // BorderTagObject tagObject = new BorderTagObject(s,
-            // BorderTag.CUSTOM);
-            // LOGGER.info("Adding node for "+tagObject);
-
             r.setTag(Tag.CUSTOM_POINT);
             r.setCollection(collection);
 
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
             root.add(node);
 
-            for (RuleSet ruleSet : collection.getRuleSets(Tag.CUSTOM_POINT)) {
+            for(Tag tag : collection.getTags()) {
+            	for (RuleSet ruleSet : collection.getRuleSets(tag)) {
 
-                RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
-                profileData.setRuleSet(ruleSet);
-                DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
-                node.add(profileNode);
+            		RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
+            		profileData.setRuleSet(ruleSet);
+            		DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
+            		node.add(profileNode);
 
-                for (Rule rule : ruleSet.getRules()) {
+            		for (Rule rule : ruleSet.getRules()) {
 
-                    RuleNodeData ruleData = new RuleNodeData(rule.toString());
-                    ruleData.setRule(rule);
-                    ruleData.setType(ruleSet.getType());
-                    DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
-                    profileNode.add(ruleNode);
-
-                }
-
+            			RuleNodeData ruleData = new RuleNodeData(rule.toString());
+            			ruleData.setRule(rule);
+            			ruleData.setType(ruleSet.getType());
+            			DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
+            			profileNode.add(ruleNode);
+            		}
+            	}
             }
-
         }
-
     }
 
     private JPanel createChartPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-
         chartPanel = new ExportableChartPanel(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
-
         panel.add(chartPanel, BorderLayout.CENTER);
-
         return panel;
     }
 
@@ -504,6 +520,11 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
     }
 
+    /**
+     * Nodes for the ruleset tree.
+     * @author ben
+     *
+     */
     public class RuleNodeData {
         private String            name       = null;
         private RuleSet           ruleSet    = null;

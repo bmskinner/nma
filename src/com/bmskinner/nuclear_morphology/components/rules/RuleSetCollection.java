@@ -51,10 +51,7 @@ public class RuleSetCollection implements Serializable {
      * Create a new empty collection
      */
     public RuleSetCollection() {
-//        for (Tag tag : BorderTagObject.values()) {
-//            clearRuleSets(tag);
-//        }
-//        clearRuleSets(Tag.CUSTOM_POINT);
+
     }
 
     /**

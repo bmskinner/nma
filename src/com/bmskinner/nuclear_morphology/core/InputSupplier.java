@@ -22,6 +22,8 @@ import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
+
 /**
  * Interface to allow different user interaction interfaces. Provides methods
  * to request user input.
@@ -30,6 +32,10 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  */
 public interface InputSupplier {
+	
+	static InputSupplier getDefault() {
+		return new DefaultInputSupplier();
+	}
 	
 	/**
 	 * Request a string input
