@@ -51,7 +51,7 @@ public class RuleSetCollection implements Serializable {
      * Create a new empty collection
      */
     public RuleSetCollection() {
-
+    	// Created empty
     }
 
     /**
@@ -101,7 +101,7 @@ public class RuleSetCollection implements Serializable {
     }
 
     public boolean hasRulesets(Tag tag) {
-        return map.get(tag).size() > 0;
+        return !map.get(tag).isEmpty();
     }
 
     public boolean isEmpty() {

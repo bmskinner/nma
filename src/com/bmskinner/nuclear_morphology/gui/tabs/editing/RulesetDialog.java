@@ -239,9 +239,9 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
      * collections in this dialog
      */
     private void updateTreeNodes() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData("Root"));
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(""));
 
-        DefaultMutableTreeNode datasetNodes = new DefaultMutableTreeNode(new RuleNodeData("Dataset"));
+        DefaultMutableTreeNode datasetNodes = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
         createDatasetNodes(datasetNodes, dataset);
         
         DefaultMutableTreeNode customNodes = new DefaultMutableTreeNode(new RuleNodeData("Custom"));
