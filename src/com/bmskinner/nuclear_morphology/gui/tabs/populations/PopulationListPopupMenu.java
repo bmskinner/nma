@@ -58,6 +58,7 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 	private PopupMenuItem exportShellsItem;
 	private PopupMenuItem saveCellsMenuItem;
 	private PopupMenuItem exportOptionsMenuItem;
+	private PopupMenuItem exportRulesetsMenuItem;
 	private PopupMenuItem exportXMLDatasetItem;
 	private PopupMenuItem exportCellImagesItem;
 	
@@ -207,6 +208,13 @@ public void createButtons() {
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
+        exportRulesetsMenuItem = fact.makeItem(Labels.Populations.EXPORT_RULESETS, 
+        		SignalChangeEvent.EXPORT_RULESETS, 
+        		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
+        		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
+        		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
+				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+        
         exportCellImagesItem = fact.makeItem(Labels.Populations.EXPORT_CELL_IMAGES, 
         		SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
@@ -226,6 +234,7 @@ public void createButtons() {
         exportSubMenu.add(exportShellsItem);
         exportSubMenu.add(saveCellsMenuItem);
         exportSubMenu.add(exportOptionsMenuItem);
+        exportSubMenu.add(exportRulesetsMenuItem);
         exportSubMenu.add(exportCellImagesItem);
         
         addNuclearSignalMenuItem = fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, 
