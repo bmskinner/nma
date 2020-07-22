@@ -103,7 +103,7 @@ public class GlobalOptions extends AbstractHashOptions {
         setDefaults();
     }
 
-    public void setDefaults() {
+    public synchronized void setDefaults() {
         this.scale = MeasurementScale.PIXELS;
         this.swatch = ColourSwatch.REGULAR_SWATCH;
         setBoolean(IS_VIOLIN_KEY, true);
@@ -123,7 +123,7 @@ public class GlobalOptions extends AbstractHashOptions {
         return defaultType;
     }
 
-    public void setDefaultType(NucleusType defaultType) {
+    public synchronized void setDefaultType(NucleusType defaultType) {
         this.defaultType = defaultType;
     }
 
@@ -140,7 +140,7 @@ public class GlobalOptions extends AbstractHashOptions {
     	return datasetExportFormat;
     }
     
-    public void setExportFormat(ExportFormat format) {
+    public synchronized void setExportFormat(ExportFormat format) {
         this.datasetExportFormat = format;
     }
 
