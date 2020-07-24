@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -59,7 +61,7 @@ public class RuleSetCollection implements Serializable {
      * 
      * @param tag
      */
-    public void clearRuleSets(Tag tag) {
+    public void clearRuleSets(@NonNull Tag tag) {
         map.put(tag, new ArrayList<RuleSet>());
     }
 
@@ -69,7 +71,7 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param r
      */
-    public void addRuleSet(Tag tag, RuleSet r) {
+    public void addRuleSet(@NonNull Tag tag, @NonNull RuleSet r) {
     	if(!map.containsKey(tag)) {
     		map.put(tag, new ArrayList<>());
     	}
@@ -82,7 +84,7 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param list
      */
-    public void setRuleSets(Tag tag, List<RuleSet> list) {
+    public void setRuleSets(@NonNull Tag tag, @NonNull List<RuleSet> list) {
         map.put(tag, list);
     }
 
@@ -92,7 +94,7 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param r
      */
-    public List<RuleSet> getRuleSets(Tag tag) {
+    public List<RuleSet> getRuleSets(@NonNull Tag tag) {
         return map.get(tag);
     }
 
@@ -100,7 +102,7 @@ public class RuleSetCollection implements Serializable {
         return map.keySet();
     }
 
-    public boolean hasRulesets(Tag tag) {
+    public boolean hasRulesets(@NonNull Tag tag) {
         return !map.get(tag).isEmpty();
     }
 

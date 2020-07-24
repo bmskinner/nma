@@ -42,15 +42,15 @@ public interface Tag extends Comparable<Tag>, Serializable {
     
     /**
      * Create a tag with the given name
-     * @param name the name of the tag. Must be one of {@link BorderTag#values()}
-     * @return
+     * @param name the name of the tag.
+     * @return a tag with the given  name
      */
     static Tag of(String name) {
     	for(BorderTag t : BorderTag.values()) {
     		if(t.name().equals(name))
     			return new BorderTagObject(t);
     	}
-    	return null;
+    	return new DefaultTag(name);
     }
     
     /**
