@@ -101,7 +101,7 @@ public class Screenshotter {
 	}
 	
 	private void deleteFiles(File folder) {
-		if(!folder.exists())
+		if(folder==null || !folder.exists())
 			return;
 		for(File f : folder.listFiles()) {
 			if(f.isDirectory())

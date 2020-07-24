@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -59,7 +60,7 @@ public class IProfileTester {
 	 * @return
 	 * @throws Exception
 	 */
-	private static IProfile createInstance(Class source) throws Exception {
+	private static IProfile createInstance(Class<? extends IProfile> source) throws Exception {
 		return createInstance(source, data);
 	}
 
@@ -69,7 +70,7 @@ public class IProfileTester {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static IProfile createInstance(Class source, float[] data) throws Exception {
+	private static IProfile createInstance(Class<? extends IProfile> source, float[] data) throws Exception {
 
 		if(source==DefaultProfile.class) {
 			DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
@@ -90,9 +91,9 @@ public class IProfileTester {
 		throw new Exception("Unable to create instance of "+source);
 	}
 	
-	@SuppressWarnings("unchecked")
+
     @Parameters
-    public static Iterable<Class> arguments() {
+    public static Iterable<Class<? extends IProfile>> arguments() {
 
 		// Since the objects created here persist throughout all tests,
 		// we're making class references. The actual objects under test
@@ -1141,7 +1142,7 @@ public class IProfileTester {
 	
 	@Test
     public void testEqualsWithSameObjectRef(){
-        assertTrue(profile.equals(profile));
+		assertEquals(profile, profile);
     }
 		
 	@Test
@@ -1152,7 +1153,7 @@ public class IProfileTester {
 	@Test
     public void testEqualsFalseWithNonProfile(){
 	    Object o = new Object();
-        assertFalse(profile.equals(o));
+	    assertNotEquals(profile, o);
     }
 	
 	@Test
@@ -1162,7 +1163,7 @@ public class IProfileTester {
             d[i] = data[i]*2;
         }
         IProfile p = createInstance(source, d);
-        assertFalse(profile.equals(p));
+        assertNotEquals(profile, p);
     }
 		
 	@Test

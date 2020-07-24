@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -89,7 +90,9 @@ public abstract class WorkspaceImporter implements Importer {
     			return WORKSPACE_VERSION_1_14_0;
 
     	} catch (Exception e) {
-    		e.printStackTrace();
+    		// Any exception thrown due to inability to read
+    		// the file as XML
+    		LOGGER.log(Level.FINE, "Unable to read workspace file as XML, assuming v1.13.x");
     	}
 
     	// No xml, so it must be the previous workspace type

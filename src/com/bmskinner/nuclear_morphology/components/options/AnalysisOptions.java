@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -659,14 +660,9 @@ public class AnalysisOptions implements IAnalysisOptions {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisOptions#equals(java.lang.Object)
-     */
+
     @Override
     public boolean equals(Object obj) {
-        // finest("Testing equality");
         if (this == obj)
             return true;
         if (obj == null)
@@ -695,7 +691,6 @@ public class AnalysisOptions implements IAnalysisOptions {
         if (Double.doubleToLongBits(minNucleusSize) != Double.doubleToLongBits(other.minNucleusSize))
             return false;
 
-        // finest("Testing contrast");
         if (normaliseContrast != other.normaliseContrast)
             return false;
         if (nucleusThreshold != other.nucleusThreshold)
@@ -708,7 +703,6 @@ public class AnalysisOptions implements IAnalysisOptions {
             return false;
         if (Double.doubleToLongBits(scale) != Double.doubleToLongBits(other.scale))
             return false;
-        // finest("Testing signal detection");
         if (signalDetection == null) {
             if (other.signalDetection != null)
                 return false;
@@ -1135,7 +1129,7 @@ public class AnalysisOptions implements IAnalysisOptions {
 		@Override
 		public float getFloat(String s) {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			return 0;
+			return 0f;
 		}
 
 		@Override
@@ -1147,31 +1141,31 @@ public class AnalysisOptions implements IAnalysisOptions {
 		@Override
 		public List<String> getBooleanKeys() {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			return null;
+			return new ArrayList<>();
 		}
 
 		@Override
 		public List<String> getIntegerKeys() {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			return null;
+			return new ArrayList<>();
 		}
 
 		@Override
 		public List<String> getDoubleKeys() {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			return null;
+			return new ArrayList<>();
 		}
 
 		@Override
 		public List<String> getFloatKeys() {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			return null;
+			return new ArrayList<>();
 		}
 
 		@Override
 		public Map<String, Object> getEntries() {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			return null;
+			return new HashMap<>();
 		}
 
 		@Override
@@ -1183,19 +1177,17 @@ public class AnalysisOptions implements IAnalysisOptions {
 		@Override
 		public void setString(String k, String v) {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			
 		}
 
 		@Override
 		public List<String> getStringKeys() {
 			LOGGER.warning("Unimplemented method in " + this.getClass().getName());
-			return null;
+			return new ArrayList<>();
 		}
 
 		@Override
 		public void set(HashOptions o) {
-			// TODO Auto-generated method stub
-			
+			// No action, deprecated class
 		}
     }
 
@@ -1239,42 +1231,36 @@ public class AnalysisOptions implements IAnalysisOptions {
 
     @Override
     public void setDetectionOptions(String key, IDetectionOptions options) {
-
+    	// No action, deprecated class
     }
 
 	@Override
 	public long getAnalysisTime() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void set(@NonNull IAnalysisOptions o) {
-		// TODO Auto-generated method stub
-		
+		// No action, deprecated class
 	}
 
 	@Override
 	public Optional<HashOptions> getSecondaryOptions(String key) {
-		// TODO Auto-generated method stub
-		return null;
+		return Optional.empty();
 	}
 
 	@Override
 	public Set<String> getSecondaryOptionKeys() {
-		// TODO Auto-generated method stub
-		return null;
+		return new HashSet<>();
 	}
 
 	@Override
 	public boolean hasSecondaryOptions(String key) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void setSecondaryOptions(String key, HashOptions options) {
-		// TODO Auto-generated method stub
-		
+		// No action, deprecated class
 	}
 }

@@ -299,7 +299,7 @@ public class TestComponentFactory {
 	
 	@Test
 	public void testCellCreatedWithDefaultVariables() throws ComponentCreationException {
-		ICell c = new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
+		new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
 				TestDatasetBuilder.DEFAULT_BASE_HEIGHT, TestDatasetBuilder.DEFAULT_X_BASE, 
 				TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION, 
 				TestDatasetBuilder.DEFAULT_BORDER_OFFSET));
@@ -311,7 +311,7 @@ public class TestComponentFactory {
 
 		for(int offset=0; offset<max; offset++) {
 			try {
-			ICell c = new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
+				new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
 					TestDatasetBuilder.DEFAULT_BASE_HEIGHT, TestDatasetBuilder.DEFAULT_X_BASE, 
 					TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION, offset));
 			} catch(ComponentCreationException e) {

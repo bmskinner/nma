@@ -37,7 +37,7 @@ public class FloatEquationTest {
 
     @Test
     public void testFloatEquationFloatFloat() {
-        FloatEquation d = new FloatEquation(1, 0);
+        new FloatEquation(1, 0);
     }
     
     @Test

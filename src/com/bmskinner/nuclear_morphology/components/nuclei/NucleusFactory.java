@@ -142,8 +142,6 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         }
 
         nucleusCount++;
-        if (n == null)
-            throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;
     }
@@ -171,8 +169,6 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         }
 
         nucleusCount++;
-        if (n == null)
-            throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;
     }
@@ -197,8 +193,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
         			nucleusNumber, id);
         }
-        if (n == null)
-            throw new ComponentCreationException(NULL_NUCLEUS_ERROR);
+
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;
     }

@@ -129,7 +129,6 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
     	}
     	
-    	DatasetComparator dc = new DatasetComparator();
     	assertEquals(d1.getCollection().size(), extracted.get(0).getCollection().size());
     	assertEquals(d2.getCollection().size(), extracted.get(1).getCollection().size());
     	
