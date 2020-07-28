@@ -280,10 +280,11 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         if (d.isReadyToRun()) {
             // get selected sets
 
-            RuleSetCollection r = d.getSelected();
-            for (Tag tag : r.getTags()) {
-                if (r.hasRulesets(tag)) {
-                    dataset.getCollection().getRuleSetCollection().setRuleSets(tag, r.getRuleSets(tag));
+            RuleSetCollection rsc = d.getSelected();
+            for (Tag tag : rsc.getTags()) {
+            	LOGGER.fine("Testing existance of tag "+tag);
+                if (rsc.hasRulesets(tag)) {
+                    dataset.getCollection().getRuleSetCollection().setRuleSets(tag, rsc.getRuleSets(tag));
                     updateBorderTagAction(tag);
                 }
             }
@@ -358,7 +359,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     }
     
     /**
-     * Create the nodes in the tree from the dataset's own rulesets
+     * Create the nodes in the tree from the dataset's existing rulesets
      * 
      * @param root the root node
      * @param dataset the dataset to use
@@ -368,7 +369,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
         Set<Tag> tags = c.getTags();
 
-        List<Tag> sortedList = new ArrayList<Tag>(tags);
+        List<Tag> sortedList = new ArrayList<>(tags);
         Collections.sort(sortedList);
 
         for (Tag t : sortedList) {
@@ -422,35 +423,47 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         Collections.sort(customList);
         
         for (String s : customList) {
-        	LOGGER.fine("Adding "+s);
+        	LOGGER.fine("Adding collection from "+s);
             RuleSetCollection collection = customCollections.get(s);
-
-            RuleNodeData r = new RuleNodeData(s);
-            r.setTag(Tag.CUSTOM_POINT);
-            r.setCollection(collection);
-
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
-            root.add(node);
-
+            RuleNodeData c = new RuleNodeData(s);
+            DefaultMutableTreeNode collectionNode = new DefaultMutableTreeNode(c);
             for(Tag tag : collection.getTags()) {
+
+            	RuleNodeData r = new RuleNodeData(tag.getName());
+            	r.setTag(Tag.of(s));
+            	r.setCollection(collection);
+
+            	DefaultMutableTreeNode tagNode = new DefaultMutableTreeNode(r);
+            	collectionNode.add(tagNode);
+
+
             	for (RuleSet ruleSet : collection.getRuleSets(tag)) {
-
-            		RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
-            		profileData.setRuleSet(ruleSet);
-            		DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
-            		node.add(profileNode);
-
-            		for (Rule rule : ruleSet.getRules()) {
-
-            			RuleNodeData ruleData = new RuleNodeData(rule.toString());
-            			ruleData.setRule(rule);
-            			ruleData.setType(ruleSet.getType());
-            			DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
-            			profileNode.add(ruleNode);
-            		}
+            		addNodesForRuleSet(tagNode, ruleSet);
             	}
             }
+            root.add(collectionNode);
         }
+    }
+    
+    /**
+     * Create tree nodes for each rule in a ruleset
+     * @param tagNode
+     * @param ruleSet
+     */
+    private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet) {
+    	RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
+		profileData.setRuleSet(ruleSet);
+		DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
+		tagNode.add(profileNode);
+
+		for (Rule rule : ruleSet.getRules()) {
+
+			RuleNodeData ruleData = new RuleNodeData(rule.toString());
+			ruleData.setRule(rule);
+			ruleData.setType(ruleSet.getType());
+			DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
+			profileNode.add(ruleNode);
+		}
     }
 
     private JPanel createChartPanel() {
@@ -498,13 +511,16 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
             if (data.hasRuleSetCollection()) {
                 RuleSetCollection c = data.getCollection();
-                IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                        Tag.REFERENCE_POINT, Stats.MEDIAN);
+                
+                if(c.hasRulesets(data.getTag())) {
+                	IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
+                			Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-                BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
-                        c.getRuleSets(data.getTag()));
+                	BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
+                			c.getRuleSets(data.getTag()));
 
-                chart = chf.createBooleanProfileChart(p, limits);
+                	chart = chf.createBooleanProfileChart(p, limits);
+                }
 
             }
 

@@ -35,7 +35,7 @@ public class RuleSetCollectionXMLReader extends XMLReader<RuleSetCollection>{
 			
 			String tagName = tagElement.getChildText(XMLCreator.NAME_KEY);
 			String tagType = tagElement.getChildText(XMLCreator.TYPE_KEY);
-			Tag tagObject = Tag.of(tagType);
+			Tag tagObject = Tag.of(tagName);
 			LOGGER.finest("Found tag "+tagName+" ("+tagType+") as "+tagObject);
 			int rulesetCount = tagElement.getChildren().size()-2;
 			for(int i=0; i<rulesetCount; i++) {

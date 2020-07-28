@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -103,7 +104,7 @@ public class RuleSetCollection implements Serializable {
     }
 
     public boolean hasRulesets(@NonNull Tag tag) {
-        return !map.get(tag).isEmpty();
+        return map.containsKey(tag) && !map.get(tag).isEmpty();
     }
 
     public boolean isEmpty() {
@@ -113,10 +114,9 @@ public class RuleSetCollection implements Serializable {
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("RuleSets:\n");
-        for (Tag tag : map.keySet()) {
-            b.append("\t" + tag + ":\n");
-            List<RuleSet> l = map.get(tag);
-            for (RuleSet r : l) {
+        for(Entry<Tag, List<RuleSet>> entry : map.entrySet()) {
+            b.append("\t" + entry.getKey() + ":\n");
+            for (RuleSet r : entry.getValue()) {
                 b.append("\t" + r.toString() + "\n");
             }
         }
