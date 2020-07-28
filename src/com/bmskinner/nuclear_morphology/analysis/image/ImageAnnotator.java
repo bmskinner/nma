@@ -88,6 +88,18 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
     
     /**
+     * Get the defined colour for a given tag, or a 
+     * default colour if the tag is not defined
+     * @param t the tag to get a colour for
+     * @return the defined colour, or a default colour
+     */
+    private Color getDefaultColour(Tag t) {
+    	if(DEFAULT_TAG_COLOURS.containsKey(t))
+    		return DEFAULT_TAG_COLOURS.get(t);
+    	return Color.PINK;
+    }
+    
+    /**
      * Get the conversion scale between the annotated image width and the input image width
      * @return the scale factor
      */
@@ -197,7 +209,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             	for(Tag t : n.getBorderTags().keySet()) {
             		if(Tag.INTERSECTION_POINT.equals(t)) // Not required to be drawn
             			continue;
-            		Color c = DEFAULT_TAG_COLOURS.get(t);
+            		Color c = getDefaultColour(t);
             		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
                 			n.getBorderPoint(t).plus(Imageable.COMPONENT_BUFFER), 
                 			c, DEFAULT_LINE_WIDTH);
