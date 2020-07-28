@@ -47,7 +47,7 @@ public interface Tag extends Comparable<Tag>, Serializable {
      */
     static Tag of(String name) {
     	for(BorderTag t : BorderTag.values()) {
-    		if(t.name().equals(name))
+    		if(t.name().equals(name) || t.toString().equals(name))
     			return new BorderTagObject(t);
     	}
     	return new DefaultTag(name);

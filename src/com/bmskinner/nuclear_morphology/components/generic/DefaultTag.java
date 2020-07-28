@@ -64,4 +64,9 @@ public class DefaultTag implements Tag {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return name;
+	}
 }
