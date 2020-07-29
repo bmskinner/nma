@@ -20,10 +20,13 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,6 +34,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 
@@ -42,6 +46,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
  */
 @SuppressWarnings("serial")
 public class RulesetSaveDialog extends SettingsDialog {
+	
+	private static final Logger LOGGER = Logger.getLogger(RulesetSaveDialog.class.getName());
 
     private Map<String, RuleSetCollection> customCollections;
 
@@ -67,14 +73,24 @@ public class RulesetSaveDialog extends SettingsDialog {
         this.setLayout(new BorderLayout());
         main = new JPanel();
 
-        main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
+        main.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        
         main.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         for(Entry<String, RuleSetCollection> entry : customCollections.entrySet() ) {
-        	main.add(new JLabel(entry.getKey()));
+        	main.add(new JLabel(entry.getKey()), c);
         	for(Tag t : entry.getValue().getTags()) {
-        		main.add(new RuleSetPanel(entry.getKey(), t));
+        		c.gridy++;
+        		main.add(new RuleSetPanel(entry.getKey(), t), c);
+
         	}
+        	c.gridy++;
         }
 
         add(createHeader(), BorderLayout.NORTH);
@@ -95,7 +111,8 @@ public class RulesetSaveDialog extends SettingsDialog {
         		RuleSetPanel p  = (RuleSetPanel)c;
         		if(p.isSelected()) {
         			RuleSetCollection r = customCollections.get(p.getCollectionName());
-        			result.setRuleSets(p.getTag(), r.getRuleSets(p.getTag()));
+        			List<RuleSet> rules =  r.getRuleSets(p.oldTag());
+        			result.setRuleSets(p.getTag(), rules);
         		}
         	}
         }
@@ -112,9 +129,11 @@ public class RulesetSaveDialog extends SettingsDialog {
     	 private final JCheckBox box;
     	 private final JTextField text;
     	 private final String collectionName;
+    	 private final Tag oldTag;
          
          public RuleSetPanel(String collectionName, Tag t) {
         	 this.collectionName = collectionName;
+        	 this.oldTag = t;
         	 this.setLayout(new FlowLayout());
         	 box = new JCheckBox("", true);
         	 text = new JTextField(t.toString());
@@ -130,6 +149,10 @@ public class RulesetSaveDialog extends SettingsDialog {
          
          public String getCollectionName() {
         	 return collectionName;
+         }
+         
+         public Tag oldTag() {
+        	 return oldTag;
          }
          
          public Tag getTag() {

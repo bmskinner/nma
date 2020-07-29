@@ -63,7 +63,7 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      */
     public void clearRuleSets(@NonNull Tag tag) {
-        map.put(tag, new ArrayList<RuleSet>());
+        map.put(tag, new ArrayList<>());
     }
 
     /**
@@ -86,7 +86,8 @@ public class RuleSetCollection implements Serializable {
      * @param list
      */
     public void setRuleSets(@NonNull Tag tag, @NonNull List<RuleSet> list) {
-        map.put(tag, list);
+        map.put(tag, new ArrayList<>());
+        map.get(tag).addAll(list);
     }
 
     /**
@@ -104,7 +105,10 @@ public class RuleSetCollection implements Serializable {
     }
 
     public boolean hasRulesets(@NonNull Tag tag) {
-        return map.containsKey(tag) && !map.get(tag).isEmpty();
+    	if(map.containsKey(tag)) {
+    		return !map.get(tag).isEmpty();
+    	}
+    	return false;
     }
 
     public boolean isEmpty() {
