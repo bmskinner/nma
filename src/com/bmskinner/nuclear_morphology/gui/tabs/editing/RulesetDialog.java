@@ -77,6 +77,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
@@ -104,7 +105,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     public RulesetDialog(IAnalysisDataset dataset) {
         super();
         this.setLayout(new GridBagLayout());
-        this.setTitle("RuleSets for " + dataset.getName());
+        this.setTitle(Labels.EditingBorderTags.RULESET_DIALOG_TITLE + dataset.getName());
         this.dataset = dataset;
         
         GridBagConstraints c = new GridBagConstraints();
@@ -215,13 +216,8 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        JLabel label0 = new JLabel(
-                "This window displays the rules that are used to find points in the outlines of nuclei");
-        JLabel label3 = new JLabel(
-                "Rules are combined via logical AND to determine final valid positions");
-
-        panel.add(label0);
-        panel.add(label3);
+        panel.add(new JLabel(Labels.EditingBorderTags.RULESET_DIALOG_HEADER_0));
+        panel.add(new JLabel(Labels.EditingBorderTags.RULESET_DIALOG_HEADER_1));
 
         return panel;
     }
@@ -229,7 +225,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout());
 
-        JButton addButton = new JButton("Custom");
+        JButton addButton = new JButton(Labels.EditingBorderTags.RULESET_DIALOG_CUSTOM_BTN);
 
         addButton.addActionListener(e -> {
 
@@ -246,11 +242,11 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         panel.add(addButton);
         
         
-        JButton importButton = new JButton("Import");
+        JButton importButton = new JButton(Labels.EditingBorderTags.RULESET_DIALOG_IMPORT_BTN);
         importButton.addActionListener(e->{
         	try {
 				File f = InputSupplier.getDefault()
-						.requestFile("Select ruleset file", 
+						.requestFile(Labels.EditingBorderTags.RULESET_DIALOG_SELECT_FILE, 
 								dataset.getSavePath().getParentFile(), 
 								"xml", 
 								"XML file");
@@ -381,9 +377,11 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
     private void askToSaveCustomPoints() {
 
-        Object[] options = { "Save new rulesets", "Discard rulesets", };
-        int save = JOptionPane.showOptionDialog(null, "Do you want to save some or all custom ruleset(s)?",
-                "Save rulesets?", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        Object[] options = { Labels.EditingBorderTags.RULESET_DIALOG_SAVE_OPTION, 
+        		Labels.EditingBorderTags.RULESET_DIALOG_DISCARD_OPTION };
+        int save = JOptionPane.showOptionDialog(null, Labels.EditingBorderTags.RULESET_DIALOG_SAVE_CHOICE,
+        		Labels.EditingBorderTags.RULESET_DIALOG_SAVE_TITLE, JOptionPane.DEFAULT_OPTION, 
+                JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         if (save == 0) {
             saveCustomPoints();
