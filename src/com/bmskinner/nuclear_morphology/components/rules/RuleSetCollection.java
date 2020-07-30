@@ -65,6 +65,10 @@ public class RuleSetCollection implements Serializable {
     public void clearRuleSets(@NonNull Tag tag) {
         map.put(tag, new ArrayList<>());
     }
+    
+    public List<RuleSet> removeRuleSets(@NonNull Tag tag) {
+    	return map.remove(tag);
+    }
 
     /**
      * Add a ruleset for the given tag
