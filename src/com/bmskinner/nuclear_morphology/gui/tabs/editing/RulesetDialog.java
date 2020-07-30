@@ -87,7 +87,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
-public class RulesetDialog extends LoadingIconDialog implements TreeSelectionListener, ListSelectionListener {
+public class RulesetDialog extends LoadingIconDialog 
+	implements TreeSelectionListener, ListSelectionListener {
 	
 	private static final Logger LOGGER = Logger.getLogger(RulesetDialog.class.getName());
 
@@ -312,7 +313,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     	String[] collections = tagCollection.toArray(new String[0]);
     	
     	model.addColumn("Tag", tags);    	
-    	model.addColumn("Collection", collections);    	
+    	model.addColumn("Collection", collections);    
     	return model;
     }
 
@@ -589,5 +590,4 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 			updateTreeNodes();
 		}
 	}
-
 }
