@@ -21,8 +21,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -55,6 +53,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -219,7 +218,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         JLabel label0 = new JLabel(
                 "This window displays the rules that are used to find points in the outlines of nuclei");
         JLabel label3 = new JLabel(
-                "Rules are combined via the logical AND operator ('ANDed') to determine final valid positions");
+                "Rules are combined via logical AND to determine final valid positions");
 
         panel.add(label0);
         panel.add(label3);
@@ -355,13 +354,11 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     	// Get the appropriate RulesetCollection
     	List<RuleSet> rulesets = getRulesetsForTag(tag, collection);
     	
-    	RuleNodeData r = new RuleNodeData(tag.getName());
-    	r.setTag(tag);
-
+    	RuleNodeData r = new RuleNodeData(tag, null, null);
     	DefaultMutableTreeNode tagNode = new DefaultMutableTreeNode(r);
 
     	for (RuleSet ruleSet : rulesets) {
-    		addNodesForRuleSet(tagNode, ruleSet);
+    		addNodesForRuleSet(tagNode, ruleSet, tag);
     	}
     	return tagNode;
     }
@@ -451,7 +448,6 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         } else {
             LOGGER.fine("Tag is null");
         }
-
     }
         
     /**
@@ -459,17 +455,14 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
      * @param tagNode
      * @param ruleSet
      */
-    private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet) {
-    	RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
-		profileData.setRuleSet(ruleSet);
+    private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet, Tag tag) {
+    	RuleNodeData profileData = new RuleNodeData(tag, ruleSet, null);
 		DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
 		tagNode.add(profileNode);
 
 		for (Rule rule : ruleSet.getRules()) {
 
-			RuleNodeData ruleData = new RuleNodeData(rule.toString());
-			ruleData.setRule(rule);
-			ruleData.setType(ruleSet.getType());
+			RuleNodeData ruleData = new RuleNodeData(tag, ruleSet, rule);
 			DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
 			profileNode.add(ruleNode);
 		}
@@ -510,65 +503,9 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
     @Override
     public void valueChanged(TreeSelectionEvent e) {
-
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
         RuleNodeData data = (RuleNodeData) node.getUserObject();
-
-        ProfileIndexFinder finder = new ProfileIndexFinder();
-
-        JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
-
-        ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
-        MorphologyChartFactory chf = new MorphologyChartFactory(options);
-
-        try {
-
-            if (data.hasRule()) {
-
-                Rule r = data.getRule();
-
-                IProfile p = dataset.getCollection().getProfileCollection().getProfile(data.getType(),
-                        Tag.REFERENCE_POINT, Stats.MEDIAN);
-                BooleanProfile b = finder.getMatchingIndexes(p, r);
-                chart = chf.createBooleanProfileChart(p, b);
-            }
-
-            if (data.hasRuleSet()) {
-                RuleSet r = data.getRuleSet();
-
-                IProfile p = dataset.getCollection().getProfileCollection().getProfile(data.getType(),
-                        Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-                BooleanProfile b = finder.getMatchingIndexes(p, r);
-                chart = chf.createBooleanProfileChart(p, b);
-
-            }
-
-            if (data.hasRuleSetCollection()) {
-                RuleSetCollection c = data.getCollection();
-                
-                if(c.hasRulesets(data.getTag())) {
-                	IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                			Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-                	BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
-                			c.getRuleSets(data.getTag()));
-
-                	chart = chf.createBooleanProfileChart(p, limits);
-                }
-
-            }
-
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
-                | IllegalArgumentException e1) {
-            LOGGER.log(Loggable.STACK, "Error getting profile", e1);
-            chart = MorphologyChartFactory.createErrorChart();
-        }
-
-        // Draw the rule on the chart
-
-        chartPanel.setChart(chart);
-
+        chartPanel.setChart(data.getChart());
     }
 
     /**
@@ -577,103 +514,80 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
      *
      */
     public class RuleNodeData {
-        private String            name       = null;
-        private RuleSet           ruleSet    = null;
-        private Rule              rule       = null;
-        private ProfileType       type       = null;
-        private Tag               tag        = null;
-        private RuleSetCollection collection = null;
-
-        public RuleNodeData(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setRuleSet(RuleSet r) {
-            this.ruleSet = r;
-            this.type = r.getType();
-        }
-
-        public void setRule(Rule r) {
-            this.rule = r;
-        }
-
-        public void setType(ProfileType type) {
-            this.type = type;
-        }
-
-        public void setTag(Tag tag) {
+        private RuleSet ruleSet = null;
+        private Rule    rule    = null;
+        private Tag     tag     = null;
+        
+        public RuleNodeData(@NonNull Tag tag, @Nullable RuleSet ruleSet, @Nullable Rule rule) {;
             this.tag = tag;
+            this.ruleSet = ruleSet;
+            this.rule = rule;
         }
+        
+        /**
+         * Create the appropriate chart for the node 
+         * @return
+         */
+        public JFreeChart getChart() {
 
-        public RuleSet getRuleSet() {
-            return ruleSet;
-        }
+        	try {
+        		ProfileIndexFinder finder = new ProfileIndexFinder();
+        		ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
+        		MorphologyChartFactory chf = new MorphologyChartFactory(options);
 
-        public Rule getRule() {
-            return rule;
-        }
+        		if(rule!=null) {
+        			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
+        					Tag.REFERENCE_POINT, Stats.MEDIAN);
+        			BooleanProfile b = finder.getMatchingIndexes(p, rule);
+        			return chf.createBooleanProfileChart(p, b);
+        		}
 
-        public ProfileType getType() {
-            return type;
-        }
+        		if(ruleSet!=null) {
+        			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
+        					Tag.REFERENCE_POINT, Stats.MEDIAN);
+        			BooleanProfile b = finder.getMatchingIndexes(p, ruleSet);
+        			return chf.createBooleanProfileChart(p, b);
+        		}
 
-        public RuleSetCollection getCollection() {
-            return collection;
-        }
+        		return createChartForSelectedTableRow();
 
-        public void setCollection(RuleSetCollection collection) {
-            this.collection = collection;
-        }
-
-        public Tag getTag() {
-            return tag;
-        }
-
-        public boolean hasRuleSet() {
-            return ruleSet != null;
-        }
-
-        public boolean hasRule() {
-            return rule != null;
-        }
-
-        public boolean hasType() {
-            return type != null;
-        }
-
-        public boolean hasTag() {
-            return tag != null;
-        }
-
-        public boolean hasRuleSetCollection() {
-            return collection != null;
+        	} catch(Exception e) {
+        		LOGGER.log(Loggable.STACK, "Error creating profile chart: "+e.getMessage(), e);
+        		return MorphologyChartFactory.createErrorChart();
+        	}
         }
 
         public String toString() {
-            return name;
+        	if(rule!=null)
+            	return rule.toString();
+            if(ruleSet!=null)
+            	return ruleSet.getType().toString();
+            return tag.toString();
         }
+    }
+    
+    /**
+     * Create a chart for the currently selected row in the tag table
+     * @return
+     */
+    private JFreeChart createChartForSelectedTableRow() {
+    	int row = borderTagTable.getSelectedRow();
+		if(row<0)
+			return MorphologyChartFactory.createEmptyChart();
+		Tag t = (Tag)borderTagTable.getValueAt(row, 0);
+		String collection = (String) borderTagTable.getValueAt(row, 1);
+		try {
+			return createChart(t, collection);
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+			LOGGER.log(Loggable.STACK, "Unable to make chart: "+e.getMessage(), e);
+			return MorphologyChartFactory.createErrorChart();
+		}
     }
 
 	@Override
 	public synchronized void valueChanged(ListSelectionEvent e) {
 		if(!e.getValueIsAdjusting()) {
-			int row = borderTagTable.getSelectedRow();
-			if(row<0)
-				return;
-			Tag t = (Tag)borderTagTable.getValueAt(row, 0);
-			String collection = (String) borderTagTable.getValueAt(row, 1);
-			LOGGER.finest("Selected row "+row+": Tag "+t+" Collection: "+collection);
-
-			try {
-				chartPanel.setChart(createChart(t, collection));
-			} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e1) {
-				chartPanel.setChart(MorphologyChartFactory.createErrorChart());
-				LOGGER.log(Loggable.STACK, "Unable to make chart: "+e1.getMessage(), e);
-			}
+			chartPanel.setChart(createChartForSelectedTableRow());
 			updateTreeNodes();
 		}
 	}
