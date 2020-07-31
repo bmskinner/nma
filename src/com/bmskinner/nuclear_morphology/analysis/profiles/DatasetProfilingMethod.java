@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
@@ -31,6 +33,9 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -86,9 +91,61 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @param pointType
 	 */
 	private void run() throws Exception {
-		LOGGER.fine("-----------------------------");
     	LOGGER.fine("Beginning profiling method");
-    	LOGGER.fine("-----------------------------");
+    	
+    	RuleApplicationType ruleType = dataset.getCollection().getRuleSetCollection().getRuleApplicationType();
+    	
+    	switch(ruleType) {
+	    	case VIA_MEDIAN: {
+	    		runViaMedian();
+	    		break;
+	    	}
+	    	case PER_NUCLEUS:{
+	    		runPerNucleus();
+	    		break;
+	    	}
+    	}
+		
+	}
+	
+	private void runPerNucleus() throws Exception {
+		ICellCollection collection = dataset.getCollection();
+		
+		collection.createProfileCollection();
+		
+		// Reference points are assigned in each nucleus on creation
+		// Create a median from the current reference points in the nuclei
+		collection.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		
+		
+		// For each tag in the dataset ruleset collection, identify the tag in nuclei
+		Set<Tag> tags = collection.getRuleSetCollection().getTags();
+		
+		for(Tag t : tags) {
+			if(Tag.REFERENCE_POINT.equals(t)) // Already set
+				continue;
+			List<RuleSet> ruleSets = collection.getRuleSetCollection().getRuleSets(t);
+			for(Nucleus n :  collection.getNuclei()) {
+				int index = finder.identifyIndex(n, ruleSets);
+				if(!n.isLocked()) {
+					n.setBorderTag(t, index);
+				} else {
+					LOGGER.fine("Nucleus "+n.getNameAndNumber()+" is locked, not changing "+t);
+				}
+			}
+			
+			// Add the index to the median profiles
+			int medianIndex = finder.identifyIndex(collection, ruleSets);
+			collection.getProfileManager().updateProfileCollectionOffsets(t, medianIndex);
+		}
+	}
+	
+	/**
+	 * Detect border tags using the median profile
+	 * @throws Exception
+	 */
+	private void runViaMedian() throws Exception {
 		ICellCollection collection = dataset.getCollection();
 
 		collection.createProfileCollection();
