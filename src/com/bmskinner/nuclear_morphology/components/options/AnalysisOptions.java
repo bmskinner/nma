@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
@@ -1276,5 +1277,16 @@ public class AnalysisOptions implements IAnalysisOptions {
 	public void setSecondaryOptions(String key, HashOptions options) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public RuleApplicationType getRuleApplicationType() {
+		// Default for old format
+		return RuleApplicationType.VIA_MEDIAN;
+	}
+
+	@Override
+	public void setRuleApplicationType(RuleApplicationType type) {
+		// No action
 	}
 }
