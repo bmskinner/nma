@@ -93,7 +93,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private void run() throws Exception {
     	LOGGER.fine("Beginning profiling method");
     	
-    	RuleApplicationType ruleType = dataset.getCollection().getRuleSetCollection().getRuleApplicationType();
+    	RuleApplicationType ruleType = dataset.getCollection()
+    			.getRuleSetCollection()
+    			.getRuleApplicationType();
     	
     	switch(ruleType) {
 	    	case VIA_MEDIAN: {
@@ -105,10 +107,16 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	    		break;
 	    	}
     	}
-		
 	}
 	
+	/**
+	 * Detect border tags in nuclei using the dataset rulesets,
+	 * and also apply rules to the median profile. The median is not 
+	 * used for back-propogation of tags.
+	 * @throws Exception
+	 */
 	private void runPerNucleus() throws Exception {
+		LOGGER.fine("Detecting border tags per-nucleus");
 		ICellCollection collection = dataset.getCollection();
 		
 		collection.createProfileCollection();
@@ -146,6 +154,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws Exception
 	 */
 	private void runViaMedian() throws Exception {
+		LOGGER.fine("Detecting border tags via median");
 		ICellCollection collection = dataset.getCollection();
 
 		collection.createProfileCollection();
@@ -180,6 +189,15 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		identifyNonCoreTags(collection);
 	}
 
+	/**
+	 * Identify tags that are not core tags (i.e not the RP) using
+	 * the median profile, and propagate these to nuclei
+	 * @param collection the collection to work on
+	 * @throws NoDetectedIndexException
+	 * @throws UnavailableBorderTagException
+	 * @throws UnavailableProfileTypeException
+	 * @throws ProfileException
+	 */
 	private synchronized void identifyNonCoreTags(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		// Identify the border tags in the median profile
 		for(Tag tag : BorderTagObject.values()) {
@@ -197,9 +215,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			int index = 0;
 
 			try {
-
 				index = finder.identifyIndex(collection, tag);
-
 			} catch (NoDetectedIndexException e) {
 				LOGGER.warning("Unable to detect " + tag + " using default ruleset");
 

@@ -108,6 +108,11 @@ public class RuleSetCollection implements Serializable {
         return map.keySet();
     }
 
+    /**
+     * Test if the collection has rulesets for the given tag
+     * @param tag the tag to check
+     * @return true if rulesets are present, false otherwise
+     */
     public boolean hasRulesets(@NonNull Tag tag) {
     	if(map.containsKey(tag)) {
     		return !map.get(tag).isEmpty();
@@ -115,6 +120,10 @@ public class RuleSetCollection implements Serializable {
     	return false;
     }
 
+    /**
+     * Test if the collection is empty
+     * @return
+     */
     public boolean isEmpty() {
         return map.isEmpty();
     }
