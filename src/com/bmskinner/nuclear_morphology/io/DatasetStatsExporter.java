@@ -52,23 +52,30 @@ public class DatasetStatsExporter extends StatsExporter {
 	
 	private static final Logger LOGGER = Logger.getLogger(DatasetStatsExporter.class.getName());
 
-    private boolean includeProfiles = true;
-    private boolean includeSegments = false;
+    private boolean isIncludeProfiles = true;
+    private boolean isIncludeSegments = false;
     private int segCount = 0;
+    
+    /** The default length to which profiles should be normalised */
+    private static final int DEFAULT_PROFILE_LENGTH = 1000;
+    
+    /** The length to which profiles should be normalised */
+    private final int normProfileLength;
 
     /**
      * Create specifying the folder stats will be exported into
      * 
      * @param folder
      */
-    public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
+    public DatasetStatsExporter(@NonNull final File file, @NonNull final List<IAnalysisDataset> list) {
         super(file, list);
         segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         if(list.size()==1){
-            includeSegments = true;
+            isIncludeSegments = true;
         } else {
-            includeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
+            isIncludeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
         }
+        normProfileLength = chooseNormalisedProfileLength();
     }
 
     /**
@@ -76,9 +83,10 @@ public class DatasetStatsExporter extends StatsExporter {
      * 
      * @param folder
      */
-    public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
+    public DatasetStatsExporter(@NonNull final File file, @NonNull final IAnalysisDataset dataset) {
         super(file, dataset);
-        includeSegments = true;
+        isIncludeSegments = true;
+        normProfileLength = chooseNormalisedProfileLength();
     }
 
     /**
@@ -110,7 +118,7 @@ public class DatasetStatsExporter extends StatsExporter {
 
         }
 
-        if (includeProfiles) {
+        if (isIncludeProfiles) {
             for (ProfileType type : ProfileType.exportValues()) {
                 String label = type.toString().replace(" ", "_");
                 for (int i = 0; i < 100; i++) {
@@ -123,7 +131,7 @@ public class DatasetStatsExporter extends StatsExporter {
             }
         }
         
-        if(includeSegments){
+        if(isIncludeSegments){
             String label = "Length_seg_";
             
             for (int i = 0; i < segCount; i++) { 
@@ -167,12 +175,12 @@ public class DatasetStatsExporter extends StatsExporter {
                         .append(n.getOriginalCentreOfMass().toString() + TAB);
                     appendNucleusStats(outLine, d, n);
 
-                    if (includeProfiles) {
+                    if (isIncludeProfiles) {
                         appendProfiles(outLine, n);
                         appendFrankenProfiles(outLine, n, medianProfile);
                     }
                     
-                    if(includeSegments){
+                    if(isIncludeSegments){
                         appendSegments(outLine, n);
                     }
                     
@@ -188,7 +196,14 @@ public class DatasetStatsExporter extends StatsExporter {
         }
     }
 
-    private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, CellularComponent c) {
+    /**
+     * Append the nuclear stats for the given component from a dataset to the 
+     * string builder
+     * @param outLine the string builder to append to
+     * @param d the dataset to export to append
+     * @param c the component within the dataset to append
+     */
+    private void appendNucleusStats(final StringBuilder outLine, final IAnalysisDataset d, final CellularComponent c) {
 
         for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
             double varP = 0;
@@ -225,7 +240,7 @@ public class DatasetStatsExporter extends StatsExporter {
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private void appendProfiles(StringBuilder outLine, Taggable c)
+    private void appendProfiles(final StringBuilder outLine, final Taggable c)
             throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
         for (ProfileType type : ProfileType.exportValues()) {
 
@@ -249,7 +264,7 @@ public class DatasetStatsExporter extends StatsExporter {
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private void appendFrankenProfiles(StringBuilder outLine, Taggable c, ISegmentedProfile median)
+    private void appendFrankenProfiles(final StringBuilder outLine, final Taggable c, final ISegmentedProfile median)
             throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 
             ISegmentedProfile s = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
@@ -263,14 +278,14 @@ public class DatasetStatsExporter extends StatsExporter {
             }
     }
     
-    private void appendSegments(StringBuilder outLine, Taggable c)
+    private void appendSegments(final StringBuilder outLine, final Taggable c)
             throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
         
         double varP = 0;
         double varM = 0;
                 
         ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        ISegmentedProfile normalisedProfile = p.interpolate(1000); // Allows point indexes
+        ISegmentedProfile normalisedProfile = p.interpolate(normProfileLength); // Allows point indexes
         List<IBorderSegment> segs = p.getOrderedSegments();
         
         for(IBorderSegment segment : segs){
@@ -297,4 +312,30 @@ public class DatasetStatsExporter extends StatsExporter {
             }
         }
     }
+    
+    /**
+	 * When handling large objects, the default normalised profile
+	 * length may not be sufficient. Ensure the normalised length
+	 * is a multiple of DEFAULT_PROFILE_LENGTH and greater than any 
+	 * individual profile.
+	 * @return
+	 * @throws UnavailableProfileTypeException
+	 */
+	private int chooseNormalisedProfileLength() {
+		int profileLength = DEFAULT_PROFILE_LENGTH;
+
+		try {
+			for(IAnalysisDataset d : datasets) {
+				for(Nucleus n : d.getCollection().getNuclei()) {
+					int l = n.getProfile(ProfileType.ANGLE).size();
+					if(l > profileLength)
+						profileLength = (int) Math.ceil(l/DEFAULT_PROFILE_LENGTH)*DEFAULT_PROFILE_LENGTH;
+				}
+			}
+		} catch(UnavailableProfileTypeException e) {
+			LOGGER.log(Loggable.STACK, "Unable to get profile: "+e.getMessage(), e);
+			LOGGER.fine("Unable to get a profile, defaulting to default profile length of "+DEFAULT_PROFILE_LENGTH);
+		}
+		return profileLength;
+	}
 }
