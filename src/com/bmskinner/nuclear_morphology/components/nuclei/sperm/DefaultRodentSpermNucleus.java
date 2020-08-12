@@ -204,15 +204,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          FloatPolygon p = n.toPolygon();
          double maxBoundingX = p.getBounds().getMaxX();
          double minBoundingX = p.getBounds().getMinX();
-
-         if (vertX < minBoundingX || vertX > maxBoundingX) {
-             // The chosen vertical points is outside the bounding box of the nucleus
-             IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical point x is outside nucleus bounds");
-             LOGGER.log(Loggable.STACK, String.format("Vertical point %s is out of bounds %s-%s", vertX, minBoundingX, maxBoundingX), e);
-             setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-             setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
-             return;
-         }
          
          /*
           * To determine if the point is hook or hump, take the X position of the
