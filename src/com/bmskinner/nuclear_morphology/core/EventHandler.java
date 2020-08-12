@@ -655,8 +655,28 @@ public class EventHandler implements EventListener {
                 return new BuildHierarchicalTreeAction(event.firstDataset(), acceptor, EventHandler.this);
             }
 
-            if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN))
-                return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
+            if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)) {
+            	return () ->{
+            		final CountDownLatch latch  = new CountDownLatch(1);
+            		new Thread( ()-> { 
+            			new RunProfilingAction(selectedDatasets, 
+            					SingleDatasetResultAction.NO_FLAG, 
+            					acceptor, 
+            					EventHandler.this, 
+            					latch).run();
+            		}).start();   
+            		
+            		new Thread( ()-> { // wait for profiling to complete and recache charts
+            			try {
+            				latch.await();
+            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
+            			} catch(InterruptedException e) {
+            				Thread.currentThread().interrupt();
+            				return;
+            			}	
+            		}).start();
+            	};
+            }
             
             if (event.method().equals(DatasetEvent.RUN_GLCM_ANALYSIS)) {
             	return () -> {
