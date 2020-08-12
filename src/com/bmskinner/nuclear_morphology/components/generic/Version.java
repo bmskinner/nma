@@ -43,7 +43,7 @@ public class Version implements Serializable {
      */
     public static final int VERSION_MAJOR    = 1;
     public static final int VERSION_MINOR    = 18;
-    public static final int VERSION_REVISION = 3;
+    public static final int VERSION_REVISION = 4;
 
     private final int major;
     private final int minor;
