@@ -354,8 +354,6 @@ public interface IProfile extends Serializable, Iterable<Integer> {
 
     /**
      * Reverse the profile. Does not copy.
-     * 
-     * @throws Exception
      */
     void reverse();
 
