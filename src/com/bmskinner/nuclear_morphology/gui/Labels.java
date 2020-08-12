@@ -263,6 +263,10 @@ public class Labels {
     	
     	public static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
     	
+    	// Profiles tab
+    	public static final String PROFILES_PANEL_TITLE_LBL = "Profiles";
+    	public static final String REVERSE_PROFILE_BTN_LBL = "Reverse profile";
+    	
     }
     
     public static class AnalysisParameters {

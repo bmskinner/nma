@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class RunProfilingAction extends SingleDatasetResultAction {
@@ -104,7 +105,6 @@ public class RunProfilingAction extends SingleDatasetResultAction {
                 cancel();
                 getInterfaceEventHandler().removeListener(eh);
                 getDatasetEventHandler().removeListener(eh);
-                //
                 countdownLatch();
 
             } else {

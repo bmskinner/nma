@@ -27,7 +27,7 @@ public class CellViewModel {
     private volatile ICell             cell      = null;
     private volatile CellularComponent component = null;
 
-    List<CellEditingTabPanel> views = new ArrayList<CellEditingTabPanel>();
+    List<CellEditingTabPanel> views = new ArrayList<>();
 
     public CellViewModel(ICell cell, CellularComponent component) {
         this.cell = cell;
@@ -50,8 +50,7 @@ public class CellViewModel {
      * resegmentation dialog to update the active cell without triggering a view
      * update before the dialog closes.
      * 
-     * @param c
-     *            the cell. Must have the same ID as the existing cell.
+     * @param c the cell. Must have the same ID as the existing cell.
      */
     public void swapCell(ICell c) {
         if (c == null || c.getId().equals(cell.getId())) {
@@ -97,6 +96,9 @@ public class CellViewModel {
         return this.component;
     }
 
+    /**
+     * Update all charts and tables for the current cell 
+     */
     public void updateViews() {
         for (CellEditingTabPanel d : views) {
             d.update();

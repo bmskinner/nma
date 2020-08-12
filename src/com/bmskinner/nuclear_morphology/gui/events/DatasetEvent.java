@@ -79,6 +79,9 @@ public class DatasetEvent extends EventObject {
     public static final String ADD_DATASET        = "Add dataset";
     public static final String ADD_WORKSPACE      = "Add workspace";
     public static final String RESEGMENT          = "Resegment dataset";
+    
+    /** Rerun the profiling action to generate new median profiles. Also recalculates
+     * the positions of border tags using built in rules. Does not recache charts. */
     public static final String RECALCULATE_MEDIAN = "Recalculate median profiles";
     public static final String RUN_SHELL_ANALYSIS = "Run shell analysis";
     
