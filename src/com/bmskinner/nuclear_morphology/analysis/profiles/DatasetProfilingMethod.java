@@ -93,9 +93,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private void run() throws Exception {
     	LOGGER.fine("Beginning profiling method");
     	
-    	RuleApplicationType ruleType = dataset.getCollection()
-    			.getRuleSetCollection()
-    			.getRuleApplicationType();
+    	RuleApplicationType ruleType = dataset.getAnalysisOptions().get().getRuleApplicationType();
     	
     	switch(ruleType) {
 	    	case VIA_MEDIAN: {
@@ -115,7 +113,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * used for back-propogation of tags.
 	 * @throws Exception
 	 */
-	private void runPerNucleus() throws Exception {
+	private void runPerNucleus() throws ProfileException, 
+	UnavailableProfileTypeException,
+	UnavailableBorderTagException {
 		LOGGER.fine("Detecting border tags per-nucleus");
 		ICellCollection collection = dataset.getCollection();
 		
@@ -135,7 +135,13 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 				continue;
 			List<RuleSet> ruleSets = collection.getRuleSetCollection().getRuleSets(t);
 			for(Nucleus n :  collection.getNuclei()) {
-				int index = finder.identifyIndex(n, ruleSets);
+				int index = 0;
+				try {
+					index = finder.identifyIndex(n, ruleSets);
+				} catch (NoDetectedIndexException e) {
+					LOGGER.fine("Cannot identify "+t+" in nucleus "+n.getNucleusNumber()+", using index 0");
+					// Fall back to zero index, correct manually
+				}
 				if(!n.isLocked()) {
 					n.setBorderTag(t, index);
 				} else {
@@ -144,7 +150,12 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			}
 			
 			// Add the index to the median profiles
-			int medianIndex = finder.identifyIndex(collection, ruleSets);
+			int medianIndex = 0;
+			try {
+				medianIndex = finder.identifyIndex(collection, ruleSets);
+			} catch (NoDetectedIndexException e) {
+				LOGGER.fine("Cannot identify "+t+" in median, using index 0");
+			}
 			collection.getProfileManager().updateProfileCollectionOffsets(t, medianIndex);
 		}
 	}
