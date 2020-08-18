@@ -58,6 +58,7 @@ public abstract class XMLCreator<T> {
 	public static final String CELLS_SECTION_KEY              = "Cells";
 	public static final String OUTPUT_FOLDER_KEY              = "OutputFolder";
 	public static final String NUCLEUS_TYPE_KEY               = "NucleusType";
+	public static final String RULE_APPLICATION_KEY           = "RuleApplication";
 	public static final String NUCLEUS_NUMBER_KEY             = "NucleusNumber";
 	public static final String CELL_IDS_KEY                   = "CellIds";
 	public static final String DATASET_IDS_KEY                = "DatasetIds";
@@ -156,6 +157,13 @@ public abstract class XMLCreator<T> {
 	public static final String BORDER_LENGTH_KEY             = "InterpolatedBorderLength";
 	public static final String PROFILE_LENGTH_KEY            = "ProfileLength";
 	
+	public static final String RULE_KEY						 = "Rule";
+	public static final String RULESET_KEY					 = "RuleSet";
+	public static final String RULESET_COLLECTION_KEY		 = "RuleSetCollection";
+	public static final String PROFILE_TYPE_KEY			     = "ProfileType";
+	public static final String TYPE_KEY			    		 = "Type";
+	public static final String TAG_KEY			    		 = "Tag";
+	
 	protected final T template;
 	
 	public XMLCreator(T template) {
@@ -167,7 +175,7 @@ public abstract class XMLCreator<T> {
 	 * @return
 	 */
 	public abstract Document create();
-	
+		
 	
 	/**
 	 * Create an XML key-value element from an arbitrary object

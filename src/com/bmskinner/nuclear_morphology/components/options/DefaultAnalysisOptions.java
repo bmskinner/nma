@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 
 /**
  * The default implementation of the IAnalysisOptions interface
@@ -53,6 +54,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     
     /* Store options that are not detection options. For example, clustering or tSNE options */
      private Map<String, HashOptions> secondaryOptions = new HashMap<>();
+     
+     /** How border tags should be detected in this dataset */
+     private RuleApplicationType ruleApplicationType = RuleApplicationType.VIA_MEDIAN;
 
 
     /**
@@ -227,6 +231,16 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         return null;
     }
     
+	@Override
+	public RuleApplicationType getRuleApplicationType() {
+		return ruleApplicationType;
+	}
+
+	@Override
+	public void setRuleApplicationType(RuleApplicationType type) {
+		ruleApplicationType = type;
+	}
+    
     @Override
     public void set(@NonNull IAnalysisOptions template) {
     	for (String key : template.getDetectionOptionTypes()) {
@@ -237,6 +251,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
         profileWindowProportion = template.getProfileWindowProportion();
         type = template.getNucleusType();
+        ruleApplicationType = template.getRuleApplicationType();
     }
 
     @Override
@@ -250,6 +265,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         result = prime * result + (int) (temp ^ (temp >>> 32));
 
         result = prime * result + type.hashCode();
+        result = prime * result + ruleApplicationType.hashCode();
 
         result = prime * result + (isRefoldNucleus ? 1231 : 1237);
         result = prime * result + (isKeepFailed ? 1231 : 1237);
@@ -291,6 +307,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
         if (type != other.getNucleusType())
             return false;
+        
+        if(ruleApplicationType != other.getRuleApplicationType())
+        	return false;
         return true;
     }
     
@@ -306,6 +325,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         }
         b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
         b.append(IDetectionOptions.NEWLINE+type);
+        b.append(IDetectionOptions.NEWLINE+ruleApplicationType);
         return b.toString();
     }  
     
@@ -315,6 +335,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         //  Changes from 1.15.2 to 1.16.0
         if(secondaryOptions==null)
         	secondaryOptions = new HashMap<>();
+        
+        // Changes from 1.18.2 to 1.18.3/1.19.0
+        if(ruleApplicationType==null)
+        	ruleApplicationType = RuleApplicationType.VIA_MEDIAN;
     }
-
 }

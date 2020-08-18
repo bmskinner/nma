@@ -17,33 +17,45 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.editing;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -63,16 +75,23 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.io.xml.RuleSetCollectionXMLImporter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
-public class RulesetDialog extends LoadingIconDialog implements TreeSelectionListener {
+public class RulesetDialog extends LoadingIconDialog 
+	implements TreeSelectionListener, ListSelectionListener {
 	
 	private static final Logger LOGGER = Logger.getLogger(RulesetDialog.class.getName());
 
@@ -80,23 +99,42 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
     private ExportableChartPanel chartPanel;
 
-    private JTree tree;
+    private JTree rulesetTree;
+    private JTable borderTagTable;
 
-    private Map<String, RuleSetCollection> customCollections = new HashMap<String, RuleSetCollection>();
+    /** Imported ruleset collections may give multiple instances of a single tag
+     * Allow multiple ruleset collections to be stored */ 
+    private Map<String, RuleSetCollection> customCollections = new HashMap<>();
 
     public RulesetDialog(IAnalysisDataset dataset) {
         super();
-        this.setLayout(new BorderLayout());
-        this.setTitle("RuleSets for " + dataset.getName());
+        this.setLayout(new GridBagLayout());
+        this.setTitle(Labels.EditingBorderTags.RULESET_DIALOG_TITLE + dataset.getName());
         this.dataset = dataset;
-
-        JPanel westPanel = createWestPanel();
-        JPanel sidePanel = createChartPanel();
-        JPanel headPanel = createHeader();
-
-        this.add(headPanel, BorderLayout.NORTH);
-        this.add(westPanel, BorderLayout.WEST);
-        this.add(sidePanel, BorderLayout.CENTER);
+        
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 2;
+        c.gridheight = 1;
+        c.weightx = 1.0;
+        c.weighty = 0.1;
+        this.add(createHeader(), c);
+        
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 1;
+        c.weightx = 0.3;
+        c.weighty = 0.9;
+        this.add(createWestPanel(), c);
+        
+        c.gridx = 1;
+        c.gridy = 1;
+        c.weightx = 0.7;
+        c.weighty = 0.9;
+        this.add(createChartPanel(), c);
 
         this.setModal(false);
         this.pack();
@@ -112,23 +150,63 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
     }
 
+    /**
+     * Create the panel to display the points
+     * in the dataset
+     * @return
+     */
     private JPanel createWestPanel() {
 
         JPanel panel = new JPanel(new BorderLayout());
-
-        JPanel mainPanel = createRuleSetUI();
-
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(mainPanel);
-
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        JPanel footer = createFooter();
-
-        panel.add(footer, BorderLayout.SOUTH);
+        
+        //Separate upper and lower panels for tags and detail
+        JPanel tagPanel = new JPanel(new BorderLayout());
+        borderTagTable = createBorderPointTable();
+        JScrollPane upperScrollPane = new JScrollPane(borderTagTable);
+        tagPanel.setMinimumSize(new Dimension(10, 50));
+        tagPanel.add(upperScrollPane, BorderLayout.CENTER);
+        
+        createRuleSetTree();
+        JPanel rulePanel = new JPanel(new BorderLayout());
+        rulePanel.setMinimumSize(new Dimension(10, 50));
+        JScrollPane lowerScrollPane = new JScrollPane(rulesetTree);
+        rulePanel.add(lowerScrollPane, BorderLayout.CENTER);
+        
+        // Ensure the two panels take equal Y space
+        JPanel resizingPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+       
+        c.anchor = GridBagConstraints.WEST;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        c.fill = GridBagConstraints.BOTH; // reset to default
+        c.weightx = 1.0;
+        c.weighty = 0.5;
+        
+        resizingPanel.add(tagPanel, c);
+        c.gridy = 1;
+        c.weightx = 1.0;
+        c.weighty = 0.5;
+        resizingPanel.add(rulePanel, c);
+                
+        panel.add(createButtonPanel(), BorderLayout.NORTH);
+        panel.add(resizingPanel, BorderLayout.CENTER);
 
         return panel;
 
+    }
+    
+    /**
+     * Create the  tree of 
+     * rulesets for a given point
+     */
+    private void createRuleSetTree() {
+        rulesetTree = new JTree();
+        updateTreeNodes();
+        rulesetTree.addTreeSelectionListener(this);
+        rulesetTree.setToggleClickCount(2);
     }
 
     private JPanel createHeader() {
@@ -136,75 +214,117 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        JLabel label0 = new JLabel(
-                "This window displays the rules that are used to find points in the outlines of nuclei");
-        JLabel label1 = new JLabel("Double click a border point name to replace an existing ruleset");
-        JLabel label2 = new JLabel(
-                "Experiment with rules via 'Custom ruleset' - these can be saved when you close this window");
-        JLabel label3 = new JLabel(
-                "Rules are combined via the logical AND operator ('ANDed') to determine final valid positions");
-
-        panel.add(label0);
-        panel.add(label1);
-        panel.add(label2);
-        panel.add(label3);
+        panel.add(new JLabel(Labels.EditingBorderTags.RULESET_DIALOG_HEADER_0));
+        panel.add(new JLabel(Labels.EditingBorderTags.RULESET_DIALOG_HEADER_1));
 
         return panel;
     }
 
-    private JPanel createFooter() {
+    private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout());
+        
+        // Allow switching of dataset rule type
+        RuleApplicationType currentRule = dataset.getAnalysisOptions().get().getRuleApplicationType(); 
+        ButtonGroup bg = new ButtonGroup();
+        for(RuleApplicationType ruleType: RuleApplicationType.values()) {
+        	JRadioButton btn = new JRadioButton(ruleType.toString());
+        	
+        	btn.addActionListener(e->dataset.getAnalysisOptions().get()
+            		.setRuleApplicationType(ruleType));
+        	btn.setSelected(currentRule.equals(ruleType));
+        	bg.add(btn);
+        	panel.add(btn);
+        }
+        
 
-        JButton addButton = new JButton("Custom ruleset");
+        JButton addButton = new JButton(Labels.EditingBorderTags.RULESET_DIALOG_CUSTOM_BTN);
 
         addButton.addActionListener(e -> {
 
             RuleSetBuildingDialog builder = new RuleSetBuildingDialog();
             if (builder.isOK()) {
-
-                // LOGGER.info("Getting custom collection");
                 RuleSetCollection custom = builder.getCollection();
                 int size = customCollections.size();
                 customCollections.put("Custom_" + size, custom);
-                // LOGGER.info("Added as "+"Custom_"+size);
-                updateTreeNodes();
+                borderTagTable.setModel(createBorderTagTableModel(dataset));
             }
 
         });
 
         panel.add(addButton);
+        
+        
+        JButton importButton = new JButton(Labels.EditingBorderTags.RULESET_DIALOG_IMPORT_BTN);
+        importButton.addActionListener(e->{
+        	try {
+				File f = InputSupplier.getDefault()
+						.requestFile(Labels.EditingBorderTags.RULESET_DIALOG_SELECT_FILE, 
+								dataset.getSavePath().getParentFile(), 
+								"xml", 
+								"XML file");
+				
+				RuleSetCollectionXMLImporter ri = new RuleSetCollectionXMLImporter(f);
+				RuleSetCollection rsc = ri.importRuleset();
+				
+				customCollections.put(f.getName(), rsc);
+				borderTagTable.setModel(createBorderTagTableModel(dataset));
+				
+			} catch (RequestCancelledException e1) {
+				// User cancelled, no action
+			} catch (XMLReadingException e1) {
+				LOGGER.warning("Unable to import file: "+e1.getMessage());
+				LOGGER.log(Loggable.STACK, "Error importing XML file", e);
+			}
+        });
+        panel.add(importButton);
         return panel;
 
     }
 
-    private JPanel createRuleSetUI() {
-        JPanel panel = new JPanel();
-
-        panel.setLayout(new BorderLayout());
-
-        tree = new JTree();
-        updateTreeNodes();
-
-        panel.add(tree);
-        tree.addTreeSelectionListener(this);
-        tree.setToggleClickCount(3);
-
-        tree.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-                if (e.getClickCount() == 2) {
-
-                    DefaultMutableTreeNode o = (DefaultMutableTreeNode) tree.getSelectionModel().getSelectionPath()
-                            .getLastPathComponent();
-                    RuleNodeData r = (RuleNodeData) o.getUserObject();
-                    changeData(r);
-                }
-            }
-        });
-
-        return panel;
-
+    /**
+     * Create the table to display border tags
+     * @return
+     */
+    private JTable createBorderPointTable() {
+    	JTable table = new JTable(createBorderTagTableModel(dataset));
+    	table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    	table.getSelectionModel().addListSelectionListener(this);
+    	return table;
+    }
+    
+    /**
+     * Create a table showing all the tags in the given dataset
+     * @param d the dataset to display tags for
+     * @return
+     */
+    private TableModel createBorderTagTableModel(IAnalysisDataset d) {
+    	DefaultTableModel model = new DefaultTableModel() {
+    		@Override
+    	    public boolean isCellEditable(int row, int column) {
+    	       return false;
+    	    }
+    	};
+    	List<Tag> tagList = new ArrayList<>();
+    	List<String> tagCollection = new ArrayList<>();
+    	
+    	// Dataset tags
+    	tagList.addAll(d.getCollection().getProfileCollection().getBorderTags());
+    	tagCollection.addAll(tagList.stream().map(t->dataset.getName()).collect(Collectors.toList()));
+    	
+    	// Custom tags
+    	for(Entry<String, RuleSetCollection> entry : customCollections.entrySet()) {
+    		tagList.addAll(entry.getValue().getTags());
+    		tagCollection.addAll(entry.getValue().getTags().stream().map(t->entry.getKey()).collect(Collectors.toList()));
+    	}
+    	
+    	
+    	Tag[] tags = tagList.toArray(new Tag[0]);
+    	String[] collections = tagCollection.toArray(new String[0]);
+    	
+    	model.addColumn("Tag", tags);    	
+    	model.addColumn("Dataset", collections);    
+    	
+    	return model;
     }
 
     /**
@@ -212,29 +332,71 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
      * collections in this dialog
      */
     private void updateTreeNodes() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
-
-        createNodes(root, dataset);
-
+    	DefaultMutableTreeNode root;
+    	if(borderTagTable.getSelectedRow()<0) {
+    		root = new DefaultMutableTreeNode("");
+    	} else {
+    		Tag selectedTag = (Tag)borderTagTable.getValueAt(borderTagTable.getSelectedRow(), 0);  
+    		String collection = (String) borderTagTable.getValueAt(borderTagTable.getSelectedRow(), 1);  
+    		root = createTagNodes(selectedTag, collection);
+    	}
+        
         TreeModel model = new DefaultTreeModel(root);
-        tree.setModel(model);
+        rulesetTree.setModel(model);
 
-        for (int i = 0; i < tree.getRowCount(); i++) {
-            tree.expandRow(i);
+        for (int i = 0; i < rulesetTree.getRowCount(); i++) {
+        	rulesetTree.expandRow(i);
         }
+    }
+    
+    /**
+     * Create tree nodes for the given tag
+     * @param tag the tag
+     * @param collection the collection the tag is within. Use {@link IAnalysisDataset::getName} to use the current dataset.
+     * @return
+     */
+    private DefaultMutableTreeNode createTagNodes(@NonNull Tag tag, @NonNull String collection) {
+    	LOGGER.finest("Adding nodes for "+tag);
+    	
+    	// Get the appropriate RulesetCollection
+    	List<RuleSet> rulesets = getRulesetsForTag(tag, collection);
+    	
+    	RuleNodeData r = new RuleNodeData(tag, null, null);
+    	DefaultMutableTreeNode tagNode = new DefaultMutableTreeNode(r);
+
+    	for (RuleSet ruleSet : rulesets) {
+    		addNodesForRuleSet(tagNode, ruleSet, tag);
+    	}
+    	return tagNode;
+    }
+    
+    /**
+     * Fetch the rulesets for the given tag, whether in the dataset
+     * or unsaved custom rulesets
+     * @param t the tag to fetch
+     * @param collection the collection to use. Use {@link IAnalysisDataset::getName} to use the current dataset.
+     * @return the rulesets for the tag
+     */
+    private List<RuleSet> getRulesetsForTag(@NonNull Tag t, @NonNull String collection){
+    	if(collection==null || collection.equals(dataset.getName())) {
+    		RuleSetCollection datasetCollection = dataset.getCollection().getRuleSetCollection();
+    		if(datasetCollection.hasRulesets(t))
+    			return datasetCollection.getRuleSets(t);
+    	}
+    	return customCollections.get(collection).getRuleSets(t);
     }
 
     private void askToSaveCustomPoints() {
 
-        Object[] options = { "Save new rulesets", "Discard rulesets", };
-        int save = JOptionPane.showOptionDialog(null, "Do you want to save some or all custom ruleset(s)?",
-                "Save rulesets?", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        Object[] options = { Labels.EditingBorderTags.RULESET_DIALOG_SAVE_OPTION, 
+        		Labels.EditingBorderTags.RULESET_DIALOG_DISCARD_OPTION };
+        int save = JOptionPane.showOptionDialog(null, Labels.EditingBorderTags.RULESET_DIALOG_SAVE_CHOICE,
+        		Labels.EditingBorderTags.RULESET_DIALOG_SAVE_TITLE, JOptionPane.DEFAULT_OPTION, 
+                JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         if (save == 0) {
             saveCustomPoints();
-
         }
-
     }
 
     private void saveCustomPoints() {
@@ -245,52 +407,20 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
         if (d.isReadyToRun()) {
             // get selected sets
 
-            RuleSetCollection r = d.getSelected();
-            // LOGGER.info(r.toString());
-
-            for (Tag tag : r.getTags()) {
-
-                if (r.hasRulesets(tag)) {
-
-                    dataset.getCollection().getRuleSetCollection().setRuleSets(tag, r.getRuleSets(tag));
+            RuleSetCollection rsc = d.getSelected();
+            for (Tag tag : rsc.getTags()) {
+            	LOGGER.fine("Testing existence of tag "+tag);
+                if (rsc.hasRulesets(tag)) {
+                    dataset.getCollection().getRuleSetCollection().setRuleSets(tag, rsc.getRuleSets(tag));
                     updateBorderTagAction(tag);
                 }
-
             }
 
             // add the custom sets to the dataset
-
             // trigger a point finding for cells
-
         } else {
             LOGGER.fine("Save was cancelled");
         }
-
-    }
-
-    private void changeData(RuleNodeData data) {
-
-        if (data.hasRuleSetCollection()) {
-
-            Tag tag = data.getTag();
-
-            RuleSetBuildingDialog builder = new RuleSetBuildingDialog(tag);
-            if (builder.isOK()) {
-
-                RuleSetCollection custom = builder.getCollection();
-                List<RuleSet> list = custom.getRuleSets(tag);
-
-                dataset.getCollection().getRuleSetCollection().setRuleSets(tag, list);
-
-                updateTreeNodes();
-                LOGGER.info("Replaced RuleSet for " + tag.toString());
-                // TODO - update points in cell profiles
-                updateBorderTagAction(tag);
-
-            }
-
-        }
-
     }
 
     private void updateBorderTagAction(Tag tag) {
@@ -326,264 +456,148 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
         } else {
             LOGGER.fine("Tag is null");
-            return;
         }
-
     }
-
+        
     /**
-     * Create the nodes in the tree
-     * 
-     * @param root
-     *            the root node
-     * @param dataset
-     *            the dataset to use
+     * Create tree nodes for each rule in a ruleset
+     * @param tagNode
+     * @param ruleSet
      */
-    private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
+    private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet, Tag tag) {
+    	RuleNodeData profileData = new RuleNodeData(tag, ruleSet, null);
+		DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
+		tagNode.add(profileNode);
 
-        RuleSetCollection c = dataset.getCollection().getRuleSetCollection();
+		for (Rule rule : ruleSet.getRules()) {
 
-        Set<Tag> tags = c.getTags();
-
-        List<Tag> sortedList = new ArrayList<Tag>(tags);
-        Collections.sort(sortedList);
-
-        for (Tag t : sortedList) {
-
-            if (c.hasRulesets(t)) {
-
-                RuleNodeData r = new RuleNodeData(t.toString());
-                r.setTag(t);
-                r.setCollection(c);
-
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
-                root.add(node);
-
-                for (RuleSet ruleSet : c.getRuleSets(t)) {
-
-                    RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
-                    profileData.setRuleSet(ruleSet);
-                    DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
-                    node.add(profileNode);
-
-                    for (Rule rule : ruleSet.getRules()) {
-
-                        RuleSet summedRules = new RuleSet(ruleSet.getType());
-                        for (Rule prev : ruleSet.getRules()) {
-                            summedRules.addRule(prev);
-                            if (prev == rule) {
-                                break;
-                            }
-                        }
-                        RuleNodeData ruleData = new RuleNodeData(rule.toString());
-                        ruleData.setRuleSet(summedRules);
-
-                        // RuleNodeData ruleData = new
-                        // RuleNodeData(rule.toString());
-                        // ruleData.setRule(rule);
-                        // ruleData.setType(ruleSet.getType());
-                        DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
-                        profileNode.add(ruleNode);
-
-                    }
-
-                }
-
-            }
-        }
-
-        // Add any custom collections created in ascending order
-        // LOGGER.info("Adding custom nodes");
-        List<String> customList = new ArrayList<String>(customCollections.keySet());
-        Collections.sort(customList);
-        for (String s : customList) {
-            // LOGGER.info("Adding "+s);
-            RuleSetCollection collection = customCollections.get(s);
-
-            RuleNodeData r = new RuleNodeData(s);
-            // BorderTagObject tagObject = new BorderTagObject(s,
-            // BorderTag.CUSTOM);
-            // LOGGER.info("Adding node for "+tagObject);
-
-            r.setTag(Tag.CUSTOM_POINT);
-            r.setCollection(collection);
-
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
-            root.add(node);
-
-            for (RuleSet ruleSet : collection.getRuleSets(Tag.CUSTOM_POINT)) {
-
-                RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
-                profileData.setRuleSet(ruleSet);
-                DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
-                node.add(profileNode);
-
-                for (Rule rule : ruleSet.getRules()) {
-
-                    RuleNodeData ruleData = new RuleNodeData(rule.toString());
-                    ruleData.setRule(rule);
-                    ruleData.setType(ruleSet.getType());
-                    DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
-                    profileNode.add(ruleNode);
-
-                }
-
-            }
-
-        }
-
+			RuleNodeData ruleData = new RuleNodeData(tag, ruleSet, rule);
+			DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
+			profileNode.add(ruleNode);
+		}
     }
 
     private JPanel createChartPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-
         chartPanel = new ExportableChartPanel(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
-
         panel.add(chartPanel, BorderLayout.CENTER);
-
         return panel;
+    }
+    
+    /**
+     * Give a tag, create the boolean chart showing the points identified
+     * by the tag's rulesets, either in the dataset or unsaved custom
+     * @param t the tag to display
+     * 
+     * @return a chart showing the index found by the tag
+     * @throws UnavailableBorderTagException
+     * @throws UnavailableProfileTypeException
+     * @throws ProfileException
+     */
+    private JFreeChart createChart(@NonNull Tag t, @NonNull String collection) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+    	LOGGER.finest("Creating chart for "+t);
+    	JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
+    	ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
+        MorphologyChartFactory chf = new MorphologyChartFactory(options);
+        ProfileIndexFinder finder = new ProfileIndexFinder();
+        IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
+        
+        BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
+        		getRulesetsForTag(t, collection));
+
+    	chart = chf.createBooleanProfileChart(p, limits);
+        return chart;
     }
 
     @Override
     public void valueChanged(TreeSelectionEvent e) {
-
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
         RuleNodeData data = (RuleNodeData) node.getUserObject();
-
-        ProfileIndexFinder finder = new ProfileIndexFinder();
-
-        JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
-
-        ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
-        MorphologyChartFactory chf = new MorphologyChartFactory(options);
-
-        try {
-
-            if (data.hasRule()) {
-
-                Rule r = data.getRule();
-
-                IProfile p = dataset.getCollection().getProfileCollection().getProfile(data.getType(),
-                        Tag.REFERENCE_POINT, Stats.MEDIAN);
-                BooleanProfile b = finder.getMatchingIndexes(p, r);
-                chart = chf.createBooleanProfileChart(p, b);
-            }
-
-            if (data.hasRuleSet()) {
-                RuleSet r = data.getRuleSet();
-
-                IProfile p = dataset.getCollection().getProfileCollection().getProfile(data.getType(),
-                        Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-                BooleanProfile b = finder.getMatchingIndexes(p, r);
-                chart = chf.createBooleanProfileChart(p, b);
-
-            }
-
-            if (data.hasRuleSetCollection()) {
-                RuleSetCollection c = data.getCollection();
-                IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                        Tag.REFERENCE_POINT, Stats.MEDIAN);
-
-                BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
-                        c.getRuleSets(data.getTag()));
-
-                chart = chf.createBooleanProfileChart(p, limits);
-
-            }
-
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
-                | IllegalArgumentException e1) {
-            LOGGER.log(Loggable.STACK, "Error getting profile", e1);
-            chart = MorphologyChartFactory.createErrorChart();
-        }
-
-        // Draw the rule on the chart
-
-        chartPanel.setChart(chart);
-
+        chartPanel.setChart(data.getChart());
     }
 
+    /**
+     * Nodes for the ruleset tree.
+     * @author ben
+     *
+     */
     public class RuleNodeData {
-        private String            name       = null;
-        private RuleSet           ruleSet    = null;
-        private Rule              rule       = null;
-        private ProfileType       type       = null;
-        private Tag               tag        = null;
-        private RuleSetCollection collection = null;
-
-        public RuleNodeData(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setRuleSet(RuleSet r) {
-            this.ruleSet = r;
-            this.type = r.getType();
-        }
-
-        public void setRule(Rule r) {
-            this.rule = r;
-        }
-
-        public void setType(ProfileType type) {
-            this.type = type;
-        }
-
-        public void setTag(Tag tag) {
+        private RuleSet ruleSet = null;
+        private Rule    rule    = null;
+        private Tag     tag     = null;
+        
+        public RuleNodeData(@NonNull Tag tag, @Nullable RuleSet ruleSet, @Nullable Rule rule) {;
             this.tag = tag;
+            this.ruleSet = ruleSet;
+            this.rule = rule;
         }
+        
+        /**
+         * Create the appropriate chart for the node 
+         * @return
+         */
+        public JFreeChart getChart() {
 
-        public RuleSet getRuleSet() {
-            return ruleSet;
-        }
+        	try {
+        		ProfileIndexFinder finder = new ProfileIndexFinder();
+        		ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
+        		MorphologyChartFactory chf = new MorphologyChartFactory(options);
 
-        public Rule getRule() {
-            return rule;
-        }
+        		if(rule!=null) {
+        			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
+        					Tag.REFERENCE_POINT, Stats.MEDIAN);
+        			BooleanProfile b = finder.getMatchingIndexes(p, rule);
+        			return chf.createBooleanProfileChart(p, b);
+        		}
 
-        public ProfileType getType() {
-            return type;
-        }
+        		if(ruleSet!=null) {
+        			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
+        					Tag.REFERENCE_POINT, Stats.MEDIAN);
+        			BooleanProfile b = finder.getMatchingIndexes(p, ruleSet);
+        			return chf.createBooleanProfileChart(p, b);
+        		}
 
-        public RuleSetCollection getCollection() {
-            return collection;
-        }
+        		return createChartForSelectedTableRow();
 
-        public void setCollection(RuleSetCollection collection) {
-            this.collection = collection;
-        }
-
-        public Tag getTag() {
-            return tag;
-        }
-
-        public boolean hasRuleSet() {
-            return ruleSet != null;
-        }
-
-        public boolean hasRule() {
-            return rule != null;
-        }
-
-        public boolean hasType() {
-            return type != null;
-        }
-
-        public boolean hasTag() {
-            return tag != null;
-        }
-
-        public boolean hasRuleSetCollection() {
-            return collection != null;
+        	} catch(Exception e) {
+        		LOGGER.log(Loggable.STACK, "Error creating profile chart: "+e.getMessage(), e);
+        		return MorphologyChartFactory.createErrorChart();
+        	}
         }
 
         public String toString() {
-            return name;
+        	if(rule!=null)
+            	return rule.toString();
+            if(ruleSet!=null)
+            	return ruleSet.getType().toString();
+            return tag.toString();
         }
     }
+    
+    /**
+     * Create a chart for the currently selected row in the tag table
+     * @return
+     */
+    private JFreeChart createChartForSelectedTableRow() {
+    	int row = borderTagTable.getSelectedRow();
+		if(row<0)
+			return MorphologyChartFactory.createEmptyChart();
+		Tag t = (Tag)borderTagTable.getValueAt(row, 0);
+		String collection = (String) borderTagTable.getValueAt(row, 1);
+		try {
+			return createChart(t, collection);
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+			LOGGER.log(Loggable.STACK, "Unable to make chart: "+e.getMessage(), e);
+			return MorphologyChartFactory.createErrorChart();
+		}
+    }
 
+	@Override
+	public synchronized void valueChanged(ListSelectionEvent e) {
+		if(!e.getValueIsAdjusting()) {
+			chartPanel.setChart(createChartForSelectedTableRow());
+			updateTreeNodes();
+		}
+	}
 }

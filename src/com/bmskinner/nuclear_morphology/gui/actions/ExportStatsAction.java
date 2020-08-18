@@ -16,24 +16,43 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagLayout;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.io.DatasetOutlinesExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetProfileExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.TPSexporter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The base action for exporting stats from datasets
@@ -43,6 +62,8 @@ import com.bmskinner.nuclear_morphology.io.TPSexporter;
  *
  */
 public abstract class ExportStatsAction extends MultiDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(ExportStatsAction.class.getName());
 
     public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String label, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
         super(datasets, label, acceptor, eh);
@@ -58,7 +79,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
     public static class ExportNuclearStatsAction extends ExportStatsAction {
 
         private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
-
+        
         public ExportNuclearStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
             super(datasets, PROGRESS_LBL, acceptor, eh);
         }
@@ -66,19 +87,91 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
         @Override
         public void run() {
 
-            File file = FileSelector.chooseStatsExportFile(datasets, "stats");
+        	SubAnalysisSetupDialog optionsPanel = new ExportOptionsDialog(datasets);  
+        	if(optionsPanel.isReadyToRun()) {
+        	        	
+        	            File file = FileSelector.chooseStatsExportFile(datasets, "stats");
 
-            if (file == null) {
-                cancel();
-                return;
-            }
+        	            if (file == null) {
+        	                cancel();
+        	                return;
+        	            }
 
-            IAnalysisMethod m = new DatasetStatsExporter(file, datasets);
-            worker = new DefaultAnalysisWorker(m, datasets.size());
-            worker.addPropertyChangeListener(this);
-            this.setProgressMessage("Exporting stats");
-            ThreadManager.getInstance().submit(worker);
+        	            IAnalysisMethod m = new DatasetStatsExporter(file, datasets, optionsPanel.getOptions());
+        	            worker = new DefaultAnalysisWorker(m, datasets.size());
+        	            worker.addPropertyChangeListener(this);
+        	            this.setProgressMessage("Exporting stats");
+        	            ThreadManager.getInstance().submit(worker);
+        	} else {
+        		cancel();
+        	}
+        }
+        
+        /**
+         * Configure the exported parameters
+         * @author ben
+         * @since 1.18.4
+         *
+         */
+        private class ExportOptionsDialog extends SubAnalysisSetupDialog {
+        	
+        	private HashOptions options = new DefaultOptions(); 
+        	private static final String PROFILE_SAMPLE_LBL = "Profile samples";
+        	
+        	public ExportOptionsDialog(final List<IAnalysisDataset> datasets) {
+        		super(datasets, "Export options");
+        		setDefaults();
+                createUI();
+                packAndDisplay();
+        	}
 
+			@Override
+			public IAnalysisMethod getMethod() {
+				// Not used here, we need to select a file first
+				return null;
+			}
+
+			@Override
+			public HashOptions getOptions() {
+				return options;
+			}
+
+			@Override
+			protected void createUI() {
+				JPanel panel = new JPanel();
+				GridBagLayout layout = new GridBagLayout();
+				panel.setLayout(layout);
+				List<JLabel> labels = new ArrayList<>();
+				List<Component> fields = new ArrayList<>();
+				SpinnerModel model = new SpinnerNumberModel(100, // initial
+						100, // min
+						1000, // max
+						1); // step
+				JSpinner spinner = new JSpinner(model);
+				
+				spinner.addChangeListener(e->{
+					JSpinner j = (JSpinner) e.getSource();
+					try {
+						j.commitEdit();
+						options.setInt(Io.PROFILE_SAMPLES_KEY, (Integer) j.getValue());
+
+					} catch (Exception e1) {
+						LOGGER.warning("Error reading value in profile sample field");
+						LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
+					}
+				});
+				labels.add(new JLabel(PROFILE_SAMPLE_LBL));
+				fields.add(spinner);
+				addLabelTextRows(labels, fields, layout, panel);
+				add(panel, BorderLayout.CENTER);
+				add(createFooter(), BorderLayout.SOUTH);
+			}
+
+			@Override
+			protected void setDefaults() {
+				 options.setInt(Io.PROFILE_SAMPLES_KEY, 100);
+			}
+        	
         }
 
     }

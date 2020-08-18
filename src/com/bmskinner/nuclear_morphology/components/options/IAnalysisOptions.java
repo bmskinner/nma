@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**
@@ -114,6 +115,12 @@ public interface IAnalysisOptions extends Serializable {
      * @return the type of nucleus
      */
     NucleusType getNucleusType();
+    
+    /**
+     * Get the application type for rules
+     * @return the application type
+     */
+    RuleApplicationType getRuleApplicationType();
 
     /**
      * Should the consensus nucleus be automatically refolded?
@@ -186,6 +193,12 @@ public interface IAnalysisOptions extends Serializable {
      * @param nucleusType
      */
     void setNucleusType(NucleusType nucleusType);
+    
+    /**
+     * Set the rule application type
+     * @param type the type to set
+     */
+    void setRuleApplicationType(RuleApplicationType type);
 
     /**
      * Set whether the consensus nucleus should be refolded during the analysis

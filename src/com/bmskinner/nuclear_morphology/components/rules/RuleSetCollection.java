@@ -23,8 +23,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -33,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**
  * This holds the rulesets for identifying each of the BorderTags in a profile.
- * Multiple RuleSets can be combined for each BorderTag, allowing multiple
+ * Multiple RuleSets can be combined for each tag, allowing multiple
  * ProfileTypes to be used. Designed to be stored within a cell collection
  * 
  * @author bms41
@@ -45,16 +48,13 @@ public class RuleSetCollection implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<Tag, List<RuleSet>> map = new HashMap<Tag, List<RuleSet>>();
+    private Map<Tag, List<RuleSet>> map = new HashMap<>();
 
     /**
      * Create a new empty collection
      */
     public RuleSetCollection() {
-        for (Tag tag : BorderTagObject.values()) {
-            clearRuleSets(tag);
-        }
-        clearRuleSets(Tag.CUSTOM_POINT);
+    	// Created empty
     }
 
     /**
@@ -62,8 +62,12 @@ public class RuleSetCollection implements Serializable {
      * 
      * @param tag
      */
-    public void clearRuleSets(Tag tag) {
-        map.put(tag, new ArrayList<RuleSet>());
+    public void clearRuleSets(@NonNull Tag tag) {
+        map.put(tag, new ArrayList<>());
+    }
+    
+    public List<RuleSet> removeRuleSets(@NonNull Tag tag) {
+    	return map.remove(tag);
     }
 
     /**
@@ -72,8 +76,11 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param r
      */
-    public void addRuleSet(Tag tag, RuleSet r) {
-        map.get(tag).add(r);
+    public void addRuleSet(@NonNull Tag tag, @NonNull RuleSet r) {
+    	if(!map.containsKey(tag)) {
+    		map.put(tag, new ArrayList<>());
+    	}
+    	map.get(tag).add(r);
     }
 
     /**
@@ -82,8 +89,9 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param list
      */
-    public void setRuleSets(Tag tag, List<RuleSet> list) {
-        map.put(tag, list);
+    public void setRuleSets(@NonNull Tag tag, @NonNull List<RuleSet> list) {
+        map.put(tag, new ArrayList<>());
+        map.get(tag).addAll(list);
     }
 
     /**
@@ -92,7 +100,7 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param r
      */
-    public List<RuleSet> getRuleSets(Tag tag) {
+    public List<RuleSet> getRuleSets(@NonNull Tag tag) {
         return map.get(tag);
     }
 
@@ -100,10 +108,22 @@ public class RuleSetCollection implements Serializable {
         return map.keySet();
     }
 
-    public boolean hasRulesets(Tag tag) {
-        return map.get(tag).size() > 0;
+    /**
+     * Test if the collection has rulesets for the given tag
+     * @param tag the tag to check
+     * @return true if rulesets are present, false otherwise
+     */
+    public boolean hasRulesets(@NonNull Tag tag) {
+    	if(map.containsKey(tag)) {
+    		return !map.get(tag).isEmpty();
+    	}
+    	return false;
     }
 
+    /**
+     * Test if the collection is empty
+     * @return
+     */
     public boolean isEmpty() {
         return map.isEmpty();
     }
@@ -111,22 +131,48 @@ public class RuleSetCollection implements Serializable {
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("RuleSets:\n");
-        for (Tag tag : map.keySet()) {
-            b.append("\t" + tag + ":\n");
-            List<RuleSet> l = map.get(tag);
-            for (RuleSet r : l) {
+        for(Entry<Tag, List<RuleSet>> entry : map.entrySet()) {
+            b.append("\t" + entry.getKey() + ":\n");
+            for (RuleSet r : entry.getValue()) {
                 b.append("\t" + r.toString() + "\n");
             }
         }
 
         return b.toString();
     }
+    
+    
 
     /*
      * Static methods to create the default rulesets for a given NucleusType
      */
 
-    public static RuleSetCollection createDefaultRuleSet(NucleusType type) {
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((map == null) ? 0 : map.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RuleSetCollection other = (RuleSetCollection) obj;
+		if (map == null) {
+			if (other.map != null)
+				return false;
+		} else if (!map.equals(other.map))
+			return false;
+		return true;
+	}
+
+	public static RuleSetCollection createDefaultRuleSet(NucleusType type) {
 
         switch (type) {
         case PIG_SPERM:
@@ -182,20 +228,19 @@ public class RuleSetCollection implements Serializable {
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading RulesetCollection");
         in.defaultReadObject();
 
         if (map != null) {
 
-            Map<Tag, List<RuleSet>> newMap = new HashMap<Tag, List<RuleSet>>();
+            Map<Tag, List<RuleSet>> newMap = new HashMap<>();
 
             Iterator<?> it = map.keySet().iterator();
 
+            // We need to convert any old tags using enums to the newer objects
             while (it.hasNext()) {
                 Object tag = it.next();
                 if (tag instanceof BorderTag) {
-                    LOGGER.fine("No BorderTagObject for " + tag.toString() + ": creating");
-
+                    LOGGER.finer("No BorderTagObject for " + tag.toString() + ": creating");
                     newMap.put(new BorderTagObject((BorderTag) tag), map.get(tag));
                 }
 
@@ -206,14 +251,10 @@ public class RuleSetCollection implements Serializable {
             }
 
         }
-
-        // finest("\tRead RulesetCollection");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting RulesetCollection");
         out.defaultWriteObject();
-        // finest("\tWrote RulesetCollection");
     }
 
 }

@@ -285,6 +285,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         columnList.add(Labels.AnalysisParameters.NUCLEUS_TYPE);
         columnList.add(Labels.AnalysisParameters.PROFILE_WINDOW);
         columnList.add(Labels.AnalysisParameters.SOFTWARE_VERSION);
+        columnList.add(Labels.AnalysisParameters.RULE_APPLICATON_TYPE);
         
         if(options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
         	columnList.add(Labels.Merges.RECOVER_SOURCE);
@@ -398,6 +399,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         dataList.add(options.getNucleusType().toString());
         dataList.add(options.getProfileWindowProportion());
         dataList.add(dataset.getVersion().toString());
+        dataList.add(options.getRuleApplicationType().toString());
         
         if(this.options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
         	dataList.add(dataset);

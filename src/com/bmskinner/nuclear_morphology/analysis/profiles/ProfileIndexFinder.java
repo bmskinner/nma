@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -154,6 +155,36 @@ public class ProfileIndexFinder {
         throw new NoDetectedIndexException();
     }
 
+    
+    /**
+     * Use the provided RuleSets to identify an index within profiles of an object. Returns
+     * the first matching index in the profile. On error or no hit, return -1.
+     * Note that this ignores the RuleSet's ProfileType preference, and works
+     * directly on the given profile
+     * @param t the object to detect on
+     * @param list the rulesets to use
+     * @return the first index matching the rules
+     * @throws NoDetectedIndexException if no indexes were found
+     * @throws UnavailableProfileTypeException 
+     */
+    public int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list) throws NoDetectedIndexException, UnavailableProfileTypeException {
+    	 if (list == null || list.isEmpty())
+             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
+    	 BooleanProfile indexes = new BooleanProfile(t.getBorderLength(), true);
+    	 for(RuleSet r : list) {
+    		 IProfile p = t.getProfile(r.getType());
+    		 BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
+    		 indexes = indexes.and(matchingIndexes);
+    	 }
+    	 
+    	 for (int i = 0; i < indexes.size(); i++) {
+             if (indexes.get(i)) {
+                 return i;
+             }
+         }
+    	 throw new NoDetectedIndexException();
+    }
+    
     /**
      * Use the provided RuleSets to identify an index within a profile. Returns
      * the first matching index in the profile. On error or no hit, return -1.

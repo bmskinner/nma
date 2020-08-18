@@ -25,6 +25,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ISegmentedProfileTester.class,
 	ProfileManagerTest.class, 
 	SegmentedFloatProfileTest.class, 
+	TagTest.class,
 	VersionTest.class })
 public class ComponentGenericTestSuite {
 

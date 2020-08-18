@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportOptionsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportRuleSetsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportSingleCellImagesAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearOutlinesAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearProfilesAction;
@@ -286,6 +287,9 @@ public class EventHandler implements EventListener {
             if (event.type().equals(SignalChangeEvent.EXPORT_OPTIONS))
                 return new ExportOptionsAction(selectedDatasets, acceptor, EventHandler.this);
             
+            if (event.type().equals(SignalChangeEvent.EXPORT_RULESETS))
+                return new ExportRuleSetsAction(selectedDatasets, acceptor, EventHandler.this);
+
             if (event.type().equals(SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES))
                 return new ExportSingleCellImagesAction(selectedDatasets, acceptor, EventHandler.this);
 

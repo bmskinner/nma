@@ -77,6 +77,8 @@ public interface Io  {
 	String INVALID_FILE_ERROR       = "File is not valid for importing";
 	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
 	
+	String PROFILE_SAMPLES_KEY = "ProfileSamples";
+	
     /**
      * Get the directory that the program is being run from
      * 

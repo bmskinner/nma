@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -55,12 +56,15 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
     private static final String TYPE_LBL           = "Nucleus type";
     private static final String PROFILE_WINDOW_LBL = "Profile window";
+    private static final String RULE_APPLICATION_LBL = "Apply rulesets";
 
     private IAnalysisOptions options;
 
     private JSpinner profileWindow;
 
     private JComboBox<NucleusType> typeBox;
+    
+    private JComboBox<RuleApplicationType> ruleTypeBox;
 
     public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
         super();
@@ -73,7 +77,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
      */
     private void createSpinners() {
 
-        typeBox = new JComboBox<NucleusType>(NucleusType.values());
+        typeBox = new JComboBox<>(NucleusType.values());
         typeBox.setSelectedItem(options.getNucleusType());
 
         typeBox.addActionListener(e -> {
@@ -81,7 +85,6 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
         	Optional<IDetectionOptions> nOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
         	if(!nOptions.isPresent())
         		return;
-        	IDetectionOptions nucleusOptions = nOptions.get();
 
         	NucleusType type = (NucleusType) typeBox.getSelectedItem();
         	options.setNucleusType(type);
@@ -104,6 +107,14 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
             }
 
         });
+        
+        
+        ruleTypeBox = new JComboBox<>(RuleApplicationType.values());
+        ruleTypeBox.setSelectedItem(options.getRuleApplicationType());
+        ruleTypeBox.addActionListener(e -> {
+        	options.setRuleApplicationType( (RuleApplicationType)ruleTypeBox.getSelectedItem());
+        });
+        
     }
 
     private JPanel createPanel() {
@@ -112,14 +123,16 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
         JPanel panel = new JPanel(new GridBagLayout());
 
-        List<JLabel> labels = new ArrayList<JLabel>();
+        List<JLabel> labels = new ArrayList<>();
         labels.add(new JLabel(TYPE_LBL));
         labels.add(new JLabel(PROFILE_WINDOW_LBL));
+        labels.add(new JLabel(RULE_APPLICATION_LBL));
 
-        List<Component> fields = new ArrayList<Component>();
+        List<Component> fields = new ArrayList<>();
 
         fields.add(typeBox);
         fields.add(profileWindow);
+        fields.add(ruleTypeBox);
 
         addLabelTextRows(labels, fields, panel);
 
@@ -141,6 +154,6 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
         super.setEnabled(b);
         profileWindow.setEnabled(b);
         typeBox.setEnabled(b);
-
+        ruleTypeBox.setEnabled(b);
     }
 }

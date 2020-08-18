@@ -115,6 +115,7 @@ public class Labels {
         public static final String EXPORT_SHELLS          = "Nuclear signal shells";
         public static final String EXPORT_CELL_LOCS       = "Cell locations within images";
         public static final String EXPORT_OPTIONS         = "Dataset analysis options";
+        public static final String EXPORT_RULESETS        = "Border tag rulesets";
         public static final String EXPORT_XML_DATASET     = "XML format dataset";
         public static final String EXPORT_CELL_IMAGES     = "Single cell images";
     }
@@ -279,6 +280,7 @@ public class Labels {
     	public static final String RUN_TIME            = "Run time";
     	public static final String NUCLEUS_TYPE        = "Nucleus type";
     	public static final String SOFTWARE_VERSION    = "Created in";
+    	public static final String RULE_APPLICATON_TYPE= "Rule type";
     	
     }
     
@@ -286,7 +288,19 @@ public class Labels {
     	public static final String NO_MERGE_SOURCES = "No merge sources";
     	public static final String MERGE_SOURCE     = "Merge sources";
     	public static final String RECOVER_SOURCE   = "Recover merge source";
-    	
-    	
     }
+    
+    public static class EditingBorderTags {
+    	public static final String RULESET_DIALOG_TITLE = "RuleSets for ";
+    	public static final String RULESET_DIALOG_HEADER_0 = "This window displays the rules that are used to find points in the outlines of nuclei";
+    	public static final String RULESET_DIALOG_HEADER_1 =  "Rules are combined via logical AND to determine final valid positions";
+    	public static final String RULESET_DIALOG_CUSTOM_BTN = "Custom";
+    	public static final String RULESET_DIALOG_IMPORT_BTN = "Import";
+    	public static final String RULESET_DIALOG_SELECT_FILE = "Select ruleset file";
+    	public static final String RULESET_DIALOG_SAVE_CHOICE = "Do you want to save some or all custom rulesets?";
+    	public static final String RULESET_DIALOG_SAVE_TITLE  = "Save ruleset(s)?";
+    	public static final String RULESET_DIALOG_SAVE_OPTION = "Save rulesets";
+    	public static final String RULESET_DIALOG_DISCARD_OPTION = "Discard rulesets";
+    }
+    
 }

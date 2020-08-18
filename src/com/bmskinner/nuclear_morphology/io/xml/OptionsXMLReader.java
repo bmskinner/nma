@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOpti
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 
 /**
  * Read options XML files into analysis options objects
@@ -59,11 +60,13 @@ public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 		if(!rootElement.getName().equals(XMLCreator.DETECTION_SETTINGS_KEY))
 			return op;
 
-		NucleusType type = NucleusType.valueOf(rootElement.getChild(XMLCreator.NUCLEUS_TYPE_KEY).getText());
+		NucleusType type = NucleusType.valueOf(rootElement.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
 		op.setNucleusType(type);
-		double windowSize = Double.parseDouble(rootElement.getChild(XMLCreator.PROFILE_WINDOW_KEY).getText());
+		double windowSize = Double.parseDouble(rootElement.getChildText(XMLCreator.PROFILE_WINDOW_KEY));
 		op.setAngleWindowProportion(windowSize);
-
+		RuleApplicationType ruleType = RuleApplicationType.valueOf(rootElement.getChildText(XMLCreator.RULE_APPLICATION_KEY));
+		op.setRuleApplicationType(ruleType);
+		
 		// should be single elements with options class
 		for(Element component : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY))
 			addComponent(component, op);
