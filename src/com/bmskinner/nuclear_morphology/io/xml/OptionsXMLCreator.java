@@ -78,25 +78,17 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> {
 				UUID signalGroup = UUID.fromString(key.replace(IAnalysisOptions.SIGNAL_GROUP, ""));
 				String groupName = dataset.getCollection().getSignalGroup(signalGroup).get().getGroupName();
 				
-				Element signalId = new Element(XMLCreator.ID_KEY);
-				signalId.setText(signalGroup.toString());
-				element.addContent(signalId);
-				
-				Element signalName = new Element(XMLCreator.NAME_KEY);
-				signalName.setText(groupName);
-				element.addContent(signalName);
+				element.addContent(createElement(ID_KEY, signalGroup.toString()));
+				element.addContent(createElement(NAME_KEY, groupName));
 			}
 			
 			appendElement(element, options.getDetectionOptions(key).get());
 			rootElement.addContent(element);
 		}
-		Element ntElement = new Element(NUCLEUS_TYPE_KEY);
-		ntElement.setText(options.getNucleusType().name());
-		rootElement.addContent(ntElement);
 		
-		Element anElement = new Element(PROFILE_WINDOW_KEY);
-		anElement.setText(String.valueOf(options.getProfileWindowProportion()));
-		rootElement.addContent(anElement);
+		rootElement.addContent(createElement(NUCLEUS_TYPE_KEY, options.getNucleusType().name()));
+		rootElement.addContent(createElement(PROFILE_WINDOW_KEY, String.valueOf(options.getProfileWindowProportion())));
+		rootElement.addContent(createElement(RULE_APPLICATION_KEY, options.getRuleApplicationType().name()));
 	}
 
 		

@@ -58,6 +58,7 @@ public abstract class XMLCreator<T> {
 	public static final String CELLS_SECTION_KEY              = "Cells";
 	public static final String OUTPUT_FOLDER_KEY              = "OutputFolder";
 	public static final String NUCLEUS_TYPE_KEY               = "NucleusType";
+	public static final String RULE_APPLICATION_KEY           = "RuleApplication";
 	public static final String NUCLEUS_NUMBER_KEY             = "NucleusNumber";
 	public static final String CELL_IDS_KEY                   = "CellIds";
 	public static final String DATASET_IDS_KEY                = "DatasetIds";
