@@ -53,8 +53,8 @@ public class DatasetStatsExporter extends StatsExporter {
 	
 	private static final Logger LOGGER = Logger.getLogger(DatasetStatsExporter.class.getName());
 
-    private boolean includeProfiles = true;
-    private boolean includeSegments = false;
+    private boolean isIncludeProfiles = true;
+    private boolean isIncludeSegments = false;
     
     /** How many samples should be taken from each profile? */
     private int profileSamples = 100;
@@ -69,9 +69,9 @@ public class DatasetStatsExporter extends StatsExporter {
         super(file, list);
         segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         if(list.size()==1){
-            includeSegments = true;
+            isIncludeSegments = true;
         } else {
-            includeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
+            isIncludeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
         }
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
     }
@@ -83,7 +83,7 @@ public class DatasetStatsExporter extends StatsExporter {
      */
     public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset, HashOptions options) {
         super(file, dataset);
-        includeSegments = true;
+        isIncludeSegments = true;
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
     }
 
@@ -116,7 +116,7 @@ public class DatasetStatsExporter extends StatsExporter {
 
         }
 
-        if (includeProfiles) {
+        if (isIncludeProfiles) {
             for (ProfileType type : ProfileType.exportValues()) {
                 String label = type.toString().replace(" ", "_");
                 for (int i = 0; i < profileSamples; i++) {
@@ -129,7 +129,7 @@ public class DatasetStatsExporter extends StatsExporter {
             }
         }
         
-        if(includeSegments){
+        if(isIncludeSegments){
             String label = "Length_seg_";
             
             for (int i = 0; i < segCount; i++) { 
@@ -173,12 +173,12 @@ public class DatasetStatsExporter extends StatsExporter {
                         .append(n.getOriginalCentreOfMass().toString() + TAB);
                     appendNucleusStats(outLine, d, n);
 
-                    if (includeProfiles) {
+                    if (isIncludeProfiles) {
                         appendProfiles(outLine, n);
                         appendFrankenProfiles(outLine, n, medianProfile);
                     }
                     
-                    if(includeSegments){
+                    if(isIncludeSegments){
                         appendSegments(outLine, n);
                     }
                     
