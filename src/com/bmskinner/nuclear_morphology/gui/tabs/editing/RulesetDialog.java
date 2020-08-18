@@ -34,10 +34,12 @@ import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
@@ -73,6 +75,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
+import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -118,7 +121,6 @@ public class RulesetDialog extends LoadingIconDialog
         c.gridheight = 1;
         c.weightx = 1.0;
         c.weighty = 0.1;
-
         this.add(createHeader(), c);
         
         c.gridwidth = 1;
@@ -156,16 +158,19 @@ public class RulesetDialog extends LoadingIconDialog
     private JPanel createWestPanel() {
 
         JPanel panel = new JPanel(new BorderLayout());
-
-        JPanel tagPanel = createBorderPointTable();
-        tagPanel.setMinimumSize(new Dimension(10, 50));
-        JScrollPane upperScrollPane = new JScrollPane();
-        upperScrollPane.setViewportView(tagPanel);
         
-        JPanel rulePanel = createRuleSetPanel();
+        //Separate upper and lower panels for tags and detail
+        JPanel tagPanel = new JPanel(new BorderLayout());
+        borderTagTable = createBorderPointTable();
+        JScrollPane upperScrollPane = new JScrollPane(borderTagTable);
+        tagPanel.setMinimumSize(new Dimension(10, 50));
+        tagPanel.add(upperScrollPane, BorderLayout.CENTER);
+        
+        createRuleSetTree();
+        JPanel rulePanel = new JPanel(new BorderLayout());
         rulePanel.setMinimumSize(new Dimension(10, 50));
-        JScrollPane lowerScrollPane = new JScrollPane();
-        lowerScrollPane.setViewportView(rulePanel);
+        JScrollPane lowerScrollPane = new JScrollPane(rulesetTree);
+        rulePanel.add(lowerScrollPane, BorderLayout.CENTER);
         
         // Ensure the two panels take equal Y space
         JPanel resizingPanel = new JPanel(new GridBagLayout());
@@ -180,13 +185,12 @@ public class RulesetDialog extends LoadingIconDialog
         c.weightx = 1.0;
         c.weighty = 0.5;
         
-        resizingPanel.add(upperScrollPane, c);
+        resizingPanel.add(tagPanel, c);
         c.gridy = 1;
         c.weightx = 1.0;
         c.weighty = 0.5;
-        resizingPanel.add(lowerScrollPane, c);
-        
-        
+        resizingPanel.add(rulePanel, c);
+                
         panel.add(createButtonPanel(), BorderLayout.NORTH);
         panel.add(resizingPanel, BorderLayout.CENTER);
 
@@ -195,21 +199,14 @@ public class RulesetDialog extends LoadingIconDialog
     }
     
     /**
-     * Create the panel to hold a tree of 
+     * Create the  tree of 
      * rulesets for a given point
-     * @return
      */
-    private JPanel createRuleSetPanel() {
-
-        JPanel panel = new JPanel(new BorderLayout());
-
+    private void createRuleSetTree() {
         rulesetTree = new JTree();
         updateTreeNodes();
-
-        panel.add(rulesetTree);
         rulesetTree.addTreeSelectionListener(this);
         rulesetTree.setToggleClickCount(2);
-        return panel;
     }
 
     private JPanel createHeader() {
@@ -225,6 +222,20 @@ public class RulesetDialog extends LoadingIconDialog
 
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout());
+        
+        // Allow switching of dataset rule type
+        RuleApplicationType currentRule = dataset.getAnalysisOptions().get().getRuleApplicationType(); 
+        ButtonGroup bg = new ButtonGroup();
+        for(RuleApplicationType ruleType: RuleApplicationType.values()) {
+        	JRadioButton btn = new JRadioButton(ruleType.toString());
+        	
+        	btn.addActionListener(e->dataset.getAnalysisOptions().get()
+            		.setRuleApplicationType(ruleType));
+        	btn.setSelected(currentRule.equals(ruleType));
+        	bg.add(btn);
+        	panel.add(btn);
+        }
+        
 
         JButton addButton = new JButton(Labels.EditingBorderTags.RULESET_DIALOG_CUSTOM_BTN);
 
@@ -274,13 +285,11 @@ public class RulesetDialog extends LoadingIconDialog
      * Create the table to display border tags
      * @return
      */
-    private JPanel createBorderPointTable() {
-    	JPanel panel = new JPanel(new BorderLayout());
-    	borderTagTable = new JTable(createBorderTagTableModel(dataset));
-    	borderTagTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    	borderTagTable.getSelectionModel().addListSelectionListener(this);
-    	panel.add(borderTagTable, BorderLayout.CENTER);
-    	return panel;
+    private JTable createBorderPointTable() {
+    	JTable table = new JTable(createBorderTagTableModel(dataset));
+    	table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    	table.getSelectionModel().addListSelectionListener(this);
+    	return table;
     }
     
     /**
@@ -313,7 +322,8 @@ public class RulesetDialog extends LoadingIconDialog
     	String[] collections = tagCollection.toArray(new String[0]);
     	
     	model.addColumn("Tag", tags);    	
-    	model.addColumn("Collection", collections);    
+    	model.addColumn("Dataset", collections);    
+    	
     	return model;
     }
 
