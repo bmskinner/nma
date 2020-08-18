@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -54,6 +55,9 @@ public class DatasetStatsExporter extends StatsExporter {
 
     private boolean includeProfiles = true;
     private boolean includeSegments = false;
+    
+    /** How many samples should be taken from each profile? */
+    private int profileSamples = 100;
     private int segCount = 0;
 
     /**
@@ -61,7 +65,7 @@ public class DatasetStatsExporter extends StatsExporter {
      * 
      * @param folder
      */
-    public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
+    public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list, HashOptions options) {
         super(file, list);
         segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         if(list.size()==1){
@@ -69,6 +73,7 @@ public class DatasetStatsExporter extends StatsExporter {
         } else {
             includeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
         }
+        profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
     }
 
     /**
@@ -76,9 +81,10 @@ public class DatasetStatsExporter extends StatsExporter {
      * 
      * @param folder
      */
-    public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
+    public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset, HashOptions options) {
         super(file, dataset);
         includeSegments = true;
+        profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
     }
 
     /**
@@ -113,12 +119,12 @@ public class DatasetStatsExporter extends StatsExporter {
         if (includeProfiles) {
             for (ProfileType type : ProfileType.exportValues()) {
                 String label = type.toString().replace(" ", "_");
-                for (int i = 0; i < 100; i++) {
+                for (int i = 0; i < profileSamples; i++) {
                     outLine.append(label + "_" + i + TAB);
                 }
             }
             // Frankenprofile separately
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < profileSamples; i++) {
                 outLine.append("Franken_profile_" + i + TAB);
             }
         }
@@ -231,8 +237,8 @@ public class DatasetStatsExporter extends StatsExporter {
 
             IProfile p = c.getProfile(type, Tag.REFERENCE_POINT);
 
-            for (int i = 0; i < 100; i++) {
-                double idx = ((double) i) / 100d;
+            for (int i = 0; i < profileSamples; i++) {
+                double idx = ((double) i) / (double)profileSamples;
 
                 double value = p.get(idx);
                 outLine.append(value + TAB);
@@ -255,8 +261,8 @@ public class DatasetStatsExporter extends StatsExporter {
             ISegmentedProfile s = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
             ISegmentedProfile f = s.frankenNormaliseToProfile(median);
             
-            for (int i = 0; i < 100; i++) {
-                double idx = ((double) i) / 100d;
+            for (int i = 0; i < profileSamples; i++) {
+                double idx = ((double) i) / (double)profileSamples;
 
                 double value = f.get(idx);
                 outLine.append(value + TAB);
