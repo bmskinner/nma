@@ -30,6 +30,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
@@ -78,10 +80,12 @@ public class BasicAnalysisPipeline {
         IAnalysisDataset obs = new NucleusDetectionMethod(folder, op)
         		.call().getFirstDataset();
         
+        HashOptions exportOptions = new DefaultOptions();
+        exportOptions.setInt(Io.PROFILE_SAMPLES_KEY, 100);
         new DatasetProfilingMethod(obs)
         	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW))
         	.then(new DatasetExportMethod(obs, saveFile, ExportFormat.JAVA))
-        	.then(new DatasetStatsExporter(statsFile, obs))
+        	.then(new DatasetStatsExporter(statsFile, obs, exportOptions))
         	.call();
     }
 
