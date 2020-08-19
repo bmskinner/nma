@@ -21,7 +21,6 @@ import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -33,13 +32,11 @@ import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -51,7 +48,6 @@ import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.TPSexporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -149,17 +145,9 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 						1); // step
 				JSpinner spinner = new JSpinner(model);
 				
-				spinner.addChangeListener(e->{
-					JSpinner j = (JSpinner) e.getSource();
-					try {
-						j.commitEdit();
-						options.setInt(Io.PROFILE_SAMPLES_KEY, (Integer) j.getValue());
-
-					} catch (Exception e1) {
-						LOGGER.warning("Error reading value in profile sample field");
-						LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
-					}
-				});
+				spinner.addChangeListener(e->
+					addIntToOptions(spinner, options, Io.PROFILE_SAMPLES_KEY)
+				);
 				labels.add(new JLabel(PROFILE_SAMPLE_LBL));
 				fields.add(spinner);
 				addLabelTextRows(labels, fields, layout, panel);

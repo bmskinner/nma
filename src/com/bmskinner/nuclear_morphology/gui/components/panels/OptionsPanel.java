@@ -7,13 +7,16 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A panel that allows options to be selected for downstream analyses
@@ -22,6 +25,8 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
  *
  */
 public abstract class OptionsPanel extends JPanel {
+	
+	private static final Logger LOGGER = Logger.getLogger(OptionsPanel.class.getName());
 	
 	protected final IAnalysisDataset dataset;
 	protected final HashOptions options;
@@ -38,6 +43,38 @@ public abstract class OptionsPanel extends JPanel {
 	protected abstract void setDefaults();
 	
 	protected abstract JPanel createUI();
+	
+    /**
+     * Add an integer value from a spinner to a given options
+     * @param spinner the spinner to select the value from
+     * @param options the options to put the value in
+     * @param key the key to store the value under
+     */
+    protected static void addIntToOptions(JSpinner spinner, HashOptions options, String key) {
+    	try {
+    		spinner.commitEdit();
+			options.setInt(key, (Integer) spinner.getValue());
+		} catch (Exception e) {
+			LOGGER.warning("Error reading value in spinner");
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+		}
+    }
+    
+    /**
+     * Add a double value from a spinner to a given options
+     * @param spinner the spinner to select the value from
+     * @param options the options to put the value in
+     * @param key the key to store the value under
+     */
+    protected static void addDoubleToOptions(JSpinner spinner, HashOptions options, String key) {
+    	try {
+    		spinner.commitEdit();
+			options.setDouble(key, (Double) spinner.getValue());
+		} catch (Exception e) {
+			LOGGER.warning("Error reading value in spinner");
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+		}
+    }
 	
 	 /**
      * Add components to a container via a list

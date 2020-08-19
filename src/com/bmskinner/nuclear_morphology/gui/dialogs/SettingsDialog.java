@@ -35,10 +35,13 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Contains methods for laying out panels in settings dialog options
@@ -176,6 +179,22 @@ public abstract class SettingsDialog extends JDialog {
             c.weightx = 1.0;
             container.add(fields[i], c);
         }
+    }
+    
+    /**
+     * Add an integer value from a spinner to a given options
+     * @param spinner the spinner to select the value from
+     * @param options the options to put the value in
+     * @param key the key to store the value under
+     */
+    protected static void addIntToOptions(JSpinner spinner, HashOptions options, String key) {
+    	try {
+    		spinner.commitEdit();
+			options.setInt(key, (Integer) spinner.getValue());
+		} catch (Exception e) {
+			LOGGER.warning("Error reading value in spinner");
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+		}
     }
 
     /**

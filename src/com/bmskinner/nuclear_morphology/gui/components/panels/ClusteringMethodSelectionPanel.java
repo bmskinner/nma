@@ -135,17 +135,9 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 		labels.add(new JLabel(CLUSTER_NUMBER_LBL));
 		fields.add(clusterNumberSpinner);
 
-		clusterNumberSpinner.addChangeListener(e -> {
-			JSpinner j = (JSpinner) e.getSource();
-			try {
-				j.commitEdit();
-				options.setInt(IClusteringOptions.MANUAL_CLUSTER_NUMBER_KEY, (Integer) clusterNumberSpinner.getValue());
-
-			} catch (Exception e1) {
-				LOGGER.warning("Error reading value in cluster number field");
-				LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
-			}
-		});
+		clusterNumberSpinner.addChangeListener(e -> 
+			addIntToOptions(clusterNumberSpinner, options, IClusteringOptions.MANUAL_CLUSTER_NUMBER_KEY)
+		);
 
 		addLabelTextRows(labels, fields, layout, panel);
 		return panel;
@@ -168,14 +160,9 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 				1); // step
 
 		iterationsSpinner = new JSpinner(model);
-		iterationsSpinner.addChangeListener(e -> {
-			try {
-				iterationsSpinner.commitEdit();
-				options.setInt(IClusteringOptions.EM_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
-			} catch (ParseException e1) {
-				LOGGER.log(Loggable.STACK,"Error reading value in iterations field", e1);
-			}
-		});
+		iterationsSpinner.addChangeListener(e -> 
+				addIntToOptions(iterationsSpinner, options, IClusteringOptions.EM_ITERATIONS_KEY)
+		);
 
 		labels.add(new JLabel(EM_ITERATIONS_LBL));
 		fields.add(iterationsSpinner);
