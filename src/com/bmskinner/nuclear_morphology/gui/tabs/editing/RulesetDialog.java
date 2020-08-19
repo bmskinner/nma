@@ -68,6 +68,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -408,7 +409,19 @@ public class RulesetDialog extends LoadingIconDialog
             // get selected sets
 
             RuleSetCollection rsc = d.getSelected();
+            
+            // If the reference point is in the collection, handle it first
+            // TODO: this will eventually cause threading issues with large datasets
+            if(rsc.getTags().contains(Tag.REFERENCE_POINT)) {
+            	if(rsc.hasRulesets(Tag.REFERENCE_POINT)) {
+                    dataset.getCollection().getRuleSetCollection().setRuleSets(Tag.REFERENCE_POINT, rsc.getRuleSets(Tag.REFERENCE_POINT));
+                    updateBorderTagAction(Tag.REFERENCE_POINT);
+                }
+            }
+            
             for (Tag tag : rsc.getTags()) {
+            	if(tag.equals(Tag.REFERENCE_POINT))
+            		continue;
             	LOGGER.fine("Testing existence of tag "+tag);
                 if (rsc.hasRulesets(tag)) {
                     dataset.getCollection().getRuleSetCollection().setRuleSets(tag, rsc.getRuleSets(tag));
