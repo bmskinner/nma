@@ -15,8 +15,6 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMStepAngle;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
-import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTilePath;
-import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -67,7 +65,10 @@ public class GLCMTest {
 //	}
 
 	@Test
-	public void testRunningOnImageWithDefaultOptions() throws Exception {
+	public void testRunningOnImageWithNorthStepAngle() throws Exception {
+		HashOptions options = GLCM.defaultOptions();
+		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.NORTH.toString());
+		
 		File f = new File(TestResources.GLCM_SAMPLE_IMAGE);
 		ImageProcessor ip = new ImageImporter(f).importImage(ImageImporter.RGB_BLUE);
 		

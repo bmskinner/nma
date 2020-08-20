@@ -721,7 +721,7 @@ public class GLCM {
 	public static HashOptions defaultOptions() {
 		HashOptions o = new DefaultOptions();
 		o.setInt(STEP_SIZE_KEY, 1);
-		o.setString(ANGLE_KEY, GLCMStepAngle.NORTH.toString());
+		o.setString(ANGLE_KEY, GLCMStepAngle.ALL.toString());
 		o.setBoolean(USE_SYMMETRY_KEY, true);
 		return o;
 	}
