@@ -1,8 +1,10 @@
 package com.bmskinner.nuclear_morphology.analysis.image;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
@@ -14,6 +16,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTilePath;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -23,6 +26,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
@@ -64,6 +68,34 @@ public class GLCMTest {
 	}
 
 	@Test
+	public void testRunningOnImage() throws Exception {
+		File f = new File(TestResources.GLCM_SAMPLE_IMAGE);
+		ImageProcessor ip = new ImageImporter(f).importImage(ImageImporter.RGB_BLUE);
+		
+		// DEfault parameters
+		GLCM glcm = new GLCM();
+		GLCMTile result = glcm.calculate(ip);
+		
+		// Compare to known values for this image
+		assertEquals("ASM", 0.0015, result.get(GLCMParameter.ASM), 0.01);
+		assertEquals("IDM", 0.2351, result.get(GLCMParameter.IDM), 0.01);
+		assertEquals("Contrast", 77.780, result.get(GLCMParameter.CONSTRAST), 0.01);
+		assertEquals("Energy", 0.0015, result.get(GLCMParameter.ENERGY), 0.01);
+		assertEquals("Entropy", 7.3240, result.get(GLCMParameter.ENTROPY), 0.01);
+		assertEquals("Homogeneity", 0.3201, result.get(GLCMParameter.HOMOGENEITY), 0.01);
+		assertEquals("Variance", 5005.8566, result.get(GLCMParameter.VARIANCE), 0.01);
+		assertEquals("Shade", -3380213.3374, result.get(GLCMParameter.SHADE), 0.01);
+		assertEquals("Prominence", 1133415570.7007, result.get(GLCMParameter.PROMINENCE), 0.01);
+		assertEquals("Inertia", 77.7480, result.get(GLCMParameter.INERTIA), 0.01);
+		assertEquals("Correlation", 0.0002, result.get(GLCMParameter.CORRELATION), 0.01);
+		assertEquals("Sum", 1.000, result.get(GLCMParameter.SUM), 0.01);
+		
+		
+		
+		
+	}
+	
+	@Test
 	public void testRunningOnComponent() throws Exception {
 		GLCM glcm = new GLCM();
 		
@@ -83,7 +115,9 @@ public class GLCMTest {
 
 		GLCMTile result = glcm.calculate(n);
 		
-		assertFalse(result.toString().equals(result1.toString()));
+		assertEquals("Sum should be 1", 1d, result1.get(GLCMParameter.SUM), 0.01);
+		assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",result.toString().equals(result1.toString()));
+		
 		
 		System.out.println(result.toString());
 	}
