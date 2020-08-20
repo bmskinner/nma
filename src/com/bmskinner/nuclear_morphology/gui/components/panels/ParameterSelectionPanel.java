@@ -16,7 +16,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMValue;
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -102,7 +102,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 				continue;
 			
 			// Handle texture separately
-			PlottableStatistic[] textureStats = GLCMValue.toStats();
+			PlottableStatistic[] textureStats = GLCMParameter.toStats();
 			if(Arrays.stream(textureStats).anyMatch(s->s.equals(stat)))
 				continue;
 			
@@ -141,7 +141,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 				continue;
 			
 			// Handle texture separately
-			PlottableStatistic[] textureStats = GLCMValue.toStats();
+			PlottableStatistic[] textureStats = GLCMParameter.toStats();
 			if(Arrays.stream(textureStats).anyMatch(s->s.equals(stat)))
 				continue;
 
@@ -166,7 +166,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
 		
-		for (PlottableStatistic stat : GLCMValue.toStats()) {
+		for (PlottableStatistic stat : GLCMParameter.toStats()) {
 			JCheckBox box = new JCheckBox();
 			box.addChangeListener(e ->  options.setBoolean(stat.toString(), box.isSelected()));
 			box.setForeground(Color.DARK_GRAY);

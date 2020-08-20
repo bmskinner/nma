@@ -54,6 +54,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
         addPanel(nucleusMagnitudePanel);
         addPanel(nuclearScatterChartPanel);
         addPanel(nuclearLobesPanel);
+//        addPanel(nuclearGlcmPanel);
 
         this.add(tabPane, BorderLayout.CENTER);
     }

@@ -7,8 +7,8 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMResult;
-import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMValue;
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -27,19 +27,24 @@ public class GLCMCalculationMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
+	/**
+	 * Calculate the GLCM value across the entire
+	 * nucleus image
+	 * @throws Exception
+	 */
 	private void run() throws Exception {
 		GLCM glcm = new GLCM();
 				
-		List<GLCMResult> results = new ArrayList<>();
+		List<GLCMTile> results = new ArrayList<>();
 		
 		// Do all cells in an image at a time
-		// Should store the image as a weak reference in the nucleus	
+		// This should store the image as a weak reference in the nucleus	
 		for(File f : dataset.getCollection().getImageFiles()) {
 			for(ICell c : dataset.getCollection().getCells(f)) {
 				for(Nucleus n : c.getNuclei()) {
-					GLCMResult r = glcm.calculate(n);
+					GLCMTile r = glcm.calculate(n);
 					results.add(r);
-					for(GLCMValue v : GLCMValue.values())
+					for(GLCMParameter v : GLCMParameter.values())
 						n.setStatistic(v.toStat(), r.get(v));
 				}
 				fireProgressEvent();
@@ -47,7 +52,7 @@ public class GLCMCalculationMethod extends SingleDatasetAnalysisMethod {
 		}
 		
 		// Clear stats caches
-		for(PlottableStatistic stat : GLCMValue.toStats()) {
+		for(PlottableStatistic stat : GLCMParameter.toStats()) {
 			dataset.getCollection().clear(stat, CellularComponent.NUCLEUS);
 			for(IAnalysisDataset child : dataset.getAllChildDatasets()) {
 				child.getCollection().clear(stat, CellularComponent.NUCLEUS);

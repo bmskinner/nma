@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMImage;
-import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMResult;
-import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMValue;
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTilePath;
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -56,9 +56,9 @@ public class GLCMTest {
 		Nucleus n = d.getCollection().stream().findFirst().get().getNucleus();
 		
 		ImageProcessor ip = n.getComponentImage().convertToByte(false);
-		GLCMImage result = glcm.calculate(ip, 25);
+		GLCMTilePath result = glcm.calculate(ip, 25);
 		
-		System.out.println(result.toString(GLCMValue.IDM));
+		System.out.println(result.toString(GLCMParameter.IDM));
 //		ImageViewer.showImage(ip, "input");
 		ImageViewer.showImage(result.toStack(), "output");
 	}
@@ -74,14 +74,14 @@ public class GLCMTest {
 		Roi roi = n.toRoi();
 		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
 		ImageProcessor ip = n.getComponentImage().convertToByte(false);
-		GLCMResult result1 = glcm.calculate(ip);
+		GLCMTile result1 = glcm.calculate(ip);
 		System.out.println(result1.toString());
 		ip.setLineWidth(2);
 		ip.setColor(Color.GRAY);
 		ip.draw(roi);
 //		ImageViewer.showImage(ip, "input");
 
-		GLCMResult result = glcm.calculate(n);
+		GLCMTile result = glcm.calculate(n);
 		
 		assertFalse(result.toString().equals(result1.toString()));
 		
@@ -94,25 +94,25 @@ public class GLCMTest {
 		
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
 		
-		List<GLCMResult> results = new ArrayList<>();
+		List<GLCMTile> results = new ArrayList<>();
 		for(ICell c : d.getCollection()) {
 			for(Nucleus n : c.getNuclei()) {
-				GLCMResult r = glcm.calculate(n);
+				GLCMTile r = glcm.calculate(n);
 				results.add(r);
-				for(GLCMValue v : GLCMValue.values())
+				for(GLCMParameter v : GLCMParameter.values())
 					n.setStatistic(v.toStat(), r.get(v));
 			}
 		}
 		
 		StringBuilder builder = new StringBuilder();
 		builder.append("ID"+Io.TAB);
-		for(GLCMValue v : GLCMValue.values())
+		for(GLCMParameter v : GLCMParameter.values())
 			builder.append(v.toString()+Io.TAB);
 		builder.append(Io.NEWLINE);
 		
-		for(GLCMResult r : results) {
+		for(GLCMTile r : results) {
 			builder.append(r.getIdentifier()+Io.TAB);
-			for(GLCMValue v : GLCMValue.values())
+			for(GLCMParameter v : GLCMParameter.values())
 				builder.append(r.get(v)+Io.TAB);
 			builder.append(Io.NEWLINE);
 		}

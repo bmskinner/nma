@@ -72,7 +72,7 @@ import ij.process.ShortProcessor;
  */
 public class GLCM {
 
-	private static final Logger LOGGER = Logger.getGlobal();
+	private static final Logger LOGGER = Logger.getLogger(GLCM.class.getName());
 
 	public static final String USE_SYMMETRY_KEY   = "Use symmetry";
 	public static final String DO_ASM_KEY         = "Do ASM";
@@ -98,28 +98,30 @@ public class GLCM {
 
 	private final HashOptions options;
 
+	/**
+	 * The step angles possible in a GLCM analysis
+	 * @author ben
+	 *
+	 */
 	private enum GLCMStepAngle {
 		NORTH(0),
 		NORTHEAST(45), EAST(90), SOUTHEAST(135), ALL(-1);
 
-		private final int angle;
+		public final int angle;
 
 		private GLCMStepAngle(int angle) {
 			this.angle = angle;
 		}
 
-		public int angle() {
-			return angle;
-		}
 	}
 
 	/**
-	 * The difference elements calculated from 
+	 * The parameters calculated from 
 	 * the GCLM
 	 * @author ben
 	 *
 	 */
-	public enum GLCMValue {
+	public enum GLCMParameter {
 		/** Angular Second Moment */ ASM, 
 		/** Inverse Difference Moment */ IDM, 
 		CONSTRAST, ENERGY, ENTROPY,
@@ -139,7 +141,7 @@ public class GLCM {
 		 * @return
 		 */
 		public static PlottableStatistic[] toStats() {
-			GLCMValue[] values = values();
+			GLCMParameter[] values = values();
 			PlottableStatistic[] result = new PlottableStatistic[values.length];
 			for(int i=0; i<values.length; i++)
 				result[i] = values[i].toStat();
@@ -153,72 +155,73 @@ public class GLCM {
 		}
 	}
 
+	
+
 	/**
-	 * Internal store for stats on the GLCM
+	 * Store results of the GLCM calculations from a
+	 * single tile in an image. Does not store the
+	 * entire matrix, just the output parameters
 	 * @author ben
 	 *
 	 */
-	private class GLCMStats {
+	public class GLCMTile {
 
-		public double meanx = 0;
-		public double meany = 0;
-		public double stdevx = 0;
-		public double stdevy = 0;
-
-		public GLCMStats(double[][] glcm) {
-			double [] px = new double [256];
-			double [] py = new double [256];
-
-			// Px(i) and Py(j) are the marginal-probability matrix; sum rows (px) or columns (py) 
-			// First, initialize the arrays to 0
-			for (int i=0;  i<256; i++){
-				px[i] = 0.0;
-				py[i] = 0.0;
-			}
-
-			// sum the glcm rows to Px(i)
-			for (int i=0;  i<256; i++) {
-				for (int j=0; j<256; j++) {
-					px[i] += glcm [i][j];
-				} 
-			}
-
-			// sum the glcm rows to Py(j)
-			for (int j=0;  j<256; j++) {
-				for (int i=0; i<256; i++) {
-					py[j] += glcm [i][j];
-				} 
-			}
-
-			// calculate meanx and meany
-			for (int i=0;  i<256; i++) {
-				meanx += (i*px[i]);
-				meany += (i*py[i]);
-			}
-
-			// calculate stdevx and stdevy
-			for (int i=0;  i<256; i++) {
-				stdevx += ((Math.pow((i-meanx),2))*px[i]);
-				stdevy += ((Math.pow((i-meany),2))*py[i]);
-			}
-		}		
-	}
-
-	/**
-	 * Store results of the GLCM calculations
-	 * @author ben
-	 *
-	 */
-	public class GLCMResult {
-
-		private Map<GLCMValue, Double> values = new EnumMap<>(GLCMValue.class);
+		private Map<GLCMParameter, Double> values = new EnumMap<>(GLCMParameter.class);
 		private String identifier = null;
+		
+		public GLCMTile() {
+			// empty result
+		}
+		
+		/**
+		 * Create from a matrix
+		 * @param matrix
+		 */
+		public GLCMTile(GLCMMatrix matrix) {
+			if (options.getBoolean(DO_ASM_KEY))
+				set(GLCMParameter.ASM, matrix.asm());
 
-		public void set(GLCMValue key, double value) {
+			if (options.getBoolean(DO_IDM_KEY))
+				set(GLCMParameter.IDM, matrix.idm());
+
+			if (options.getBoolean(DO_CONTRAST_KEY))
+				set(GLCMParameter.CONSTRAST, matrix.contrast());
+
+			if (options.getBoolean(DO_ENERGY_KEY))
+				set(GLCMParameter.ENERGY, matrix.energy());
+
+			if (options.getBoolean(DO_ENTROPY_KEY))
+				set(GLCMParameter.ENTROPY, matrix.entropy());
+
+			if (options.getBoolean(DO_HOMOGENEITY_KEY))
+				set(GLCMParameter.HOMOGENEITY, matrix.homogeneity());
+
+			if (options.getBoolean(DO_INERTIA_KEY))
+				set(GLCMParameter.INERTIA, matrix.inertia());
+
+//			// Calculate stats for subsequent calculations
+//			GLCMStats stats = new GLCMStats(matrix);
+
+			if (options.getBoolean(DO_VARIANCE_KEY))
+				set(GLCMParameter.VARIANCE, matrix.variance());
+
+			if (options.getBoolean(DO_SHADE_KEY))
+				set(GLCMParameter.SHADE, matrix.shade());
+
+			if (options.getBoolean(DO_PROMINENCE_KEY))
+				set(GLCMParameter.PROMINENCE, matrix.prominence());
+
+			if (options.getBoolean(DO_CORRELATION_KEY))
+				set(GLCMParameter.CORRELATION, matrix.correlation());
+
+			set(GLCMParameter.SUM, matrix.sum());
+		}
+
+		public void set(GLCMParameter key, double value) {
 			values.put(key, value);
 		}
 
-		public double get(GLCMValue key) {
+		public double get(GLCMParameter key) {
 			if(values.containsKey(key))
 				return values.get(key);
 			return 0;
@@ -246,7 +249,7 @@ public class GLCM {
 			StringBuilder builder = new StringBuilder();
 			if(identifier!=null)
 				builder.append(identifier+Io.NEWLINE);
-			for(Entry<GLCMValue, Double> entry : values.entrySet()) {
+			for(Entry<GLCMParameter, Double> entry : values.entrySet()) {
 				builder.append(entry.getKey()+": "+entry.getValue()+Io.NEWLINE);
 			}
 			return builder.toString();
@@ -254,22 +257,21 @@ public class GLCM {
 	}
 
 	/**
-	 * Stores GLCM results tiled across an image
-	 * through a moving ROI.
+	 * Stores GLCM tiles covering an image
 	 * @author ben
 	 *
 	 */
-	public class GLCMImage {
+	public class GLCMTilePath {
 
-		GLCMResult[][] values;
+		GLCMTile[][] values;
 
 		/**
 		 * Create from a template image, specifying the ROI diameter
-		 * @param template
-		 * @param roiDiameter
+		 * @param template the image to analyse
+		 * @param roiDiameter the diameter of the circular roi
 		 */
-		public GLCMImage(ImageProcessor template, int roiDiameter) {
-			values = new GLCMResult[template.getWidth()-roiDiameter][template.getHeight()-roiDiameter];
+		public GLCMTilePath(ImageProcessor template, int roiDiameter) {
+			values = new GLCMTile[template.getWidth()-roiDiameter][template.getHeight()-roiDiameter];
 		}
 
 		/**
@@ -279,15 +281,16 @@ public class GLCM {
 		 * @param x
 		 * @param y
 		 */
-		public void addGLCMResult(GLCMResult result, int x, int y) {
+		public void addGLCMTile(GLCMTile result, int x, int y) {
 			values[x][y] = result;
 		}
 
 		/**
-		 * Convert the GLCM result to an image format.
+		 * Display the GLCM result an an image
+		 * @param key the GLCM parameter to display
 		 * @return
 		 */
-		public ImageProcessor toProcessor(GLCMValue key) {
+		public ImageProcessor toProcessor(GLCMParameter key) {
 			ImageProcessor ip = new ShortProcessor(values.length, values[0].length);
 
 			double max = 0;
@@ -316,17 +319,17 @@ public class GLCM {
 		 */
 		public ImageStack toStack() {
 
-			ImageProcessor temp = toProcessor(GLCMValue.SUM);
+			ImageProcessor temp = toProcessor(GLCMParameter.SUM);
 			ImageStack st = new ImageStack(temp.getWidth(), temp.getHeight());
 
-			for(GLCMValue key : GLCMValue.values()) {
+			for(GLCMParameter key : GLCMParameter.values()) {
 				LOGGER.finer("Adding "+key);
 				st.addSlice(key.toString(), toProcessor(key));
 			}
 			return st;
 		}
 
-		public String toString(GLCMValue key) {
+		public String toString(GLCMParameter key) {
 			StringBuilder sb = new StringBuilder();
 			for(int x=0; x<values.length; x++) {
 				for(int y=0; y<values[0].length;y++) {
@@ -340,24 +343,91 @@ public class GLCM {
 	}
 
 	
+	/**
+	 * Calculates GLCM probabilities
+	 * across a matrix and parameters
+	 * @author ben
+	 *
+	 */
 	private class GLCMMatrix {
 		
 		public double[][] glcm;
 		public double pixelCount;
+		private GLCMStats stats;
+		
+		/**
+		 * Internal store for overall stats on the GLCM
+		 * matrix
+		 * @author ben
+		 *
+		 */
+		private class GLCMStats {
+
+			public double meanx = 0;
+			public double meany = 0;
+			public double stdevx = 0;
+			public double stdevy = 0;
+
+			public GLCMStats() {
+				double [] px = new double [256];
+				double [] py = new double [256];
+
+				// Px(i) and Py(j) are the marginal-probability matrix; sum rows (px) or columns (py) 
+				// First, initialize the arrays to 0
+				for (int i=0;  i<256; i++){
+					px[i] = 0.0;
+					py[i] = 0.0;
+				}
+
+				// sum the glcm rows to Px(i)
+				for (int i=0;  i<256; i++) {
+					for (int j=0; j<256; j++) {
+						px[i] += glcm [i][j];
+					} 
+				}
+
+				// sum the glcm rows to Py(j)
+				for (int j=0;  j<256; j++) {
+					for (int i=0; i<256; i++) {
+						py[j] += glcm [i][j];
+					} 
+				}
+
+				// calculate meanx and meany
+				for (int i=0;  i<256; i++) {
+					meanx += (i*px[i]);
+					meany += (i*py[i]);
+				}
+
+				// calculate stdevx and stdevy
+				for (int i=0;  i<256; i++) {
+					stdevx += ((Math.pow((i-meanx),2))*px[i]);
+					stdevy += ((Math.pow((i-meany),2))*py[i]);
+				}
+			}		
+		}
 		
 		// Not accessible
-		private GLCMMatrix() {}
+		private GLCMMatrix() {
+			// No access
+		}
 		
 		public GLCMMatrix(int w, int h) {
 			glcm = new double[w][h];
 			pixelCount = 0;
+			stats = new GLCMStats();
+		}
+		
+		private void updateStats() {
+			stats = new GLCMStats();
 		}
 		
 		/**
-		 * Add the values to this matrix
+		 * Add values to this matrix
 		 * @param g
 		 */
 		public GLCMMatrix plus(GLCMMatrix g) {
+			
 			if(g.glcm.length!=glcm.length && g.glcm[0].length!=glcm[0].length)
 				return this;
 			
@@ -366,6 +436,7 @@ public class GLCM {
 					glcm[i][j] += (g.glcm[i][j]);
 				}
 			}
+			updateStats();
 			return this;
 		}
 		
@@ -375,14 +446,238 @@ public class GLCM {
 					glcm[i][j] = (glcm[i][j])/(pixelCount);
 				}
 			}
+			updateStats();
 			return this;
+		}
+		
+		/**
+		 * Calculate the angular second moment (ASM)
+		 * @return
+		 */
+		public double asm() {
+			double asm = 0.0;
+			for (int i=0;  i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					asm += (glcm[i][j]*glcm[i][j]);
+				}
+			}
+			return asm;
+		}
+		
+		/**
+		 * Calculate the inverse difference moment (IDM) (Walker, et al. 1995). 
+		 * This is calculated using the same formula as 
+		 * Conners, et al., 1984 "Local Homogeneity"
+		 * @param glcm
+		 * @return
+		 */
+		public double idm() {
+			double idm = 0.0;
+			for (int i=0;  i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					idm += ((1/(1+(Math.pow(i-j,2))))*glcm[i][j]);
+				}
+			}
+			return idm;
+		}
+
+		/**
+		 * Calculate the contrast (Haralick, et al. 1973).
+		 * Similar to the inertia, except abs(i-j) is used
+		 * @param glcm
+		 * @return
+		 */
+		public double contrast() {
+			double contrast = 0.0;
+			for (int i=0;  i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					contrast += Math.pow(Math.abs(i-j),2)*(glcm[i][j]);
+				}
+			}
+			return contrast;
+		}
+
+		/**
+		 * @param glcm
+		 * @return
+		 */
+		public double energy() {
+			double energy = 0.0;
+			for (int i=0;  i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					energy += Math.pow(glcm[i][j],2);
+				}
+			}
+			return energy;
+		}
+
+		/**
+		 * Calculate the entropy (Haralick et al., 1973; Walker, et al., 1995)
+		 * @param glcm
+		 * @return
+		 */
+		public double entropy() {
+			double entropy = 0.0;
+			for (int i=0;  i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					if (glcm[i][j] != 0) {
+						entropy = entropy-(glcm[i][j]*(Math.log(glcm[i][j])));
+						//the next line is how Xite calculates it -- I am not sure why they use this, I do not think it is correct
+						//(they also use log base 10, which I need to implement)
+						//entropy = entropy-(glcm[i][j]*((Math.log(glcm[i][j]))/Math.log(2.0)) );
+					}
+				}
+			}
+			return entropy;
+		}
+
+		/**
+		 * Calculate the homogeneity (Parker)
+		 *  "Local Homogeneity" from Conners, et al., 1984 is calculated 
+		 *  the same as IDM above.
+		 *   Parker's implementation is below; absolute value
+		 *   of i-j is taken rather than square
+		 * @param glcm
+		 * @return
+		 */
+		public double homogeneity() {
+			double homogeneity = 0.0;
+			for (int i=0;  i<256; i++) {
+				for (int j=0; j<256; j++) {
+					homogeneity += glcm[i][j]/(1.0+Math.abs(i-j));
+				}
+			}
+			return homogeneity;
+		}
+
+		/**
+		 * Calculate the inertia (Walker, et al., 1995; Connors, et al. 1984)
+		 * @param glcm
+		 * @return
+		 */
+		public double inertia() {
+			double inertia = 0.0;
+			for (int i=0;  i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					if (glcm[i][j] != 0) {
+						inertia += (Math.pow((i-j),2)*glcm[i][j]);
+					}
+				}
+			}
+			return inertia;
+		}
+
+		/**
+		 * Calculate the sum of all glcm elements. If the matrix is
+		 * of probabilities, this should return 1
+		 * @param glcm
+		 * @return
+		 */
+		public double sum() {
+			double sum = 0.0;
+			for (int i=0; i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					sum = sum + glcm[i][j];
+				}
+			}
+			return sum;
+		}
+		
+		/**
+		 * Calculate the variance ("variance" in Walker 1995; 
+		 * "Sum of Squares: Variance" in Haralick 1973)
+		 * @param glcm
+		 * @param stats
+		 * @return
+		 */
+		public double variance() {
+			double variance = 0.0;
+			double mean = 0.0;
+
+			mean = (stats.meanx + stats.meany)/2;
+			/*
+		// this is based on xite, and is much greater than the actual mean -- it is here for reference only
+		for (int i=0;  i<256; i++)  {
+			for (int j=0; j<256; j++) {
+				mean += glcm[i][j]*i*j;
+			}
+		}
+			 */
+
+			for (int i=0;  i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					variance += (Math.pow((i-mean),2)* glcm[i][j]);
+				}
+			}
+			return variance;
+		}
+
+		/**
+		 * Calculate the shade (Walker, et al., 1995; Connors, et al. 1984)
+		 * @param glcm
+		 * @param stats
+		 * @return
+		 */
+		public double shade() {
+			double shade = 0.0;
+
+			// calculate the shade parameter
+			for (int i=0;  i<256; i++) {
+				for (int j=0; j<256; j++) {
+					shade += (Math.pow((i+j-stats.meanx-stats.meany),3)*glcm[i][j]);
+				}
+			}
+			return shade;
+		}
+
+		/**
+		 * Calculate the prominence (Walker, et al., 1995; Connors, et al. 1984)
+		 * @param glcm
+		 * @param stats
+		 * @return
+		 */
+		public double prominence() {
+			double prominence=0.0;
+			for (int i=0;  i<256; i++) {
+				for (int j=0; j<256; j++) {
+					prominence += (Math.pow((i+j-stats.meanx-stats.meany),4)*glcm[i][j]);
+				}
+			}
+			return prominence;
+		}
+
+		/**
+		 * Calculate the correlation. Methods based on Haralick 1973 
+		 * (and MatLab), Walker 1995 are included below. Haralick/Matlab 
+		 * result reported for correlation currently; will 
+		 * give Walker as an option in the future.
+		 * @param glcm
+		 * @param stats
+		 * @return
+		 */
+		public double correlation() {
+			double correlation=0.0;
+
+			// calculate the correlation parameter
+			for (int i=0;  i<256; i++) {
+				for (int j=0; j<256; j++) {
+					//Walker, et al. 1995 (matches Xite)
+					//correlation += ((((i-meanx)*(j-meany))/Math.sqrt(stdevx*stdevy))*glcm[i][j]);
+					//Haralick, et al. 1973 (continued below outside loop; matches original GLCM_Texture)
+					//correlation += (i*j)*glcm[i][j];
+					//matlab's rephrasing of Haralick 1973; produces the same result as Haralick 1973
+					correlation += ((((i-stats.meanx)*(j-stats.meany))/( stats.stdevx*stats.stdevy))*glcm[i][j]);
+				}
+			}
+			//Haralick, et al. 1973, original method continued.
+			//correlation = (correlation -(meanx*meany))/(stdevx*stdevy);
+			return correlation;
 		}
 
 	}
 	
 	/**
 	 * Create with default options
-	 * @param options
 	 */
 	public GLCM() {
 		this(defaultOptions());
@@ -390,16 +685,10 @@ public class GLCM {
 
 	/**
 	 * Create with options
-	 * @param options
+	 * @param options the options for the GLCM analysis
 	 */
 	public GLCM(@NonNull final HashOptions options) {
-		//		int phi = options.getInt(ANGLE_KEY);
-		//		;
 		GLCMStepAngle phi = GLCMStepAngle.valueOf(options.getString(ANGLE_KEY));
-
-		//		boolean isValid = Arrays.stream(GLCMStepAngle.values()).mapToInt(GLCMStepAngle::angle).anyMatch(a->a==phi);
-		//		if(!isValid)
-		//			throw new IllegalArgumentException("Step angle is not in allowed range");
 		this.options = options;
 
 	}
@@ -428,6 +717,11 @@ public class GLCM {
 	}
 
 
+	/**
+	 * Test if the given image is suitable for GLCM analysis
+	 * @param ip the image to test
+	 * @return true if the image can be analysed, false otherwise
+	 */
 	private boolean isValid(ImageProcessor ip) {
 		if(ip==null) {
 			LOGGER.fine("Image is null");
@@ -449,24 +743,25 @@ public class GLCM {
 
 	/**
 	 * Given a circular roi diameter, calculate the GLCM values across
-	 * the image, moving the roi.
-	 * @param ip
-	 * @param roi
-	 * @return
+	 * the image, moving the roi by a fixed step size.
+	 * @param ip the image to analyse
+	 * @param diameter the diameter of the circular roi in pixels 
+	 * @return the calculated GLCM parameters for each tile
 	 */
-	public GLCMImage calculate(ImageProcessor ip, int diameter){
+	public GLCMTilePath calculate(ImageProcessor ip, int diameter){
 		LOGGER.fine("Calculating GLCM");
 		int w = ip.getWidth();
 		int h = ip.getHeight();
 
-		GLCMImage result = new GLCMImage(ip, diameter);
+		GLCMTilePath result = new GLCMTilePath(ip, diameter);
 
+		// Start from the left edge, up to 'diameter' from the right edge
 		for(int x=0; x<w-diameter; x++) {
 			LOGGER.fine("x: "+x+" of "+w);
 			for(int y=0; y<h-diameter;y++) {
 				Roi roi = new EllipseRoi(x, y, x+diameter, y+diameter, 1);
 				ip.setRoi(roi);
-				result.addGLCMResult(calculate(ip), x, y);
+				result.addGLCMTile(calculate(ip), x, y);
 			}
 		}
 
@@ -475,18 +770,18 @@ public class GLCM {
 
 	/**
 	 * Calculate the GLCM across the entire component. Pixels
-	 * outside the component roi are masked.
+	 * outside the component roi are masked. Does not tile.
 	 * @param component
 	 * @return
 	 */
-	public GLCMResult calculate(CellularComponent component) {
+	public GLCMTile calculate(CellularComponent component) {
 		Roi roi = component.toRoi();
 		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
 		try {
 			ImageProcessor ip = component.getGreyscaleComponentImage();
 
 			ip.setRoi(roi);
-			GLCMResult r = calculate(ip);
+			GLCMTile r = calculate(ip);
 			if(component instanceof Nucleus)
 				r.setIdentifier( ((Nucleus)component).getNameAndNumber());
 			else
@@ -494,64 +789,23 @@ public class GLCM {
 			return r;
 		} catch (UnloadableImageException e) {
 			LOGGER.log(Loggable.STACK, "Cannot open component image", e);
-			return new GLCMResult();
+			return new GLCMTile();
 		}
 	}
 
 	/**
-	 * Calculate the GLCM results for the current ROI
+	 * Calculate the GLCM results for the current tile ROI
 	 * of the given image.
-	 * @param ip
-	 * @return
+	 * @param ip the image to analyse, with a tile ROI already specified
+	 * @return the GLCM result for the current tile
 	 */
-	public GLCMResult calculate(ImageProcessor ip) {
-
-		GLCMResult result = new GLCMResult();
+	public GLCMTile calculate(ImageProcessor ip) {
 
 		if(!isValid(ip)) 
-			return result;
+			return new GLCMTile();
 
-		double[][] glcm = calculateGlCM(ip).glcm;
-
-		if (options.getBoolean(DO_ASM_KEY))
-			result.set(GLCMValue.ASM, calculateASM(glcm));
-
-		if (options.getBoolean(DO_IDM_KEY))
-			result.set(GLCMValue.IDM, calculateIDM(glcm));
-
-		if (options.getBoolean(DO_CONTRAST_KEY))
-			result.set(GLCMValue.CONSTRAST, calculateContrast(glcm));
-
-		if (options.getBoolean(DO_ENERGY_KEY))
-			result.set(GLCMValue.ENERGY, calculateEnergy(glcm));
-
-		if (options.getBoolean(DO_ENTROPY_KEY))
-			result.set(GLCMValue.ENTROPY, calculateEntropy(glcm));
-
-		if (options.getBoolean(DO_HOMOGENEITY_KEY))
-			result.set(GLCMValue.HOMOGENEITY, calculateHomogeneity(glcm));
-
-		if (options.getBoolean(DO_INERTIA_KEY))
-			result.set(GLCMValue.INERTIA, calculateInertia(glcm));
-
-		// Calculate stats for subsequent calculations
-		GLCMStats stats = new GLCMStats(glcm);
-
-		if (options.getBoolean(DO_VARIANCE_KEY))
-			result.set(GLCMValue.VARIANCE, calculateVariance(glcm, stats));
-
-		if (options.getBoolean(DO_SHADE_KEY))
-			result.set(GLCMValue.SHADE, calculateShade(glcm, stats));
-
-		if (options.getBoolean(DO_PROMINENCE_KEY))
-			result.set(GLCMValue.PROMINENCE, calculateProminence(glcm, stats));
-
-		if (options.getBoolean(DO_CORRELATION_KEY))
-			result.set(GLCMValue.CORRELATION, calculateCorrelation(glcm, stats));
-
-		result.set(GLCMValue.SUM, calculateSum(glcm));
-
-		return result;
+		GLCMMatrix matrix = calculateMatrix(ip);
+		return new GLCMTile(matrix);
 	}
 
 	/**
@@ -559,35 +813,33 @@ public class GLCM {
 	 * @param ip
 	 * @return
 	 */
-	private GLCMMatrix calculateGlCM(ImageProcessor ip){
+	private GLCMMatrix calculateMatrix(ImageProcessor ip){
 
-		LOGGER.finest("Calculating GLCM");
+		LOGGER.finest("Calculating GLCM matrix");
 
 		GLCMStepAngle phi = GLCMStepAngle.valueOf(options.getString(ANGLE_KEY));
 		int d = options.getInt(STEP_SIZE_KEY);
-		int offsetX = 1;
-		int offsetY = 0;
 		
 		GLCMMatrix glcm;
 		switch(phi) {
 		case EAST:
-			glcm = calculateGlCM(ip, 0, -d);
+			glcm = calculateMatrix(ip, 0, -d);
 			break;
 		case NORTH:
-			glcm = calculateGlCM(ip, d, 0);
+			glcm = calculateMatrix(ip, d, 0);
 			break;
 		case NORTHEAST:
-			glcm = calculateGlCM(ip, d, -d);
+			glcm = calculateMatrix(ip, d, -d);
 			break;
 		case SOUTHEAST:
-			glcm = calculateGlCM(ip, -d, -d);
+			glcm = calculateMatrix(ip, -d, -d);
 			break;
 		case ALL:
 		default:
-			glcm = calculateGlCM(ip, 0, -d)
-			.plus(calculateGlCM(ip, d, 0))
-			.plus(calculateGlCM(ip, d, -d))
-			.plus(calculateGlCM(ip, -d, -d));
+			glcm = calculateMatrix(ip, 0, -d)
+			.plus(calculateMatrix(ip, d, 0))
+			.plus(calculateMatrix(ip, d, -d))
+			.plus(calculateMatrix(ip, -d, -d));
 			break;
 		
 		}
@@ -596,8 +848,10 @@ public class GLCM {
 		return glcm.convertToProbabilities();
 	}
 
-	private GLCMMatrix calculateGlCM(ImageProcessor ip, int offsetX, int offsetY){
+	private GLCMMatrix calculateMatrix(ImageProcessor ip, int offsetX, int offsetY){
 
+		// The matrix size is fixed by default.
+		// What happens if the tile is smaller? Values wil be 0.
 		GLCMMatrix g = new GLCMMatrix(256, 256);
 
 		// use the bounding rectangle ROI to roughly limit processing
@@ -612,8 +866,6 @@ public class GLCM {
 		// value = value at pixel of interest; dValue = value of pixel at offset    
 		int value;
 		int dValue;
-
-		double pixelCount = 0;
 
 		Rectangle roi = ip.getRoi();
 
@@ -655,228 +907,4 @@ public class GLCM {
 		return g;
 	}
 
-	/**
-	 * Calculate the angular second moment (asm)
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateASM(double[][] glcm) {
-		double asm = 0.0;
-		for (int i=0;  i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				asm += (glcm[i][j]*glcm[i][j]);
-			}
-		}
-		return asm;
-	}
-
-	/**
-	 * Calculate the inverse difference moment (IDM) (Walker, et al. 1995). 
-	 * This is calculated using the same formula as 
-	 * Conners, et al., 1984 "Local Homogeneity"
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateIDM(double[][] glcm) {
-		double idm = 0.0;
-		for (int i=0;  i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				idm += ((1/(1+(Math.pow(i-j,2))))*glcm[i][j]);
-			}
-		}
-		return idm;
-	}
-
-	/**
-	 * Calculate the contrast (Haralick, et al. 1973).
-	 * Similar to the inertia, except abs(i-j) is used
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateContrast(double[][] glcm) {
-		double contrast = 0.0;
-		for (int i=0;  i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				contrast += Math.pow(Math.abs(i-j),2)*(glcm[i][j]);
-			}
-		}
-		return contrast;
-	}
-
-	/**
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateEnergy(double[][] glcm) {
-		double energy = 0.0;
-		for (int i=0;  i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				energy += Math.pow(glcm[i][j],2);
-			}
-		}
-		return energy;
-	}
-
-	/**
-	 * Calculate the entropy (Haralick et al., 1973; Walker, et al., 1995)
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateEntropy(double[][] glcm) {
-		double entropy = 0.0;
-		for (int i=0;  i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				if (glcm[i][j] != 0) {
-					entropy = entropy-(glcm[i][j]*(Math.log(glcm[i][j])));
-					//the next line is how Xite calculates it -- I am not sure why they use this, I do not think it is correct
-					//(they also use log base 10, which I need to implement)
-					//entropy = entropy-(glcm[i][j]*((Math.log(glcm[i][j]))/Math.log(2.0)) );
-				}
-			}
-		}
-		return entropy;
-	}
-
-	/**
-	 * Calculate the homogeneity (Parker)
-	 *  "Local Homogeneity" from Conners, et al., 1984 is calculated 
-	 *  the same as IDM above.
-	 *   Parker's implementation is below; absolute value
-	 *   of i-j is taken rather than square
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateHomogeneity(double[][] glcm) {
-		double homogeneity = 0.0;
-		for (int i=0;  i<256; i++) {
-			for (int j=0; j<256; j++) {
-				homogeneity += glcm[i][j]/(1.0+Math.abs(i-j));
-			}
-		}
-		return homogeneity;
-	}
-
-	/**
-	 * Calculate the inertia (Walker, et al., 1995; Connors, et al. 1984)
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateInertia(double[][] glcm) {
-		double inertia = 0.0;
-		for (int i=0;  i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				if (glcm[i][j] != 0) {
-					inertia += (Math.pow((i-j),2)*glcm[i][j]);
-				}
-			}
-		}
-		return inertia;
-	}
-
-	/**
-	 * Calculate the sum of all glcm elements. If the matrix is
-	 * of probabilities, this should return 1
-	 * @param glcm
-	 * @return
-	 */
-	private double calculateSum(double[][] glcm) {
-		double sum = 0.0;
-		for (int i=0; i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				sum = sum + glcm[i][j];
-			}
-		}
-		return sum;
-	}
-
-	/**
-	 * Calculate the variance ("variance" in Walker 1995; 
-	 * "Sum of Squares: Variance" in Haralick 1973)
-	 * @param glcm
-	 * @param stats
-	 * @return
-	 */
-	private double calculateVariance(double[][] glcm, GLCMStats stats) {
-		double variance = 0.0;
-		double mean = 0.0;
-
-		mean = (stats.meanx + stats.meany)/2;
-		/*
-	// this is based on xite, and is much greater than the actual mean -- it is here for reference only
-	for (int i=0;  i<256; i++)  {
-		for (int j=0; j<256; j++) {
-			mean += glcm[i][j]*i*j;
-		}
-	}
-		 */
-
-		for (int i=0;  i<256; i++)  {
-			for (int j=0; j<256; j++) {
-				variance += (Math.pow((i-mean),2)* glcm[i][j]);
-			}
-		}
-		return variance;
-	}
-
-	/**
-	 * Calculate the shade (Walker, et al., 1995; Connors, et al. 1984)
-	 * @param glcm
-	 * @param stats
-	 * @return
-	 */
-	private double calculateShade(double[][] glcm, GLCMStats stats) {
-		double shade = 0.0;
-
-		// calculate the shade parameter
-		for (int i=0;  i<256; i++) {
-			for (int j=0; j<256; j++) {
-				shade += (Math.pow((i+j-stats.meanx-stats.meany),3)*glcm[i][j]);
-			}
-		}
-		return shade;
-	}
-
-	/**
-	 * Calculate the prominence (Walker, et al., 1995; Connors, et al. 1984)
-	 * @param glcm
-	 * @param stats
-	 * @return
-	 */
-	private double calculateProminence(double[][] glcm, GLCMStats stats) {
-		double prominence=0.0;
-		for (int i=0;  i<256; i++) {
-			for (int j=0; j<256; j++) {
-				prominence += (Math.pow((i+j-stats.meanx-stats.meany),4)*glcm[i][j]);
-			}
-		}
-		return prominence;
-	}
-
-	/**
-	 * Calculate the correlation. Methods based on Haralick 1973 
-	 * (and MatLab), Walker 1995 are included below. Haralick/Matlab 
-	 * result reported for correlation currently; will 
-	 * give Walker as an option in the future.
-	 * @param glcm
-	 * @param stats
-	 * @return
-	 */
-	private double calculateCorrelation(double[][] glcm, GLCMStats stats) {
-		double correlation=0.0;
-
-		// calculate the correlation parameter
-		for (int i=0;  i<256; i++) {
-			for (int j=0; j<256; j++) {
-				//Walker, et al. 1995 (matches Xite)
-				//correlation += ((((i-meanx)*(j-meany))/Math.sqrt(stdevx*stdevy))*glcm[i][j]);
-				//Haralick, et al. 1973 (continued below outside loop; matches original GLCM_Texture)
-				//correlation += (i*j)*glcm[i][j];
-				//matlab's rephrasing of Haralick 1973; produces the same result as Haralick 1973
-				correlation += ((((i-stats.meanx)*(j-stats.meany))/( stats.stdevx*stats.stdevy))*glcm[i][j]);
-			}
-		}
-		//Haralick, et al. 1973, original method continued.
-		//correlation = (correlation -(meanx*meany))/(stdevx*stdevy);
-		return correlation;
-	}
 }
