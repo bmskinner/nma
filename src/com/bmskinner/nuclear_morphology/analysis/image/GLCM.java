@@ -58,7 +58,6 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
-import ij.gui.EllipseRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
@@ -731,24 +730,24 @@ public class GLCM {
 	}
 
 	/**
-	 * Given a circular roi diameter, calculate the GLCM values across
+	 * Given a square roi, calculate tiled GLCM values across
 	 * the image, moving the roi by a fixed step size.
 	 * @param ip the image to analyse
-	 * @param diameter the diameter of the circular roi in pixels 
+	 * @param tileWidth the width of the square roi in pixels 
 	 * @return the calculated GLCM parameters for each tile
 	 */
-	public GLCMTilePath calculate(ImageProcessor ip, int diameter){
+	public GLCMTilePath calculate(ImageProcessor ip, int tileWidth){
 		LOGGER.fine("Calculating GLCM");
 		int w = ip.getWidth();
 		int h = ip.getHeight();
 
-		GLCMTilePath result = new GLCMTilePath(ip, diameter);
+		GLCMTilePath result = new GLCMTilePath(ip, tileWidth);
 
-		// Start from the left edge, up to 'diameter' from the right edge
-		for(int x=0; x<w-diameter; x++) {
+		// Start from the left edge, up to 'tileWidth' from the right edge
+		for(int x=0; x<w-tileWidth; x++) {
 			LOGGER.fine("x: "+x+" of "+w);
-			for(int y=0; y<h-diameter;y++) {
-				Roi roi = new EllipseRoi(x, y, x+diameter, y+diameter, 1);
+			for(int y=0; y<h-tileWidth;y++) {
+				Roi roi = new Roi(x, y, x+tileWidth, y+tileWidth);
 				ip.setRoi(roi);
 				result.addGLCMTile(calculate(ip), x, y);
 			}
@@ -839,8 +838,7 @@ public class GLCM {
 
 	private GLCMMatrix calculateMatrix(ImageProcessor ip, int offsetX, int offsetY){
 
-		// The matrix size is fixed by default.
-		// What happens if the tile is smaller? Values wil be 0.
+		// The matrix size is fixed to 8-bit grey levels.
 		GLCMMatrix g = new GLCMMatrix(256, 256);
 
 		// use the bounding rectangle ROI to roughly limit processing
