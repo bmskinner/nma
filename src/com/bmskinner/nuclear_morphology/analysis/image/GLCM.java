@@ -412,6 +412,11 @@ public class GLCM {
 			// No access
 		}
 		
+		/**
+		 * Create with a specified dimension
+		 * @param w
+		 * @param h
+		 */
 		public GLCMMatrix(int w, int h) {
 			glcm = new double[w][h];
 			pixelCount = 0;
@@ -439,6 +444,23 @@ public class GLCM {
 			updateStats();
 			return this;
 		}
+		
+		/**
+		 * Calculate the mean of the matrix
+		 * for the given sample size
+		 * @param n
+		 * @return
+		 */
+		public GLCMMatrix average(double n) {
+			for (int i=0; i<256; i++)  {
+				for (int j=0; j<256; j++) {
+					glcm[i][j] /= n;
+				}
+			}
+			updateStats();
+			return this;
+		}
+			
 		
 		private GLCMMatrix convertToProbabilities(){
 			for (int i=0; i<256; i++)  {
@@ -827,7 +849,8 @@ public class GLCM {
 			glcm = calculateMatrix(ip, 0, -d)
 			.plus(calculateMatrix(ip, d, 0))
 			.plus(calculateMatrix(ip, d, -d))
-			.plus(calculateMatrix(ip, -d, -d));
+			.plus(calculateMatrix(ip, -d, -d))
+			.average(4);
 			break;
 		
 		}

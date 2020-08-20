@@ -15,6 +15,8 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMStepAngle;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTilePath;
+import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -35,7 +37,7 @@ import ij.process.ImageProcessor;
  */
 public class GLCMTest {
 	
-	private static final Logger LOGGER = Logger.getGlobal();
+	private static final Logger LOGGER = Logger.getLogger(GLCMTest.class.getName());
 
 	@Before
 	public void setUp() throws Exception {
@@ -50,7 +52,7 @@ public class GLCMTest {
 	
 
 //	@Test
-//	public void test() throws Exception {
+//	public void testRunningTilePath() throws Exception {
 //		GLCM glcm = new GLCM();
 //		
 //		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
@@ -59,8 +61,7 @@ public class GLCMTest {
 //		
 //		ImageProcessor ip = n.getComponentImage().convertToByte(false);
 //		GLCMTilePath result = glcm.calculate(ip, 25);
-//		
-//		System.out.println(result.toString(GLCMParameter.IDM));
+//
 ////		ImageViewer.showImage(ip, "input");
 ////		ImageViewer.showImage(result.toStack(), "output");
 //	}
@@ -193,6 +194,32 @@ public class GLCMTest {
 //		ip.setLineWidth(2);
 //		ip.setColor(Color.GRAY);
 //		ip.draw(roi);
+
+		GLCMTile result = glcm.calculate(n);
+		
+		assertEquals("Sum should be 1", 1d, result1.get(GLCMParameter.SUM), 0.01);
+		assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",result.toString().equals(result1.toString()));
+		
+		
+//		System.out.println(result.toString());
+	}
+	
+	@Test
+	public void testRunningAllStepAnglesOnComponent() throws Exception {
+		HashOptions options = GLCM.defaultOptions();
+		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.ALL.toString());
+//		options.setInt(GLCM.STEP_SIZE_KEY, 2);
+		GLCM glcm = new GLCM(options);
+		
+		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
+		
+		Nucleus n = d.getCollection().stream().findFirst().get().getNucleus();
+		
+		Roi roi = n.toRoi();
+		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
+		ImageProcessor ip = n.getComponentImage().convertToByte(false);
+		GLCMTile result1 = glcm.calculate(ip);
+		System.out.println(result1.toString());
 
 		GLCMTile result = glcm.calculate(n);
 		
