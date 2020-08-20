@@ -107,16 +107,22 @@ public class DatasetStatsExporter extends StatsExporter {
 
         for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
 
-            String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("\\(", "_")
-                    .replace("\\)", "").replace("__", "_");
+            String label = s.label(MeasurementScale.PIXELS)
+            		.replace(" ", "_")
+            		.replace("(", "_")
+                    .replace(")", "")
+                    .replace("__", "_");
             outLine.append(label + TAB);
 
             if (!s.isDimensionless() && !s.isAngle()) { // only give micron
                                                         // measurements when
                                                         // length or area
 
-                label = s.label(MeasurementScale.MICRONS).replace(" ", "_").replace("\\(", "_")
-                        .replace("\\)", "").replace("__", "_");
+                label = s.label(MeasurementScale.MICRONS)
+                		.replace(" ", "_")
+                		.replace("(", "_")
+                        .replace(")", "")
+                        .replace("__", "_");
 
                 outLine.append(label + TAB);
             }
