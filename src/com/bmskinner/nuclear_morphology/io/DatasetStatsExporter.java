@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -55,6 +56,7 @@ public class DatasetStatsExporter extends StatsExporter {
 
     private boolean isIncludeProfiles = true;
     private boolean isIncludeSegments = false;
+    private boolean isIncludeGlcm = false;
     
     /** How many samples should be taken from each profile? */
     private int profileSamples = 100;
@@ -74,6 +76,11 @@ public class DatasetStatsExporter extends StatsExporter {
             isIncludeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
         }
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
+        
+        // Only include if present in all datasets
+        isIncludeGlcm = list.stream()
+        		.allMatch(d->d.getCollection().getCells().stream()
+        				.allMatch(c->c.getNucleus().hasStatistic(GLCMParameter.SUM.toStat())));
     }
 
     /**
@@ -114,6 +121,13 @@ public class DatasetStatsExporter extends StatsExporter {
                 outLine.append(label + TAB);
             }
 
+        }
+        
+        if(isIncludeGlcm) {
+        	for (PlottableStatistic s : PlottableStatistic.getGlcmStats()) {
+        		String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__", "_");
+                outLine.append("GLCM_"+label + TAB);
+        	}
         }
 
         if (isIncludeProfiles) {
@@ -172,6 +186,8 @@ public class DatasetStatsExporter extends StatsExporter {
                         .append(n.getSourceFileName() + TAB)
                         .append(n.getOriginalCentreOfMass().toString() + TAB);
                     appendNucleusStats(outLine, d, n);
+                    
+                    
 
                     if (isIncludeProfiles) {
                         appendProfiles(outLine, n);
@@ -219,6 +235,12 @@ public class DatasetStatsExporter extends StatsExporter {
             if (!s.isDimensionless() && !s.isAngle()) {
                 outLine.append(varM + TAB);
             }
+        }
+        
+        if(isIncludeGlcm) {
+        	for (PlottableStatistic s : PlottableStatistic.getGlcmStats()) {
+        		outLine.append(c.getStatistic(s) + TAB);
+        	}
         }
     }
 
