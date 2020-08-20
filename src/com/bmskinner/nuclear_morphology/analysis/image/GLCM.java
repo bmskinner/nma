@@ -75,20 +75,6 @@ public class GLCM {
 	private static final Logger LOGGER = Logger.getLogger(GLCM.class.getName());
 
 	public static final String USE_SYMMETRY_KEY   = "Use symmetry";
-	public static final String DO_ASM_KEY         = "Do ASM";
-	public static final String DO_CONTRAST_KEY    = "Do contrast";
-	public static final String DO_CORRELATION_KEY = "Do correlation";
-
-
-	/** Inverse Difference Moment (Walker, et al. 1995)	 */
-	public static final String DO_IDM_KEY         = "Do IDM";
-	public static final String DO_ENTROPY_KEY     = "Do entropy";
-	public static final String DO_ENERGY_KEY      = "Do energy";
-	public static final String DO_INERTIA_KEY     = "Do inertia";
-	public static final String DO_HOMOGENEITY_KEY = "Do homogeneity";
-	public static final String DO_PROMINENCE_KEY  = "Do prominence";
-	public static final String DO_VARIANCE_KEY    = "Do variance";
-	public static final String DO_SHADE_KEY       = "Do shade";
 
 	/** Step size in pixels */
 	public static final String STEP_SIZE_KEY      = "Step size";
@@ -103,7 +89,7 @@ public class GLCM {
 	 * @author ben
 	 *
 	 */
-	private enum GLCMStepAngle {
+	public enum GLCMStepAngle {
 		NORTH(0),
 		NORTHEAST(45), EAST(90), SOUTHEAST(135), ALL(-1);
 
@@ -178,42 +164,17 @@ public class GLCM {
 		 * @param matrix
 		 */
 		public GLCMTile(GLCMMatrix matrix) {
-			if (options.getBoolean(DO_ASM_KEY))
-				set(GLCMParameter.ASM, matrix.asm());
-
-			if (options.getBoolean(DO_IDM_KEY))
-				set(GLCMParameter.IDM, matrix.idm());
-
-			if (options.getBoolean(DO_CONTRAST_KEY))
-				set(GLCMParameter.CONSTRAST, matrix.contrast());
-
-			if (options.getBoolean(DO_ENERGY_KEY))
-				set(GLCMParameter.ENERGY, matrix.energy());
-
-			if (options.getBoolean(DO_ENTROPY_KEY))
-				set(GLCMParameter.ENTROPY, matrix.entropy());
-
-			if (options.getBoolean(DO_HOMOGENEITY_KEY))
-				set(GLCMParameter.HOMOGENEITY, matrix.homogeneity());
-
-			if (options.getBoolean(DO_INERTIA_KEY))
-				set(GLCMParameter.INERTIA, matrix.inertia());
-
-//			// Calculate stats for subsequent calculations
-//			GLCMStats stats = new GLCMStats(matrix);
-
-			if (options.getBoolean(DO_VARIANCE_KEY))
-				set(GLCMParameter.VARIANCE, matrix.variance());
-
-			if (options.getBoolean(DO_SHADE_KEY))
-				set(GLCMParameter.SHADE, matrix.shade());
-
-			if (options.getBoolean(DO_PROMINENCE_KEY))
-				set(GLCMParameter.PROMINENCE, matrix.prominence());
-
-			if (options.getBoolean(DO_CORRELATION_KEY))
-				set(GLCMParameter.CORRELATION, matrix.correlation());
-
+			set(GLCMParameter.ASM, matrix.asm());
+			set(GLCMParameter.IDM, matrix.idm());
+			set(GLCMParameter.CONSTRAST, matrix.contrast());
+			set(GLCMParameter.ENERGY, matrix.energy());
+			set(GLCMParameter.ENTROPY, matrix.entropy());
+			set(GLCMParameter.HOMOGENEITY, matrix.homogeneity());
+			set(GLCMParameter.INERTIA, matrix.inertia());
+			set(GLCMParameter.VARIANCE, matrix.variance());
+			set(GLCMParameter.SHADE, matrix.shade());
+			set(GLCMParameter.PROMINENCE, matrix.prominence());
+			set(GLCMParameter.CORRELATION, matrix.correlation());
 			set(GLCMParameter.SUM, matrix.sum());
 		}
 
@@ -254,6 +215,46 @@ public class GLCM {
 			}
 			return builder.toString();
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
+			result = prime * result + ((values == null) ? 0 : values.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			GLCMTile other = (GLCMTile) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (identifier == null) {
+				if (other.identifier != null)
+					return false;
+			} else if (!identifier.equals(other.identifier))
+				return false;
+			if (values == null) {
+				if (other.values != null)
+					return false;
+			} else if (!values.equals(other.values))
+				return false;
+			return true;
+		}
+
+		private GLCM getOuterType() {
+			return GLCM.this;
+		}
+		
+		
 	}
 
 	/**
@@ -688,7 +689,6 @@ public class GLCM {
 	 * @param options the options for the GLCM analysis
 	 */
 	public GLCM(@NonNull final HashOptions options) {
-		GLCMStepAngle phi = GLCMStepAngle.valueOf(options.getString(ANGLE_KEY));
 		this.options = options;
 
 	}
@@ -700,19 +700,8 @@ public class GLCM {
 	public static HashOptions defaultOptions() {
 		HashOptions o = new DefaultOptions();
 		o.setInt(STEP_SIZE_KEY, 1);
-		o.setString(ANGLE_KEY, GLCMStepAngle.ALL.toString());
+		o.setString(ANGLE_KEY, GLCMStepAngle.NORTH.toString());
 		o.setBoolean(USE_SYMMETRY_KEY, true);
-		o.setBoolean(DO_ASM_KEY, true);
-		o.setBoolean(DO_CONTRAST_KEY, true);
-		o.setBoolean(DO_CORRELATION_KEY, true);
-		o.setBoolean(DO_IDM_KEY, true);
-		o.setBoolean(DO_ENTROPY_KEY, true);
-		o.setBoolean(DO_ENERGY_KEY, true);
-		o.setBoolean(DO_INERTIA_KEY, true);
-		o.setBoolean(DO_HOMOGENEITY_KEY, true);
-		o.setBoolean(DO_PROMINENCE_KEY, true);
-		o.setBoolean(DO_VARIANCE_KEY, true);
-		o.setBoolean(DO_SHADE_KEY, true);
 		return o;
 	}
 

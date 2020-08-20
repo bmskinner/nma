@@ -11,7 +11,8 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({MultiScaleStructuralSimilarityIndexTest.class})
+@SuiteClasses({MultiScaleStructuralSimilarityIndexTest.class,
+	GLCMTest.class})
 public class AnalysisImageTestSuite {
 	
 }
