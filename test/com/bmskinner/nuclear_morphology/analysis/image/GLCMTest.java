@@ -220,7 +220,7 @@ public class GLCMTest {
 		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
 		ImageProcessor ip = n.getComponentImage().convertToByte(false);
 		GLCMTile result1 = glcm.calculate(ip);
-		System.out.println(result1.toString());
+//		System.out.println(result1.toString());
 
 		GLCMTile result = glcm.calculate(n);
 		

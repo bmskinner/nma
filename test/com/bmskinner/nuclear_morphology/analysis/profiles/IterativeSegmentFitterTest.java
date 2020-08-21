@@ -107,17 +107,6 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 		
 		ISegmentedProfile result = fitter.fit(target.copy());
 		
-//		List<IProfile> profiles = new ArrayList<>();
-//		profiles.add(template);
-//		profiles.add(target);
-//		profiles.add(result);
-//		
-//		List<String> names = new ArrayList<>();
-//		names.add("Template");
-//		names.add("Target");
-//		names.add("Result");
-		
-		
 		for(int i=0; i<target.getSegmentCount(); i++) {
 			IBorderSegment targetSeg = target.getOrderedSegments().get(i);
 			IBorderSegment resultSeg = result.getOrderedSegments().get(i);	
@@ -152,12 +141,6 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 						
 			ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 			IBorderSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-			System.out.println("Median: "+singleSegmentProfile.toString());
-			System.out.println("Added to nucleus: "+segProfile.toString());
-			System.out.println("Seg in profile added: "+segProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getDetail());
-			System.out.println("Fetched from nucleus: "+test.toString());
-			System.out.println("Seg in profile fetched: "+seg.getDetail());
-			System.out.println("RP in nucleus: "+n.getBorderIndex(Tag.REFERENCE_POINT));
 			assertEquals("Single segment start fetched from nucleus", 0, seg.getStartIndex());			
 		}
 		

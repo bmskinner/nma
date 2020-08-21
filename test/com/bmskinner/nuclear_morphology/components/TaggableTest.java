@@ -94,9 +94,8 @@ public class TaggableTest extends ComponentTester {
 		
 		int oldEnd = seg0.getEndIndex();
 		int newEnd = oldEnd+10;
-		System.out.println("Old profile: "+oldProfile);
+
 		assertTrue(oldProfile.update(seg0, newStart, newEnd));
-		System.out.println("Updated profile: "+oldProfile);
 		
 		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, oldProfile);
 		

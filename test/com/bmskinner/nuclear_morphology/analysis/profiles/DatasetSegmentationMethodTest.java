@@ -37,7 +37,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 
 		int maxCells = 50;		
 		for(int i=1; i<=maxCells; i++) {
-			System.out.println(String.format("Testing %s cells", i));
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(i)
 					.baseHeight(40).baseWidth(40)
 					.ofType(NucleusType.ROUND)
@@ -56,7 +55,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 
 		int maxCells = 50;		
 		for(int i=1; i<=maxCells; i++) {
-			System.out.println(String.format("Testing %s cells", i));
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(i)
 					.baseHeight(40).baseWidth(40)
 					.ofType(NucleusType.ROUND)
@@ -75,7 +73,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 	public void testSegmentationOfMultiCellDatasetWithVariableOffset() throws Exception {
 		int maxCells = 50;		
 		for(int i=1; i<=maxCells; i++) {
-			System.out.println(String.format("Testing %s cells", i));
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(i)
 					.baseHeight(40).baseWidth(40)
 					.ofType(NucleusType.ROUND)
@@ -92,7 +89,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		int cells = 50;
 		int var   = 20;
 
-		System.out.println(String.format("Testing variability %s on %s cells", var, cells));
 		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(cells)
 				.withMaxSizeVariation(var)
 				.baseHeight(40).baseWidth(40)
@@ -105,7 +101,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 	@Test
 	public void testSegmentationIsIndependentOfCellCountInVaryingDatasetWithKnownError() throws Exception {
 
-		System.out.println(String.format("Testing variability %s on %s cells", 16, 3));
 		IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(3)
 				.withMaxSizeVariation(16)
 				.baseHeight(40).baseWidth(40)
@@ -128,7 +123,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 	public void testSegmentationIsIndependentOfCellCountInIdenticalDataset() throws Exception {
 		int maxCells = 50;		
 		for(int nCells=1; nCells<=maxCells; nCells++) {
-				System.out.println(String.format("Testing %s cells", nCells));
 				IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(nCells)
 						.baseHeight(40).baseWidth(40)
 						.randomOffsetProfiles(false)
@@ -152,7 +146,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		int maxCells = 50;		
 		for(int nCells=1; nCells<=maxCells; nCells++) {
 			for(int var=0; var<=20; var++) {
-				System.out.println(String.format("Testing variability %s on %s cells", var, nCells));
 				IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(nCells)
 						.withMaxSizeVariation(var)
 						.baseHeight(40).baseWidth(40)

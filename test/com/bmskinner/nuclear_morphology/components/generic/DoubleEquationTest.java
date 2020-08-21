@@ -137,9 +137,6 @@ public class DoubleEquationTest {
         IPoint pPos = X_EQ_Y.getPointOnLine(ORIGIN, 1);
         IPoint pNeg = X_EQ_Y.getPointOnLine(ORIGIN, -1);
         
-        System.out.println(pPos.toString());
-        System.out.println(pNeg.toString());
-        
         IPoint p1 = IPoint.makeNew(Math.sqrt(0.5),Math.sqrt(0.5)); 
         assertEquals("x", p1.getX(), pPos.getX(), 0.000001); 
         assertEquals("y", p1.getY(), pPos.getY(), 0.000001);

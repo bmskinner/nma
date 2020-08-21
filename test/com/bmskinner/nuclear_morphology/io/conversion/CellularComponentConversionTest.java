@@ -83,14 +83,10 @@ public class CellularComponentConversionTest extends ComponentTester {
 			
 			Field tagField = getInheritedField(n.getClass(), "borderTags");		
 			Map<Tag, Integer> idx = (Map<Tag, Integer>) tagField.get(n);
-			
-			for(Tag t : idx.keySet())
-				System.out.println(t.toString()+": "+idx.get(t));
-			
+						
 			
 			Field borderField = getInheritedField(n.getClass(), "borderList");
 			List<IBorderPoint> borderList = (List<IBorderPoint>) borderField.get(n);
-			System.out.println(n.getNameAndNumber()+" Border: "+borderList.size());
 		}
 
 

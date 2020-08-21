@@ -82,16 +82,13 @@ public class AbstractProfileMethodTest extends ComponentTester {
 
 		DatasetValidator v = new DatasetValidator();
 		boolean ok = v.validate(d);
-		for(String s : v.getErrors()){
-			System.out.println(s);
-		}
 		
 		if(!ok) {
 			ChartFactoryTest.showProfiles(v.getErrorCells(), d);
 			OutlineTestChartFactory.generateOutlineChartsForAllCells(d, "An error was found in segmentation of "+d.getName());
 		}
 				
-		assertTrue(ok);
+		assertTrue("Dataset should be valid", ok);
 
 		ISegmentedProfile median = d.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);

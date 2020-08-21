@@ -22,7 +22,6 @@ import org.junit.Before;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 
 /**
  * Base class for the component tests
@@ -35,17 +34,16 @@ public abstract class ComponentTester extends FloatArrayTester {
 	protected static final long RNG_SEED = 1234;
 	protected static final int N_CELLS = 10;
 	protected static final int N_CHILD_DATASETS = 2;
-	protected static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	protected static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
 	
 	@Before
 	public void setUp() throws Exception{
-		for(Handler h : logger.getHandlers())
-			logger.removeHandler(h);
+		for(Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
 		Handler h = new ConsoleHandler(new ConsoleFormatter());
-		logger.setLevel(Level.FINER);
+		LOGGER.setLevel(Level.FINER);
 		h.setLevel(Level.FINER);
-		logger.addHandler(h);
-		
+		LOGGER.addHandler(h);
 	}
 	
 	
@@ -58,7 +56,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 */
 	protected boolean areVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
 		double err = bottomPoint.getX()-topPoint.getX();
-		logger.fine("Error = "+err);
+		LOGGER.fine("Error = "+err);
 		boolean xEqual = (Math.abs(bottomPoint.getX()- topPoint.getX())<0.0001);
 		boolean yAbove = topPoint.getY()>bottomPoint.getY();
 		return xEqual & yAbove;

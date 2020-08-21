@@ -193,7 +193,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			LOGGER.log(Loggable.STACK, "Profile error getting segments", e);
 			return new ArrayList<>();
 		}
-    	System.out.println("Found segment count is "+getSegmentCount());
 		return new ArrayList<>();
     }
 

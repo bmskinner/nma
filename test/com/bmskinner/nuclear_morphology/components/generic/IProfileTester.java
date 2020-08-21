@@ -591,9 +591,7 @@ public class IProfileTester {
 	
 	@Test
 	public void testGetLocalMinimaWorksOnZeroIndex() throws ProfileException {
-		System.out.println(Arrays.toString(profile.toFloatArray()));
 		IProfile offset = profile.offset(270);
-		System.out.println(Arrays.toString(offset.toFloatArray()));
 	    BooleanProfile b = offset.getLocalMinima(3, 180);
 	    assertTrue("Expecting minima at "+offset.get(0), b.get(0));
 	}
@@ -655,9 +653,7 @@ public class IProfileTester {
         int start = data.length-2;
         int stop  = 2;
         IProfile p = profile.getSubregion(start, stop);
-        
-        System.out.println(p.toString());
-        
+                
         for(int i=0; i<p.size(); i++){
         	int original = i<2 ? start+i : i-2;
         	 assertEquals(data[original], p.get(i), 0);

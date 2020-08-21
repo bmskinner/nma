@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.stream.LongStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Allow cell collections to be filtered based on
@@ -43,6 +45,8 @@ public class ShellResultCellFilterer {
 	private double proportion;
 	private int shell;
 	private ShellResultFilterOperation operation;
+	
+	private static final Logger LOGGER = Logger.getLogger(ShellResultCellFilterer.class.getName());
 	
 	public ShellResultCellFilterer(@NonNull UUID signalGroupId) {
 		this.signalGroupId = signalGroupId;
@@ -81,7 +85,6 @@ public class ShellResultCellFilterer {
 			throw new IllegalArgumentException("No shell result in signal group");
 		
 		final IShellResult s = r.get();
-//		log(String.format("Making nucleus filter for operation %s with shell %s and proportion %s on signal group %s", operation, shell, proportion, signalGroupId));
 		Predicate<ICell> pred = (cell)->{
 			boolean cellPasses = true;
 			for(Nucleus n : cell.getNuclei()) {
@@ -89,17 +92,14 @@ public class ShellResultCellFilterer {
 					long[] pixels = s.getPixelValues(CountType.SIGNAL, cell, n, null);
 					if(pixels==null) {
 						cellPasses &= false;
-//						log(String.format("Cell: %s No pixels", operation));
 						continue;
 					}
 					long total = LongStream.of(pixels).sum();
 					double[] props = LongStream.of(pixels).mapToDouble(l->(double)l/(double)total).toArray();
 					switch(operation) {
 						case SPECIFIC_SHELL_IS_MORE_THAN: cellPasses &= props[shell]>=proportion; 
-//						log(String.format("Cell: %s prop %s and needed %s: %s", operation, props[shell], proportion, cellPasses));
 						break;
 						case SPECIFIC_SHELL_IS_LESS_THAN: cellPasses &= props[shell]<=proportion; 
-//						log(String.format("Cell: %s prop %s and needed %s: %s", operation, props[shell], proportion, cellPasses));
 						break;
 						
 						case SHELL_PLUS_SHELLS_INTERIOR_TO_MORE_THAN: {
@@ -107,7 +107,6 @@ public class ShellResultCellFilterer {
 							for(int i=shell;i<s.getNumberOfShells(); i++) {
 								sum+=props[i];
 							}
-//							log(String.format("Cell: %s sum %s and needed %s: %s", operation, sum, proportion, cellPasses));
 							cellPasses &= sum>=proportion;
 							 break;
 						}
@@ -116,16 +115,13 @@ public class ShellResultCellFilterer {
 							for(int i=0; i<=shell; i++) {
 								sum+=props[i];
 							}
-//							log(String.format("Cell: %s sum %s and needed %s: %s", operation, sum, proportion, cellPasses));
 							cellPasses &= sum>=proportion;
 							 break;
 						}
-//						default: log(String.format("Cell: %s needed %s. No valid operation provided", operation, proportion));
 					}
 				} catch(Exception e) {
 					cellPasses &= false;
-					System.out.println(e.getMessage());
-					e.printStackTrace();
+					LOGGER.log(Loggable.STACK, "Unable to filter cells", e);
 				}
 			}
 			return cellPasses;

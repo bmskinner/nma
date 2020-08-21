@@ -57,9 +57,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 		
 		for(int xBase = -10; xBase<10; xBase++) {
 			for(int yBase = -10; yBase<10; yBase++) {
-				
-				System.out.println("xBase "+xBase+"; yBase "+yBase);
-				
+								
 				IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 						.xBase(xBase).yBase(yBase)
 						.randomOffsetProfiles(false).fixedProfileOffset(20)

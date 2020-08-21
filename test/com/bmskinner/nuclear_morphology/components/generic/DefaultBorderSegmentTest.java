@@ -619,95 +619,9 @@ public class DefaultBorderSegmentTest {
 			i++;
 		}
 	}
-		
-//	@Test
-//	public void testNudgeUnlinkedWithoutMergeSources(){
-//		int[] start = { 0,  10, 30, 88 };
-//		int[] end   = { 10, 30, 88, 0  };
-//		
-//		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
-//		
-//		for(int i=0; i<start.length; i++){
-//			list.add(new DefaultBorderSegment(start[i], end[i], 100));
-//		}
-//		
-//		/*
-//		 * Offset of 1
-//		 */
-//		
-//		int[] expStart = { 1,  11, 31, 89 };
-//		int[] expEnd   = { 11, 31, 89, 1 };
-//		
-//		List<IBorderSegment> result = IBorderSegment.nudgeUnlinked(list, 1);
-//		
-//		for(int i=0; i<list.size(); i++){
-//			IBorderSegment s = result.get(i);
-//			assertEquals(expStart[i], s.getStartIndex());
-//			assertEquals(  expEnd[i], s.getEndIndex());			
-//		}
-//		
-//		/*
-//		 * Offset of -2
-//		 */
-//		int[] expStart_2 = { 98, 8,  28, 86 };
-//		int[] expEnd_2   = { 8, 28,  86, 98 };
-//		
-//		result = IBorderSegment.nudgeUnlinked(list, -2);
-//		
-//		for(int i=0; i<list.size(); i++){
-//			IBorderSegment s = result.get(i);
-//			assertEquals(expStart_2[i], s.getStartIndex());
-//			assertEquals(  expEnd_2[i], s.getEndIndex());			
-//		}
-//	}
-//	
-//	@Test
-//    public void testNudgeUnlinkedWithMergeSources(){
-//		
-//		int[] start = { 0,  10, 30, 88 };
-//		int[] end   = { 10, 30, 88, 0  };
-//		
-//		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
-//		
-//		for(int i=0; i<start.length; i++){
-//			list.add(new DefaultBorderSegment(start[i], end[i], 100));
-//		}
-//		// Add merge sources to seg 1
-//		
-//		list.get(0).addMergeSource( new DefaultBorderSegment(0, 4,  100) );
-//		list.get(0).addMergeSource( new DefaultBorderSegment(4, 10, 100) );
-//		
-//		
-//		/*
-//		 * Offset of 1
-//		 */
-//		
-//		int[] expStart = { 1,  11, 31, 89 };
-//		int[] expEnd   = { 11, 31, 89, 1 };
-//		
-//		List<IBorderSegment> result = IBorderSegment.nudgeUnlinked(list, 1);
-//		
-//		for(int i=0; i<list.size(); i++){
-//			IBorderSegment s = result.get(i);
-//			assertEquals(expStart[i], s.getStartIndex());
-//			assertEquals(  expEnd[i], s.getEndIndex());			
-//		}
-//		
-//		
-//		int[] mgeStart = { 1, 5 };
-//		int[] mgeEnd   = { 5, 11 };
-//		List<IBorderSegment> sources = list.get(0).getMergeSources();
-//		for(int i=0; i<sources.size(); i++){
-//			IBorderSegment s = sources.get(i);
-//			assertEquals(mgeStart[i], s.getStartIndex());
-//			assertEquals(  mgeEnd[i], s.getEndIndex());	
-//		}
-//		
-//		
-//	}
-	
+			
 	@Test
-	public void testCopy() throws ProfileException{
+	public void testCopy() throws ProfileException {
 		
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
@@ -717,15 +631,8 @@ public class DefaultBorderSegmentTest {
 		for(int i=0; i<start.length; i++){
 			list.add(new DefaultBorderSegment(start[i], end[i], 100));
 		}
-		
-		try {
-			IBorderSegment.linkSegments(list);
-		} catch (ProfileException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			fail("Error linking segments");
-			
-		}
+
+		IBorderSegment.linkSegments(list);
 
 		List<IBorderSegment> result = IBorderSegment.copy(list);
 
@@ -734,9 +641,7 @@ public class DefaultBorderSegmentTest {
 		    IBorderSegment r = result.get(i);
 
 		    assertEquals(t, r);
-
 		}
-
 	}
 
 	@Test

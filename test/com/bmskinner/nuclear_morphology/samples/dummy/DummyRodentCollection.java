@@ -68,25 +68,15 @@ public class DummyRodentCollection extends DefaultCellCollection {
 		
 	}
 	
-	public static void main(String[] args){
-		
-		System.out.println("Making collection");
-		
+	public static void main(String[] args){	
 		
 		DummyRodentCollection collection = new DummyRodentCollection(10000);
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
-//		System.out.println(collection.toString());
-		
-//		for(Nucleus n : collection.getNuclei()){
-//			System.out.println(n.toString());
-//		}
-		
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection);		
 		IAnalysisMethod profiler = new DatasetProfilingMethod(d);
 		
 		IAnalysisWorker w = new DefaultAnalysisWorker(profiler);
 		w.run();
 		
-		System.out.println("Waiting for profiler...");
 		try {
 			w.get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -94,15 +84,9 @@ public class DummyRodentCollection extends DefaultCellCollection {
 			e.printStackTrace();
 		}
 		
-		System.out.println("Profiling complete");
-		
-//		collection.getNuclearStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-		
 		double area;
 		try {
-			System.out.println("Fetching areas");
 			area = collection.getMedian(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-			System.out.println("Median area: "+area);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -68,7 +68,6 @@ public class DatasetMergeTest {
 
         IAnalysisMethod m = new DatasetMergeMethod(toMerge, new File(TestResources.TESTING_MULTIPLE_BASE_FOLDER+"Merge_test.nmd"));  
 
-        System.out.println("Merging "+d1.toString()+" and "+d2.toString());
         IAnalysisResult r = m.call();
         IAnalysisDataset d = r.getFirstDataset();
 

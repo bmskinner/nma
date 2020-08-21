@@ -3,8 +3,6 @@ package com.bmskinner.nuclear_morphology.analysis;
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -17,8 +15,6 @@ import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 
 /**
  * Test that nuclei in an image are detected,
@@ -31,16 +27,16 @@ import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
  */
 public class NucleusDetectionTest {
 	
-protected static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+protected static final Logger LOGGER = Logger.getLogger(NucleusDetectionTest.class.getName());
 	
 	@Before
 	public void setUp() throws Exception{
-		for(Handler h : logger.getHandlers())
-			logger.removeHandler(h);
-		Handler h = new ConsoleHandler(new ConsoleFormatter());
-		logger.setLevel(Level.FINER);
-		h.setLevel(Level.FINER);
-		logger.addHandler(h);
+//		for(Handler h : LOGGER.getHandlers())
+//			LOGGER.removeHandler(h);
+//		Handler h = new ConsoleHandler(new ConsoleFormatter());
+//		LOGGER.setLevel(Level.FINER);
+//		h.setLevel(Level.FINER);
+//		LOGGER.addHandler(h);
 		
 	}
 	

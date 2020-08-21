@@ -116,12 +116,10 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
 		// Check the stats are the same
 		for(PlottableStatistic s : PlottableStatistic.getStats(CellularComponent.NUCLEUS)){
-			System.out.println("Testing equality of "+s);
 			double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
-			assertEquals(s.toString(), eMed, oMed, 0.3);
-			//            assertEquals(s.toString(), eMed, oMed, 0.00000001); // TODO fails for variability. Not yet sure why. Something different after saving.
+			assertEquals("Stats should be equal: " +s.toString(), eMed, oMed, 0.3);
 		}
 	}
 }

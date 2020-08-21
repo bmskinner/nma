@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 
 public class MergeSourceExtracterTest extends SampleDatasetReader {
     
-	private Logger logger;
+	private static final Logger LOGGER = Logger.getLogger(MergeSourceExtracterTest.class.getName());
     public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
     
 //    /** A 1k cell dataset with 3 merge sources created in 1.13.8 on a different computer */
@@ -55,16 +55,15 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
         
     @Before
     public void setUp() throws Exception {
-    	logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		logger.setLevel(Level.FINE);
+		LOGGER.setLevel(Level.FINE);
 
 		boolean hasHandler = false;
-		for(Handler h : logger.getHandlers()) {
+		for(Handler h : LOGGER.getHandlers()) {
 			if(h instanceof ConsoleHandler)
 				hasHandler = true;
 		}
 		if(!hasHandler)
-			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+			LOGGER.addHandler(new ConsoleHandler(new LogPanelFormatter()));
     }
     
     @Test

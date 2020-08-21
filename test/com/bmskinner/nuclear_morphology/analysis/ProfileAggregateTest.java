@@ -60,7 +60,7 @@ public class ProfileAggregateTest {
 	}
 	
 	@Test
-	public void addAProfileToTheAggregate(){
+	public void addAProfileToTheAggregate() throws ProfileException{
 		
 		float[] array   = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 		IProfile values = new FloatProfile(array);
@@ -68,30 +68,15 @@ public class ProfileAggregateTest {
 		IProfileAggregate tester = new DefaultProfileAggregate(10, 50);
 		
 		for( int i=0;i<50; i++){
-			try {
-				tester.addValues(values);
-			} catch (ProfileException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				fail("Adding profile failed");
-			}
+			tester.addValues(values);
 		}
-		
-		
-		IProfile median;
-		try {
-			median = tester.getMedian();
-			
-			for( int i =0;i<10; i++){
-				assertEquals("Values should be identical", array[i], median.toDoubleArray()[i],0);
-			}
-			
-		} catch (ProfileException e) {
-			e.printStackTrace();
-			fail("Adding profile failed");
+
+
+		IProfile median = tester.getMedian();
+
+		for( int i =0;i<10; i++){
+			assertEquals("Values should be identical", array[i], median.toDoubleArray()[i],0);
 		}
-		
-		
 	}
 
 }

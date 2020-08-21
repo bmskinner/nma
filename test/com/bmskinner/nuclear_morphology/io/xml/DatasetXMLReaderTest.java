@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 public class DatasetXMLReaderTest extends ComponentTester {
 
 	private void testXMLRead(File f) throws Exception {
-		logger.fine("Opening serialised template dataset");
+		LOGGER.fine("Opening serialised template dataset");
 		IAnalysisDataset d = SampleDatasetReader.openDataset(f.getAbsoluteFile());
 		
 		// Create the XML file from the serialised file
@@ -38,7 +38,7 @@ public class DatasetXMLReaderTest extends ComponentTester {
 		XMLWriter.writeXML(dxc.create(), xmlFile);
 
 		// Read the XML file back in and check it's the same
-		logger.fine("Opening XML dataset");
+		LOGGER.fine("Opening XML dataset");
 		IAnalysisDataset read =  SampleDatasetReader.openXMLDataset(xmlFile);
 		
 		assertEquals(d.getName(), read.getName());
@@ -69,8 +69,6 @@ public class DatasetXMLReaderTest extends ComponentTester {
 		
 		DatasetValidator dv = new DatasetValidator();
 		boolean isValid = dv.validate(read);
-		if(!isValid)
-			dv.getErrors().stream().forEach(s->System.out.println(s));
 		assertTrue(isValid);
 		
 //		TODO: Functionality is not fully enabled

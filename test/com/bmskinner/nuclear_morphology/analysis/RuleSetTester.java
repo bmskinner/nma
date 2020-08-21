@@ -29,14 +29,14 @@ public class RuleSetTester {
 	@Test
 	public void testMouseOPRuleSet() throws Exception{
 	    IProfile median = IndividualNuclei.rodentSpermMedianProfileFromRP();
-	    for(int i=0; i<median.size(); i++){
-            System.out.println(i+" : " +median.get(i));
-        }
+//	    for(int i=0; i<median.size(); i++){
+//            System.out.println(i+" : " +median.get(i));
+//        }
 	    ProfileIndexFinder finder = new ProfileIndexFinder();
 
 	    RuleSet r = RuleSet.mouseSpermOPRuleSet();
 
-	    System.out.println(r.toString());
+//	    System.out.println(r.toString());
 
 	    int hits = finder.countMatchingIndexes(median, r);
 	    assertEquals(1, hits);

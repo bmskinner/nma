@@ -557,11 +557,6 @@ public class ISegmentedProfileTester extends ComponentTester {
 				 UUID segId = testSeg.getID();
 				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
 				 expSeg.offset(-i);
-				 
-				 if(!expSeg.toString().equals(testSeg.toString())) {
-					 System.out.println(String.format("Offset: %s Exp: %s", i, expSeg.getDetail()));
-					 System.out.println(String.format("Offset: %s Act: %s", i, testSeg.getDetail()));
-				 }
 				 assertEquals("Index "+i, expSeg.toString(), testSeg.toString());
 			 }
 
@@ -581,10 +576,6 @@ public class ISegmentedProfileTester extends ComponentTester {
 			 for(IBorderSegment testSeg : testSegments){
 				 UUID segId = testSeg.getID();
 				 IBorderSegment expSeg = expectedSegments.stream().filter(s->s.getID().equals(segId)).findFirst().orElseThrow(Exception::new);
-				 if(!expSeg.toString().equals(testSeg.toString())) {
-					 System.out.println(String.format("Offset: %s Exp: %s", i, expSeg.getDetail()));
-					 System.out.println(String.format("Offset: %s Act: %s", i, testSeg.getDetail()));
-				 }
 				 assertEquals("Index "+i, expSeg.toString(), testSeg.toString());
 			 }
 

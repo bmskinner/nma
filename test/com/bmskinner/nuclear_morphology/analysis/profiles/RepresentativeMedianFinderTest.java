@@ -94,7 +94,7 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 	public void testMedianFindingIsRobustToIncreasingVariation() throws Exception {
 		int maxCells = 50;		
 		for(int var=0; var<=20; var++) {
-			logger.log(Level.INFO, String.format("Testing variability %s on %s cells", var, maxCells));
+			LOGGER.log(Level.INFO, String.format("Testing variability %s on %s cells", var, maxCells));
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(maxCells)
 					.withMaxSizeVariation(var)
 					.baseHeight(40).baseWidth(40)
