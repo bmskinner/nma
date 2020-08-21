@@ -19,7 +19,6 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import org.junit.Rule;
 import org.junit.Test;

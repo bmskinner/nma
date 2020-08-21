@@ -12,16 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 
 /**
  * Base class for the component tests
@@ -35,18 +31,11 @@ public abstract class ComponentTester extends FloatArrayTester {
 	protected static final int N_CELLS = 10;
 	protected static final int N_CHILD_DATASETS = 2;
 	protected static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
-	
+
 	@Before
 	public void setUp() throws Exception{
-		for(Handler h : LOGGER.getHandlers())
-			LOGGER.removeHandler(h);
-		Handler h = new ConsoleHandler(new ConsoleFormatter());
-		LOGGER.setLevel(Level.FINER);
-		h.setLevel(Level.FINER);
-		LOGGER.addHandler(h);
+
 	}
-	
-	
 	
 	/**
 	 * Test if the two given points are vertically aligned

@@ -18,9 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,8 +29,6 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class SegmentFitterTest {
@@ -45,10 +40,6 @@ public class SegmentFitterTest {
 	
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-
 	}
 	
 	@Test

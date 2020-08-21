@@ -43,9 +43,6 @@ public class RotatableTest extends ComponentTester {
 
 			t = AngleTools.rotateAboutPoint(t, c, angle);
 			b = AngleTools.rotateAboutPoint(b, c, angle);
-			LOGGER.fine("A: "+angle);
-			LOGGER.fine("T: "+t.toString());
-			LOGGER.fine("B: "+b.toString());
 			assertTrue(areVertical(t, b));
 
 		}
@@ -78,22 +75,15 @@ public class RotatableTest extends ComponentTester {
 				List<JPanel> panels = new ArrayList<>();
 
 				Nucleus n = c.getNucleus();
-				LOGGER.info("Testing "+tIndex+" and "+bIndex+" of "+length);
 				n.setBorderTag(Tag.TOP_VERTICAL, tIndex);
 				n.setBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
 				panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
 				IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
 				IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
-				LOGGER.fine("TV: "+tv);
-				LOGGER.fine("BV: "+bv);
-
 				n.alignVertically();
 				tv = n.getBorderPoint(Tag.TOP_VERTICAL);
 				bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
-
-				LOGGER.fine("TV: "+tv);
-				LOGGER.fine("BV: "+bv);
 
 				panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
 

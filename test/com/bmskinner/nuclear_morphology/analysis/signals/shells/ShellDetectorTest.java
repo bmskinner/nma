@@ -19,6 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -36,12 +37,11 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -129,12 +129,19 @@ public class ShellDetectorTest extends ComponentTester {
     }
         
     @Test
-    public void testRealSignalsDetectedInMouseSpermDataset() throws Exception{
+    public void testRealSignalsDetectedInMouseSpermDataset() throws Exception {
         IAnalysisDataset dataset = SampleDatasetReader.openTestMouseSignalsDataset();
+        for(ISignalGroup s : dataset.getCollection().getSignalGroups()) {
+        	s.setShellResult(null);
+        	assertFalse("Shells should not exist on first open", s.hasShellResult());
+        }
+        
         IAnalysisMethod m = new ShellAnalysisMethod(dataset, new DefaultShellOptions());
         m.call();
-        IAnalysisMethod s = new DatasetExportMethod(dataset, dataset.getSavePath(), ExportFormat.JAVA);
-        s.call();
+        
+        for(ISignalGroup s : dataset.getCollection().getSignalGroups()) {
+        	assertTrue("Shells should be created", s.hasShellResult());
+        }
     }
           
     
@@ -145,17 +152,4 @@ public class ShellDetectorTest extends ComponentTester {
         }
         return Arrays.equals(obs, exp);
     }
-    
-    /**
-     * Test that the values are within 250 of the expected
-     * @param exp
-     * @param obs
-     */
-    private void testRoughly(long[] exp, long[ ]obs){
-        assertEquals(exp.length, obs.length);
-        for(int i=0; i<obs.length; i++) {
-            assertEquals("Shell "+i,exp[i], obs[i], 250);
-        }
-    }
-
 }

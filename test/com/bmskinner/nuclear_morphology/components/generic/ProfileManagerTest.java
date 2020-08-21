@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -28,8 +27,6 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -42,7 +39,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 @RunWith(Parameterized.class)
 public class ProfileManagerTest {
 	
-	private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(ProfileManagerTest.class.getName());
 	private static final long RNG_SEED = 42;
 	private ProfileManager manager;
 	private ICellCollection collection;
@@ -52,9 +49,6 @@ public class ProfileManagerTest {
 
 	@Before
 	public void setUp() throws Exception {
-
-		logger.setLevel(Level.FINE);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 		collection = createInstance(source);
 		manager = collection.getProfileManager();
 	}

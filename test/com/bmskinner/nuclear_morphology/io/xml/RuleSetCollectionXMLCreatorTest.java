@@ -58,7 +58,6 @@ public class RuleSetCollectionXMLCreatorTest {
 	private void testRuleSetCreated(RuleSetCollection rsc) throws IOException {
 		RuleSetCollectionXMLCreator rxc = new RuleSetCollectionXMLCreator(rsc);		
 		Document d = rxc.create();
-		printXML(d);
 		testRuleSetCollectionMatches(rsc, d);
 	}
 	

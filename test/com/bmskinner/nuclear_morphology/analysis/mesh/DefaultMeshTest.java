@@ -1,6 +1,6 @@
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;

@@ -4,11 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
@@ -21,8 +18,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -36,33 +31,6 @@ import ij.process.ImageProcessor;
 public class GLCMTest {
 	
 	private static final Logger LOGGER = Logger.getLogger(GLCMTest.class.getName());
-
-	@Before
-	public void setUp() throws Exception {
-		for(Handler h : LOGGER.getHandlers())
-			LOGGER.removeHandler(h);
-		Handler h = new ConsoleHandler(new ConsoleFormatter());
-		LOGGER.setLevel(Level.FINER);
-		h.setLevel(Level.FINER);
-		LOGGER.addHandler(h);
-	}
-	
-	
-
-//	@Test
-//	public void testRunningTilePath() throws Exception {
-//		GLCM glcm = new GLCM();
-//		
-//		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
-//		
-//		Nucleus n = d.getCollection().stream().findFirst().get().getNucleus();
-//		
-//		ImageProcessor ip = n.getComponentImage().convertToByte(false);
-//		GLCMTilePath result = glcm.calculate(ip, 25);
-//
-////		ImageViewer.showImage(ip, "input");
-////		ImageViewer.showImage(result.toStack(), "output");
-//	}
 
 	@Test
 	public void testRunningOnImageWithNorthStepAngle() throws Exception {

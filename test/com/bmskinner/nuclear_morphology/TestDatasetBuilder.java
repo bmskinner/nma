@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
  */
 public class TestDatasetBuilder {
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(TestDatasetBuilder.class.getName());
 	
 	public static final String TEST_DATASET_NAME = "Test";
 	public static final String TEST_DATASET_IMAGE_FOLDER = "Image folder";

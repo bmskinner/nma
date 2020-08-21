@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.junit.Test;
 
@@ -94,7 +93,6 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 	public void testMedianFindingIsRobustToIncreasingVariation() throws Exception {
 		int maxCells = 50;		
 		for(int var=0; var<=20; var++) {
-			LOGGER.log(Level.INFO, String.format("Testing variability %s on %s cells", var, maxCells));
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(maxCells)
 					.withMaxSizeVariation(var)
 					.baseHeight(40).baseWidth(40)
@@ -109,15 +107,6 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 			IProfile result = finder.findMedian();
 			
 			assertTrue(result!=null);
-//			assertEquals(dataset)
-			
-//			List<IProfile> profiles = new ArrayList<>();
-//			profiles.add(template);
-//			profiles.add(result);
-//			
-//			List<String> names = new ArrayList<>();
-//			names.add("Overall median");
-//			names.add("Representative median");
 		}
 		
 	}

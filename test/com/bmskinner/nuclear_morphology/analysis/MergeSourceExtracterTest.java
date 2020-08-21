@@ -26,8 +26,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -42,8 +40,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 
 public class MergeSourceExtracterTest extends SampleDatasetReader {
     
@@ -55,15 +51,6 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
         
     @Before
     public void setUp() throws Exception {
-		LOGGER.setLevel(Level.FINE);
-
-		boolean hasHandler = false;
-		for(Handler h : LOGGER.getHandlers()) {
-			if(h instanceof ConsoleHandler)
-				hasHandler = true;
-		}
-		if(!hasHandler)
-			LOGGER.addHandler(new ConsoleHandler(new LogPanelFormatter()));
     }
     
     @Test
@@ -72,25 +59,6 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	 List<IAnalysisDataset> extracted = mse.call().getDatasets();
     	 assertTrue(extracted.isEmpty());
     }
-    
-    
-//    @Test
-//    public void testSourceExtractedFrom1_13_8DatasetGetsRPReassigned() throws Exception {
-//    	IAnalysisDataset merged = SampleDatasetReader.openDataset(new File(MERGED_1_13_8_DATASET_FILE));
-//
-//    	List<IAnalysisDataset> sources = new ArrayList<>();
-//    	sources.addAll(merged.getAllMergeSources());
-//    	
-//    	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(sources);
-//    	List<IAnalysisDataset> extracted = mse.call().getDatasets();
-//
-//    	DatasetValidator dv = new DatasetValidator();
-//    	for(IAnalysisDataset m : extracted){
-//    		if(!dv.validate(m))
-//    			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
-//    	}
-//    	
-//    }
     
     @Test
     public void testSourceExtractedFromMergedDatasetEqualsInput() throws Exception {

@@ -1005,15 +1005,12 @@ public class ISegmentedProfileTester extends ComponentTester {
 		
 		int oldEnd = seg0.getEndIndex();
 		int newEnd = oldEnd+10;
-		System.out.println(profile);
 		assertTrue(profile.update(seg0, newStart, newEnd));
 		
 		IBorderSegment updated = profile.getSegment(UUID.fromString(SEG_0));
 		assertEquals(newStart, updated.getStartIndex());
 		assertEquals(newEnd, updated.getEndIndex());
-		
-		System.out.println(profile);
-		
+				
 		IBorderSegment prev = updated.prevSegment();
 		IBorderSegment next = updated.nextSegment();
 		

@@ -59,10 +59,7 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		pca.call();
 		
 		Nucleus n = dataset.getCollection().getNuclei().stream().findFirst().get();
-		int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);
-		
-		LOGGER.log(Level.INFO, "Number of PCs: "+nPcs);
-		
+		int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);		
 		
 		// Test that PCs have been set
 		for(int i=0; i<nPcs; i++) {

@@ -8,8 +8,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -40,8 +38,6 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 
 import ij.Prefs;
 
@@ -55,7 +51,7 @@ import ij.Prefs;
  */
 public class TestImageDatasetCreator {
 	
-	protected Logger logger;
+	protected Logger LOGGER = Logger.getLogger(TestImageDatasetCreator.class.getName());
 	
 	public static final UUID RED_SIGNAL_ID   = UUID.fromString("00000000-0000-0000-0000-100000000001");
 	public static final UUID GREEN_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-100000000002");
@@ -64,18 +60,7 @@ public class TestImageDatasetCreator {
 	public static final String GREEN_SIGNAL_NAME = "Test green";
 
 	@Before
-	public void setUp(){
-		logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		logger.setLevel(Level.FINEST);
-
-		boolean hasHandler = false;
-		for(Handler h : logger.getHandlers()) {
-			if(h instanceof ConsoleHandler)
-				hasHandler = true;
-		}
-		if(!hasHandler)
-			logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
-		
+	public void setUp(){		
 		Prefs.setThreads(2); // Attempt to avoid issue 162
 	}
 

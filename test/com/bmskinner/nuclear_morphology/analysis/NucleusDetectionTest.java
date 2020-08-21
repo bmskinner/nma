@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.analysis;
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
-import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,18 +25,9 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  *
  */
 public class NucleusDetectionTest {
-	
-protected static final Logger LOGGER = Logger.getLogger(NucleusDetectionTest.class.getName());
-	
+		
 	@Before
 	public void setUp() throws Exception{
-//		for(Handler h : LOGGER.getHandlers())
-//			LOGGER.removeHandler(h);
-//		Handler h = new ConsoleHandler(new ConsoleFormatter());
-//		LOGGER.setLevel(Level.FINER);
-//		h.setLevel(Level.FINER);
-//		LOGGER.addHandler(h);
-		
 	}
 	
 	@Test

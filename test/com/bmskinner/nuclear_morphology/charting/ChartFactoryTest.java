@@ -6,8 +6,6 @@ import java.awt.ScrollPane;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -28,8 +26,6 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
-import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 
 /**
  * Base class for testing the charting functions. This provides methods for 
@@ -42,9 +38,6 @@ public abstract class ChartFactoryTest {
 	
 	@Before
 	public void setUp(){
-		Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		logger.setLevel(Level.FINEST);
-		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
 	
 	/**
