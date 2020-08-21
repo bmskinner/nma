@@ -30,6 +30,7 @@ import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
@@ -54,6 +55,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.NucleusProfilesPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
+import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
 import com.javadocking.DockingManager;
@@ -96,6 +98,12 @@ public class DockableMainWindow extends AbstractMainWindow {
         createEventHandling();
                
         this.setJMenuBar(new MainWindowMenuBar(this));
+        
+        // Run update check
+        Version latestVersion = UpdateChecker.fetchLatestVersion();
+        if(latestVersion.isNewerThan(Version.currentVersion())) {
+        	LOGGER.info("New version "+latestVersion+" available");
+        }
         
 
     }

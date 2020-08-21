@@ -29,6 +29,8 @@ import javax.swing.JLabel;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 
+import com.bmskinner.nuclear_morphology.components.generic.Version;
+
 import ij.IJ;
 import ij.Prefs;
 
@@ -131,7 +133,7 @@ public class Nuclear_Morphology_Analysis {
 			
 			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
 			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));
-			
+			LOGGER.config("Version: "+Version.currentVersion());
 			// First invokation will create and log resources 
 			ThreadManager.getInstance();
 		} catch (SecurityException e ) {
