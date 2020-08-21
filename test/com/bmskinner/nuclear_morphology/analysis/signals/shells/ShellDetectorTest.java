@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
+import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
@@ -57,6 +58,9 @@ public class ShellDetectorTest extends ComponentTester {
     private ShellDetector sd;
     private Nucleus testNucleus;
     private INuclearSignal testSignal;
+    
+    private static final int OBJECT_WIDTH = 200;
+    private static final int OBJECT_HEIGHT = 200;
 
     @Override
 	@Before
@@ -64,7 +68,8 @@ public class ShellDetectorTest extends ComponentTester {
     	super.setUp();
     	IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
         		.xBase(50).yBase(50)
-        		.baseWidth(200).baseHeight(200)
+        		.baseWidth(OBJECT_WIDTH).baseHeight(OBJECT_HEIGHT)
+        		.withMaxSizeVariation(0)
         		.ofType(NucleusType.ROUND)
         		.withNucleusShape(TestComponentShape.SQUARE)
         		.addSignalsInChannel(0)
@@ -105,10 +110,17 @@ public class ShellDetectorTest extends ComponentTester {
     	testGetShells(ShrinkType.AREA);
     }
     
+    /**
+     * Test that the correct number of shells are generated
+     * with the default settings
+     * @param type
+     * @throws Exception
+     */
     private void testGetShells(ShrinkType type) throws Exception {
     	sd = new ShellDetector(testNucleus, type, false);
-    	ImageProcessor ip = drawShells(testNucleus, sd);
-//        ImageViewer.showImage(ip, "Nucleus shells");
+    	assertEquals("Shell count should be default", 
+    			ShellDetector.DEFAULT_SHELL_COUNT, 
+    			sd.getShells().size());
     }
     
     @Test
@@ -121,11 +133,32 @@ public class ShellDetectorTest extends ComponentTester {
     	testFindPixelCountPerShellCellularComponent(ShrinkType.RADIUS);
     }
     
+    /**
+     * Test that the number of pixels per shell in a component matches the number
+     * of pixels per shell in the entire object, when that component is the only
+     * object
+     * @param type
+     * @throws Exception
+     */
     private void testFindPixelCountPerShellCellularComponent(ShrinkType type) throws Exception {
     	sd = new ShellDetector(testNucleus, type, false);
-        long[] obs = sd.findPixelCounts(testNucleus);
-        long[] exp = sd.findPixelCounts();
-        assertTrue(testEquals(exp, obs));
+        long[] inObjectPixels = sd.findPixelCounts(testNucleus);
+        long totalInComponent = sum(inObjectPixels);
+
+        long[] totalPixels = sd.findPixelCounts();
+        long totalInObject = sum(totalPixels);
+
+        ImageViewer.showImage(drawShells(testNucleus, sd), "Shells");
+        assertEquals("Total pixels in shells", 
+        		OBJECT_HEIGHT*OBJECT_WIDTH, 
+        		totalInObject, 
+        		OBJECT_HEIGHT*OBJECT_WIDTH*0.01);
+        
+        assertEquals("Same number of pixels in component as object", 
+        		totalInObject, 
+        		totalInComponent);
+        
+        assertTrue(testEquals(totalPixels, inObjectPixels));
     }
         
     @Test
@@ -151,5 +184,12 @@ public class ShellDetectorTest extends ComponentTester {
             assertEquals("Shell "+i,exp[i], obs[i]);
         }
         return Arrays.equals(obs, exp);
+    }
+    
+    private long sum(long[] values) {
+    	long r = 0;
+    	for(long l : values)
+    		r+=l;
+    	return r;
     }
 }

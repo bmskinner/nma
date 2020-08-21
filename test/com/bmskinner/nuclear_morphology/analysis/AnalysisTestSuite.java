@@ -8,6 +8,7 @@ import com.bmskinner.nuclear_morphology.analysis.classification.AnalysisClassifi
 import com.bmskinner.nuclear_morphology.analysis.image.AnalysisImageTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.mesh.AnalysisMeshTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSuite;
+import com.bmskinner.nuclear_morphology.analysis.signals.AnalysisSignalsTestSuite;
 
 /**
  * Runs all test classes in the analysis package
@@ -17,14 +18,16 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSu
  */
 @RunWith(Suite.class)
 @SuiteClasses({ 
-	MergeSourceExtracterTest.class, 
-	ProfileAggregateTest.class,
-	RuleSetTester.class,
-	AnalysisProfilesTestSuite.class,
 	AnalysisClassificationTestSuite.class,
 	AnalysisImageTestSuite.class,
 	AnalysisMeshTestSuite.class,
-	NucleusDetectionTest.class})
+	AnalysisProfilesTestSuite.class,
+	AnalysisSignalsTestSuite.class,
+	
+	MergeSourceExtracterTest.class, 
+	NucleusDetectionTest.class,
+	ProfileAggregateTest.class,
+	RuleSetTester.class})
 public class AnalysisTestSuite {
 
 }
