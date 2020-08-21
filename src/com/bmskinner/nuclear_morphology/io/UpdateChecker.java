@@ -65,12 +65,12 @@ public class UpdateChecker {
 	 * repository. 
 	 * @return true if an update is found, false on error, timeout or if this is the latest version
 	 */
-	public static boolean isUpdateAvailable() {		
+	public static boolean isUpdateAvailable(Version testVersion) {		
 
 		boolean isLaterVersion = false;
 		
 		Version latestVersion = fetchLatestVersion();
-		isLaterVersion = latestVersion.isNewerThan(Version.currentVersion());
+		isLaterVersion = latestVersion.isNewerThan(testVersion);
 
 		if(isLaterVersion)
 			LOGGER.fine("Found later version: " +latestVersion);
