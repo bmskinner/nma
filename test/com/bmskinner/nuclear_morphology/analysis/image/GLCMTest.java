@@ -73,7 +73,7 @@ public class GLCMTest {
 		ImageProcessor ip = new ImageImporter(f).importImage(ImageImporter.RGB_BLUE);
 		
 		// Default parameters
-		GLCM glcm = new GLCM();
+		GLCM glcm = new GLCM(options);
 		GLCMTile result = glcm.calculate(ip);
 
 //		 Compare to known values for this image
