@@ -61,6 +61,13 @@ public class DatasetStatsExporter extends StatsExporter {
     /** How many samples should be taken from each profile? */
     private int profileSamples = 100;
     private int segCount = 0;
+    
+    /** The default length to which profiles should be normalised */
+    private static final int DEFAULT_PROFILE_LENGTH = 1000;
+    
+    /** The length to which profiles should be normalised */
+    private final int normProfileLength;
+    
 
     /**
      * Create specifying the folder stats will be exported into
@@ -81,6 +88,8 @@ public class DatasetStatsExporter extends StatsExporter {
         isIncludeGlcm = list.stream()
         		.allMatch(d->d.getCollection().getCells().stream()
         				.allMatch(c->c.getNucleus().hasStatistic(GLCMParameter.SUM.toStat())));
+        
+        normProfileLength = chooseNormalisedProfileLength();
     }
 
     /**
@@ -90,8 +99,14 @@ public class DatasetStatsExporter extends StatsExporter {
      */
     public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset, HashOptions options) {
         super(file, dataset);
+        segCount = dataset.getCollection().getProfileManager().getSegmentCount();
         isIncludeSegments = true;
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
+        
+        isIncludeGlcm = dataset.getCollection().getCells().stream()
+        				.allMatch(c->c.getNucleus().hasStatistic(GLCMParameter.SUM.toStat()));
+        
+        normProfileLength = chooseNormalisedProfileLength();
     }
 
     /**
@@ -304,7 +319,7 @@ public class DatasetStatsExporter extends StatsExporter {
         double varM = 0;
                 
         ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        ISegmentedProfile normalisedProfile = p.interpolate(1000); // Allows point indexes
+        ISegmentedProfile normalisedProfile = p.interpolate(normProfileLength); // Allows point indexes
         List<IBorderSegment> segs = p.getOrderedSegments();
         
         for(IBorderSegment segment : segs){
@@ -331,4 +346,30 @@ public class DatasetStatsExporter extends StatsExporter {
             }
         }
     }
+    
+    /**
+	 * When handling large objects, the default normalised profile
+	 * length may not be sufficient. Ensure the normalised length
+	 * is a multiple of DEFAULT_PROFILE_LENGTH and greater than any 
+	 * individual profile.
+	 * @return
+	 * @throws UnavailableProfileTypeException
+	 */
+	private int chooseNormalisedProfileLength() {
+		int profileLength = DEFAULT_PROFILE_LENGTH;
+
+		try {
+			for(IAnalysisDataset d : datasets) {
+				for(Nucleus n : d.getCollection().getNuclei()) {
+					int l = n.getProfile(ProfileType.ANGLE).size();
+					if(l > profileLength)
+						profileLength = (int) Math.ceil(l/DEFAULT_PROFILE_LENGTH)*DEFAULT_PROFILE_LENGTH;
+				}
+			}
+		} catch(UnavailableProfileTypeException e) {
+			LOGGER.log(Loggable.STACK, "Unable to get profile: "+e.getMessage(), e);
+			LOGGER.fine("Unable to get a profile, defaulting to default profile length of "+DEFAULT_PROFILE_LENGTH);
+		}
+		return profileLength;
+	}
 }
