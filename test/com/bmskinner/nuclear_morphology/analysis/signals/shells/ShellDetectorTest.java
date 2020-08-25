@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -80,6 +81,19 @@ public class ShellDetectorTest extends ComponentTester {
     	
     }
     
+    /**
+     * Ensure that nested shells values are corrected properly
+     * @throws ShellAnalysisException
+     */
+    @Test
+    public void testNestedShellCorrection() throws ShellAnalysisException {
+    	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
+    	long[] testValues = { 10000, 8000, 6000, 4000, 2000 };
+    	long[] exp = { 2000, 2000, 2000, 2000, 2000 };
+        long[] obs = sd.correctNestedValues(testValues);
+        testEquals(exp, obs);
+    }
+        
     /**
      * Draw the shells on the source image of the given template 
      * @param template
@@ -157,7 +171,7 @@ public class ShellDetectorTest extends ComponentTester {
         assertEquals("Same number of pixels in component as object", 
         		totalInObject, 
         		totalInComponent);
-        
+                
         assertTrue(testEquals(totalPixels, inObjectPixels));
     }
         

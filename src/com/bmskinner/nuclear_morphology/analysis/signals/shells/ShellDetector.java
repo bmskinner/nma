@@ -230,7 +230,7 @@ public class ShellDetector extends Detector {
      * @param array
      * @return
      */
-    private long[] correctNestedValues(long[] array) {
+    long[] correctNestedValues(long[] array) {
 
         if (array.length == 0)
             throw new IllegalArgumentException("Array length is zero");
