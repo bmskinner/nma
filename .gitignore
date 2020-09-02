@@ -12,6 +12,7 @@ screens/*
 target/*
 wiki/*
 test/Samples/*
+scripts/UploadJar.bat
 
 # Non-project related files
 maven.bat

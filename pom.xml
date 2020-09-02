@@ -212,6 +212,28 @@
 						</configuration>
 					</execution>
 					
+					<!-- Copy Bitbucket upload script from templates into scripts-->
+					<execution>
+						<id>bitbucket-upload</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.scripts.directory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.template.directory}</directory>
+									<includes>
+										<include>UploadJar.bat</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+					
 				</executions>
 			</plugin>
 
