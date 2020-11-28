@@ -37,6 +37,10 @@ public class CellCollectionModel extends DefaultTableModel {
 	private Set<UUID> selectedCellIds = new HashSet<>();
 	private IAnalysisDataset dataset;
 	
+	/**
+	 * Create a new model based on the given dataset
+	 * @param d the dataset to select cells from
+	 */
 	public CellCollectionModel(IAnalysisDataset d) {
 		super();
 		
@@ -73,6 +77,10 @@ public class CellCollectionModel extends DefaultTableModel {
 		return ((SelectableCellIcon)getValueAt(r, c)).getCell();
 	}
 		
+	/**
+	 * Get the number of currently selected cells
+	 * @return
+	 */
 	public synchronized int selectedCount() {
 		return selectedCellIds.size();
 	}
@@ -104,15 +112,7 @@ public class CellCollectionModel extends DefaultTableModel {
 			selectedCellIds.remove(c.getId());
 		}
 	}
-	
-	/**
-	 * Invert the selection of the given cell
-	 * @param c the cell to toggle
-	 */
-	private synchronized void toggleSelected(ICell c) {
-		setSelected(c, !selectedCellIds.contains(c.getId()));
-	}
-	
+		
 	/**
 	 * Invert the selection of the given cell
 	 * @param r the row containing the cell
@@ -121,14 +121,14 @@ public class CellCollectionModel extends DefaultTableModel {
 	public synchronized void toggleSelected(int r, int c) {
 		SelectableCellIcon icon = (SelectableCellIcon)getValueAt(r, c);
 		icon.setSelected(!icon.isSelected());
-		toggleSelected(icon.getCell());
+		setSelected(icon.getCell(), !selectedCellIds.contains(icon.getCell().getId()));
 	}
 	
 	/**
 	 * Set the selection state of the given cell
-	 * @param r
-	 * @param c
-	 * @param b
+	 * @param r the row
+	 * @param c the column
+	 * @param b the desired selection state
 	 */
 	public synchronized void setSelected(int r, int c, boolean b) {
 
@@ -150,6 +150,10 @@ public class CellCollectionModel extends DefaultTableModel {
 				.collect(Collectors.toList());
 	}
 	
+	/**
+	 * Create a new child collection from the currently selected cells
+	 * @return the created dataset, or an empty object if no cells were selected
+	 */
 	public Optional<IAnalysisDataset> makeNewCollectionFromSelected() {
 		LOGGER.fine("Creating new collection from selected cells");
 		List<ICell> cells = getSelected();
