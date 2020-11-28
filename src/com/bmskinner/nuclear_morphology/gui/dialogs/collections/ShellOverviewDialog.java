@@ -63,7 +63,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.7
  *
  */
-public class ShellOverviewDialog extends CollectionOverviewDialog {
+public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 	
 	private static final Logger LOGGER = Logger.getLogger(ShellOverviewDialog.class.getName());
 	

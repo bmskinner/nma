@@ -69,9 +69,9 @@ import ij.process.ImageProcessor;
  *
  */
 @SuppressWarnings("serial")
-public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
+public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(CellCollectionOverviewDialog.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ManualCurationDialog.class.getName());
 	
 	private static final String MAKE_NEW_COLLECTION_LBL = "Make new collection from selected";
 	private static final String SELECT_ALL_LBL = "Select all";
@@ -105,7 +105,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
     }
 	
 
-    public CellCollectionOverviewDialog(IAnalysisDataset dataset) {
+    public ManualCurationDialog(IAnalysisDataset dataset) {
         super(dataset);
     }
 

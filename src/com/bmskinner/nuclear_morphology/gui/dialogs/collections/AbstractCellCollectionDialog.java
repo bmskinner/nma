@@ -42,9 +42,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.7
  *
  */
-public abstract class CollectionOverviewDialog extends LoadingIconDialog implements PropertyChangeListener {
+public abstract class AbstractCellCollectionDialog extends LoadingIconDialog implements PropertyChangeListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(CollectionOverviewDialog.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(AbstractCellCollectionDialog.class.getName());
 
     public static final int COLUMN_COUNT = 3;
 
@@ -61,7 +61,7 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
      * Construct with a dataset to display
      * @param dataset
      */
-    public CollectionOverviewDialog(IAnalysisDataset dataset) {
+    public AbstractCellCollectionDialog(IAnalysisDataset dataset) {
         super();
         this.dataset = dataset;
 

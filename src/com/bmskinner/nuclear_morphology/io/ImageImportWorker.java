@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
-import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.Blitter;
@@ -53,7 +53,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
 
 	protected final IAnalysisDataset dataset;
 	protected final TableModel       model;
-	protected static final int       COLUMN_COUNT = CellCollectionOverviewDialog.COLUMN_COUNT;
+	protected static final int       COLUMN_COUNT = ManualCurationDialog.COLUMN_COUNT;
 	protected int                    loaded       = 0;
 	protected boolean                rotate;
 

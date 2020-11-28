@@ -71,8 +71,8 @@ import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
-import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
-import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
@@ -329,7 +329,7 @@ public class EventHandler implements EventListener {
             if (event.type().equals(SignalChangeEvent.CURATE_DATASET))
             	return () -> {
             		Runnable r = () -> {
-            			CollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
+            			AbstractCellCollectionDialog d = new ManualCurationDialog(selectedDataset);
             			d.addDatasetEventListener(EventHandler.this);
             		};
             		new Thread(r).start();// separate from the UI and method threads - we must not block them

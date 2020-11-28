@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class CellCollectionModel extends DefaultTableModel {
 	
-	private static final Logger LOGGER = Logger.getLogger(CellCollectionOverviewModel.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(CellCollectionModel.class.getName());
 	
 	/** Default number of columns in the table model */
 	public static final int COLUMN_COUNT = 3;

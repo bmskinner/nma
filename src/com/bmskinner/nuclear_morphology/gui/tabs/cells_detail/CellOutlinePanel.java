@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -165,7 +165,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     public void eventReceived(DatasetEvent event) {
         super.eventReceived(event);
         // Pass messages upwards
-        if (event.getSource() instanceof CellCollectionOverviewDialog)
+        if (event.getSource() instanceof ManualCurationDialog)
             this.getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
         
         if(event.getSource()==imagePanel) {
