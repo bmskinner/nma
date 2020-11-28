@@ -162,12 +162,18 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 
     @Test
     public void testHasChildIAnalysisDataset() {
-        //TODO
+        assertTrue(d.hasChildren());
+        for(IAnalysisDataset child : d.getChildDatasets()) {
+        	assertTrue(d.hasChild(child));
+        }
     }
 
     @Test
     public void testHasChildUUID() {
-    	//TODO
+    	assertTrue(d.hasChildren());
+        for(IAnalysisDataset child : d.getChildDatasets()) {
+        	assertTrue(d.hasChild(child.getId()));
+        }
     }
 
 }
