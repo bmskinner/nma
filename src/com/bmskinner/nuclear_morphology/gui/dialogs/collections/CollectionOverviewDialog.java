@@ -55,7 +55,7 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
     protected JTable           table;
     protected JProgressBar     progressBar;
     protected ImageImportWorker worker;
-    protected CellCollectionOverviewModel model;
+    protected CellCollectionModel model;
 
     /**
      * Construct with a dataset to display

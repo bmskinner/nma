@@ -28,6 +28,7 @@ import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -44,8 +45,6 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
@@ -187,7 +186,13 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         header.add(selectAllChkBox);
 
         
-        curateBtn.addActionListener(e ->  makeNewCollection());
+        curateBtn.addActionListener(e -> {
+        	Optional<IAnalysisDataset> newDataset = model.makeNewCollectionFromSelected();
+        	if(newDataset.isPresent())
+        		fireDatasetEvent(DatasetEvent.ADD_DATASET, newDataset.get());
+        	else
+        		LOGGER.info("No cells added to new dataset; not creating"); 
+        });
         header.add(curateBtn);
         return header;
 		
@@ -214,7 +219,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         getContentPane().add(header, BorderLayout.NORTH);
         getContentPane().add(progressBar, BorderLayout.SOUTH);
         
-        model = new CellCollectionOverviewModel(rows, COLUMN_COUNT);
+        model = new CellCollectionModel(dataset);
         
         createTable();
         
@@ -237,33 +242,33 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         getContentPane().add(scrollPane, BorderLayout.CENTER);
     }
 
-    private void makeNewCollection() {
-    	LOGGER.finer("Creating new collection from selected cells");
-    	List<ICell> cells = model.getSelected();
-    	LOGGER.fine("Selection has "+cells.size()+" cells");
-
-        ICellCollection newCollection = new VirtualCellCollection(dataset, dataset.getName() + "_Curated");
-        for (ICell c : cells) {
-        	if(c==null)
-        		LOGGER.fine("Null cell encountered!");
-        	else
-        		newCollection.addCell(c);
-        }
-        
-        LOGGER.info("Added " + cells.size() + " cells to new collection");
-
-        /* We don;t want to run a new profiling because this will bugger up the
-         * segment patterns of the original cells. We need to copy the segments
-         *  over as with FISH remapping */
-
-        if (!cells.isEmpty()) {
-            dataset.addChildCollection(newCollection);
-            List<IAnalysisDataset> list = new ArrayList<>();
-            list.add(dataset.getChildDataset(newCollection.getID()));
-            LOGGER.fine("Firing request for profile segmentation");
-            fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, list, dataset);
-        }
-    }
+//    private void makeNewCollection() {
+//    	LOGGER.finer("Creating new collection from selected cells");
+//    	List<ICell> cells = model.getSelected();
+//    	LOGGER.fine("Selection has "+cells.size()+" cells");
+//
+//        ICellCollection newCollection = new VirtualCellCollection(dataset, dataset.getName() + "_Curated");
+//        for (ICell c : cells) {
+//        	if(c==null)
+//        		LOGGER.fine("Null cell encountered!");
+//        	else
+//        		newCollection.addCell(c);
+//        }
+//        
+//        LOGGER.info("Added " + cells.size() + " cells to new collection");
+//
+//        /* We don;t want to run a new profiling because this will bugger up the
+//         * segment patterns of the original cells. We need to copy the segments
+//         *  over as with FISH remapping */
+//
+//        if (!cells.isEmpty()) {
+//            dataset.addChildCollection(newCollection);
+//            List<IAnalysisDataset> list = new ArrayList<>();
+//            list.add(dataset.getChildDataset(newCollection.getID()));
+//            LOGGER.fine("Firing request for profile segmentation");
+//            fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, list, dataset);
+//        }
+//    }
     
     @Override
     public void propertyChange(PropertyChangeEvent evt) {

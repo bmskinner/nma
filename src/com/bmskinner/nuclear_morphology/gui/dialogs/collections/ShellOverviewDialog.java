@@ -103,12 +103,6 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         this.setLayout(new BorderLayout());
         this.setTitle("Showing " + dataset.getCollection().size() + " cells in " + dataset.getName());
 
-        int cellCount = dataset.getCollection().size();
-
-        int remainder = cellCount % COLUMN_COUNT == 0 ? 0 : 1;
-
-        int rows = cellCount / COLUMN_COUNT + remainder;
-
         progressBar = new JProgressBar();
         progressBar.setString(LOADING_LBL);
         progressBar.setStringPainted(true);
@@ -118,7 +112,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         getContentPane().add(header, BorderLayout.NORTH);
         getContentPane().add(progressBar, BorderLayout.SOUTH);
 
-        model = new CellCollectionOverviewModel(rows, COLUMN_COUNT);
+        model = new CellCollectionModel(dataset);
         
         createTable();
         
