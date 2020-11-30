@@ -148,31 +148,38 @@ public class ShellDetectorTest extends ComponentTester {
     }
     
     /**
-     * Test that the number of pixels per shell in a component matches the number
-     * of pixels per shell in the entire object, when that component is the only
-     * object
-     * @param type
+     * Test that the number of pixels per shell in a cellular component matches the number
+     * of pixels per shell in the entire nucleus, when the cellular component is the nucleus
+     * @param type the type of shrinking to use to define shells
      * @throws Exception
      */
     private void testFindPixelCountPerShellCellularComponent(ShrinkType type) throws Exception {
     	sd = new ShellDetector(testNucleus, type, false);
-        long[] inObjectPixels = sd.findPixelCounts(testNucleus);
-        long totalInComponent = sum(inObjectPixels);
+        long[] inComponentPixels = sd.findPixelCounts(testNucleus);
+        long totalInComponent = sum(inComponentPixels);
 
-        long[] totalPixels = sd.findPixelCounts();
-        long totalInObject = sum(totalPixels);
-
-        ImageViewer.showImage(drawShells(testNucleus, sd), "Shells");
-        assertEquals("Total pixels in shells", 
+        long[] inNucleusPixels = sd.findPixelCounts();
+        long totalInObject = sum(inNucleusPixels);
+        
+        // Check all pixels in the object are covered by a shell
+        assertEquals("Total pixels covered by shells", 
         		OBJECT_HEIGHT*OBJECT_WIDTH, 
         		totalInObject, 
         		OBJECT_HEIGHT*OBJECT_WIDTH*0.01);
         
+//         Check all pixels in the component are covered by a shell
+        assertEquals("Total pixels covered by shells", 
+        		OBJECT_HEIGHT*OBJECT_WIDTH, 
+        		totalInComponent, 
+        		OBJECT_HEIGHT*OBJECT_WIDTH*0.01);
+        
+//        ImageViewer.showImage(drawShells(testNucleus, sd), "Shells");
+
         assertEquals("Same number of pixels in component as object", 
         		totalInObject, 
         		totalInComponent);
                 
-        assertTrue(testEquals(totalPixels, inObjectPixels));
+        assertTrue(testEquals(inNucleusPixels, inComponentPixels));
     }
         
     @Test

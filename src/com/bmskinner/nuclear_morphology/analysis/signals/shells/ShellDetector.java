@@ -139,10 +139,14 @@ public class ShellDetector extends Detector {
     /**
      * Find the number of pixels of the given component within each shell
      * 
-     * @param signal
+     * @param component the component to search. If this is the same as the object from which the
+     * shells were constructed, the counts should match that of findPixelCounts()
      * @return
      */
     public long[] findPixelCounts(@NonNull CellularComponent component) {
+    	if(shells.get(0).getSource().equals(component))
+    			return findPixelCounts();
+    	
         long[] counts = makeZeroArray();
         for (int i=0; i<shells.size(); i++) {
             Shell shell = shells.get(i);
