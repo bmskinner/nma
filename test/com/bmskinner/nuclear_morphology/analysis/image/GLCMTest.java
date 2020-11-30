@@ -13,13 +13,11 @@ import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMStepAngle;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.Imageable;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
-import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 /**
@@ -153,80 +151,35 @@ public class GLCMTest {
 		
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
 		
-		Nucleus n = d.getCollection().stream().findFirst().get().getNucleus();
-		
-		Roi roi = n.toRoi();
-		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
-		ImageProcessor ip = n.getComponentImage().convertToByte(false);
-		GLCMTile result1 = glcm.calculate(ip);
-//		System.out.println(result1.toString());
-//		ip.setLineWidth(2);
-//		ip.setColor(Color.GRAY);
-//		ip.draw(roi);
-
-		GLCMTile result = glcm.calculate(n);
-		
-		assertEquals("Sum should be 1", 1d, result1.get(GLCMParameter.SUM), 0.01);
-		assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",result.toString().equals(result1.toString()));
-		
-		
-//		System.out.println(result.toString());
+		for(ICell cell : d.getCollection()) {
+			ImageProcessor ip = cell.getNucleus().getComponentImage().convertToByte(false);
+			GLCMTile result1 = glcm.calculate(ip);
+			GLCMTile result = glcm.calculate(cell.getNucleus());
+			System.out.println(result1);
+			assertEquals(cell.getNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
+					result1.get(GLCMParameter.SUM), 0.015);
+			assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",
+					result.toString().equals(result1.toString()));
+		}
 	}
 	
 	@Test
 	public void testRunningAllStepAnglesOnComponent() throws Exception {
 		HashOptions options = GLCM.defaultOptions();
 		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.ALL.toString());
-//		options.setInt(GLCM.STEP_SIZE_KEY, 2);
 		GLCM glcm = new GLCM(options);
 		
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
 		
-		Nucleus n = d.getCollection().stream().findFirst().get().getNucleus();
-		
-		Roi roi = n.toRoi();
-		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
-		ImageProcessor ip = n.getComponentImage().convertToByte(false);
-		GLCMTile result1 = glcm.calculate(ip);
-//		System.out.println(result1.toString());
-
-		GLCMTile result = glcm.calculate(n);
-		
-		assertEquals("Sum should be 1", 1d, result1.get(GLCMParameter.SUM), 0.01);
-		assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",result.toString().equals(result1.toString()));
-		
-		
-//		System.out.println(result.toString());
+		for(ICell cell : d.getCollection()) {
+			ImageProcessor ip = cell.getNucleus().getComponentImage().convertToByte(false);
+			GLCMTile result1 = glcm.calculate(ip);
+			GLCMTile result = glcm.calculate(cell.getNucleus());
+			System.out.println(result1);
+			assertEquals(cell.getNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
+					result1.get(GLCMParameter.SUM), 0.015);
+			assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",
+					result.toString().equals(result1.toString()));
+		}
 	}
-//	
-//	@Test
-//	public void testRunningOnDataset() throws Exception {
-//		GLCM glcm = new GLCM();
-//		
-//		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
-//		
-//		List<GLCMTile> results = new ArrayList<>();
-//		for(ICell c : d.getCollection()) {
-//			for(Nucleus n : c.getNuclei()) {
-//				GLCMTile r = glcm.calculate(n);
-//				results.add(r);
-//				for(GLCMParameter v : GLCMParameter.values())
-//					n.setStatistic(v.toStat(), r.get(v));
-//			}
-//		}
-//		
-//		StringBuilder builder = new StringBuilder();
-//		builder.append("ID"+Io.TAB);
-//		for(GLCMParameter v : GLCMParameter.values())
-//			builder.append(v.toString()+Io.TAB);
-//		builder.append(Io.NEWLINE);
-//		
-//		for(GLCMTile r : results) {
-//			builder.append(r.getIdentifier()+Io.TAB);
-//			for(GLCMParameter v : GLCMParameter.values())
-//				builder.append(r.get(v)+Io.TAB);
-//			builder.append(Io.NEWLINE);
-//		}
-//		System.out.println(builder.toString());
-//	}
 }

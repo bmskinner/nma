@@ -351,6 +351,7 @@ public class GLCM {
 	 */
 	private class GLCMMatrix {
 		
+		private static final int EIGHT_BIT = 256;
 		public double[][] glcm;
 		public double pixelCount;
 		private GLCMStats stats;
@@ -368,39 +369,42 @@ public class GLCM {
 			public double stdevx = 0;
 			public double stdevy = 0;
 
+			/**
+			 * Compute and store values relating to the GLCM
+			 */
 			public GLCMStats() {
-				double [] px = new double [256];
-				double [] py = new double [256];
+				double [] px = new double [EIGHT_BIT];
+				double [] py = new double [EIGHT_BIT];
 
 				// Px(i) and Py(j) are the marginal-probability matrix; sum rows (px) or columns (py) 
 				// First, initialize the arrays to 0
-				for (int i=0;  i<256; i++){
+				for (int i=0;  i<EIGHT_BIT; i++){
 					px[i] = 0.0;
 					py[i] = 0.0;
 				}
 
 				// sum the glcm rows to Px(i)
-				for (int i=0;  i<256; i++) {
-					for (int j=0; j<256; j++) {
+				for (int i=0;  i<EIGHT_BIT; i++) {
+					for (int j=0; j<EIGHT_BIT; j++) {
 						px[i] += glcm [i][j];
 					} 
 				}
 
 				// sum the glcm rows to Py(j)
-				for (int j=0;  j<256; j++) {
-					for (int i=0; i<256; i++) {
+				for (int j=0;  j<EIGHT_BIT; j++) {
+					for (int i=0; i<EIGHT_BIT; i++) {
 						py[j] += glcm [i][j];
 					} 
 				}
 
 				// calculate meanx and meany
-				for (int i=0;  i<256; i++) {
+				for (int i=0;  i<EIGHT_BIT; i++) {
 					meanx += (i*px[i]);
 					meany += (i*py[i]);
 				}
 
 				// calculate stdevx and stdevy
-				for (int i=0;  i<256; i++) {
+				for (int i=0;  i<EIGHT_BIT; i++) {
 					stdevx += ((Math.pow((i-meanx),2))*px[i]);
 					stdevy += ((Math.pow((i-meany),2))*py[i]);
 				}
@@ -436,8 +440,8 @@ public class GLCM {
 			if(g.glcm.length!=glcm.length && g.glcm[0].length!=glcm[0].length)
 				return this;
 			
-			for (int i=0; i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0; i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					glcm[i][j] += (g.glcm[i][j]);
 				}
 			}
@@ -452,8 +456,8 @@ public class GLCM {
 		 * @return
 		 */
 		public GLCMMatrix average(double n) {
-			for (int i=0; i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0; i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					glcm[i][j] /= n;
 				}
 			}
@@ -463,8 +467,8 @@ public class GLCM {
 			
 		
 		private GLCMMatrix convertToProbabilities(){
-			for (int i=0; i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0; i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					glcm[i][j] = (glcm[i][j])/(pixelCount);
 				}
 			}
@@ -478,8 +482,8 @@ public class GLCM {
 		 */
 		public double asm() {
 			double asm = 0.0;
-			for (int i=0;  i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					asm += (glcm[i][j]*glcm[i][j]);
 				}
 			}
@@ -490,13 +494,12 @@ public class GLCM {
 		 * Calculate the inverse difference moment (IDM) (Walker, et al. 1995). 
 		 * This is calculated using the same formula as 
 		 * Conners, et al., 1984 "Local Homogeneity"
-		 * @param glcm
 		 * @return
 		 */
 		public double idm() {
 			double idm = 0.0;
-			for (int i=0;  i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					idm += ((1/(1+(Math.pow(i-j,2))))*glcm[i][j]);
 				}
 			}
@@ -506,13 +509,12 @@ public class GLCM {
 		/**
 		 * Calculate the contrast (Haralick, et al. 1973).
 		 * Similar to the inertia, except abs(i-j) is used
-		 * @param glcm
 		 * @return
 		 */
 		public double contrast() {
 			double contrast = 0.0;
-			for (int i=0;  i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					contrast += Math.pow(Math.abs(i-j),2)*(glcm[i][j]);
 				}
 			}
@@ -520,13 +522,12 @@ public class GLCM {
 		}
 
 		/**
-		 * @param glcm
 		 * @return
 		 */
 		public double energy() {
 			double energy = 0.0;
-			for (int i=0;  i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					energy += Math.pow(glcm[i][j],2);
 				}
 			}
@@ -535,13 +536,12 @@ public class GLCM {
 
 		/**
 		 * Calculate the entropy (Haralick et al., 1973; Walker, et al., 1995)
-		 * @param glcm
 		 * @return
 		 */
 		public double entropy() {
 			double entropy = 0.0;
-			for (int i=0;  i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					if (glcm[i][j] != 0) {
 						entropy = entropy-(glcm[i][j]*(Math.log(glcm[i][j])));
 						//the next line is how Xite calculates it -- I am not sure why they use this, I do not think it is correct
@@ -559,13 +559,12 @@ public class GLCM {
 		 *  the same as IDM above.
 		 *   Parker's implementation is below; absolute value
 		 *   of i-j is taken rather than square
-		 * @param glcm
 		 * @return
 		 */
 		public double homogeneity() {
 			double homogeneity = 0.0;
-			for (int i=0;  i<256; i++) {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++) {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					homogeneity += glcm[i][j]/(1.0+Math.abs(i-j));
 				}
 			}
@@ -574,13 +573,12 @@ public class GLCM {
 
 		/**
 		 * Calculate the inertia (Walker, et al., 1995; Connors, et al. 1984)
-		 * @param glcm
 		 * @return
 		 */
 		public double inertia() {
 			double inertia = 0.0;
-			for (int i=0;  i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					if (glcm[i][j] != 0) {
 						inertia += (Math.pow((i-j),2)*glcm[i][j]);
 					}
@@ -592,13 +590,12 @@ public class GLCM {
 		/**
 		 * Calculate the sum of all glcm elements. If the matrix is
 		 * of probabilities, this should return 1
-		 * @param glcm
 		 * @return
 		 */
 		public double sum() {
 			double sum = 0.0;
-			for (int i=0; i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0; i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					sum = sum + glcm[i][j];
 				}
 			}
@@ -608,8 +605,6 @@ public class GLCM {
 		/**
 		 * Calculate the variance ("variance" in Walker 1995; 
 		 * "Sum of Squares: Variance" in Haralick 1973)
-		 * @param glcm
-		 * @param stats
 		 * @return
 		 */
 		public double variance() {
@@ -626,8 +621,8 @@ public class GLCM {
 		}
 			 */
 
-			for (int i=0;  i<256; i++)  {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++)  {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					variance += (Math.pow((i-mean),2)* glcm[i][j]);
 				}
 			}
@@ -636,16 +631,14 @@ public class GLCM {
 
 		/**
 		 * Calculate the shade (Walker, et al., 1995; Connors, et al. 1984)
-		 * @param glcm
-		 * @param stats
 		 * @return
 		 */
 		public double shade() {
 			double shade = 0.0;
 
 			// calculate the shade parameter
-			for (int i=0;  i<256; i++) {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++) {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					shade += (Math.pow((i+j-stats.meanx-stats.meany),3)*glcm[i][j]);
 				}
 			}
@@ -654,14 +647,12 @@ public class GLCM {
 
 		/**
 		 * Calculate the prominence (Walker, et al., 1995; Connors, et al. 1984)
-		 * @param glcm
-		 * @param stats
 		 * @return
 		 */
 		public double prominence() {
 			double prominence=0.0;
-			for (int i=0;  i<256; i++) {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++) {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					prominence += (Math.pow((i+j-stats.meanx-stats.meany),4)*glcm[i][j]);
 				}
 			}
@@ -671,18 +662,15 @@ public class GLCM {
 		/**
 		 * Calculate the correlation. Methods based on Haralick 1973 
 		 * (and MatLab), Walker 1995 are included below. Haralick/Matlab 
-		 * result reported for correlation currently; will 
-		 * give Walker as an option in the future.
-		 * @param glcm
-		 * @param stats
+		 * result reported for correlation currently
 		 * @return
 		 */
 		public double correlation() {
 			double correlation=0.0;
 
 			// calculate the correlation parameter
-			for (int i=0;  i<256; i++) {
-				for (int j=0; j<256; j++) {
+			for (int i=0;  i<EIGHT_BIT; i++) {
+				for (int j=0; j<EIGHT_BIT; j++) {
 					//Walker, et al. 1995 (matches Xite)
 					//correlation += ((((i-meanx)*(j-meany))/Math.sqrt(stdevx*stdevy))*glcm[i][j]);
 					//Haralick, et al. 1973 (continued below outside loop; matches original GLCM_Texture)
