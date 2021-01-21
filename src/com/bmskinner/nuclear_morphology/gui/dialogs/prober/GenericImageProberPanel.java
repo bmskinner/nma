@@ -80,7 +80,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
     private static final String NEXT_IMAGE_BTN          = "Next";
     private static final String WORKING_LBL             = "Working...";
     private static final String LOOKING_LBL             = "Looking for images...";
-    private static final double IMAGE_SCREEN_PROPORTION = 0.80;
+    private static final double IMAGE_SCREEN_PROPORTION = 0.70;
 
     private Window parentWindow;
     private JLabel imageLabel;
@@ -443,17 +443,22 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
             double ratio = (double) originalWidth / (double) originalHeight;
 
             Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+            
+//            LOGGER.fine("Screen size: "+screenSize);
+//            LOGGER.fine("Original image dimensions: w"+originalWidth+" by h"+originalHeight);
 
             // set the new width
             int newWidth = (int) (screenSize.getWidth() * fraction);
             int newHeight = (int) ((double) newWidth / ratio);
+            
+
 
             // Check height is OK. If not, recalculate sizes
             if (newHeight >= screenSize.getHeight()) {
                 newHeight = (int) (screenSize.getHeight() * fraction);
                 newWidth = (int) ((double) newHeight * ratio);
             }
-
+//            LOGGER.fine("New image dimensions: w"+newWidth+" by h"+newHeight);
             // Create the image
 
             Image result = largeIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_FAST);
@@ -549,15 +554,11 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
      */
     public class LargeImageDialog extends JDialog {
 
-        // public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
-
         /**
          * Create a full-scale image for the given key in this ImageProber.
          * 
-         * @param key
-         *            the image to show
-         * @param parent
-         *            the parent ImageProber window
+         * @param cell the cell in the table to display
+         * @param parent the parent ImageProber window
          */
         public LargeImageDialog(final ProberTableCell cell, final Window parent) {
             super(parent);
