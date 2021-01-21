@@ -417,20 +417,27 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         try {
         	dataset.updateSourceImageDirectory(expectedImageDirectory);
         } catch (IllegalArgumentException e) {
-        	LOGGER.fine("Cannot update image file paths: " + e.getMessage());
-        	LOGGER.fine("Nucleus images will not be displayed");
+        	LOGGER.warning("Cannot update image file paths: " + e.getMessage());
+        	LOGGER.warning("Nucleus images will not be displayed");
         }
 
-        LOGGER.fine("Checking if signal folders need updating");
+        LOGGER.info("Checking if signal folders need updating");
         if(!signalFileMap.isPresent()){
+        	// We did not provide the map beforehand
+        	// Figure out if the signal images are in the expected place
         	Map<UUID, File> map = new HashMap<>();
         	for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
-        		Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(id);
-        		INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id);
+        		INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get()
+        				.getNuclearSignalOptions(id);
         		File signalFolder = signalOptions.getFolder();
-        		if(group.isPresent() && signalFolder!=null && signalFolder.exists()) {
+        		
+        		// If there are images in the expected folder, all ok
+        		// Otherwise, ask the user to find them
+        		LOGGER.info("Expected signal folder: "+signalFolder.getAbsolutePath());
+        		if(signalFolder!=null && signalFolder.exists()) {
         			map.put(id, signalOptions.getFolder());
         		} else {
+        			LOGGER.info("Expected signal folder does not exist");
         			map.put(id, FileSelector.getSignalDirectory(dataset, id));
         		}        		
         	}
