@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
@@ -124,8 +125,8 @@ public class ImportDatasetAction extends VoidResultAction {
                 worker.addPropertyChangeListener(this);
                 
             } catch(IllegalArgumentException e){
-                LOGGER.warning("Unable to import file");
-                LOGGER.log(Loggable.STACK, e.getMessage(), e);
+                LOGGER.warning("Unable to import file: "+e.getMessage());
+                LOGGER.log(Level.FINE, e.getMessage(), e);
                 cancel();
             }
 
@@ -188,14 +189,12 @@ public class ImportDatasetAction extends VoidResultAction {
 
         } catch (InterruptedException e) {
             LOGGER.warning("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
-            LOGGER.log(Loggable.STACK, "Unable to open '" + file.getAbsolutePath() + "': ", e);
             return;
         } catch (ExecutionException e) {
             LOGGER.warning("Unable to open '" + file.getAbsolutePath() + "': " + e.getMessage());
-            LOGGER.log(Loggable.STACK, "Unable to open '" + file.getAbsolutePath() + "': ", e);
             return;
         }
-        LOGGER.fine("Opened dataset");
+        LOGGER.fine("Opened dataset: "+dataset.getName());
 
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
         super.finished();

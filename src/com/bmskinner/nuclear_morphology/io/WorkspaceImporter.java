@@ -120,6 +120,7 @@ public abstract class WorkspaceImporter implements Importer {
 		public IWorkspace importWorkspace() {
 			
 			IWorkspace w = WorkspaceFactory.createWorkspace(file);
+			LOGGER.fine("Attempting to read workspace file: "+file.getAbsolutePath());
 			
 		    try {
 		         SAXBuilder saxBuilder = new SAXBuilder();
@@ -138,6 +139,7 @@ public abstract class WorkspaceImporter implements Importer {
 		         for(Element dataset : datasets) {
 		        	 String path = dataset.getChild(IWorkspace.DATASET_PATH).getText();
 		        	 File f = new File(path);
+		        	 LOGGER.fine("Workspace has dataset file: "+f.getAbsolutePath());
 		        	 w.add(f);
 		         }
 		         
@@ -159,9 +161,11 @@ public abstract class WorkspaceImporter implements Importer {
 		         }
 		         		         
 		      } catch(JDOMException e) {
-		         e.printStackTrace();
+		    	  LOGGER.log(Level.WARNING, "Unable to read XML of workspace file: "+file.getAbsolutePath());
+		    	  LOGGER.log(Loggable.STACK, "Unable to read XML of workspace file: "+file.getAbsolutePath(),e);
 		      } catch(IOException ioe) {
-		         ioe.printStackTrace();
+		    	  LOGGER.log(Level.WARNING, "IO error reading workspace file: "+file.getAbsolutePath());
+		    	  LOGGER.log(Loggable.STACK, "IO error reading workspace file: "+file.getAbsolutePath(),ioe);
 		      }
 			return w;
 		}
@@ -197,7 +201,7 @@ public abstract class WorkspaceImporter implements Importer {
     	@Override
         public IWorkspace importWorkspace() {
 
-            
+    		LOGGER.fine("Attempting to read workspace file: "+file);
             try {
 
                 FileInputStream fstream = new FileInputStream(file);

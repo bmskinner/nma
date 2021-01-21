@@ -82,11 +82,15 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     public DatasetImportMethod(final File f) {
         super();
 
-        if (!Importer.isSuitableImportFile(f))
+        if (!Importer.isSuitableImportFile(f)) {
+        	LOGGER.warning(INVALID_FILE_ERROR);
             throw new IllegalArgumentException(INVALID_FILE_ERROR);
+        }
 
-        if (! (f.getName().endsWith(SAVE_FILE_EXTENSION) || f.getName().endsWith(BACKUP_FILE_EXTENSION)) )
+        if (! (f.getName().endsWith(SAVE_FILE_EXTENSION) || f.getName().endsWith(BACKUP_FILE_EXTENSION)) ) {
+        	LOGGER.warning("File is not nmd or bak format or has been renamed: "+f.getAbsolutePath());
             throw new IllegalArgumentException("File is not nmd or bak format or has been renamed: "+f.getAbsolutePath());
+        }
         
         this.file = f;
     }
