@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
@@ -32,7 +33,7 @@ import ij.process.ImageProcessor;
  * Calculate the similarities between warped images for signal pairs in the same nuclei.
  * For example, if a nucleus has signals A and B, this will calculate the MS-SSIM* between 
  * A and B warped onto a common template. If a nucleus has only one of these signals, no 
- * score is generated. 
+ * score is generated, and an empty chart will result
  * @author bms41
  * @since 1.15.0
  *
@@ -55,7 +56,7 @@ public class PerCellMSSSIMCalculationMethod extends SwingWorker<Map<ViolinKey, L
     protected Map<ViolinKey, List<MSSIMScore>> doInBackground() throws Exception {
 		Map<ViolinKey, List<MSSIMScore>> result = new HashMap<>();
         try {
-            LOGGER.finer( "Running warping");
+            LOGGER.fine( "Running warping");
             result = calculatePerCellMSSSIMs();
 
         } catch (Exception e) {
@@ -67,21 +68,28 @@ public class PerCellMSSSIMCalculationMethod extends SwingWorker<Map<ViolinKey, L
     }
 	
 	private Map<ViolinKey, List<MSSIMScore>> calculatePerCellMSSSIMs() {
+		LOGGER.fine( "Calculating per cell MS-SSIM*s");
 		int progress = 0;
 		MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
-		Map<ViolinKey, List<MSSIMScore>> scores = new HashMap();
+		
+		Map<ViolinKey, List<MSSIMScore>> scores = new HashMap<>();
 		for(IAnalysisDataset d : model.getTemplates()) {
-			LOGGER.fine("Calculating score for "+d.getName());
+			LOGGER.fine("Calculating MS-SSIM* scores for "+d.getName());
+			
+			// Get the consensus mesh for the current target shape
 			Mesh<Nucleus> meshConsensus;
 			try {
 				meshConsensus = new DefaultMesh<>(d.getCollection().getConsensus());
 			} catch (MeshCreationException e2) {
-				LOGGER.log(Loggable.STACK, "Error making mesh of consensus", e2);
+				LOGGER.log(Level.FINE, "Error making mesh of consensus", e2);
 				progress+=d.getCollection().getNucleusCount();
 				publish(progress);
 				continue;
 			}
 			
+			LOGGER.fine("Consensus mesh built for "+d.getName());
+			
+			// Choose the signals and threshold to set for warping
 			Map<UUID, String>  signalNames = new HashMap<>();
 			Map<UUID, Integer> signalThresholds = new HashMap<>();
 			for(UUID id : d.getCollection().getSignalGroupIDs()) {
@@ -93,7 +101,7 @@ public class PerCellMSSSIMCalculationMethod extends SwingWorker<Map<ViolinKey, L
 			Rectangle r = meshConsensus.toPath().getBounds();
 
 			for(Nucleus n : d.getCollection().getNuclei()) {
-				LOGGER.finest( "Calculating "+n.getNameAndNumber());
+								
 				if(n.getSignalCollection().getSignalGroupIds().size()==2) {
 					List<UUID> signalIds = new ArrayList<>(n.getSignalCollection().getSignalGroupIds());
 					UUID sig0 = signalIds.get(0);
@@ -144,7 +152,7 @@ public class PerCellMSSSIMCalculationMethod extends SwingWorker<Map<ViolinKey, L
 		    return meshImage.drawImage(meshConsensus);
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error making nucleus mesh image",  e);
+			LOGGER.log(Level.SEVERE, "Error making nucleus mesh image",  e);
 			return ImageFilterer.createBlackByteProcessor(w, h);
 		} 
 	}
