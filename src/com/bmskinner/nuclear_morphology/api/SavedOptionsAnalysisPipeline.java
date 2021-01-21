@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -66,6 +67,8 @@ import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
  *
  */
 public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod implements AnalysisPipeline {
+	
+	private static final Logger LOGGER = Logger.getLogger(SavedOptionsAnalysisPipeline.class.getName());
 	
 	private static final String DATE_FORMAT = "YYYY-MM-dd_HH-mm-ss";
 	
@@ -143,6 +146,11 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
     	run(methodsToRun);
 	}
 	
+	/**
+	 * Read the options XML file and create analysis options object
+	 * @return an analysis options object with the options from file
+	 * @throws XMLReadingException if the file cannot be read
+	 */
 	private IAnalysisOptions readOptions() throws XMLReadingException {
 		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
 		IAnalysisOptions options = r.read();
@@ -154,11 +162,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		datasets =  new NucleusDetectionMethod(outputFolder, options).call().getDatasets();
 		for(IAnalysisDataset dataset : datasets) {
 			methodsToRun.add(new DatasetProfilingMethod(dataset));
-			methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW));
-			
-			// Update the source folder in the options - if multiple folders were analysed, this may be wrong
-//			File folder = dataset.getCollection().getFolder();
-//			dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(folder);
+			methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW));	
 		}
 
 	}
@@ -213,10 +217,11 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			for(UUID signalGroupId : options.getNuclearSignalGroups()) {
 				
 				INuclearSignalOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
-				signalOptions.setFolder(datasetOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder());
-				
+				signalOptions.setFolder(imageFolder);
 				ISignalGroup signalGroup = new SignalGroup(signalNames.get(signalGroupId));
 				signalGroup.setGroupColour(ColourSelecter.getSignalColour(signalOptions.getChannel()));
+				
+				LOGGER.info("Set signal group "+signalGroup.getGroupName()+" to "+signalOptions.getFolder());
 				
 				dataset.getCollection().addSignalGroup(signalGroupId, signalGroup);
 				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions, signalGroupId));
@@ -230,14 +235,6 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			// Handle shell analysis setup
 			
 			if(shellOptions!=null) {
-				// filter the dataset for cells that can have a shell analysis applied - if all pass, does nothing
-//				final int shellCount = shellOptions.getShellNumber();
-//				Predicate<ICell> p = (c)->{
-//					return c.getNuclei().stream().allMatch(n->{
-//						return (n.getStatistic(PlottableStatistic.AREA) > shellCount*ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL
-//								&& n.getStatistic(PlottableStatistic.CIRCULARITY)>ShellAnalysisMethod.MINIMUM_CIRCULARITY);
-//					});
-//				};
 				methodsToRun.add(new ShellAnalysisMethod(dataset, shellOptions));
 				methodsToRun.add(new ShellReportMethod(dataset));
 			}
@@ -262,7 +259,6 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	}
 		
 	private void run(@NonNull List<IAnalysisMethod> methods) throws Exception {
-//		 fireUpdateProgressTotalLength(methods.size());
 		 for(IAnalysisMethod method : methods) {
 			 method.addProgressListener(this);
 			 method.call();
