@@ -126,6 +126,7 @@ public class Labels {
      *
      */
     public static class Signals {
+    	public static final String SIGNAL_COLOUR_LABEL     = "  "; // whitespace that will not be collapsed
     	public static final String SIGNAL_GROUP_LABEL      = "Signal group";
     	public static final String NUMBER_OF_SIGNAL_GROUPS = "Number of signal groups";
     	public static final String SIGNALS_LABEL           = "Signals";

@@ -287,7 +287,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                             
                     DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
-                    rowData.add(EMPTY_STRING);
+                    rowData.add(Labels.Signals.SIGNAL_COLOUR_LABEL);
                     rowData.add(cell);
                     rowData.add(ns.getChannel());
                     rowData.add(ns.getFolder());
@@ -344,8 +344,6 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         int signalGroupTotal = options.getDatasets().stream()
                 .mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount()).max().orElse(0);
 
-        // int signalGroupCount = getSignalGroupCount(options.getDatasets());
-
         LOGGER.finest( "Selected collections have " + signalGroupTotal + " signal groups");
 
         if (signalGroupTotal <= 0) {
@@ -358,8 +356,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
         // Make an instance of row names
-        List<Object> rowNames = new ArrayList<Object>();
-        rowNames.add(EMPTY_STRING);
+        List<Object> rowNames = new ArrayList<>();
+        rowNames.add(Labels.Signals.SIGNAL_COLOUR_LABEL);
         rowNames.add(Labels.Signals.SIGNAL_GROUP_LABEL);
         rowNames.add(Labels.Signals.SIGNALS_LABEL);
         rowNames.add(Labels.Signals.SIGNALS_PER_NUCLEUS);
@@ -370,7 +368,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         }
 
         // Make the full column of row names for each signal group
-        List<Object> firstColumn = new ArrayList<Object>(0);
+        List<Object> firstColumn = new ArrayList<>(0);
         firstColumn.add(Labels.Signals.NUMBER_OF_SIGNAL_GROUPS);
         for (int i = 0; i < signalGroupTotal; i++) {
             firstColumn.addAll(rowNames);
