@@ -129,8 +129,9 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         UUID activeID = null;
         String activeName = null;
 
-        Map<UUID, IAnalysisDataset> map = new HashMap<UUID, IAnalysisDataset>();
+        Map<UUID, IAnalysisDataset> map = new HashMap<>();
 
+        int cellCount = 0;
         while (scanner.hasNextLine()) {
 
             /*
@@ -142,10 +143,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
             String line = scanner.nextLine();
             if (line.startsWith(UUID_KEY)) {
-
-                /*
-                 * New dataset found
-                 */
+                /*  New dataset found */
                 activeID = UUID.fromString(line.split(TAB)[1]);
 
                 if (dataset.getId().equals(activeID) || dataset.hasChild(activeID)) {
@@ -160,9 +158,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
             }
 
             if (line.startsWith(NAME_KEY)) {
-                /*
-                 * Name of new dataset
-                 */
+                /* Name of new dataset  */
 
                 activeName = line.split(TAB)[1];
 
@@ -182,9 +178,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
             }
 
             if (line.startsWith(CHILD_OF_KEY)) {
-                /*
-                 * Parent dataset
-                 */
+                /*  Parent dataset */
                 UUID parentID = UUID.fromString(line.split(TAB)[1]);
 
                 if (parentID.equals(activeID)) {
@@ -195,19 +189,25 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                 continue;
             }
 
-            /*
-             * No header line, must be a cell for the current dataset
-             */
-
-            ICell cell = getCellFromLine(line);
-            if (cell != null) {
-                map.get(activeID).getCollection().addCell(cell);
+            /* No header line, so must be a cell for the current dataset  */
+            Optional<ICell> cell = getCellFromLine(line);
+            if (cell.isPresent()) {
+                map.get(activeID).getCollection().addCell(cell.get());
+                cellCount++;
+            } else {
+            	LOGGER.finer("Cell not found: "+line);
             }
         }
-        LOGGER.fine("All cells found");
+        
+        LOGGER.info(map.get(activeID).getCollection().size()+" cells out of "+ cellCount+" relocated");
 
+        if(cellCount==0) {
+        	LOGGER.warning("No cells in dataset "+map.get(activeID).getName());
+        	dataset.deleteChild(activeID);
+        	map.remove(activeID);
+        }
+        
         // Make the profile collections for the new datasets
-
         for (IAnalysisDataset d : map.values()) {
             d.getCollection().createProfileCollection();
         }
@@ -216,7 +216,14 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         return map.keySet();
     }
 
-    private ICell getCellFromLine(String line) throws CellRelocationException {
+    /**
+     * Given a line from the cell file, return a matching cell from the current 
+     * dataset
+     * @param line
+     * @return
+     * @throws CellRelocationException
+     */
+    private Optional<ICell> getCellFromLine(String line) throws CellRelocationException {
         LOGGER.finest("Processing line: " + line);
 
         // Line format is FilePath\tPosition as x-y
@@ -224,16 +231,20 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         // Note - we don't need the file to exist for the assignment to work
         Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
         if(analysisOptions.isPresent()) {
-        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get().getDetectionOptions(CellularComponent.NUCLEUS);
+        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get()
+        			.getDetectionOptions(CellularComponent.NUCLEUS);
+        	
         	if(nucleusOptions.isPresent()) {
         		File currentImageDirectory = nucleusOptions.get().getFolder();
 
         		File savedFile = getFile(line);
         		// Get the image name and substitute the parent dataset path.
         		savedFile = new File(currentImageDirectory, savedFile.getName());
+        		LOGGER.finest("New path: "+savedFile.getAbsolutePath());
 
         		// get position
         		IPoint com = getPosition(line);
+
         		return copyCellFromRoot(savedFile, com);
         	} else {
         		throw new CellRelocationException("No nuclear detection options - cannot check directory path");
@@ -241,11 +252,6 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         } else {
         	throw new CellRelocationException("No analysis options - cannot check directory path");
         }
-
-        
-
-       
-
     }
 
     /**
@@ -256,21 +262,17 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
      * @param com
      * @return
      */
-    private ICell copyCellFromRoot(File f, IPoint com) {
+    private Optional<ICell> copyCellFromRoot(File f, IPoint com) {
         // find the nucleus
         Set<ICell> cells = this.dataset.getCollection().getCells(f);
-
         for (ICell c : cells) {
-
             for (Nucleus n : c.getNuclei()) {
                 if (n.containsOriginalPoint(com)) {
-
-                    return c;
+                    return Optional.of(c);
                 }
             }
-
         }
-        return null;
+        return Optional.empty();
     }
 
     private File getFile(String line) {
