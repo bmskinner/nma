@@ -153,50 +153,19 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
         LOGGER.info("Creating cell collections");
 
-        List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> result = new ArrayList<>();
 
         for (ICellCollection collection : folderCollection) {
 
             IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
             dataset.setAnalysisOptions(analysisOptions);
             dataset.setRoot(true);
-
-            File folder = collection.getFolder();
-            LOGGER.info("Analysing: " + folder.getName());
-
+            
             try {
-
-                ICellCollection failedNuclei = new DefaultCellCollection(folder, collection.getOutputFolderName(),
-                        collection.getName() + " - failed", collection.getNucleusType());
-
-                // LOGGER.info("Filtering collection...");
-                // boolean ok = new CollectionFilterer().run(collection,
-                // failedNuclei); // put fails into failedNuclei, remove from r
-                // if(ok){
-                // LOGGER.info("Filtered OK");
-                // } else {
-                // LOGGER.info("Filtering error");
-                // }
-
-                /*
-                 * Keep the failed nuclei - they can be manually assessed later
-                 */
-
-                if (analysisOptions.isKeepFailedCollections()) {
-                    LOGGER.info("Keeping failed nuclei as new collection");
-                    IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-                    IAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
-                    failedOptions.setNucleusType(NucleusType.ROUND);
-                    failed.setAnalysisOptions(failedOptions);
-                    failed.setRoot(true);
-                    result.add(failed);
-                }
-
                 LOGGER.info(spacerString);
 
                 LOGGER.info("Population: " + collection.getName());
                 LOGGER.info("Passed: " + collection.size() + " nuclei");
-                LOGGER.info("Failed: " + failedNuclei.size() + " nuclei");
 
                 LOGGER.info(spacerString);
 

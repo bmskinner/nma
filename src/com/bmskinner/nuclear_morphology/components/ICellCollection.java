@@ -292,6 +292,7 @@ public interface ICellCollection
      * Get the name of the analysis output folder
      * 
      * @return
+     * @deprecated because we should use the analysis dataset save path for this
      */
     String getOutputFolderName();
 
@@ -306,6 +307,7 @@ public interface ICellCollection
 
     /**
      * Set the output folder of the collection
+     * @deprecated because we should use the analysis dataset save path for this
      */
     void setOutputFolder(@NonNull File folder);
 

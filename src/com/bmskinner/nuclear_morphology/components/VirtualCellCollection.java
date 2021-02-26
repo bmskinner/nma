@@ -494,21 +494,25 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
+    @Deprecated
     public File getFolder() {
         return parent.getCollection().getFolder();
     }
 
     @Override
+    @Deprecated
     public String getOutputFolderName() {
         return parent.getCollection().getOutputFolderName();
     }
 
     @Override
+    @Deprecated
     public File getOutputFolder() {
         return parent.getCollection().getOutputFolder();
     }
 
     @Override
+    @Deprecated
     public void setOutputFolder(@NonNull File folder) {
         parent.getCollection().setOutputFolder(folder);
     }
