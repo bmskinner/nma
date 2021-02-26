@@ -511,8 +511,22 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     		return;
     	}
 
+    	 // Update the old storage location
         getCollection().setSourceFolder(expectedImageDirectory);
-
+        
+        // Update the analysis options
+        Optional<IAnalysisOptions> analysisOptions = getAnalysisOptions();
+        if(analysisOptions.isPresent()) {
+        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get()
+        			.getDetectionOptions(CellularComponent.NUCLEUS);
+        	
+        	if(nucleusOptions.isPresent()) {
+        		nucleusOptions.get().setFolder(expectedImageDirectory);
+        	}
+        }
+        
+        //TODO add unit tests that this completes correctly
+        
         for (IAnalysisDataset child : this.getAllChildDatasets()) {
             child.getCollection().setSourceFolder(expectedImageDirectory);
         }
