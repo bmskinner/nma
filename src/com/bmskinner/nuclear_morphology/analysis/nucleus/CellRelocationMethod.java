@@ -195,7 +195,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                 map.get(activeID).getCollection().addCell(cell.get());
                 cellCount++;
             } else {
-            	LOGGER.finer("Cell not found: "+line);
+            	LOGGER.fine("Cell not found: "+line);
             }
         }
         
@@ -224,7 +224,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
      * @throws CellRelocationException
      */
     private Optional<ICell> getCellFromLine(String line) throws CellRelocationException {
-        LOGGER.finest("Processing line: " + line);
+        LOGGER.fine("Processing line: " + line);
 
         // Line format is FilePath\tPosition as x-y
         // Build a file name based on the current image folder and the stored filename
@@ -240,7 +240,12 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         		File savedFile = getFile(line);
         		// Get the image name and substitute the parent dataset path.
         		savedFile = new File(currentImageDirectory, savedFile.getName());
-        		LOGGER.finest("New path: "+savedFile.getAbsolutePath());
+        		LOGGER.fine("New path: "+savedFile.getAbsolutePath());
+        		
+        		if(!savedFile.exists()) {
+        			LOGGER.warning("File does not exist: "+savedFile.getAbsolutePath());
+        			return Optional.empty();
+        		}
 
         		// get position
         		IPoint com = getPosition(line);
@@ -277,8 +282,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
     private File getFile(String line) {
         String[] array = line.split(TAB);
-        File f = new File(array[0]);
-        return f;
+        return new File(array[0]);
     }
 
     private IPoint getPosition(String line) {
