@@ -499,7 +499,25 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     	// Is the name of the expectedImageDirectory the same as the dataset
     	// image directory?
-    	String expectedName = getCollection().getFolder().getName();
+    	// Update the analysis options
+        Optional<IAnalysisOptions> analysisOptions = getAnalysisOptions();
+        if(!analysisOptions.isPresent()) {
+        	LOGGER.warning("No analysis options to contain image folder");
+        	return;
+        }
+        
+    	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get()
+    			.getDetectionOptions(CellularComponent.NUCLEUS);
+    	
+    	if(!nucleusOptions.isPresent()) {
+    		LOGGER.warning("No nucleus detection options to contain image folder");
+    		return;
+    	}
+    	
+    	// Check that the folders have the same name - if the files have
+    	// just been copied between computers, this should be true
+    	String expectedName = nucleusOptions.get().getFolder().getName();
+
     	if (!expectedImageDirectory.getName().equals(expectedName)) {
     		LOGGER.warning(String.format("Caution: Existing dataset folder '%s' does not match new folder name '%s'",
     				expectedName, expectedImageDirectory.getName()));
@@ -515,15 +533,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         getCollection().setSourceFolder(expectedImageDirectory);
         
         // Update the analysis options
-        Optional<IAnalysisOptions> analysisOptions = getAnalysisOptions();
-        if(analysisOptions.isPresent()) {
-        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get()
-        			.getDetectionOptions(CellularComponent.NUCLEUS);
-        	
-        	if(nucleusOptions.isPresent()) {
-        		nucleusOptions.get().setFolder(expectedImageDirectory);
-        	}
-        }
+        nucleusOptions.get().setFolder(expectedImageDirectory);
+
         
         //TODO add unit tests that this completes correctly
         
