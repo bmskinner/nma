@@ -446,15 +446,15 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
             
 //            LOGGER.fine("Screen size: "+screenSize);
 //            LOGGER.fine("Original image dimensions: w"+originalWidth+" by h"+originalHeight);
-
-            // set the new width
-            int newWidth = (int) (screenSize.getWidth() * fraction);
-            int newHeight = (int) ((double) newWidth / ratio);
+//            LOGGER.fine("Scaling to "+fraction);
             
-
+            // set the new width
+            int newWidth  = (int) ( screenSize.getWidth() * fraction);
+            int newHeight = (int) ((double) newWidth / ratio);
+            int maxHeight = (int) (screenSize.getHeight() * fraction);
 
             // Check height is OK. If not, recalculate sizes
-            if (newHeight >= screenSize.getHeight()) {
+            if (newHeight >= maxHeight) {
                 newHeight = (int) (screenSize.getHeight() * fraction);
                 newWidth = (int) ((double) newHeight * ratio);
             }
