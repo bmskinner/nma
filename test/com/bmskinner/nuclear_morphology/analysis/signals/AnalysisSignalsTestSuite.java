@@ -8,7 +8,8 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.AnalysisSignalsS
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	AnalysisSignalsShellsTestSuite.class, 
-	PairedSignalGroupsTest.class})
+	PairedSignalGroupsTest.class,
+	SignalDetectionMethodTest.class})
 public class AnalysisSignalsTestSuite {
 
 }

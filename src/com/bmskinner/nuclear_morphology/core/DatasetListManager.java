@@ -300,9 +300,10 @@ public final class DatasetListManager {
     }
 
     /**
-     * Get the dataset with the given id, or null
+     * Test if a dataset with the given id is present, either as a root
+     * or child dataset
      * 
-     * @param id
+     * @param id the id to check
      * @return
      */
     public final synchronized boolean hasDataset(@NonNull UUID id) {
@@ -315,6 +316,21 @@ public final class DatasetListManager {
                 if (child.getId().equals(id)) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Test if a root dataset with the given id is present.
+     * 
+     * @param id the id to check
+     * @return
+     */
+    public final synchronized boolean hasRootDataset(@NonNull UUID id) {
+        for (IAnalysisDataset d : list) {
+            if (d.getId().equals(id)) {
+                return true;
             }
         }
         return false;
