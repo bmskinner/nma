@@ -18,8 +18,15 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
 
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
+/**
+ * Generate colour swatches for display. Uses the accessibility
+ * global option to choose swatch.
+ * @author ben
+ *
+ */
 public class ColourSelecter {
 
     public static final Color DEFAULT_CELL_OUTLINE    = Color.CYAN;
@@ -101,6 +108,26 @@ public class ColourSelecter {
 	        default:                return getRegularColor(i);
     	}
     }
+    
+    /**
+     * Get the appropriate colour for the given tag
+     * @param tag the tag to get a color for
+     * @return the colour
+     */
+    public static Color getColour(Tag tag) {
+    	
+    	if(Tag.BOTTOM_VERTICAL.equals(tag) ||
+    		Tag.TOP_VERTICAL.equals(tag))
+    		return(Color.GREEN);
+    	
+    	if(Tag.REFERENCE_POINT.equals(tag))
+    		return Color.ORANGE;
+    	
+    	if(Tag.ORIENTATION_POINT.equals(tag))
+    		return Color.BLUE;
+    	
+    	return Color.BLACK;
+    }
 
     /**
      * Get an appropriate colour for the given number from the AI colour set.
@@ -112,6 +139,7 @@ public class ColourSelecter {
     private static Color getAIColor(int i) {
         return ColourSelecter.aiSwatchList[i % ColourSelecter.aiSwatchList.length];
     }
+    
 
     /**
      * Get an appropriate colour for the given number from the regular colour

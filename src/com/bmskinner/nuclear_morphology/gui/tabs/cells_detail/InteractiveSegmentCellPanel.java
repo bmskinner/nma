@@ -236,8 +236,24 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			if(cell==null)
 				return popupMenu;
 
-			try {
+			addSegmentsToPopup(popupMenu, point);
 
+			popupMenu.addSeparator();
+
+			addTagsToPopup(popupMenu, point);
+
+
+			return popupMenu;
+		}
+		
+		/**
+		 * Add segment update options to the popup menu, coloured
+		 * by segment
+		 * @param popupMenu
+		 * @param point
+		 */
+		private void addSegmentsToPopup(JPopupMenu popupMenu, IBorderPoint point) {
+			try {
 				int rawIndex = cell.getNucleus().getBorderIndex(point);
 
 				int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
@@ -277,63 +293,73 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 					createImage();
 				});
 				popupMenu.add(nextItem);
-				
+			} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
+				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
+			}
+		}
+		
+		/**
+		 * Add tags to the popup menu
+		 * @param popupMenu
+		 */
+		private void addTagsToPopup(JPopupMenu popupMenu, IBorderPoint point) {
+			List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+
+			Collections.sort(tags);
+
+			for (Tag tag : tags) {
+
+				if (tag.equals(Tag.INTERSECTION_POINT))
+					continue; // The IP is determined solely by the OP
+
+				// Colour the menu item by tag colour
+				JMenuItem item = new JMenuItem("Move "+tag.toString().toLowerCase()+" here");
+				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 3));
+				item.setBackground(ColourSelecter.getColour(tag).darker());
+				item.setBorderPainted(true);
+				item.setForeground(Color.WHITE);
+				item.setOpaque(true);
+
+				item.addActionListener(a -> {
+					int pIndex = cell.getNucleus().getBorderIndex(point);
+					updateTag(tag, pIndex);
+					repaint();
+				});
+				popupMenu.add(item);
+				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
+			}
+
+			// Find border tags with rulesets that have not been assigned in the median
+			List<Tag> unassignedTags = new ArrayList<>();
+			for (Tag tag : BorderTagObject.values()) {
+				if (tag.equals(Tag.INTERSECTION_POINT))
+					continue;
+				if (!tags.contains(tag)) {
+					unassignedTags.add(tag);
+				}
+			}
+
+			if (!unassignedTags.isEmpty()) {
+				Collections.sort(unassignedTags);
+
 				popupMenu.addSeparator();
-				
-				List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
 
-				Collections.sort(tags);
-
-				for (Tag tag : tags) {
-
-					if (tag.equals(Tag.INTERSECTION_POINT))
-						continue; // The IP is determined solely by the OP
-
-					JMenuItem item = new JMenuItem("Move "+tag.toString().toLowerCase()+" here");
+				for (Tag tag : unassignedTags) {
+					JMenuItem item = new JMenuItem("Set "+tag.toString().toLowerCase()+" here");
+					item.setForeground(Color.DARK_GRAY);
 
 					item.addActionListener(a -> {
 						int pIndex = cell.getNucleus().getBorderIndex(point);
 						updateTag(tag, pIndex);
-						repaint();
 					});
 					popupMenu.add(item);
 				}
-
-				// Find border tags with rulesets that have not been assigned in the median
-				List<Tag> unassignedTags = new ArrayList<Tag>();
-				for (Tag tag : BorderTagObject.values()) {
-					if (tag.equals(Tag.INTERSECTION_POINT))
-						continue;
-					if (!tags.contains(tag)) {
-						unassignedTags.add(tag);
-					}
-				}
-
-				if (!unassignedTags.isEmpty()) {
-					Collections.sort(unassignedTags);
-
-					popupMenu.addSeparator();
-
-					for (Tag tag : unassignedTags) {
-						JMenuItem item = new JMenuItem("Set "+tag.toString().toLowerCase()+" here");
-						item.setForeground(Color.DARK_GRAY);
-
-						item.addActionListener(a -> {
-							int pIndex = cell.getNucleus().getBorderIndex(point);
-							updateTag(tag, pIndex);
-						});
-						popupMenu.add(item);
-					}
-				}
-
-			} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
-				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
 			}
-			return popupMenu;
 		}
 
-	}
 
+	}
+	
 	@Override
 	protected synchronized void computeBulgeImage(BufferedImage input, int cx, int cy, 
 			int small, int big, BufferedImage output){
@@ -376,19 +402,19 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
 						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.GREEN);
+					g2.setColor(ColourSelecter.getColour(Tag.TOP_VERTICAL));
 				}
 				if(cell.getNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
 						cell.getNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.GREEN);
+					g2.setColor(ColourSelecter.getColour(Tag.BOTTOM_VERTICAL));
 				}
 				if(cell.getNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
 						cell.getNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.ORANGE);
+					g2.setColor(ColourSelecter.getColour(Tag.REFERENCE_POINT));
 				}
 				if(cell.getNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
 						cell.getNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.BLUE);
+					g2.setColor(ColourSelecter.getColour(Tag.ORIENTATION_POINT));
 				}
 
 			} catch (UnavailableBorderTagException e) {
