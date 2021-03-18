@@ -47,9 +47,11 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.NumberTools;
 
 import ij.process.ImageProcessor;
 
@@ -220,11 +222,18 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 	 *
 	 */
 	private class CellImageMouseListener extends MouseAdapter {
+		
+		private static final int SMALL_MULTIPLIER = 1;
+		private static final int LARGE_MULTIPLIER = 3;
+
+		/** Minimum radius of the zoomed image */
+		private static final int SMALL_MIN_RADIUS = 5;
+		private static final int SMALL_MAX_RADIUS = 100;
+		
+		private static final int LARGE_MIN_RADIUS = 10;
+		private static final int LARGE_MAX_RADIUS = 200;
+		
 		public CellImageMouseListener() { super(); }
-		private static final int MAX_BIG_RADIUS = 200;
-		private static final int MIN_BIG_RADIUS = 10;
-		private static final int MAX_SMALL_RADIUS = 100;
-		private static final int MIN_SMALL_RADIUS = 5;
 		
 		
 		@Override
@@ -234,16 +243,12 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 			// Modify the square size
             if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
                 InputEvent.CTRL_DOWN_MASK){
-            	int temp = smallRadius +( 1*e.getWheelRotation());
-            	temp = temp>MAX_SMALL_RADIUS?MAX_SMALL_RADIUS:temp;
-            	temp = temp<MIN_SMALL_RADIUS?MIN_SMALL_RADIUS:temp;
-                smallRadius = temp;
+            	int temp = smallRadius +( SMALL_MULTIPLIER * e.getWheelRotation());
+            	smallRadius = NumberTools.constrain(temp, SMALL_MIN_RADIUS, SMALL_MAX_RADIUS);
             } else {
             	// Modify the zoom
-            	int temp = bigRadius +( 3 * e.getWheelRotation());
-            	temp = temp>MAX_BIG_RADIUS?MAX_BIG_RADIUS:temp;
-            	temp = temp<MIN_BIG_RADIUS?MIN_BIG_RADIUS:temp;
-            	bigRadius = temp;
+            	int temp = bigRadius +( LARGE_MULTIPLIER * e.getWheelRotation());
+            	bigRadius = NumberTools.constrain(temp, LARGE_MIN_RADIUS, LARGE_MAX_RADIUS);
             }
             IPoint p = translatePanelLocationToRenderedImage(e); 
 			updateImage(p.getXAsInt(), p.getYAsInt());
@@ -357,19 +362,19 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 				
 				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
 						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.GREEN);
+					g2.setColor(ColourSelecter.getColour(Tag.TOP_VERTICAL));
 				}
 				if(cell.getNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
 						cell.getNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.GREEN);
+					g2.setColor(ColourSelecter.getColour(Tag.BOTTOM_VERTICAL));
 				}
 				if(cell.getNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
 						cell.getNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.ORANGE);
+					g2.setColor(ColourSelecter.getColour(Tag.REFERENCE_POINT));
 				}
 				if(cell.getNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
 						cell.getNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(Color.BLUE);
+					g2.setColor(ColourSelecter.getColour(Tag.ORIENTATION_POINT));
 				}
 
 			} catch (UnavailableBorderTagException e) {

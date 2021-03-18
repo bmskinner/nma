@@ -9,15 +9,15 @@ package com.bmskinner.nuclear_morphology.utility;
 public class NumberTools {
 	
 	/**
-	 * Constrain a number to within set bounds
+	 * Constrain a number to within set bounds.
 	 * @param number the number to constrain
 	 * @param min the minimum value
 	 * @param max the maximum value
 	 * @return the minimum or maximum bound if the number is outside these
 	 */
 	public static int constrain(int number, int min, int max) {
-		number = number>max ? max : number;
-		number = number<min ? min :number;
+		if(number>max) return max;
+		if(number<min) return min;
 		return number;
 	}
 

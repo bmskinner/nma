@@ -161,7 +161,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 	private class ImageMouseAdapter extends MouseAdapter {
 		
 		private static final int SMALL_MULTIPLIER = 1;
-		private static final int LARGE_MULTIPLIER = 1;
+		private static final int LARGE_MULTIPLIER = 3;
 
 		/** Minimum radius of the zoomed image */
 		private static final int SMALL_MIN_RADIUS = 5;
