@@ -88,7 +88,7 @@ public class FileUtils {
      */
     public static File extantComponent(File file) {
     	if(file==null)
-    		return null;
+    		return new File(System.getProperty("user.home"));
     	if(file.exists())
     		return file;
     	return extantComponent(file.getParentFile());

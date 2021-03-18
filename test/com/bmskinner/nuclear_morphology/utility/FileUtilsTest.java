@@ -1,0 +1,34 @@
+package com.bmskinner.nuclear_morphology.utility;
+
+import static org.junit.Assert.*;
+
+import java.io.File;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class FileUtilsTest {
+
+	@Before
+	public void setUp() throws Exception {
+	}
+	
+	@Test
+	public void testExtantComponent() {
+		File f = new File(System.getProperty("user.home"));
+		assertTrue(f.exists());
+		File g = FileUtils.extantComponent(f);
+		assertNotNull(g);
+		assertEquals(f, g);
+	}
+
+	@Test
+	public void testExtantComponentHandlesNonExistentFiles() {
+		File f = new File("Q:/non/existant/folder");
+		assertFalse(f.exists());
+		File g = FileUtils.extantComponent(f);
+		assertNotNull(g);
+		assertEquals(new File(System.getProperty("user.home")), g);
+	}
+
+}

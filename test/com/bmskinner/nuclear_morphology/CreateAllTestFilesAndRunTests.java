@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.io.IoTestSuite;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.UtilityTestSuite;
 
 /**
  * This suite runs the test file creators, then runs the
@@ -29,7 +30,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 	AnalysisTestSuite.class,
 	ApiTestSuite.class,
 	ComponentTestSuite.class,
-	IoTestSuite.class
+	IoTestSuite.class,
+	UtilityTestSuite.class
 	})
 public class CreateAllTestFilesAndRunTests {
 	
