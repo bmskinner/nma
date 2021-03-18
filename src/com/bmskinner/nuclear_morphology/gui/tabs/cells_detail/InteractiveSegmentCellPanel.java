@@ -60,6 +60,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateTyp
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.NumberTools;
 
 import ij.process.ImageProcessor;
 
@@ -158,21 +159,29 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 	 *
 	 */
 	private class ImageMouseAdapter extends MouseAdapter {
+		
+		private static final int SMALL_MULTIPLIER = 1;
+		private static final int LARGE_MULTIPLIER = 1;
+
+		/** Minimum radius of the zoomed image */
+		private static final int SMALL_MIN_RADIUS = 5;
+		private static final int SMALL_MAX_RADIUS = 100;
+		
+		private static final int LARGE_MIN_RADIUS = 10;
+		private static final int LARGE_MAX_RADIUS = 200;
+		
+		
 		@Override
 		public synchronized void mouseWheelMoved(MouseWheelEvent e) {
 			if(imageLabel.getIcon()==null)
 				return;
 			if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
 					InputEvent.CTRL_DOWN_MASK){
-				int temp = smallRadius +( 1*e.getWheelRotation());
-				temp = temp>100?100:temp;
-				temp = temp<5?5:temp;
-				smallRadius = temp;
+				int temp = smallRadius +( SMALL_MULTIPLIER*e.getWheelRotation());
+				smallRadius = NumberTools.constrain(temp, SMALL_MIN_RADIUS, SMALL_MAX_RADIUS);
 			} else {
-				int temp = bigRadius +( 3 * e.getWheelRotation());
-				temp = temp>200?200:temp;
-				temp = temp<10?10:temp;
-				bigRadius = temp;
+				int temp = bigRadius +( LARGE_MULTIPLIER * e.getWheelRotation());
+				bigRadius = NumberTools.constrain(temp, LARGE_MIN_RADIUS, LARGE_MAX_RADIUS);
 			}
 			IPoint p = translatePanelLocationToRenderedImage(e); 
 			updateImage(p.getXAsInt(), p.getYAsInt());
