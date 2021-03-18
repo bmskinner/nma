@@ -313,7 +313,6 @@ public class SignalWarpingModel extends DefaultTableModel{
 
     	// Recolour each of the grey images according to the stored colours
         List<ImageProcessor> recoloured = new ArrayList<>();
-
         for (WarpedImageKey k : displayImages) {        	
         	// The image from the warper is greyscale. Change to use the signal colour
         	ImageProcessor raw = cache.get(k); // a short processor
@@ -329,19 +328,27 @@ public class SignalWarpingModel extends DefaultTableModel{
         	recol.setMinAndMax(0, cache.getThreshold(k));
     		recoloured.add(recol);
         }
-
+        
+    	LOGGER.fine("Found "+recoloured.size()+" images");
         if (selectedImageCount() == 1)
             return recoloured.get(0);
 
-        // If multiple images are in the list, make an average of their RGB
+        // If multiple images are in the list, make an blend of their RGB
         // values so territories can be compared
         try {
-            ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
-            if(isEnhance)
-              return ImageFilterer.rescaleRGBImageIntensity(averaged, 128 ,255);
-            else
-            	return averaged;
+        	ImageProcessor ip1 = recoloured.get(0);
+        	for(int i=1; i<recoloured.size(); i++) {
+        		// Weighting by fractions reduces intensity across the image
+        		// Weighting by integer multiples washes the image out.
+        		// Since there is little benefit to 3 or more blended, 
+        		// just keep equal weighting
+//        		float weight1 = i/(i+1);
+//        		float weight2 = 1-weight1; 
 
+        		ip1 = ImageFilterer.blendImages(ip1, 1, recoloured.get(i),1);
+        	}
+        	return ip1;
+        	
         } catch (Exception e) {
         	LOGGER.warning("Error averaging images");
             LOGGER.log(Loggable.STACK, "Error averaging images", e);

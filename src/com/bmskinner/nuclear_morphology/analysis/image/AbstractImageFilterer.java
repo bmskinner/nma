@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.logging.Logger;
@@ -337,6 +338,56 @@ public abstract class AbstractImageFilterer {
         }
 
         return cp;
+    }
+    
+    
+    
+    /**
+     * Blend two images together using the Blend images plugin method
+     * from Michael Schmid
+     * https://imagej.nih.gov/ij/plugins/blend-images.html
+     * @param ip1 the first image
+     * @param ip2 the second image
+     * @return
+     */
+    public static ImageProcessor blendImages(ImageProcessor ip1, float weight1, ImageProcessor ip2, float weight2) {
+    	ip1.invert();
+    	ip2.invert();
+    	ImageProcessor result = ip1.duplicate();
+    	FloatProcessor fp1 = null, fp2 = null;  // non-float images will be converted to these
+        for (int i=0; i<ip1.getNChannels(); i++) { //grayscale: once. RBG: once per color, i.e., 3 times
+            fp1 = ip1.toFloat(i, fp1);           // convert image or color channel to float (unless float already)
+            fp2 = ip2.toFloat(i, fp2);
+            blendFloat(fp1, weight1, fp2, weight2);
+            result.setPixels(i, fp1);               // convert back from float (unless ip is a FloatProcessor)
+        }
+        result.invert();
+        return result;
+    }
+    
+    /**
+     * Blend a FloatProcessor (i.e., a 32-bit image) with another one, i.e.
+     * set the pixel values of fp1 according to a weighted sum of the corresponding
+     * pixels of fp1 and fp2. This is done for pixels in the rectangle fp1.getRoi()
+     * only.
+     * Note that both FloatProcessors, fp1 and fp2 must have the same width and height.
+     * 
+     * From Michael Schmid's Blend images plugin:
+     * https://imagej.nih.gov/ij/plugins/blend-images.html
+     * @param fp1 The FloatProcessor that will be modified.
+     * @param weight1 The weight of the pixels of fp1 in the sum.
+     * @param fp2  The FloatProcessor that will be read only.
+     * @param weight2 The weight of the pixels of fp2 in the sum.
+     */
+    private static void blendFloat (FloatProcessor fp1, float weight1, FloatProcessor fp2, float weight2) {
+        int width = fp1.getWidth();
+        float[] pixels1 = (float[])fp1.getPixels();     // array of the pixels of fp1
+        float[] pixels2 = (float[])fp2.getPixels();
+        for (int y=0; y<fp1.getHeight(); y++)          // loop over all pixels inside the roi rectangle
+            for (int x=0; x<fp1.getWidth(); x++) {
+                int i = x + y*width;                    // this is how the pixels are addressed
+                pixels1[i] = weight1*pixels1[i] + weight2*pixels2[i]; //the weighted sum
+            }
     }
     
     /**
