@@ -196,6 +196,11 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
             clusterMap.put(i, clusterCollection);
         }
         
+        // Get dataset cells not in the map file
+        List<ICell> unmappedCells = dataset.getCollection().stream()
+        		.filter(c->!cellMap.keySet().contains(c.getId()))
+        		.collect(Collectors.toList());
+        
         // Add all the cells to clusters
         for(Entry<UUID, Integer> entry : cellMap.entrySet()){
             int cluster = entry.getValue();
@@ -205,11 +210,19 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
             	LOGGER.fine("Cell not found "+entry.getKey().toString());
                 continue;
             }
-            clusterMap.get(cluster).addCell(cell);
+            
+            // Check that the cluster map has a cluster with the given number
+            // Clusterers like DBSCAN can create a cluster 0 for unassigned 
+            // nuclei. Cluster number starts from 1, so there is no cluster zero
+            // to assign to. Put these in the unmapped collection
+            if(clusterMap.containsKey(cluster)) {           
+            	clusterMap.get(cluster).addCell(cell);
+            } else {
+            	LOGGER.fine("No cluster defined for "+entry.getKey().toString()+": expected "+cluster);
+            	unmappedCells.add(cell);
+            }
         }
         
-       // Get dataset cells not in the map file
-        List<ICell> unmappedCells = dataset.getCollection().stream().filter(c->!cellMap.keySet().contains(c.getId())).collect(Collectors.toList());
         // Add unmapped cells to a final cluster
         ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Unmapped");
         clusterCollection.setName("Unmapped");
