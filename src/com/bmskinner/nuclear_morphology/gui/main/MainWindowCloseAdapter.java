@@ -20,6 +20,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -108,25 +109,32 @@ public class MainWindowCloseAdapter extends WindowAdapter {
     	// Run saves
     	Runnable r = () ->{
     		
-    		for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
+    		for (IAnalysisDataset root : DatasetListManager.getInstance().getUnsavedRootDatasets()) {
     			final CountDownLatch cl = new CountDownLatch(1);
-    			Runnable task = new ExportDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), cl, false, GlobalOptions.getInstance().getExportFormat());
-//    			ThreadManager.getInstance().execute(task);
+    			Runnable task = new ExportDatasetAction(root, 
+    					mw.getProgressAcceptor(), 
+    					mw.getEventHandler(), cl, 
+    					false, 
+    					GlobalOptions.getInstance().getExportFormat());
     			new Thread(task).start();
     			try {
     				cl.await();
     			} catch (InterruptedException e) {
-    				// TODO Auto-generated catch block
-    				e.printStackTrace();
+    				LOGGER.log(Level.SEVERE, "Interruption saving datasets", e);
     			}
     		}
-    	 LOGGER.info("All root datasets saved");
+    		LOGGER.info("Changed root datasets saved");
 
+    		// Save all workspaces, not just changed workspaces;
+    		// just because the datasets are not changed, does
+    		// not mean the workspace is written to disk
     		for (IWorkspace w : DatasetListManager.getInstance().getWorkspaces()) {
-    			Runnable wrkTask = new ExportWorkspaceAction(w, mw.getProgressAcceptor(), mw.getEventHandler());
+    			Runnable wrkTask = new ExportWorkspaceAction(w, 
+    					mw.getProgressAcceptor(), 
+    					mw.getEventHandler());
     			wrkTask.run();
     		}
-    	 LOGGER.info("All workspaces saved");
+    		LOGGER.info("All workspaces saved");
     		latch.countDown();
     	};
 

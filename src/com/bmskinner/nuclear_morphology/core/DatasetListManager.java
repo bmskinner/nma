@@ -463,6 +463,19 @@ public final class DatasetListManager {
         }
         return false;
     }
+    
+    /**
+     * Get all root datasets with a hashcode that has changed since last save
+     * @return the datasets that have changed
+     */
+    public final synchronized @NonNull Set<IAnalysisDataset> getUnsavedRootDatasets() {
+        Set<IAnalysisDataset> result = new HashSet<>();
+        for (IAnalysisDataset d : list) {
+        	 if (hashCodeChanged(d))
+        		 result.add(d);
+        }
+        return result;
+    }
 
     /**
      * Update the stored hashcode for the given dataset to its current actual
@@ -550,6 +563,19 @@ public final class DatasetListManager {
     	List<IWorkspace> result = new ArrayList<>();
     	for(IWorkspace w : workspaces) {
     		if(w.has(d))
+    			result.add(w);
+    	}
+    	return result;
+    }
+    
+    /**
+     * Get all workspaces with changed hashcodes since last save
+     * @return
+     */
+    public final synchronized @NonNull List<IWorkspace> getUnsavedWorkspaces() {
+    	List<IWorkspace> result = new ArrayList<>();
+    	for(IWorkspace w : workspaces) {
+    		if(hashCodeChanged(w))
     			result.add(w);
     	}
     	return result;
