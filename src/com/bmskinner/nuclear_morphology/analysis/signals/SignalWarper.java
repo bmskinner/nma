@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -81,12 +82,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	public static final String BINARISE_KEY   = "Binarise source images";
 	
 	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
-
-    private IAnalysisDataset sourceDataset;
-    private UUID             signalGroup;
     
     /** The options for the analysis */
-    private HashOptions warpingOptions;
+    private SignalWarpingRunSettings warpingOptions;
             
     /** The number of cell images to be merged */
     private int totalCells;
@@ -102,27 +100,64 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
      * @param signalGroup the signal group id to be warped
      * @param warpingOptions the options to use for warping
      */
-    public SignalWarper(@NonNull final IAnalysisDataset source, @NonNull final Nucleus target, @NonNull final UUID signalGroup, @NonNull HashOptions warpingOptions) {
+//    public SignalWarper(@NonNull final IAnalysisDataset source, 
+//    		@NonNull final Nucleus target,
+//    		@NonNull final UUID signalGroup,
+//    		@NonNull HashOptions warpingOptions) {
+//
+//        if (source == null)
+//            throw new IllegalArgumentException("Must have source dataset");
+//        if (target == null)
+//            throw new IllegalArgumentException("Must have target nucleus");
+//        if (warpingOptions == null)
+//            throw new IllegalArgumentException("Must have options");
+//
+//        this.sourceDataset = source;
+//        this.signalGroup = signalGroup;
+//        this.warpingOptions = warpingOptions;
+//
+//        // Count the number of cells to include
+//        SignalManager m = sourceDataset.getCollection().getSignalManager();
+//        Set<ICell> cells = warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY) ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
+//        totalCells = cells.size();
+//        LOGGER.fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
+//        		sourceDataset.getName(), signalGroup, totalCells, warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
+//        
+//        try {
+//    		// Create the consensus mesh to warp each cell onto
+//    		meshConsensus = new DefaultMesh<>(target);
+//        } catch (MeshCreationException e2) {
+//    		LOGGER.log(Loggable.STACK, "Error creating mesh", e2);
+//    		throw new IllegalArgumentException("Could not create mesh", e2);
+//    	}
+//    }
+    
+    /**
+     * Construct with settings object.
+     * @param warpingOptions
+     */
+    public SignalWarper(@NonNull final SignalWarpingRunSettings warpingOptions) {
 
-        if (source == null)
-            throw new IllegalArgumentException("Must have source dataset");
-        if (target == null)
-            throw new IllegalArgumentException("Must have target nucleus");
         if (warpingOptions == null)
             throw new IllegalArgumentException("Must have options");
 
-        this.sourceDataset = source;
-        this.signalGroup = signalGroup;
         this.warpingOptions = warpingOptions;
 
         // Count the number of cells to include
-        SignalManager m = sourceDataset.getCollection().getSignalManager();
-        Set<ICell> cells = warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY) ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
+        SignalManager m = warpingOptions.datasetOne().getCollection().getSignalManager();
+        Set<ICell> cells = warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY) 
+        		? m.getCellsWithNuclearSignals(warpingOptions.signalId(), true) 
+        		: warpingOptions.datasetOne().getCollection().getCells();
         totalCells = cells.size();
         LOGGER.fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
-        		sourceDataset.getName(), signalGroup, totalCells, warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
+        		warpingOptions.datasetOne().getName(), warpingOptions.signalId(), totalCells, 
+        		warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
         
         try {
+        	
+        	Nucleus target = warpingOptions.datasetTwo()
+        			.getCollection().getConsensus(); // Issue here when using '.duplicate()' - causes image sizing issue
+            
     		// Create the consensus mesh to warp each cell onto
     		meshConsensus = new DefaultMesh<>(target);
         } catch (MeshCreationException e2) {
@@ -138,6 +173,10 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
         List<ImageProcessor> warpedImages =  generateImages();
         return ImageFilterer.addByteImages(warpedImages);
+    }
+    
+    public SignalWarpingRunSettings getOptions() {
+    	return warpingOptions;
     }
 
     @Override
@@ -171,7 +210,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
      * 
      */
     private List<ImageProcessor> generateImages() {
-    	LOGGER.finer( "Generating warped images for " + sourceDataset.getName());
+    	LOGGER.finer( "Generating warped images for " + warpingOptions.datasetOne().getName());
     	final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
     	
     	Set<ICell> cells = getCells(warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY));
@@ -211,15 +250,16 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 		    // Get the image with the signal
 		    ImageProcessor ip;
-		    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will throw exception
-		    	ip = n.getSignalCollection().getImage(signalGroup);
+		    if(n.getSignalCollection().hasSignal(warpingOptions.signalId())){ // if there is no signal, getImage will throw exception
+		    	ip = n.getSignalCollection().getImage(warpingOptions.signalId());
 		    	ip.invert(); // image is imported as white background. Need black background.
 		    } else {
 		    	// We need to get the file in which no signals were detected
 		    	// This is not stored in a nucleus, so combine the expected file name with the source folder
-		    	Optional<IAnalysisOptions> analysisOptions = sourceDataset.getAnalysisOptions();
+		    	Optional<IAnalysisOptions> analysisOptions = warpingOptions.datasetOne().getAnalysisOptions();
 		    	if(analysisOptions.isPresent()) {
-		    		INuclearSignalOptions signalOptions = analysisOptions.get().getNuclearSignalOptions(signalGroup);
+		    		INuclearSignalOptions signalOptions = analysisOptions.get()
+		    				.getNuclearSignalOptions(warpingOptions.signalId());
 		    		File imageFolder = signalOptions.getFolder();
 		    		File imageFile   = new File(imageFolder, n.getSourceFileName());
 		    		ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
@@ -229,7 +269,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    }
 		    
 		    if(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)>0)
-	    		ip = new ImageFilterer(ip).setBlackLevel(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)).toProcessor();
+	    		ip = new ImageFilterer(ip)
+	    		.setBlackLevel(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY))
+	    		.toProcessor();
 		    
 		    if(warpingOptions.getBoolean(BINARISE_KEY))
 		    	ip.threshold(warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY));
@@ -256,14 +298,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
      */
     private Set<ICell> getCells(boolean withSignalsOnly) {
 
-        SignalManager m = sourceDataset.getCollection().getSignalManager();
+        SignalManager m = warpingOptions.datasetOne().getCollection().getSignalManager();
         Set<ICell> cells;
         if (withSignalsOnly) {
             LOGGER.finer( "Only fetching cells with signals");
-            cells = m.getCellsWithNuclearSignals(signalGroup, true);
+            cells = m.getCellsWithNuclearSignals(warpingOptions.signalId(), true);
         } else {
             LOGGER.finer( "Fetching all cells");
-            cells = sourceDataset.getCollection().getCells();
+            cells = warpingOptions.datasetOne().getCollection().getCells();
 
         }
         return cells;

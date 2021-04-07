@@ -513,19 +513,17 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     	        	int minThreshold = (int) minThresholdSpinner.getValue();
 
-    	        	Nucleus target = targetDataset.getCollection().getConsensus(); // Issue here when using '.duplicate()' - causes image sizing issue
-    	        	setSettingsEnabled(false);
-
     	            progressBar.setStringPainted(true);
     	            progressBar.setEnabled(true);
     	            
-    	            HashOptions ho = new DefaultOptions();
+    	            SignalWarpingRunSettings ho = new SignalWarpingRunSettings(sourceDataset,
+    	            		targetDataset, getSignalId());
     	            ho.setBoolean(SignalWarper.IS_STRAIGHTEN_MESH_KEY, SignalWarper.REGULAR_MESH);
     	            ho.setBoolean(SignalWarper.JUST_CELLS_WITH_SIGNAL_KEY,cellsWithSignals);
     	            ho.setBoolean(SignalWarper.BINARISE_KEY, binarise);
     	            ho.setInt(SignalWarper.MIN_SIGNAL_THRESHOLD_KEY, minThreshold);
 
-    	            warper = new SignalWarper(sourceDataset, target, getSignalId(), ho);
+    	            warper = new SignalWarper(ho);
     	            warper.addPropertyChangeListener(SignalWarpingDialog.this);
     	            
     	            ThreadManager.getInstance().execute(warper);
