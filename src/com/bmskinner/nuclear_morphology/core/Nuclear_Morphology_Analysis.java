@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.core;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -124,17 +123,19 @@ public class Nuclear_Morphology_Analysis {
 		try {
 			String logFile = System.getProperty(JAVA_UTIL_LOGGING_CONFIG_FILE);
 			if(logFile!=null) {
-				LOGGER.config("Logger properties file specified: "+System.getProperty(JAVA_UTIL_LOGGING_CONFIG_FILE));
+				LOGGER.config("Logger properties file specified: "
+						+System.getProperty(JAVA_UTIL_LOGGING_CONFIG_FILE));
 			} else {
 				LOGGER.config("No external logging properties specified; using default logging config");
-				LOGGER.config("Log file location: "+LOG_FOLDER.getAbsolutePath());
-				GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, LOG_FOLDER.getAbsolutePath());
+				LOGGER.config("Log file location: " + LOG_FOLDER.getAbsolutePath());
+				GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, 
+													LOG_FOLDER.getAbsolutePath());
 			}
 			
 			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
 			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));
 			LOGGER.config("Version: "+Version.currentVersion());
-			// First invokation will create and log resources 
+			// First invokation of the thread manager will log available resources 
 			ThreadManager.getInstance();
 		} catch (SecurityException e ) {
 			LOGGER.log(Level.SEVERE, "Error initialising logger", e);
