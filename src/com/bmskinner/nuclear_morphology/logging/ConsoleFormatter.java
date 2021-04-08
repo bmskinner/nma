@@ -34,13 +34,14 @@ public class ConsoleFormatter extends Formatter {
     	buffer.append(record.getSourceClassName());
     	buffer.append(SEPARATOR);
     	buffer.append(record.getMessage());
+    	
 
     	if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.STACK) {
 
     		if (record.getThrown() != null) {
     			Throwable t = record.getThrown();
-
-    			buffer.append(date)
+    			buffer.append(NEWLINE)
+    			.append(date)
     			.append(SEPARATOR)
     			.append(STACK)
     			.append(SEPARATOR)
