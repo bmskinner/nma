@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,6 +69,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 import ij.process.ImageProcessor;
 
@@ -307,7 +309,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     			} catch (Exception e1) {
     				label.setIcon(null);
-    				LOGGER.fine("Error fetching image "+f.getAbsolutePath()+": "+e1.getMessage());
+    				LOGGER.log(Level.SEVERE, "Error fetching image "+f.getAbsolutePath()+": "+e1.getMessage(), e);
     			}
     		};
 
@@ -351,73 +353,35 @@ public class ImagesTabPanel extends DetailPanel {
     
     /**
      * Update the folder for the given node
-     * @param node thenode to be updated
+     * @param node the node to be updated
      */
     private void updateImageFolder(ImageTreeNode node) {
     	
     	File oldFolder = node.getFile();
         
+    	// Don't update nodes that have no file
         if(oldFolder==null)
         	return;
+        
     	try {
         	
-        	oldFolder = getExistingParent(oldFolder);
+    		// Shortcut file search by finding any extant element of the path
+        	oldFolder = FileUtils.extantComponent(oldFolder);
         	
-        	File folderToRequest = lastSelectedFolder!=null ? lastSelectedFolder : null;
+        	// Store the last folder to be selected, to speed choosing other files
+        	File folderToRequest = lastSelectedFolder!=null ? lastSelectedFolder : oldFolder;
         	File newFolder = getInputSupplier().requestFolder(folderToRequest);
         	lastSelectedFolder = newFolder;
         	LOGGER.finer("Image tab last selected folder is now "+lastSelectedFolder.getAbsolutePath());
         	
-        	// Should signal groups be updated at the same time?
-        	// Check if the dataset has signals, and if so update
-        	// images to the same folder if they use the same image as
-        	// the nucleus
-
+        	// Update the folder for the node and it's children
         	node.setFile(newFolder); // update node
-
-        	Enumeration<ImageTreeNode> children = node.convertChildren();
-        	while(children.hasMoreElements()){
-        		ImageTreeNode imageData = children.nextElement(); 	        
-        		File imageFile = imageData.getFile();
-        		if(imageFile==null)
-        			continue;
-
-        		// Replace the source folder for all nuclei in the current image
-        		getDatasets().stream()
-	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
-	        		.flatMap(c->c.getNuclei().stream())
-	        		.forEach(n->{
-	        			n.setSourceFolder(newFolder);
-	        			
-	        			// Update signals in the same file
-	        			n.getSignalCollection().getAllSignals().stream()
-	        			.forEach(s->{
-	        				if(s.getSourceFile().equals(imageFile))
-	        					s.setSourceFolder(newFolder);
-	        			});
-	        		});        		
-        		imageData.setFile( new File(newFolder, imageFile.getName()));
-        	}
+        	
         } catch (RequestCancelledException e1) {
         	// No action
         }
     }
-    
-    /**
-     * Fetch the first existing folder in the given path, or
-     * null if none of the path exists.
-     * @param folder the folder to check
-     * @return
-     */
-    private File getExistingParent(File folder) {
-    	if(folder==null)
-    		return null;
-    	if(folder.exists())
-    		return folder;
-    	return getExistingParent(folder.getParentFile());
-    	
-    }
-        
+            
     private class ImageTreeNode extends DefaultMutableTreeNode {
     	
     	 private String name;
@@ -451,6 +415,31 @@ public class ImagesTabPanel extends DetailPanel {
     	public void setFile(File f) {
     		isFile = true;
     		name = f.getAbsolutePath();
+    		
+    		// Update each file within the node to the new folder
+        	Enumeration<ImageTreeNode> children = convertChildren();
+        	while(children.hasMoreElements()){
+        		ImageTreeNode imageData = children.nextElement(); 	        
+        		File imageFile = imageData.getFile();
+        		if(imageFile==null)
+        			continue;
+
+        		// Replace the source folder for all nuclei in the current image
+        		getDatasets().stream()
+	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
+	        		.flatMap(c->c.getNuclei().stream())
+	        		.forEach(n->{
+	        			n.setSourceFolder(f);
+	        			
+	        			// Update signals in the same file
+	        			n.getSignalCollection().getAllSignals().stream()
+	        			.forEach(s->{
+	        				if(s.getSourceFile().equals(imageFile))
+	        					s.setSourceFolder(f);
+	        			});
+	        		});        		
+        		imageData.setFile( new File(f, imageFile.getName()));
+        	}
     		
         }
     	
