@@ -227,12 +227,12 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 	 * Get the chart matching the current display criteria
 	 * @return
 	 */
-	public synchronized JFreeChart getChart(HashOptions displayOptions) {
+	public synchronized JFreeChart getChart(SignalWarpingDisplaySettings displayOptions) {
 		if(!isCommonTargetSelected())
 			return OutlineChartFactory.createEmptyChart();
 			
 		LOGGER.fine("Creating display image from "+displayImages.size()+" selected keys");
-		ImageProcessor image = createDisplayImage(displayOptions.getBoolean("IS_PSEUDOCOLOUR"));
+		ImageProcessor image = createDisplayImage(displayOptions);
 
         ChartOptions options = new ChartOptionsBuilder()
         		.setCellularComponent(getCommonSelectedTarget())
@@ -248,8 +248,8 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 	 * @param isEnhance
 	 * @return
 	 */
-	public ImageProcessor getDisplayImage(HashOptions options) {
-		return createDisplayImage(options.getBoolean("IS_PSEUDOCOLOUR"));
+	public ImageProcessor getDisplayImage(SignalWarpingDisplaySettings options) {
+		return createDisplayImage(options);
 	}
 	
 	/**
@@ -318,7 +318,7 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
      * @param image
      * @return
      */
-    private synchronized ImageProcessor createDisplayImage(boolean isPseudoColour) {
+    private synchronized ImageProcessor createDisplayImage(SignalWarpingDisplaySettings options) {
     	if (selectedImageCount() == 0 || !isCommonTargetSelected()) 
             return ImageFilterer.createWhiteByteProcessor(100, 100);
 
@@ -331,7 +331,7 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
         	bp.invert();
 
         	ImageProcessor recol = bp;
-        	if(isPseudoColour)
+        	if(options.getBoolean(SignalWarpingDisplaySettings.PSEUDOCOLOUR_KEY))
         		recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
         	else 
         		recol = bp.convertToColorProcessor();

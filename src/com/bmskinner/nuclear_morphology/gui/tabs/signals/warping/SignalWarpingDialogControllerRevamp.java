@@ -5,7 +5,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.swing.JTable;
@@ -20,21 +19,15 @@ import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimil
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ShortWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog.WarpingSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -62,14 +55,16 @@ implements SignalWarpingDisplayListener,
     private SignalWarper warper;
 	private ChartPanel chart;
 	private JTable table;
+	private SignalWarpingDisplaySettings displayOptions;
 	
 	public SignalWarpingDialogControllerRevamp(SignalWarpingModelRevamp model, 
 			ChartPanel chart, 
 			JTable table, 
-			HashOptions displayOptions) {
+			SignalWarpingDisplaySettings displayOptions) {
 		this.chart = chart;
 		this.table = table;
 		this.model = model;
+		this.displayOptions = displayOptions;
 
 
 		ListSelectionModel cellSelectionModel = table.getSelectionModel();
@@ -97,9 +92,10 @@ implements SignalWarpingDisplayListener,
 			MSSIMScore values = null;
 			if(keys.size()==2 && keys.get(0).getTarget().getID().equals(keys.get(1).getTarget().getID())) {
 				MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
-				values = msi.calculateMSSIM(model.getImage(keys.get(0)), model.getImage(keys.get(1)));
+				values = msi.calculateMSSIM(model.getImage(keys.get(0)), 
+											model.getImage(keys.get(1)));
 			}
-			settingsPanel.setMSSIM(keys.size(), values);
+//			settingsPanel.setMSSIM(keys.size(), values);
 
 			updateChart();
 		});
@@ -133,8 +129,8 @@ implements SignalWarpingDisplayListener,
         } catch (Exception e) {
         	LOGGER.warning("Error running warping");
             LOGGER.log(Loggable.STACK, "Error running warping", e);
-            JFreeChart chart = ConsensusNucleusChartFactory.createErrorChart();
-            chartPanel.setChart(chart);
+            JFreeChart ch = ConsensusNucleusChartFactory.createErrorChart();
+            chart.setChart(ch);
         }
     }
     
@@ -147,7 +143,7 @@ implements SignalWarpingDisplayListener,
 	public void updateChart() {
 
 		Runnable task = () -> {
-			chart.setChart(model.getChart(settingsPanel.isPseudocolour()));
+			chart.setChart(model.getChart(displayOptions));
 			chart.restoreAutoBounds();
 		};
 		ThreadManager.getInstance().submit(task);
@@ -175,33 +171,31 @@ implements SignalWarpingDisplayListener,
 		try {
 
 			ImageProcessor image = warper.get(); // get the 16-bit result of warping
-			SignalWarpingRunSettings o = warper.getOptions();
-			
-//			IAnalysisDataset targetDataset = settingsPanel.getTarget();
-//			CellularComponent consensusTemplate = targetDataset.getCollection().getConsensus();
-//			IAnalysisDataset signalSource = settingsPanel.getSource();
-//			UUID signalGroupId = settingsPanel.getSignalId();
-//
-//			boolean isCellsWithSignals = settingsPanel.isCellsWithSignals();
-//			
-//			boolean isBinarise = settingsPanel.isBinarise();
-//			
-//			int minThreshold = settingsPanel.getMinThreshold();
+			SignalWarpingRunSettings runSettings = warper.getOptions();
 
-			ISignalGroup sg  = o.datasetOne().getCollection()
-					.getSignalGroup(o.signalId()).get();
-			IWarpedSignal ws = sg.getWarpedSignals().orElse(new ShortWarpedSignal(o.signalId()));
+			ISignalGroup sg  = runSettings.templateSignalGroup();
+			IWarpedSignal ws = sg.getWarpedSignals()
+					.orElse(new ShortWarpedSignal(runSettings.signalId()));
 
-			ws.addWarpedImage(consensusTemplate, signalSource.getId(), targetDataset.getName(), 
-					isCellsWithSignals, minThreshold, image);
+			ws.addWarpedImage(runSettings.targetShape(), 
+					runSettings.signalId(), 
+					runSettings.targetDataset().getName(), 
+					runSettings.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY), 
+					runSettings.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY), 
+					image);
 			sg.setWarpedSignals(ws);
 
 			model.clearSelection();
-			model.addImage(consensusTemplate, targetDataset.getName(), signalSource, signalGroupId, 
-					isCellsWithSignals, isBinarise, minThreshold, image);
+			model.addImage(runSettings.targetShape(), 
+					runSettings.targetDataset().getName(), 
+					runSettings.templateDataset(), 
+					runSettings.signalId(), 
+					runSettings.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY),
+					runSettings.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY),
+					runSettings.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY), 
+					image);
 
 			updateChart();
-			settingsPanel.setSettingsEnabled(true);
 
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error getting warp results", e);
@@ -219,27 +213,28 @@ implements SignalWarpingDisplayListener,
 	}
 
 	/**
-	 * Display the nucleus outline for dataset two
+	 * Update the chart to display to an empty chart
 	 * 
 	 */
-	public void updateBlankChart() {
+	public void displayBlankChart() {
 
 		LOGGER.fine("Updating blank chart");
-		JFreeChart ch = null;
-
-		ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(settingsPanel.getTarget()).build();
-
-		ch = new ConsensusNucleusChartFactory(options)
-				.makeNucleusOutlineChart();
-		chart.setChart(ch);
+		chart.setChart(ConsensusNucleusChartFactory.createEmptyChart());
+//		JFreeChart ch = null;
+//
+//		ChartOptions options = new ChartOptionsBuilder()
+//				.setDatasets(model.getTemplates()).build();
+//
+//		ch = new ConsensusNucleusChartFactory(options)
+//				.makeNucleusOutlineChart();
+//		chart.setChart(ch);
 	}
 
 	/**
 	 * Export the selected warped image with no chart decorations. The image is pseudocoloured,
-	 * enhanced and thresholded according to the settings in the key.
+	 * enhanced and thresholded according to the current display settings.
 	 */
-	public void exportImage(HashOptions displayOptions) {
+	public void exportImage() {
 		
 		ImageProcessor ip = model.getDisplayImage(displayOptions);
 		ip.flipVertical();
@@ -274,8 +269,8 @@ implements SignalWarpingDisplayListener,
 
 	@Override
 	public void signalWarpingDisplayChanged(@NonNull SignalWarpingDisplaySettings settings) {
-		
-		setThresholdOfSelected(value);
+		displayOptions.set(settings);
+		setThresholdOfSelected(displayOptions.getInt(SignalWarpingDisplaySettings.THRESHOLD_KEY));
 		updateChart();
 		
 	}

@@ -2,8 +2,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,16 +10,12 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 
@@ -102,7 +96,7 @@ public class SignalWarpingRunSettingsPanel extends JPanel {
     		}
     		
     	});
-    	datasetBoxTwo.addActionListener(e -> controller.updateBlankChart() );
+    	datasetBoxTwo.addActionListener(e -> controller.displayBlankChart() );
 
     	signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
     	if (!signalBox.hasSelection())

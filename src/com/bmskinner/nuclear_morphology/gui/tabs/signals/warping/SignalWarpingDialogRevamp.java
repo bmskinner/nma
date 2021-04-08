@@ -22,8 +22,6 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -31,53 +29,32 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
-import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
 
 /**
  * Displays signals warped onto the consensus nucleus of a dataset
@@ -126,9 +103,11 @@ public class SignalWarpingDialogRevamp extends LoadingIconDialog implements Prop
      * 
      * @param datasets
      */
-    public SignalWarpingDialogRevamp(final List<IAnalysisDataset> datasets) {
+    public SignalWarpingDialogRevamp(@NonNull final List<IAnalysisDataset> datasets,
+    		@NonNull final SignalWarpingDialogControllerRevamp controller) {
         super();
         this.datasets = datasets;
+        this.controller = controller;
         model = new SignalWarpingModelRevamp(datasets); // adds any saved warp images       
         createUI();
         
@@ -236,7 +215,7 @@ public class SignalWarpingDialogRevamp extends LoadingIconDialog implements Prop
         		int row = table.rowAtPoint(e.getPoint());
         		if (e.getClickCount() == DOUBLE_CLICK) {
         			controller.deleteWarpedSignal(row);
-        			controller.updateBlankChart();
+        			controller.displayBlankChart();
         		}
         	}
         });
@@ -251,7 +230,7 @@ public class SignalWarpingDialogRevamp extends LoadingIconDialog implements Prop
         	for(WarpedImageKey k : keys)
         		controller.deleteWarpedSignal(k);
         	
-        	controller.updateBlankChart();
+        	controller.displayBlankChart();
         });
         tableMenu.add(deleteItem);
         

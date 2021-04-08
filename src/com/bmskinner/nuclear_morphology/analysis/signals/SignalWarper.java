@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -40,10 +39,8 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingRunSettings;
@@ -56,7 +53,7 @@ import ij.process.ImageProcessor;
 
 /**
  * Warps signals from nuclei in a collection onto a target nucleus using meshes.
- * This is implemneted as a SwingWorker that returns the merged overlay of all
+ * This is implemented as a SwingWorker that returns the merged overlay of all
  * the signals in the collection
  * 
  * @author ben
@@ -144,18 +141,20 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
         this.warpingOptions = warpingOptions;
 
         // Count the number of cells to include
-        SignalManager m = warpingOptions.datasetOne().getCollection().getSignalManager();
+        SignalManager m = warpingOptions.templateDataset().getCollection().getSignalManager();
         Set<ICell> cells = warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY) 
         		? m.getCellsWithNuclearSignals(warpingOptions.signalId(), true) 
-        		: warpingOptions.datasetOne().getCollection().getCells();
+        		: warpingOptions.templateDataset().getCollection().getCells();
         totalCells = cells.size();
         LOGGER.fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
-        		warpingOptions.datasetOne().getName(), warpingOptions.signalId(), totalCells, 
+        		warpingOptions.templateDataset().getName(),
+        		warpingOptions.signalId(), 
+        		totalCells, 
         		warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
         
         try {
         	
-        	Nucleus target = warpingOptions.datasetTwo()
+        	Nucleus target = warpingOptions.targetDataset()
         			.getCollection().getConsensus(); // Issue here when using '.duplicate()' - causes image sizing issue
             
     		// Create the consensus mesh to warp each cell onto
@@ -210,7 +209,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
      * 
      */
     private List<ImageProcessor> generateImages() {
-    	LOGGER.finer( "Generating warped images for " + warpingOptions.datasetOne().getName());
+    	LOGGER.finer( "Generating warped images for " + warpingOptions.templateDataset().getName());
     	final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
     	
     	Set<ICell> cells = getCells(warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY));
@@ -256,7 +255,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    } else {
 		    	// We need to get the file in which no signals were detected
 		    	// This is not stored in a nucleus, so combine the expected file name with the source folder
-		    	Optional<IAnalysisOptions> analysisOptions = warpingOptions.datasetOne().getAnalysisOptions();
+		    	Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset().getAnalysisOptions();
 		    	if(analysisOptions.isPresent()) {
 		    		INuclearSignalOptions signalOptions = analysisOptions.get()
 		    				.getNuclearSignalOptions(warpingOptions.signalId());
@@ -298,14 +297,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
      */
     private Set<ICell> getCells(boolean withSignalsOnly) {
 
-        SignalManager m = warpingOptions.datasetOne().getCollection().getSignalManager();
+        SignalManager m = warpingOptions.templateDataset().getCollection().getSignalManager();
         Set<ICell> cells;
         if (withSignalsOnly) {
             LOGGER.finer( "Only fetching cells with signals");
             cells = m.getCellsWithNuclearSignals(warpingOptions.signalId(), true);
         } else {
             LOGGER.finer( "Fetching all cells");
-            cells = warpingOptions.datasetOne().getCollection().getCells();
+            cells = warpingOptions.templateDataset().getCollection().getCells();
 
         }
         return cells;
