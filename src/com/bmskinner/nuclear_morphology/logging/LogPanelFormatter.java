@@ -56,11 +56,11 @@ public class LogPanelFormatter extends Formatter {
             buffer.append(": ");
             buffer.append(t.getMessage());
             buffer.append(NEWLINE);
-
-            for (StackTraceElement el : t.getStackTrace()) {
-                buffer.append(el.toString());
-                buffer.append(NEWLINE);
-            }
+//
+//            for (StackTraceElement el : t.getStackTrace()) {
+//                buffer.append(el.toString());
+//                buffer.append(NEWLINE);
+//            }
         }
         return buffer.toString();
     }
