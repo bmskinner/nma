@@ -88,47 +88,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
     
     /** The mesh images are warped onto */
     private final Mesh<Nucleus> meshConsensus;
-    
-    /**
-     * Constructor
-     * 
-     * @param source the dataset with signals to be warped
-     * @param target the nucleus to warp signals onto
-     * @param signalGroup the signal group id to be warped
-     * @param warpingOptions the options to use for warping
-     */
-//    public SignalWarper(@NonNull final IAnalysisDataset source, 
-//    		@NonNull final Nucleus target,
-//    		@NonNull final UUID signalGroup,
-//    		@NonNull HashOptions warpingOptions) {
-//
-//        if (source == null)
-//            throw new IllegalArgumentException("Must have source dataset");
-//        if (target == null)
-//            throw new IllegalArgumentException("Must have target nucleus");
-//        if (warpingOptions == null)
-//            throw new IllegalArgumentException("Must have options");
-//
-//        this.sourceDataset = source;
-//        this.signalGroup = signalGroup;
-//        this.warpingOptions = warpingOptions;
-//
-//        // Count the number of cells to include
-//        SignalManager m = sourceDataset.getCollection().getSignalManager();
-//        Set<ICell> cells = warpingOptions.getBoolean(JUST_CELLS_WITH_SIGNAL_KEY) ? m.getCellsWithNuclearSignals(signalGroup, true) : sourceDataset.getCollection().getCells();
-//        totalCells = cells.size();
-//        LOGGER.fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
-//        		sourceDataset.getName(), signalGroup, totalCells, warpingOptions.getInt(MIN_SIGNAL_THRESHOLD_KEY)));
-//        
-//        try {
-//    		// Create the consensus mesh to warp each cell onto
-//    		meshConsensus = new DefaultMesh<>(target);
-//        } catch (MeshCreationException e2) {
-//    		LOGGER.log(Loggable.STACK, "Error creating mesh", e2);
-//    		throw new IllegalArgumentException("Could not create mesh", e2);
-//    	}
-//    }
-    
+        
     /**
      * Construct with settings object.
      * @param warpingOptions
