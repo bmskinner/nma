@@ -22,6 +22,11 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * Format log records for display in the log panel
+ * @author ben
+ *
+ */
 public class LogPanelFormatter extends Formatter {
 
     private static final String NEWLINE = System.getProperty("line.separator");
@@ -56,11 +61,6 @@ public class LogPanelFormatter extends Formatter {
             buffer.append(": ");
             buffer.append(t.getMessage());
             buffer.append(NEWLINE);
-//
-//            for (StackTraceElement el : t.getStackTrace()) {
-//                buffer.append(el.toString());
-//                buffer.append(NEWLINE);
-//            }
         }
         return buffer.toString();
     }
