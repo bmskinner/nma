@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -61,7 +62,6 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingModelRevamp.class.getName());
 
 	public static final int THRESHOLD_ALL_VISIBLE = 255;
-	private static final int KEY_COLUMN_INDEX = 5;
 	
 	
 	/** Datasets currently accessible */
@@ -79,10 +79,12 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
         addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_DATASET, new Vector<IAnalysisDataset>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_SIGNALS, new Vector<ISignalGroup>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY, new Vector<Boolean>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_BINARISED, new Vector<Boolean>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_TARGET_SHAPE, new Vector<String>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_THRESHOLD, new Vector<String>());
-        addColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN, new Vector<WarpedImageKey>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN, new Vector<Color>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN, new Vector<JButton>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN, new Vector<WarpedImageKey>());
 		addSavedImages(datasets);
 	}
 	
@@ -93,17 +95,31 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 	public List<IAnalysisDataset> getDatasets(){
 		return datasets;
 	}
+	
+	/**
+	 * Get the index of the column with the given name
+	 * @param columnName
+	 * @return
+	 */
+	public int getColumnIndex(String columnName) {
+		for(int i=0; i<this.getColumnCount(); i++) {
+			if(getColumnName(i).equals(columnName))
+				return i;
+		}
+		return -1;
+	}
 		
 	public WarpedImageKey getKey(int row) {
-		
-		WarpedImageKey key = (WarpedImageKey) getValueAt(row, KEY_COLUMN_INDEX);
+		int keyColumn = this.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
+		WarpedImageKey key = (WarpedImageKey) getValueAt(row, keyColumn);
 		LOGGER.fine("Selecting key "+key.toString());
 		return key;
 	}
 	
 	public synchronized int getRow(WarpedImageKey key) {
+		int keyColumn = this.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
 		for(int r=0; r<getRowCount(); r++) {
-			if( getValueAt(r, KEY_COLUMN_INDEX).equals(key))
+			if( getValueAt(r, keyColumn).equals(key))
 				return r;
 		}
 		return -1;
@@ -158,8 +174,12 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 
 					Optional<ImageProcessor> im = warpedSignal.getWarpedImage(c);
 					if(im.isPresent() && d.getId().equals(c.getTemplateId())) { // skip child dataset signals
-						WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), warpedSignal.getTargetName(c), d, 
-								signalGroupId, c.isCellWithSignalsOnly(), c.isCellWithSignalsOnly(), c.getThreshold());
+						WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), 
+								warpedSignal.getTargetName(c), d, 
+								signalGroupId, 
+								c.isCellWithSignalsOnly(), 
+								c.isCellWithSignalsOnly(), 
+								c.getThreshold());
 						cache.add(k, im.get());
 						Color col = sg.getGroupColour().orElse(Color.WHITE);
 						cache.setColour(k, col);
@@ -203,11 +223,36 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 		v.add(k.getTemplate().getName());
         v.add(k.getSignalGroupName());
         v.add(k.isOnlyCellsWithSignals());
+        v.add(k.isBinarise);
         v.add(k.getTargetName());
         v.add(k.minThreshold);
+        v.add(cache.getColour(k));       
+        JButton jb = new JButton("-");
+        jb.addActionListener(e->removeRow(k));
+        v.add(jb);
         v.add(k);
-        v.add(cache.getColour(k));
         this.addRow(v);
+	}
+	
+	/**
+	 * Update pseudocolours for all rows with the same template
+	 * as the given key
+	 * @param key
+	 */
+	public void recachePseudoColour(WarpedImageKey key) {
+		
+		List<WarpedImageKey> keysToUpdate = cache.getKeysForTemplate(key.template);
+		
+		for(WarpedImageKey k : keysToUpdate) {
+			Color c = k.getTemplate().getCollection()
+					.getSignalGroup(k.getSignalGroupId()).get()
+					.getGroupColour().orElse(Color.WHITE);
+			cache.setColour(k, c);
+
+			int row = getRow(k);
+			int col = getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN);
+			this.setValueAt(c, row, col); 
+		}
 	}
 	
 	public void addImage(@NonNull CellularComponent consensusTemplate, @NonNull String targetName, 
@@ -285,6 +330,7 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
     public synchronized List<WarpedImageKey> getKeys(@NonNull CellularComponent n) {
         return cache.getKeys(n);
     }
+    
     
     /**
      * Get the target shape in common to all selected keys
@@ -446,6 +492,16 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 
         public List<WarpedImageKey> getKeys(@NonNull CellularComponent n) {
             return map.keySet().stream().filter(k -> k.target.getID().equals(n.getID()))
+                    .collect(Collectors.toList());
+        }
+        
+        /**
+         * Get all the keys for the given source dataset
+         * @param template
+         * @return
+         */
+        public List<WarpedImageKey> getKeysForTemplate(@NonNull IAnalysisDataset template){
+        	return map.keySet().stream().filter(k -> k.template.getId().equals(template.getId()))
                     .collect(Collectors.toList());
         }
 

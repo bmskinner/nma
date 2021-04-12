@@ -12,14 +12,17 @@ import javax.swing.JSlider;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
+
 /**
  * Contains display settings for warped images
  * @author ben
  * @since 1.19.4
  *
  */
-public class SignalWarpingDisplaySettingPanel extends JPanel 
-implements SignalWarpingDisplayListener {
+public class SignalWarpingDisplaySettingPanel 
+	extends JPanel 
+	implements SignalWarpingDisplayListener {
 
 	private static final long serialVersionUID = 1L;
 	private static final String PSEUDOCOLOUR_LBL = "Pseudocolour signals";
@@ -45,18 +48,19 @@ implements SignalWarpingDisplayListener {
 	}
 	
 	private JPanel createDisplaySettingsPanel() {
-    	JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    	JPanel panel = new JPanel();
+    	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     	
-    	isPseudocolourBox = new JCheckBox(PSEUDOCOLOUR_LBL, true);
-    	
+    	isPseudocolourBox = new JCheckBox(PSEUDOCOLOUR_LBL, 
+    			SignalWarpingDisplaySettings.DEFAULT_IS_PSEUDOCOLOUR);
     	isPseudocolourBox.addActionListener(e->fireDisplaySettingsChanged());
+    	
     	panel.add(isPseudocolourBox);
-    	
-    	
     	panel.add(new JLabel(THRESHOLD_LBL));
     	
     	thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
     	thresholdSlider.setVisible(true);
+    	thresholdSlider.setValue(SignalWarpingDisplaySettings.DEFAULT_THRESHOLD);
     	thresholdSlider.addChangeListener(e->fireDisplaySettingsChanged());
     	panel.add(thresholdSlider);    	    	    	
     	return panel;
@@ -79,9 +83,12 @@ implements SignalWarpingDisplayListener {
 
 	@Override
 	public void signalWarpingDisplayChanged(@NonNull SignalWarpingDisplaySettings settings) {
+		if(settings.getIntegerKeys().contains(SignalWarpingDisplaySettings.THRESHOLD_KEY)) {
+			thresholdSlider.setValue(settings.getInt(SignalWarpingDisplaySettings.THRESHOLD_KEY));
+		}
 		
-		if(settings.getBooleanKeys().contains(SignalWarpingDisplaySettings.THRESHOLD_KEY)) {
-			thresholdSlider.setValue(UNDEFINED_CONDITION);
+		if(settings.getBooleanKeys().contains(SignalWarpingDisplaySettings.PSEUDOCOLOUR_KEY)) {
+			isPseudocolourBox.setSelected(settings.getBoolean(SignalWarpingDisplaySettings.PSEUDOCOLOUR_KEY));
 		}
 	}
 }

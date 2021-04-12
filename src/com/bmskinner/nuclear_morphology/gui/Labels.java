@@ -189,11 +189,13 @@ public class Labels {
         	public static final String TABLE_HEADER_SOURCE_DATASET = "Source dataset";
         	public static final String TABLE_HEADER_SOURCE_SIGNALS = "Source signals";
         	public static final String TABLE_HEADER_SIGNALS_ONLY   = "Only cells with signals?";
+        	public static final String TABLE_HEADER_BINARISED      = "Binarised";
         	public static final String TABLE_HEADER_TARGET_SHAPE   = "Target shape";
         	public static final String TABLE_HEADER_KEY_COLUMN     = "Keys";
         	public static final String TABLE_HEADER_N_CELLS        = "Cells";
         	public static final String TABLE_HEADER_THRESHOLD      = "Threshold";
         	public static final String TABLE_HEADER_COLOUR_COLUMN  = "Pseudocolour";
+        	public static final String TABLE_HEADER_DELETE_COLUMN  = "Delete";
         	
         }
 
