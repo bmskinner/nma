@@ -22,13 +22,11 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
 public class SignalWarpingRunSettingsPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private static final String EXPORT_IMAGE_LBL    = "Export image";
 	private static final String SOURCE_DATASET_LBL  = "Source dataset";
     private static final String TARGET_DATASET_LBL  = "Target dataset";
     private static final String SIGNAL_GROUP_LBL    = "Signal group";
     private static final String INCLUDE_CELLS_LBL   = "Only include cells with signals";
     private static final String RUN_LBL             = "Run";
-    private static final String DIALOG_TITLE        = "Signal warping";
     private static final String MIN_THRESHOLD_LBL   = "Min threshold";
     private static final String BINARISE_LBL        = "Binarise";
     
@@ -64,9 +62,9 @@ public class SignalWarpingRunSettingsPanel extends JPanel {
 		SignalWarpingRunSettings settings = new SignalWarpingRunSettings(datasetBoxOne.getSelectedDataset(),
 				datasetBoxTwo.getSelectedDataset(),
 				signalBox.getSelectedID());
-		settings.setBoolean(BINARISE_LBL, binariseBox.isSelected());
-		settings.setBoolean(INCLUDE_CELLS_LBL, cellsWithSignalsBox.isSelected());
-		settings.setInt(MIN_THRESHOLD_LBL, (int)minThresholdSpinner.getValue());
+		settings.setBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY, binariseBox.isSelected());
+		settings.setBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY, cellsWithSignalsBox.isSelected());
+		settings.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY, (int)minThresholdSpinner.getValue());
 		
 		for(SignalWarpingRunEventListener l : runListeners) {
 			l.runEventReceived(settings);

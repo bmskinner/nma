@@ -43,7 +43,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -54,7 +53,7 @@ import ij.process.ImageProcessor;
 /**
  * The model for signal warping views
  * @author bms41
- * @since 1.14.0
+ * @since 1.19.4
  *
  */
 public class SignalWarpingModelRevamp extends DefaultTableModel {
@@ -200,7 +199,7 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 	}
 	
 	private void addTableRow(WarpedImageKey k) {
-        Vector v = new Vector();
+        Vector<Object> v = new Vector<>();
 		v.add(k.getTemplate().getName());
         v.add(k.getSignalGroupName());
         v.add(k.isOnlyCellsWithSignals());

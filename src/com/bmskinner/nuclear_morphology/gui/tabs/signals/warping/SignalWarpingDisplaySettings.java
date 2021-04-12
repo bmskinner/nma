@@ -11,11 +11,19 @@ import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
  */
 public class SignalWarpingDisplaySettings extends AbstractHashOptions {
 	
+	public static final boolean DEFAULT_IS_PSEUDOCOLOUR = true;
+	public static final int DEFAULT_THRESHOLD = 0;
+	
+	
 	public static final String PSEUDOCOLOUR_KEY = "IS_PSEUDOCOLOUR";
 	public static final String THRESHOLD_KEY = "DISPLAY_THRESHOLD";
 
 	private static final long serialVersionUID = 1L;
 		
-	public SignalWarpingDisplaySettings() {}
+	public SignalWarpingDisplaySettings() {
+		setBoolean(PSEUDOCOLOUR_KEY, DEFAULT_IS_PSEUDOCOLOUR);
+		setInt(THRESHOLD_KEY, DEFAULT_THRESHOLD);
+	}
+	
 
 }

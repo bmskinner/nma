@@ -60,6 +60,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialogRevamp;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventListener {
@@ -232,7 +233,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
 
         warpButton = new JButton(Labels.Signals.WARP_BTN_LBL);
         warpButton.setToolTipText(Labels.Signals.WARP_BTN_TOOLTIP);
-        warpButton.addActionListener(e ->  new SignalWarpingDialog(getDatasets()));
+        warpButton.addActionListener(e ->  new SignalWarpingDialogRevamp(getDatasets()));
         warpButton.setEnabled(false);
         panel.add(warpButton);
         

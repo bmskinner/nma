@@ -25,8 +25,6 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -45,7 +43,6 @@ import javax.swing.table.TableColumn;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -63,19 +60,14 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingMo
  *
  */
 @SuppressWarnings("serial")
-public class SignalWarpingDialogRevamp extends LoadingIconDialog implements PropertyChangeListener {
+public class SignalWarpingDialogRevamp 
+	extends LoadingIconDialog 
+	implements SignalWarpingProgressEventListener {
 	
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialogRevamp.class.getName());
 
     private static final String EXPORT_IMAGE_LBL    = "Export image";
-	private static final String SOURCE_DATASET_LBL  = "Source dataset";
-    private static final String TARGET_DATASET_LBL  = "Target dataset";
-    private static final String SIGNAL_GROUP_LBL    = "Signal group";
-    private static final String INCLUDE_CELLS_LBL   = "Only include cells with signals";
-    private static final String RUN_LBL             = "Run";
     private static final String DIALOG_TITLE        = "Signal warping";
-    private static final String MIN_THRESHOLD_LBL   = "Min threshold";
-    private static final String BINARISE_LBL        = "Binarise";
 
     private List<IAnalysisDataset> datasets;
     private ExportableChartPanel   chartPanel;
@@ -103,14 +95,20 @@ public class SignalWarpingDialogRevamp extends LoadingIconDialog implements Prop
      * 
      * @param datasets
      */
-    public SignalWarpingDialogRevamp(@NonNull final List<IAnalysisDataset> datasets,
-    		@NonNull final SignalWarpingDialogControllerRevamp controller) {
+    public SignalWarpingDialogRevamp(@NonNull final List<IAnalysisDataset> datasets) {
         super();
         this.datasets = datasets;
-        this.controller = controller;
-        model = new SignalWarpingModelRevamp(datasets); // adds any saved warp images       
-        createUI();
+        model = new SignalWarpingModelRevamp(datasets); // adds any saved warp images 
         
+        createUIElements();
+
+        controller = new SignalWarpingDialogControllerRevamp(model, 
+        		chartPanel, 
+        		signalSelectionTable, new SignalWarpingDisplaySettings());
+        controller.addSignalWarpingProgressEventListener(this);
+        
+        layoutUI();
+
         addCtrlPressListener();
         this.setModal(false);
         this.pack();
@@ -146,58 +144,25 @@ public class SignalWarpingDialogRevamp extends LoadingIconDialog implements Prop
         });
     }
     
-    private void createUI() {
-        this.setLayout(new BorderLayout());
-        this.setTitle(DIALOG_TITLE);
-        
-        JPanel northPanel = createNorthPanel();
-        add(northPanel, BorderLayout.NORTH);
-
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets.get(0)).build();
-
+    /**
+     * Create the outline chart panel
+     */
+    private void createChartPanel() {
+    	ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets.get(0)).build();
         JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
         chartPanel = new ExportableChartPanel(chart);
-        chartPanel.setFixedAspectRatio(true);
-        
         JMenuItem exportImageItem = new JMenuItem(EXPORT_IMAGE_LBL);
         exportImageItem.addActionListener(e->controller.exportImage());
+        chartPanel.setFixedAspectRatio(true);
         chartPanel.getPopupMenu().add(exportImageItem);
-
-        JPanel westPanel = createWestPanel();        
-        
-        JSplitPane centrePanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, westPanel, chartPanel);
-        centrePanel.setDividerLocation(0.5);
-        add(centrePanel, BorderLayout.CENTER);
-        
-//       this.controller = new SignalWarpingDialogController(model, chartPanel, signalSelectionTable, settingsPanel);
     }
     
-    private JPanel createNorthPanel() {
-    	JPanel panel = new JPanel(new FlowLayout());
-    	
-    	SignalWarpingRunSettingsPanel runPanel = new SignalWarpingRunSettingsPanel(controller, model);
-    	runPanel.addSignalWarpingRunEventListener(controller);
-    	panel.add(runPanel);
-    	
-    	SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel();
-    	displayPanel.addSignalWarpingDisplayListener(controller);
-    	panel.add(displayPanel);
-    	
-    	return panel;
-    }
-    
-
     /**
-     * Create the list of saved warp images
-     * 
-     * @return
+     * Create the table to show selected signals
      */
-    private JPanel createWestPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        
-        signalSelectionTable = new ExportableTable(model, false);
-        signalSelectionTable.setCellSelectionEnabled(false);
+    private void createTablePanel() {
+    	signalSelectionTable = new ExportableTable(model, false);
+    	signalSelectionTable.setCellSelectionEnabled(false);
         signalSelectionTable.setRowSelectionAllowed(true);
         signalSelectionTable.setColumnSelectionAllowed(false);
         signalSelectionTable.setAutoCreateRowSorter(true);
@@ -233,33 +198,70 @@ public class SignalWarpingDialogRevamp extends LoadingIconDialog implements Prop
         	controller.displayBlankChart();
         });
         tableMenu.add(deleteItem);
+    	
+    }
+    
+    /**
+     * Populate the final fields of the class
+     */
+    private void createUIElements() {
+    	createChartPanel();
+    	createTablePanel();
+    }
+    
+    /**
+     * Decorate and layout the UI elements
+     */
+    private void layoutUI() {
+        this.setLayout(new BorderLayout());
+        this.setTitle(DIALOG_TITLE);
         
+        JPanel northPanel = createSettingsPanel();
+        add(northPanel, BorderLayout.NORTH);
+
+        JPanel westPanel = layoutTablePanel();        
+        
+        JSplitPane centrePanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, westPanel, chartPanel);
+        centrePanel.setDividerLocation(0.5);
+        add(centrePanel, BorderLayout.CENTER);
+        
+    }
+    
+    private JPanel createSettingsPanel() {
+    	JPanel panel = new JPanel(new FlowLayout());
+    	progressBar.setStringPainted(true);
+    	panel.add(progressBar);
+    	
+    	SignalWarpingRunSettingsPanel runPanel = new SignalWarpingRunSettingsPanel(controller, model);
+    	runPanel.addSignalWarpingRunEventListener(controller);
+    	panel.add(runPanel);
+    	
+    	SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel();
+    	displayPanel.addSignalWarpingDisplayListener(controller);
+    	panel.add(displayPanel);
+    	
+    	return panel;
+    }
+    
+	@Override
+	public void warpingProgressed(int progress) {
+		LOGGER.fine("Progress received: "+progress);
+		progressBar.setValue(progress);
+	}
+    
+
+    /**
+     * Create the list of saved warp images
+     * 
+     * @return
+     */
+    private JPanel layoutTablePanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+
         JScrollPane sp = new JScrollPane(signalSelectionTable);
         panel.add(sp, BorderLayout.CENTER);
         return panel;
-    }
-
-
-	
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-
-        if (evt.getNewValue() instanceof Integer) {
-            int percent = (Integer) evt.getNewValue(); // should be percent
-            if (percent >= 0 && percent <= 100) {
-                if (progressBar.isIndeterminate()) {
-                    progressBar.setIndeterminate(false);
-                }
-                progressBar.setValue(percent);
-            }
-        }
-
-        if (IAnalysisWorker.FINISHED_MSG.equals(evt.getPropertyName())) {
-            progressBar.setValue(0);
-            progressBar.setEnabled(false);
-            controller.warpingComplete();
-        }
-
     }
 
     
@@ -280,4 +282,7 @@ public class SignalWarpingDialogRevamp extends LoadingIconDialog implements Prop
             return l;
         }
     }
+
+
+
 }

@@ -23,8 +23,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ShortWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
-import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
@@ -50,6 +48,7 @@ implements SignalWarpingDisplayListener,
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialogControllerRevamp.class.getName());
 
     final private List<SignalWarpingDisplayListener> displayListeners = new ArrayList<>();
+    final private List<SignalWarpingProgressEventListener> progressListeners = new ArrayList<>();
 	
 	private SignalWarpingModelRevamp model;
     private SignalWarper warper;
@@ -107,6 +106,14 @@ implements SignalWarpingDisplayListener,
 	 */
 	public void addSignalWarpingDisplayListener(SignalWarpingDisplayListener l) {
 		displayListeners.add(l);
+	}
+	
+	/**
+	 * Add a listener for changes to warping progress
+	 * @param l
+	 */
+	public void addSignalWarpingProgressEventListener(SignalWarpingProgressEventListener l) {
+		progressListeners.add(l);
 	}
 	
 	private void fireDisplaySettingsChanged(SignalWarpingDisplaySettings settings){		
@@ -196,7 +203,6 @@ implements SignalWarpingDisplayListener,
 					image);
 
 			updateChart();
-
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error getting warp results", e);
 		}
@@ -261,12 +267,6 @@ implements SignalWarpingDisplayListener,
 		} catch (RequestCancelledException e) {}
 	}	
 	
-	public static HashOptions defaultDisplayOptions() {
-		HashOptions ho = new DefaultOptions();
-		ho.setBoolean("IS_PSEUDOCOLOUR", true);
-		return ho;
-	}
-
 	@Override
 	public void signalWarpingDisplayChanged(@NonNull SignalWarpingDisplaySettings settings) {
 		displayOptions.set(settings);
@@ -279,11 +279,25 @@ implements SignalWarpingDisplayListener,
 	public void runEventReceived(SignalWarpingRunSettings settings) {
 		ThreadManager.getInstance().submit( () -> runWarping(settings));		
 	}
+	
+	private void fireSignalWarpingProgressEvent(int progress){
+		if(progress<0 || progress>100)
+			return;
+		for(SignalWarpingProgressEventListener l : progressListeners) {
+			l.warpingProgressed(progress);
+		}
+	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (IAnalysisWorker.FINISHED_MSG.equals(evt.getPropertyName())) {
 			warpingComplete();
+		} else {
+			// Fire progress to listening UI elements
+	        Object newValue = evt.getNewValue();
+	        if (newValue instanceof Integer) {
+	        	fireSignalWarpingProgressEvent(((Integer) newValue).intValue());
+	        }
 		}
 		
 	}

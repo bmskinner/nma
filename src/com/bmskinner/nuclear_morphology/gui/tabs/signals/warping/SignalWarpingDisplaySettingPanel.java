@@ -72,7 +72,7 @@ implements SignalWarpingDisplayListener {
 		settings.setInt(SignalWarpingDisplaySettings.THRESHOLD_KEY, 
 				value);
 		
-		for(SignalWarpingDisplayListener l :listeners) {
+		for(SignalWarpingDisplayListener l : listeners) {
 			l.signalWarpingDisplayChanged(settings);
 		}
 	}
