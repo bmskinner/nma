@@ -64,8 +64,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingMo
  */
 @SuppressWarnings("serial")
 public class SignalWarpingDialogRevamp 
-	extends LoadingIconDialog 
-	implements SignalWarpingProgressEventListener {
+	extends LoadingIconDialog {
 	
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialogRevamp.class.getName());
 
@@ -81,7 +80,7 @@ public class SignalWarpingDialogRevamp
     
     private final SignalWarpingDialogControllerRevamp controller;
     
-    private final JProgressBar progressBar = new JProgressBar(0,100);
+//    private final JProgressBar progressBar = new JProgressBar(0,100);
     
     private JSplitPane centrePanel;
 
@@ -108,7 +107,6 @@ public class SignalWarpingDialogRevamp
         		chartPanel, 
         		signalSelectionTable, 
         		new SignalWarpingDisplaySettings());
-        controller.addSignalWarpingProgressEventListener(this);
         
         layoutUI();
 
@@ -289,6 +287,7 @@ public class SignalWarpingDialogRevamp
     	SignalWarpingRunSettingsPanel runPanel = new SignalWarpingRunSettingsPanel(controller, model);
     	runPanel.addSignalWarpingRunEventListener(controller);
     	runPanel.setBorder(BorderFactory.createTitledBorder("Run settings"));
+    	controller.addSignalWarpingProgressEventListener(runPanel);
     	panel.add(runPanel);
     	
     	SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel();
@@ -302,10 +301,10 @@ public class SignalWarpingDialogRevamp
     	return panel;
     }
     
-	@Override
-	public void warpingProgressed(int progress) {
-		progressBar.setValue(progress);
-	}
+//	@Override
+//	public void warpingProgressed(int progress) {
+//		progressBar.setValue(progress);
+//	}
     
 
     /**
@@ -317,8 +316,8 @@ public class SignalWarpingDialogRevamp
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         
-    	progressBar.setStringPainted(true);
-    	panel.add(progressBar, BorderLayout.NORTH);
+//    	progressBar.setStringPainted(true);
+//    	panel.add(progressBar, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(signalSelectionTable);
         panel.add(sp, BorderLayout.CENTER);

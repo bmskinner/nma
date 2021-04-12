@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
@@ -19,7 +20,9 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 
-public class SignalWarpingRunSettingsPanel extends JPanel {
+public class SignalWarpingRunSettingsPanel 
+	extends JPanel 
+	implements SignalWarpingProgressEventListener {
 
 	private static final long serialVersionUID = 1L;
 	private static final String SOURCE_DATASET_LBL  = "Source dataset";
@@ -43,6 +46,8 @@ public class SignalWarpingRunSettingsPanel extends JPanel {
 	private SignalWarpingDialogControllerRevamp controller;
 	private SignalWarpingModelRevamp model;
 	
+    private final JProgressBar progressBar = new JProgressBar(0,100);
+    	
 	private List<SignalWarpingRunEventListener> runListeners = new ArrayList<>();
 	
 	public SignalWarpingRunSettingsPanel(SignalWarpingDialogControllerRevamp controller2,
@@ -78,6 +83,7 @@ public class SignalWarpingRunSettingsPanel extends JPanel {
     	JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	JPanel midPanel   = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    	JPanel runPanel   = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     	datasetBoxOne = new DatasetSelectionPanel(model.getDatasets());
     	datasetBoxTwo = new DatasetSelectionPanel(model.getDatasets());
@@ -142,11 +148,15 @@ public class SignalWarpingRunSettingsPanel extends JPanel {
 
     	lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
     	lowerPanel.add(datasetBoxTwo);
-    	lowerPanel.add(runButton);
+
+    	runPanel.add(runButton);
+    	progressBar.setStringPainted(true);
+    	runPanel.add(progressBar);
     	
     	panel.add(upperPanel);
     	panel.add(midPanel);
     	panel.add(lowerPanel);
+    	panel.add(runPanel);
     	
     	return panel;
     }
@@ -154,6 +164,11 @@ public class SignalWarpingRunSettingsPanel extends JPanel {
 	private void setSignalSettingsEnabled(boolean b) {
 		minThresholdSpinner.setEnabled(b);
 		cellsWithSignalsBox.setEnabled(b);
+	}
+
+	@Override
+	public void warpingProgressed(int progress) {
+		progressBar.setValue(progress);
 	}
 
 }
