@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -267,46 +268,51 @@ public class SignalWarpingDialogRevamp
      * Decorate and layout the UI elements
      */
     private void layoutUI() {
+    	
+    	
         this.setLayout(new BorderLayout());
         this.setTitle(DIALOG_TITLE);
         
-        JPanel northPanel = createSettingsPanel();
-        add(northPanel, BorderLayout.NORTH);
-
-        JPanel westPanel = layoutTablePanel();        
+        JPanel runPanel = createRunSettingsPanel();
+        JPanel displayPanel = createDisplaySettingsPanel();
+        JPanel tablePanel = layoutTablePanel();  
+        SignalWarpingMSSSIMPanel msssimPanel = new SignalWarpingMSSSIMPanel(model);
+        controller.addSignalWarpingMSSSIMUpdateListener(msssimPanel);
         
+        JPanel eastPanel = new JPanel(new BorderLayout());
+        eastPanel.add(displayPanel, BorderLayout.NORTH);
+        eastPanel.add(chartPanel, BorderLayout.CENTER);
+        
+        JPanel westPanel = new JPanel(new BorderLayout());
+        westPanel.add(runPanel, BorderLayout.NORTH);
+        westPanel.add(tablePanel, BorderLayout.CENTER);
+        westPanel.add(msssimPanel, BorderLayout.SOUTH);
+
         centrePanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
         		westPanel, 
-        		chartPanel);
+        		eastPanel);
         add(centrePanel, BorderLayout.CENTER);
     }
     
-    private JPanel createSettingsPanel() {
-    	JPanel panel = new JPanel(new FlowLayout());
-    	
+    private JPanel createRunSettingsPanel() {
     	SignalWarpingRunSettingsPanel runPanel = new SignalWarpingRunSettingsPanel(controller, model);
     	runPanel.addSignalWarpingRunEventListener(controller);
     	runPanel.setBorder(BorderFactory.createTitledBorder("Run settings"));
     	controller.addSignalWarpingProgressEventListener(runPanel);
-    	panel.add(runPanel);
-    	
+    	return runPanel;
+
+    }
+    
+    private JPanel createDisplaySettingsPanel() {
     	SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel();
     	displayPanel.setBorder(BorderFactory.createTitledBorder("Display settings"));
     	displayPanel.addSignalWarpingDisplayListener(controller);
     	
     	// Changes to model selection need to update the display
     	controller.addSignalWarpingDisplayListener(displayPanel);
-    	panel.add(displayPanel);
-    	
-    	return panel;
-    }
+    	return displayPanel;
+    }   
     
-//	@Override
-//	public void warpingProgressed(int progress) {
-//		progressBar.setValue(progress);
-//	}
-    
-
     /**
      * Create the list of saved warp images
      * 
@@ -315,9 +321,6 @@ public class SignalWarpingDialogRevamp
     private JPanel layoutTablePanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        
-//    	progressBar.setStringPainted(true);
-//    	panel.add(progressBar, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(signalSelectionTable);
         panel.add(sp, BorderLayout.CENTER);

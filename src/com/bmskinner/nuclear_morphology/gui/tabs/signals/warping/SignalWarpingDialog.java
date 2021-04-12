@@ -375,7 +375,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	    	JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	    	
     	    	showComparisonBtn = new JButton(MS_SSIM_LBL);
-    	    	showComparisonBtn.addActionListener(e->new StructuralSimilarityComparisonDialog(model));
+//    	    	showComparisonBtn.addActionListener(e->new StructuralSimilarityComparisonDialog(model));
     	    	
     	    	mssimScore = new JLabel("");
     	    	
@@ -518,10 +518,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     	            
     	            SignalWarpingRunSettings ho = new SignalWarpingRunSettings(sourceDataset,
     	            		targetDataset, getSignalId());
-    	            ho.setBoolean(SignalWarper.IS_STRAIGHTEN_MESH_KEY, SignalWarper.REGULAR_MESH);
-    	            ho.setBoolean(SignalWarper.JUST_CELLS_WITH_SIGNAL_KEY,cellsWithSignals);
-    	            ho.setBoolean(SignalWarper.BINARISE_KEY, binarise);
-    	            ho.setInt(SignalWarper.MIN_SIGNAL_THRESHOLD_KEY, minThreshold);
+//    	            ho.setBoolean(SignalWarper.IS_STRAIGHTEN_MESH_KEY, SignalWarper.REGULAR_MESH);
+//    	            ho.setBoolean(SignalWarper.JUST_CELLS_WITH_SIGNAL_KEY,cellsWithSignals);
+//    	            ho.setBoolean(SignalWarper.BINARISE_KEY, binarise);
+//    	            ho.setInt(SignalWarper.MIN_SIGNAL_THRESHOLD_KEY, minThreshold);
 
     	            warper = new SignalWarper(ho);
     	            warper.addPropertyChangeListener(SignalWarpingDialog.this);

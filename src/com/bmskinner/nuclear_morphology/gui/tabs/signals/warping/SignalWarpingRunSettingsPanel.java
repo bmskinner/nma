@@ -131,7 +131,10 @@ public class SignalWarpingRunSettingsPanel
     	binariseBox = new JCheckBox(BINARISE_LBL, true);   	
     	
     	runButton = new JButton(RUN_LBL);
-    	runButton.addActionListener(e ->  fireSignalWarpingRunEvent() );
+    	runButton.addActionListener(e ->{  
+    		setEnabled(false);
+    		fireSignalWarpingRunEvent();
+    	});
     	if(!signalBox.hasSelection()) 
     		runButton.setEnabled(false);
     	
@@ -161,14 +164,33 @@ public class SignalWarpingRunSettingsPanel
     	return panel;
     }
 	
+	@Override
+	public void setEnabled(boolean b) {
+		datasetBoxOne.setEnabled(b);
+		datasetBoxTwo.setEnabled(b);
+		signalBox.setEnabled(b);
+		cellsWithSignalsBox.setEnabled(b);
+		minThresholdSpinner.setEnabled(b);
+		binariseBox.setEnabled(b);
+		runButton.setEnabled(b);
+	}
+	
+	/**
+	 * Set the signal settings enabled. Use when switching signal
+	 * sources
+	 * @param b
+	 */
 	private void setSignalSettingsEnabled(boolean b) {
 		minThresholdSpinner.setEnabled(b);
 		cellsWithSignalsBox.setEnabled(b);
+		binariseBox.setEnabled(b);
 	}
 
 	@Override
 	public void warpingProgressed(int progress) {
 		progressBar.setValue(progress);
+		if(progress==-1)
+			setEnabled(true);
 	}
 
 }

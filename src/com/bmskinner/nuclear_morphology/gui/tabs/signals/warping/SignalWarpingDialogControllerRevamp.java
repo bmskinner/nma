@@ -49,7 +49,8 @@ implements SignalWarpingDisplayListener,
 
     final private List<SignalWarpingDisplayListener> displayListeners = new ArrayList<>();
     final private List<SignalWarpingProgressEventListener> progressListeners = new ArrayList<>();
-	
+    final private List<SignalWarpingMSSSIMUpdateListener> msssimListeners = new ArrayList<>();
+    
 	private SignalWarpingModelRevamp model;
     private SignalWarper warper;
 	private ChartPanel chart;
@@ -89,13 +90,19 @@ implements SignalWarpingDisplayListener,
 			}
 			
 			MSSIMScore values = null;
-			if(keys.size()==2 && keys.get(0).getTarget().getID().equals(keys.get(1).getTarget().getID())) {
+			if(keys.size()==2 && keys.get(0).getTarget().getID()
+					.equals(keys.get(1).getTarget().getID())) {
 				MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
 				values = msi.calculateMSSIM(model.getImage(keys.get(0)), 
 											model.getImage(keys.get(1)));
+				
+				fireMSSSIMUpdated(String.format("%4.3f", values.msSsimIndex)+" between selected images");
+			} else {
+				if(keys.size()==2)
+					fireMSSSIMUpdated("Selected images must have the same target shape");
+				else
+					fireMSSSIMUpdated("Can only calculate MS-SSIM* between two images");
 			}
-//			settingsPanel.setMSSIM(keys.size(), values);
-
 			updateChart();
 		});
 	}
@@ -114,6 +121,25 @@ implements SignalWarpingDisplayListener,
 	 */
 	public void addSignalWarpingProgressEventListener(SignalWarpingProgressEventListener l) {
 		progressListeners.add(l);
+	}
+	
+	/**
+	 * Add a listener for changes to MS-SSIM* values
+	 * @param l
+	 */
+	public void addSignalWarpingMSSSIMUpdateListener(SignalWarpingMSSSIMUpdateListener l) {
+		msssimListeners.add(l);
+	}
+	
+	/**
+	 * Inform listeners of changes to MS-SSIM* values
+	 * @param value
+	 * @param message
+	 */
+	private void fireMSSSIMUpdated(String message){		
+		for(SignalWarpingMSSSIMUpdateListener l : msssimListeners) {
+			l.MSSSIMUpdated(message);
+		}
 	}
 	
 	private void fireDisplaySettingsChanged(SignalWarpingDisplaySettings settings){		
@@ -203,6 +229,7 @@ implements SignalWarpingDisplayListener,
 					image);
 
 			updateChart();
+			fireSignalWarpingProgressEvent(-1);
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error getting warp results", e);
 		}
@@ -281,8 +308,6 @@ implements SignalWarpingDisplayListener,
 	}
 	
 	private void fireSignalWarpingProgressEvent(int progress){
-		if(progress<0 || progress>100)
-			return;
 		for(SignalWarpingProgressEventListener l : progressListeners) {
 			l.warpingProgressed(progress);
 		}
