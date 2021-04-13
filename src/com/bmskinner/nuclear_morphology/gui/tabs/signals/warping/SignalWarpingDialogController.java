@@ -76,17 +76,23 @@ implements SignalWarpingDisplayListener,
 
 			model.clearSelection();
 			List<WarpedImageKey> keys = new ArrayList<>();
+			
 			int[] selectedRow = table.getSelectedRows();
+			
 			for (int i = 0; i < selectedRow.length; i++) {
 				LOGGER.fine("Selecting table row "+selectedRow[i]);
+				WarpedImageKey key = model.getKey(selectedRow[i]);
 				model.addSelection(selectedRow[i]);
 				
 				// Send a message with the changed display settings
-				SignalWarpingDisplaySettings displaySettings = new SignalWarpingDisplaySettings();
-				displaySettings.setInt(SignalWarpingDisplaySettings.THRESHOLD_KEY, 
-						SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
-				fireDisplaySettingsChanged(displaySettings);
-				keys.add(model.getKey(selectedRow[i]));
+				// as long as only one row is selected - otherwise
+				// we will overwrite the stored thresholds
+				if(selectedRow.length==1) {
+					this.displayOptions.setInt(SignalWarpingDisplaySettings.THRESHOLD_KEY, 
+							SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
+					fireDisplaySettingsChanged(this.displayOptions);
+				}
+				keys.add(key);
 			}
 			
 			MSSIMScore values = null;
