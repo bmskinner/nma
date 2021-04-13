@@ -84,7 +84,7 @@ implements SignalWarpingDisplayListener,
 				// Send a message with the changed display settings
 				SignalWarpingDisplaySettings displaySettings = new SignalWarpingDisplaySettings();
 				displaySettings.setInt(SignalWarpingDisplaySettings.THRESHOLD_KEY, 
-						SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
+						SignalWarpingModelRevamp.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
 				fireDisplaySettingsChanged(displaySettings);
 				keys.add(model.getKey(selectedRow[i]));
 			}
