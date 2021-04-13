@@ -59,6 +59,8 @@ import ij.process.ImageProcessor;
  */
 public class SignalWarpingModelRevamp extends DefaultTableModel {
 	
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingModelRevamp.class.getName());
 
 	public static final int THRESHOLD_ALL_VISIBLE = 255;
@@ -253,20 +255,38 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 		}
 	}
 	
+	/**
+	 * Get the threshold for the given row
+	 * @param row
+	 * @return
+	 */
 	public synchronized int getThreshold(int row) {
 		return cache.getThreshold(getKey(row));
 	}
 		
+	/**
+	 * Set the threshold of selected rows
+	 * @param threshold
+	 */
 	public synchronized void setThresholdOfSelected(int threshold) {
 		for(WarpedImageKey k : displayImages)
 			cache.setThreshold(k, threshold);;
 	}
 	
+	/**
+	 * Set the threshold for the given key
+	 * @param k
+	 * @param threshold
+	 */
 	public synchronized void setThreshold(@NonNull WarpedImageKey k, int threshold) {
 		cache.setThreshold(k, threshold);;
 	}
 	
 	
+	/**
+	 * Remove the row with the given key
+	 * @param k
+	 */
 	public void removeRow(WarpedImageKey k) {
 		removeSelection(k);
 		cache.remove(k);
@@ -280,6 +300,10 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 		removeRow(k);
 	}
 	
+	/**
+	 * Add a row to the table displaying the given key
+	 * @param k
+	 */
 	private void addTableRow(WarpedImageKey k) {
         Vector<Object> v = new Vector<>();
 		v.add(k.getTemplate().getName());
@@ -317,13 +341,37 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 		}
 	}
 	
-	public void addImage(@NonNull CellularComponent consensusTemplate, @NonNull String targetName, 
-			@NonNull IAnalysisDataset signalSource, @NonNull UUID signalGroupId, boolean isCellsWithSignals,
-			final boolean binarise, final int minThreshold, @NonNull ImageProcessor image) {
-		WarpedImageKey k = cache.new WarpedImageKey(consensusTemplate, targetName, signalSource, signalGroupId,isCellsWithSignals, binarise, minThreshold);
+	/**
+	 * Add a warped image to the model
+	 * @param targetShape the target shape to warp onto
+	 * @param targetName the name of the target
+	 * @param signalSource the dataset the signals came from
+	 * @param signalGroupId the signal group id
+	 * @param isCellsWithSignals should cells with signals only be included
+	 * @param isBinarise should images be binarised before warped
+	 * @param minThreshold the threshold to set before binarisation
+	 * @param image the warped image
+	 */
+	public void addImage(@NonNull CellularComponent targetShape, 
+			@NonNull String targetName, 
+			@NonNull IAnalysisDataset signalSource, 
+			@NonNull UUID signalGroupId,
+			boolean isCellsWithSignals,
+			final boolean isBinarise, 
+			final int minThreshold, 
+			@NonNull ImageProcessor image) {
+		WarpedImageKey k = cache.new WarpedImageKey(targetShape, 
+				targetName, 
+				signalSource, 
+				signalGroupId, 
+				isCellsWithSignals, 
+				isBinarise, 
+				minThreshold);
 
         cache.add(k, image);
-        Color c = signalSource.getCollection().getSignalGroup(signalGroupId).get().getGroupColour().orElse(Color.WHITE);
+        Color c = signalSource.getCollection()
+        		.getSignalGroup(signalGroupId).get()
+        		.getGroupColour().orElse(Color.WHITE);
         cache.setColour(k, c);
         cache.setThreshold(k, THRESHOLD_ALL_VISIBLE);
         addTableRow(k);
