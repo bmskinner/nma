@@ -33,6 +33,18 @@ public class SignalWarpingRunSettingsPanel
     private static final String MIN_THRESHOLD_LBL   = "Min threshold";
     private static final String BINARISE_LBL        = "Binarise";
     
+    private static final String SOURCE_DATASET_TOOLTIP = "Which dataset should signals come from?";
+    private static final String TARGET_DATASET_TOOLTIP = "Which dataset consensus should we warp onto?";
+    private static final String SIGNAL_GROUP_TOOLTIP   = "Which signal group to warp?";
+    private static final String INCLUDE_CELLS_TOOLTIP  = "Tick to use only cells with explicit signals detected";
+    private static final String RUN_TOOLTIP            = "Run the signal warping";
+    private static final String MIN_THRESHOLD_TOOLTIP  = "Threshold images to this value before warping";
+    private static final String BINARISE_TOOLTIP       = "Binarise images so intra-image intensities are not included";
+    
+    private static final String SOURCE_HELP       = "Choose the signals to be warped:";
+    private static final String IMAGE_HELP        = "Choose how to pre-process images:";
+    private static final String TARGET_HELP       = "Choose the shape to warp images onto:";
+    
 	private DatasetSelectionPanel datasetBoxOne;
     private DatasetSelectionPanel datasetBoxTwo;
 
@@ -80,13 +92,18 @@ public class SignalWarpingRunSettingsPanel
     	JPanel panel = new JPanel();
     	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     	
+    	JPanel help1Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    	JPanel help2Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	JPanel midPanel   = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    	JPanel help3Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     	JPanel runPanel   = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     	datasetBoxOne = new DatasetSelectionPanel(model.getDatasets());
+    	datasetBoxOne.setToolTipText(SOURCE_DATASET_TOOLTIP);
     	datasetBoxTwo = new DatasetSelectionPanel(model.getDatasets());
+    	datasetBoxTwo.setToolTipText(TARGET_DATASET_TOOLTIP);
 
     	datasetBoxOne.setSelectedDataset(model.getDatasets().get(0));
     	datasetBoxTwo.setSelectedDataset(model.getDatasets().get(0));
@@ -103,6 +120,7 @@ public class SignalWarpingRunSettingsPanel
     	datasetBoxTwo.addActionListener(e -> controller.displayBlankChart() );
 
     	signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
+    	signalBox.setToolTipText(SIGNAL_GROUP_TOOLTIP);
     	if (!signalBox.hasSelection())
     		signalBox.setEnabled(false);
 
@@ -120,17 +138,21 @@ public class SignalWarpingRunSettingsPanel
 	        }
     	});
 
-    	cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
+    	cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, false);
+    	cellsWithSignalsBox.setToolTipText(INCLUDE_CELLS_TOOLTIP);
     	
     	// Set the initial value to the signal detection threshold of the initial selected signal group
     	int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
 				.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold();
     	SpinnerModel minThresholdModel = new SpinnerNumberModel(threshold, 0, 255, 1);
     	minThresholdSpinner = new JSpinner(minThresholdModel);
+    	minThresholdSpinner.setToolTipText(MIN_THRESHOLD_TOOLTIP);
 
-    	binariseBox = new JCheckBox(BINARISE_LBL, true);   	
+    	binariseBox = new JCheckBox(BINARISE_LBL, false);   	
+    	binariseBox.setToolTipText(BINARISE_TOOLTIP);
     	
     	runButton = new JButton(RUN_LBL);
+    	runButton.setToolTipText(RUN_TOOLTIP);
     	runButton.addActionListener(e ->{  
     		setEnabled(false);
     		fireSignalWarpingRunEvent();
@@ -139,15 +161,21 @@ public class SignalWarpingRunSettingsPanel
     		runButton.setEnabled(false);
     	
     	
+    	help1Panel.add(new JLabel(SOURCE_HELP));
+    	
     	upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
     	upperPanel.add(datasetBoxOne);
     	upperPanel.add(new JLabel(SIGNAL_GROUP_LBL));
     	upperPanel.add(signalBox);
+    	
+    	help2Panel.add(new JLabel(IMAGE_HELP));
 
     	midPanel.add(new JLabel(MIN_THRESHOLD_LBL));
     	midPanel.add(minThresholdSpinner);
     	midPanel.add(binariseBox);
     	midPanel.add(cellsWithSignalsBox);
+    	
+    	help3Panel.add(new JLabel(TARGET_HELP));
 
     	lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
     	lowerPanel.add(datasetBoxTwo);
@@ -156,8 +184,11 @@ public class SignalWarpingRunSettingsPanel
     	progressBar.setStringPainted(true);
     	runPanel.add(progressBar);
     	
+    	panel.add(help1Panel);
     	panel.add(upperPanel);
+    	panel.add(help2Panel);
     	panel.add(midPanel);
+    	panel.add(help3Panel);
     	panel.add(lowerPanel);
     	panel.add(runPanel);
     	

@@ -1,6 +1,5 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
@@ -24,16 +23,17 @@ public class SignalWarpingMSSSIMPanel
 	
 	public SignalWarpingMSSSIMPanel(SignalWarpingModelRevamp model) {
 		this.model = model;
-		JPanel panel = new JPanel(new FlowLayout());
+		this.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+		JButton comparisonBtn = new JButton("MS-SSIM* details");
+		comparisonBtn.addActionListener(e->new StructuralSimilarityComparisonDialog(model));
+		panel.add(comparisonBtn);
 		
 		panel.add(new JLabel("MS-SSIM*: "));
 		panel.add(messageLabel);
 		
-		JButton comparisonBtn = new JButton("Detailed MS-SSIM*");
-		comparisonBtn.addActionListener(e->new StructuralSimilarityComparisonDialog(model));
-    	
-		panel.add(comparisonBtn);
-		this.add(panel, BorderLayout.CENTER);
+		this.add(panel);
 	}
 
 	@Override

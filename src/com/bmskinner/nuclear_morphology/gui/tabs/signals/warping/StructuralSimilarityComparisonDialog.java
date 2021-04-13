@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -54,6 +55,8 @@ import ij.process.ImageProcessor;
  */
 public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger LOGGER = Logger.getLogger(StructuralSimilarityComparisonDialog.class.getName());
 	
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
@@ -82,8 +85,6 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		add(headerPanel, BorderLayout.NORTH);
 		add(centrePanel, BorderLayout.CENTER);
 		
-		setLocationRelativeTo(null);
-		centerOnScreen();
 		setTitle(DIALOG_TITLE);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setModal(false);
@@ -101,34 +102,59 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		}
 		validate();
 		pack();
+		setLocationRelativeTo(null);
+		centerOnScreen();
 		LOGGER.finer("Showing MS-SSIM dialog");
 		setVisible(true);
 	}
 	
 	private JPanel createHeaderPanel() {
-		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel compareLabel = new JLabel("Compare MS-SSIM* scores per-cell for multiple signal groups");
-		JButton runPerCellBtn = new JButton("Run");
-		runPerCellBtn.addActionListener(e->makePerCellCharts());
-		
-		headerPanel.add(compareLabel);
-		headerPanel.add(runPerCellBtn);
-		headerPanel.add(getLoadingLabel());
-		headerPanel.add(progressBar);
-		progressBar.setVisible(false);
-		return headerPanel;
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		panel.add(new JLabel("Showing full MS-SSIM* values for all warped images"));
+		return panel;
 	}
 	
 	private JPanel createCentrePanel() {
 		
 		JPanel centrePanel = new JPanel(new BorderLayout());
-        
+		JPanel perCellPanel = createPerCellPanel();
 		JScrollPane scrollPane = new JScrollPane(comparisonTable);
 		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
 		centrePanel.add(scrollPane, BorderLayout.CENTER);
-		centrePanel.add(chartPanel, BorderLayout.SOUTH);
+		centrePanel.add(perCellPanel, BorderLayout.SOUTH);
 		
         return centrePanel;
+	}
+	
+	private JPanel createPerCellPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(createPerCellHeaderPanel(), BorderLayout.NORTH);
+		panel.add(chartPanel, BorderLayout.CENTER);
+		return panel;
+		
+	}
+	
+	private JPanel createPerCellHeaderPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel compareLabel = new JLabel("If your dataset has more than one signal group, generate MS-SSIM* scores per-cell between each group");
+		JButton runPerCellBtn = new JButton("Run");
+		runPerCellBtn.addActionListener(e->makePerCellCharts());
+		
+		headerPanel.add(runPerCellBtn);
+		headerPanel.add(compareLabel);
+		
+		panel.add(headerPanel);
+		
+		JPanel progressPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		progressPanel.add(getLoadingLabel());
+		progressPanel.add(progressBar);
+		progressBar.setVisible(false);
+		
+		panel.add(progressPanel);
+		return panel;
 	}
 
 	/**
