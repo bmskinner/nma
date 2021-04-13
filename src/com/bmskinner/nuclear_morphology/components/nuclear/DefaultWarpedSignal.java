@@ -76,7 +76,14 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	}
 
 	@Override
-	public void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId,  @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ImageProcessor image) {
+	@Deprecated
+	public void addWarpedImage(@NonNull CellularComponent template, 
+			@NonNull UUID templateId,  
+			@NonNull String name, 
+			boolean isCellWithSignalsOnly, 
+			int threshold, 
+			boolean isBinarised,
+			@NonNull ImageProcessor image) {
 
 		// TODO - reenable once this is working for 16-bit images
 //		byte[][] arr = IWarpedSignal.toArrayArray(image);
@@ -103,8 +110,16 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	}
 
 	@Override
-	public Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId,  boolean isCellWithSignalsOnly, int threshold) {
-		WarpedSignalKey k = new WarpedSignalKey(template, templateId, isCellWithSignalsOnly, threshold);
+	public Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template, 
+			@NonNull UUID templateId,  
+			boolean isCellWithSignalsOnly, 
+			int threshold,
+			boolean isBinarised) {
+		WarpedSignalKey k = new WarpedSignalKey(template, 
+				templateId, 
+				isCellWithSignalsOnly, 
+				threshold,
+				isBinarised);
 		return getWarpedImage(k);
 	}
 	
@@ -112,7 +127,11 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 	public String getTargetName(@NonNull WarpedSignalKey key) {
 		if(targetNames.containsKey(key))
 			return targetNames.get(key);
-		return targetNames.get(new WarpedSignalKey(key.getTargetShape(), key.getTemplateId(), !key.isCellWithSignalsOnly(), key.getThreshold()));
+		return targetNames.get(new WarpedSignalKey(key.getTargetShape(), 
+				key.getTemplateId(), 
+				!key.isCellWithSignalsOnly(), 
+				key.getThreshold(),
+				key.isBinarised()));
 	}
 	
 
