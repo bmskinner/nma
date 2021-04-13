@@ -1,10 +1,12 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -14,12 +16,15 @@ import ij.process.ImageProcessor;
 
 /**
  * Implementation of a warped signal using shorts. Replaces the DefaultWarpedSignal,
- * which was limited to saving 8-bit images.
+ * which was limited to saving 8-bit images. Note that the internal save state is still
+ * 8-bit - any 16-bit images will be down-sampled when saved
  * @author ben
  * @since 1.16.0
  *
  */
 public class ShortWarpedSignal implements IWarpedSignal {
+	
+	private static final Logger LOGGER = Logger.getLogger(ShortWarpedSignal.class.getName());
 
 	private static final long serialVersionUID = 1L;
 	private final UUID id;
@@ -63,15 +68,25 @@ public class ShortWarpedSignal implements IWarpedSignal {
 	}
 
 	@Override
-	public void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId,  @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ImageProcessor image) {
+	public void addWarpedImage(@NonNull CellularComponent template, 
+			@NonNull UUID templateId,  
+			@NonNull String name, 
+			boolean isCellWithSignalsOnly, 
+			int threshold, 
+			boolean isBinarised,
+			@NonNull ImageProcessor image) {
 
 		byte[] arr = IWarpedSignal.toArray(image);
 		
-		WarpedSignalKey k = new WarpedSignalKey(template, templateId, isCellWithSignalsOnly, threshold);
-		
+		WarpedSignalKey k = new WarpedSignalKey(template, 
+				templateId, 
+				isCellWithSignalsOnly, 
+				threshold,
+				isBinarised);
 		images.put(k, arr);
 		targetNames.put(k, name);
 		widths.put(k, image.getWidth());
+		LOGGER.fine("Added warped image: "+k);
 	}
 	
 	@Override
@@ -82,19 +97,31 @@ public class ShortWarpedSignal implements IWarpedSignal {
 	
 	@Override
 	public Optional<ImageProcessor> getWarpedImage(@NonNull WarpedSignalKey k){
-		if(!images.containsKey(k))
+		if(!images.containsKey(k)) {
+			LOGGER.fine("Image for requested key not present: "+k);
+			LOGGER.fine(toString());
 			return Optional.empty();
+		}
 		
 		byte[] arr = images.get(k);
 		
 		short[] shortArray = IWarpedSignal.byteToshortArray(arr);
 		int w = widths.get(k);
+		LOGGER.fine("Image retrieved: "+k);
 		return Optional.of(IWarpedSignal.toImageProcessor(shortArray, w));
 	}
 
 	@Override
-	public Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId,  boolean isCellWithSignalsOnly, int threshold) {
-		WarpedSignalKey k = new WarpedSignalKey(template, templateId, isCellWithSignalsOnly, threshold);
+	public Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template,
+			@NonNull UUID templateId, 
+			boolean isCellWithSignalsOnly, 
+			int threshold,
+			boolean isBinarised) {
+		WarpedSignalKey k = new WarpedSignalKey(template, 
+				templateId, 
+				isCellWithSignalsOnly, 
+				threshold,
+				isBinarised);
 		return getWarpedImage(k);
 	}
 	
@@ -103,10 +130,29 @@ public class ShortWarpedSignal implements IWarpedSignal {
 		if(targetNames.containsKey(key))
 			return targetNames.get(key);
 		return targetNames.get(new WarpedSignalKey(key.getTargetShape(), 
-				key.getTemplateId(), !key.isCellWithSignalsOnly(), key.getThreshold()));
+				key.getTemplateId(), 
+				key.isCellWithSignalsOnly(), 
+				key.getThreshold(), 
+				key.isBinarised()));
 	}
 	
 
+	@Override
+	public String toString() {
+		Set<WarpedSignalKey> allKeys = new HashSet<>();
+		allKeys.addAll(images.keySet());
+		allKeys.addAll(targetNames.keySet());
+		allKeys.addAll(widths.keySet());
+		StringBuilder sb = new StringBuilder();
+		for(WarpedSignalKey k : allKeys ) {
+			sb.append(k)
+			.append(" Image: "+images.containsKey(k))
+			.append("Target: "+targetNames.containsKey(k))
+			.append("Widths: "+widths.containsKey(k))
+			.append("\n");
+		}
+		return sb.toString();
+	}
 
 	@Override
 	public int hashCode() {

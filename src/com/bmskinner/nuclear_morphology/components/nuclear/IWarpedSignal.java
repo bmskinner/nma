@@ -136,13 +136,21 @@ public interface IWarpedSignal extends Serializable {
 	
 	/**
 	 * Add a warped signal image for the given template
-	 * @param template the template object signals were warped on to 
+	 * @param target the target object signals were warped on to 
 	 * @param templateId the id of the dataset the signals came from
 	 * @param name the name of the template object
+	 * @param threshold the threshold level for the images before warping
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset
+	 * @param isBinarised if the images were binarised before warping
 	 * @param image the warped image
 	 */	
-	void addWarpedImage(@NonNull CellularComponent template, @NonNull UUID templateId, @NonNull String name, boolean isCellWithSignalsOnly, int threshold, @NonNull ImageProcessor image);
+	void addWarpedImage(@NonNull CellularComponent target, 
+			@NonNull UUID templateId, 
+			@NonNull String name, 
+			boolean isCellWithSignalsOnly, 
+			int threshold,
+			boolean isBinarised,
+			@NonNull ImageProcessor image);
 	
 	
 	/**
@@ -158,7 +166,11 @@ public interface IWarpedSignal extends Serializable {
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset, or just those with defined signals
 	 * @return
 	 */
-	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template,  @NonNull UUID templateId, boolean isCellWithSignalsOnly, int threshold);
+	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template,  
+			@NonNull UUID templateId, 
+			boolean isCellWithSignalsOnly, 
+			int threshold,
+			boolean isBinarised);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 

@@ -186,7 +186,13 @@ implements SignalWarpingDisplayListener,
 				
 		ISignalGroup sg  = selectedKey.getTemplate().getCollection().getSignalGroup(selectedKey.getSignalGroupId()).get();
 		
-		WarpedSignalKey k = new WarpedSignalKey(selectedKey.getTemplate().getCollection().getConsensus(), selectedKey.getTemplate().getId(), selectedKey.isOnlyCellsWithSignals(), selectedKey.getThreshold() );
+		WarpedSignalKey k = new WarpedSignalKey(
+				selectedKey.getTemplate()
+					.getCollection().getConsensus(), 
+				selectedKey.getTemplate().getId(), 
+				selectedKey.isOnlyCellsWithSignals(), 
+				selectedKey.getThreshold(),
+				selectedKey.isBinarised());
 		sg.getWarpedSignals().ifPresent(e->e.removeWarpedImage(k));
 		model.removeRow(selectedKey);
 	}
@@ -205,16 +211,16 @@ implements SignalWarpingDisplayListener,
 
 			ImageProcessor image = warper.get(); // get the 16-bit result of warping
 			SignalWarpingRunSettings runSettings = warper.getOptions();
-
 			ISignalGroup sg  = runSettings.templateSignalGroup();
 			IWarpedSignal ws = sg.getWarpedSignals()
 					.orElse(new ShortWarpedSignal(runSettings.signalId()));
 
 			ws.addWarpedImage(runSettings.targetShape(), 
-					runSettings.signalId(), 
+					runSettings.targetDataset().getId(), 
 					runSettings.targetDataset().getName(), 
 					runSettings.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY), 
 					runSettings.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY), 
+					runSettings.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY),
 					image);
 			sg.setWarpedSignals(ws);
 
@@ -250,17 +256,8 @@ implements SignalWarpingDisplayListener,
 	 * 
 	 */
 	public void displayBlankChart() {
-
 		LOGGER.fine("Updating blank chart");
 		chart.setChart(ConsensusNucleusChartFactory.createEmptyChart());
-//		JFreeChart ch = null;
-//
-//		ChartOptions options = new ChartOptionsBuilder()
-//				.setDatasets(model.getTemplates()).build();
-//
-//		ch = new ConsensusNucleusChartFactory(options)
-//				.makeNucleusOutlineChart();
-//		chart.setChart(ch);
 	}
 
 	/**

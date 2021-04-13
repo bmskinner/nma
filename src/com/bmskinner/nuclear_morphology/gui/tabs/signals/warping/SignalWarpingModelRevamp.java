@@ -109,6 +109,11 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 		return -1;
 	}
 		
+	/**
+	 * Get the image key for the given row
+	 * @param row
+	 * @return
+	 */
 	public WarpedImageKey getKey(int row) {
 		int keyColumn = this.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
 		WarpedImageKey key = (WarpedImageKey) getValueAt(row, keyColumn);
@@ -116,6 +121,11 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 		return key;
 	}
 	
+	/**
+	 * Get the row for the given image key
+	 * @param key
+	 * @return
+	 */
 	public synchronized int getRow(WarpedImageKey key) {
 		int keyColumn = this.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
 		for(int r=0; r<getRowCount(); r++) {
@@ -125,30 +135,59 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 		return -1;
 	}
 	
+	/**
+	 * Add the given row to the selected rows
+	 * @param row
+	 */
 	public synchronized void addSelection(int row) {
 		addSelection(getKey(row));
     }
 	
+	/**
+	 * Add the given key to the selected keys
+	 * @param k
+	 */
 	private synchronized void addSelection(@NonNull final WarpedImageKey k) {
         displayImages.add(k);
     }
 
+	/**
+	 * Remove then given key from the selected keys
+	 * @param k
+	 */
 	private synchronized void removeSelection(@NonNull final WarpedImageKey k) {
         displayImages.remove(k);
     }
 
+    /**
+     * Test if the given key is currently selected
+     * @param k
+     * @return
+     */
     public synchronized boolean isSelected(@NonNull final WarpedImageKey k) {
         return displayImages.contains(k);
     }
 
+    /**
+     * Get the number of selected images
+     * @return
+     */
     public synchronized int selectedImageCount() {
         return displayImages.size();
     }
 
+    /**
+     * Clear the image selection 
+     */
     public synchronized void clearSelection() {
         displayImages.clear();
     }
 					
+	/**
+	 * If the given key is selected, deselect it. Otherwise select
+	 * it.
+	 * @param k
+	 */
 	public synchronized void toggleSelection(@NonNull final WarpedImageKey k) {
 		if(isSelected(k))
 			removeSelection(k);
@@ -157,34 +196,57 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 	}
 
 	
+	/**
+	 * Add warped images saved in datasets to this model
+	 * @param list
+	 */
 	private void addSavedImages(@NonNull List<IAnalysisDataset> list) {
 		for(IAnalysisDataset d : list) {
 			addSavedImages(d);
 		}
 	}
 
+	/**
+	 * Add warped images saved in a dataset to the model
+	 * @param d
+	 */
 	private void addSavedImages(@NonNull IAnalysisDataset d) {
 		for(UUID signalGroupId : d.getCollection().getSignalGroupIDs()) {
 			ISignalGroup sg  = d.getCollection().getSignalGroup(signalGroupId).get();
 
+			// Get any warped signals saved in the signal group
 			Optional<IWarpedSignal> ws = sg.getWarpedSignals();
 			if(ws.isPresent()) {
+				LOGGER.finer("Found saved warped image(s) for "+d.getName());
 				IWarpedSignal warpedSignal = ws.get();
-				for(WarpedSignalKey c : warpedSignal.getWarpedSignalKeys()) {
-
-					Optional<ImageProcessor> im = warpedSignal.getWarpedImage(c);
-					if(im.isPresent() && d.getId().equals(c.getTemplateId())) { // skip child dataset signals
-						WarpedImageKey k = cache.new WarpedImageKey(c.getTargetShape(), 
-								warpedSignal.getTargetName(c), d, 
+				
+				// Convert the warped signals to warped image keys used internally
+				// This allows decoupling of the serialised data from the display data
+				for(WarpedSignalKey key : warpedSignal.getWarpedSignalKeys()) {
+					LOGGER.finer("Trying to add warped image "+key);
+					Optional<ImageProcessor> im = warpedSignal.getWarpedImage(key);
+					
+					// Check if the warped image is available 
+					if(!im.isPresent()) {
+						LOGGER.fine("Cannot add warped image; image not present");
+						LOGGER.fine(ws.toString());
+						continue;
+					}
+					
+					if(d.getId().equals(key.getTemplateId())) { // skip child dataset signals
+						WarpedImageKey k = cache.new WarpedImageKey(key.getTargetShape(), 
+								warpedSignal.getTargetName(key), d, 
 								signalGroupId, 
-								c.isCellWithSignalsOnly(), 
-								c.isCellWithSignalsOnly(), 
-								c.getThreshold());
+								key.isCellWithSignalsOnly(), 
+								key.isBinarised(), 
+								key.getThreshold());
 						cache.add(k, im.get());
 						Color col = sg.getGroupColour().orElse(Color.WHITE);
 						cache.setColour(k, col);
 						cache.setThreshold(k, THRESHOLD_ALL_VISIBLE); // display threshold, not detection threshold
 						addTableRow(k);
+					} else {
+						LOGGER.fine("Cannot add warped image; dataset ID does not match template");
 					}
 				}                	
 			}
@@ -572,6 +634,10 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 			
 			public int getThreshold() {
 				return minThreshold;
+			}
+			
+			public boolean isBinarised() {
+				return isBinarise;
 			}
 
             @Override

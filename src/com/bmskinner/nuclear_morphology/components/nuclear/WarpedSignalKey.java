@@ -37,13 +37,19 @@ public class WarpedSignalKey implements Serializable {
 	private final boolean isCellWithSignalsOnly;
 	private final int threshold;
 	private final UUID templateId;
+	private final boolean isBinarised;
 	
-	public WarpedSignalKey(@NonNull CellularComponent target, @NonNull UUID templateId, final boolean cellsWithSignals, final int threshold) {
+	public WarpedSignalKey(@NonNull CellularComponent target, 
+			@NonNull UUID templateId, 
+			final boolean cellsWithSignals, 
+			final int threshold,
+			final boolean isBinarised) {
 		targetShape = target;
 		targetShapeId = target.getID();
 		isCellWithSignalsOnly = cellsWithSignals;
 		this.threshold = threshold;
 		this.templateId = templateId;
+		this.isBinarised = isBinarised;
 	}
 	
 	public UUID getTemplateId() {
@@ -61,6 +67,20 @@ public class WarpedSignalKey implements Serializable {
 	public int getThreshold() {
 		return threshold;
 	}
+	
+	public boolean isBinarised() {
+		return isBinarised;
+	}
+	
+	@Override
+	public String toString() {
+		return "Hash: "+hashCode()
+				+" "+templateId
+				+" "+targetShapeId
+				+" "+isCellWithSignalsOnly
+				+" "+threshold
+				+" "+isBinarised;
+	}
 
 	@Override
 	public int hashCode() {
@@ -69,6 +89,7 @@ public class WarpedSignalKey implements Serializable {
 		result = prime * result + (isCellWithSignalsOnly ? 1231 : 1237);
 		result = prime * result + ((targetShapeId == null) ? 0 : targetShapeId.hashCode());
 		result = prime * result + threshold;
+		result = prime * result + (isBinarised ? 1231 : 1237);
 		return result;
 	}
 
@@ -82,6 +103,8 @@ public class WarpedSignalKey implements Serializable {
 			return false;
 		WarpedSignalKey other = (WarpedSignalKey) obj;
 		if (isCellWithSignalsOnly != other.isCellWithSignalsOnly)
+			return false;
+		if (isBinarised != other.isBinarised)
 			return false;
 		if (targetShapeId == null) {
 			if (other.targetShapeId != null)

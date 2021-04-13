@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 import java.awt.Color;
 import java.io.File;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -33,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
  */
 public class SignalGroup implements ISignalGroup {
 
+	private static final Logger LOGGER = Logger.getLogger(SignalGroup.class.getName());
     private static final long serialVersionUID = 1L;
     private IShellResult      shellResult      = null;
     private String            groupName        = "";

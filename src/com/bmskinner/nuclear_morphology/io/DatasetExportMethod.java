@@ -103,12 +103,11 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     		}
 
     		if (isOk) 
-    			LOGGER.fine("Save was sucessful");
+    			LOGGER.info("Save was sucessful");
     		else
     			LOGGER.warning("Save was unsucessful");
 
     	} catch (Exception e) {
-    		LOGGER.warning("Save was unsucessful");
     		LOGGER.log(Loggable.STACK, "Unable to save dataset", e);
     	}
     }
@@ -221,7 +220,9 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     	if (!saveFile.exists())
     		return;
 
-    	File backupFile = new File(saveFile.getParent(), saveFile.getName().replaceAll(Io.SAVE_FILE_EXTENSION, Io.BACKUP_FILE_EXTENSION));
+    	File backupFile = new File(saveFile.getParent(), 
+    			saveFile.getName().replaceAll(Io.SAVE_FILE_EXTENSION, 
+    					Io.BACKUP_FILE_EXTENSION));
     	try {
     		copyFile(saveFile, backupFile);
     	} catch (IOException e) {
