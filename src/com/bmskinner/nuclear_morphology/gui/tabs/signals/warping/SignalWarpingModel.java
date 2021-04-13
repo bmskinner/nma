@@ -45,7 +45,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
@@ -57,11 +57,11 @@ import ij.process.ImageProcessor;
  * @since 1.19.4
  *
  */
-public class SignalWarpingModelRevamp extends DefaultTableModel {
+public class SignalWarpingModel extends DefaultTableModel {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = Logger.getLogger(SignalWarpingModelRevamp.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalWarpingModel.class.getName());
 
 	public static final int THRESHOLD_ALL_VISIBLE = 255;
 	
@@ -74,7 +74,7 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 	
 	private volatile ImageCache cache = new ImageCache();
 	
-	public SignalWarpingModelRevamp(@NonNull List<IAnalysisDataset> datasets) {
+	public SignalWarpingModel(@NonNull List<IAnalysisDataset> datasets) {
 		super();
 		this.datasets = datasets;
 
@@ -743,8 +743,8 @@ public class SignalWarpingModelRevamp extends DefaultTableModel {
 				return true;
 			}
 
-			private SignalWarpingModelRevamp getOuterType() {
-                return SignalWarpingModelRevamp.this;
+			private SignalWarpingModel getOuterType() {
+                return SignalWarpingModel.this;
             }
 
             @Override

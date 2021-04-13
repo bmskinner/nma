@@ -21,7 +21,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
@@ -32,7 +32,7 @@ public class SectorQuantificationDialog extends JDialog {
 	
 	private static final String DIALOG_TITLE = "Quantification scores";
 	
-	public SectorQuantificationDialog(SignalWarpingModelRevamp model) {
+	public SectorQuantificationDialog(SignalWarpingModel model) {
 
 		try {
 			TableModel compModel = createTableModel(model);
@@ -51,7 +51,7 @@ public class SectorQuantificationDialog extends JDialog {
 		}
 	}
 
-	private TableModel createTableModel(SignalWarpingModelRevamp model) throws Exception {
+	private TableModel createTableModel(SignalWarpingModel model) throws Exception {
 		DecimalFormat df = new DecimalFormat("0.000");
 		DefaultTableModel compModel = new DefaultTableModel();
 		Object[] columns = { "Key", "Segment sector", "Fraction of signal"};

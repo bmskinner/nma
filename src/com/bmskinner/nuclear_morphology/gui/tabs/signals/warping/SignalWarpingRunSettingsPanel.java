@@ -55,15 +55,15 @@ public class SignalWarpingRunSettingsPanel
     private JSpinner minThresholdSpinner;
     private JCheckBox binariseBox;
     
-	private SignalWarpingDialogControllerRevamp controller;
-	private SignalWarpingModelRevamp model;
+	private SignalWarpingDialogController controller;
+	private SignalWarpingModel model;
 	
     private final JProgressBar progressBar = new JProgressBar(0,100);
     	
 	private List<SignalWarpingRunEventListener> runListeners = new ArrayList<>();
 	
-	public SignalWarpingRunSettingsPanel(SignalWarpingDialogControllerRevamp controller2,
-			SignalWarpingModelRevamp model) {
+	public SignalWarpingRunSettingsPanel(SignalWarpingDialogController controller2,
+			SignalWarpingModel model) {
 		controller = controller2;
 		this.model = model;
 		this.setLayout(new BorderLayout());

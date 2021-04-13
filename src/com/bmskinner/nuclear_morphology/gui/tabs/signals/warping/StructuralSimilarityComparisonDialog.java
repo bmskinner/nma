@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
@@ -61,7 +61,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 	
-	private final SignalWarpingModelRevamp model;
+	private final SignalWarpingModel model;
 	private final ExportableTable comparisonTable;
 	
 	private final ChartPanel chartPanel;
@@ -71,7 +71,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	/** The MS-SSIM calculator */
 	private MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
 	
-	public StructuralSimilarityComparisonDialog(@NonNull final SignalWarpingModelRevamp model) {
+	public StructuralSimilarityComparisonDialog(@NonNull final SignalWarpingModel model) {
 		super();
 		LOGGER.finer("Creating MS-SSIM dialog");
 		this.model = model;

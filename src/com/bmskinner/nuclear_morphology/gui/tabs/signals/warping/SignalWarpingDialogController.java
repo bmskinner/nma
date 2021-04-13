@@ -26,7 +26,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -40,24 +40,24 @@ import ij.process.ImageProcessor;
  * @since 1.19.4
  *
  */
-public class SignalWarpingDialogControllerRevamp 
+public class SignalWarpingDialogController 
 implements SignalWarpingDisplayListener, 
 	SignalWarpingRunEventListener, 
 	PropertyChangeListener {
 	
-	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialogControllerRevamp.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialogController.class.getName());
 
     final private List<SignalWarpingDisplayListener> displayListeners = new ArrayList<>();
     final private List<SignalWarpingProgressEventListener> progressListeners = new ArrayList<>();
     final private List<SignalWarpingMSSSIMUpdateListener> msssimListeners = new ArrayList<>();
     
-	private SignalWarpingModelRevamp model;
+	private SignalWarpingModel model;
     private SignalWarper warper;
 	private ChartPanel chart;
 	private JTable table;
 	private SignalWarpingDisplaySettings displayOptions;
 	
-	public SignalWarpingDialogControllerRevamp(SignalWarpingModelRevamp model, 
+	public SignalWarpingDialogController(SignalWarpingModel model, 
 			ChartPanel chart, 
 			JTable table, 
 			SignalWarpingDisplaySettings displayOptions) {
@@ -84,7 +84,7 @@ implements SignalWarpingDisplayListener,
 				// Send a message with the changed display settings
 				SignalWarpingDisplaySettings displaySettings = new SignalWarpingDisplaySettings();
 				displaySettings.setInt(SignalWarpingDisplaySettings.THRESHOLD_KEY, 
-						SignalWarpingModelRevamp.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
+						SignalWarpingModel.THRESHOLD_ALL_VISIBLE-model.getThreshold(selectedRow[i]));
 				fireDisplaySettingsChanged(displaySettings);
 				keys.add(model.getKey(selectedRow[i]));
 			}

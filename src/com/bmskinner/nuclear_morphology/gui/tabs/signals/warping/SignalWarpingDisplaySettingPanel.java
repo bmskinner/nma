@@ -58,7 +58,7 @@ public class SignalWarpingDisplaySettingPanel
     	panel.add(isPseudocolourBox);
     	panel.add(new JLabel(THRESHOLD_LBL));
     	
-    	thresholdSlider = new JSlider(0, SignalWarpingModelRevamp.THRESHOLD_ALL_VISIBLE);
+    	thresholdSlider = new JSlider(0, SignalWarpingModel.THRESHOLD_ALL_VISIBLE);
     	thresholdSlider.setVisible(true);
     	thresholdSlider.setValue(SignalWarpingDisplaySettings.DEFAULT_THRESHOLD);
     	thresholdSlider.addChangeListener(e->fireDisplaySettingsChanged());
@@ -72,7 +72,7 @@ public class SignalWarpingDisplaySettingPanel
 		settings.setBoolean(SignalWarpingDisplaySettings.PSEUDOCOLOUR_KEY, 
 				isPseudocolourBox.isSelected());
 		
-		int value = SignalWarpingModelRevamp.THRESHOLD_ALL_VISIBLE - thresholdSlider.getValue();
+		int value = SignalWarpingModel.THRESHOLD_ALL_VISIBLE - thresholdSlider.getValue();
 		settings.setInt(SignalWarpingDisplaySettings.THRESHOLD_KEY, 
 				value);
 		

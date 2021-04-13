@@ -19,9 +19,9 @@ public class SignalWarpingMSSSIMPanel
 
 	private static final long serialVersionUID = 1L;
 	private final JLabel messageLabel = new JLabel();
-	private final SignalWarpingModelRevamp model;
+	private final SignalWarpingModel model;
 	
-	public SignalWarpingMSSSIMPanel(SignalWarpingModelRevamp model) {
+	public SignalWarpingMSSSIMPanel(SignalWarpingModel model) {
 		this.model = model;
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));

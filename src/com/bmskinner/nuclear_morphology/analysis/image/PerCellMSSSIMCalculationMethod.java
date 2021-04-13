@@ -24,7 +24,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
@@ -43,11 +43,11 @@ public class PerCellMSSSIMCalculationMethod
 	
 	private static final Logger LOGGER = Logger.getLogger(PerCellMSSSIMCalculationMethod.class.getName());
 	
-	private final SignalWarpingModelRevamp model;
+	private final SignalWarpingModel model;
 	
 	int totalCells =  0;
 	
-	public PerCellMSSSIMCalculationMethod(final SignalWarpingModelRevamp model) {
+	public PerCellMSSSIMCalculationMethod(final SignalWarpingModel model) {
 		this.model = model;
 		for(IAnalysisDataset d : model.getTemplates())
 			totalCells += d.getCollection().getNucleusCount();

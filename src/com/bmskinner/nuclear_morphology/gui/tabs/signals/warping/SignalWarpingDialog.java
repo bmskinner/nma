@@ -55,7 +55,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModelRevamp.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 
 /**
  * Displays signals warped onto the consensus nucleus of a dataset
@@ -64,10 +64,10 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingMo
  *
  */
 @SuppressWarnings("serial")
-public class SignalWarpingDialogRevamp 
+public class SignalWarpingDialog 
 	extends LoadingIconDialog {
 	
-	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialogRevamp.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialog.class.getName());
 
     private static final String EXPORT_IMAGE_LBL    = "Export image";
     private static final String DIALOG_TITLE        = "Signal warping";
@@ -77,9 +77,9 @@ public class SignalWarpingDialogRevamp
 
     private JTable signalSelectionTable;
 
-    private final SignalWarpingModelRevamp model;
+    private final SignalWarpingModel model;
     
-    private final SignalWarpingDialogControllerRevamp controller;
+    private final SignalWarpingDialogController controller;
     
 //    private final JProgressBar progressBar = new JProgressBar(0,100);
     
@@ -95,16 +95,16 @@ public class SignalWarpingDialogRevamp
      * 
      * @param datasets
      */
-    public SignalWarpingDialogRevamp(@NonNull final List<IAnalysisDataset> datasets,     
+    public SignalWarpingDialog(@NonNull final List<IAnalysisDataset> datasets,     
     	    TabPanel parent) {
         super();
         this.parent = parent;
         this.datasets = datasets;
-        model = new SignalWarpingModelRevamp(datasets); // adds any saved warp images 
+        model = new SignalWarpingModel(datasets); // adds any saved warp images 
         
         createUIElements();
 
-        controller = new SignalWarpingDialogControllerRevamp(model, 
+        controller = new SignalWarpingDialogController(model, 
         		chartPanel, 
         		signalSelectionTable, 
         		new SignalWarpingDisplaySettings());
@@ -122,7 +122,7 @@ public class SignalWarpingDialogRevamp
     
 
     private boolean isCtrlPressed() {
-        synchronized (SignalWarpingDialogRevamp.class) {
+        synchronized (SignalWarpingDialog.class) {
             return ctrlPressed;
         }
     }
@@ -133,7 +133,7 @@ public class SignalWarpingDialogRevamp
 
             @Override
             public boolean dispatchKeyEvent(KeyEvent ke) {
-                synchronized (SignalWarpingDialogRevamp.class) {
+                synchronized (SignalWarpingDialog.class) {
                     switch (ke.getID()) {
                     case KeyEvent.KEY_PRESSED:
                         if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
