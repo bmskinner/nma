@@ -158,13 +158,17 @@ public class SignalWarpingDialog
      * Create the outline chart panel
      */
     private void createChartPanel() {
-    	ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets.get(0)).build();
-        JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
+    	ChartOptions options = new ChartOptionsBuilder()
+    			.setDatasets(datasets.get(0))
+    			.build();
+        JFreeChart chart = new ConsensusNucleusChartFactory(options)
+        		.makeNucleusOutlineChart();
+        
         chartPanel = new ExportableChartPanel(chart);
-        JMenuItem exportImageItem = new JMenuItem(EXPORT_IMAGE_LBL);
-        exportImageItem.addActionListener(e->controller.exportImage());
+//        JMenuItem exportImageItem = new JMenuItem(EXPORT_IMAGE_LBL);
+//        exportImageItem.addActionListener(e->controller.exportImage());
         chartPanel.setFixedAspectRatio(true);
-        chartPanel.getPopupMenu().add(exportImageItem);
+//        chartPanel.getPopupMenu().add(exportImageItem);
     }
     
     /**
@@ -304,7 +308,7 @@ public class SignalWarpingDialog
     }
     
     private JPanel createDisplaySettingsPanel() {
-    	SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel();
+    	SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel(controller);
     	displayPanel.setBorder(BorderFactory.createTitledBorder("Display settings"));
     	displayPanel.addSignalWarpingDisplayListener(controller);
     	

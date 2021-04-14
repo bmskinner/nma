@@ -1,10 +1,12 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
+import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.swing.JTable;
@@ -15,10 +17,14 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ShortWarpedSignal;
@@ -29,9 +35,13 @@ import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Toolbar;
+import ij.plugin.CanvasResizer;
+import ij.plugin.RGBStackMerge;
 import ij.process.ImageProcessor;
 
 /**
@@ -267,42 +277,182 @@ implements SignalWarpingDisplayListener,
 	}
 
 	/**
-	 * Export the selected warped image with no chart decorations. The image is pseudocoloured,
-	 * enhanced and thresholded according to the current display settings.
+	 * Export the selected warped image with no chart decorations. If one image is selected, 
+	 * the image is pseudocoloured and thresholded according to the current display settings.
+	 * If two images are selected, the images are combined into an RGB image using green and
+	 * magenta channels for easily distinguishable overlaps.
 	 */
 	public void exportImage() {
-		
-		ImageProcessor ip = model.getDisplayImage(displayOptions);
-		ip.flipVertical();
-		
-		int[] selectedRow = table.getSelectedRows();
-		
-		File defaultFolder = null;
-		String imageName = "Image";
-		if(selectedRow.length==1) {
-			WarpedImageKey k = model.getKey(selectedRow[0]);
-			defaultFolder = k.getTemplate().getSavePath().getParentFile();
-			imageName = k.getTargetName()+"_"
-					+k.getTemplate().getName()+"-"
-					+k.getTemplate().getCollection()
-						.getSignalGroup(k.getSignalGroupId()).get()
-						.getGroupName();
-		}
+		ImagePlus imp;
+		File defaultFolder = FileUtils.extantComponent(model.getSelectedKeys().get(0)
+				.getTemplate().getSavePath());
 
-		ImagePlus imp = new ImagePlus(imageName,ip);
+		if(model.selectedImageCount()==2) {
+			try {
+				String[] options = { "Red-Green", "Blue-Yellow", "Green-Magenta", "What's on screen"};
+
+				int colourOption = new DefaultInputSupplier()
+						.requestOption(options, 2,
+								"Select a colour pair for signals; the default\noptions will"
+								+ " remain distinct even if the\nsignal pseudocolours were similar", 
+								"Choose colour pair");
+				
+				if(colourOption==3) {
+					// If they want to be foolish and use their own colours...
+					imp = createDualChannelDisplayImageForExport();
+				} else {
+
+					int c1 = colourOption==0 
+							? 0 : colourOption==1 ? 2 : 1;
+
+					int c2 = colourOption==0 
+							? 1 : colourOption==1 ? 6 : 5;
+					imp = createDualChannelImage(c1, c2);
+				}
+			} catch (RequestCancelledException e) { return;}
+		} else {
+			imp = createSingleChannelImage();
+		}
+		
 		try {
 			File saveFile = new DefaultInputSupplier()
-					.requestFileSave(defaultFolder, imageName, Io.TIFF_FILE_EXTENSION_NODOT);
+					.requestFileSave(defaultFolder, 
+							imp.getTitle(), 
+							Io.TIFF_FILE_EXTENSION_NODOT);
 			IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
 		} catch (RequestCancelledException e) {}
-	}	
+	}
+		
+	/**
+	 * Add a consensus nucleus to the current display image
+	 * @return
+	 */
+	private ImagePlus createSingleChannelImage() {
+		ImageProcessor ip = model.getDisplayImage(displayOptions);
+		WarpedImageKey k = model.getSelectedKeys().get(0);
+		String imageName = k.getTargetName()+"_"
+				+k.getTemplate().getName()+"-"
+				+k.getTemplate().getCollection()
+				.getSignalGroup(k.getSignalGroupId()).get()
+				.getGroupName();
+		
+		// Add a border so we don't drop outline pixels at the edge
+		int buffer = 10;
+		ip = expandImage(ip, buffer, Color.white);
+
+		return drawConsensusOnImage(ip, k.getTarget(), buffer, Color.black, imageName);
+	}
+	
+	/**
+	 * Add a buffer of the given size to the image canvas. The given image
+	 * background colour is used to fill in the new space
+	 * @param ip
+	 * @param buffer
+	 * @return
+	 */
+	private ImageProcessor expandImage(ImageProcessor ip, int buffer, Color color) {
+		Color oldBackground = Toolbar.getBackgroundColor();
+		IJ.setBackgroundColor(color.getRed(), color.getGreen(), color.getBlue());
+		CanvasResizer cr = new CanvasResizer();
+		ImageProcessor result = cr.expandImage(ip, 
+				ip.getWidth()+buffer*2, 
+				ip.getHeight()+buffer*2, 
+				buffer, buffer);
+		IJ.setBackgroundColor(oldBackground.getRed(), oldBackground.getGreen(), oldBackground.getBlue());
+		return result;
+	}
+	
+	/**
+	 * Create an image from two warped selected images, using the ImageJ colour merge
+	 * tool
+	 * @param colour1 the index of the colour for image 1 in { R, G, B, W, C, M, Y }
+	 * @param colour2 the index of the colour for image 2 in { R, G, B, W, C, M, Y }
+	 * @return
+	 */
+	private ImagePlus createDualChannelImage(int colour1, int colour2) {
+
+		List<WarpedImageKey> keys = new ArrayList<>(model.getSelectedKeys());
+		
+		WarpedImageKey key0 = keys.get(0);
+		WarpedImageKey key1 = keys.get(1);
+				
+		ImageProcessor ip1 = model.getImage(key0);
+		ImageProcessor ip2 = model.getImage(key1);
+				
+		// Order of images - RGBWCMY
+		ImagePlus[] images =  { null, null, null, null, null, null, null};
+		images[colour1] = new ImagePlus("1", ip1);
+		images[colour2] =  new ImagePlus("2", ip2);
+		
+		// Merge and flatten to an RGB image
+		ImagePlus result = RGBStackMerge.mergeChannels(images, false).flatten();
+		LOGGER.fine(result.getProcessor().getClass().getName());
+		ImageProcessor ip3 = result.getProcessor();
+		
+		// Add a border so we don't drop outline pixels at the edge
+		int buffer = 10;
+		ip3 = expandImage(ip3, buffer, Color.black);
+
+		CellularComponent target = keys.get(0).getTarget().duplicate();
+		
+		String imageName = key0.getTemplate().getName()
+				+ "_" + key0.getSignalGroupName()
+				+ "_" + key1.getTemplate().getName()
+				+ "_" + key1.getSignalGroupName();
+		
+		return drawConsensusOnImage(ip3, target, buffer, Color.white, imageName);
+	}
+	
+	/**
+	 * Create a dual channel image for export with the consensus drawn atop,
+	 * using the display image rather than recolouring to sensible values 
+	 * @return
+	 */
+	private ImagePlus createDualChannelDisplayImageForExport() {
+		ImageProcessor ip = model.getDisplayImage(displayOptions);
+		int buffer = 10;
+		ip = expandImage(ip, buffer, Color.white);
+		List<WarpedImageKey> keys = new ArrayList<>(model.getSelectedKeys());
+		
+		WarpedImageKey key0 = keys.get(0);
+		WarpedImageKey key1 = keys.get(1);
+		CellularComponent target = keys.get(0).getTarget().duplicate();
+		
+		String imageName = key0.getTemplate().getName()
+				+ "_" + key0.getSignalGroupName()
+				+ "_" + key1.getTemplate().getName()
+				+ "_" + key1.getSignalGroupName();
+		return drawConsensusOnImage(ip, target, buffer, Color.black, imageName);
+	}
+	
+	private ImagePlus drawConsensusOnImage(ImageProcessor ip, 
+			CellularComponent target, 
+			int buffer,
+			Color colour, String imageName) {
+		
+		
+		// CoM starts at 0, 0; offset to image coordinates
+		target.moveCentreOfMass(IPoint.makeNew(
+				Math.abs(target.getMinX())+buffer, 
+				Math.abs(target.getMinY())+buffer));
+		ip.setColor(colour);
+		
+		// Draw the border
+		for(IBorderPoint p : target.getBorderList()) {
+			ip.drawDot(p.getXAsInt(), p.getYAsInt());
+		}
+		
+		// Y-coordinates in images increase top to bottom
+		ip.flipVertical();
+		
+		return new ImagePlus(imageName, ip);
+	}
 	
 	@Override
 	public void signalWarpingDisplayChanged(@NonNull SignalWarpingDisplaySettings settings) {
 		displayOptions.set(settings);
 		setThresholdOfSelected(displayOptions.getInt(SignalWarpingDisplaySettings.THRESHOLD_KEY));
 		updateChart();
-		
 	}
 
 	@Override

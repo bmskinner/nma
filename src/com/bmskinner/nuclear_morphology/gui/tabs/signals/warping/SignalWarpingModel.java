@@ -441,6 +441,14 @@ public class SignalWarpingModel extends DefaultTableModel {
         return cache.getKeys(n);
     }
     
+    /**
+     * Get the keys for images currently displayed
+     * @return
+     */
+    public synchronized List<WarpedImageKey> getSelectedKeys(){
+    	return new ArrayList<>(displayImages);
+    }
+    
     
     /**
      * Get the target shape in common to all selected keys
