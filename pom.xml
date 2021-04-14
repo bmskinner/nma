@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nuclear_morphology</artifactId>
-	<version>1.19.3</version>
+	<version>1.20.0</version>
 
 	<!-- Define custom properties to be exported -->
 	<properties>
