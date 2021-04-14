@@ -315,11 +315,18 @@ implements SignalWarpingDisplayListener,
 		}
 		
 		try {
+			boolean doSave = true;
 			File saveFile = new DefaultInputSupplier()
 					.requestFileSave(defaultFolder, 
 							imp.getTitle(), 
 							Io.TIFF_FILE_EXTENSION_NODOT);
-			IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
+			if(saveFile.exists()) {
+				doSave = new DefaultInputSupplier()
+						.requestApproval("Overwrite existing file?", "Overwrite?");
+			}
+			if(doSave)
+				IJ.saveAsTiff(imp, saveFile.getAbsolutePath());
+			
 		} catch (RequestCancelledException e) {}
 	}
 		
