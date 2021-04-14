@@ -113,10 +113,10 @@ public class SignalWarpingDialog
 
         addCtrlPressListener();
         this.setModal(false);
+        
         this.pack();
-
+        centrePanel.setDividerLocation(0.65);
         chartPanel.restoreAutoBounds();
-        centrePanel.setDividerLocation(0.7);
         this.setVisible(true);
     }
     
@@ -165,10 +165,7 @@ public class SignalWarpingDialog
         		.makeNucleusOutlineChart();
         
         chartPanel = new ExportableChartPanel(chart);
-//        JMenuItem exportImageItem = new JMenuItem(EXPORT_IMAGE_LBL);
-//        exportImageItem.addActionListener(e->controller.exportImage());
         chartPanel.setFixedAspectRatio(true);
-//        chartPanel.getPopupMenu().add(exportImageItem);
     }
     
     /**

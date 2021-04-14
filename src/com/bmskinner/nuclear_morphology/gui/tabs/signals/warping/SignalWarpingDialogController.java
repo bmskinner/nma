@@ -282,7 +282,7 @@ implements SignalWarpingDisplayListener,
 	 * If two images are selected, the images are combined into an RGB image using green and
 	 * magenta channels for easily distinguishable overlaps.
 	 */
-	public void exportImage() {
+	public void exportImage(boolean includeConsensus) {
 		ImagePlus imp;
 		File defaultFolder = FileUtils.extantComponent(model.getSelectedKeys().get(0)
 				.getTemplate().getSavePath());
@@ -299,7 +299,7 @@ implements SignalWarpingDisplayListener,
 				
 				if(colourOption==3) {
 					// If they want to be foolish and use their own colours...
-					imp = createDualChannelDisplayImageForExport();
+					imp = createDualChannelDisplayImageForExport(includeConsensus);
 				} else {
 
 					int c1 = colourOption==0 
@@ -307,11 +307,11 @@ implements SignalWarpingDisplayListener,
 
 					int c2 = colourOption==0 
 							? 1 : colourOption==1 ? 6 : 5;
-					imp = createDualChannelImage(c1, c2);
+					imp = createDualChannelImage(c1, c2, includeConsensus);
 				}
 			} catch (RequestCancelledException e) { return;}
 		} else {
-			imp = createSingleChannelImage();
+			imp = createSingleChannelImage(includeConsensus);
 		}
 		
 		try {
@@ -334,20 +334,21 @@ implements SignalWarpingDisplayListener,
 	 * Add a consensus nucleus to the current display image
 	 * @return
 	 */
-	private ImagePlus createSingleChannelImage() {
+	private ImagePlus createSingleChannelImage(boolean includeConsensus) {
 		ImageProcessor ip = model.getDisplayImage(displayOptions);
 		WarpedImageKey k = model.getSelectedKeys().get(0);
 		String imageName = k.getTargetName()+"_"
 				+k.getTemplate().getName()+"-"
-				+k.getTemplate().getCollection()
-				.getSignalGroup(k.getSignalGroupId()).get()
-				.getGroupName();
+				+k.getSignalGroupName();
 		
 		// Add a border so we don't drop outline pixels at the edge
 		int buffer = 10;
 		ip = expandImage(ip, buffer, Color.white);
-
-		return drawConsensusOnImage(ip, k.getTarget(), buffer, Color.black, imageName);
+		
+		if(includeConsensus)
+			return drawConsensusOnImage(ip, k.getTarget(), buffer, Color.black, imageName);
+		ip.flipVertical();
+		return new ImagePlus(imageName, ip);
 	}
 	
 	/**
@@ -376,7 +377,7 @@ implements SignalWarpingDisplayListener,
 	 * @param colour2 the index of the colour for image 2 in { R, G, B, W, C, M, Y }
 	 * @return
 	 */
-	private ImagePlus createDualChannelImage(int colour1, int colour2) {
+	private ImagePlus createDualChannelImage(int colour1, int colour2, boolean includeConsensus) {
 
 		List<WarpedImageKey> keys = new ArrayList<>(model.getSelectedKeys());
 		
@@ -407,7 +408,10 @@ implements SignalWarpingDisplayListener,
 				+ "_" + key1.getTemplate().getName()
 				+ "_" + key1.getSignalGroupName();
 		
-		return drawConsensusOnImage(ip3, target, buffer, Color.white, imageName);
+		if(includeConsensus)
+			return drawConsensusOnImage(ip3, target, buffer, Color.white, imageName);
+		ip3.flipVertical();
+		return new ImagePlus(imageName, ip3);
 	}
 	
 	/**
@@ -415,7 +419,7 @@ implements SignalWarpingDisplayListener,
 	 * using the display image rather than recolouring to sensible values 
 	 * @return
 	 */
-	private ImagePlus createDualChannelDisplayImageForExport() {
+	private ImagePlus createDualChannelDisplayImageForExport(boolean includeConsensus) {
 		ImageProcessor ip = model.getDisplayImage(displayOptions);
 		int buffer = 10;
 		ip = expandImage(ip, buffer, Color.white);
@@ -429,7 +433,11 @@ implements SignalWarpingDisplayListener,
 				+ "_" + key0.getSignalGroupName()
 				+ "_" + key1.getTemplate().getName()
 				+ "_" + key1.getSignalGroupName();
-		return drawConsensusOnImage(ip, target, buffer, Color.black, imageName);
+		
+		if(includeConsensus)
+			return drawConsensusOnImage(ip, target, buffer, Color.black, imageName);
+		ip.flipVertical();
+		return new ImagePlus(imageName, ip);
 	}
 	
 	private ImagePlus drawConsensusOnImage(ImageProcessor ip, 
@@ -437,6 +445,8 @@ implements SignalWarpingDisplayListener,
 			int buffer,
 			Color colour, String imageName) {
 		
+		// Don't move the existing template
+		target = target.duplicate();
 		
 		// CoM starts at 0, 0; offset to image coordinates
 		target.moveCentreOfMass(IPoint.makeNew(
