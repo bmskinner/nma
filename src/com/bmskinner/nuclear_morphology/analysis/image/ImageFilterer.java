@@ -82,17 +82,25 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return a new ImageFilterer with the processed image
      */
     public ImageFilterer kuwaharaFilter(int kernelRadius) {
+    	ip = kuwaharaFilter(ip, kernelRadius);
+        return this;
+    }
+    
+    /**
+     * Run a Kuwahara filter to enhance edges in the image
+     * 
+     * @param ip the image to process
+     * @param kernelRadius the radius of the kernel
+     * @return the processed image
+     */
+    public static ImageProcessor kuwaharaFilter(ImageProcessor ip, int kernelRadius) {
     	LOGGER.finest("Running Kuwahara filter");
         Kuwahara_Filter kw = new Kuwahara_Filter();
         ImagePlus img = new ImagePlus("", ip);
         kw.setup("", img);
-
         ImageProcessor result = ip.duplicate();
-
         kw.filter(result, kernelRadius);
-        ip = result;
-        LOGGER.finest("Ran Kuwahara filter");
-        return this;
+        return result;
     }
 
 

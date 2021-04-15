@@ -476,7 +476,6 @@ public class SignalWarpingModel extends DefaultTableModel {
      * @return
      */
     private synchronized boolean isCommonTargetSelected() {
-    	
     	WarpedImageKey k = displayImages.stream().findFirst().get();
     	for (WarpedImageKey j : displayImages) {
     		if(!k.target.getID().equals(j.target.getID()))
