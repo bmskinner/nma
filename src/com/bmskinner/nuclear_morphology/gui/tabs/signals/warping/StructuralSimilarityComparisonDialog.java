@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -78,11 +79,11 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		chartPanel = new ExportableChartPanel(ViolinChartFactory.createEmptyChart());
 		comparisonTable = new ExportableTable(AbstractTableCreator.createLoadingTable());
 		
-		JPanel headerPanel = createHeaderPanel();
+//		JPanel headerPanel = createHeaderPanel();
 		JPanel centrePanel = createCentrePanel();
 		
 		setLayout(new BorderLayout());
-		add(headerPanel, BorderLayout.NORTH);
+//		add(headerPanel, BorderLayout.NORTH);
 		add(centrePanel, BorderLayout.CENTER);
 		
 		setTitle(DIALOG_TITLE);
@@ -97,7 +98,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 			});
 						
 		} catch(Exception e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			comparisonTable.setModel(AbstractTableCreator.createBlankTable());
 		}
 		validate();
@@ -110,18 +111,24 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 	
 	private JPanel createHeaderPanel() {
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		panel.add(new JLabel("Showing full MS-SSIM* values for all warped images"));
+		panel.add(new JLabel("Showing full MS-SSIM* values for all possible warped image comparisons"));
 		return panel;
 	}
 	
 	private JPanel createCentrePanel() {
 		
+		JPanel tablePanel = new JPanel(new BorderLayout());
 		JPanel centrePanel = new JPanel(new BorderLayout());
 		JPanel perCellPanel = createPerCellPanel();
+
 		JScrollPane scrollPane = new JScrollPane(comparisonTable);
 		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
-		centrePanel.add(scrollPane, BorderLayout.CENTER);
-		centrePanel.add(perCellPanel, BorderLayout.SOUTH);
+		
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(createHeaderPanel(), BorderLayout.NORTH);
+		
+		centrePanel.add(tablePanel, BorderLayout.CENTER);
+		centrePanel.add(perCellPanel, BorderLayout.EAST);
 		
         return centrePanel;
 	}
@@ -139,7 +146,8 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
 		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel compareLabel = new JLabel("If your dataset has more than one signal group, generate MS-SSIM* scores per-cell between each group");
+		JLabel compareLabel = new JLabel("If the dataset has >1 signal group, generate MS-SSIM* scores per-cell "
+				+ "between each signal group");
 		JButton runPerCellBtn = new JButton("Run");
 		runPerCellBtn.addActionListener(e->makePerCellCharts());
 		
