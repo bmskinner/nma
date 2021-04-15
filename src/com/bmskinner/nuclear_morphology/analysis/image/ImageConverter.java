@@ -22,7 +22,10 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
+import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Toolbar;
+import ij.plugin.CanvasResizer;
 import ij.plugin.RGBStackMerge;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
@@ -148,6 +151,57 @@ public class ImageConverter extends AbstractImageFilterer {
 
         return newIp;
     }
+    
+    /**
+	 * Add a buffer of the given size to the image canvas. The given image
+	 * background colour is used to fill in the new space
+	 * @param buffer the amount to add
+	 * @param color the background fill colour
+	 * @return
+	 */
+    public ImageConverter expandCanvas(int buffer, Color color) {
+    	ip = expandCanvas(ip, buffer, color);
+    	return this;
+    }
+    
+    
+    /**
+	 * Add a buffer of the given size to the image canvas. The given image
+	 * background colour is used to fill in the new space
+	 * @param ip the image
+	 * @param buffer the amount to add
+	 * @param color the background fill colour
+	 * @return
+	 */
+	public static ImageProcessor expandCanvas(ImageProcessor ip, int buffer, Color color) {
+		return expandCanvas(ip, buffer, buffer, buffer, buffer, color);
+	}
+	
+
+	/**
+	 * @param ip the image
+	 * @param lbuffer the amount to add to the left
+	 * @param rbuffer the amount to add to the right
+	 * @param tbuffer the amount to add to the top
+	 * @param bbuffer the amount to add to the bottom
+	 * @param color the background fill colour
+	 * @return the new image
+	 */
+	public static ImageProcessor expandCanvas(ImageProcessor ip, int lbuffer, 
+			int rbuffer, 
+			int tbuffer,
+			int bbuffer,
+			Color color) {
+		Color oldBackground = Toolbar.getBackgroundColor();
+		IJ.setBackgroundColor(color.getRed(), color.getGreen(), color.getBlue());
+		CanvasResizer cr = new CanvasResizer();
+		ImageProcessor result = cr.expandImage(ip, 
+				ip.getWidth()+lbuffer+rbuffer, 
+				ip.getHeight()+tbuffer+bbuffer, 
+				lbuffer, tbuffer);
+		IJ.setBackgroundColor(oldBackground.getRed(), oldBackground.getGreen(), oldBackground.getBlue());
+		return result;
+	}
 
     /**
      * Given a greyscale image processor, make a grey RGB processor

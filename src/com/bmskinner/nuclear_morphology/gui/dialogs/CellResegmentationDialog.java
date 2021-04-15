@@ -370,7 +370,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                     .setShowAnnotations(true).setInvertYAxis(true) // only
                                                                    // invert for
                                                                    // actual
-                    .setShowPoints(false).setCellularComponent(cell.getNucleus()).build();
+                    .setShowPoints(false).addCellularComponent(cell.getNucleus()).build();
 
             LOGGER.finer( "Making charts");
             JFreeChart profileChart = new ProfileChartFactory(profileOptions).createProfileChart();

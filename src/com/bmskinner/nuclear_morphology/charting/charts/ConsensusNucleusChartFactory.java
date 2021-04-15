@@ -156,7 +156,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * @return the consensus chart
      */
     public JFreeChart makeNucleusBareOutlineChart() {
-    	CellularComponent component = options.hasComponent() ? options.getComponent() : null;
+    	CellularComponent component = options.hasComponent() ? options.getComponent().get(0) : null;
     	
     	if(component==null) {
     		IAnalysisDataset dataset = options.firstDataset();
@@ -203,7 +203,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeNucleusOutlineChart() {
 
-    	CellularComponent component = options.hasComponent() ? options.getComponent() : null;
+    	CellularComponent component = options.hasComponent() ? options.getComponent().get(0) : null;
     	
     	if(component==null) {
     		IAnalysisDataset dataset = options.firstDataset();

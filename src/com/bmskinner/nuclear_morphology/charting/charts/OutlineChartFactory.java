@@ -23,10 +23,12 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -225,38 +227,49 @@ public class OutlineChartFactory extends AbstractChartFactory {
     public JFreeChart makeSignalWarpChart(ImageProcessor image) {
 
     	// Create the outline of the nucleus
-        JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
+        JFreeChart chart = new ConsensusNucleusChartFactory(options)
+        		.makeNucleusBareOutlineChart();
 
         XYPlot plot = chart.getXYPlot();
 
-        // Make an outline of the component to draw
-        XYDataset ds;
+        LOGGER.fine("Creating outline datasets");
+        // Make outline of the components to draw
+        List<XYDataset> outlineDatasets = new ArrayList<>();
         try {
-            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getComponent());
+        	for(CellularComponent c : options.getComponent()) {
+        		outlineDatasets.add(new NucleusDatasetCreator(options).createBareNucleusOutline(c));
+        	}
+            LOGGER.fine(String.format("Image bounds: %s x %s",image.getWidth(), image.getHeight()));
         } catch (ChartDatasetCreationException e) {
-            LOGGER.log(Loggable.STACK, "Error creating outline", e);
-            return createErrorChart();
+        	LOGGER.log(Level.SEVERE, "Error creating outline", e);
+        	return createErrorChart();
         }
-
-        // Calculate the offset at which to draw the image
-        // The plot area is larger than the image to be drawn 
-        double xChartMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();
-        double yChartMin = DatasetUtilities.findMinimumRangeValue(ds).doubleValue();
         
-     // Get the bounding box size for the consensus, to find the offsets for the images created
-        Rectangle2D consensusBounds = options.getComponent().getBounds();
-        LOGGER.fine(String.format("Consensus bounds: %s x %s : x%s y%s", consensusBounds.getWidth(), consensusBounds.getHeight(), consensusBounds.getX(), consensusBounds.getY() ));
-        LOGGER.fine(String.format("Image bounds: %s x %s",image.getWidth(), image.getHeight()));
+        // Calculate the offset at which to draw the image since
+        // the plot area is larger than the image to be drawn 
+        double xChartMin = Double.MAX_VALUE;
+        double yChartMin = Double.MAX_VALUE;
+        for(XYDataset ds : outlineDatasets) {
+        	xChartMin = Math.min(xChartMin, DatasetUtilities.findMinimumDomainValue(ds).doubleValue());
+        	yChartMin = Math.min(yChartMin, DatasetUtilities.findMinimumRangeValue(ds).doubleValue());
+        }
         
+        // Get the max bounding box size for the consensus nuclei,
+        // to find the offsets for the images created
         int xOffset = (int) Math.round(-xChartMin);
         int yOffset = (int) Math.round(-yChartMin);
 
+        LOGGER.fine("Adding image as annotation with offset "+xOffset+" - "+yOffset);
         drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
 
         // Set the colour of the nucleus outline
-        plot.setDataset(0, ds);
-        plot.getRenderer(0).setBasePaint(Color.BLACK);
-        plot.getRenderer(0).setBaseSeriesVisible(true);
+    	plot.getRenderer().setBasePaint(Color.BLACK);
+    	plot.getRenderer().setBaseSeriesVisible(true);
+        for(int i=0; i<outlineDatasets.size(); i++) {
+        	plot.setDataset(i, outlineDatasets.get(i));
+        	plot.getRenderer().setSeriesPaint(i, Color.black);
+        	plot.getRenderer().setSeriesVisible(i, true);
+        }
 
         applyDefaultAxisOptions(chart);
 
@@ -502,7 +515,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         clearShapeAnnotations(plot);
 
         if (options.hasComponent()) {
-            drawImageAsAnnotation(plot, options.getCell(), options.getComponent(), true);
+            drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), true);
         }
         applyDefaultAxisOptions(chart);
         return chart;
@@ -726,7 +739,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                                            // fluorescence
                     drawImageAsAnnotation(plot, cell, cell.getCytoplasm(), true);
                 } else {
-                    drawImageAsAnnotation(plot, cell, options.getComponent(), false);
+                    drawImageAsAnnotation(plot, cell, options.getComponent().get(0), false);
                 }
 
             }
@@ -807,7 +820,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 }
             }
         }
-
     }
 
     /**
@@ -859,7 +871,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * @param component the component in the cell to annotate
      * @param isRGB if the annotation should be RGB or greyscale 
      */
-    private static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell, @NonNull CellularComponent component, boolean isRGB) {
+    private static void drawImageAsAnnotation(@NonNull XYPlot plot, 
+    		@NonNull ICell cell, 
+    		@NonNull CellularComponent component, 
+    		boolean isRGB) {
 
         if (component == null || cell == null || plot == null)
             return;

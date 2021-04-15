@@ -142,8 +142,9 @@ public class SignalWarpingRunSettingsPanel
     	cellsWithSignalsBox.setToolTipText(INCLUDE_CELLS_TOOLTIP);
     	
     	// Set the initial value to the signal detection threshold of the initial selected signal group
-    	int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
-				.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold();
+    	int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().isPresent() 
+    			? datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
+				.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold() : 0;
     	SpinnerModel minThresholdModel = new SpinnerNumberModel(threshold, 0, 255, 1);
     	minThresholdSpinner = new JSpinner(minThresholdModel);
     	minThresholdSpinner.setToolTipText(MIN_THRESHOLD_TOOLTIP);

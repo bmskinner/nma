@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.options;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.jfree.chart.ChartPanel;
@@ -231,11 +232,11 @@ public interface ChartOptions extends DisplayOptions {
     RotationMode getRotateMode();
 
     /**
-     * Get the component displayed in an outline chart
+     * Get the components displayed in an outline chart
      * 
      * @return
      */
-    CellularComponent getComponent();
+    List<CellularComponent> getComponent();
 
     /**
      * Check if a component is set to display in an outline chart

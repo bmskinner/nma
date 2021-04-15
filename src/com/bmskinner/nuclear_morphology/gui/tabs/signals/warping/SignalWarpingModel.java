@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,7 @@ import javax.swing.table.DefaultTableModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -235,7 +237,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 						continue;
 					}
 					
-					if(d.getId().equals(key.getTemplateId())) { // skip child dataset signals
+//					if(d.getId().equals(key.getTemplateId())) { // skip child dataset signals
 						WarpedImageKey k = cache.new WarpedImageKey(key.getTargetShape(), 
 								warpedSignal.getTargetName(key), d, 
 								signalGroupId, 
@@ -247,9 +249,9 @@ public class SignalWarpingModel extends DefaultTableModel {
 						cache.setColour(k, col);
 						cache.setThreshold(k, THRESHOLD_ALL_VISIBLE); // display threshold, not detection threshold
 						addTableRow(k);
-					} else {
-						LOGGER.fine("Cannot add warped image; dataset ID does not match template");
-					}
+//					} else {
+//						LOGGER.fine("Cannot add warped image; dataset ID does not match template");
+//					}
 				}                	
 			}
 		}
@@ -381,19 +383,28 @@ public class SignalWarpingModel extends DefaultTableModel {
 	 * Get the chart matching the current display criteria
 	 * @return
 	 */
-	public synchronized JFreeChart getChart(SignalWarpingDisplaySettings displayOptions) {
-		if(!isCommonTargetSelected())
-			return OutlineChartFactory.createEmptyChart();
-			
-		LOGGER.fine("Creating display image from "+displayImages.size()+" selected keys");
+	public synchronized JFreeChart getChart(SignalWarpingDisplaySettings displayOptions) {			
+
 		ImageProcessor image = createDisplayImage(displayOptions);
 
-        ChartOptions options = new ChartOptionsBuilder()
-        		.setCellularComponent(getCommonSelectedTarget())
-        		.setShowXAxis(false).setShowYAxis(false)
-                .setShowBounds(false).build();
-
-        return new OutlineChartFactory(options).makeSignalWarpChart(image);
+		ChartOptionsBuilder optionsBuilder = new ChartOptionsBuilder();
+		
+		if(isCommonTargetSelected()) {
+			LOGGER.fine("Creating image from "+displayImages.size()+" keys with common target");
+			optionsBuilder.addCellularComponent(getCommonSelectedTarget());
+		} else {
+			LOGGER.fine("Creating image from "+displayImages.size()+" keys with different targets");
+			for(WarpedImageKey k : this.getSelectedKeys()) {
+				optionsBuilder.addCellularComponent(k.getTarget());
+			}
+		}
+	
+		optionsBuilder.setShowXAxis(false)
+		.setShowYAxis(false)
+		.setShowBounds(false);
+		
+        return new OutlineChartFactory(optionsBuilder.build())
+        		.makeSignalWarpChart(image);
 	}
 		
 	/**
@@ -482,26 +493,15 @@ public class SignalWarpingModel extends DefaultTableModel {
      * @return
      */
     private synchronized ImageProcessor createDisplayImage(SignalWarpingDisplaySettings options) {
-    	if (selectedImageCount() == 0 || !isCommonTargetSelected()) 
+    	if(selectedImageCount() == 0) 
             return ImageFilterer.createWhiteByteProcessor(100, 100);
 
     	// Recolour each of the grey images according to the stored colours
-        List<ImageProcessor> recoloured = new ArrayList<>();
-        for (WarpedImageKey k : displayImages) {        	
-        	// The image from the warper is greyscale. Change to use the signal colour
-        	ImageProcessor raw = cache.get(k); // a short processor
-        	ImageProcessor bp = raw.convertToByteProcessor();
-        	bp.invert();
-
-        	ImageProcessor recol = bp;
-        	if(options.getBoolean(SignalWarpingDisplaySettings.PSEUDOCOLOUR_KEY))
-        		recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
-        	else 
-        		recol = bp.convertToColorProcessor();
-        	
-        	recol.setMinAndMax(0, cache.getThreshold(k));
-    		recoloured.add(recol);
-        }
+    	List<ImageProcessor> recoloured;
+    	if(isCommonTargetSelected())
+    		recoloured = recolourImagesWithSameTarget(options);
+    	else
+    		recoloured = recolourImagesWithDifferentTargets(options);
         
     	LOGGER.fine("Found "+recoloured.size()+" images");
         if (selectedImageCount() == 1)
@@ -524,13 +524,63 @@ public class SignalWarpingModel extends DefaultTableModel {
         	return ip1;
         	
         } catch (Exception e) {
-        	LOGGER.warning("Error averaging images");
-            LOGGER.log(Loggable.STACK, "Error averaging images", e);
+            LOGGER.log(Level.SEVERE, "Error averaging images", e);
             return ImageFilterer.createWhiteByteProcessor(100, 100);
         }
-
     }
-	
+    
+    private synchronized List<ImageProcessor> recolourImagesWithSameTarget(SignalWarpingDisplaySettings options){
+    	List<ImageProcessor> recoloured = new ArrayList<>();
+        for (WarpedImageKey k : displayImages) {        	
+        	// The image from the warper is greyscale. Change to use the signal colour
+        	ImageProcessor raw = cache.get(k); // a short processor
+        	ImageProcessor bp = raw.convertToByteProcessor();
+        	bp.invert();
+
+        	ImageProcessor recol = bp;
+        	if(options.getBoolean(SignalWarpingDisplaySettings.PSEUDOCOLOUR_KEY))
+        		recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
+        	else 
+        		recol = bp.convertToColorProcessor();
+        	
+        	recol.setMinAndMax(0, cache.getThreshold(k));
+    		recoloured.add(recol);
+        }
+        return recoloured;
+    }
+    
+    private synchronized List<ImageProcessor> recolourImagesWithDifferentTargets(SignalWarpingDisplaySettings options){
+
+    	// Ensure we keep order of keys and images consistent
+    	List<WarpedImageKey> keys = new ArrayList<>(displayImages);
+    	
+    	List<ImageProcessor> images = ImageFilterer.fitToCommonCanvas(keys.stream()
+    			.map(k->cache.get(k))
+    			.collect(Collectors.toList()));
+    	
+    	List<ImageProcessor> recoloured = new ArrayList<>();
+    	
+    	for(int i=0; i<keys.size(); i++) {
+    		WarpedImageKey k = keys.get(i);
+    		// The image from the warper is greyscale. Change to use the signal colour
+    		ImageProcessor raw = images.get(i); // a short processor
+    		
+    		ImageProcessor bp = raw.convertToByteProcessor();
+    		bp.invert();
+
+    		ImageProcessor recol = bp;
+    		if(options.getBoolean(SignalWarpingDisplaySettings.PSEUDOCOLOUR_KEY))
+    			recol = ImageFilterer.recolorImage(bp, cache.getColour(k));
+    		else 
+    			recol = bp.convertToColorProcessor();
+
+    		recol.setMinAndMax(0, cache.getThreshold(k));
+    		recoloured.add(recol);
+    		
+    	}
+    	return recoloured;
+    }
+        
 	
     /**
      * Store the warped images

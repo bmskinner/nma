@@ -312,7 +312,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
                 .setShowXAxis(false)
                 .setShowYAxis(false)
                 .setShowPoints(true)
-                .setCellularComponent(cell.getNucleus())
+                .addCellularComponent(cell.getNucleus())
                 .build();
 
         OutlineChartFactory ocf = new OutlineChartFactory(outlineOptions);

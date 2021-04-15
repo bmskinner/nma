@@ -224,8 +224,8 @@ public class ChartOptionsBuilder {
         return this;
     }
 
-    public ChartOptionsBuilder setCellularComponent(CellularComponent c) {
-        options.setComponent(c);
+    public ChartOptionsBuilder addCellularComponent(CellularComponent c) {
+        options.addComponent(c);
         return this;
     }
 

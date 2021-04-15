@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -275,6 +276,37 @@ public abstract class AbstractImageFilterer {
         for (int i = 0; i < ip.getPixelCount(); i++)
             ip.set(i, 0);
         return ip;
+    }
+    
+    /**
+     * Expand each image canvas as needed so all images have the same dimensions.
+     * The original image is centred in the new canvas
+     * @param images
+     * @return
+     */
+    public static List<ImageProcessor> fitToCommonCanvas(List<ImageProcessor> images){
+    	int maxWidth = 0;
+    	int maxHeight = 0;
+    	for (ImageProcessor raw : images) {     
+    		maxWidth = Math.max(maxWidth, raw.getWidth());
+    		maxHeight = Math.max(maxHeight, raw.getHeight());
+    	}
+    	
+    	List<ImageProcessor> result = new ArrayList<>();
+    	for (ImageProcessor raw : images) {     
+    		// Beware of single pixel offsets
+    		int wDiff = maxWidth-raw.getWidth();
+    		int lbuffer = wDiff%2==0 ? wDiff/2 : wDiff/2+1;
+    		int rbuffer = wDiff/2;
+    		
+    		int hDiff = maxHeight-raw.getHeight();
+    		int tbuffer = hDiff%2==0 ? hDiff/2 : hDiff/2+1;
+    		int bbuffer = hDiff/2;
+    		
+    		result.add(ImageConverter.expandCanvas(raw, lbuffer, 
+    				rbuffer, tbuffer, bbuffer, Color.BLACK));
+    	}
+    	return result;
     }
 
     /**

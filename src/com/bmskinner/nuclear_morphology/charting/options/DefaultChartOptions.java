@@ -72,7 +72,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     private boolean invertYAxis = false;
 
     private RotationMode      rotateMode = RotationMode.ACTUAL;
-    private CellularComponent component  = null;
+    private final List<CellularComponent> component  = new ArrayList<>();
     private boolean           showWarp   = false;
 
     private ChartPanel target = null;
@@ -334,17 +334,17 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     }
 
     @Override
-    public CellularComponent getComponent() {
+    public List<CellularComponent> getComponent() {
         return component;
     }
 
-    public void setComponent(CellularComponent component) {
-        this.component = component;
+    public void addComponent(CellularComponent component) {
+        this.component.add(component);
     }
-
+    
     @Override
     public boolean hasComponent() {
-        return this.component != null;
+        return !component.isEmpty();
     }
 
     @Override

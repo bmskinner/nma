@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -18,6 +19,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
@@ -343,33 +345,19 @@ implements SignalWarpingDisplayListener,
 		
 		// Add a border so we don't drop outline pixels at the edge
 		int buffer = 10;
-		ip = expandImage(ip, buffer, Color.white);
+		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
+		
+		List<CellularComponent> targets = model.getSelectedKeys().stream()
+				.map(key->key.getTarget().duplicate())
+				.distinct()
+				.collect(Collectors.toList());
 		
 		if(includeConsensus)
-			return drawConsensusOnImage(ip, k.getTarget(), buffer, Color.black, imageName);
+			return drawConsensusOnImage(ip, targets, Color.black, imageName);
 		ip.flipVertical();
 		return new ImagePlus(imageName, ip);
 	}
-	
-	/**
-	 * Add a buffer of the given size to the image canvas. The given image
-	 * background colour is used to fill in the new space
-	 * @param ip
-	 * @param buffer
-	 * @return
-	 */
-	private ImageProcessor expandImage(ImageProcessor ip, int buffer, Color color) {
-		Color oldBackground = Toolbar.getBackgroundColor();
-		IJ.setBackgroundColor(color.getRed(), color.getGreen(), color.getBlue());
-		CanvasResizer cr = new CanvasResizer();
-		ImageProcessor result = cr.expandImage(ip, 
-				ip.getWidth()+buffer*2, 
-				ip.getHeight()+buffer*2, 
-				buffer, buffer);
-		IJ.setBackgroundColor(oldBackground.getRed(), oldBackground.getGreen(), oldBackground.getBlue());
-		return result;
-	}
-	
+		
 	/**
 	 * Create an image from two warped selected images, using the ImageJ colour merge
 	 * tool
@@ -383,9 +371,16 @@ implements SignalWarpingDisplayListener,
 		
 		WarpedImageKey key0 = keys.get(0);
 		WarpedImageKey key1 = keys.get(1);
-				
-		ImageProcessor ip1 = model.getImage(key0);
-		ImageProcessor ip2 = model.getImage(key1);
+		
+		// Ensure we keep order of keys and images consistent    	
+    	List<ImageProcessor> imageList = ImageFilterer.fitToCommonCanvas(keys.stream()
+    			.map(k->model.getImage(k))
+    			.collect(Collectors.toList()));
+    	
+		
+    	ImageProcessor ip1 = imageList.get(0);
+    	ImageProcessor ip2 = imageList.get(1);
+		
 				
 		// Order of images - RGBWCMY
 		ImagePlus[] images =  { null, null, null, null, null, null, null};
@@ -399,9 +394,12 @@ implements SignalWarpingDisplayListener,
 		
 		// Add a border so we don't drop outline pixels at the edge
 		int buffer = 10;
-		ip3 = expandImage(ip3, buffer, Color.black);
+		ip3 = ImageConverter.expandCanvas(ip3, buffer, Color.black);
 
-		CellularComponent target = keys.get(0).getTarget().duplicate();
+		List<CellularComponent> targets = keys.stream()
+				.map(k->k.getTarget().duplicate())
+				.distinct()
+				.collect(Collectors.toList());
 		
 		String imageName = key0.getTemplate().getName()
 				+ "_" + key0.getSignalGroupName()
@@ -409,7 +407,7 @@ implements SignalWarpingDisplayListener,
 				+ "_" + key1.getSignalGroupName();
 		
 		if(includeConsensus)
-			return drawConsensusOnImage(ip3, target, buffer, Color.white, imageName);
+			return drawConsensusOnImage(ip3, targets, Color.white, imageName);
 		ip3.flipVertical();
 		return new ImagePlus(imageName, ip3);
 	}
@@ -422,12 +420,16 @@ implements SignalWarpingDisplayListener,
 	private ImagePlus createDualChannelDisplayImageForExport(boolean includeConsensus) {
 		ImageProcessor ip = model.getDisplayImage(displayOptions);
 		int buffer = 10;
-		ip = expandImage(ip, buffer, Color.white);
+		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
 		List<WarpedImageKey> keys = new ArrayList<>(model.getSelectedKeys());
 		
 		WarpedImageKey key0 = keys.get(0);
 		WarpedImageKey key1 = keys.get(1);
-		CellularComponent target = keys.get(0).getTarget().duplicate();
+		
+		List<CellularComponent> targets = keys.stream()
+				.map(k->k.getTarget().duplicate())
+				.distinct()
+				.collect(Collectors.toList());
 		
 		String imageName = key0.getTemplate().getName()
 				+ "_" + key0.getSignalGroupName()
@@ -435,28 +437,33 @@ implements SignalWarpingDisplayListener,
 				+ "_" + key1.getSignalGroupName();
 		
 		if(includeConsensus)
-			return drawConsensusOnImage(ip, target, buffer, Color.black, imageName);
+			return drawConsensusOnImage(ip, targets, Color.black, imageName);
 		ip.flipVertical();
 		return new ImagePlus(imageName, ip);
 	}
 	
 	private ImagePlus drawConsensusOnImage(ImageProcessor ip, 
-			CellularComponent target, 
-			int buffer,
+			List<CellularComponent> targets, 
 			Color colour, String imageName) {
-		
-		// Don't move the existing template
-		target = target.duplicate();
-		
-		// CoM starts at 0, 0; offset to image coordinates
-		target.moveCentreOfMass(IPoint.makeNew(
-				Math.abs(target.getMinX())+buffer, 
-				Math.abs(target.getMinY())+buffer));
-		ip.setColor(colour);
-		
-		// Draw the border
-		for(IBorderPoint p : target.getBorderList()) {
-			ip.drawDot(p.getXAsInt(), p.getYAsInt());
+				
+		for(CellularComponent target : targets) {
+			// Don't move the existing template
+			target = target.duplicate();
+			
+			// Centre the outline on the canvas
+			int wBuffer = (int)(ip.getWidth()-target.getBounds().getBounds().getWidth())/2;
+			int hBuffer = (int)(ip.getHeight()-target.getBounds().getBounds().getHeight())/2;
+
+			// CoM starts at 0, 0; offset to image coordinates
+			target.moveCentreOfMass(IPoint.makeNew(
+					Math.abs(target.getMinX())+wBuffer, 
+					Math.abs(target.getMinY())+hBuffer));
+			ip.setColor(colour);
+
+			// Draw the border
+			for(IBorderPoint p : target.getBorderList()) {
+				ip.drawDot(p.getXAsInt(), p.getYAsInt());
+			}
 		}
 		
 		// Y-coordinates in images increase top to bottom
