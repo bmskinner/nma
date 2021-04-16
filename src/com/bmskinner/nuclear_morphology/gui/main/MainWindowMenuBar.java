@@ -23,6 +23,7 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +54,8 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 
 /**
@@ -92,6 +95,7 @@ public class MainWindowMenuBar extends JMenuBar  {
 	private static final String EXIT_LBL = "Exit";
 	private static final String SAVE_WORKSPACES_LBL = "Save workspaces";
 	private static final String SAVE_DATASETS_LBL = "Save datasets";
+	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
 	
 	final private SignalChangeEventHandler sh;
 	final private InterfaceEventHandler ih;
@@ -214,6 +218,17 @@ public class MainWindowMenuBar extends JMenuBar  {
             dialog.addInterfaceEventListener(mw.getEventHandler());
         });
 		menu.add(i1);
+		
+		JMenuItem configFileItem = new JMenuItem(OPEN_CONFIG_FILE_LBL);
+		configFileItem.addActionListener(e->{
+			try {
+				Desktop.getDesktop().open(Io.getConfigFile());
+			} catch (IOException e1) {
+				LOGGER.log(Level.SEVERE, "Unable to open config file", e);
+			}
+		});
+		
+		menu.add(configFileItem);
 		return menu;
 	}
 	

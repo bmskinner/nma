@@ -79,6 +79,8 @@ public interface Io  {
 	
 	String PROFILE_SAMPLES_KEY = "ProfileSamples";
 	
+	String CONFIG_FILE_NAME = "config.ini";
+	
     /**
      * Get the directory that the program is being run from
      * 
@@ -99,6 +101,15 @@ public interface Io  {
             return null;
         }
 
+    }
+    
+    /**
+     * Get the config file read at launch
+     * @return
+     */
+    static File getConfigFile() {
+        File dir = getProgramDir();
+        return new File(dir, CONFIG_FILE_NAME);
     }
 
     /**

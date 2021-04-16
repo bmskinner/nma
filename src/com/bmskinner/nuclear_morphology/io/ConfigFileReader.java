@@ -40,15 +40,10 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class ConfigFileReader {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigFileReader.class.getName());
-    public static final String INI_FILE = "config.ini";
 
     public ConfigFileReader() {
         try {
-
-            // Get the location of the jar file
-            File dir = Io.getProgramDir();
-
-            File ini = new File(dir, INI_FILE);
+            File ini = Io.getConfigFile();
             LOGGER.config("Config file: " + ini.getAbsolutePath());
 
             if (ini.exists()) {
