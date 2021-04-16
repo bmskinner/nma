@@ -175,7 +175,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 
         	 try {
         		
- 				List<Shell> shells = new ShellDetector(n, shellCount, t, false).getShells();
+ 				List<Shell> shells = new ShellDetector(n, shellCount, t).getShells();
  				
  				for(Shell shell : shells){
  					LOGGER.finest("Drawing shell at "+shell.getBase().toString());

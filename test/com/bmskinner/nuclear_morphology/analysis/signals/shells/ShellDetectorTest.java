@@ -34,7 +34,6 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.charting.ImageViewer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
@@ -87,7 +86,7 @@ public class ShellDetectorTest extends ComponentTester {
      */
     @Test
     public void testNestedShellCorrection() throws ShellAnalysisException {
-    	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
+    	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS);
     	long[] testValues = { 10000, 8000, 6000, 4000, 2000 };
     	long[] exp = { 2000, 2000, 2000, 2000, 2000 };
         long[] obs = sd.correctNestedValues(testValues);
@@ -131,7 +130,7 @@ public class ShellDetectorTest extends ComponentTester {
      * @throws Exception
      */
     private void testGetShells(ShrinkType type) throws Exception {
-    	sd = new ShellDetector(testNucleus, type, false);
+    	sd = new ShellDetector(testNucleus, type);
     	assertEquals("Shell count should be default", 
     			ShellDetector.DEFAULT_SHELL_COUNT, 
     			sd.getShells().size());
@@ -154,7 +153,7 @@ public class ShellDetectorTest extends ComponentTester {
      * @throws Exception
      */
     private void testFindPixelCountPerShellCellularComponent(ShrinkType type) throws Exception {
-    	sd = new ShellDetector(testNucleus, type, false);
+    	sd = new ShellDetector(testNucleus, type);
         long[] inComponentPixels = sd.findPixelCounts(testNucleus);
         long totalInComponent = sum(inComponentPixels);
 

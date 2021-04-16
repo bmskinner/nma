@@ -317,15 +317,24 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         ShellDetector c;
         try {
 
-            int shellCount = options.firstDataset().getCollection().getSignalManager().getShellCount();
+            int shellCount = options.firstDataset()
+            		.getCollection()
+            		.getSignalManager()
+            		.getShellCount();
 
             if (shellCount == 0) {
                 throw new ChartDatasetCreationException("Cannot make dataset for zero shells");
             }
             
-            ShrinkType type = options.firstDataset().getCollection().getSignalManager().getShrinkType().orElse(ShrinkType.AREA);
+            ShrinkType type = options.firstDataset()
+            		.getCollection()
+            		.getSignalManager()
+            		.getShrinkType().orElse(ShrinkType.AREA);
 
-            c = new ShellDetector(options.firstDataset().getCollection().getConsensus(), shellCount, type, true);
+            c = new ShellDetector(options.firstDataset().getCollection().getConsensus(), 
+            		shellCount, 
+            		type);
+            
         } catch (ShellAnalysisException e) {
             LOGGER.log(Loggable.STACK, "Error making shells in consensus", e);
             throw new ChartDatasetCreationException("Error making shells", e);
