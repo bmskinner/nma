@@ -81,7 +81,7 @@ public class FloatXYDataset extends AbstractXYDataset
          */
         @Override
 		public Comparable<?> getSeriesKey(int series) {
-            if ((series < 0) || (series >= getSeriesCount()))
+            if (series < 0 || series >= getSeriesCount())
                 throw new IllegalArgumentException("Series index out of bounds");
             return (Comparable<?>) this.seriesKeys.get(series);
         }
@@ -128,7 +128,7 @@ public class FloatXYDataset extends AbstractXYDataset
          */
         @Override
 		public int getItemCount(int series) {
-            if ((series < 0) || (series >= getSeriesCount()))
+            if (series < 0 || series >= getSeriesCount())
                 throw new IllegalArgumentException("Series index out of bounds");
             float[][] seriesArray = (float[][]) this.seriesList.get(series);
             return seriesArray[0].length;

@@ -208,24 +208,20 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
                 mouseIsDown = true;
 
                 if (rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.X_MIN_EDGE)) {
-                    // log("Left edge clicked");
                     initMinXThread();
                     return;
                 }
 
                 if (rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.X_MAX_EDGE)) {
-                    // log("Right edge clicked");
                     initMaxXThread();
                     return;
                 }
 
                 if (rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.Y_MIN_EDGE)) {
-                    // log("Bottom edge clicked");
                     initMinYThread();
                     return;
                 }
                 if (rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.Y_MAX_EDGE)) {
-                    // log("Top edge clicked");
                     initMaxYThread();
                     return;
                 }
@@ -247,9 +243,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     public void mouseReleased(MouseEvent e) {
 
         if (e.getButton() == MouseEvent.BUTTON1) {
-            // log("Mouse released, updating listening charts");
             mouseIsDown = false;
-            // overlayMoving = false;
 
             // Tell listening charts to update
             setDomainPct(getDomainCurrentPercent());
@@ -409,10 +403,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     /**
      * Update the rectangle overlay to the new position
      * 
-     * @param y
-     *            the new endpoint
-     * @param isBottom
-     *            the bottom edge (true) or top edge (false)
+     * @param y the new endpoint
+     * @param isBottom the bottom edge (true) or top edge (false)
      */
     private void updateRangeRectangleSize(int y, boolean isBottom) {
 
@@ -434,7 +426,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
                 // Bottom edge clicked, which is highest y values
 
                 // Check that y does not go lower than minimum
-                yValue = yValue <= overlayRectangle.getYMinValue() ? overlayRectangle.getYMinValue() + (yRange / 100)
+                yValue = yValue <= overlayRectangle.getYMinValue() 
+                		? overlayRectangle.getYMinValue() + (yRange / 100)
                         : yValue;
 
                 // Check that y does not go higher than chart maximum
@@ -447,7 +440,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
                 yValue = yValue < yLower ? yLower : yValue; // correct for zero
                                                             // end
 
-                yValue = yValue >= overlayRectangle.getYMaxValue() ? overlayRectangle.getYMaxValue() - (yRange / 100)
+                yValue = yValue >= overlayRectangle.getYMaxValue() 
+                		? overlayRectangle.getYMaxValue() - (yRange / 100)
                         : yValue; // correct for max end
 
                 overlayRectangle.setYMinValue(yValue);
@@ -462,7 +456,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
                 // Top edge clicked, which is lowest y values
 
                 // Check that y does not go higher than rectangle maximum
-                yValue = yValue >= overlayRectangle.getYMaxValue() ? overlayRectangle.getYMaxValue() - (yRange / 100)
+                yValue = yValue >= overlayRectangle.getYMaxValue() 
+                		? overlayRectangle.getYMaxValue() - (yRange / 100)
                         : yValue; // correct for max end
 
                 // Check that y does not go lower than chart minimum
@@ -474,7 +469,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
                 yValue = yValue >= yUpper ? yUpper : yValue; // correct for
                                                              // upper end
 
-                yValue = yValue <= overlayRectangle.getYMinValue() ? overlayRectangle.getYMinValue() + (yRange / 100)
+                yValue = yValue <= overlayRectangle.getYMinValue() 
+                		? overlayRectangle.getYMinValue() + (yRange / 100)
                         : yValue; // correct for min end
 
                 overlayRectangle.setYMaxValue(yValue);
@@ -518,31 +514,27 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
         return true;
     }
 
-    //
+
+    /**
+     * Start a new thread watching the mouse location on screen
+     */
     protected void initThread() {
-        if (checkAndMark()) {
-            new Thread() {
-                public void run() {
-                    // IJ.log("Thread start : Running :"+checkRunning());
-                    do {
+    	if (checkAndMark()) {
 
-                        /*
-                         * Make the overlay under the mouse follow the mouse
-                         */
+    		Runnable r =  () ->{
+    			do {
+    				// Make the overlay under the mouse follow the mouse
+    				int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
+    				int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
 
-                        int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
-                        int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
+    				// Move the box with the mouse
+    				updateRectangleLocation(x, y);
 
-                        // Move the box with the mouse
-                        updateRectangleLocation(x, y);
-
-                    } while (mouseIsDown);
-                    isRunning = false;
-                    // IJ.log("Thread end : Running :"+checkRunning());
-                }
-            }.start();
-        } else {
-            // IJ.log("Not starting thread: Running is "+checkRunning());
+    			} while (mouseIsDown);
+    			isRunning = false;
+    		};
+        	
+        	new Thread(r).start();
         }
     }
 
@@ -570,7 +562,6 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
         if (checkAndMark()) {
             new Thread() {
                 public void run() {
-                    // IJ.log("Thread start : Running :"+checkRunning());
                     do {
 
                         /*

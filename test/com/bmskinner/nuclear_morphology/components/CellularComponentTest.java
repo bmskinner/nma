@@ -42,7 +42,6 @@ public class CellularComponentTest  extends ComponentTester {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Parameters
 	public static Iterable<Class<? extends CellularComponent>> arguments() {
 		return Arrays.asList(DefaultNucleus.class);

@@ -68,7 +68,6 @@ public class TaggableTest extends ComponentTester {
 		throw new Exception("Unable to create instance of "+source);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Parameters
 	public static Iterable<Class<? extends Nucleus>> arguments() {
 		return Arrays.asList(DefaultNucleus.class);

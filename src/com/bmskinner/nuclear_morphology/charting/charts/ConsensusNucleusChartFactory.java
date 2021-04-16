@@ -120,7 +120,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         
         if (options.isShowMesh()) {
         	try {
-        		Mesh<Nucleus> mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
+        		Mesh<Nucleus> mesh = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
         				options.getMeshSize());
         		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
         	} catch (ChartCreationException | MeshCreationException e) {

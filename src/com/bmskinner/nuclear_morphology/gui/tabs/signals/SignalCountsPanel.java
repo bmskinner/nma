@@ -147,7 +147,7 @@ public class SignalCountsPanel extends DetailPanel {
         return new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL) ;
     }
     
-    @SuppressWarnings("serial")
+
     private class SignalCountFilteringSetupDialog extends SettingsDialog {
 
         private static final String DIALOG_TITLE = "Signal filtering options";

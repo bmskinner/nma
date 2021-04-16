@@ -81,7 +81,6 @@ public class ProfileManagerTest {
 		throw new Exception("Unable to create instance of "+source);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Parameters
 	public static Iterable<Class<? extends ICellCollection>> arguments() {
 		return Arrays.asList(DefaultCellCollection.class,

@@ -335,7 +335,6 @@ public class SignalWarpingDialog
      * @since 1.15.0
      *
      */
-    @SuppressWarnings("serial")
     public class SignalWarpingTableCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {

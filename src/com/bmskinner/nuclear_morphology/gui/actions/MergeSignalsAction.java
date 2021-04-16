@@ -9,7 +9,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalGroupMergeMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -74,10 +73,8 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 	
 	 @Override
 	    public void finished() {
-
-	        IAnalysisResult r;
 	        try {
-	            r = worker.get();
+	            worker.get();
 	        } catch (InterruptedException | ExecutionException e) {
 	            LOGGER.warning("Error merging signals");
 	            LOGGER.log(Loggable.STACK, "Error merging signals", e);
@@ -86,7 +83,6 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 	        }
 	        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 	        super.finished();
-
 	    }
 
 }

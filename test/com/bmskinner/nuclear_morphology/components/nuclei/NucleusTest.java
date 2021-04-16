@@ -70,7 +70,6 @@ public class NucleusTest {
 		throw new Exception("Unable to create instance of "+source);
 	}
 	
-	@SuppressWarnings("unchecked")
     @Parameters
     public static Iterable<Class<? extends Nucleus>> arguments() {
 

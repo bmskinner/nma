@@ -432,7 +432,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         updateChartAndTable();
     }
     
-    @SuppressWarnings("serial")
     private class ShellFilteringSetupDialog extends SettingsDialog {
 
         private static final String DIALOG_TITLE = "Shell filtering options";

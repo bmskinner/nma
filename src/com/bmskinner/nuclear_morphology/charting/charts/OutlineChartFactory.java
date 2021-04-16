@@ -286,9 +286,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         XYPlot plot = chart.getXYPlot();
 
         // Get consensus mesh.
-        DefaultMesh meshConsensus;
+        Mesh<Nucleus> meshConsensus;
         try {
-            meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
+            meshConsensus = new DefaultMesh<>(dataset.getCollection().getConsensus());
         } catch (MeshCreationException e) {
             LOGGER.log(Loggable.STACK, "Error creating consensus mesh", e);
             return createErrorChart();
@@ -297,15 +297,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
         // Get the bounding box size for the consensus, to find the offsets for
         // the images created
         Rectangle2D r = dataset.getCollection().getConsensus().getBounds();
-        r = r == null ? dataset.getCollection().getConsensus().toPolygon().getBounds() : r; // in
-                                                                                            // case
-                                                                                            // the
-                                                                                            // bounds
-                                                                                            // were
-                                                                                            // not
-                                                                                            // set
-                                                                                            // (fixed
-                                                                                            // 1.12.2)
+        
+        // Pre-1.12.2 r may be null if bounds were not set. Check.
+        r = r == null ? dataset.getCollection().getConsensus().toPolygon().getBounds() : r;
+        
         int w = (int) (r.getWidth() * 1.2);
         int h = (int) (r.getHeight() * 1.2);
 
@@ -318,9 +313,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         for (ICell cell : cells) {
             LOGGER.fine("Drawing signals for cell " + cell.getNucleus().getNameAndNumber());
             // Get each nucleus. Make a mesh.
-            DefaultMesh cellMesh;
+            Mesh<Nucleus> cellMesh;
             try {
-                cellMesh = new DefaultMesh(cell.getNucleus(), meshConsensus);
+                cellMesh = new DefaultMesh<>(cell.getNucleus(), meshConsensus);
             } catch (MeshCreationException e1) {
                 LOGGER.fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
                 LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e1);
@@ -335,7 +330,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
 
                     // Create NucleusMeshImage from nucleus.
-                    MeshImage<Nucleus> im = new DefaultMeshImage(cellMesh, ip);
+                    MeshImage<Nucleus> im = new DefaultMeshImage<>(cellMesh, ip);
 
                     // Draw NucleusMeshImage onto consensus mesh.
                     warped = im.drawImage(meshConsensus);
@@ -390,10 +385,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     try {
 
                         Mesh<Nucleus> mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
-                                ? new DefaultMesh(options.getCell().getNucleus())
-                                : new DefaultMesh(options.getCell().getNucleus().getVerticallyRotatedNucleus());
+                                ? new DefaultMesh<>(options.getCell().getNucleus())
+                                : new DefaultMesh<>(options.getCell().getNucleus().getVerticallyRotatedNucleus());
 
-                        Mesh<Nucleus> mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
+                        Mesh<Nucleus> mesh2 = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         Mesh<Nucleus> result = mesh1.comparison(mesh2);
@@ -414,15 +409,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        Mesh<Nucleus> mesh1 = new DefaultMesh(options.getCell().getNucleus());
-                        Mesh<Nucleus> mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
+                        Mesh<Nucleus> mesh1 = new DefaultMesh<>(options.getCell().getNucleus());
+                        Mesh<Nucleus> mesh2 = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         //
                         ImageProcessor nucleusIP = options.getCell().getNucleus().getImage();
 
                         // Create a mesh image from the nucleus
-                        MeshImage<Nucleus> im = new DefaultMeshImage(mesh1, nucleusIP);
+                        MeshImage<Nucleus> im = new DefaultMeshImage<>(mesh1, nucleusIP);
 
                         // Draw the image onto the shape described by the
                         // consensus nucleus
@@ -584,7 +579,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                 if (n instanceof LobedNucleus) {
 
-                    OutlineDataset lobes = new NucleusDatasetCreator(options)
+                    OutlineDataset<CellularComponent> lobes = new NucleusDatasetCreator(options)
                             .createNucleusLobeDataset((LobedNucleus) n);
                     cellDataset.addLobes(CellularComponent.NUCLEAR_LOBE + "_" + n.getID(), lobes);
                 }

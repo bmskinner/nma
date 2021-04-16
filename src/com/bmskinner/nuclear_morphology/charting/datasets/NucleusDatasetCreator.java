@@ -606,9 +606,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public ComponentOutlineDataset createNucleusLobeDataset(@NonNull LobedNucleus nucleus) throws ChartDatasetCreationException {
+    public ComponentOutlineDataset<CellularComponent> createNucleusLobeDataset(@NonNull LobedNucleus nucleus) throws ChartDatasetCreationException {
 
-        ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
+        ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<>();
 
         int i = 0;
         Iterator<Lobe> lobes = nucleus.getLobes().iterator();

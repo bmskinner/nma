@@ -140,7 +140,6 @@ public class IBorderSegmentTester {
 		return list.get(0);
 	}
 	
-	@SuppressWarnings("unchecked")
     @Parameters
     public static Iterable<Class<?>> arguments() {
 

@@ -57,11 +57,10 @@ public class SelectableChartPanel extends ExportableChartPanel implements ChartM
     MouseMarker                mouseMarker      = null;
     public static final String SOURCE_COMPONENT = "SelectableChartPanel";
     private List<Object>       listeners        = new ArrayList<Object>();
-    List<Line2D.Double>        lines            = new ArrayList<Line2D.Double>(); // drwaing
-                                                                                  // lines
-                                                                                  // on
-                                                                                  // the
-                                                                                  // chart
+    
+    
+    /** Lines drawn over the chart */
+    List<Line2D.Double>        lines            = new ArrayList<Line2D.Double>();
 
     private Crosshair xCrosshair;
 
@@ -98,8 +97,8 @@ public class SelectableChartPanel extends ExportableChartPanel implements ChartM
 
     @Override
     // override the default zoom to keep aspect ratio
-    public void zoom(java.awt.geom.Rectangle2D selection) {
-
+    public void zoom(Rectangle2D selection) {
+    	// Does nothing
     }
 
     @Override
@@ -108,7 +107,6 @@ public class SelectableChartPanel extends ExportableChartPanel implements ChartM
         this.removeMouseListener(mouseMarker);
         mouseMarker = new MouseMarker(this);
         this.addMouseListener(mouseMarker);
-//        mouseMarker.addSignalChangeListener(this);
     }
 
     public void addLine(Line2D.Double line) {
@@ -180,22 +178,15 @@ public class SelectableChartPanel extends ExportableChartPanel implements ChartM
         }
 
         private Double getPosition(MouseEvent e) {
-            Point2D p = panel.translateScreenToJava2D(e.getPoint()); // Translates
-                                                                     // a panel
-                                                                     // (component)
-                                                                     // location
-                                                                     // to a
-                                                                     // Java2D
-                                                                     // point.
-            Rectangle2D plotArea = panel.getChartRenderingInfo().getPlotInfo().getDataArea();// panel.getScreenDataArea();
-                                                                                             // //
-                                                                                             // get
-                                                                                             // the
-                                                                                             // area
-                                                                                             // covered
-                                                                                             // by
-                                                                                             // the
-                                                                                             // panel
+        	
+        	//Translate the panel location on screen to a Java2D point
+            Point2D p = panel.translateScreenToJava2D(e.getPoint());
+            
+            // Get the area covered by the panel
+            Rectangle2D plotArea = panel
+            		.getChartRenderingInfo()
+            		.getPlotInfo()
+            		.getDataArea();
 
             XYPlot plot = (XYPlot) chart.getPlot();
 
@@ -213,40 +204,8 @@ public class SelectableChartPanel extends ExportableChartPanel implements ChartM
         public void mousePressed(MouseEvent e) {
             markerStart = getPosition(e);
         }
-//
-//        private synchronized void fireSignalChangeEvent(String message) {
-//            // IJ.log("Mouse marker has fired a change");
-//            SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
-//            Iterator<Object> iterator = listeners.iterator();
-//            while (iterator.hasNext()) {
-//                ((EventListener) iterator.next()).eventReceived(event);
-//            }
-//        }
-
-//        @Override
-//        public void eventReceived(SignalChangeEvent event) {
-//            // TODO Auto-generated method stub
-//
-//        }
-
-//        public synchronized void addSignalChangeListener(EventListener l) {
-//            listeners.add(l);
-//        }
-//
-//        public synchronized void removeSignalChangeListener(EventListener l) {
-//            listeners.remove(l);
-//        }
     }
-
-//    @Override
-//    public void eventReceived(SignalChangeEvent event) {
-//        // pass messages up
-//        if (event.type().equals("MarkerPositionUpdated")) {
-//            fireSignalChangeEvent("MarkerPositionUpdated");
-//        }
-//
-//    }
-
+    
     public synchronized void addSignalChangeListener(EventListener l) {
         listeners.add(l);
     }

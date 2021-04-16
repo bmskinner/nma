@@ -61,6 +61,6 @@ public abstract class CellClusteringMethod extends SingleDatasetAnalysisMethod {
 	 * Create the columns of the matrix to be analysed
 	 * @return
 	 */
-	protected abstract ArrayList makeAttributes() throws ClusteringMethodException;
+	protected abstract ArrayList<?> makeAttributes() throws ClusteringMethodException;
 	
 }

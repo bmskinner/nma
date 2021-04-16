@@ -100,8 +100,8 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 
 	@Override
 	public boolean isUseSimilarityMatrix() {
-		if(boolMap.containsKey(DEFAULT_USE_SIMILARITY_MATRIX))
-			return boolMap.get(DEFAULT_USE_SIMILARITY_MATRIX);
+		if(boolMap.containsKey(USE_SIMILARITY_MATRIX_KEY))
+			return boolMap.get(USE_SIMILARITY_MATRIX_KEY);
 		return false;
 	}
 

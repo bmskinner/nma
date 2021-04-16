@@ -235,7 +235,7 @@ public class CoupledProfileOutlineChartPanel {
 
     public interface BorderPointEventListener {
 
-        public void borderPointEventReceived(BorderPointEvent event);
+        void borderPointEventReceived(BorderPointEvent event);
 
     }
 

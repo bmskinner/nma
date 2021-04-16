@@ -268,7 +268,9 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         private synchronized void analyseNucleus(@NonNull final Nucleus n) {
 
             try {
-                shellDetector = new ShellDetector(n,  options.getShellNumber(), options.getErosionMethod(), true);
+                shellDetector = new ShellDetector(n,  
+                		options.getShellNumber(), 
+                		options.getErosionMethod());
             } catch (ShellAnalysisException e1) {
                 LOGGER.warning("Unable to make shells for " + n.getNameAndNumber());
                 LOGGER.log(Loggable.STACK, "Error in shell detector", e1);

@@ -66,7 +66,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static ISegmentedProfile createInstance(Class source) throws Exception {
+	public static ISegmentedProfile createInstance(Class<? extends ISegmentedProfile> source) throws Exception {
 		
 		DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
 		float[] data = new float[comp.getBorderLength()];
@@ -96,7 +96,6 @@ public class ISegmentedProfileTester extends ComponentTester {
 		return list;
 	}
 		
-	@SuppressWarnings("unchecked")
     @Parameters
     public static Iterable<Class> arguments() {
 

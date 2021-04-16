@@ -71,8 +71,6 @@ public class ShellDetector extends Detector {
     
     private final int nShells;
     private final ShrinkType type;
-//    private static final int DEFAULT_SCALE_FACTOR = 4;
-//    private boolean isScale = false;
 
     /**
      * The shell ROIs within the template object. This list begins with the
@@ -88,8 +86,8 @@ public class ShellDetector extends Detector {
      * @param isScale should the component be scaled up for more precise shell creation
      * @throws ShellAnalysisException
      */
-    public ShellDetector(@NonNull final CellularComponent component, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
-        this(component, ShellDetector.DEFAULT_SHELL_COUNT, type, isScale);
+    public ShellDetector(@NonNull final CellularComponent component, @NonNull ShrinkType type) throws ShellAnalysisException {
+        this(component, ShellDetector.DEFAULT_SHELL_COUNT, type);
     }
 
     /**
@@ -101,10 +99,9 @@ public class ShellDetector extends Detector {
      * @param isScale should the component be scaled up for more precise shell creation
      * @throws ShellAnalysisException
      */
-    public ShellDetector(@NonNull final CellularComponent component, int shellCount, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
+    public ShellDetector(@NonNull final CellularComponent component, int shellCount, @NonNull ShrinkType type) throws ShellAnalysisException {
         nShells = shellCount;
         this.type = type;
-//        this.isScale = isScale;
         createShells(component);
     }
 
