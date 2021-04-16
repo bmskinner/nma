@@ -16,10 +16,12 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -80,6 +82,16 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 		LOGGER.fine("Variance covered: "+var);
 		
 		int expectedPcs = 0;
+		
+		double[] eigenValues = pca.getEigenValues();
+		
+		
+		double totalEigenValues = Arrays.stream(eigenValues).sum();
+		double[] varianceExplained = Arrays.stream(eigenValues)
+				.map(d->d/totalEigenValues)
+				.sorted()
+				.toArray();
+		LOGGER.fine("Variance explained by each eigenvector: "+Arrays.toString(varianceExplained));
 
 		for(int i=0; i<inst.numInstances(); i++) {
 			Instance instance = inst.instance(i);
@@ -148,14 +160,18 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
         FastVector attributes = createAttributes();
 
-        Instances instances = new Instances(dataset.getName(), attributes, dataset.getCollection().size());
+        Instances instances = new Instances(dataset.getName(), 
+        		attributes, 
+        		dataset.getCollection().size());
         
         for(ICell c : dataset.getCollection()) {
         	for(Nucleus n : c.getNuclei()) {
         		try {
     				addNucleus(n, attributes, instances,  windowProportion);
-    			} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-    				LOGGER.warning("Unable to add nucleus to instances: "+e.getMessage());
+    			} catch (UnavailableBorderTagException
+    					| UnavailableProfileTypeException
+    					| ProfileException e) {
+    				LOGGER.log(Level.SEVERE, "Unable to add nucleus to instances",e);
     			}
         	}
         }
@@ -184,7 +200,10 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         	}
         }
         
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(dataset.getCollection().getNucleusType())) {
+        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(dataset
+        		.getCollection()
+        		.getNucleusType())) {
+        	
         	if (options.getBoolean(stat.toString())) {
         		Attribute att = (Attribute) attributes.elementAt(attNumber++);
         		inst.setValue(att, n.getStatistic(stat, MeasurementScale.MICRONS));
