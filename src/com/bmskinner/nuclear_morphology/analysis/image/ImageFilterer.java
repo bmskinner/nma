@@ -53,6 +53,8 @@ import inra.ijpb.morphology.strel.DiskStrel;
 public class ImageFilterer extends AbstractImageFilterer {
 	
 	private static final Logger LOGGER = Logger.getLogger(ImageFilterer.class.getName());
+	
+	public static final double DEFAULT_SCREEN_FRACTION = 0.8;
 
     public ImageFilterer(ImageProcessor ip) {
         super(ip);
@@ -235,12 +237,12 @@ public class ImageFilterer extends AbstractImageFilterer {
      * the screen width. If this would cause the height to become greater than the screen
      * height, the image will be resized such that the height is 80% of the screen height.
      * 
-     * @return the resized image, preserving aspect ratio
+     * @return the filterer, for pipelining
      */
     public ImageFilterer fitToScreen() {
         if (ip == null)
             throw new IllegalArgumentException("Image processor is null");
-        return fitToScreen(0.8);
+        return fitToScreen(DEFAULT_SCREEN_FRACTION);
     }
 
     /**
@@ -249,11 +251,23 @@ public class ImageFilterer extends AbstractImageFilterer {
      * height, the image will be resized such that the height is that fraction of the screen height.
      * 
      * @param fraction the fraction of the screen width to take up (0-1)
-     * @return the resized image, preserving aspect ratio
+     * @return the filterer, for pipelining
      */
     public ImageFilterer fitToScreen(double fraction) {
-
-        if (ip == null) {
+    	ip = fitToScreen(ip, fraction);
+        return this;
+    }
+    
+    /**
+     * Resize the image to fit on the screen. By default the width will be the given fraction of
+     * the screen width. If this would cause the height to become greater than the screen
+     * height, the image will be resized such that the height is that fraction of the screen height.
+     * 
+     * @param fraction the fraction of the screen width to take up (0-1)
+     * @return the resized image, preserving aspect ratio
+     */
+    public static ImageProcessor fitToScreen(ImageProcessor ip, double fraction) {
+    	if (ip == null) {
             throw new IllegalArgumentException("Image processor is null");
         }
 
@@ -276,10 +290,7 @@ public class ImageFilterer extends AbstractImageFilterer {
         }
 
         // Create the image
-        ImageProcessor result = ip.duplicate().resize(newWidth, newHeight);
-
-        ip = result;
-        return this;
+        return ip.duplicate().resize(newWidth, newHeight);
     }
     
     /**

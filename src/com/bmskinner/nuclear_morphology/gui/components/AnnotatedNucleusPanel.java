@@ -160,26 +160,14 @@ public class AnnotatedNucleusPanel extends JPanel {
             icon = (ImageIcon) imageLabel.getIcon();
             icon.getImage().flush();
         }
-        icon = makeIcon(ip);
-//        this.setSize(icon.getIconWidth(), icon.getIconHeight());
+        
+        icon = new ImageIcon(ImageFilterer.fitToScreen(ip, 0.8)
+        		.getBufferedImage());
+
         imageLabel.setIcon(icon);
         imageLabel.revalidate();
         imageLabel.repaint();
 
         this.repaint();
     }
-
-    /*
-     * Resize the image to half of the screen height
-     */
-    private ImageIcon makeIcon(ImageProcessor processor) {
-
-        ImageProcessor resized = new ImageFilterer(processor).resize(2).toProcessor();
-
-        ImageIcon smallImageIcon = new ImageIcon(resized.getBufferedImage());
-
-        return smallImageIcon;
-
-    }
-
 }
