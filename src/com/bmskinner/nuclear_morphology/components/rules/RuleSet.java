@@ -193,7 +193,7 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet roundOPRuleSet() {
-        return new RuleSetBuilder(ProfileType.DIAMETER).isMinimum().build();
+        return new RuleSetBuilder(ProfileType.DIAMETER).isMaximum().build();
     }
 
 }
