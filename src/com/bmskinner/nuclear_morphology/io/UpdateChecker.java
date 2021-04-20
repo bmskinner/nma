@@ -13,6 +13,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Check for updates to the program on the Bitbucket repository
@@ -54,7 +55,7 @@ public class UpdateChecker {
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | JsonSyntaxException e) {
 			LOGGER.fine("Unable to fetch latest version from website; using current version");
 		}
 		return latestVersion;
@@ -95,7 +96,8 @@ public class UpdateChecker {
 
 	        result = buffer.toString();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.fine("Unable to connect to remote server");
+			result = "Unable to connect";
 		}
 		return result;
 	}
