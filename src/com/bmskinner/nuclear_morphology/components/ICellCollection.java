@@ -232,6 +232,14 @@ public interface ICellCollection
      * @return
      */
     boolean contains(ICell cell);
+    
+    /**
+     * Test if the given nucleus is present in the collection (ID comparison test).
+     * 
+     * @param nucleus
+     * @return
+     */
+    boolean contains(Nucleus nucleus);
 
     /**
      * Test if a cell with the given id is present in the collection

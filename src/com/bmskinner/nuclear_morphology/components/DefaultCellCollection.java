@@ -1088,6 +1088,19 @@ public class DefaultCellCollection implements ICellCollection {
 			return false;
 		return contains(c.getId());
 	}
+	
+	@Override
+	public boolean contains(Nucleus nucleus) {
+		if(nucleus==null)
+			return false;
+		
+		for(Nucleus n : getNuclei()) {
+			if(n.getID().equals(nucleus.getID()))
+				return true;
+		}
+		
+		return false;
+	}
 
 	@Override
 	public boolean contains(UUID id) {

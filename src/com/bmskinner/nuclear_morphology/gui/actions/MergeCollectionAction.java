@@ -137,10 +137,11 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
             this.cancel();
             return;
         }
-        List<IAnalysisDataset> datasets = r.getDatasets();
+        List<IAnalysisDataset> result = r.getDatasets();
+                
 
         if (datasets != null && !datasets.isEmpty())
-        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets);
+        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, result);
 
         super.finished();
     }

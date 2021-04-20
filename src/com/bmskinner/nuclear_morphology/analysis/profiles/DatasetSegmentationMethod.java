@@ -290,7 +290,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	/**
 	 * Assign the segments in the given profile to the nuclei within the
 	 * collection. The template profile is assumed to be indexed at the reference
-	 * point.
+	 * point. This will unlock nuclei as needed to ensure that segments are consistent
+	 * through the dataset.
 	 * @throws UnavailableComponentException 
 	 * @throws SegmentUpdateException 
 	 * @throws ProfileException 

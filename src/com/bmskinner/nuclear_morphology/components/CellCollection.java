@@ -1652,6 +1652,19 @@ public class CellCollection implements ICellCollection {
         }
         return false;
     }
+    
+	@Override
+	public boolean contains(Nucleus nucleus) {
+		if(nucleus==null)
+			return false;
+		
+		for(Nucleus n : getNuclei()) {
+			if(n.getID().equals(nucleus.getID()))
+				return true;
+		}
+		
+		return false;
+	}
 
     /**
      * Test if the collection contains the given cell (this must be the same

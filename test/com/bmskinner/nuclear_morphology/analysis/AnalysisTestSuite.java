@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.AnalysisSignalsTestSuit
 	AnalysisMeshTestSuite.class,
 	AnalysisProfilesTestSuite.class,
 	AnalysisSignalsTestSuite.class,
-	
+	DatasetMergeMethodTest.class,
 	MergeSourceExtracterTest.class, 
 	NucleusDetectionTest.class,
 	ProfileAggregateTest.class,

@@ -18,7 +18,10 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -68,23 +71,27 @@ public class ProfileManager {
      * @param type the profile type to fit against
      * @param median the template profile to offset against
      */
-    public void updateTagToMedianBestFit(@NonNull Tag tag, @NonNull ProfileType type, @NonNull IProfile median) {
+    public void updateTagToMedianBestFit(@NonNull Tag tag, 
+    		@NonNull ProfileType type,
+    		@NonNull IProfile median) {
 
         collection.getNuclei().parallelStream().forEach(n -> {
             if (!n.isLocked()) {
             	try {
-            		// returns the positive offset index of this profile which best
+            		// Find positive offset index of this profile which best
             		// matches the median profile
             		int newIndex = n.getProfile(type).findBestFitOffset(median);
             		
             		n.setBorderTag(tag, newIndex);
 
                 } catch (ProfileException | UnavailableProfileTypeException e1) {
-                    LOGGER.warning("Error updating tag by offset in nucleus " + n.getNameAndNumber());
-                    LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
+                    LOGGER.log(Level.SEVERE, 
+                    		"Error updating tag by offset in nucleus " + n.getNameAndNumber(), 
+                    		e1);
                     return;
                 }
 
+            	// Update any stats that are based on orientation
                 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
                     n.updateDependentStats();
                     setOpUsingTvBv(n);
@@ -113,9 +120,7 @@ public class ProfileManager {
             }
 
             collection.getProfileCollection().addIndex(tag, index);
-
         }
-
     }
     
     /**
@@ -150,13 +155,19 @@ public class ProfileManager {
         IProfile btmMedian;
 
         try {
-            topMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.TOP_VERTICAL,
-                    Stats.MEDIAN);
+        	topMedian = collection.getProfileCollection()
+        			.getProfile(ProfileType.ANGLE,
+        					Tag.TOP_VERTICAL,
+        					Stats.MEDIAN);
 
-            btmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL,
-                    Stats.MEDIAN);
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-        	LOGGER.log(Loggable.STACK, "Error getting TV or BV profile", e);
+        	btmMedian = collection.getProfileCollection()
+        			.getProfile(ProfileType.ANGLE, 
+        					Tag.BOTTOM_VERTICAL,
+        					Stats.MEDIAN);
+        } catch (ProfileException 
+        		| UnavailableBorderTagException 
+        		| UnavailableProfileTypeException e) {
+        	LOGGER.log(Level.SEVERE, "Error getting TV or BV profile", e);
             return;
         }
 
@@ -164,6 +175,35 @@ public class ProfileManager {
         updateTagToMedianBestFit(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
 
         LOGGER.fine("Updated nuclei");
+    }
+    
+
+    /**
+     * Copy the tag index from cells in the given source collection
+     * to cells with the same ID in this collection. This is intended
+     * to be use to ensure tag indexes are consistent between cells after a
+     * collection has been duplicated (e.g. after a merge of datasets) 
+     * @param source the collection to take tag indexes from
+     */
+    public void copyTagIndexesToCells(@NonNull ICellCollection source) {
+    	for(Nucleus n : collection.getNuclei()) {
+    		if(!source.contains(n)) 
+    			continue;
+    		
+    		Nucleus template = source.getNucleus(n.getID()).get();
+    		
+    		Map<Tag, Integer> tags = template.getBorderTags();
+    		for(Entry<Tag, Integer> entry : tags.entrySet()) {
+    			
+    			// RP should never change in re-segmentation, so don't
+    			// affect it here. This would risk moving RP off a
+    			// segment boundary
+    			if(entry.getKey().equals(Tag.REFERENCE_POINT))
+    				continue;
+    			n.setBorderTag(entry.getKey(), entry.getValue());
+    		}    		
+    	}
+    	LOGGER.fine("Updated tag indexes from source collection");
     }
 
     /**
@@ -186,9 +226,9 @@ public class ProfileManager {
 			} catch (UnsegmentedProfileException e) {
 				LOGGER.log(Loggable.STACK, "Profile is not segmented", e);
 			}
-            return;
+        } else {
+        	updateExtendedBorderTagIndex(tag, index);
         }
-		updateExtendedBorderTagIndex(tag, index);
     }
 
     /**

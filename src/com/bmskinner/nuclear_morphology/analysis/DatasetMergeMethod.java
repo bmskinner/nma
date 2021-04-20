@@ -203,6 +203,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         for(Nucleus n : newCollection.getNuclei()) {
         	for(ProfileType t : ProfileType.values())
         		n.getProfile(t).clearSegments();
+        		n.setLocked(true); // Ensure tags will not be overwritten by downstream resegmentation
         }
         
 

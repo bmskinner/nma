@@ -31,9 +31,14 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Launch a profiling action that will create object profiles, and automatically detect tags 
+ * using the built-in rules
+ * @author ben
+ *
+ */
 public class RunProfilingAction extends SingleDatasetResultAction {
 	
 	private static final Logger LOGGER = Logger.getLogger(RunProfilingAction.class.getName());

@@ -452,6 +452,19 @@ public class VirtualCellCollection implements ICellCollection {
 			return false;
         return cellIDs.contains(cell.getId());
     }
+    
+	@Override
+	public boolean contains(Nucleus nucleus) {
+		if(nucleus==null)
+			return false;
+		
+		for(Nucleus n : getNuclei()) {
+			if(n.getID().equals(nucleus.getID()))
+				return true;
+		}
+		
+		return false;
+	}
 
     @Override
     public boolean contains(UUID cellID) {

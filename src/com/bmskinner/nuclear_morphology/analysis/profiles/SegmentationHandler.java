@@ -295,13 +295,15 @@ public class SegmentationHandler {
             return;
         }
         try {
-
+        	// Try updating to an existing tag index. If this
+        	// succeeds, do nothing else
         	if(couldUpdateTagToExistingTagIndex(tag, index))
         		return;
 
         	// Otherwise, find the best fit for each child dataset
             double prop = dataset.getCollection().getProfileCollection()
-                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
+                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                    .getFractionOfIndex(index);
 
             dataset.getCollection().getProfileManager().updateBorderTag(tag, index);
 
@@ -309,7 +311,8 @@ public class SegmentationHandler {
 
                 // Update each child median profile to the same proportional index
                 int childIndex = child.getCollection().getProfileCollection()
-                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
+                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getIndexOfFraction(prop);
 
                 child.getCollection().getProfileManager().updateBorderTag(tag, childIndex);
             }
