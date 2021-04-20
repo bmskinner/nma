@@ -98,7 +98,7 @@ public interface Taggable extends Profileable {
     boolean hasBorderTag(int index) throws IndexOutOfBoundsException;
 
     /**
-     * Set the index of the given border tag
+     * Set the index of the given border tag. Has no effect if this object is locked.
      * 
      * @param tag the tag
      * @param i the index of the border point to set the tag at
