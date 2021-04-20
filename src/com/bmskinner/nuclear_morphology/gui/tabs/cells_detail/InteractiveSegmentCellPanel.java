@@ -223,7 +223,6 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		private synchronized void updateTag(Tag tag, int newIndex) {
 
 			ThreadManager.getInstance().execute(()->{
-				boolean wasLocked = cell.getNucleus().isLocked();
 				cell.getNucleus().setLocked(false);
 
 				cell.getNucleus().setBorderTag(tag, newIndex);
@@ -233,7 +232,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 					cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
 				}
 				cell.getNucleus().updateDependentStats();
-				cell.getNucleus().setLocked(wasLocked);
+				cell.getNucleus().setLocked(true);
 				dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
 				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 				createImage();
