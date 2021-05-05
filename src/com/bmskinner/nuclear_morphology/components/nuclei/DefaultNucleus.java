@@ -600,6 +600,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         b.append(this.getNameAndNumber());
         b.append(newLine);
+        b.append(this.getID().toString());
+        b.append(newLine);
         b.append(this.getSignalCollection().toString());
         b.append(newLine);
         return b.toString();

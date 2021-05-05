@@ -551,7 +551,7 @@ public class DatasetValidator {
 				}
 				for(IBorderSegment obj : objectSeg.getMergeSources()) {
 					if(!medianSeg.hasMergeSource(obj.getID())) {
-						errorList.add(String.format("Median segment %s does not have object merge source in object %s", medianSeg.getName(), n.getID()));
+						errorList.add(String.format("Median segment %s does not have merge source %s from nucleus %s", medianSeg.getName(), obj.getID(), n.getID()));
 						errorCount++;
 					}
 						
