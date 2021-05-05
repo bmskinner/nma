@@ -647,16 +647,22 @@ public class ProfileManager {
     public boolean testSegmentsMergeable(IBorderSegment seg1, IBorderSegment seg2)
             throws UnavailableBorderTagException {
 
-    	if(!seg1.nextSegment().getID().equals(seg2.getID()))
+    	if(!seg1.nextSegment().getID().equals(seg2.getID())) {
+    		LOGGER.fine("Segments are not adjacent; cannot merge");
     		return false;
+    	}
+    		
+    		
     	
         // check the boundaries of the segment - we do not want to merge across the RP
         for (Tag tag : BorderTagObject.values(BorderTagType.CORE)) {
 
              // Find the position of the border tag in the median profile
             int tagIndex = collection.getProfileCollection().getIndex(tag);            
-            if(seg1.getEndIndex()==tagIndex || seg2.getStartIndex() == tagIndex)
+            if(seg1.getEndIndex()==tagIndex || seg2.getStartIndex() == tagIndex) {
+            	LOGGER.fine("Segments cross RP; cannot merge");
             	return false;
+            }
         }
         return true;
     }

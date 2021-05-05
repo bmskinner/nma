@@ -441,9 +441,11 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     	String[] nameArray = names.stream().map(e->e.toString()).toArray(String[]::new);
 
     	try {
-    		int mergeOption = getInputSupplier().requestOption(nameArray, "Choose segments to merge", "Merge");
+    		int mergeOption = getInputSupplier().
+    				requestOption(nameArray, "Choose segments to merge", "Merge");
     		SegMergeItem item = names.get(mergeOption);
     		this.setAnalysing(true);
+    		LOGGER.fine("User reqested merge of "+item.getOne().getName()+" and "+item.getTwo().getName());
     		SegmentationHandler sh = new SegmentationHandler(activeDataset());
     		sh.mergeSegments(item.getOne().getID(), item.getTwo().getID());
 
@@ -452,7 +454,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     		this.setAnalysing(false);
 
     	} catch(RequestCancelledException e) {
-    		// user cancelled
+    		LOGGER.fine("User cancelled segment merge request");
     	}
     }
 
