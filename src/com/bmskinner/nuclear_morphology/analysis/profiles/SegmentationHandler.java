@@ -51,6 +51,10 @@ public class SegmentationHandler {
     private static final String SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL = "Segments are out of sync with median";
 	private final IAnalysisDataset dataset;
 
+    /**
+     * Create with a dataset that can be adjusted
+     * @param d
+     */
     public SegmentationHandler(final IAnalysisDataset d) {
         dataset = d;
     }

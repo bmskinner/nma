@@ -494,7 +494,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     		sh.splitSegment(nameArray[option].getID());
     		refreshEditingPanelCharts();
     		setAnalysing(false);
-    	} catch (RequestCancelledException e) {}
+    	} catch (RequestCancelledException e) {
+    		LOGGER.fine("User cancelled segment split request");
+    	}
     }
 
     /**
@@ -525,14 +527,14 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     		refreshEditingPanelCharts();
     		setAnalysing(false);
     	} catch (RequestCancelledException e) {
-    		// No action needed
+    		LOGGER.fine("User cancelled segment unmerge request");
     	}
     }
 
     @Override
     public void segmentEventReceived(SegmentEvent event) {
         if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
-            LOGGER.finest( "Heard update segment request");
+            LOGGER.finer( "Heard update segment request");
             try {
                 setAnalysing(true);
                 updateSegmentStartIndexAction(event.id, event.index);
