@@ -68,6 +68,9 @@ public class SegmentationHandler {
      */
     public synchronized void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) {
 
+    	LOGGER.fine("Requested merge of segments "+segID1+" and "+segID2
+    			+" in dataset "+dataset.getName());
+    	
         if (segID1 == null || segID2 == null)
             throw new IllegalArgumentException("Segment IDs cannot be null");
 
@@ -142,6 +145,9 @@ public class SegmentationHandler {
      */
     public synchronized void unmergeSegments(@NonNull final UUID segID) {
 
+    	LOGGER.fine("Requested unmerge of segment "+segID
+    			+" in dataset "+dataset.getName());
+    	
         if(!dataset.isRoot()) {
         	LOGGER.fine("Cannot unmerge segments in a virtual collection");
         	return;
@@ -194,6 +200,9 @@ public class SegmentationHandler {
      */
     public synchronized void splitSegment(@NonNull UUID segID) {
 
+    	LOGGER.fine("Requested split of segment "+segID
+    			+" in dataset "+dataset.getName());
+    	
     	if(!dataset.isRoot()) {
         	LOGGER.fine("Cannot split segments in a virtual collection");
         	return;
@@ -252,6 +261,9 @@ public class SegmentationHandler {
      * @throws Exception
      */
     public synchronized void updateSegmentStartIndexAction(UUID id, int index) {
+    	
+    	LOGGER.fine("Requested update of segment "+id+" to index "+index
+    			+" in dataset "+dataset.getName());
 
         try {
 
@@ -291,9 +303,14 @@ public class SegmentationHandler {
      * @param newTagIndex
      */
     public synchronized void setBorderTag(Tag tag, int index) {
-
+    	    	
         if (tag == null)
             throw new IllegalArgumentException("Tag is null");
+        
+    	
+    	LOGGER.fine("Requested "+tag+" set to index "+index
+    			+" in dataset "+dataset.getName());
+        
         if (dataset.getCollection().isVirtual()) {
         	LOGGER.fine("Cannot update tag in virtual collection");
             return;
