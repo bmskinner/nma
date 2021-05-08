@@ -62,7 +62,7 @@ public class SegmentationHandler {
      * @param segID1 the segment ID to be merged
      * @param segID2 the segment ID to be merged
      */
-    public void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) {
+    public synchronized void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) {
 
         if (segID1 == null || segID2 == null)
             throw new IllegalArgumentException("Segment IDs cannot be null");
@@ -136,7 +136,7 @@ public class SegmentationHandler {
      * 
      * @param segID the segment ID to be unmerged
      */
-    public void unmergeSegments(@NonNull final UUID segID) {
+    public synchronized void unmergeSegments(@NonNull final UUID segID) {
 
         if(!dataset.isRoot()) {
         	LOGGER.fine("Cannot unmerge segments in a virtual collection");
@@ -188,7 +188,7 @@ public class SegmentationHandler {
      * 
      * @param segID the segment ID to be split
      */
-    public void splitSegment(@NonNull UUID segID) {
+    public synchronized void splitSegment(@NonNull UUID segID) {
 
     	if(!dataset.isRoot()) {
         	LOGGER.fine("Cannot split segments in a virtual collection");
@@ -247,7 +247,7 @@ public class SegmentationHandler {
      * @param index
      * @throws Exception
      */
-    public void updateSegmentStartIndexAction(UUID id, int index) {
+    public synchronized void updateSegmentStartIndexAction(UUID id, int index) {
 
         try {
 
@@ -286,7 +286,7 @@ public class SegmentationHandler {
      * @param tag
      * @param newTagIndex
      */
-    public void setBorderTag(Tag tag, int index) {
+    public synchronized void setBorderTag(Tag tag, int index) {
 
         if (tag == null)
             throw new IllegalArgumentException("Tag is null");
@@ -339,7 +339,7 @@ public class SegmentationHandler {
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+    private synchronized boolean couldUpdateTagToExistingTagIndex(Tag tag, int index) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
     	List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
     	for(Tag existingTag : tags) {
     		if(existingTag.equals(tag))
