@@ -27,11 +27,18 @@ public class OutlineTestChartFactory extends ChartFactoryTest {
 	
 	private static final boolean IS_FIXED_ASPECT = true;
 	
+	/**
+	 * Create a panel containing an outline chart for the given 
+	 * @param dataset the dataset containing the cell
+	 * @param cell the cell to draw the outline for
+	 * @return a panel with the desired outline chart
+	 * @throws InterruptedException
+	 */
 	public static JPanel generateOutlineChart(@NonNull IAnalysisDataset dataset, @NonNull ICell cell) throws InterruptedException {
 		String title = new Exception().getStackTrace()[0].getMethodName();
-		List<JPanel> panels = new ArrayList<>();
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(dataset)
 				.setCell(cell)
+				.addCellularComponent(cell.getNucleus())
 				.build();
 		return makeChartPanel(new OutlineChartFactory(options).makeCellOutlineChart(), options, title, IS_FIXED_ASPECT);
 	}

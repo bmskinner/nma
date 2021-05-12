@@ -48,48 +48,60 @@ public class RotatableTest extends ComponentTester {
 		}
 	}
 	
+	/**
+	 * Test that a test nucleus is able to be consistently
+	 * rotated vertically using the TV and BV points
+	 * @throws Exception
+	 */
 	@Test 
 	public void testComponentAlignsVertically() throws Exception {
+		
+		// Create a single nucleus dataset
 		IAnalysisDataset t = new TestDatasetBuilder(1234).cellCount(1)
 				.ofType(NucleusType.ROUND)
-				.withMaxSizeVariation(10)
+				.withMaxSizeVariation(0)
 				.randomOffsetProfiles(true)
 				.segmented().build();
 		
-		int length = t.getCollection().stream().findFirst().get().getNucleus().getBorderLength();
+		// Profile length of the test nucleus
+		int length = t.getCollection().stream()
+				.findFirst().get()
+				.getNucleus()
+				.getBorderLength();
+		
+		// The initial bottom vertical point
 		int bIndex = 1;
 		
+		// Create a top vertical point for alignment
+		// We will test all possible positions in the 
+		// test dataset profile
 		for(int tIndex=0; tIndex<length; tIndex++) {			
 			if(tIndex==bIndex)
 				continue;
 			if(Math.abs(tIndex-bIndex)<5)
 				continue;
 
+			// Make a new single nucleus dataset
 			IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1)
 					.ofType(NucleusType.ROUND)
 					.withMaxSizeVariation(0)
 					.randomOffsetProfiles(true)
 					.segmented().build();
 
+			// Get the cell from the test dataset
 			for(ICell c : d.getCollection()) {
-				List<JPanel> panels = new ArrayList<>();
-
+				
+				// Set the TV and BV to the current indices
 				Nucleus n = c.getNucleus();
 				n.setBorderTag(Tag.TOP_VERTICAL, tIndex);
 				n.setBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
-				panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
+				n.alignVertically();
+				
 				IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
 				IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
 
-				n.alignVertically();
-				tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-				bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
-
-				panels.add(OutlineTestChartFactory.generateOutlineChart(d, c));
-
+				// Test if the TV and BV points are vertical after rotation
 				boolean areVertical = areVertical(tv, bv);
-				//					if(!areVertical)
-				//						ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
 				assertTrue(areVertical);
 			}
 
