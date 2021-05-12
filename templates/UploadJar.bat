@@ -1,3 +1,3 @@
 REM Upload files to NMA downloads
 
-C:\Portable\curl-7.72.0-win64-mingw\bin\curl -s -u bmskinner -X POST https://api.bitbucket.org/2.0/repositories/bmskinner/nuclear_morphology/downloads -F files=@..\target\Nuclear_Morphology_Analysis_${project.version}_ImageJ_plugin.zip -F files=@..\target\Nuclear_Morphology_Analysis_${project.version}_standalone.jar -F files=@..\target\Nuclear_Morphology_Analysis_${project.version}.exe   
+C:\Portable\curl-7.72.0-win64-mingw\bin\curl -s -u bmskinner -X POST https://api.bitbucket.org/2.0/repositories/bmskinner/nuclear_morphology/downloads -F files=@..\target\Nuclear_Morphology_Analysis_${project.version}_standalone.jar -F files=@..\target\Nuclear_Morphology_Analysis_${project.version}.exe   
