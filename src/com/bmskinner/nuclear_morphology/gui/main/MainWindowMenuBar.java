@@ -313,8 +313,9 @@ public class MainWindowMenuBar extends JMenuBar  {
 				LOGGER.fine("Opening log directory: "+dir.getAbsolutePath());
 				try {
 					Desktop.getDesktop().open(dir);
-				} catch(Exception ex) {
+				} catch(IOException ex) {
 					LOGGER.log(Level.SEVERE, "Unable to open folder", ex);
+					JOptionPane.showMessageDialog(this, "Unable to open log folder: "+dir.getAbsolutePath(), "Error opening log folder", JOptionPane.ERROR_MESSAGE);
 				}
 			};
 			ThreadManager.getInstance().submit(r);
