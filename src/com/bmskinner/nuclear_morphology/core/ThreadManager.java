@@ -69,7 +69,11 @@ public class ThreadManager {
     	if(maxThreads>2) // if this is a dual core machine, we can't afford to be nice
     		maxThreads-=1; // otherwise, leave something for the OS, EDT etc.
     	
-    	int maxMethodThreads = maxThreads<4 ? 1 : 2; //Math.max(1, maxThreads-maxUiThreads);   	
+    	int maxMethodThreads = 1; // if on a low core system, just have one thread
+    	if(maxThreads > 4) maxMethodThreads = 2; // if we have more than 4 cores, up to two
+    	if(maxThreads > 10) maxMethodThreads = maxThreads/3; // if we're on a server, go wild
+    	
+    	// The bulk of threads should still be devoted to redrawing charts
     	int maxUiThreads = Math.max(1, maxThreads-maxMethodThreads);
     	
     	int maxForkJoinThreads =  Math.max(1, maxUiThreads-1); // ensure FJPs don't block the ui
@@ -86,8 +90,17 @@ public class ThreadManager {
     	LOGGER.config(String.format("Thread manager: Method threads: %s", maxMethodThreads));
     	
     	long maxMemory = Runtime.getRuntime().maxMemory();
-    	long maxMemoryMiB = maxMemory / (1024*1024);
-    	LOGGER.config(String.format("Thread manager: Maximum memory: %s MiB (%s)", maxMemoryMiB, maxMemory));
+    	long maxMemoryHuman = maxMemory / (1024*1024);
+    	
+    	// Pretty format for readability
+    	String units = "MiB";
+    	if(maxMemoryHuman > 10000) {
+    		maxMemoryHuman /= 1024;
+    		units = "GiB";
+    	}
+    	
+    	LOGGER.config(String.format("Thread manager: Maximum memory: %s %s (%s bytes)", 
+    			maxMemoryHuman, units, maxMemory));
     }
         
     /**
