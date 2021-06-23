@@ -118,7 +118,7 @@ public class DatasetStatsExporter extends StatsExporter {
     @Override
 	protected void appendHeader(@NonNull StringBuilder outLine) {
 
-        outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
+        outLine.append("Dataset\tFile\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
         for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
 
@@ -201,6 +201,7 @@ public class DatasetStatsExporter extends StatsExporter {
                 for (Nucleus n : cell.getNuclei()) {
 
                     outLine.append(d.getName() + TAB)
+                    	.append(d.getSavePath() + TAB)
                         .append(cell.getId() + TAB)
                         .append(CellularComponent.NUCLEUS+"_" + n.getNameAndNumber() + TAB)
                         .append(n.getSourceFolder() + TAB)
