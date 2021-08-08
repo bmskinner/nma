@@ -18,12 +18,11 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -48,7 +47,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
  *
  */
 @SuppressWarnings("serial")
-public class DatasetMergingDialog extends LoadingIconDialog implements ActionListener {
+public class DatasetMergingDialog extends LoadingIconDialog {
 	
 	private static final Logger LOGGER = Logger.getLogger(DatasetMergingDialog.class.getName());
 
@@ -66,6 +65,8 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 
     private JButton mergeButton;
     private JButton setEqualButton;
+    
+    private JButton inferButton;
 
     // Store the ids of signal groups that should be merged
     private PairedSignalGroups pairedSignalGroups = new PairedSignalGroups();
@@ -110,7 +111,11 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         JPanel panel = new JPanel(new FlowLayout());
 
         mergeButton = new JButton("Merge");
-        mergeButton.addActionListener(this);
+        mergeButton.addActionListener(e->{
+        	LOGGER.info("Signal pairing complete");
+            LOGGER.fine("Merged pairs: "+pairedSignalGroups.toString());
+            this.setVisible(false);
+        });
 
         panel.add(mergeButton);
         return panel;
@@ -121,7 +126,8 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 
         JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         upperPanel.add(new JLabel("Datasets have signals. Choose which signal groups (if any) to merge"));
 
@@ -134,24 +140,39 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
         datasetBoxOne.setSelectedDataset(d0);
         datasetBoxTwo.setSelectedDataset(d1);
 
-        datasetBoxOne.addActionListener(this);
-        datasetBoxTwo.addActionListener(this);
+        datasetBoxOne.addActionListener(e->signalBoxOne.setDataset(datasetBoxOne.getSelectedDataset()));
+        datasetBoxTwo.addActionListener(e->signalBoxTwo.setDataset(datasetBoxTwo.getSelectedDataset()));
 
         signalBoxOne = new SignalGroupSelectionPanel(d0);
         signalBoxTwo = new SignalGroupSelectionPanel(d1);
 
         setEqualButton = new JButton("Set equal");
-        setEqualButton.addActionListener(this);
-
-        // upperPanel.add(new JLabel("Source dataset"));
-        lowerPanel.add(datasetBoxOne);
-        lowerPanel.add(signalBoxOne);
-        lowerPanel.add(setEqualButton);
-        lowerPanel.add(signalBoxTwo);
-        lowerPanel.add(datasetBoxTwo);
+        setEqualButton.addActionListener(e->{
+        	pairedSignalGroups.add(datasetBoxOne.getSelectedDataset().getId(), 
+        			signalBoxOne.getSelectedID(), 
+        			datasetBoxTwo.getSelectedDataset().getId(), 
+        			signalBoxTwo.getSelectedID());
+            updateTable();
+        });
+        
+        inferButton = new JButton("Infer from group names");
+        inferButton.addActionListener(e->{
+        	LOGGER.info("Inferring pairs from signal group names");
+        	inferPairs();
+        	updateTable();
+        });
+        
+        bottomPanel.add(inferButton);
+        
+        middlePanel.add(datasetBoxOne);
+        middlePanel.add(signalBoxOne);
+        middlePanel.add(setEqualButton);
+        middlePanel.add(signalBoxTwo);
+        middlePanel.add(datasetBoxTwo);
 
         headerPanel.add(upperPanel);
-        headerPanel.add(lowerPanel);
+        headerPanel.add(middlePanel);
+        headerPanel.add(bottomPanel);
         return headerPanel;
     }
 
@@ -199,35 +220,48 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 		matchTable.setModel(model);
 
     }
+    
+    /**
+     * Infer which signal groups should be merged based on their names.
+     * Signal groups with identical names will be added to the paired list.
+     * 
+     */
+    private void inferPairs() {
+    	
+    	List<String> signalGroupNames = datasets.stream()
+    			.flatMap(d->d.getCollection().getSignalGroups().stream())
+    			.map(g->g.getGroupName())
+    			.distinct()
+    			.collect(Collectors.toList());
+    	
+    	
+    	// For each name, find matching datasets
+    	for(String groupName : signalGroupNames) {
+    		
+    		List<IAnalysisDataset> matchingDatasets = datasets.stream().filter(d->d.getCollection()
+    				.getSignalGroups()
+    				.stream().anyMatch(g->g.getGroupName()
+    						.equals(groupName))).collect(Collectors.toList());
+    		
+    		IAnalysisDataset d1 = matchingDatasets.get(0);
+    		
+    		// Get the id from d1
+    		UUID u1 = null;
+    		for(UUID u : d1.getCollection().getSignalGroupIDs()) {
+    			if(d1.getCollection().getSignalGroup(u).get().getGroupName().equals(groupName))
+    				u1 = u;
+    		}
+    		
+    		
+    		for(IAnalysisDataset d2 : matchingDatasets) {
+    			if(d1==d2) continue;
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        IAnalysisDataset d1 = datasetBoxOne.getSelectedDataset();
-        IAnalysisDataset d2 = datasetBoxTwo.getSelectedDataset();
-
-        UUID s1 = signalBoxOne.getSelectedID();
-        UUID s2 = signalBoxTwo.getSelectedID();
-        
-        if (e.getSource() == datasetBoxOne) {
-            signalBoxOne.setDataset(d1);
-        }
-        if (e.getSource() == datasetBoxTwo) {
-            signalBoxTwo.setDataset(d2);
-        }
-
-        if (e.getSource() == setEqualButton) {
-        	pairedSignalGroups.add(d1.getId(), s1, d2.getId(), s2);
-            updateTable();
-        }
-
-        if (e.getSource() == mergeButton) {
-            LOGGER.info("Signal pairing complete");
-            
-            LOGGER.fine("Merged pairs: "+pairedSignalGroups.toString());
-            this.setVisible(false);
-        }
-
+    			// Get the id from d2
+        		for(UUID u2 : d2.getCollection().getSignalGroupIDs()) {
+        			if(d2.getCollection().getSignalGroup(u2).get().getGroupName().equals(groupName))
+        				pairedSignalGroups.add(d1.getId(), u1, d2.getId(), u2);
+        		}
+    		}
+    	}   
     }
-
 }
