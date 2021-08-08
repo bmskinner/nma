@@ -23,6 +23,8 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.filechooser.FileFilter;
+
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -111,7 +113,7 @@ public interface Io  {
         File dir = getProgramDir();
         return new File(dir, CONFIG_FILE_NAME);
     }
-
+    
     /**
      * Static methods for exporting data
      * 
@@ -162,6 +164,29 @@ public interface Io  {
             String newFileName = f.getAbsolutePath().replace(oldExt, newExt);
             return new File(newFileName);
 
+        }
+        
+        /**
+         * Test if the given folder contains at least 1 image file that
+         * can be imported. Importable image files are defined in 
+         * ImageImporter.IMPORTABLE_FILE_TYPES
+         * @param folder the folder to test
+         * @return
+         */
+        static boolean containsImportableImageFiles(final File folder) {
+        	if (folder == null)
+                return false;  
+            if (!folder.exists())
+                return false;
+        	if (!folder.isDirectory())
+                return false;
+        	for(String fileType : ImageImporter.IMPORTABLE_FILE_TYPES) {
+        		for(File f : folder.listFiles()){
+        			if (f.getName().endsWith(fileType))
+                        return true;
+        		}
+        	}
+        	return false;
         }
 
         /**

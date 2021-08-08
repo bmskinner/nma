@@ -206,8 +206,12 @@ public class EventHandler implements EventListener {
         	
         	if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX)) {
                 String s = event.type().replace(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, "");
+                
+                // No image folder specified; will be requested in workflow
                 if(s.equals(""))
                 	return new ImportWorkflowAction(acceptor, EventHandler.this);
+                
+                // Image folder specified                
                 File f = new File(s);
                 return new ImportWorkflowAction(acceptor, EventHandler.this, f);
             }

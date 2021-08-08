@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.api.AnalysisPipeline.AnalysisPipelineException;
 import com.bmskinner.nuclear_morphology.api.SavedOptionsAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
@@ -62,7 +63,8 @@ public class ImportWorkflowAction  extends VoidResultAction {
      * @param mw the main window to which a progress bar will be attached
      * @param file the workspace file to open
      */
-    public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, @Nullable File file) {
+    public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor, 
+    		@NonNull final EventHandler eh, @Nullable File file) {
         super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.file = file;
     }
@@ -77,18 +79,19 @@ public class ImportWorkflowAction  extends VoidResultAction {
     				file = eh.getInputSupplier().requestFile("Choose analysis options", null, Importer.XML_FILE_EXTENSION_NODOT, "Analysis options file");
 
     			File folder = eh.getInputSupplier().requestFolder("Choose image folder", file.getParentFile());    
-
+    			
     			IAnalysisMethod m = new SavedOptionsAnalysisPipeline(folder, file);
                 
                 worker = new DefaultAnalysisWorker(m);
                 worker.addPropertyChangeListener(this);
                 ThreadManager.getInstance().submit(worker);
 
-    		} catch (RequestCancelledException e) {
+    		} catch (RequestCancelledException | AnalysisPipelineException e) {
+    			LOGGER.warning("Cancelled workflow; "+e.getMessage());
     			cancel();
     		}
     }
-    
+        
     @Override
     public void finished() {
 
