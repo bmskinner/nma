@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import javax.swing.SwingWorker;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jfree.data.general.Dataset;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
@@ -196,36 +197,15 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 	/**
 	 * Create the warped image for a nucleus
-	 * @param meshConsensus the mesh to warp to
-	 * @param w
-	 * @param h
-	 * @param n
-	 * @return
+	 * @param n the nucleus to warp
+	 * @return the warped image
 	 */
 	private ImageProcessor generateNucleusImage(@NonNull Nucleus n) {
 
 		try {
 			Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
 
-		    // Get the image with the signal
-		    ImageProcessor ip;
-		    if(n.getSignalCollection().hasSignal(warpingOptions.signalId())){ // if there is no signal, getImage will throw exception
-		    	ip = n.getSignalCollection().getImage(warpingOptions.signalId());
-		    	ip.invert(); // image is imported as white background. Need black background.
-		    } else {
-		    	// We need to get the file in which no signals were detected
-		    	// This is not stored in a nucleus, so combine the expected file name with the source folder
-		    	Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset().getAnalysisOptions();
-		    	if(analysisOptions.isPresent()) {
-		    		INuclearSignalOptions signalOptions = analysisOptions.get()
-		    				.getNuclearSignalOptions(warpingOptions.signalId());
-		    		File imageFolder = signalOptions.getFolder();
-		    		File imageFile   = new File(imageFolder, n.getSourceFileName());
-		    		ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
-		    	} else {
-		    		return createEmptyProcessor();
-		    	}
-		    }
+			ImageProcessor ip = getNucleusImageProcessor(n);
 		    
 		    if(warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY)>0)
 	    		ip = new ImageFilterer(ip)
@@ -242,11 +222,81 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    LOGGER.finer( "Warping image onto consensus mesh");
 		   return meshImage.drawImage(meshConsensus);
 
-		} catch (IllegalArgumentException | UnloadableImageException |ImageImportException | MeshCreationException | UncomparableMeshImageException | MeshImageCreationException e) {
+		} catch (IllegalArgumentException | MeshCreationException | UncomparableMeshImageException | MeshImageCreationException e) {
 		    LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		    return createEmptyProcessor();
 		}
 		
+	}
+	
+	/**
+	 * Fetch the appropriate image to warp for the given nucleus
+	 * @param n the nucleus to warp
+	 * @return the nucleus image
+	 */
+	private ImageProcessor getNucleusImageProcessor(@NonNull Nucleus n) {
+
+		try {
+			// Get the image with the signal
+			ImageProcessor ip;
+			if(n.getSignalCollection().hasSignal(warpingOptions.signalId())){ // if there is no signal, getImage will throw exception
+				ip = n.getSignalCollection().getImage(warpingOptions.signalId());
+				ip.invert(); // image is imported as white background. Need black background.
+			} else {
+				// We need to get the file in which no signals were detected
+				// This is not stored in a nucleus, so combine the expected file name 
+				// with the source folder				
+				INuclearSignalOptions signalOptions = getSignalOptions(n);
+
+				if(signalOptions!=null) {
+					File imageFolder = signalOptions.getFolder();
+					File imageFile   = new File(imageFolder, n.getSourceFileName());
+					ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
+
+				} else {
+					return createEmptyProcessor();
+				}
+			}
+			return ip;
+		} catch (UnloadableImageException |ImageImportException e) {
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			return createEmptyProcessor();
+		}
+	}
+	
+	/**
+	 * Get the nuclear signal detection options, accounting for whether
+	 * the dataset is merged or not merged.
+	 * @param n the nucleus to fetch options for
+	 * @return the signal options if present, otherwise null
+	 */
+	private INuclearSignalOptions getSignalOptions(@NonNull Nucleus n) {
+		
+		// If merged datasets are being warped, the imageFolder will not
+		// be correct, since the analysis options are mostly blank. We need
+		// to find the correct source dataset, and take the analysis options
+		// from that dataset.
+		if(warpingOptions.templateDataset().hasMergeSources()) {
+
+			return warpingOptions.templateDataset()
+			.getAllMergeSources().stream()
+			.filter(d->d.getCollection().contains(n))
+			.findFirst().get()
+			.getAnalysisOptions().get()
+			.getNuclearSignalOptions(warpingOptions.signalId());			
+		} else {
+			
+			Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset()
+					.getAnalysisOptions();
+
+			if(analysisOptions.isPresent()) {
+				return analysisOptions.get()
+						.getNuclearSignalOptions(warpingOptions.signalId());
+
+			}
+		}
+
+		return null;
 	}
 	
     /**
