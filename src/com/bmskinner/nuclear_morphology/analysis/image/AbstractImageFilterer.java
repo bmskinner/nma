@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 import ij.ImagePlus;
@@ -48,7 +49,7 @@ public abstract class AbstractImageFilterer {
 	
 	protected static final String DIMENSIONS_DO_NOT_MATCH_ERROR = "Dimensions do not match";
 
-	private static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final Logger LOGGER = Logger.getLogger(AbstractImageFilterer.class.getName());
 
     private static final int RGB_WHITE = 16777215;
     private static final int RGB_BLACK = 0;
@@ -569,13 +570,13 @@ public abstract class AbstractImageFilterer {
         if (ip instanceof FloatProcessor) {
             maxIntensity = 0;
             minIntensity = Float.MAX_VALUE;
-            result = new FloatProcessor(ip.getWidth(), ip.getHeight());
+            result = new ByteProcessor(ip.getWidth(), ip.getHeight());
         }
         
         if (ip instanceof ShortProcessor) {
             maxIntensity = 0;
             minIntensity = Short.MAX_VALUE;
-            result = new ShortProcessor(ip.getWidth(), ip.getHeight());
+            result = new ByteProcessor(ip.getWidth(), ip.getHeight());
         }
 
         if (result == null) {
@@ -594,16 +595,23 @@ public abstract class AbstractImageFilterer {
             return ip;
         }
 
-        double range = maxIntensity - minIntensity;
-
+        
+        double range = maxIntensity - minIntensity < 0.01 ? 0d : maxIntensity - minIntensity;
+        LOGGER.finer("Max intensity: "+maxIntensity);
+        LOGGER.finer("Min intensity: "+minIntensity);
+        LOGGER.finer("Rescaling image across image range "+ range);
+        
         // Adjust each pixel to the proportion in range 0-255
         for (int i = 0; i < ip.getPixelCount(); i++) {
             int pixel = ip.get(i);
-
-            double proportion = (pixel - minIntensity) / range;
-
-            int newPixel = (int) (255 * proportion);
-            result.set(i, newPixel);
+            
+            if(range==0) {
+            	result.set(i, 128);
+            } else {
+            	double proportion = (pixel - minIntensity) / range;
+            	int newPixel = (int) (255 * proportion);
+            	result.set(i, newPixel);
+            }
         }
         return result;
     }
@@ -721,7 +729,7 @@ public abstract class AbstractImageFilterer {
     	ImageProcessor result = new ShortProcessor(w, h);
     	
     	if(maxValue > Short.MAX_VALUE) {
-    		logger.fine(String.format("Rescaling pixels with max value %s to fit short range", maxValue));
+    		LOGGER.fine(String.format("Rescaling pixels with max value %s to fit short range", maxValue));
     		for (int x = 0; x < w; x++) {
     			for (int y = 0; y < h; y++) {
     				pixelValues[x][y] = (int) ((((double)pixelValues[x][y])/(double)maxValue) * (double)Short.MAX_VALUE);

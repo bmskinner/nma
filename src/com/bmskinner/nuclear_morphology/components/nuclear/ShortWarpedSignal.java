@@ -74,6 +74,7 @@ public class ShortWarpedSignal implements IWarpedSignal {
 			boolean isCellWithSignalsOnly, 
 			int threshold, 
 			boolean isBinarised,
+			boolean isNormalised,
 			@NonNull ImageProcessor image) {
 
 		byte[] arr = IWarpedSignal.toArray(image);
@@ -82,7 +83,8 @@ public class ShortWarpedSignal implements IWarpedSignal {
 				templateId, 
 				isCellWithSignalsOnly, 
 				threshold,
-				isBinarised);
+				isBinarised,
+				isNormalised);
 		images.put(k, arr);
 		targetNames.put(k, name);
 		widths.put(k, image.getWidth());
@@ -116,12 +118,14 @@ public class ShortWarpedSignal implements IWarpedSignal {
 			@NonNull UUID templateId, 
 			boolean isCellWithSignalsOnly, 
 			int threshold,
-			boolean isBinarised) {
+			boolean isBinarised,
+			boolean isNormalised) {
 		WarpedSignalKey k = new WarpedSignalKey(template, 
 				templateId, 
 				isCellWithSignalsOnly, 
 				threshold,
-				isBinarised);
+				isBinarised,
+				isNormalised);
 		return getWarpedImage(k);
 	}
 	
@@ -133,7 +137,8 @@ public class ShortWarpedSignal implements IWarpedSignal {
 				key.getTemplateId(), 
 				key.isCellWithSignalsOnly(), 
 				key.getThreshold(), 
-				key.isBinarised()));
+				key.isBinarised(),
+				key.isNormalised()));
 	}
 	
 

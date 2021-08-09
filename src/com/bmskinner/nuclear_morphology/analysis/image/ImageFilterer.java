@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.process.ByteProcessor;
+import ij.process.FloatProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
 import inra.ijpb.morphology.Morphology;
@@ -614,5 +615,54 @@ public class ImageFilterer extends AbstractImageFilterer {
         for(int i=0; i<max; i++)
         	values[i]=image.get(i);
         return Stats.quartile(values, Stats.MEDIAN);
+    }
+    
+    /**
+     * Given a counterstain image, normalise the current image against it
+     * to reveal regions of greater or lesser than expected intensity.
+     * @param ip the image to be normalised
+     * @param counterstain an image of equal dimensions
+     * @return the normalised image of ip/counterstain
+     */
+    public static ImageProcessor normaliseToCounterStain(@NonNull ImageProcessor ip,
+    		@NonNull ImageProcessor counterstain) {
+    	if(ip.getWidth()!=counterstain.getWidth() || ip.getHeight()!=counterstain.getHeight()) {
+    		throw new IllegalArgumentException("Image dimensions must match: input 1 "+
+    				ip.getWidth()+" x " + ip.getHeight()+ "; input 2 "+ counterstain.getWidth()+" x "+
+    				counterstain.getHeight());
+    	}
+    	
+    	FloatProcessor result = new FloatProcessor(ip.getWidth(), ip.getHeight());
+    	    	
+    	float[][] input = ip.getFloatArray();
+    	
+    	for(int i=0; i<ip.getWidth(); i++) {
+    		for(int j=0; j<ip.getHeight(); j++) {
+    			
+    			// Special case where both images are blank
+    			if(ip.get(i, j)==0 && counterstain.get(i, j)==0) {
+    				input[i][j] = 1f;
+    				continue;
+    			}
+    			
+    			float out = ((float)ip.get(i, j)) / ((float)counterstain.get(i, j));
+    			out = Float.isInfinite(out) ? 0 : out;
+    			out = Float.isNaN(out) ? 0 : out;
+    			input[i][j] = out;
+    		}
+    	}
+    	result.setFloatArray(input);
+    	return result;
+    }
+    
+    /**
+     * Given a counterstain image, normalise the current image against it
+     * to reveal regions of greater or lesser than expected intensity.
+     * @param counterstain an image of equal dimensions
+     * @return this filterer
+     */
+    public ImageFilterer normaliseToCounterStain(@NonNull ImageProcessor counterstain) {
+    	ip = normaliseToCounterStain(ip, counterstain);
+    	return this;
     }
 }

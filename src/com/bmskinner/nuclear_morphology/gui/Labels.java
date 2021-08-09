@@ -190,6 +190,7 @@ public class Labels {
         	public static final String TABLE_HEADER_SOURCE_SIGNALS = "Source signals";
         	public static final String TABLE_HEADER_SIGNALS_ONLY   = "Only cells with signals?";
         	public static final String TABLE_HEADER_BINARISED      = "Binarised";
+        	public static final String TABLE_HEADER_NORMALISED     = "Normalised";
         	public static final String TABLE_HEADER_TARGET_SHAPE   = "Target shape";
         	public static final String TABLE_HEADER_KEY_COLUMN     = "Keys";
         	public static final String TABLE_HEADER_N_CELLS        = "Cells";

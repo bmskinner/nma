@@ -214,6 +214,13 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    
 		    if(warpingOptions.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY))
 		    	ip.threshold(warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY));
+		    
+		    if(warpingOptions.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY)) {
+		    	ip = new ImageFilterer(ip)
+		    	.normaliseToCounterStain(n.getGreyscaleImage())
+		    	.toProcessor();
+		    	ip = ImageFilterer.rescaleImageIntensity(ip);
+		    }
 
 		    // Create a mesh coordinate image from the nucleus
 		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
@@ -222,13 +229,13 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    LOGGER.finer( "Warping image onto consensus mesh");
 		   return meshImage.drawImage(meshConsensus);
 
-		} catch (IllegalArgumentException | MeshCreationException | UncomparableMeshImageException | MeshImageCreationException e) {
+		} catch (IllegalArgumentException | MeshCreationException | UncomparableMeshImageException | MeshImageCreationException | UnloadableImageException e) {
 		    LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		    return createEmptyProcessor();
 		}
 		
 	}
-	
+		
 	/**
 	 * Fetch the appropriate image to warp for the given nucleus
 	 * @param n the nucleus to warp

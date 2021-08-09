@@ -180,6 +180,8 @@ public class SignalWarpingDialog
     				return Boolean.class;
     			if(column==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_BINARISED))
     				return Boolean.class;
+    			if(column==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_NORMALISED))
+    				return Boolean.class;
     			if(column==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN))
     				return JButton.class;
     			else

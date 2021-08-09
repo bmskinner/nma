@@ -210,7 +210,8 @@ implements SignalWarpingDisplayListener,
 				selectedKey.getTemplate().getId(), 
 				selectedKey.isOnlyCellsWithSignals(), 
 				selectedKey.getThreshold(),
-				selectedKey.isBinarised());
+				selectedKey.isBinarised(),
+				selectedKey.isNormalised());
 		sg.getWarpedSignals().ifPresent(e->e.removeWarpedImage(k));
 		model.removeRow(selectedKey);
 	}
@@ -239,6 +240,7 @@ implements SignalWarpingDisplayListener,
 					runSettings.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY), 
 					runSettings.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY), 
 					runSettings.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY),
+					runSettings.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY),
 					image);
 			sg.setWarpedSignals(ws);
 
@@ -249,6 +251,7 @@ implements SignalWarpingDisplayListener,
 					runSettings.signalId(), 
 					runSettings.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY),
 					runSettings.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY),
+					runSettings.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY),
 					runSettings.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY), 
 					image);
 

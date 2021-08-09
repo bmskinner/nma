@@ -83,6 +83,7 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			boolean isCellWithSignalsOnly, 
 			int threshold, 
 			boolean isBinarised,
+			boolean isNormalised,
 			@NonNull ImageProcessor image) {
 
 		// TODO - reenable once this is working for 16-bit images
@@ -114,12 +115,14 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 			@NonNull UUID templateId,  
 			boolean isCellWithSignalsOnly, 
 			int threshold,
-			boolean isBinarised) {
+			boolean isBinarised,
+			boolean isNormalised) {
 		WarpedSignalKey k = new WarpedSignalKey(template, 
 				templateId, 
 				isCellWithSignalsOnly, 
 				threshold,
-				isBinarised);
+				isBinarised,
+				isNormalised);
 		return getWarpedImage(k);
 	}
 	
@@ -131,7 +134,8 @@ public class DefaultWarpedSignal implements IWarpedSignal {
 				key.getTemplateId(), 
 				!key.isCellWithSignalsOnly(), 
 				key.getThreshold(),
-				key.isBinarised()));
+				key.isBinarised(),
+				key.isNormalised()));
 	}
 	
 

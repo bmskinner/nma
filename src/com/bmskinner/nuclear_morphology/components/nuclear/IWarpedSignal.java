@@ -150,6 +150,7 @@ public interface IWarpedSignal extends Serializable {
 			boolean isCellWithSignalsOnly, 
 			int threshold,
 			boolean isBinarised,
+			boolean isNormalised,
 			@NonNull ImageProcessor image);
 	
 	
@@ -170,7 +171,8 @@ public interface IWarpedSignal extends Serializable {
 			@NonNull UUID templateId, 
 			boolean isCellWithSignalsOnly, 
 			int threshold,
-			boolean isBinarised);
+			boolean isBinarised,
+			boolean isNormalised);
 	
 	/**
 	 * Get the warped signal image corresponding to the signals warped onto 

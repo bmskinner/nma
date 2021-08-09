@@ -32,6 +32,8 @@ public class SignalWarpingRunSettingsPanel
     private static final String RUN_LBL             = "Run";
     private static final String MIN_THRESHOLD_LBL   = "Min threshold";
     private static final String BINARISE_LBL        = "Binarise";
+    private static final String NORMALISE_LBL       = "Normalise to counterstain";
+    
     
     private static final String SOURCE_DATASET_TOOLTIP = "Which dataset should signals come from?";
     private static final String TARGET_DATASET_TOOLTIP = "Which dataset consensus should we warp onto?";
@@ -40,6 +42,7 @@ public class SignalWarpingRunSettingsPanel
     private static final String RUN_TOOLTIP            = "Run the signal warping";
     private static final String MIN_THRESHOLD_TOOLTIP  = "Threshold images to this value before warping";
     private static final String BINARISE_TOOLTIP       = "Binarise images so intra-image intensities are not included";
+    private static final String NORMALISE_TOOLTIP      = "Normalise signal against the counterstain before warping";
     
     private static final String SOURCE_HELP       = "Choose the signals to be warped:";
     private static final String IMAGE_HELP        = "Choose how to pre-process images:";
@@ -54,6 +57,7 @@ public class SignalWarpingRunSettingsPanel
     private JCheckBox cellsWithSignalsBox;
     private JSpinner minThresholdSpinner;
     private JCheckBox binariseBox;
+    private JCheckBox normaliseBox;
     
 	private SignalWarpingDialogController controller;
 	private SignalWarpingModel model;
@@ -82,6 +86,7 @@ public class SignalWarpingRunSettingsPanel
 		settings.setBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY, binariseBox.isSelected());
 		settings.setBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY, cellsWithSignalsBox.isSelected());
 		settings.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY, (int)minThresholdSpinner.getValue());
+		settings.setBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY, normaliseBox.isSelected());
 		
 		for(SignalWarpingRunEventListener l : runListeners) {
 			l.runEventReceived(settings);
@@ -152,6 +157,9 @@ public class SignalWarpingRunSettingsPanel
     	binariseBox = new JCheckBox(BINARISE_LBL, false);   	
     	binariseBox.setToolTipText(BINARISE_TOOLTIP);
     	
+    	normaliseBox = new JCheckBox(NORMALISE_LBL, false);   	
+    	normaliseBox.setToolTipText(NORMALISE_TOOLTIP);
+    	
     	runButton = new JButton(RUN_LBL);
     	runButton.setToolTipText(RUN_TOOLTIP);
     	runButton.addActionListener(e ->{  
@@ -175,6 +183,7 @@ public class SignalWarpingRunSettingsPanel
     	midPanel.add(minThresholdSpinner);
     	midPanel.add(binariseBox);
     	midPanel.add(cellsWithSignalsBox);
+    	midPanel.add(normaliseBox);
     	
     	help3Panel.add(new JLabel(TARGET_HELP));
 
@@ -205,6 +214,7 @@ public class SignalWarpingRunSettingsPanel
 		minThresholdSpinner.setEnabled(b);
 		binariseBox.setEnabled(b);
 		runButton.setEnabled(b);
+		normaliseBox.setEnabled(b);
 	}
 	
 	/**
@@ -216,6 +226,7 @@ public class SignalWarpingRunSettingsPanel
 		minThresholdSpinner.setEnabled(b);
 		cellsWithSignalsBox.setEnabled(b);
 		binariseBox.setEnabled(b);
+		normaliseBox.setEnabled(b);
 	}
 
 	@Override

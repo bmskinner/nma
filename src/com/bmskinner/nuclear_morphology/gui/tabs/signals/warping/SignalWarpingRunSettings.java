@@ -22,6 +22,7 @@ public class SignalWarpingRunSettings extends AbstractHashOptions {
 	public static final String IS_ONLY_CELLS_WITH_SIGNALS_KEY = "Only cells with signals";
 	public static final String IS_BINARISE_SIGNALS_KEY = "Binarise signals";
 	public static final String MIN_THRESHOLD_KEY = "Min threshold";
+	public static final String IS_NORMALISE_TO_COUNTERSTAIN_KEY = "Normalise to counterstain";
 	
 	private final IAnalysisDataset d1;
 	private final IAnalysisDataset d2;

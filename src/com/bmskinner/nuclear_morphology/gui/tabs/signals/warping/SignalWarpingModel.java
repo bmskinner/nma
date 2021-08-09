@@ -84,6 +84,7 @@ public class SignalWarpingModel extends DefaultTableModel {
         addColumn(Labels.Signals.Warper.TABLE_HEADER_SOURCE_SIGNALS, new Vector<ISignalGroup>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY, new Vector<Boolean>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_BINARISED, new Vector<Boolean>());
+        addColumn(Labels.Signals.Warper.TABLE_HEADER_NORMALISED, new Vector<Boolean>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_TARGET_SHAPE, new Vector<String>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_THRESHOLD, new Vector<String>());
         addColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN, new Vector<Color>());
@@ -243,6 +244,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 								signalGroupId, 
 								key.isCellWithSignalsOnly(), 
 								key.isBinarised(), 
+								key.isNormalised(),
 								key.getThreshold());
 						cache.add(k, im.get());
 						Color col = sg.getGroupColour().orElse(Color.WHITE);
@@ -312,6 +314,7 @@ public class SignalWarpingModel extends DefaultTableModel {
         v.add(k.getSignalGroupName());
         v.add(k.isOnlyCellsWithSignals());
         v.add(k.isBinarise);
+        v.add(k.isNormalise);
         v.add(k.getTargetName());
         v.add(k.minThreshold);
         v.add(cache.getColour(k));       
@@ -360,6 +363,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 			@NonNull UUID signalGroupId,
 			boolean isCellsWithSignals,
 			final boolean isBinarise, 
+			final boolean isNormalise,
 			final int minThreshold, 
 			@NonNull ImageProcessor image) {
 		WarpedImageKey k = cache.new WarpedImageKey(targetShape, 
@@ -368,6 +372,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 				signalGroupId, 
 				isCellsWithSignals, 
 				isBinarise, 
+				isNormalise,
 				minThreshold);
 
         cache.add(k, image);
@@ -630,9 +635,10 @@ public class SignalWarpingModel extends DefaultTableModel {
 
         public synchronized void add(@NonNull final CellularComponent target, @NonNull final String targetName, 
         		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
-        		final boolean isCellsWithSignals, final boolean binarise, final int minThreshold,
+        		final boolean isCellsWithSignals, final boolean binarise, final boolean normalise, final int minThreshold,
         		@NonNull final ImageProcessor ip) {
-        	add(new WarpedImageKey(target, targetName, template, signalGroupId, isCellsWithSignals, binarise, minThreshold), ip);
+        	add(new WarpedImageKey(target, targetName, template, 
+        			signalGroupId, isCellsWithSignals, binarise, normalise, minThreshold), ip);
         }
 
         public synchronized ImageProcessor get(@NonNull final WarpedImageKey k) {
@@ -688,6 +694,7 @@ public class SignalWarpingModel extends DefaultTableModel {
             private final @NonNull UUID  signalGroupId;
             private final boolean isOnlyCellsWithSignals;
             private final boolean isBinarise;
+            private final boolean isNormalise;
             private final int minThreshold;
 
         	
@@ -698,7 +705,8 @@ public class SignalWarpingModel extends DefaultTableModel {
 
             public WarpedImageKey(@NonNull final CellularComponent target, @NonNull final String targetName, 
             		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
-            		final boolean isCellsWithSignals, final boolean binarise, final int minThreshold) {
+            		final boolean isCellsWithSignals, final boolean binarise, 
+            		final boolean normalise, final int minThreshold) {
             	targetId = target.getID();
             	templateId = template.getId();
             	
@@ -710,6 +718,7 @@ public class SignalWarpingModel extends DefaultTableModel {
                 this.signalGroupId = signalGroupId;
                 this.isOnlyCellsWithSignals = isCellsWithSignals;
                 this.isBinarise = binarise;
+                this.isNormalise = normalise;
                 this.minThreshold = minThreshold;
             }
 
@@ -744,6 +753,10 @@ public class SignalWarpingModel extends DefaultTableModel {
 			public boolean isBinarised() {
 				return isBinarise;
 			}
+			
+			public boolean isNormalised() {
+				return isNormalise;
+			}
 
             @Override
 			public int hashCode() {
@@ -755,6 +768,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 				result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
 				result = prime * result + ((templateId == null) ? 0 : templateId.hashCode());
 				result = prime * result + (isBinarise ? 1231 : 1237);
+				result = prime * result + (isNormalise ? 1231 : 1237);
 				result = prime * result + minThreshold;
 				return result;
 				
@@ -794,6 +808,8 @@ public class SignalWarpingModel extends DefaultTableModel {
 				} else if (!templateId.equals(other.templateId))
 					return false;
 				if (isBinarise != other.isBinarise)
+					return false;
+				if (isNormalise != other.isNormalise)
 					return false;
 				if (minThreshold != other.minThreshold)
 					return false;
