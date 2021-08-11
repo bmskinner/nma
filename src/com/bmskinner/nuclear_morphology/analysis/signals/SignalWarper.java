@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 import javax.swing.SwingWorker;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.data.general.Dataset;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
@@ -67,18 +66,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	
 	public static final boolean STRAIGHTEN_MESH = true;
 	public static final boolean REGULAR_MESH = false;
-	
-	/** Pixels with values lower than this will not be included in the warped image */
-//	public static final String MIN_SIGNAL_THRESHOLD_KEY = "Min signal threshold";
-	
-	 /** Straighten the meshes */
-//	public static final String IS_STRAIGHTEN_MESH_KEY   = "Straighten mesh";
-	
-	 /** Only warp the cell images with detected signals */
-//	public static final String JUST_CELLS_WITH_SIGNAL_KEY   = "Cells withs signals only";
-	
-//	public static final String BINARISE_KEY   = "Binarise source images";
-	
+		
 	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
     
     /** The options for the analysis */
@@ -219,6 +207,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    	ip = new ImageFilterer(ip)
 		    	.normaliseToCounterStain(n.getGreyscaleImage())
 		    	.toProcessor();
+		    	
+		    	// The actual floating point values may not be visible to the human eye
+		    	// Rescale the values to lie in the 0-255 range
 		    	ip = ImageFilterer.rescaleImageIntensity(ip);
 		    }
 
